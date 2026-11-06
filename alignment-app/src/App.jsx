@@ -5,7 +5,7 @@ import SquadRoster from './components/SquadRoster';
 import ConsensusDashboard from './components/ConsensusDashboard';
 import PromptGDDStudio from './components/PromptGDDStudio';
 import AddOptionModal from './components/AddOptionModal';
-import AddMemberModal from './components/AddMemberModal';
+import MemberModal from './components/MemberModal';
 import { 
   Filter, 
   RotateCcw, 
@@ -14,7 +14,8 @@ import {
   CheckCircle,
   Clock,
   Compass,
-  ArrowRight
+  ArrowRight,
+  Vote
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -41,7 +42,7 @@ export default function App() {
 
   // Modals state
   const [addOptionTargetQuestion, setAddOptionTargetQuestion] = useState(null);
-  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [memberModalTarget, setMemberModalTarget] = useState(null); // null = closed, 'new' = add, member = edit
   const [exportStatus, setExportStatus] = useState(null);
 
   // Fetch state on mount
@@ -119,8 +120,8 @@ export default function App() {
     }
   };
 
-  // Handle adding team member
-  const handleAddMember = async (memberData) => {
+  // Handle saving team member (create or update)
+  const handleSaveMember = async (memberData) => {
     try {
       const res = await fetch('/api/member', {
         method: 'POST',
@@ -137,7 +138,49 @@ export default function App() {
         fetchCompiled();
       }
     } catch (err) {
-      console.error('Add member error:', err);
+      console.error('Save member error:', err);
+    }
+  };
+
+  // Handle deleting team member
+  const handleDeleteMember = async (memberId) => {
+    try {
+      const res = await fetch('/api/member/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: memberId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setState(data.state);
+        setAnalysis(data.analysis);
+        // If the active voter was deleted, switch to the first remaining member
+        if (activeMemberId === memberId && data.state.team?.length > 0) {
+          setActiveMemberId(data.state.team[0].id);
+        }
+        fetchCompiled();
+      }
+    } catch (err) {
+      console.error('Delete member error:', err);
+    }
+  };
+
+  // Handle toggling steward role for a member directly
+  const handleToggleStewardRole = async (memberId, roleKey) => {
+    try {
+      const res = await fetch('/api/member/toggle-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, roleName: roleKey })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setState(data.state);
+        setAnalysis(data.analysis);
+        fetchCompiled();
+      }
+    } catch (err) {
+      console.error('Toggle steward role error:', err);
     }
   };
 
@@ -194,9 +237,25 @@ export default function App() {
     }
   };
 
-  // Handle reset
-  const handleReset = async () => {
-    if (!window.confirm('Reset all questions and votes back to default template?')) return;
+  // Handle resetting ONLY votes to zero
+  const handleResetVotes = async () => {
+    if (!window.confirm('Reset all cast votes to 0? Your questions, custom options, and stewards will remain intact.')) return;
+    try {
+      const res = await fetch('/api/reset-votes', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setState(data.state);
+        setAnalysis(data.analysis);
+        fetchCompiled();
+      }
+    } catch (err) {
+      console.error('Reset votes error:', err);
+    }
+  };
+
+  // Handle full reset back to default template
+  const handleFullReset = async () => {
+    if (!window.confirm('Warning: Reset everything (questions, options, members) back to factory default?')) return;
     try {
       const res = await fetch('/api/reset', { method: 'POST' });
       if (res.ok) {
@@ -206,7 +265,7 @@ export default function App() {
         fetchCompiled();
       }
     } catch (err) {
-      console.error('Reset error:', err);
+      console.error('Full reset error:', err);
     }
   };
 
@@ -249,7 +308,7 @@ export default function App() {
         setActiveMemberId={setActiveMemberId}
         team={state.team}
         analysis={analysis}
-        onAddMemberClick={() => setIsAddMemberOpen(true)}
+        onAddMemberClick={() => setMemberModalTarget('new')}
       />
 
       {/* Main Container */}
@@ -272,10 +331,17 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={handleResetVotes}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-amber-500/10 text-slate-300 hover:text-amber-400 border border-slate-700 text-xs font-semibold transition"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Votes to 0</span>
+                </button>
                 <button
                   onClick={() => setActiveTab('compiler')}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow-lg shadow-teal-500/20"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow-lg shadow-teal-500/20"
                 >
                   <span>Compile Bootstrap Prompt</span>
                   <ArrowRight className="w-4 h-4" />
@@ -325,7 +391,10 @@ export default function App() {
         {activeTab === 'roster' && (
           <SquadRoster
             team={state.team}
-            onOpenAddMember={() => setIsAddMemberOpen(true)}
+            onOpenAddMember={() => setMemberModalTarget('new')}
+            onOpenEditMember={(member) => setMemberModalTarget(member)}
+            onDeleteMember={handleDeleteMember}
+            onToggleStewardRole={handleToggleStewardRole}
           />
         )}
 
@@ -365,11 +434,17 @@ export default function App() {
 
           <div className="flex items-center gap-4">
             <button
-              onClick={handleReset}
+              onClick={handleResetVotes}
               className="text-slate-400 hover:text-amber-400 transition flex items-center gap-1"
             >
               <RotateCcw className="w-3 h-3" />
-              <span>Reset Votes to Default</span>
+              <span>Reset All Votes to 0</span>
+            </button>
+            <button
+              onClick={handleFullReset}
+              className="text-slate-500 hover:text-rose-400 transition flex items-center gap-1"
+            >
+              <span>Factory Reset</span>
             </button>
             <a
               href="https://github.com/flaxos/Team-Discovery-Channel"
@@ -392,10 +467,12 @@ export default function App() {
         onSubmit={handleAddOption}
       />
 
-      <AddMemberModal
-        isOpen={isAddMemberOpen}
-        onClose={() => setIsAddMemberOpen(false)}
-        onAddMember={handleAddMember}
+      <MemberModal
+        isOpen={Boolean(memberModalTarget)}
+        member={memberModalTarget && memberModalTarget !== 'new' ? memberModalTarget : null}
+        onClose={() => setMemberModalTarget(null)}
+        onSaveMember={handleSaveMember}
+        onDeleteMember={handleDeleteMember}
       />
     </div>
   );

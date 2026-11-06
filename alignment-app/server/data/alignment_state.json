@@ -3,7 +3,7 @@
     {
       "id": "flaxos",
       "name": "flaxos",
-      "avatar": "\ud83d\ude80",
+      "avatar": "🚀",
       "color": "#14b8a6",
       "rolePreferences": [
         "AI Agent Orchestrator",
@@ -15,7 +15,7 @@
     {
       "id": "scotty",
       "name": "Scotty",
-      "avatar": "\u26a1",
+      "avatar": "⚡",
       "color": "#f59e0b",
       "rolePreferences": [
         "Multiplayer & Netcode",
@@ -140,7 +140,7 @@
       "options": [
         {
           "id": "opt_genre_horde",
-          "title": "Co-op Horde Survival (Vampire Survivors \u00d7 Risk of Rain)",
+          "title": "Co-op Horde Survival (Vampire Survivors × Risk of Rain)",
           "description": "2-4 players hold out in dynamic arenas against swarming waves. Shared XP gems, synergized elemental upgrades, clutch revive beacons.",
           "feasibility": "High",
           "pros": [
@@ -153,7 +153,7 @@
         },
         {
           "id": "opt_genre_extraction",
-          "title": "Top-Down Extraction / Micro-Raid (Zero Sievert \u00d7 Enter the Gungeon)",
+          "title": "Top-Down Extraction / Micro-Raid (Zero Sievert × Enter the Gungeon)",
           "description": "Fast 8-10 minute raids into hostile derelict sectors. Scavenge tech components, fight rogue AI drones, rush to extraction beacon before meltdown.",
           "feasibility": "Medium",
           "pros": [
@@ -166,7 +166,7 @@
         },
         {
           "id": "opt_genre_brawler",
-          "title": "Chaotic Physics Arena Brawler (Duck Game \u00d7 Rounds \u00d7 Stick Fight)",
+          "title": "Chaotic Physics Arena Brawler (Duck Game × Rounds × Stick Fight)",
           "description": "Fast, goofy 1-minute rounds. Physics-driven knockback, bizarre randomized weapon drops, destructible platforms, sudden death.",
           "feasibility": "High",
           "pros": [

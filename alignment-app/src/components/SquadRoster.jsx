@@ -1,40 +1,63 @@
 import React from 'react';
-import { Users, Clock, Shield, CheckCircle, AlertTriangle, Plus, Code, Network, Sparkles, Gamepad2, Wrench } from 'lucide-react';
+import { 
+  Users, 
+  Clock, 
+  Shield, 
+  CheckCircle, 
+  AlertTriangle, 
+  Plus, 
+  Code, 
+  Network, 
+  Sparkles, 
+  Gamepad2, 
+  Wrench,
+  Edit2,
+  Trash2,
+  UserCheck,
+  UserX,
+  X
+} from 'lucide-react';
 
 const CORE_DOMAINS = [
-  { id: 'ai_orchestrator', name: 'AI Agent Orchestrator', icon: Code, desc: 'Prompts agents, maintains system prompts, and reviews code structure' },
-  { id: 'netcode', name: 'Multiplayer & Netcode', icon: Network, desc: 'Manages room state, socket ticks, interpolation, and connectivity' },
-  { id: 'combat_feel', name: 'Game Feel & Combat Juice', icon: Gamepad2, desc: 'Weapon recoil, screenshake, hitstop, responsiveness, and physics' },
-  { id: 'content', name: 'Weapons, Perks & Scripter', icon: Sparkles, desc: 'Designs classes, enemy behaviors, upgrade synergies, and drop tables' },
-  { id: 'qa_host', name: 'Playtest Host & QA Czar', icon: Wrench, desc: 'Hosts Friday playtests, verifies builds, and logs priority bugs' }
+  { id: 'ai_orchestrator', name: 'AI Agent Orchestrator', roleKey: 'AI Agent Orchestrator', icon: Code, desc: 'Prompts agents, maintains system prompts, and reviews code structure' },
+  { id: 'netcode', name: 'Multiplayer & Netcode', roleKey: 'Multiplayer & Netcode', icon: Network, desc: 'Manages room state, socket ticks, interpolation, and connectivity' },
+  { id: 'combat_feel', name: 'Game Feel & Combat Juice', roleKey: 'Combat Feel & Juice', icon: Gamepad2, desc: 'Weapon recoil, screenshake, hitstop, responsiveness, and physics' },
+  { id: 'content', name: 'Weapons, Perks & Scripter', roleKey: 'Weapons & Perks Scripter', icon: Sparkles, desc: 'Designs classes, enemy behaviors, upgrade synergies, and drop tables' },
+  { id: 'qa_host', name: 'Playtest Host & QA Czar', roleKey: 'QA & Playtest Host', icon: Wrench, desc: 'Hosts Friday playtests, verifies builds, and logs priority bugs' }
 ];
 
-export default function SquadRoster({ team = [], onOpenAddMember }) {
+export default function SquadRoster({ 
+  team = [], 
+  onOpenAddMember, 
+  onOpenEditMember, 
+  onDeleteMember, 
+  onToggleStewardRole 
+}) {
   const totalHours = team.reduce((sum, m) => sum + (m.weeklyHours || 0), 0);
 
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="glass-panel rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="glass-panel rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">🛸</span>
             <h2 className="text-xl font-bold text-white">Squad Roster & Division of Labor</h2>
           </div>
           <p className="text-sm text-slate-300">
-            Clear ownership eliminates the bystander effect. Everyone has an assigned domain while pairing with AI agents.
+            Clear ownership eliminates the bystander effect. Adjust stewards or click below to assign domains.
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-center">
-            <span className="text-xs text-slate-400 block font-mono">Total Squad Capacity</span>
+            <span className="text-[11px] text-slate-400 block font-mono">Total Squad Capacity</span>
             <span className="text-lg font-bold text-teal-400 font-mono">{totalHours} hrs / week</span>
           </div>
 
           <button
             onClick={onOpenAddMember}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-teal-500/20"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow-lg shadow-teal-500/20"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Add Friend to Crew</span>
@@ -47,12 +70,12 @@ export default function SquadRoster({ team = [], onOpenAddMember }) {
         {team.map((member) => (
           <div 
             key={member.id} 
-            className="glass-panel rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition"
+            className="glass-panel rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition relative group"
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-3">
                 <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-md"
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-md flex-shrink-0"
                   style={{ backgroundColor: `${member.color}20`, border: `1px solid ${member.color}60` }}
                 >
                   {member.avatar}
@@ -63,7 +86,7 @@ export default function SquadRoster({ team = [], onOpenAddMember }) {
                     <span 
                       className="w-2.5 h-2.5 rounded-full" 
                       style={{ backgroundColor: member.color }}
-                      title="Status: Active"
+                      title="Status: Active Steward"
                     />
                   </h3>
                   <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
@@ -72,20 +95,58 @@ export default function SquadRoster({ team = [], onOpenAddMember }) {
                   </div>
                 </div>
               </div>
+
+              {/* Adjust / Edit / Remove Action Buttons */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => onOpenEditMember(member)}
+                  title="Adjust steward details & hours"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-teal-300 hover:bg-slate-800 border border-transparent hover:border-slate-700 transition"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Remove ${member.name} from the squad roster?`)) {
+                      onDeleteMember(member.id);
+                    }
+                  }}
+                  title="Remove from squad"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Role Preferences */}
+            {/* Stewarded Roles */}
             <div className="mb-3">
-              <span className="text-xs font-mono text-slate-400 block mb-1.5 uppercase">Primary Domains:</span>
+              <span className="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase tracking-wider">
+                Stewarded Domains:
+              </span>
               <div className="flex flex-wrap gap-1.5">
-                {member.rolePreferences && member.rolePreferences.map((role, idx) => (
-                  <span 
-                    key={idx}
-                    className="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-teal-300 border border-slate-700/80 font-medium"
-                  >
-                    {role}
-                  </span>
-                ))}
+                {member.rolePreferences && member.rolePreferences.length > 0 ? (
+                  member.rolePreferences.map((role, idx) => (
+                    <span 
+                      key={idx}
+                      className="text-xs px-2.5 py-1 rounded-md bg-slate-800 text-teal-300 border border-slate-700/80 font-medium flex items-center gap-1.5"
+                    >
+                      <span>{role}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleStewardRole(member.id, role);
+                        }}
+                        title={`Remove ${role} from ${member.name}`}
+                        className="hover:text-rose-400 transition"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-500 italic">No specific domains assigned yet.</span>
+                )}
               </div>
             </div>
 
@@ -99,62 +160,95 @@ export default function SquadRoster({ team = [], onOpenAddMember }) {
         ))}
       </div>
 
-      {/* Domain Coverage Matrix */}
+      {/* Interactive Core Development Pillars Coverage Matrix */}
       <div className="glass-panel rounded-2xl p-6">
-        <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-teal-400" />
-          <span>Core Development Pillars Coverage</span>
-        </h3>
-        <p className="text-xs text-slate-400 mb-4">
-          A successful multiplayer game requires someone actively stewarding each of these 5 pillars.
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Shield className="w-5 h-5 text-teal-400" />
+            <span>Core Development Pillars Coverage (Direct Steward Assignment)</span>
+          </h3>
+          <span className="text-xs font-mono text-slate-400">
+            Click any member badge to assign or unassign
+          </span>
+        </div>
+        <p className="text-xs text-slate-400 mb-5">
+          Each pillar must have at least one designated steward. Click any squad member's button under a pillar to toggle their stewardship on or off with 1 click!
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {CORE_DOMAINS.map((domain) => {
             const Icon = domain.icon;
-            // Find which members cover this domain
+            
+            // Check which members are actively stewarding this pillar
             const assignedMembers = team.filter(m => 
-              m.rolePreferences?.some(r => r.toLowerCase().includes(domain.name.toLowerCase().split(' ')[0]))
+              m.rolePreferences?.some(r => 
+                r.toLowerCase().includes(domain.roleKey.toLowerCase().split(' ')[0]) ||
+                domain.roleKey.toLowerCase().includes(r.toLowerCase().split(' ')[0])
+              )
             );
             const isCovered = assignedMembers.length > 0;
 
             return (
               <div 
                 key={domain.id} 
-                className={`p-4 rounded-xl border ${
+                className={`p-4 rounded-xl border flex flex-col justify-between transition ${
                   isCovered 
                     ? 'bg-slate-900/60 border-slate-800' 
                     : 'bg-amber-500/5 border-amber-500/30'
                 }`}
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-teal-400" />
-                    <span className="font-bold text-sm text-white">{domain.name}</span>
-                  </div>
-                  {isCovered ? (
-                    <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  )}
-                </div>
-                <p className="text-xs text-slate-400 mb-3 leading-snug">
-                  {domain.desc}
-                </p>
-
-                <div className="flex items-center gap-1.5 pt-2 border-t border-slate-800/80">
-                  <span className="text-[11px] font-mono text-slate-400">Assigned:</span>
-                  {assignedMembers.length > 0 ? (
-                    <div className="flex items-center gap-1">
-                      {assignedMembers.map(m => (
-                        <span key={m.id} className="text-xs font-semibold px-2 py-0.5 rounded bg-teal-500/15 text-teal-300 border border-teal-500/30">
-                          {m.avatar} {m.name}
-                        </span>
-                      ))}
+                <div>
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-teal-400" />
+                      <span className="font-bold text-sm text-white">{domain.name}</span>
                     </div>
-                  ) : (
-                    <span className="text-xs text-amber-400 italic">Needs owner!</span>
-                  )}
+                    {isCovered ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 mb-4 leading-snug">
+                    {domain.desc}
+                  </p>
+                </div>
+
+                {/* Direct Steward Toggles */}
+                <div className="pt-3 border-t border-slate-800/80">
+                  <span className="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase">
+                    Assign Stewards:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {team.map((member) => {
+                      const isAssigned = member.rolePreferences?.some(r => 
+                        r.toLowerCase().includes(domain.roleKey.toLowerCase().split(' ')[0]) ||
+                        domain.roleKey.toLowerCase().includes(r.toLowerCase().split(' ')[0])
+                      );
+
+                      return (
+                        <button
+                          key={member.id}
+                          type="button"
+                          onClick={() => onToggleStewardRole(member.id, domain.roleKey)}
+                          title={isAssigned ? `Click to remove ${member.name} from this pillar` : `Click to assign ${member.name} to this pillar`}
+                          className={`text-xs px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1.5 ${
+                            isAssigned
+                              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/50 shadow-sm'
+                              : 'bg-slate-900/80 text-slate-400 border border-dashed border-slate-700 hover:text-white hover:border-slate-500'
+                          }`}
+                        >
+                          <span>{member.avatar}</span>
+                          <span>{member.name}</span>
+                          {isAssigned ? (
+                            <X className="w-3 h-3 text-teal-400 hover:text-rose-400 ml-0.5" />
+                          ) : (
+                            <Plus className="w-3 h-3 text-slate-500 ml-0.5" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             );

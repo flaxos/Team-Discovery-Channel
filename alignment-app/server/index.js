@@ -171,6 +171,69 @@ app.post('/api/member', (req, res) => {
   res.json({ success: true, state, analysis, member: memberData });
 });
 
+// DELETE Team Member
+app.delete('/api/member/:id', (req, res) => {
+  const { id } = req.params;
+  state.team = state.team.filter(m => m.id !== id);
+  // Remove any votes by this member
+  state.questions.forEach(q => {
+    q.options.forEach(opt => {
+      if (Array.isArray(opt.votes)) {
+        opt.votes = opt.votes.filter(vId => vId !== id);
+      }
+    });
+  });
+  saveState();
+  const analysis = analyzeVotes(state);
+  res.json({ success: true, state, analysis });
+});
+
+app.post('/api/member/delete', (req, res) => {
+  const { id } = req.body;
+  state.team = state.team.filter(m => m.id !== id);
+  state.questions.forEach(q => {
+    q.options.forEach(opt => {
+      if (Array.isArray(opt.votes)) {
+        opt.votes = opt.votes.filter(vId => vId !== id);
+      }
+    });
+  });
+  saveState();
+  const analysis = analyzeVotes(state);
+  res.json({ success: true, state, analysis });
+});
+
+// POST Toggle Steward / Role Preference for Member
+app.post('/api/member/toggle-role', (req, res) => {
+  const { memberId, roleName } = req.body;
+  const member = state.team.find(m => m.id === memberId);
+  if (!member) return res.status(404).json({ error: 'Member not found' });
+  if (!Array.isArray(member.rolePreferences)) member.rolePreferences = [];
+
+  const index = member.rolePreferences.indexOf(roleName);
+  if (index >= 0) {
+    member.rolePreferences.splice(index, 1);
+  } else {
+    member.rolePreferences.push(roleName);
+  }
+
+  saveState();
+  const analysis = analyzeVotes(state);
+  res.json({ success: true, state, analysis, member });
+});
+
+// POST Reset ONLY Votes (Keeping all questions, custom options & members intact)
+app.post('/api/reset-votes', (req, res) => {
+  state.questions.forEach(q => {
+    q.options.forEach(opt => {
+      opt.votes = [];
+    });
+  });
+  saveState();
+  const analysis = analyzeVotes(state);
+  res.json({ success: true, state, analysis });
+});
+
 // POST Add Comment
 app.post('/api/comment', (req, res) => {
   const { questionId, memberId, text } = req.body;
