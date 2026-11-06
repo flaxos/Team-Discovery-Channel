@@ -7,6 +7,7 @@
     "dev": "concurrently -n \"API,WEB\" -c \"cyan,magenta\" \"npm run server\" \"npm run client\"",
     "server": "node server/index.js",
     "client": "vite --port 5173 --host",
+    "tunnel": "cloudflared tunnel --url http://localhost:4100",
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/index.js"

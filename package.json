@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npm --prefix alignment-app run dev",
     "start": "npm --prefix alignment-app start",
+    "tunnel": "npm --prefix alignment-app run tunnel",
     "build": "npm --prefix alignment-app run build",
     "setup": "npm --prefix alignment-app install"
   },
