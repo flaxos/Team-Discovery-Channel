@@ -3,7 +3,7 @@
     {
       "id": "flaxos",
       "name": "flaxos",
-      "avatar": "🚀",
+      "avatar": "\ud83d\ude80",
       "color": "#14b8a6",
       "rolePreferences": [
         "AI Agent Orchestrator",
@@ -15,7 +15,7 @@
     {
       "id": "scotty",
       "name": "Scotty",
-      "avatar": "⚡",
+      "avatar": "\u26a1",
       "color": "#f59e0b",
       "rolePreferences": [
         "Multiplayer & Netcode",
@@ -45,9 +45,7 @@
             "Zero time for scope creep"
           ],
           "caution": "High intensity over a single weekend.",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         },
         {
           "id": "opt_timeframe_2weeks",
@@ -60,9 +58,7 @@
             "Fits around regular life"
           ],
           "caution": "Requires holding each other strictly accountable each week.",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_timeframe_month",
@@ -104,9 +100,7 @@
             "Solves netcode bottleneck on Day 1"
           ],
           "caution": "Looks ugly for the first 3 days, but feels amazing when it works.",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         },
         {
           "id": "opt_rule_friday_playtest",
@@ -119,9 +113,7 @@
             "Makes game dev a social event"
           ],
           "caution": "Requires reserving the Friday evening slot.",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_rule_single_mechanic",
@@ -148,7 +140,7 @@
       "options": [
         {
           "id": "opt_genre_horde",
-          "title": "Co-op Horde Survival (Vampire Survivors × Risk of Rain)",
+          "title": "Co-op Horde Survival (Vampire Survivors \u00d7 Risk of Rain)",
           "description": "2-4 players hold out in dynamic arenas against swarming waves. Shared XP gems, synergized elemental upgrades, clutch revive beacons.",
           "feasibility": "High",
           "pros": [
@@ -157,13 +149,11 @@
             "Easy to add tons of fun agent-generated weapons"
           ],
           "caution": "Screen can get busy if weapon particles aren't disciplined.",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         },
         {
           "id": "opt_genre_extraction",
-          "title": "Top-Down Extraction / Micro-Raid (Zero Sievert × Enter the Gungeon)",
+          "title": "Top-Down Extraction / Micro-Raid (Zero Sievert \u00d7 Enter the Gungeon)",
           "description": "Fast 8-10 minute raids into hostile derelict sectors. Scavenge tech components, fight rogue AI drones, rush to extraction beacon before meltdown.",
           "feasibility": "Medium",
           "pros": [
@@ -172,13 +162,11 @@
             "Matches our 'Discovery Channel' expedition vibe"
           ],
           "caution": "Requires inventory sync and extract logic.",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_genre_brawler",
-          "title": "Chaotic Physics Arena Brawler (Duck Game × Rounds × Stick Fight)",
+          "title": "Chaotic Physics Arena Brawler (Duck Game \u00d7 Rounds \u00d7 Stick Fight)",
           "description": "Fast, goofy 1-minute rounds. Physics-driven knockback, bizarre randomized weapon drops, destructible platforms, sudden death.",
           "feasibility": "High",
           "pros": [
@@ -243,9 +231,7 @@
             "Cross-platform desktop & web exports"
           ],
           "caution": "Requires downloading Godot 4 editor (though lightweight ~100MB).",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         },
         {
           "id": "opt_engine_web",
@@ -258,9 +244,7 @@
             "Standard web dev workflow"
           ],
           "caution": "Browser audio/fullscreen quirks; requires web netcode (WebSocket/WebRTC).",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_engine_godot_csharp",
@@ -309,10 +293,7 @@
             "Both Web and Desktop clients can connect"
           ],
           "caution": "Requires hosting or running a local server terminal.",
-          "votes": [
-            "flaxos",
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_net_steamworks",
@@ -381,9 +362,7 @@
             "Easy for agents to generate matching sprites"
           ],
           "caution": "Can feel generic if palette and juice (screenshake, particles) aren't dialed in.",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         },
         {
           "id": "opt_art_lowpoly",
@@ -395,9 +374,7 @@
             "Easy to prototype with geometric primitives in 3D"
           ],
           "caution": "Requires 3D math and camera handling.",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_art_neon_minimal",
@@ -446,10 +423,7 @@
             "Infinite upgrade permutations"
           ],
           "caution": "Needs clear status effect rules.",
-          "votes": [
-            "flaxos",
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_mech_physics_chaos",
@@ -461,9 +435,7 @@
             "Emergent gameplay without complex scripted events"
           ],
           "caution": "Ensure friendly knockback is fun, not grief-inducing.",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_mech_shared_super",
@@ -475,9 +447,7 @@
             "Forces high-five synchronization moments"
           ],
           "caution": "Needs clear visual HUD indicator.",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         },
         {
           "id": "opt_mech_procedural_hazards",
@@ -516,9 +486,7 @@
           "caution": "Revive dome needs a long cooldown so it cannot be spammed",
           "isCustom": true,
           "addedBy": "scotty",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         }
       ],
       "comments": [
@@ -549,10 +517,7 @@
             "Great blend of wonder and danger"
           ],
           "caution": "None, it's a stellar fit.",
-          "votes": [
-            "flaxos",
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_theme_office_apocalypse",
@@ -599,9 +564,7 @@
             "Fastest feature iteration"
           ],
           "caution": "Must maintain clean documentation and types.",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         },
         {
           "id": "opt_role_netcode",
@@ -613,9 +576,7 @@
             "Rock solid reliability"
           ],
           "caution": "High responsibility to keep the sync bug-free.",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_role_combat_feel",
@@ -627,10 +588,7 @@
             "Super fun domain to iterate on"
           ],
           "caution": "Requires lots of playtesting tweaks.",
-          "votes": [
-            "flaxos",
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_role_content_scripter",
@@ -642,9 +600,7 @@
             "Fast to prompt with AI agents once foundation is set"
           ],
           "caution": "Keep balance within sane bounds.",
-          "votes": [
-            "scotty"
-          ]
+          "votes": []
         },
         {
           "id": "opt_role_qa_playtest",
@@ -655,9 +611,7 @@
             "The heartbeat that keeps the squad motivated and shipping"
           ],
           "caution": "Must be organized and consistent.",
-          "votes": [
-            "flaxos"
-          ]
+          "votes": []
         }
       ],
       "comments": [

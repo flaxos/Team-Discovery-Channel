@@ -36,7 +36,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Forces extreme simplicity", "Instant gratification", "Zero time for scope creep"],
           caution: "High intensity over a single weekend.",
-          votes: ["flaxos"]
+          votes: []
         },
         {
           id: "opt_timeframe_2weeks",
@@ -45,7 +45,7 @@ module.exports = {
           feasibility: "High",
           pros: ["Sweet spot for agentic velocity", "Allows polish on core combat feel", "Fits around regular life"],
           caution: "Requires holding each other strictly accountable each week.",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_timeframe_month",
@@ -81,7 +81,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Proves fun before spending time on art", "Solves netcode bottleneck on Day 1"],
           caution: "Looks ugly for the first 3 days, but feels amazing when it works.",
-          votes: ["flaxos"]
+          votes: []
         },
         {
           id: "opt_rule_friday_playtest",
@@ -90,7 +90,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Built-in peer accountability", "Celebrates incremental progress", "Makes game dev a social event"],
           caution: "Requires reserving the Friday evening slot.",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_rule_single_mechanic",
@@ -119,7 +119,7 @@ module.exports = {
           feasibility: "High",
           pros: ["Huge dopamine loop", "Low netcode overhead (enemies can use deterministic swarming)", "Easy to add tons of fun agent-generated weapons"],
           caution: "Screen can get busy if weapon particles aren't disciplined.",
-          votes: ["flaxos"]
+          votes: []
         },
         {
           id: "opt_genre_extraction",
@@ -128,7 +128,7 @@ module.exports = {
           feasibility: "Medium",
           pros: ["Incredible tension & emergent teamwork", "Natural meta-progression in the ship hub", "Matches our 'Discovery Channel' expedition vibe"],
           caution: "Requires inventory sync and extract logic.",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_genre_brawler",
@@ -182,7 +182,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Native high-level multiplayer", "Instant compiles", "Zero licensing baggage", "Cross-platform desktop & web exports"],
           caution: "Requires downloading Godot 4 editor (though lightweight ~100MB).",
-          votes: ["flaxos"]
+          votes: []
         },
         {
           id: "opt_engine_web",
@@ -191,7 +191,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Absolute zero friction for playtesting with friends", "Instant hot reload", "Standard web dev workflow"],
           caution: "Browser audio/fullscreen quirks; requires web netcode (WebSocket/WebRTC).",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_engine_godot_csharp",
@@ -229,7 +229,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Easy to run locally or host on a $5 VPS / Render / Fly.io", "Rock solid cheat-free logic", "Both Web and Desktop clients can connect"],
           caution: "Requires hosting or running a local server terminal.",
-          votes: ["flaxos", "scotty"]
+          votes: []
         },
         {
           id: "opt_net_steamworks",
@@ -283,7 +283,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Timeless aesthetic", "Massive open-source asset libraries (Kenney.nl, itch.io)", "Easy for agents to generate matching sprites"],
           caution: "Can feel generic if palette and juice (screenshake, particles) aren't dialed in.",
-          votes: ["flaxos"]
+          votes: []
         },
         {
           id: "opt_art_lowpoly",
@@ -292,7 +292,7 @@ module.exports = {
           feasibility: "High",
           pros: ["Very trendy indie aesthetic (Lethal Company / Ultrakill vibe)", "Easy to prototype with geometric primitives in 3D"],
           caution: "Requires 3D math and camera handling.",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_art_neon_minimal",
@@ -330,7 +330,7 @@ module.exports = {
           feasibility: "High",
           pros: ["Encourages active communication", "Spectacular visual payoff", "Infinite upgrade permutations"],
           caution: "Needs clear status effect rules.",
-          votes: ["flaxos", "scotty"]
+          votes: []
         },
         {
           id: "opt_mech_physics_chaos",
@@ -339,7 +339,7 @@ module.exports = {
           feasibility: "High",
           pros: ["Guaranteed laughter during playtest night", "Emergent gameplay without complex scripted events"],
           caution: "Ensure friendly knockback is fun, not grief-inducing.",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_mech_shared_super",
@@ -348,7 +348,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Simple to code", "Forces high-five synchronization moments"],
           caution: "Needs clear visual HUD indicator.",
-          votes: ["flaxos"]
+          votes: []
         },
         {
           id: "opt_mech_procedural_hazards",
@@ -393,7 +393,7 @@ module.exports = {
           feasibility: "Very High",
           pros: ["Matches our repo name perfectly!", "Justifies weird experimental weapons and alien artifacts", "Great blend of wonder and danger"],
           caution: "None, it's a stellar fit.",
-          votes: ["flaxos", "scotty"]
+          votes: []
         },
         {
           id: "opt_theme_office_apocalypse",
@@ -431,7 +431,7 @@ module.exports = {
           feasibility: "Essential",
           pros: ["Ensures agents don't produce spaghetti code", "Fastest feature iteration"],
           caution: "Must maintain clean documentation and types.",
-          votes: ["flaxos"]
+          votes: []
         },
         {
           id: "opt_role_netcode",
@@ -440,7 +440,7 @@ module.exports = {
           feasibility: "Essential",
           pros: ["Single owner for the most delicate system", "Rock solid reliability"],
           caution: "High responsibility to keep the sync bug-free.",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_role_combat_feel",
@@ -449,7 +449,7 @@ module.exports = {
           feasibility: "High Impact",
           pros: ["Directly makes the game addictive to play", "Super fun domain to iterate on"],
           caution: "Requires lots of playtesting tweaks.",
-          votes: ["flaxos", "scotty"]
+          votes: []
         },
         {
           id: "opt_role_content_scripter",
@@ -458,7 +458,7 @@ module.exports = {
           feasibility: "High Impact",
           pros: ["High creative output", "Fast to prompt with AI agents once foundation is set"],
           caution: "Keep balance within sane bounds.",
-          votes: ["scotty"]
+          votes: []
         },
         {
           id: "opt_role_qa_playtest",
@@ -467,7 +467,7 @@ module.exports = {
           feasibility: "Essential",
           pros: ["The heartbeat that keeps the squad motivated and shipping"],
           caution: "Must be organized and consistent.",
-          votes: ["flaxos"]
+          votes: []
         }
       ],
       comments: [
