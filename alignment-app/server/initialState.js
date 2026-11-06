@@ -1,0 +1,483 @@
+// Initial State for Team Discovery Channel Game Dev Alignment
+module.exports = {
+  team: [
+    {
+      id: "flaxos",
+      name: "flaxos",
+      avatar: "🚀",
+      color: "#14b8a6", // teal
+      rolePreferences: ["AI Agent Orchestrator", "Core Gameplay & Systems"],
+      weeklyHours: 6,
+      notes: "Keen to keep things grounded, iterate with coding agents, and ensure we actually ship a playable build."
+    },
+    {
+      id: "scotty",
+      name: "Scotty",
+      avatar: "⚡",
+      color: "#f59e0b", // amber
+      rolePreferences: ["Multiplayer & Netcode", "Game Feel & Combat"],
+      weeklyHours: 6,
+      notes: "Ready to pair on multiplayer mechanics and co-op shenanigans."
+    }
+  ],
+  questions: [
+    {
+      id: "q_grounding_timeframe",
+      category: "grounding",
+      categoryName: "Grounding & Reality Check",
+      title: "What is our hard deadline for Milestone 1 (First Playable Build)?",
+      subtitle: "The #1 reason agentic game dev projects stall is indefinite timelines. We need a rapid, locked-in target for 2 players to connect and play.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_timeframe_jam",
+          title: "The 48-Hour Weekend Jam Sprint",
+          description: "Hyper-focused 2-day hackathon. Graybox circles, simple sync, 1 mechanic. Playable by Sunday night.",
+          feasibility: "Very High",
+          pros: ["Forces extreme simplicity", "Instant gratification", "Zero time for scope creep"],
+          caution: "High intensity over a single weekend.",
+          votes: ["flaxos"]
+        },
+        {
+          id: "opt_timeframe_2weeks",
+          title: "The 2-Week Vertical Slice (Recommended)",
+          description: "14 days from kickoff to playable squad playtest. 1 arena, 2 character classes, core win/loss loop.",
+          feasibility: "High",
+          pros: ["Sweet spot for agentic velocity", "Allows polish on core combat feel", "Fits around regular life"],
+          caution: "Requires holding each other strictly accountable each week.",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_timeframe_month",
+          title: "The 1-Month Milestone",
+          description: "4 structured weekly sprints. Deeper architectural foundations, sound effects, full lobby flow.",
+          feasibility: "Medium",
+          pros: ["More breathing room for complex netcode", "Better architecture"],
+          caution: "Higher risk of enthusiasm tapering off if week 1 doesn't produce something moving on screen.",
+          votes: []
+        }
+      ],
+      comments: [
+        {
+          id: "c1",
+          memberId: "flaxos",
+          text: "I really want us to have something we can physically play together within 2 weeks max. Once we play together, the momentum is unstoppable!",
+          timestamp: "2026-11-07T09:00:00.000Z"
+        }
+      ]
+    },
+    {
+      id: "q_anti_abandonment",
+      category: "grounding",
+      categoryName: "Grounding & Reality Check",
+      title: "Which Anti-Abandonment Rule will be our sacred team covenant?",
+      subtitle: "To overcome the curse of unfinished game dev projects, we must agree on our guiding constraint.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_rule_graybox",
+          title: "The 'Graybox First' Covenant",
+          description: "Zero custom art, sound, or complex menus until two actual human players can move, shoot/interact, and score in a graybox arena.",
+          feasibility: "Very High",
+          pros: ["Proves fun before spending time on art", "Solves netcode bottleneck on Day 1"],
+          caution: "Looks ugly for the first 3 days, but feels amazing when it works.",
+          votes: ["flaxos"]
+        },
+        {
+          id: "opt_rule_friday_playtest",
+          title: "The 'Friday 8pm Playtest Night' Covenant",
+          description: "Every Friday at 8:00 PM we hop on Discord and play whatever build exists. No excuses. If it crashes, we laugh and fix it live.",
+          feasibility: "Very High",
+          pros: ["Built-in peer accountability", "Celebrates incremental progress", "Makes game dev a social event"],
+          caution: "Requires reserving the Friday evening slot.",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_rule_single_mechanic",
+          title: "The 'Rule of One Core Mechanic'",
+          description: "v0.1 has only ONE primary verb (e.g. either dashing, or shooting, or grappling). We only add a second verb after the first is 10/10 juicy.",
+          feasibility: "High",
+          pros: ["Keeps game feel razor sharp", "Prevents feature bloat"],
+          caution: "Requires discipline to resist adding 'wouldn't it be cool if...' features.",
+          votes: []
+        }
+      ],
+      comments: []
+    },
+    {
+      id: "q_genre",
+      category: "genre",
+      categoryName: "Genre & Core Gameplay Loop",
+      title: "What genre & core gameplay loop should we build?",
+      subtitle: "Needs to be inherently fun in co-op/multiplayer and achievable with agentic AI pair programming.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_genre_horde",
+          title: "Co-op Horde Survival (Vampire Survivors × Risk of Rain)",
+          description: "2-4 players hold out in dynamic arenas against swarming waves. Shared XP gems, synergized elemental upgrades, clutch revive beacons.",
+          feasibility: "High",
+          pros: ["Huge dopamine loop", "Low netcode overhead (enemies can use deterministic swarming)", "Easy to add tons of fun agent-generated weapons"],
+          caution: "Screen can get busy if weapon particles aren't disciplined.",
+          votes: ["flaxos"]
+        },
+        {
+          id: "opt_genre_extraction",
+          title: "Top-Down Extraction / Micro-Raid (Zero Sievert × Enter the Gungeon)",
+          description: "Fast 8-10 minute raids into hostile derelict sectors. Scavenge tech components, fight rogue AI drones, rush to extraction beacon before meltdown.",
+          feasibility: "Medium",
+          pros: ["Incredible tension & emergent teamwork", "Natural meta-progression in the ship hub", "Matches our 'Discovery Channel' expedition vibe"],
+          caution: "Requires inventory sync and extract logic.",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_genre_brawler",
+          title: "Chaotic Physics Arena Brawler (Duck Game × Rounds × Stick Fight)",
+          description: "Fast, goofy 1-minute rounds. Physics-driven knockback, bizarre randomized weapon drops, destructible platforms, sudden death.",
+          feasibility: "High",
+          pros: ["Instant laugh-out-loud fun with friends", "Trivial game loop (last team standing)", "Very fast to prototype"],
+          caution: "Physics sync over high ping can be tricky if not client-authoritative with rollback.",
+          votes: []
+        },
+        {
+          id: "opt_genre_dungeon",
+          title: "Twin-Stick Co-op Dungeon Crawler / ARPG",
+          description: "Procedural rooms, dodge-roll combat, telegraph attacks, combo abilities, and coordinated boss fights with distinct phases.",
+          feasibility: "Medium",
+          pros: ["Deeply rewarding combat mastery", "Great class synergy (Tank, Blaster, Support)"],
+          caution: "Requires more enemy AI states and room generator logic.",
+          votes: []
+        },
+        {
+          id: "opt_genre_social",
+          title: "Space Station Subterfuge / Social Deception (SS13-lite)",
+          description: "Keep a rickety space expedition vessel running with mini-tasks while random malfunctions (or a secret rogue saboteur) cause chaos.",
+          feasibility: "Medium",
+          pros: ["Endless comedic storytelling", "Low combat complexity"],
+          caution: "Requires at least 4-5 players to shine.",
+          votes: []
+        }
+      ],
+      comments: [
+        {
+          id: "c2",
+          memberId: "scotty",
+          text: "Horde survival or extraction both sound super fun. With horde survival, even 2 of us can jump in and have a blast immediately without needing a full lobby.",
+          timestamp: "2026-11-07T09:05:00.000Z"
+        }
+      ]
+    },
+    {
+      id: "q_engine",
+      category: "engine",
+      categoryName: "Engine & Tech Stack",
+      title: "What engine & tech stack should power the game?",
+      subtitle: "The engine dictates how quickly our AI agents can write code, how fast we can test, and how easy it is for friends to join.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_engine_godot",
+          title: "Godot 4.x (GDScript)",
+          description: "Lightweight, blazing fast launch times, clean text-based scene files that git merges seamlessly, and LLMs write top-tier GDScript.",
+          feasibility: "Very High",
+          pros: ["Native high-level multiplayer", "Instant compiles", "Zero licensing baggage", "Cross-platform desktop & web exports"],
+          caution: "Requires downloading Godot 4 editor (though lightweight ~100MB).",
+          votes: ["flaxos"]
+        },
+        {
+          id: "opt_engine_web",
+          title: "Web-Native (TypeScript + Phaser 3 / Pixi.js / Three.js + Vite)",
+          description: "Zero installation barrier. Send a URL link in Discord or WhatsApp, click it, and all friends are playing together in Chrome/Firefox in 3 seconds.",
+          feasibility: "Very High",
+          pros: ["Absolute zero friction for playtesting with friends", "Instant hot reload", "Standard web dev workflow"],
+          caution: "Browser audio/fullscreen quirks; requires web netcode (WebSocket/WebRTC).",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_engine_godot_csharp",
+          title: "Godot 4.x (C# / .NET)",
+          description: "Full Godot engine capabilities with strict static typing, LINQ, and familiar C# architecture.",
+          feasibility: "High",
+          pros: ["Strong types prevent silly runtime bugs", "Familiar syntax for backend/C# devs"],
+          caution: "Slightly heavier build step than pure GDScript.",
+          votes: []
+        },
+        {
+          id: "opt_engine_bevy",
+          title: "Bevy (Rust ECS)",
+          description: "Modern data-driven Entity Component System in Rust. Blazing fast, pure code, zero graphical editor required.",
+          feasibility: "Medium",
+          pros: ["Architectural purity", "Rock solid memory safety", "Rust flex"],
+          caution: "Rust compile times can slow down rapid agentic iterations.",
+          votes: []
+        }
+      ],
+      comments: []
+    },
+    {
+      id: "q_netcode",
+      category: "netcode",
+      categoryName: "Multiplayer Architecture & Networking",
+      title: "What multiplayer architecture & networking model should we use?",
+      subtitle: "Complex netcode kills indie projects. We must choose the simplest path that delivers snappy, lag-free fun.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_net_websocket",
+          title: "Authoritative WebSocket / Node.js Server (Colyseus or Custom Room State)",
+          description: "Fast Node.js / TypeScript room server running a 30Hz or 60Hz tick loop with client-side interpolation. Clients send inputs, server sends world snapshots.",
+          feasibility: "Very High",
+          pros: ["Easy to run locally or host on a $5 VPS / Render / Fly.io", "Rock solid cheat-free logic", "Both Web and Desktop clients can connect"],
+          caution: "Requires hosting or running a local server terminal.",
+          votes: ["flaxos", "scotty"]
+        },
+        {
+          id: "opt_net_steamworks",
+          title: "Steamworks P2P Lobby (Steam P2P / Godot ENet)",
+          description: "Host player acts as listen-server. Friends join via Steam overlay or room code with automatic NAT punch-through.",
+          feasibility: "High",
+          pros: ["$0 server hosting costs", "Instant Steam friend invites", "Built into Godot/C#"],
+          caution: "Requires Steam running and a Steam App ID (or Spacewar 480 test ID).",
+          votes: []
+        },
+        {
+          id: "opt_net_local_remoteplay",
+          title: "Local Shared Screen / Steam Remote Play Together",
+          description: "v0.1 is built as a single-screen local co-op game. Friends connect via Steam Remote Play or Parsec or Discord screen-share with zero netcode!",
+          feasibility: "Maximum",
+          pros: ["100% ZERO netcode bugs for Milestone 1", "Ship in 48 hours guaranteed", "Can add real netcode in Milestone 2"],
+          caution: "Requires host bandwidth and game must support shared screen or splitscreen.",
+          votes: []
+        },
+        {
+          id: "opt_net_webrtc",
+          title: "WebRTC DataChannels (Peer-to-Peer Browser Mesh)",
+          description: "Direct browser-to-browser UDP-like connections using WebRTC DataChannels for ultra-low latency.",
+          feasibility: "Medium",
+          pros: ["True peer-to-peer in the browser", "No central server relaying gameplay ticks"],
+          caution: "Signaling and STUN/TURN server setup needed.",
+          votes: []
+        }
+      ],
+      comments: [
+        {
+          id: "c3",
+          memberId: "flaxos",
+          text: "Authoritative WebSocket room server is awesome because we can write it in TypeScript/Node with full test coverage, and agents write great server tick loops!",
+          timestamp: "2026-11-07T09:08:00.000Z"
+        }
+      ]
+    },
+    {
+      id: "q_art_style",
+      category: "art",
+      categoryName: "Visual Direction & Art Style",
+      title: "What visual direction & art style should we target?",
+      subtitle: "Art must look distinctive and cohesive without becoming an asset creation bottleneck that halts development.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_art_pixel16",
+          title: "16-Bit Crisp Pixel Art (Retro Sci-Fi)",
+          description: "Chunky 32x32 sprites, vibrant palette, expressive walk cycles, dynamic lighting on top of 2D tiles.",
+          feasibility: "Very High",
+          pros: ["Timeless aesthetic", "Massive open-source asset libraries (Kenney.nl, itch.io)", "Easy for agents to generate matching sprites"],
+          caution: "Can feel generic if palette and juice (screenshake, particles) aren't dialed in.",
+          votes: ["flaxos"]
+        },
+        {
+          id: "opt_art_lowpoly",
+          title: "Stylized Low-Poly 3D / Retro PS1 Crunch",
+          description: "Flat-shaded low polygon meshes with vertex coloring or crunchy low-res textures, dramatic point lights, modern post-processing.",
+          feasibility: "High",
+          pros: ["Very trendy indie aesthetic (Lethal Company / Ultrakill vibe)", "Easy to prototype with geometric primitives in 3D"],
+          caution: "Requires 3D math and camera handling.",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_art_neon_minimal",
+          title: "Minimalist Neon Vector / Synthwave Geometry",
+          description: "Glowing geometric wireframes, particle blooms, dark space backgrounds, synthwave color bursts (cyan, magenta, electric yellow).",
+          feasibility: "Maximum",
+          pros: ["ZERO 2D sprite art bottleneck!", "Focus 100% on gameplay feel, juicy particles, and lighting", "Looks slick instantly"],
+          caution: "Less character personality compared to sprites.",
+          votes: []
+        },
+        {
+          id: "opt_art_isometric",
+          title: "Isometric 2.5D (HD-2D style)",
+          description: "Layered isometric perspective with pixel characters, dynamic cast shadows, and depth-sorted terrain.",
+          feasibility: "Medium",
+          pros: ["Great depth and tactical readability", "Core Keeper / Diablo aesthetic"],
+          caution: "Isometric depth sorting and collision math can be fiddly.",
+          votes: []
+        }
+      ],
+      comments: []
+    },
+    {
+      id: "q_mechanics",
+      category: "mechanics",
+      categoryName: "Core Unique Mechanics ('Secret Sauce')",
+      title: "Which core mechanics will make our game uniquely addictive?",
+      subtitle: "Select up to 3 core mechanics that create memorable multiplayer moments and emergent chaos. (Multi-select enabled)",
+      allowMultiple: true,
+      options: [
+        {
+          id: "opt_mech_elemental_combos",
+          title: "Synergistic Elemental Combos (Spell / Tech Fusing)",
+          description: "Player A lays down a Cryo Field or Oil Slick, Player B fires Lightning or Plasma into it to cause an Overload explosion. Teammates must coordinate!",
+          feasibility: "High",
+          pros: ["Encourages active communication", "Spectacular visual payoff", "Infinite upgrade permutations"],
+          caution: "Needs clear status effect rules.",
+          votes: ["flaxos", "scotty"]
+        },
+        {
+          id: "opt_mech_physics_chaos",
+          title: "Physics Havoc & Hilarious Ragdolls / Knockback",
+          description: "Shockwaves knock enemies into environmental hazard pits, explosive barrels chain-react, bouncy shields reflect lasers.",
+          feasibility: "High",
+          pros: ["Guaranteed laughter during playtest night", "Emergent gameplay without complex scripted events"],
+          caution: "Ensure friendly knockback is fun, not grief-inducing.",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_mech_shared_super",
+          title: "Shared 'Discovery Super' Meter",
+          description: "The squad shares one giant energy gauge. When maxed, both players must simultaneously hit a button to trigger an epic screen-clearing super weapon.",
+          feasibility: "Very High",
+          pros: ["Simple to code", "Forces high-five synchronization moments"],
+          caution: "Needs clear visual HUD indicator.",
+          votes: ["flaxos"]
+        },
+        {
+          id: "opt_mech_procedural_hazards",
+          title: "Unstable Sector Hazards & Escaping Collapse",
+          description: "Solar flares disable shields, containment leaks flood sectors with radiation, extraction zone changes location dynamically.",
+          feasibility: "Medium",
+          pros: ["Prevents static camping", "Adds urgent pacing"],
+          caution: "Hazards must be clearly telegraphed to feel fair.",
+          votes: []
+        },
+        {
+          id: "opt_mech_asymmetric_roles",
+          title: "Asymmetric Roles (e.g. Breacher vs Tech Specialist)",
+          description: "One player wields heavy ordnance and shields; the other operates remote drones, hacks terminal doors, and calls in supply drops.",
+          feasibility: "Medium",
+          pros: ["Deep complementary teamwork", "Different playstyles for different moods"],
+          caution: "Both roles must feel equally thrilling to play.",
+          votes: []
+        }
+      ],
+      comments: [
+        {
+          id: "c4",
+          memberId: "flaxos",
+          text: "Combining abilities (like cryo + lightning) makes co-op feel like real teamwork instead of just two people shooting in parallel!",
+          timestamp: "2026-11-07T09:10:00.000Z"
+        }
+      ]
+    },
+    {
+      id: "q_theme",
+      category: "theme",
+      categoryName: "Theme, Lore & Narrative Vibe",
+      title: "What lore & narrative vibe fits 'Team Discovery Channel' best?",
+      subtitle: "Gives personality to our characters, weapons, voice barks, and interface.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_theme_deepspace",
+          title: "Team Discovery: Derelict Deep Space Expeditions",
+          description: "A ragtag salvage science crew exploring abandoned megastructures on the galactic rim. Retro CRT terminals, malfunctioning research AI, cosmic oddities.",
+          feasibility: "Very High",
+          pros: ["Matches our repo name perfectly!", "Justifies weird experimental weapons and alien artifacts", "Great blend of wonder and danger"],
+          caution: "None, it's a stellar fit.",
+          votes: ["flaxos", "scotty"]
+        },
+        {
+          id: "opt_theme_office_apocalypse",
+          title: "Corporate Dystopia / Intergalactic Custodians",
+          description: "Overworked space station janitors battling sentient bureaucracy mutants with high-powered mop-cannons and recycling beamers.",
+          feasibility: "High",
+          pros: ["High comedic potential", "Satirical flavor"],
+          caution: "Humor can be subjective.",
+          votes: []
+        },
+        {
+          id: "opt_theme_cyberpunk_heist",
+          title: "Cyberpunk Data Heist",
+          description: "Infiltrate neon data vaults, crack corporate ICE, extract digital payloads while fighting digital enforcers.",
+          feasibility: "High",
+          pros: ["Awesome synth soundtrack potential", "Sleek visuals"],
+          caution: "Cyberpunk is a well-trodden indie space.",
+          votes: []
+        }
+      ],
+      comments: []
+    },
+    {
+      id: "q_division_of_labor",
+      category: "roles",
+      categoryName: "Division of Labor & Accountability",
+      title: "How should we divide the core development pillars?",
+      subtitle: "Clear ownership prevents bystander effect. Everyone has an assigned domain while pairing with AI agents.",
+      allowMultiple: true,
+      options: [
+        {
+          id: "opt_role_agent_architect",
+          title: "AI Agent Orchestrator & Prompt Architect",
+          description: "Owns the system prompts, architectural rules, agent dev loop (Codex/Antigravity/Claude Code), and keeping code structure clean.",
+          feasibility: "Essential",
+          pros: ["Ensures agents don't produce spaghetti code", "Fastest feature iteration"],
+          caution: "Must maintain clean documentation and types.",
+          votes: ["flaxos"]
+        },
+        {
+          id: "opt_role_netcode",
+          title: "Multiplayer Netcode & Lobby Czar",
+          description: "Owns room management, player connection state, snapshot serialization, and latency compensation.",
+          feasibility: "Essential",
+          pros: ["Single owner for the most delicate system", "Rock solid reliability"],
+          caution: "High responsibility to keep the sync bug-free.",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_role_combat_feel",
+          title: "Combat Feel & Juice Lead (Screen Shake, Controls, Hitstop)",
+          description: "Tunes weapon recoil, dodge roll responsiveness, sound triggers, impact effects, and damage numbers.",
+          feasibility: "High Impact",
+          pros: ["Directly makes the game addictive to play", "Super fun domain to iterate on"],
+          caution: "Requires lots of playtesting tweaks.",
+          votes: ["flaxos", "scotty"]
+        },
+        {
+          id: "opt_role_content_scripter",
+          title: "Weapons, Perks & Enemy Scripter",
+          description: "Designs and scripts new enemy attack patterns, synergy perks, boss phases, and level spawn tables using AI prompts.",
+          feasibility: "High Impact",
+          pros: ["High creative output", "Fast to prompt with AI agents once foundation is set"],
+          caution: "Keep balance within sane bounds.",
+          votes: ["scotty"]
+        },
+        {
+          id: "opt_role_qa_playtest",
+          title: "QA, DevOps & Friday Playtest Host",
+          description: "Ensures the build compiles, runs playtest servers on Friday night, records bug tickets, and keeps the team celebrated.",
+          feasibility: "Essential",
+          pros: ["The heartbeat that keeps the squad motivated and shipping"],
+          caution: "Must be organized and consistent.",
+          votes: ["flaxos"]
+        }
+      ],
+      comments: [
+        {
+          id: "c5",
+          memberId: "flaxos",
+          text: "I can lead the AI agent tooling/prompt architecture and QA builds, while Scotty and I pair on netcode and juicy combat mechanics!",
+          timestamp: "2026-11-07T09:12:00.000Z"
+        }
+      ]
+    }
+  ]
+};

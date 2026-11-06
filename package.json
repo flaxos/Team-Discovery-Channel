@@ -1,0 +1,19 @@
+{
+  "name": "team-discovery-channel",
+  "version": "1.0.0",
+  "description": "Collab project with the agentic lads - Multiplayer Game Dev & Alignment Engine",
+  "scripts": {
+    "dev": "npm --prefix alignment-app run dev",
+    "start": "npm --prefix alignment-app start",
+    "build": "npm --prefix alignment-app run build",
+    "setup": "npm --prefix alignment-app install"
+  },
+  "keywords": [
+    "multiplayer",
+    "game-dev",
+    "agentic-ai",
+    "community"
+  ],
+  "author": "flaxos, Scotty & Team Discovery Channel",
+  "license": "MIT"
+}
