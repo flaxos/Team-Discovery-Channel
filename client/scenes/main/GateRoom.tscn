@@ -261,10 +261,22 @@ use_collision = true
 size = Vector3(10, 6, 0.8)
 material = SubResource("Mat_Wall")
 
-[node name="HallwayCeiling" type="CSGBox3D" parent="FallbackHallway"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, 32)
+[node name="CeilingBeamNorth" type="CSGBox3D" parent="FallbackHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 26)
 use_collision = true
-size = Vector3(10, 0.4, 20)
+size = Vector3(10, 0.4, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="CeilingBeamMid" type="CSGBox3D" parent="FallbackHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 33)
+use_collision = true
+size = Vector3(10, 0.4, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="CeilingBeamSouth" type="CSGBox3D" parent="FallbackHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 40)
+use_collision = true
+size = Vector3(10, 0.4, 0.8)
 material = SubResource("Mat_Wall")
 
 [node name="HallwayLightNorth" type="OmniLight3D" parent="FallbackHallway"]

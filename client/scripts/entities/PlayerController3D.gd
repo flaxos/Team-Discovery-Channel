@@ -47,6 +47,8 @@ const TURRET_COOLDOWN_S: float = 25.0
 var trauma: float = 0.0
 var max_shake_offset: float = 0.65
 var max_shake_yaw_deg: float = 1.5
+var max_aim_lead_dist: float = 2.8
+var occluded_nodes: Dictionary = {}
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -65,6 +67,10 @@ func _enter_tree() -> void:
 	is_local_authority = (multiplayer.get_unique_id() == peer_id)
 	if has_node("MultiplayerSynchronizer"):
 		$MultiplayerSynchronizer.set_multiplayer_authority(peer_id)
+
+
+func _exit_tree() -> void:
+	_restore_all_occluded_nodes()
 
 
 func _ready() -> void:
@@ -198,8 +204,7 @@ func _physics_process(delta: float) -> void:
 			if aim_dir != Vector3.ZERO:
 				mounted_turret.try_manual_fire(aim_dir)
 				add_screen_shake(0.08)
-		if is_local_authority and camera_rig != null:
-			camera_rig.global_position = camera_rig.global_position.lerp(global_position, 14.0 * delta)
+		_update_camera_and_occlusion(delta)
 		return
 
 	# If actively dialing DHD console, route directional inputs to glyph entries
@@ -217,6 +222,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		move_and_slide()
+		_update_camera_and_occlusion(delta)
 		return
 
 	# Stances (Sprint / Crouch)
@@ -252,23 +258,130 @@ func _physics_process(delta: float) -> void:
 	if turret_cooldown > 0.0:
 		turret_cooldown = maxf(0.0, turret_cooldown - delta)
 
-	# Smoothly follow player with camera rig without rotating with character, plus trauma screen shake
-	if is_local_authority and camera_rig != null:
-		var target_cam_pos := camera_rig.global_position.lerp(global_position, 14.0 * delta)
-		if trauma > 0.0:
-			trauma = maxf(0.0, trauma - 1.8 * delta)
-			var shake_p := trauma * trauma
-			var off_x := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
-			var off_z := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
-			var off_yaw := deg_to_rad((randf() * 2.0 - 1.0) * max_shake_yaw_deg * shake_p)
-			target_cam_pos += Vector3(off_x, 0, off_z)
-			camera_rig.rotation.y = off_yaw
-		else:
-			camera_rig.rotation = Vector3.ZERO
-		camera_rig.global_position = target_cam_pos
+	# Update tactical dynamic camera (aim-lead, screenshake, and occlusion transparency)
+	_update_camera_and_occlusion(delta)
 
 	# Handle firing & reloading
 	_process_combat()
+
+
+func _update_camera_and_occlusion(delta: float) -> void:
+	if not is_local_authority or camera_rig == null:
+		return
+
+	# 1. Aim-Lead: offset camera toward aiming reticle for tactical forward vision
+	var aim_lead := Vector3.ZERO
+	if current_aim_target != Vector3.ZERO:
+		var aim_diff := (current_aim_target - global_position)
+		aim_diff.y = 0.0
+		aim_lead = aim_diff.limit_length(max_aim_lead_dist)
+
+	var desired_cam_pos := global_position + aim_lead
+	var target_cam_pos := camera_rig.global_position.lerp(desired_cam_pos, 10.0 * delta)
+
+	# 2. Procedural trauma screen shake
+	if trauma > 0.0:
+		trauma = maxf(0.0, trauma - 1.8 * delta)
+		var shake_p := trauma * trauma
+		var off_x := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
+		var off_z := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
+		var off_yaw := deg_to_rad((randf() * 2.0 - 1.0) * max_shake_yaw_deg * shake_p)
+		target_cam_pos += Vector3(off_x, 0, off_z)
+		camera_rig.rotation.y = off_yaw
+	else:
+		camera_rig.rotation = Vector3.ZERO
+
+	camera_rig.global_position = target_cam_pos
+
+	# 3. Dynamic Wall & Structure Occlusion Fade
+	_update_wall_occlusion()
+
+
+func _update_wall_occlusion() -> void:
+	if camera == null or not is_inside_tree():
+		return
+
+	var world_3d := get_world_3d()
+	if world_3d == null:
+		return
+	var space_state := world_3d.direct_space_state
+	if space_state == null:
+		return
+
+	var cam_pos := camera.global_position
+	var player_head := global_position + Vector3(0, 1.2, 0)
+	var newly_hit: Dictionary = {}
+
+	# Cast 3 ray passes (center, left flank, right flank) to detect wide occluding structures
+	var ray_targets: Array[Vector3] = [
+		player_head,
+		player_head + Vector3(-0.6, 0, 0),
+		player_head + Vector3(0.6, 0, 0)
+	]
+
+	var exclude: Array[RID] = [get_rid()]
+
+	for target_pt in ray_targets:
+		var cur_exclude := exclude.duplicate()
+		for iter in range(3):
+			var query := PhysicsRayQueryParameters3D.create(cam_pos, target_pt)
+			query.collision_mask = 1
+			query.exclude = cur_exclude
+			var res := space_state.intersect_ray(query)
+			if res.is_empty():
+				break
+
+			var col: Object = res.get("collider")
+			cur_exclude.append(res.get("rid"))
+			if col is Node:
+				var node: Node = col as Node
+				if node != self and not node.name.begins_with("Floor") and not node.name.begins_with("Sandbag"):
+					newly_hit[node] = true
+
+	# Fade newly occluded nodes
+	for node: Node in newly_hit.keys():
+		if not occluded_nodes.has(node):
+			var orig_mat: Material = null
+			if "material" in node and node.get("material") is Material:
+				orig_mat = node.get("material") as Material
+			elif "material_override" in node and node.get("material_override") is Material:
+				orig_mat = node.get("material_override") as Material
+
+			if orig_mat is StandardMaterial3D:
+				occluded_nodes[node] = orig_mat
+				var fade_mat := (orig_mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+				fade_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				fade_mat.albedo_color.a = 0.22
+				if "material" in node:
+					node.set("material", fade_mat)
+				elif "material_override" in node:
+					node.set("material_override", fade_mat)
+
+	# Restore nodes that are no longer occluding
+	var to_remove: Array[Node] = []
+	for node: Node in occluded_nodes.keys():
+		if not newly_hit.has(node):
+			if is_instance_valid(node):
+				var orig_mat: Material = occluded_nodes[node]
+				if "material" in node:
+					node.set("material", orig_mat)
+				elif "material_override" in node:
+					node.set("material_override", orig_mat)
+			to_remove.append(node)
+
+	for node in to_remove:
+		occluded_nodes.erase(node)
+
+
+func _restore_all_occluded_nodes() -> void:
+	for node: Node in occluded_nodes.keys():
+		if is_instance_valid(node):
+			var orig_mat: Material = occluded_nodes[node]
+			if "material" in node:
+				node.set("material", orig_mat)
+			elif "material_override" in node:
+				node.set("material_override", orig_mat)
+	occluded_nodes.clear()
 
 
 func add_screen_shake(amount: float) -> void:
@@ -416,6 +529,7 @@ func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = fa
 
 
 func _on_died() -> void:
+	_restore_all_occluded_nodes()
 	player_died.emit(peer_id)
 	print("Player %d has fallen in combat." % peer_id)
 
