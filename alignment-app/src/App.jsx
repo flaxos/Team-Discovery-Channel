@@ -19,14 +19,15 @@ import {
 } from 'lucide-react';
 
 const CATEGORIES = [
-  { id: 'all', name: 'All Questions' },
-  { id: 'grounding', name: 'Grounding & Scope' },
-  { id: 'genre', name: 'Genre & Core Loop' },
-  { id: 'engine', name: 'Tech & Engine' },
-  { id: 'netcode', name: 'Multiplayer Netcode' },
-  { id: 'art', name: 'Art Direction' },
-  { id: 'mechanics', name: 'Core Mechanics' },
-  { id: 'theme', name: 'Theme & Lore' },
+  { id: 'all', name: 'All Directives' },
+  { id: 'perspective', name: 'Camera & Scope' },
+  { id: 'core_loop', name: 'Stealth-to-Loud Loop' },
+  { id: 'missions', name: 'Mission Modes' },
+  { id: 'classes', name: 'Squad Classes' },
+  { id: 'mechanics', name: 'Signature Mechanics' },
+  { id: 'engine', name: 'Engine & Pipeline' },
+  { id: 'art', name: 'Visual Direction' },
+  { id: 'grounding', name: 'Grounding & Sprints' },
   { id: 'roles', name: 'Division of Labor' }
 ];
 
@@ -317,17 +318,17 @@ export default function App() {
         {activeTab === 'poll' && (
           <div className="space-y-6">
             {/* Mission Hero Banner */}
-            <div className="glass-panel rounded-2xl p-6 bg-gradient-to-r from-teal-950/40 via-slate-900 to-slate-900/60 border border-teal-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="glass-panel rounded-2xl p-6 bg-gradient-to-r from-sky-950/40 via-slate-900 to-indigo-950/40 border border-cyan-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>MISSION DIRECTIVE: DEFEAT UNFINISHED GAME SYNDROME</span>
+                <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-1">
+                  <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                  <span>SGC DIRECTIVE: STARGATE SG-1 / SG-3 TACTICAL EXTRACTION</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-extrabold text-white">
-                  Vote, Align, and Lock In Our Game Direction
+                  Vote, Align, and Lock In Our Stargate Co-op Shooter
                 </h2>
                 <p className="text-sm text-slate-300 mt-1 max-w-2xl">
-                  Cast votes as <strong>{activeMemberId}</strong>. If you have a different vision, click <strong>"Propose Custom Idea (Other)"</strong> on any category!
+                  Step through the puddle, scout the AO, plant C4, and dial home under Jaffa fire! Cast votes as <strong>{activeMemberId}</strong> or click <strong>"Propose Custom Idea (Other)"</strong>.
                 </p>
               </div>
 
@@ -341,9 +342,9 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setActiveTab('compiler')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs sm:text-sm transition shadow-lg shadow-teal-500/20"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-bold text-xs sm:text-sm transition shadow-lg shadow-cyan-500/20"
                 >
-                  <span>Compile Bootstrap Prompt</span>
+                  <span>Compile SGC Bootstrap Spec</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

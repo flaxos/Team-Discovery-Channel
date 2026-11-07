@@ -34,20 +34,22 @@ export default function Header({
         {/* Top Info Bar */}
         <div className="py-3 flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/60">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xl shadow-lg shadow-teal-500/20">
-              🔭
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 via-teal-500 to-indigo-600 flex items-center justify-center text-xl shadow-lg shadow-teal-500/25 border border-teal-400/30">
+              🌀
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-extrabold text-lg sm:text-xl tracking-tight text-white flex items-center gap-1.5">
-                  <span>Team Discovery Channel</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-mono">
-                    ALIGNMENT ENGINE
+                  <span>Project SGC</span>
+                  <span className="text-slate-500 font-mono text-sm">•</span>
+                  <span className="text-sm sm:text-base text-slate-300 font-semibold">Team Discovery Channel</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-mono tracking-wide">
+                    STARGATE SG-1 / SG-3
                   </span>
                 </h1>
               </div>
               <p className="text-xs text-slate-400">
-                Grounding matrix & bootstrap compiler to finally finish our multiplayer game
+                Militarized Tactical Extraction & Iris Defense • Grounded Alignment Engine
               </p>
             </div>
           </div>

@@ -19,11 +19,11 @@ import {
 } from 'lucide-react';
 
 const CORE_DOMAINS = [
-  { id: 'ai_orchestrator', name: 'AI Agent Orchestrator', roleKey: 'AI Agent Orchestrator', icon: Code, desc: 'Prompts agents, maintains system prompts, and reviews code structure' },
-  { id: 'netcode', name: 'Multiplayer & Netcode', roleKey: 'Multiplayer & Netcode', icon: Network, desc: 'Manages room state, socket ticks, interpolation, and connectivity' },
-  { id: 'combat_feel', name: 'Game Feel & Combat Juice', roleKey: 'Combat Feel & Juice', icon: Gamepad2, desc: 'Weapon recoil, screenshake, hitstop, responsiveness, and physics' },
-  { id: 'content', name: 'Weapons, Perks & Scripter', roleKey: 'Weapons & Perks Scripter', icon: Sparkles, desc: 'Designs classes, enemy behaviors, upgrade synergies, and drop tables' },
-  { id: 'qa_host', name: 'Playtest Host & QA Czar', roleKey: 'QA & Playtest Host', icon: Wrench, desc: 'Hosts Friday playtests, verifies builds, and logs priority bugs' }
+  { id: 'gate_netcode', name: 'Stargate & Netcode Czar', roleKey: 'Multiplayer & Netcode', icon: Network, desc: 'Manages Stargate event horizon transitions, DHD chevron sync, and netcode interpolation' },
+  { id: 'combat_feel', name: 'Combat & Weapon Juice Lead', roleKey: 'Combat Feel & Juice', icon: Gamepad2, desc: 'P90 recoil, Ma\'Tok staff plasma blasts, Zat stun/kill arcs, and C4 detonations' },
+  { id: 'ai_orchestrator', name: 'AI Agent Orchestrator', roleKey: 'AI Agent Orchestrator', icon: Code, desc: 'Prompts AI agents, maintains architecture rules, and conducts code reviews' },
+  { id: 'jaffa_ai', name: 'Jaffa AI & Stealth Scripter', roleKey: 'Weapons & Perks Scripter', icon: Sparkles, desc: 'Patrol paths, vision cones, alarm radios, and transport ring drop waves' },
+  { id: 'qa_host', name: 'Friday SGC Playtest Host', roleKey: 'QA & Playtest Host', icon: Wrench, desc: 'Hosts weekly Friday playtests on Discord, verifies builds, and logs priority bugs' }
 ];
 
 export default function SquadRoster({ 

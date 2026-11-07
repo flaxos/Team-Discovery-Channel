@@ -31,7 +31,7 @@ Open [http://localhost:5173](http://localhost:5173) to cast votes, propose custo
 ---
 
 ## 👥 The Squad
-* **flaxos** (🚀) - AI Agent Orchestrator, Core Gameplay & Systems
-* **Scotty** (⚡) - Multiplayer & Netcode, Game Feel & Combat
+* **flaxos** (🚀) - AI Agent Orchestrator, Core Gameplay & Systems, Combat Feel & Juice
+* **Scotty** (⚡) - Multiplayer & Netcode, Game Feel & Combat, Weapons & Perks Scripter
 
 *Built with passion, caffeine, and agentic AI.*

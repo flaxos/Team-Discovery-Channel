@@ -1,4 +1,6 @@
-// Initial State for Team Discovery Channel Game Dev Alignment
+// Stargate SG-1 & SG-3 Tactical Extraction Shooter - Initial Alignment State
+// Team Discovery Channel / Cheyenne Mountain Complex (SGC)
+
 module.exports = {
   team: [
     {
@@ -6,411 +8,386 @@ module.exports = {
       name: "flaxos",
       avatar: "🚀",
       color: "#14b8a6", // teal
-      rolePreferences: ["AI Agent Orchestrator", "Core Gameplay & Systems"],
+      rolePreferences: ["AI Agent Orchestrator", "Core Gameplay & Systems", "Combat Feel & Juice"],
       weeklyHours: 6,
-      notes: "Keen to keep things grounded, iterate with coding agents, and ensure we actually ship a playable build."
+      notes: "Keen to keep things grounded, dial chevrons under fire, and ensure we actually ship a playable Stargate co-op prototype!"
     },
     {
       id: "scotty",
       name: "Scotty",
       avatar: "⚡",
       color: "#f59e0b", // amber
-      rolePreferences: ["Multiplayer & Netcode", "Game Feel & Combat"],
+      rolePreferences: ["Multiplayer & Netcode", "Game Feel & Combat", "Weapons & Perks Scripter"],
       weeklyHours: 6,
-      notes: "Ready to pair on multiplayer mechanics and co-op shenanigans."
+      notes: "Ready to pair on netcode, Jaffa AI, P90 recoil, and transport ring drops."
     }
   ],
   questions: [
     {
-      id: "q_grounding_timeframe",
-      category: "grounding",
-      categoryName: "Grounding & Reality Check",
-      title: "What is our hard deadline for Milestone 1 (First Playable Build)?",
-      subtitle: "The #1 reason agentic game dev projects stall is indefinite timelines. We need a rapid, locked-in target for 2 players to connect and play.",
+      id: "q_camera_perspective",
+      category: "perspective",
+      categoryName: "Camera & Perspective (Scope Decider)",
+      title: "What camera angle & perspective should dictate our tactical gameplay?",
+      subtitle: "The camera dictates 80% of asset and animation workload. A smart choice guarantees we actually finish.",
       allowMultiple: false,
       options: [
         {
-          id: "opt_timeframe_jam",
-          title: "The 48-Hour Weekend Jam Sprint",
-          description: "Hyper-focused 2-day hackathon. Graybox circles, simple sync, 1 mechanic. Playable by Sunday night.",
+          id: "opt_cam_isometric",
+          title: "Isometric / Top-Down 3D Tactical (Helldivers 1, Alien Swarm, Synthetik)",
+          description: "Full squad tactical awareness. Clear Jaffa patrol vision cones, coordinated crossfires, transport ring drop telegraphs, and C4 ambush lines. Zero first-person viewmodel or complex weapon animation traps.",
           feasibility: "Very High",
-          pros: ["Forces extreme simplicity", "Instant gratification", "Zero time for scope creep"],
-          caution: "High intensity over a single weekend.",
+          pros: ["Fastest to prototype and finish", "Perfect for stealth cones & tactical traps", "Great fit for low-poly Synty assets"],
+          caution: "Less cinematic face-to-face NPC immersion, but mechanically 10/10.",
           votes: []
         },
         {
-          id: "opt_timeframe_2weeks",
-          title: "The 2-Week Vertical Slice (Recommended)",
-          description: "14 days from kickoff to playable squad playtest. 1 arena, 2 character classes, core win/loss loop.",
-          feasibility: "High",
-          pros: ["Sweet spot for agentic velocity", "Allows polish on core combat feel", "Fits around regular life"],
-          caution: "Requires holding each other strictly accountable each week.",
-          votes: []
-        },
-        {
-          id: "opt_timeframe_month",
-          title: "The 1-Month Milestone",
-          description: "4 structured weekly sprints. Deeper architectural foundations, sound effects, full lobby flow.",
+          id: "opt_cam_third_person",
+          title: "Third-Person Over-the-Shoulder (Helldivers 2, Ghost Recon Wildlands)",
+          description: "Cinematic combat perspective behind the marine's shoulder. Thrilling when dialing the DHD or watching Death Glider strafe runs, but requires cover rigging and camera collision math.",
           feasibility: "Medium",
-          pros: ["More breathing room for complex netcode", "Better architecture"],
-          caution: "Higher risk of enthusiasm tapering off if week 1 doesn't produce something moving on screen.",
+          pros: ["High cinematic adrenaline", "Impressive character presence"],
+          caution: "3D camera obstacle collisions and aim-IK animations add substantial scope.",
+          votes: []
+        },
+        {
+          id: "opt_cam_first_person",
+          title: "First-Person Tactical (GTFO, Payday 2, Six Days in Fallujah)",
+          description: "Total claustrophobic immersion. Stepping through the Stargate puddle in first-person, checking P90 magazine counts, and holding flashlight beams down dark pyramid corridors.",
+          feasibility: "Medium",
+          pros: ["Maximum immersion and horror tension during night raids"],
+          caution: "Requires detailed viewmodel rigs, iron-sight aiming, and reload animation states.",
+          votes: []
+        },
+        {
+          id: "opt_cam_hybrid",
+          title: "Hybrid SGC Hub (1st Person SGC Gate Room + Top-Down Planetary Raids)",
+          description: "Walk around the Cheyenne Mountain Gate Room and armory in 1st person; step through the Stargate event horizon and transition seamlessly into top-down tactical squad action.",
+          feasibility: "High",
+          pros: ["Best of both worlds: iconic SGC briefing feel + crisp tactical raid gameplay"],
+          caution: "Two camera rigs to support, though hub can be lightweight.",
           votes: []
         }
       ],
       comments: [
         {
-          id: "c1",
+          id: "c_sg1",
           memberId: "flaxos",
-          text: "I really want us to have something we can physically play together within 2 weeks max. Once we play together, the momentum is unstoppable!",
-          timestamp: "2026-11-07T09:00:00.000Z"
+          text: "Isometric / Top-Down 3D lets us build stealth vision cones, C4 traps, and transport rings 5x faster without getting bogged down in animation blending!",
+          timestamp: "2026-11-07T10:00:00.000Z"
         }
       ]
     },
     {
-      id: "q_anti_abandonment",
-      category: "grounding",
-      categoryName: "Grounding & Reality Check",
-      title: "Which Anti-Abandonment Rule will be our sacred team covenant?",
-      subtitle: "To overcome the curse of unfinished game dev projects, we must agree on our guiding constraint.",
+      id: "q_stealth_to_loud_loop",
+      category: "core_loop",
+      categoryName: "Core Loop & Stealth Mechanics",
+      title: "How should our 'Stealth-to-Loud' extraction loop play out?",
+      subtitle: "A 4-person SG team is always wildly outnumbered by Jaffa battalions. Starting quiet and extracting loud is the signature SG-1 rhythm.",
       allowMultiple: false,
       options: [
         {
-          id: "opt_rule_graybox",
-          title: "The 'Graybox First' Covenant",
-          description: "Zero custom art, sound, or complex menus until two actual human players can move, shoot/interact, and score in a graybox arena.",
+          id: "opt_loop_full_recon_extract",
+          title: "Full Recon -> C4 Sabotage -> Transport Ring Alarm -> DHD Dial Under Fire",
+          description: "Insert through gate. Scout with MALP/Zats quietly. Plant C4 on the primary objective. Once detonated (or cover blown), orbital Ha'tak rings drop Jaffa shock-troops. Squad fights back to DHD, punches 7 chevrons under fire, transmits IDC code to open SGC iris, and dives through!",
           feasibility: "Very High",
-          pros: ["Proves fun before spending time on art", "Solves netcode bottleneck on Day 1"],
-          caution: "Looks ugly for the first 3 days, but feels amazing when it works.",
+          pros: ["Matches Stargate SG-1 canon 100%", "Natural escalation from tension to chaotic action", "High-five extraction moments"],
+          caution: "DHD dial timer must be balanced so it's clutch, not frustrating.",
           votes: []
         },
         {
-          id: "opt_rule_friday_playtest",
-          title: "The 'Friday 8pm Playtest Night' Covenant",
-          description: "Every Friday at 8:00 PM we hop on Discord and play whatever build exists. No excuses. If it crashes, we laugh and fix it live.",
-          feasibility: "Very High",
-          pros: ["Built-in peer accountability", "Celebrates incremental progress", "Makes game dev a social event"],
-          caution: "Requires reserving the Friday evening slot.",
-          votes: []
-        },
-        {
-          id: "opt_rule_single_mechanic",
-          title: "The 'Rule of One Core Mechanic'",
-          description: "v0.1 has only ONE primary verb (e.g. either dashing, or shooting, or grappling). We only add a second verb after the first is 10/10 juicy.",
+          id: "opt_loop_breech_strike",
+          title: "Aggressive Strike & Bunker Buster (Fast Pace)",
+          description: "Loud from the drop. Call in SGC artillery or drone strikes, breach fortified Jaffa gates with shape charges, secure alien artifact, and establish a defensive perimeter at the gate.",
           feasibility: "High",
-          pros: ["Keeps game feel razor sharp", "Prevents feature bloat"],
-          caution: "Requires discipline to resist adding 'wouldn't it be cool if...' features.",
+          pros: ["Pure run-and-gun arcade energy", "Minimal stealth AI requirements"],
+          caution: "Loses some of that tense SG-1 covert recon flavor.",
+          votes: []
+        },
+        {
+          id: "opt_loop_dynamic_heat",
+          title: "Dynamic Alert Heat Level (Metal Gear × Helldivers)",
+          description: "Patrols stay suspicious if bodies are found. If alarm consoles are activated, Jaffa patrols call in Death Glider fly-bys and transport ring heavy reinforcements.",
+          feasibility: "High",
+          pros: ["Rewards careful silenced play and hiding bodies with Zat 2-shot disintegration"],
+          caution: "Requires alarm radio AI state.",
           votes: []
         }
       ],
       comments: []
     },
     {
-      id: "q_genre",
-      category: "genre",
-      categoryName: "Genre & Core Gameplay Loop",
-      title: "What genre & core gameplay loop should we build?",
-      subtitle: "Needs to be inherently fun in co-op/multiplayer and achievable with agentic AI pair programming.",
-      allowMultiple: false,
-      options: [
-        {
-          id: "opt_genre_horde",
-          title: "Co-op Horde Survival (Vampire Survivors × Risk of Rain)",
-          description: "2-4 players hold out in dynamic arenas against swarming waves. Shared XP gems, synergized elemental upgrades, clutch revive beacons.",
-          feasibility: "High",
-          pros: ["Huge dopamine loop", "Low netcode overhead (enemies can use deterministic swarming)", "Easy to add tons of fun agent-generated weapons"],
-          caution: "Screen can get busy if weapon particles aren't disciplined.",
-          votes: []
-        },
-        {
-          id: "opt_genre_extraction",
-          title: "Top-Down Extraction / Micro-Raid (Zero Sievert × Enter the Gungeon)",
-          description: "Fast 8-10 minute raids into hostile derelict sectors. Scavenge tech components, fight rogue AI drones, rush to extraction beacon before meltdown.",
-          feasibility: "Medium",
-          pros: ["Incredible tension & emergent teamwork", "Natural meta-progression in the ship hub", "Matches our 'Discovery Channel' expedition vibe"],
-          caution: "Requires inventory sync and extract logic.",
-          votes: []
-        },
-        {
-          id: "opt_genre_brawler",
-          title: "Chaotic Physics Arena Brawler (Duck Game × Rounds × Stick Fight)",
-          description: "Fast, goofy 1-minute rounds. Physics-driven knockback, bizarre randomized weapon drops, destructible platforms, sudden death.",
-          feasibility: "High",
-          pros: ["Instant laugh-out-loud fun with friends", "Trivial game loop (last team standing)", "Very fast to prototype"],
-          caution: "Physics sync over high ping can be tricky if not client-authoritative with rollback.",
-          votes: []
-        },
-        {
-          id: "opt_genre_dungeon",
-          title: "Twin-Stick Co-op Dungeon Crawler / ARPG",
-          description: "Procedural rooms, dodge-roll combat, telegraph attacks, combo abilities, and coordinated boss fights with distinct phases.",
-          feasibility: "Medium",
-          pros: ["Deeply rewarding combat mastery", "Great class synergy (Tank, Blaster, Support)"],
-          caution: "Requires more enemy AI states and room generator logic.",
-          votes: []
-        },
-        {
-          id: "opt_genre_social",
-          title: "Space Station Subterfuge / Social Deception (SS13-lite)",
-          description: "Keep a rickety space expedition vessel running with mini-tasks while random malfunctions (or a secret rogue saboteur) cause chaos.",
-          feasibility: "Medium",
-          pros: ["Endless comedic storytelling", "Low combat complexity"],
-          caution: "Requires at least 4-5 players to shine.",
-          votes: []
-        }
-      ],
-      comments: [
-        {
-          id: "c2",
-          memberId: "scotty",
-          text: "Horde survival or extraction both sound super fun. With horde survival, even 2 of us can jump in and have a blast immediately without needing a full lobby.",
-          timestamp: "2026-11-07T09:05:00.000Z"
-        }
-      ]
-    },
-    {
-      id: "q_engine",
-      category: "engine",
-      categoryName: "Engine & Tech Stack",
-      title: "What engine & tech stack should power the game?",
-      subtitle: "The engine dictates how quickly our AI agents can write code, how fast we can test, and how easy it is for friends to join.",
-      allowMultiple: false,
-      options: [
-        {
-          id: "opt_engine_godot",
-          title: "Godot 4.x (GDScript)",
-          description: "Lightweight, blazing fast launch times, clean text-based scene files that git merges seamlessly, and LLMs write top-tier GDScript.",
-          feasibility: "Very High",
-          pros: ["Native high-level multiplayer", "Instant compiles", "Zero licensing baggage", "Cross-platform desktop & web exports"],
-          caution: "Requires downloading Godot 4 editor (though lightweight ~100MB).",
-          votes: []
-        },
-        {
-          id: "opt_engine_web",
-          title: "Web-Native (TypeScript + Phaser 3 / Pixi.js / Three.js + Vite)",
-          description: "Zero installation barrier. Send a URL link in Discord or WhatsApp, click it, and all friends are playing together in Chrome/Firefox in 3 seconds.",
-          feasibility: "Very High",
-          pros: ["Absolute zero friction for playtesting with friends", "Instant hot reload", "Standard web dev workflow"],
-          caution: "Browser audio/fullscreen quirks; requires web netcode (WebSocket/WebRTC).",
-          votes: []
-        },
-        {
-          id: "opt_engine_godot_csharp",
-          title: "Godot 4.x (C# / .NET)",
-          description: "Full Godot engine capabilities with strict static typing, LINQ, and familiar C# architecture.",
-          feasibility: "High",
-          pros: ["Strong types prevent silly runtime bugs", "Familiar syntax for backend/C# devs"],
-          caution: "Slightly heavier build step than pure GDScript.",
-          votes: []
-        },
-        {
-          id: "opt_engine_bevy",
-          title: "Bevy (Rust ECS)",
-          description: "Modern data-driven Entity Component System in Rust. Blazing fast, pure code, zero graphical editor required.",
-          feasibility: "Medium",
-          pros: ["Architectural purity", "Rock solid memory safety", "Rust flex"],
-          caution: "Rust compile times can slow down rapid agentic iterations.",
-          votes: []
-        }
-      ],
-      comments: []
-    },
-    {
-      id: "q_netcode",
-      category: "netcode",
-      categoryName: "Multiplayer Architecture & Networking",
-      title: "What multiplayer architecture & networking model should we use?",
-      subtitle: "Complex netcode kills indie projects. We must choose the simplest path that delivers snappy, lag-free fun.",
-      allowMultiple: false,
-      options: [
-        {
-          id: "opt_net_websocket",
-          title: "Authoritative WebSocket / Node.js Server (Colyseus or Custom Room State)",
-          description: "Fast Node.js / TypeScript room server running a 30Hz or 60Hz tick loop with client-side interpolation. Clients send inputs, server sends world snapshots.",
-          feasibility: "Very High",
-          pros: ["Easy to run locally or host on a $5 VPS / Render / Fly.io", "Rock solid cheat-free logic", "Both Web and Desktop clients can connect"],
-          caution: "Requires hosting or running a local server terminal.",
-          votes: []
-        },
-        {
-          id: "opt_net_steamworks",
-          title: "Steamworks P2P Lobby (Steam P2P / Godot ENet)",
-          description: "Host player acts as listen-server. Friends join via Steam overlay or room code with automatic NAT punch-through.",
-          feasibility: "High",
-          pros: ["$0 server hosting costs", "Instant Steam friend invites", "Built into Godot/C#"],
-          caution: "Requires Steam running and a Steam App ID (or Spacewar 480 test ID).",
-          votes: []
-        },
-        {
-          id: "opt_net_local_remoteplay",
-          title: "Local Shared Screen / Steam Remote Play Together",
-          description: "v0.1 is built as a single-screen local co-op game. Friends connect via Steam Remote Play or Parsec or Discord screen-share with zero netcode!",
-          feasibility: "Maximum",
-          pros: ["100% ZERO netcode bugs for Milestone 1", "Ship in 48 hours guaranteed", "Can add real netcode in Milestone 2"],
-          caution: "Requires host bandwidth and game must support shared screen or splitscreen.",
-          votes: []
-        },
-        {
-          id: "opt_net_webrtc",
-          title: "WebRTC DataChannels (Peer-to-Peer Browser Mesh)",
-          description: "Direct browser-to-browser UDP-like connections using WebRTC DataChannels for ultra-low latency.",
-          feasibility: "Medium",
-          pros: ["True peer-to-peer in the browser", "No central server relaying gameplay ticks"],
-          caution: "Signaling and STUN/TURN server setup needed.",
-          votes: []
-        }
-      ],
-      comments: [
-        {
-          id: "c3",
-          memberId: "flaxos",
-          text: "Authoritative WebSocket room server is awesome because we can write it in TypeScript/Node with full test coverage, and agents write great server tick loops!",
-          timestamp: "2026-11-07T09:08:00.000Z"
-        }
-      ]
-    },
-    {
-      id: "q_art_style",
-      category: "art",
-      categoryName: "Visual Direction & Art Style",
-      title: "What visual direction & art style should we target?",
-      subtitle: "Art must look distinctive and cohesive without becoming an asset creation bottleneck that halts development.",
-      allowMultiple: false,
-      options: [
-        {
-          id: "opt_art_pixel16",
-          title: "16-Bit Crisp Pixel Art (Retro Sci-Fi)",
-          description: "Chunky 32x32 sprites, vibrant palette, expressive walk cycles, dynamic lighting on top of 2D tiles.",
-          feasibility: "Very High",
-          pros: ["Timeless aesthetic", "Massive open-source asset libraries (Kenney.nl, itch.io)", "Easy for agents to generate matching sprites"],
-          caution: "Can feel generic if palette and juice (screenshake, particles) aren't dialed in.",
-          votes: []
-        },
-        {
-          id: "opt_art_lowpoly",
-          title: "Stylized Low-Poly 3D / Retro PS1 Crunch",
-          description: "Flat-shaded low polygon meshes with vertex coloring or crunchy low-res textures, dramatic point lights, modern post-processing.",
-          feasibility: "High",
-          pros: ["Very trendy indie aesthetic (Lethal Company / Ultrakill vibe)", "Easy to prototype with geometric primitives in 3D"],
-          caution: "Requires 3D math and camera handling.",
-          votes: []
-        },
-        {
-          id: "opt_art_neon_minimal",
-          title: "Minimalist Neon Vector / Synthwave Geometry",
-          description: "Glowing geometric wireframes, particle blooms, dark space backgrounds, synthwave color bursts (cyan, magenta, electric yellow).",
-          feasibility: "Maximum",
-          pros: ["ZERO 2D sprite art bottleneck!", "Focus 100% on gameplay feel, juicy particles, and lighting", "Looks slick instantly"],
-          caution: "Less character personality compared to sprites.",
-          votes: []
-        },
-        {
-          id: "opt_art_isometric",
-          title: "Isometric 2.5D (HD-2D style)",
-          description: "Layered isometric perspective with pixel characters, dynamic cast shadows, and depth-sorted terrain.",
-          feasibility: "Medium",
-          pros: ["Great depth and tactical readability", "Core Keeper / Diablo aesthetic"],
-          caution: "Isometric depth sorting and collision math can be fiddly.",
-          votes: []
-        }
-      ],
-      comments: []
-    },
-    {
-      id: "q_mechanics",
-      category: "mechanics",
-      categoryName: "Core Unique Mechanics ('Secret Sauce')",
-      title: "Which core mechanics will make our game uniquely addictive?",
-      subtitle: "Select up to 3 core mechanics that create memorable multiplayer moments and emergent chaos. (Multi-select enabled)",
+      id: "q_mission_types",
+      category: "missions",
+      categoryName: "Mission Archetypes (Milestone 1 & Beyond)",
+      title: "Which mission archetypes should we support in our core framework?",
+      subtitle: "By reusing the same gate, ring, and AI prefabs, we can build multiple game modes with zero extra engine overhead. (Multi-select)",
       allowMultiple: true,
       options: [
         {
-          id: "opt_mech_elemental_combos",
-          title: "Synergistic Elemental Combos (Spell / Tech Fusing)",
-          description: "Player A lays down a Cryo Field or Oil Slick, Player B fires Lightning or Plasma into it to cause an Overload explosion. Teammates must coordinate!",
-          feasibility: "High",
-          pros: ["Encourages active communication", "Spectacular visual payoff", "Infinite upgrade permutations"],
-          caution: "Needs clear status effect rules.",
-          votes: []
-        },
-        {
-          id: "opt_mech_physics_chaos",
-          title: "Physics Havoc & Hilarious Ragdolls / Knockback",
-          description: "Shockwaves knock enemies into environmental hazard pits, explosive barrels chain-react, bouncy shields reflect lasers.",
-          feasibility: "High",
-          pros: ["Guaranteed laughter during playtest night", "Emergent gameplay without complex scripted events"],
-          caution: "Ensure friendly knockback is fun, not grief-inducing.",
-          votes: []
-        },
-        {
-          id: "opt_mech_shared_super",
-          title: "Shared 'Discovery Super' Meter",
-          description: "The squad shares one giant energy gauge. When maxed, both players must simultaneously hit a button to trigger an epic screen-clearing super weapon.",
+          id: "opt_mission_sabotage",
+          title: "Goa'uld Outpost Sabotage & Extraction",
+          description: "Infiltrate a planetary fortress, plant C4 on a Naquadah power core or Tel'tak cargo ship, trigger a distraction, and fight back to the Stargate.",
           feasibility: "Very High",
-          pros: ["Simple to code", "Forces high-five synchronization moments"],
-          caution: "Needs clear visual HUD indicator.",
+          pros: ["The definitive Stargate extraction raid", "Great mix of stealth and loud gunplay"],
+          caution: "Needs clear primary and secondary objectives.",
           votes: []
         },
         {
-          id: "opt_mech_procedural_hazards",
-          title: "Unstable Sector Hazards & Escaping Collapse",
-          description: "Solar flares disable shields, containment leaks flood sectors with radiation, extraction zone changes location dynamically.",
-          feasibility: "Medium",
-          pros: ["Prevents static camping", "Adds urgent pacing"],
-          caution: "Hazards must be clearly telegraphed to feel fair.",
+          id: "opt_mission_iris_defense",
+          title: "SGC Gate Room Foothold / Iris Defense (Horde Mode)",
+          description: "A foothold situation in Cheyenne Mountain! The Iris is breached. Defend the Gate Room from waves of incoming Jaffa, seal blast doors, set up Browning .50 cals, and hold until techs force-dial out.",
+          feasibility: "High",
+          pros: ["Iconic episode feel ('Foothold', 'The Serpent's Lair')", "Self-contained room defense (very fast to build)"],
+          caution: "Keep wave pacing tight so players don't run dry on ammo.",
           votes: []
         },
         {
-          id: "opt_mech_asymmetric_roles",
-          title: "Asymmetric Roles (e.g. Breacher vs Tech Specialist)",
-          description: "One player wields heavy ordnance and shields; the other operates remote drones, hacks terminal doors, and calls in supply drops.",
+          id: "opt_mission_alpha_site",
+          title: "Alpha Site / Village Evacuation Defense",
+          description: "Protect a human settlement or off-world Alpha Site from swarms of Jaffa landing via transport rings while civilians escape through the dialed Stargate.",
           feasibility: "Medium",
-          pros: ["Deep complementary teamwork", "Different playstyles for different moods"],
-          caution: "Both roles must feel equally thrilling to play.",
+          pros: ["Escort / holdout tension", "Open outdoor skirmishes"],
+          caution: "Civilian escort pathfinding must not be annoying.",
+          votes: []
+        },
+        {
+          id: "opt_mission_hatak_boarding",
+          title: "Ha'tak Mothership Infiltration (via Transport Rings)",
+          description: "Locate hidden transport rings on a planet surface, beam up into an orbiting Goa'uld Ha'tak, plant C4 on the hyperdrive crystal room, and ring back down before detonation.",
+          feasibility: "Medium",
+          pros: ["Epic verticality and mothership corridors", "Great sense of scale"],
+          caution: "Requires interior mothership tile set.",
           votes: []
         }
       ],
       comments: [
         {
-          id: "c4",
-          memberId: "flaxos",
-          text: "Combining abilities (like cryo + lightning) makes co-op feel like real teamwork instead of just two people shooting in parallel!",
-          timestamp: "2026-11-07T09:10:00.000Z"
+          id: "c_sg2",
+          memberId: "scotty",
+          text: "Starting with Outpost Sabotage + Iris Defense gives us both an extraction mode AND an awesome wave mode using the exact same weapons and Jaffa AI!",
+          timestamp: "2026-11-07T10:05:00.000Z"
         }
       ]
     },
     {
-      id: "q_theme",
-      category: "theme",
-      categoryName: "Theme, Lore & Narrative Vibe",
-      title: "What lore & narrative vibe fits 'Team Discovery Channel' best?",
-      subtitle: "Gives personality to our characters, weapons, voice barks, and interface.",
+      id: "q_class_archetypes",
+      category: "classes",
+      categoryName: "Squad Specializations & SGC Archetypes",
+      title: "Which SGC soldier archetypes should our squad select from?",
+      subtitle: "Asymmetric roles make 2-4 player co-op feel like a genuine SG team rather than 4 clones. (Multi-select)",
+      allowMultiple: true,
+      options: [
+        {
+          id: "opt_class_recon_lead",
+          title: "Pointman / Recon Leader (The O'Neill / Mitchell)",
+          description: "Suppressed P90, tactical C4 satchel, flashbangs, sprint dodge. Can tag enemies through walls and set remote detonators.",
+          feasibility: "Essential",
+          pros: ["Core stealth lead", "All-around tactical agility"],
+          caution: "Moderate armor.",
+          votes: []
+        },
+        {
+          id: "opt_class_tech_archaeologist",
+          title: "Tech Specialist & Archaeologist (The Carter / Daniel)",
+          description: "Armed with MP5. Fast DHD chevron dialer (cuts dial time in half), carries GDO transmitter for Iris override, deploys MALP/UAV scout drones, hacks Ancient terminals.",
+          feasibility: "Essential",
+          pros: ["The ultimate objective specialist", "Vital during hot extractions"],
+          caution: "Lighter combat firepower.",
+          votes: []
+        },
+        {
+          id: "opt_class_heavy_marine",
+          title: "Heavy Support Marine (SG-3 Marine)",
+          description: "M249 SAW light machine gun, claymore anti-personnel mines, deployable Browning .50 cal tripod, shoulder-fired rocket launcher for turret busting.",
+          feasibility: "Essential",
+          pros: ["Suppressive fire pins Jaffa guards", "Carries the squad during loud phase"],
+          caution: "Slower sprint speed, noisy weapons.",
+          votes: []
+        },
+        {
+          id: "opt_class_rebel_jaffa",
+          title: "Allied Jaffa / Tok'ra Infiltrator (The Teal'c / Bra'tac)",
+          description: "Ma'Tok Staff weapon (heavy plasma blasts and melee parry), Zat'nik'tel (silent 1-shot stun / 2-shot kill), healing ribbon device, symbiote regeneration.",
+          feasibility: "High Impact",
+          pros: ["Fan-favorite archetype", "Versatile plasma and silent stunner"],
+          caution: "Needs distinctive staff weapon firing sounds and particle FX.",
+          votes: []
+        }
+      ],
+      comments: []
+    },
+    {
+      id: "q_signature_mechanics",
+      category: "mechanics",
+      categoryName: "Signature Stargate Mechanics ('Secret Sauce')",
+      title: "Which signature Stargate mechanics will make the game legendary?",
+      subtitle: "Unique mechanics that you can only get in a Stargate co-op game. (Multi-select)",
+      allowMultiple: true,
+      options: [
+        {
+          id: "opt_mech_dhd_chevron_dial",
+          title: "The 7-Chevron DHD Dialing Mini-Game Under Fire",
+          description: "Dialing isn't a simple button press! One player must punch the 7 glyph chevrons on the DHD (or hold a sequence like a Helldivers Stratagem) while teammates form a defensive firing arc. Transmit the IDC code before diving into the event horizon!",
+          feasibility: "Very High",
+          pros: ["Unmatched cinematic tension", "Every extraction is a story you talk about"],
+          caution: "Ensure controls feel crisp on both keyboard and gamepad.",
+          votes: []
+        },
+        {
+          id: "opt_mech_zat_rule",
+          title: "Authentic Zat'nik'tel Rules (1-Shot Stun, 2-Shot Kill/Disintegrate)",
+          description: "1st shot silently incapacitates Jaffa guards for 20 seconds. 2nd shot kills and vaporizes the body completely, preventing patrols from discovering corpses and triggering alarms!",
+          feasibility: "High",
+          pros: ["Iconic canon mechanic", "Deep stealth utility (vaporizing bodies without carrying them)"],
+          caution: "Zat ammo/charge should be limited to prevent trivializing encounters.",
+          votes: []
+        },
+        {
+          id: "opt_mech_transport_rings",
+          title: "Transport Rings (Enemy Spawns & Tactical Flanking)",
+          description: "Five glowing metallic rings slam down with iconic audio. Enemies arrive in drop waves, but clever players can throw grenades into descending rings or step inside to teleport across the compound.",
+          feasibility: "High",
+          pros: ["Dynamic 3D entry without awkward elevator shafts", "High tactical emergent gameplay"],
+          caution: "Teleport collision checking must be clean.",
+          votes: []
+        },
+        {
+          id: "opt_mech_c4_distraction",
+          title: "Remote C4 & Beacon Distractions",
+          description: "Plant C4 on a fuel depot on a far ridge. Trigger detonation to pull Jaffa patrols away from the central temple entrance, opening a silent infiltration window.",
+          feasibility: "High",
+          pros: ["Classic SG-1 tactical trope", "Very satisfying stealth coordination"],
+          caution: "AI sensory radius must react reliably to explosion sounds.",
+          votes: []
+        },
+        {
+          id: "opt_mech_malp_uav",
+          title: "MALP / UAV Scout Drone Recon",
+          description: "Pilot a wheeled MALP probe or miniature UAV drone through the Stargate first to map out Jaffa sentries, alarm horns, and Naquadah deposits on the squad's HUD.",
+          feasibility: "Medium",
+          pros: ["Immense tactical team prep", "Great Daniel/Carter role gameplay"],
+          caution: "Drone piloting controls should be streamlined.",
+          votes: []
+        }
+      ],
+      comments: [
+        {
+          id: "c_sg3",
+          memberId: "flaxos",
+          text: "The DHD 7-chevron dial under fire and the 2-shot Zat body vaporize mechanic are absolute must-haves!",
+          timestamp: "2026-11-07T10:10:00.000Z"
+        }
+      ]
+    },
+    {
+      id: "q_engine_choice",
+      category: "engine",
+      categoryName: "Engine & Tech Stack",
+      title: "Which game engine and asset pipeline will we use?",
+      subtitle: "We need an engine that handles 3D lighting, clean Git merges with Scotty, and easy integration of military/sci-fi low-poly asset packs.",
       allowMultiple: false,
       options: [
         {
-          id: "opt_theme_deepspace",
-          title: "Team Discovery: Derelict Deep Space Expeditions",
-          description: "A ragtag salvage science crew exploring abandoned megastructures on the galactic rim. Retro CRT terminals, malfunctioning research AI, cosmic oddities.",
+          id: "opt_engine_godot_synty",
+          title: "Godot 4.x (GDScript) + Low-Poly Asset Packs (Synty FBX/glTF)",
+          description: "Ultra-lightweight, blazing fast compile times, text-based .tscn scene files that Git merges cleanly without merge conflict hell. Godot 4's Forward+ renderer gives us gorgeous glowing Stargate kawoosh shaders, Zat lightning arcs, and volumetric ring beams out of the box.",
           feasibility: "Very High",
-          pros: ["Matches our repo name perfectly!", "Justifies weird experimental weapons and alien artifacts", "Great blend of wonder and danger"],
-          caution: "None, it's a stellar fit.",
+          pros: ["Clean Git collaboration for pair dev", "Fastest agentic code gen with Claude/Codex", "No heavy editor bloat"],
+          caution: "Requires importing FBX/glTF models into Godot materials.",
           votes: []
         },
         {
-          id: "opt_theme_office_apocalypse",
-          title: "Corporate Dystopia / Intergalactic Custodians",
-          description: "Overworked space station janitors battling sentient bureaucracy mutants with high-powered mop-cannons and recycling beamers.",
+          id: "opt_engine_unity_synty",
+          title: "Unity 6 (C#) + Synty POLYGON Military & Sci-Fi",
+          description: "Massive pre-built asset ecosystem. Plug-and-play character controllers, pre-rigged military animations, sound packs, and particle systems available directly on the Unity Asset Store.",
           feasibility: "High",
-          pros: ["High comedic potential", "Satirical flavor"],
-          caution: "Humor can be subjective.",
+          pros: ["Huge asset store ecosystem", "Familiar C# architecture"],
+          caution: "Binary scene files and meta files can cause Git friction between team members.",
           votes: []
         },
         {
-          id: "opt_theme_cyberpunk_heist",
-          title: "Cyberpunk Data Heist",
-          description: "Infiltrate neon data vaults, crack corporate ICE, extract digital payloads while fighting digital enforcers.",
+          id: "opt_engine_web_three",
+          title: "Web-Native 3D (Three.js / Babylon.js + Vite)",
+          description: "Zero installation for anyone. Send a URL link in Discord, click it, and you're stepping through the Stargate in Chrome/Edge.",
+          feasibility: "Medium",
+          pros: ["Zero install friction for friends"],
+          caution: "More boilerplate for 3D physics and character animation controllers.",
+          votes: []
+        }
+      ],
+      comments: []
+    },
+    {
+      id: "q_visual_art_style",
+      category: "art",
+      categoryName: "Visual Direction & Shader Polish",
+      title: "What visual direction & art style will look stellar and be fast to build?",
+      subtitle: "Visual budget should focus on iconic Stargate shaders and lighting rather than high-poly texture baking.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_art_lowpoly_neon",
+          title: "Stylized Low-Poly 3D + Next-Gen Dynamic Lighting (Synty × Deep Rock Galactic)",
+          description: "Clean geometric character silhouettes, sandy Abydos desert temples, dark Goa'uld pyramid interiors, with high-end dynamic point lights, glowing staff weapon plasma bolts, and fluid Stargate water shaders.",
+          feasibility: "Very High",
+          pros: ["Instant cohesive visual style", "120+ FPS performance", "Highlights lighting and particle FX"],
+          caution: "Must maintain consistent color grading across levels.",
+          votes: []
+        },
+        {
+          id: "opt_art_ps1_retro",
+          title: "Retro 90s Tactical Stealth / PS1 Crunch (Metal Gear Solid × SG-1)",
+          description: "Low-res textured meshes, scanlines, gritty military CRT monitors, dithering, and retro sound effects matching the 1997 television era.",
           feasibility: "High",
-          pros: ["Awesome synth soundtrack potential", "Sleek visuals"],
-          caution: "Cyberpunk is a well-trodden indie space.",
+          pros: ["Huge nostalgic charm", "Matches SG-1's 1990s debut era perfectly"],
+          caution: "Niche aesthetic.",
+          votes: []
+        },
+        {
+          id: "opt_art_clean_realistic",
+          title: "Realistic Tactical PBR (Military Sim)",
+          description: "Photorealistic P90s, camouflage fatigues, detailed normal maps, and realistic bullet physics.",
+          feasibility: "Low",
+          pros: ["High visual fidelity"],
+          caution: "Massive asset pipeline bottleneck that risks abandoning the project.",
+          votes: []
+        }
+      ],
+      comments: []
+    },
+    {
+      id: "q_grounding_timeframe",
+      category: "grounding",
+      categoryName: "Grounding & First Playable Target",
+      title: "What is our hard target for Milestone 1 (First Playable Netcode Prototype)?",
+      subtitle: "To defeat the curse of unfinished game dev, we must lock in a realistic first playable milestone.",
+      allowMultiple: false,
+      options: [
+        {
+          id: "opt_time_2weeks_vertical",
+          title: "The 2-Week SGC Vertical Slice (Recommended)",
+          description: "14 days to a playable co-op raid: 1 Gate Room, 1 desert outpost arena, 2 character classes (P90 & Staff weapon), basic Jaffa patrol AI, C4 explosion, DHD dialing, and successful extraction through the puddle.",
+          feasibility: "Very High",
+          pros: ["Sweet spot for agentic pair programming", "Guarantees a playable Friday night session"],
+          caution: "Requires strict commitment to cut non-essential features.",
+          votes: []
+        },
+        {
+          id: "opt_time_weekend_jam",
+          title: "The 48-Hour Weekend Graybox Jam",
+          description: "Hyper-focused 2-day sprint. Graybox geometry, 2 player capsules moving together, stepping through a blue portal, shooting dummy targets, and dialing back home.",
+          feasibility: "Very High",
+          pros: ["Instant proof-of-fun in 48 hours", "Zero scope creep possible"],
+          caution: "Intense weekend push.",
+          votes: []
+        },
+        {
+          id: "opt_time_month_expanded",
+          title: "The 1-Month SGC Expedition Build",
+          description: "4 weekly sprints: Week 1 Gate & Netcode, Week 2 P90 & Staff combat feel, Week 3 Jaffa AI & C4 sabotage, Week 4 DHD extraction & SGC Gate Room polish.",
+          feasibility: "High",
+          pros: ["More breathing room for audio and polished VFX"],
+          caution: "Must maintain momentum every Friday.",
           votes: []
         }
       ],
@@ -419,63 +396,63 @@ module.exports = {
     {
       id: "q_division_of_labor",
       category: "roles",
-      categoryName: "Division of Labor & Accountability",
+      categoryName: "Division of Labor & Squad Ownership",
       title: "How should we divide the core development pillars?",
-      subtitle: "Clear ownership prevents bystander effect. Everyone has an assigned domain while pairing with AI agents.",
+      subtitle: "Clear domain ownership prevents bystander effect while working with AI coding agents. (Multi-select)",
       allowMultiple: true,
       options: [
+        {
+          id: "opt_role_gate_netcode",
+          title: "Stargate & Multiplayer Netcode Czar",
+          description: "Owns room connections, player position synchronization, DHD chevron state sync, and Stargate event horizon portal transitions.",
+          feasibility: "Essential",
+          pros: ["Single owner for multiplayer foundation", "Prevents desync"],
+          caution: "High responsibility for network stability.",
+          votes: []
+        },
+        {
+          id: "opt_role_combat_juice",
+          title: "Tactical Combat & Juice Lead (P90, Staff Weapon, Zat, C4)",
+          description: "Tunes weapon recoil, sound effects, screen shake, staff blast impacts, Zat stun arcs, and C4 detonation physics.",
+          feasibility: "High Impact",
+          pros: ["Directly creates the punchy Stargate feel", "Super fun to iterate on"],
+          caution: "Needs regular playtesting tweaks.",
+          votes: []
+        },
         {
           id: "opt_role_agent_architect",
           title: "AI Agent Orchestrator & Prompt Architect",
           description: "Owns the system prompts, architectural rules, agent dev loop (Codex/Antigravity/Claude Code), and keeping code structure clean.",
           feasibility: "Essential",
-          pros: ["Ensures agents don't produce spaghetti code", "Fastest feature iteration"],
-          caution: "Must maintain clean documentation and types.",
+          pros: ["Ensures coding agents produce modular, maintainable code"],
+          caution: "Maintains code reviews and documentation.",
           votes: []
         },
         {
-          id: "opt_role_netcode",
-          title: "Multiplayer Netcode & Lobby Czar",
-          description: "Owns room management, player connection state, snapshot serialization, and latency compensation.",
-          feasibility: "Essential",
-          pros: ["Single owner for the most delicate system", "Rock solid reliability"],
-          caution: "High responsibility to keep the sync bug-free.",
-          votes: []
-        },
-        {
-          id: "opt_role_combat_feel",
-          title: "Combat Feel & Juice Lead (Screen Shake, Controls, Hitstop)",
-          description: "Tunes weapon recoil, dodge roll responsiveness, sound triggers, impact effects, and damage numbers.",
+          id: "opt_role_jaffa_ai",
+          title: "Jaffa Enemy AI & Stealth Scripter",
+          description: "Scripts patrol paths, vision cones, hearing radius for unsilenced gunshots, alarm sounding, and transport ring drop waves.",
           feasibility: "High Impact",
-          pros: ["Directly makes the game addictive to play", "Super fun domain to iterate on"],
-          caution: "Requires lots of playtesting tweaks.",
+          pros: ["Brings tension and life to the encounters"],
+          caution: "Keep AI state machine clean and predictable.",
           votes: []
         },
         {
-          id: "opt_role_content_scripter",
-          title: "Weapons, Perks & Enemy Scripter",
-          description: "Designs and scripts new enemy attack patterns, synergy perks, boss phases, and level spawn tables using AI prompts.",
+          id: "opt_role_vfx_audio",
+          title: "Stargate Shaders, Level Design & Sound Czar",
+          description: "Creates the blue puddle kawoosh shader, transport ring light beams, DHD dialing soundscape, and Egyptian-alien temple props.",
           feasibility: "High Impact",
-          pros: ["High creative output", "Fast to prompt with AI agents once foundation is set"],
-          caution: "Keep balance within sane bounds.",
-          votes: []
-        },
-        {
-          id: "opt_role_qa_playtest",
-          title: "QA, DevOps & Friday Playtest Host",
-          description: "Ensures the build compiles, runs playtest servers on Friday night, records bug tickets, and keeps the team celebrated.",
-          feasibility: "Essential",
-          pros: ["The heartbeat that keeps the squad motivated and shipping"],
-          caution: "Must be organized and consistent.",
+          pros: ["Delivers the authentic Stargate nostalgia and atmosphere"],
+          caution: "Focus on shaders and audio before bespoke modeling.",
           votes: []
         }
       ],
       comments: [
         {
-          id: "c5",
+          id: "c_sg4",
           memberId: "flaxos",
-          text: "I can lead the AI agent tooling/prompt architecture and QA builds, while Scotty and I pair on netcode and juicy combat mechanics!",
-          timestamp: "2026-11-07T09:12:00.000Z"
+          text: "I can lead the AI agent tooling and pair with Scotty on netcode, P90 recoil, and Stargate portal shaders!",
+          timestamp: "2026-11-07T10:15:00.000Z"
         }
       ]
     }
