@@ -1,0 +1,108 @@
+[gd_scene load_steps=10 format=3 uid="uid://cstargate01"]
+
+[ext_resource type="Script" path="res://scripts/props/StargateRing.gd" id="1_sg"]
+[ext_resource type="Shader" path="res://shaders/StargateEventHorizon.gdshader" id="2_ehshader"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Naquadah"]
+albedo_color = Color(0.2, 0.22, 0.25, 1)
+metallic = 0.85
+roughness = 0.35
+
+[sub_resource type="TorusMesh" id="TorusMesh_Gate"]
+material = SubResource("Mat_Naquadah")
+inner_radius = 3.3
+outer_radius = 4.3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_Puddle"]
+render_priority = 0
+shader = ExtResource("2_ehshader")
+shader_parameter/deep_color = Color(0.06, 0.35, 0.85, 0.95)
+shader_parameter/ripple_color = Color(0.3, 0.8, 1, 1)
+shader_parameter/speed = 1.2
+shader_parameter/frequency = 8.0
+shader_parameter/amplitude = 0.04
+shader_parameter/emission_energy = 2.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_Horizon"]
+material = SubResource("ShaderMaterial_Puddle")
+top_radius = 3.3
+bottom_radius = 3.3
+height = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Kawoosh"]
+height = 4.5
+radius = 2.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_KawooshVortex"]
+transparency = 1
+albedo_color = Color(0.2, 0.7, 1, 0.85)
+emission_enabled = true
+emission = Color(0.2, 0.75, 1, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_Vortex"]
+material = SubResource("Mat_KawooshVortex")
+top_radius = 0.4
+bottom_radius = 2.8
+height = 4.5
+
+[node name="Stargate" type="Node3D"]
+script = ExtResource("1_sg")
+
+[node name="GateRingMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("TorusMesh_Gate")
+
+[node name="EventHorizon" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+visible = false
+mesh = SubResource("CylinderMesh_Horizon")
+
+[node name="GateLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+light_color = Color(0.2, 0.65, 1, 1)
+light_energy = 0.0
+omni_range = 8.0
+
+[node name="KawooshArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="KawooshArea"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 2.25)
+shape = SubResource("CylinderShape3D_Kawoosh")
+
+[node name="VortexMesh" type="MeshInstance3D" parent="KawooshArea"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 2.25)
+visible = false
+mesh = SubResource("CylinderMesh_Vortex")
+
+[node name="Chevrons" type="Node3D" parent="."]
+
+[node name="Chevron1" type="CSGBox3D" parent="Chevrons"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, 0)
+size = Vector3(0.5, 0.8, 0.4)
+
+[node name="Chevron2" type="CSGBox3D" parent="Chevrons"]
+transform = Transform3D(0.62349, -0.781831, 0, 0.781831, 0.62349, 0, 0, 0, 1, 3.36, 2.68, 0)
+size = Vector3(0.5, 0.8, 0.4)
+
+[node name="Chevron3" type="CSGBox3D" parent="Chevrons"]
+transform = Transform3D(-0.222521, -0.974928, 0, 0.974928, -0.222521, 0, 0, 0, 1, 4.19, -0.96, 0)
+size = Vector3(0.5, 0.8, 0.4)
+
+[node name="Chevron4" type="CSGBox3D" parent="Chevrons"]
+transform = Transform3D(-0.900969, -0.433884, 0, 0.433884, -0.900969, 0, 0, 0, 1, 1.86, -3.87, 0)
+size = Vector3(0.5, 0.8, 0.4)
+
+[node name="Chevron5" type="CSGBox3D" parent="Chevrons"]
+transform = Transform3D(-0.900969, 0.433884, 0, -0.433884, -0.900969, 0, 0, 0, 1, -1.86, -3.87, 0)
+size = Vector3(0.5, 0.8, 0.4)
+
+[node name="Chevron6" type="CSGBox3D" parent="Chevrons"]
+transform = Transform3D(-0.222521, 0.974928, 0, -0.974928, -0.222521, 0, 0, 0, 1, -4.19, -0.96, 0)
+size = Vector3(0.5, 0.8, 0.4)
+
+[node name="Chevron7" type="CSGBox3D" parent="Chevrons"]
+transform = Transform3D(0.62349, 0.781831, 0, -0.781831, 0.62349, 0, 0, 0, 1, -3.36, 2.68, 0)
+size = Vector3(0.5, 0.8, 0.4)

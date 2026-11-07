@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/world/GateRoom.gd" id="1_gr01"]
 [ext_resource type="Script" path="res://scripts/world/WaveManager.gd" id="2_wm01"]
+[ext_resource type="PackedScene" path="res://scenes/props/Stargate.tscn" id="3_sg01"]
+[ext_resource type="PackedScene" path="res://scenes/props/DHDConsole.tscn" id="4_dhd01"]
+[ext_resource type="PackedScene" path="res://scenes/props/TransportRings.tscn" id="5_tr01"]
 
 [sub_resource type="Environment" id="Environment_sgc"]
 background_mode = 1
@@ -154,21 +157,14 @@ use_collision = true
 size = Vector3(4, 1.2, 0.8)
 material = SubResource("Mat_Sandbag")
 
-[node name="Stargate" type="Node3D" parent="."]
+[node name="Stargate" parent="." instance=ExtResource("3_sg01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, -15)
 
-[node name="GateRing" type="MeshInstance3D" parent="Stargate"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
-mesh = SubResource("TorusMesh_Gate")
+[node name="DHDConsole" parent="." instance=ExtResource("4_dhd01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2, -11.5)
 
-[node name="EventHorizon" type="MeshInstance3D" parent="Stargate"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
-mesh = SubResource("CylinderMesh_Puddle")
-
-[node name="TopChevron" type="CSGBox3D" parent="Stargate"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, 0)
-size = Vector3(0.5, 0.8, 0.4)
-material = SubResource("Mat_Chevron")
+[node name="TransportRings" parent="." instance=ExtResource("5_tr01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 3)
 
 [node name="Spawns" type="Node3D" parent="."]
 

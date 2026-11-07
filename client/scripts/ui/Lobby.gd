@@ -150,7 +150,7 @@ func _refresh_roster() -> void:
 
 func _update_ui_state() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-	var is_connected: bool = (net != null and net.multiplayer.multiplayer_peer != null)
+	var is_connected: bool = (net != null and net.is_in_active_session())
 	var is_server: bool = (net != null and net.is_server)
 
 	host_button.disabled = is_connected

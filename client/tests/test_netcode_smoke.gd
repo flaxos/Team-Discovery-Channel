@@ -7,7 +7,7 @@ extends SceneTree
 ## 4. MultiplayerSynchronizer continuous state sync over 60 physics ticks.
 ## 5. Strict assert: Distance delta between peers < 0.2 meters.
 
-const TEST_PORT: int = 7777
+const TEST_PORT: int = 7780
 const GATE_ROOM_SCENE: String = "res://scenes/main/GateRoom.tscn"
 const PLAYER_SCENE: String = "res://scenes/entities/Player.tscn"
 

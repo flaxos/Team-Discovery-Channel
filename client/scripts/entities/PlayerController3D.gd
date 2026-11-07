@@ -163,6 +163,26 @@ func _physics_process(delta: float) -> void:
 	# Aiming towards mouse intersection on horizontal plane
 	_process_aim()
 
+	if Input.is_action_just_pressed("interact"):
+		_try_interact()
+
+	# If actively dialing DHD console, route directional inputs to glyph entries
+	var dhd := get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
+	if dhd != null and dhd.active_dialer == self:
+		if Input.is_action_just_pressed("move_up"):
+			dhd.input_glyph("UP")
+		elif Input.is_action_just_pressed("move_down"):
+			dhd.input_glyph("DOWN")
+		elif Input.is_action_just_pressed("move_left"):
+			dhd.input_glyph("LEFT")
+		elif Input.is_action_just_pressed("move_right"):
+			dhd.input_glyph("RIGHT")
+
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+		move_and_slide()
+		return
+
 	# Stances (Sprint / Crouch)
 	is_crouching = Input.is_action_pressed("crouch")
 	is_sprinting = Input.is_action_pressed("sprint") and not is_crouching
@@ -328,3 +348,12 @@ func _on_vaporized() -> void:
 	var flash_tween := flash.create_tween()
 	flash_tween.tween_property(flash, "light_energy", 0.0, 0.25)
 	flash_tween.tween_callback(flash.queue_free)
+
+
+func _try_interact() -> void:
+	var dhd := get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
+	if dhd != null and global_position.distance_to(dhd.global_position) <= 3.2:
+		if dhd.current_phase == DHDDialer.DialPhase.INACTIVE:
+			dhd.start_dialing(self)
+		else:
+			dhd.cancel_dialing()

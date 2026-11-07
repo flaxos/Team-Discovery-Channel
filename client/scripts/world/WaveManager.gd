@@ -21,6 +21,7 @@ var intermission_timer: float = 0.0
 
 @onready var enemies_container: Node3D = get_node_or_null("../Enemies")
 @onready var gate_spawn_marker: Marker3D = get_node_or_null("../GateSpawnMarker")
+@onready var transport_rings: TransportRings = get_node_or_null("../TransportRings") as TransportRings
 
 
 func _ready() -> void:
@@ -60,6 +61,14 @@ func start_next_wave() -> void:
 	enemies_alive = count_to_spawn
 	wave_started.emit(current_wave, count_to_spawn)
 	print("WaveManager: Starting Wave %d with %d Jaffa Guards!" % [current_wave, count_to_spawn])
+
+	# Trigger tactical Transport Rings drop on Waves 2 and 3
+	if current_wave >= 2 and transport_rings != null:
+		var ring_timer := get_tree().create_timer(2.5)
+		ring_timer.timeout.connect(func() -> void:
+			if transport_rings != null and is_wave_active:
+				transport_rings.trigger_ring_drop()
+		)
 
 	# Spawn Jaffa with slight delays from Stargate platform
 	_spawn_wave_jaffa(count_to_spawn)

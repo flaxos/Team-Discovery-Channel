@@ -66,6 +66,10 @@ var peers: Dictionary = {}
 var _peer: ENetMultiplayerPeer
 
 
+func is_in_active_session() -> bool:
+	return _peer != null
+
+
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
