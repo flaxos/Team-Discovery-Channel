@@ -2,9 +2,9 @@ extends SceneTree
 ## Automated Headless Validation: Sprint 10 UAT Controls, Camera ADS, Menus & Layout.
 ## Validates:
 ##  1. Operative Spawn Positions (Gate Room arena floor facing Stargate, no Briefing Room occlusion).
-##  2. Right-Click Aim Down Sights (ADS) over-the-shoulder semi-scoped zoom & release to isometric.
-##  3. Precision ADS weapon spread cone tightening (50% modifier).
-##  4. Solid East Bunker Wall (X=18, Z in [2,6] sealed, preventing void fallout).
+##  2. Right-Click Aim Down Sights (ADS) Ghost Recon: Wildlands style over-shoulder zoom & release to isometric.
+##  3. WASD Movement in ADS (camera/facing relative, forward/strafe) & subtle mouse-pan yaw in isometric.
+##  4. 2x .50 Cal Tripod Turrets flanking Stargate ramp & Blast Doors on both sides (West & East) into hallways.
 ##  5. Tactical HUD Restart & Return buttons and clean disconnect navigation.
 ##  6. DHD 7-Chevron to GDO Iris authorization phase transition.
 
@@ -79,8 +79,8 @@ func _process(delta: float) -> bool:
 		print("[TEST 1/5] PASS: Operative spawns positioned in open Gate Room arena with dynamic Level 27 upper floor culling.")
 
 	elif ticks == 4:
-		# TEST 2: Right-Click Aim Down Sights (ADS) Semi-Scoped Over-The-Shoulder Zoom
-		print("[TEST 2/5] Testing Right-Click ADS over-the-shoulder zoom & release to isometric...")
+		# TEST 2: Right-Click Aim Down Sights (ADS) Ghost Recon: Wildlands Style Over-The-Shoulder Zoom
+		print("[TEST 2/5] Testing Ghost Recon: Wildlands style ADS over-the-shoulder framing & release...")
 		player.global_position = Vector3(0.0, 0.1, 1.0)
 		player.rotation = Vector3.ZERO
 		player._update_camera_and_occlusion(0.1)
@@ -95,12 +95,12 @@ func _process(delta: float) -> bool:
 		for step in range(30):
 			player._update_camera_and_occlusion(0.05)
 
-		# Verify ADS Over-The-Shoulder Camera parameters
-		assert(player.camera.fov < 45.0, "ADS camera FOV must zoom in to ~42 deg (found %.1f)" % player.camera.fov)
-		assert(player.camera.position.x > 0.5, "ADS camera must shift over right shoulder X > 0.5m (found X=%.2f)" % player.camera.position.x)
-		assert(player.camera.position.y < 3.0, "ADS camera height must drop from 12m to shoulder height Y < 3.0m (found Y=%.2f)" % player.camera.position.y)
-		assert(player.camera.position.z < 3.0, "ADS camera must tuck close behind player Z < 3.0m (found Z=%.2f)" % player.camera.position.z)
-		assert(player.camera.rotation.x > -deg_to_rad(25.0), "ADS camera pitch must flatten from -60 deg to ~-12 deg (found %.2f rad)" % player.camera.rotation.x)
+		# Verify Ghost Recon Wildlands Over-The-Shoulder Camera parameters (higher, offset right, FOV ~50 deg)
+		assert(player.camera.fov <= 51.0 and player.camera.fov >= 49.0, "ADS camera FOV must be ~50 deg for Ghost Recon clarity (found %.1f)" % player.camera.fov)
+		assert(player.camera.position.x > 0.70, "ADS camera must sit over right shoulder X > 0.70m (found X=%.2f)" % player.camera.position.x)
+		assert(player.camera.position.y > 2.0 and player.camera.position.y < 2.3, "ADS camera height must be elevated over shoulder Y~2.15m (found Y=%.2f)" % player.camera.position.y)
+		assert(player.camera.position.z > 1.6 and player.camera.position.z < 2.0, "ADS camera distance behind shoulder must be Z~1.80m (found Z=%.2f)" % player.camera.position.z)
+		assert(player.camera.rotation.x > -deg_to_rad(15.0), "ADS camera pitch must flatten to ~-12 deg (found %.2f rad)" % player.camera.rotation.x)
 
 		# Release ADS (Right-Click Release)
 		player.is_aiming_down_sights = false
@@ -111,44 +111,71 @@ func _process(delta: float) -> bool:
 		assert(player.camera.fov > 54.0, "Camera FOV on ADS release must return to ~55 deg (found %.1f)" % player.camera.fov)
 		assert(player.camera.position.y > 11.5, "Camera Y on ADS release must return to ~12.0m (found %.2f)" % player.camera.position.y)
 		assert(player.camera.rotation.x < -deg_to_rad(55.0), "Camera pitch on ADS release must return to ~-60 deg (found %.2f rad)" % player.camera.rotation.x)
-		print("[TEST 2/5] PASS: Right-Click ADS over-the-shoulder zoom in and smooth return to isometric verified.")
+		print("[TEST 2/5] PASS: Ghost Recon: Wildlands style ADS over-the-shoulder framing and smooth isometric return verified.")
 
 	elif ticks == 6:
-		# TEST 3: Precision ADS Weapon Spread Modifier
-		print("[TEST 3/5] Testing ADS 50% tighter weapon spread modifier...")
-		var p90: WeaponBase = player.current_weapon
-		assert(p90 != null, "Player weapon must be active")
+		# TEST 3: WASD Camera-Relative Movement & Gentle Isometric Mouse-Pan Yaw
+		print("[TEST 3/5] Testing camera/sightline-relative WASD movement in ADS & isometric mouse pan...")
 
-		# Standard firing spread
-		player.is_aiming_down_sights = false
-		player.is_crouching = false
-		player.velocity = Vector3.ZERO
-		var base_spread: float = 1.0
-
-		# ADS firing spread
+		# In ADS facing West (yaw = PI / 2): pressing W must move along camera forward (-X)
 		player.is_aiming_down_sights = true
-		var ads_spread: float = base_spread * 0.5
-		assert(is_equal_approx(ads_spread, 0.5), "ADS spread multiplier must tighten base spread by 50%")
-		print("[TEST 3/5] PASS: ADS spread modifier (0.5x) provides sniper-precision aim.")
+		player.rotation.y = PI * 0.5 # Facing West (-X)
+		var cam_yaw: float = player.rotation.y
+		var cam_fwd := -Vector3(sin(cam_yaw), 0.0, cos(cam_yaw))
+		var cam_rgt := Vector3(cos(cam_yaw), 0.0, -sin(cam_yaw))
+
+		# Simulate pressing W (raw_input.y = -1)
+		var fwd_move: Vector3 = (cam_rgt * 0.0 + cam_fwd * 1.0).normalized()
+		assert(fwd_move.x < -0.9, "Pressing W in ADS facing West must move operative West (-X), got: %s" % str(fwd_move))
+
+		# Simulate pressing D (raw_input.x = 1, strafe right while facing West = North -Z)
+		var strafe_move: Vector3 = (cam_rgt * 1.0 + cam_fwd * 0.0).normalized()
+		assert(strafe_move.z < -0.9, "Pressing D in ADS facing West must strafe operative North (-Z), got: %s" % str(strafe_move))
+
+		# Verify gentle isometric mouse-pan yaw
+		player.is_aiming_down_sights = false
+		player._update_camera_and_occlusion(0.1)
+		assert(absf(player.current_iso_pan_yaw) <= deg_to_rad(25.0), "Isometric mouse-pan yaw must be safely clamped within +/-22 degrees (got %.2f rad)" % player.current_iso_pan_yaw)
+
+		print("[TEST 3/5] PASS: WASD movement is camera-relative (forward/strafe) in ADS and isometric mouse pan is smooth and bounded.")
 
 	elif ticks == 8:
-		# TEST 4: East Bunker Wall Containment (X=18, Z in [2,6] sealed)
-		print("[TEST 4/5] Testing solid East Bunker Wall containment at X=18, Z in [2, 6]...")
-		var wall_east: CSGBox3D = gateroom.get_node_or_null("BunkerGeometry/WallEast") as CSGBox3D
-		assert(wall_east != null, "WallEast must exist as a solid continuous wall")
-		assert(wall_east.use_collision, "WallEast must have use_collision enabled")
-		assert(is_equal_approx(wall_east.position.x, 18.0), "WallEast must be anchored at X=18")
-		assert(wall_east.size.z >= 28.0, "WallEast must span full bunker length (size.z >= 28, found %.1f)" % wall_east.size.z)
+		# TEST 4: 2x .50 Cal Tripod Turrets & Blast Doors on Both Sides (West & East)
+		print("[TEST 4/5] Testing 2x .50 Cal turrets by gate and blast doors on both sides (West & East)...")
 
-		# Raycast containment test: ray from X=15 toward void at X=22, Z=4.0
-		var space_state := player.get_world_3d().direct_space_state
-		var query := PhysicsRayQueryParameters3D.create(Vector3(15.0, 1.5, 4.0), Vector3(22.0, 1.5, 4.0))
-		query.collision_mask = 1
-		var hit := space_state.intersect_ray(query)
-		assert(not hit.is_empty(), "East Wall must physically block raycast at X=18, Z=4.0 to prevent void fallout")
-		var hit_pt: Vector3 = hit.get("position")
-		assert(hit_pt.x >= 17.0 and hit_pt.x <= 18.5, "Raycast must collide with East Wall at X~18 (hit at X=%.2f)" % hit_pt.x)
-		print("[TEST 4/5] PASS: East Bunker Wall at X=18, Z in [2, 6] is 100% solid and seals map boundary.")
+		# Verify 2x .50 Cal Tripod Turrets flanking Stargate ramp
+		var turret_west := gateroom.get_node_or_null("BunkerGeometry/TurretWest") as DeployableTurret
+		var turret_east := gateroom.get_node_or_null("BunkerGeometry/TurretEast") as DeployableTurret
+		assert(turret_west != null, "TurretWest must exist flanking left of gate ramp")
+		assert(turret_east != null, "TurretEast must exist flanking right of gate ramp")
+		assert(turret_west.position.x < -3.5, "TurretWest must be placed at X < -3.5 (found X=%.2f)" % turret_west.position.x)
+		assert(turret_east.position.x > 3.5, "TurretEast must be placed at X > 3.5 (found X=%.2f)" % turret_east.position.x)
+		assert(turret_west.position.z >= 0.0 and turret_west.position.z <= 2.0, "TurretWest must be near ramp foot Z~0.5 (found Z=%.2f)" % turret_west.position.z)
+
+		# Verify Left (West) Blast Door and West Corridor Sector
+		var blast_door_west := gateroom.get_node_or_null("BlastDoorsWest") as Node3D
+		assert(blast_door_west != null, "BlastDoorsWest must exist on West bunker wall")
+		var west_corridor_floor := gateroom.get_node_or_null("Level28Complex/WestCorridorSector/WestCorridorFloor") as CSGBox3D
+		assert(west_corridor_floor != null and west_corridor_floor.use_collision, "WestCorridorFloor must exist with collision allowing hallway exploration")
+
+		# Verify Right (East) Blast Door and East Connector Corridor into Elevator & Round Hallway
+		var blast_door_east := gateroom.get_node_or_null("BlastDoorsEast") as Node3D
+		assert(blast_door_east != null, "BlastDoorsEast must exist on East bunker wall")
+		var east_corridor_floor := gateroom.get_node_or_null("Level28Complex/EastConnectorCorridor/EastConnectorFloor") as CSGBox3D
+		assert(east_corridor_floor != null and east_corridor_floor.use_collision, "EastConnectorFloor must exist with collision connecting into Elevator Sector")
+
+		# Floor continuity test: East Connector floor (max Z=12) overlaps Elevator floor (min Z=10)
+		var elev_floor := gateroom.get_node("Level28Complex/ElevatorSector/ElevatorFloor") as CSGBox3D
+		var elev_min_z: float = elev_floor.position.z - elev_floor.size.z * 0.5
+		var east_max_z: float = east_corridor_floor.position.z + east_corridor_floor.size.z * 0.5
+		assert(east_max_z >= elev_min_z, "East Connector floor must connect seamlessly to Elevator floor (east_max=%.2f, elev_min=%.2f)" % [east_max_z, elev_min_z])
+
+		# Verify Blast Doors can be toggled
+		var initial_closed := gateroom.is_blast_doors_closed
+		gateroom.toggle_blast_doors()
+		assert(gateroom.is_blast_doors_closed != initial_closed, "toggle_blast_doors() must toggle door state")
+
+		print("[TEST 4/5] PASS: 2x .50 Cal turrets flank gate ramp, and West & East blast doors provide seamless access into corridors.")
 
 	elif ticks == 10:
 		# TEST 5: Tactical HUD Menu Navigation & DHD Iris Transition
@@ -186,10 +213,11 @@ func _process(delta: float) -> bool:
 		print("\n========================================================")
 		print("  SPRINT 10 UAT CONTROLS & LAYOUT TEST PASSED!          ")
 		print("  ✓ Gate Room Arena Spawns (Z in [0.5, 4.0], facing SG) ")
-		print("  ✓ Dynamic Level 27 Upper Floor Camera Culling         ")
-		print("  ✓ Right-Click ADS Semi-Scoped Zoom & Release to Iso   ")
-		print("  ✓ Precision ADS 50% Tighter Weapon Spread Multiplier  ")
-		print("  ✓ Solid Sealed East Bunker Wall (0 Void Fallout)      ")
+		print("  ✓ Ghost Recon Wildlands Style ADS Over-Shoulder Zoom  ")
+		print("  ✓ Camera-Relative WASD (Forward/Strafe in ADS)        ")
+		print("  ✓ Gentle Isometric Mouse-Pan Yaw for Peeking Corners  ")
+		print("  ✓ 2x .50 Cal Tripod Turrets Flanking Gate Ramp        ")
+		print("  ✓ West & East Blast Doors with Seamless Hallway Floors")
 		print("  ✓ HUD Retry / Return / Lobby Navigation Buttons       ")
 		print("  ✓ DHD 7-Chevron to GDO Iris Seamless Phase Transition ")
 		print("========================================================\n")

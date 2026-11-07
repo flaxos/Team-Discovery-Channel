@@ -41,7 +41,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	# Sentry mode: server authoritative target acquisition
-	if not multiplayer.is_server():
+	if not is_automated_sentry or not multiplayer.is_server():
 		return
 
 	_find_target()

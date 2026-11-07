@@ -282,6 +282,11 @@ func toggle_blast_doors() -> void:
 	var target_lx := -1.5 if is_blast_doors_closed else -4.8
 	var target_rx := 1.5 if is_blast_doors_closed else 4.8
 
+	# Side doors (West & East) target X relative to their local door frames:
+	# Retracted (open): -2.8 and 2.8; Closed (sealed): -0.9 and 0.9
+	var side_lx := -0.9 if is_blast_doors_closed else -2.8
+	var side_rx := 0.9 if is_blast_doors_closed else 2.8
+
 	if console_light != null:
 		console_light.light_color = Color(1.0, 0.2, 0.2) if is_blast_doors_closed else Color(0.2, 0.9, 0.3)
 
@@ -290,11 +295,31 @@ func toggle_blast_doors() -> void:
 		tween.tween_property(door_left, "position:x", target_lx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 		tween.parallel().tween_property(door_right, "position:x", target_rx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
+	# Animate West Blast Door
+	var west_door_n := get_node_or_null("BlastDoorsWest/BlastDoorNorth") as CSGBox3D
+	var west_door_s := get_node_or_null("BlastDoorsWest/BlastDoorSouth") as CSGBox3D
+	var west_light := get_node_or_null("BlastDoorsWest/BlastDoorConsole/ConsoleLight") as OmniLight3D
+	if west_door_n != null and west_door_s != null:
+		tween.parallel().tween_property(west_door_n, "position:x", side_lx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.parallel().tween_property(west_door_s, "position:x", side_rx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	if west_light != null:
+		west_light.light_color = Color(1.0, 0.2, 0.2) if is_blast_doors_closed else Color(0.2, 0.9, 0.3)
+
+	# Animate East Blast Door
+	var east_door_n := get_node_or_null("BlastDoorsEast/BlastDoorNorth") as CSGBox3D
+	var east_door_s := get_node_or_null("BlastDoorsEast/BlastDoorSouth") as CSGBox3D
+	var east_light := get_node_or_null("BlastDoorsEast/BlastDoorConsole/ConsoleLight") as OmniLight3D
+	if east_door_n != null and east_door_s != null:
+		tween.parallel().tween_property(east_door_n, "position:x", side_lx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.parallel().tween_property(east_door_s, "position:x", side_rx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	if east_light != null:
+		east_light.light_color = Color(1.0, 0.2, 0.2) if is_blast_doors_closed else Color(0.2, 0.9, 0.3)
+
 	_play_door_sfx()
 
 	tween.tween_callback(func() -> void:
 		is_animating_doors = false
-		print("GateRoom: Blast doors %s." % ("SEALED" if is_blast_doors_closed else "OPENED"))
+		print("GateRoom: All SGC Blast doors %s." % ("SEALED" if is_blast_doors_closed else "OPENED"))
 	)
 
 
