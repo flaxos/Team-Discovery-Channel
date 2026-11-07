@@ -15,3 +15,4 @@ func _init() -> void:
 	base_spread_deg = 1.2
 	max_range_m = 55.0
 	is_plasma = true
+	fire_sound_path = "res://audio/sfx_staff_fire.wav"

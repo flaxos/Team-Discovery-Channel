@@ -1,0 +1,232 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8hudsgc01"]
+
+[ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="1_hud01"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_Panel"]
+bg_color = Color(0.08, 0.1, 0.12, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.5, 0.7, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_HP_Fill"]
+bg_color = Color(0.18, 0.8, 0.35, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_HP_BG"]
+bg_color = Color(0.2, 0.2, 0.2, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="TacticalHUD" type="CanvasLayer"]
+script = ExtResource("1_hud01")
+
+[node name="VitalsPanel" type="PanelContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -140.0
+offset_right = 320.0
+offset_bottom = -24.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBox_Panel")
+
+[node name="VBox" type="VBoxContainer" parent="VitalsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="OperativeLabel" type="Label" parent="VitalsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "OPERATIVE [SG-3 HEAVY]"
+
+[node name="HealthBar" type="ProgressBar" parent="VitalsPanel/VBox"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBox_HP_BG")
+theme_override_styles/fill = SubResource("StyleBox_HP_Fill")
+value = 100.0
+show_percentage = false
+
+[node name="HealthLabel" type="Label" parent="VitalsPanel/VBox/HealthBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 13
+text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StunLabel" type="Label" parent="VitalsPanel/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "⚡ ELECTRICAL STUN: 20s ⚡"
+
+[node name="AmmoPanel" type="PanelContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -140.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBox_Panel")
+
+[node name="VBox" type="VBoxContainer" parent="AmmoPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="WeaponNameLabel" type="Label" parent="AmmoPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 15
+text = "FN P90 PDW"
+
+[node name="SlotLabel" type="Label" parent="AmmoPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "[1] PRIMARY"
+
+[node name="AmmoLabel" type="Label" parent="AmmoPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "50 / 250"
+
+[node name="GadgetLabel" type="Label" parent="AmmoPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "[G] BROWNING .50 CAL TRIPOD"
+
+[node name="TopBanner" type="PanelContainer" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -260.0
+offset_top = 20.0
+offset_right = 260.0
+offset_bottom = 110.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBox_Panel")
+
+[node name="VBox" type="VBoxContainer" parent="TopBanner"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="WaveLabel" type="Label" parent="TopBanner/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.1, 1)
+theme_override_font_sizes/font_size = 20
+text = "WAVE 1 / 3"
+horizontal_alignment = 1
+
+[node name="EnemiesLabel" type="Label" parent="TopBanner/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 14
+text = "HOSTILES: 4 JAFFA GUARDS"
+horizontal_alignment = 1
+
+[node name="ObjectiveLabel" type="Label" parent="TopBanner/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
+horizontal_alignment = 1
+
+[node name="DHDPanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -80.0
+offset_right = 280.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_Panel")
+
+[node name="VBox" type="VBoxContainer" parent="DHDPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="DHDTitle" type="Label" parent="DHDPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "SGC DIALING COMPUTER: 7-CHEVRON LOCK SEQUENCE"
+horizontal_alignment = 1
+
+[node name="GlyphContainer" type="HBoxContainer" parent="DHDPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="VictoryModal" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -120.0
+offset_right = 280.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_Panel")
+
+[node name="VBox" type="VBoxContainer" parent="VictoryModal"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="VictoryModal/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 28
+text = "EXTRACTION SUCCESSFUL"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="VictoryModal/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 15
+text = "SGC LEVEL 28 SECURED
+ALL FOOTHOLD ASSAULTS REPELLED"
+horizontal_alignment = 1
+
+[node name="ReturnBtn" type="Button" parent="VictoryModal/VBox"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "RETURN TO SGC BRIEFING"

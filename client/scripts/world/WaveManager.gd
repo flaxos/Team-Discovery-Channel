@@ -5,6 +5,7 @@ extends Node
 
 signal wave_started(wave_number: int, enemy_count: int)
 signal wave_cleared(wave_number: int)
+signal jaffa_count_changed(remaining: int, current_wave: int)
 signal intermission_tick(seconds_left: int)
 signal all_waves_defeated()
 
@@ -62,9 +63,31 @@ func start_next_wave() -> void:
 	wave_started.emit(current_wave, count_to_spawn)
 	print("WaveManager: Starting Wave %d with %d Jaffa Guards!" % [current_wave, count_to_spawn])
 
+	_play_klaxon()
+	_trigger_incoming_stargate(count_to_spawn)
+
+
+func _play_klaxon() -> void:
+	if ResourceLoader.exists("res://audio/sfx_klaxon.wav"):
+		var audio := AudioStreamPlayer.new()
+		audio.stream = load("res://audio/sfx_klaxon.wav")
+		add_child(audio)
+		audio.finished.connect(audio.queue_free)
+		audio.play()
+
+
+func _trigger_incoming_stargate(count_to_spawn: int) -> void:
+	var stargate := get_node_or_null("../Stargate") as StargateRing
+	if stargate != null:
+		# Lock Chevrons 1 through 7 sequentially (0.15s interval)
+		for c in range(1, 8):
+			await get_tree().create_timer(0.15).timeout
+			stargate.lock_chevron(c)
+		await get_tree().create_timer(1.2).timeout
+
 	# Trigger tactical Transport Rings drop on Waves 2 and 3
 	if current_wave >= 2 and transport_rings != null:
-		var ring_timer := get_tree().create_timer(2.5)
+		var ring_timer := get_tree().create_timer(3.0)
 		ring_timer.timeout.connect(func() -> void:
 			if transport_rings != null and is_wave_active:
 				transport_rings.trigger_ring_drop()
@@ -97,6 +120,7 @@ func _spawn_wave_jaffa(total_count: int) -> void:
 
 func _on_jaffa_killed(_killer: Node, jaffa: JaffaAI) -> void:
 	enemies_alive = maxi(0, enemies_alive - 1)
+	jaffa_count_changed.emit(enemies_alive, current_wave)
 	print("WaveManager: Jaffa killed! %d remaining in Wave %d." % [enemies_alive, current_wave])
 
 	if enemies_alive == 0 and is_wave_active:

@@ -45,6 +45,7 @@ func sync_trigger_ring_drop() -> void:
 	current_state = RingState.TELEGRAPH
 	telegraph_started.emit()
 	print("Transport Rings: Ceiling hatch opening! Rings descending in 2s...")
+	_play_sfx("res://audio/sfx_rings.wav", 60.0)
 
 	if telegraph_light != null:
 		telegraph_light.visible = true
@@ -137,3 +138,14 @@ func _on_crush_body_entered(body: Node) -> void:
 	if health != null and not health.is_dead:
 		print("Transport Rings: Entity %s crushed by slamming rings!" % body.name)
 		health.take_damage(crush_damage, self, "ring_crush")
+
+
+func _play_sfx(path: String, max_dist: float) -> void:
+	if ResourceLoader.exists(path):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load(path)
+		audio.max_distance = max_dist
+		audio.unit_size = 12.0
+		add_child(audio)
+		audio.finished.connect(audio.queue_free)
+		audio.play()

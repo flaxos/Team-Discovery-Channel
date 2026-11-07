@@ -8,6 +8,7 @@ signal chevron_locked(chevron_index: int)
 signal kawoosh_erupted()
 signal wormhole_opened()
 signal wormhole_closed()
+signal player_extracted(player: Node)
 
 enum GateState { INACTIVE, DIALING, KAWOOSH, ACTIVE }
 
@@ -21,6 +22,7 @@ var locked_chevrons_count: int = 0
 @onready var event_horizon_mesh: MeshInstance3D = $EventHorizon if has_node("EventHorizon") else null
 @onready var kawoosh_area: Area3D = $KawooshArea if has_node("KawooshArea") else null
 @onready var kawoosh_mesh: MeshInstance3D = $KawooshArea/VortexMesh if has_node("KawooshArea/VortexMesh") else null
+@onready var extraction_area: Area3D = $ExtractionArea if has_node("ExtractionArea") else null
 @onready var chevron_container: Node3D = $Chevrons if has_node("Chevrons") else null
 @onready var gate_light: OmniLight3D = $GateLight if has_node("GateLight") else null
 
@@ -29,10 +31,18 @@ func _ready() -> void:
 	if kawoosh_area != null:
 		kawoosh_area.monitoring = false
 		kawoosh_area.body_entered.connect(_on_kawoosh_hit_body)
+	if extraction_area != null:
+		extraction_area.body_entered.connect(_on_extraction_entered)
 	if kawoosh_mesh != null:
 		kawoosh_mesh.visible = false
 	if event_horizon_mesh != null:
 		event_horizon_mesh.visible = false
+
+
+func _on_extraction_entered(body: Node) -> void:
+	if current_state == GateState.ACTIVE and body is PlayerController3D:
+		print("Stargate: Operative %s stepped into active event horizon! Extraction sequence initiated!" % body.name)
+		player_extracted.emit(body)
 
 
 ## Locks an individual chevron in sequence (1 through 7)
@@ -67,6 +77,7 @@ func sync_lock_chevron(chevron_idx: int) -> void:
 
 	chevron_locked.emit(chevron_idx)
 	print("Stargate: Chevron %d LOCKED!" % chevron_idx)
+	_play_sfx("res://audio/sfx_chevron.wav", 70.0)
 
 	# If 7th chevron locked, trigger the Kawoosh!
 	if chevron_idx >= max_chevrons and multiplayer.is_server():
@@ -85,6 +96,7 @@ func sync_trigger_kawoosh() -> void:
 	current_state = GateState.KAWOOSH
 	kawoosh_erupted.emit()
 	print("Stargate: KAWOOSH! Event horizon erupting forward!")
+	_play_sfx("res://audio/sfx_kawoosh.wav", 100.0)
 
 	if gate_light != null:
 		gate_light.light_color = Color(0.2, 0.7, 1.0)
@@ -157,3 +169,14 @@ func sync_close_wormhole() -> void:
 
 	wormhole_closed.emit()
 	print("Stargate: Wormhole collapsed. Gate disengaged.")
+
+
+func _play_sfx(path: String, max_dist: float) -> void:
+	if ResourceLoader.exists(path):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load(path)
+		audio.max_distance = max_dist
+		audio.unit_size = 15.0
+		add_child(audio)
+		audio.finished.connect(audio.queue_free)
+		audio.play()

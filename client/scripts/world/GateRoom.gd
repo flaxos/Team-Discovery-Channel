@@ -8,8 +8,11 @@ const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
 @onready var players_container: Node3D = $Players
 @onready var spawns_container: Node3D = $Spawns
 @onready var spawner: MultiplayerSpawner = $MultiplayerSpawner
-@onready var stargate_mesh: Node3D = $Stargate
+@onready var stargate_mesh: StargateRing = $Stargate as StargateRing if has_node("Stargate") else null
 @onready var event_horizon: MeshInstance3D = $Stargate/EventHorizon if has_node("Stargate/EventHorizon") else null
+@onready var wave_manager: WaveManager = $WaveManager if has_node("WaveManager") else null
+@onready var dhd_console: DHDDialer = $DHDConsole if has_node("DHDConsole") else null
+@onready var hud: TacticalHUD = $TacticalHUD if has_node("TacticalHUD") else null
 
 
 func _ready() -> void:
@@ -19,11 +22,55 @@ func _ready() -> void:
 		if spawner.get_spawnable_scene_count() == 0:
 			spawner.add_spawnable_scene(PLAYER_SCENE_PATH)
 
+	# Connect players container to bind HUD
+	if players_container != null:
+		players_container.child_entered_tree.connect(_on_player_child_entered)
+
+	# Connect WaveManager and DHD to HUD
+	if hud != null:
+		if wave_manager != null:
+			wave_manager.wave_started.connect(hud.on_wave_started)
+			wave_manager.jaffa_count_changed.connect(hud.on_jaffa_count_changed)
+			wave_manager.wave_cleared.connect(func(w: int) -> void:
+				hud.on_wave_cleared(w, wave_manager.intermission_duration_s)
+			)
+			wave_manager.all_waves_defeated.connect(hud.on_all_waves_defeated)
+		if dhd_console != null:
+			hud.bind_dhd(dhd_console)
+		if stargate_mesh != null:
+			stargate_mesh.player_extracted.connect(_on_player_extracted)
+
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-	# If host / server in an active game session, spawn all registered players
+	# If host / server in an active game session, spawn all registered players and start waves
 	if net != null and net.is_server:
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 		_spawn_all_players()
+		_start_foothold_defense()
+
+
+func _on_player_child_entered(node: Node) -> void:
+	var player := node as PlayerController3D
+	if player != null and hud != null:
+		# Check if local player
+		var local_id := multiplayer.get_unique_id()
+		if player.name == str(local_id) or (local_id == 1 and player.name == "1"):
+			hud.bind_local_player(player)
+
+
+func _on_player_extracted(_player: Node) -> void:
+	if hud != null:
+		hud.show_victory()
+
+
+func _start_foothold_defense() -> void:
+	if wave_manager == null:
+		return
+	# 3-second preparation time before Stargate alarms sound
+	var timer := get_tree().create_timer(3.0)
+	timer.timeout.connect(func() -> void:
+		if wave_manager != null and is_instance_valid(wave_manager):
+			wave_manager.start_wave_defense()
+	)
 
 
 func _spawn_all_players() -> void:
