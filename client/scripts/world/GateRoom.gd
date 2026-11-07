@@ -13,6 +13,14 @@ const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
 @onready var wave_manager: WaveManager = $WaveManager if has_node("WaveManager") else null
 @onready var dhd_console: DHDDialer = $DHDConsole if has_node("DHDConsole") else null
 @onready var hud: TacticalHUD = $TacticalHUD if has_node("TacticalHUD") else null
+@onready var door_left: CSGBox3D = $BlastDoors/BlastDoorLeft if has_node("BlastDoors/BlastDoorLeft") else null
+@onready var door_right: CSGBox3D = $BlastDoors/BlastDoorRight if has_node("BlastDoors/BlastDoorRight") else null
+@onready var console_light: OmniLight3D = $BlastDoors/BlastDoorConsole/ConsoleLight if has_node("BlastDoors/BlastDoorConsole/ConsoleLight") else null
+
+var is_blast_doors_closed: bool = false
+var is_animating_doors: bool = false
+
+signal blast_doors_toggled(closed: bool)
 
 
 func _ready() -> void:
@@ -60,6 +68,44 @@ func _on_player_child_entered(node: Node) -> void:
 func _on_player_extracted(_player: Node) -> void:
 	if hud != null:
 		hud.show_victory()
+
+
+func toggle_blast_doors() -> void:
+	if is_animating_doors:
+		return
+	is_blast_doors_closed = not is_blast_doors_closed
+	is_animating_doors = true
+	blast_doors_toggled.emit(is_blast_doors_closed)
+
+	var target_lx := -1.5 if is_blast_doors_closed else -4.8
+	var target_rx := 1.5 if is_blast_doors_closed else 4.8
+
+	if console_light != null:
+		console_light.light_color = Color(1.0, 0.2, 0.2) if is_blast_doors_closed else Color(0.2, 0.9, 0.3)
+
+	var tween := create_tween()
+	if door_left != null and door_right != null:
+		tween.tween_property(door_left, "position:x", target_lx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.parallel().tween_property(door_right, "position:x", target_rx, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+	_play_door_sfx()
+
+	tween.tween_callback(func() -> void:
+		is_animating_doors = false
+		print("GateRoom: Blast doors %s." % ("SEALED" if is_blast_doors_closed else "OPENED"))
+	)
+
+
+func _play_door_sfx() -> void:
+	if ResourceLoader.exists("res://audio/sfx_door_hydraulic.wav"):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load("res://audio/sfx_door_hydraulic.wav")
+		audio.max_distance = 60.0
+		audio.unit_size = 14.0
+		add_child(audio)
+		audio.global_position = Vector3(0, 2.5, 22.0)
+		audio.finished.connect(audio.queue_free)
+		audio.play()
 
 
 func _start_foothold_defense() -> void:

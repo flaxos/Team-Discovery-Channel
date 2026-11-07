@@ -101,12 +101,29 @@ func _update_weapon_display() -> void:
 
 	# Gadget display
 	if local_player.class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
-		gadget_label.text = "[G] BROWNING .50 CAL TRIPOD"
+		if local_player.turret_cooldown > 0.0:
+			gadget_label.text = "[G] .50 CAL COOLDOWN (%ds)" % int(ceil(local_player.turret_cooldown))
+			gadget_label.modulate = Color(0.7, 0.7, 0.7)
+		else:
+			gadget_label.text = "[G] DEPLOY .50 CAL TRIPOD"
+			gadget_label.modulate = Color(0.4, 0.9, 0.5)
 	elif local_player.class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
 		var has_c4: bool = local_player.active_c4 != null and is_instance_valid(local_player.active_c4)
-		gadget_label.text = "[G] DETONATE C4 SATCHEL" if has_c4 else "[G] DEPLOY C4 SATCHEL"
+		if has_c4:
+			gadget_label.text = "[G] DETONATE C4 SATCHEL"
+			gadget_label.modulate = Color(1.0, 0.4, 0.2)
+		elif local_player.c4_charges_remaining > 0:
+			gadget_label.text = "[G] THROW C4 (%d LEFT)" % local_player.c4_charges_remaining
+			gadget_label.modulate = Color(0.4, 0.9, 0.5)
+		else:
+			gadget_label.text = "[G] C4 DEPLETED (0/3)"
+			gadget_label.modulate = Color(0.7, 0.7, 0.7)
 	else:
 		gadget_label.text = "[G] TACTICAL SATCHEL"
+
+	# Append Claymore indicator
+	var claymore_str := "  |  [3] CLAYMORE (%d/2)" % local_player.claymore_charges
+	gadget_label.text += claymore_str
 
 
 func _on_health_changed(cur: float, max_h: float) -> void:

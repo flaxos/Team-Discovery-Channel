@@ -1,9 +1,11 @@
 class_name DeployableTurret
 extends Node3D
 ## SGC Browning M2HB .50 Cal Deployable Heavy Machine Gun.
-## Deployed by SG-3 Heavy Support Marines to hold choke points and suppress Jaffa waves.
+## Operates in automated sentry mode OR mounted by an operative via [E] for manual suppressing fire.
 
 signal turret_fired(origin: Vector3, dir: Vector3)
+signal player_mounted(player: Node)
+signal player_dismounted(player: Node)
 
 @export var fire_rate_rpm: float = 450.0
 @export var damage: float = 52.0
@@ -11,15 +13,33 @@ signal turret_fired(origin: Vector3, dir: Vector3)
 
 var fire_cooldown: float = 0.0
 var current_target: Node3D = null
+var mounted_player: CharacterBody3D = null
 
 @onready var muzzle_point: Marker3D = $TurretHead/MuzzlePoint if has_node("TurretHead/MuzzlePoint") else null
 @onready var turret_head: Node3D = $TurretHead if has_node("TurretHead") else null
+@onready var interact_area: Area3D = $InteractArea if has_node("InteractArea") else null
+
+
+func _ready() -> void:
+	if interact_area != null:
+		interact_area.body_entered.connect(_on_interact_entered)
+		interact_area.body_exited.connect(_on_interact_exited)
 
 
 func _physics_process(delta: float) -> void:
 	if fire_cooldown > 0.0:
 		fire_cooldown -= delta
 
+	# If manually mounted by a player, aim head where the player is aiming
+	if mounted_player != null and is_instance_valid(mounted_player):
+		var p_aim: Vector3 = mounted_player.get("current_aim_target")
+		if p_aim != Vector3.ZERO and turret_head != null:
+			var target_head_pos := Vector3(p_aim.x, turret_head.global_position.y, p_aim.z)
+			if turret_head.global_position.distance_squared_to(target_head_pos) > 0.2:
+				turret_head.look_at(target_head_pos, Vector3.UP)
+		return
+
+	# Sentry mode: server authoritative target acquisition
 	if not multiplayer.is_server():
 		return
 
@@ -34,6 +54,40 @@ func _physics_process(delta: float) -> void:
 		if fire_cooldown <= 0.0:
 			fire_cooldown = 60.0 / fire_rate_rpm
 			_fire_shot(aim_dir)
+
+
+func try_manual_fire(aim_dir: Vector3) -> bool:
+	if fire_cooldown > 0.0:
+		return false
+	fire_cooldown = 60.0 / fire_rate_rpm
+	_fire_shot(aim_dir)
+	return true
+
+
+func mount(player: CharacterBody3D) -> void:
+	if mounted_player != null:
+		return
+	mounted_player = player
+	player_mounted.emit(player)
+	print("DeployableTurret: Operative %s mounted the .50 Cal Browning!" % player.name)
+
+
+func dismount() -> void:
+	if mounted_player != null:
+		var prev := mounted_player
+		mounted_player = null
+		player_dismounted.emit(prev)
+		print("DeployableTurret: Operative %s dismounted the .50 Cal Browning." % prev.name)
+
+
+func _on_interact_entered(body: Node) -> void:
+	if body is PlayerController3D and (body as PlayerController3D).is_local_authority:
+		print("DeployableTurret: In range of .50 Cal. Press [E] to mount.")
+
+
+func _on_interact_exited(body: Node) -> void:
+	if body == mounted_player:
+		dismount()
 
 
 func _find_target() -> void:
@@ -98,3 +152,13 @@ func play_turret_fx(origin: Vector3, hit_point: Vector3) -> void:
 	var tween := tracer.create_tween()
 	tween.tween_property(mat, "albedo_color:a", 0.0, 0.06)
 	tween.tween_callback(tracer.queue_free)
+
+	if ResourceLoader.exists("res://audio/sfx_m249.wav"):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load("res://audio/sfx_m249.wav")
+		audio.max_distance = 60.0
+		audio.unit_size = 12.0
+		get_tree().root.add_child(audio)
+		audio.global_position = origin
+		audio.finished.connect(audio.queue_free)
+		audio.play()

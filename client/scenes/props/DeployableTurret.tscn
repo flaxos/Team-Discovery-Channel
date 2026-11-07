@@ -17,8 +17,20 @@ height = 0.7
 material = SubResource("Mat_GunMetal")
 size = Vector3(0.25, 0.25, 0.8)
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Interact"]
+height = 2.0
+radius = 1.8
+
 [node name="DeployableTurret" type="Node3D"]
 script = ExtResource("1_turret")
+
+[node name="InteractArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_Interact")
 
 [node name="TripodBase" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)

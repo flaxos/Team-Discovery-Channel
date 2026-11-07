@@ -46,8 +46,14 @@ func _process(delta: float) -> void:
 func take_damage(amount: float, source: Node = null, damage_type: String = "bullet") -> void:
 	if is_dead:
 		return
-	current_health = maxf(0.0, current_health - amount)
-	damage_taken.emit(amount, source, damage_type)
+
+	var final_dmg := amount
+	var parent_node := get_parent()
+	if parent_node is PlayerController3D and (parent_node as PlayerController3D).is_crouching:
+		final_dmg *= 0.35  # 65% damage mitigation while crouched behind cover
+
+	current_health = maxf(0.0, current_health - final_dmg)
+	damage_taken.emit(final_dmg, source, damage_type)
 	health_changed.emit(current_health, max_health)
 
 	if current_health <= 0.0 and not is_dead:

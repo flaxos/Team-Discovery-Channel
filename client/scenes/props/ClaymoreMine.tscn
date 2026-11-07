@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://cclaymore01"]
+
+[ext_resource type="Script" path="res://scripts/weapons/ClaymoreMine.gd" id="1_cm01"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_OliveDrab"]
+albedo_color = Color(0.22, 0.28, 0.18, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_ClaymoreBody"]
+material = SubResource("Mat_OliveDrab")
+size = Vector3(0.5, 0.3, 0.15)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_Tripwire"]
+points = PackedVector3Array(0, 0, 0, -2.5, 0, -4.5, 2.5, 0, -4.5, -2.5, 1.2, -4.5, 2.5, 1.2, -4.5, 0, 1.2, 0)
+
+[sub_resource type="StandardMaterial3D" id="Mat_LaserTripwire"]
+shading_mode = 0
+albedo_color = Color(0.1, 0.9, 0.3, 0.6)
+
+[node name="ClaymoreMine" type="Node3D"]
+script = ExtResource("1_cm01")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+mesh = SubResource("BoxMesh_ClaymoreBody")
+
+[node name="ArmLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+light_color = Color(0.2, 0.9, 0.3, 1)
+light_energy = 0.5
+omni_range = 2.0
+
+[node name="TripwireArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TripwireArea"]
+shape = SubResource("ConvexPolygonShape3D_Tripwire")
