@@ -8,6 +8,7 @@ signal wave_cleared(wave_number: int)
 signal jaffa_count_changed(remaining: int, current_wave: int)
 signal intermission_tick(seconds_left: int)
 signal all_waves_defeated()
+signal multi_sector_incursion_started(sectors: Array[String])
 
 const JAFFA_SCENE_PATH: String = "res://scenes/entities/JaffaGuard.tscn"
 const SHOCK_GUARD_SCENE_PATH: String = "res://scenes/entities/JaffaShockGuard.tscn"
@@ -168,3 +169,46 @@ func _on_jaffa_killed(_killer: Node, _jaffa: JaffaAI) -> void:
 			intermission_timer = intermission_duration_s
 		else:
 			all_waves_defeated.emit()
+
+
+## Initiates Sprint 9 Foothold Climax Multi-Sector Incursion.
+## Concurrently spawns elite strike squads across Gate Room, Transport Rings, and Level 27 Upper Deck.
+func trigger_climax_incursion() -> void:
+	current_wave = 4
+	max_waves = 4
+	is_wave_active = true
+	var total_count := 8
+	enemies_alive = total_count
+	wave_started.emit(current_wave, total_count)
+	var sectors: Array[String] = ["GATE_ROOM", "ARMORY_HALLWAY", "LEVEL_27_CORRIDOR"]
+	multi_sector_incursion_started.emit(sectors)
+	print("WaveManager: MULTI-SECTOR CLIMAX INCURSION ENGAGED! Breaches across Gate Room, Armory Rings, and Level 27 Upper Deck!")
+
+	# 1. Sector 1: Gate Room Ramp incursion (4 hostiles)
+	_spawn_wave_jaffa(4)
+
+	# 2. Sector 2: Fallback Hallway / Armory rings incursion (2 hostiles)
+	if transport_rings != null:
+		transport_rings.reinforcements_per_beam = 2
+		transport_rings.reinforcement_scene = load(SHOCK_GUARD_SCENE_PATH) as PackedScene
+		transport_rings.trigger_ring_drop()
+	else:
+		_spawn_sector_jaffa(Vector3(3.0, 0.0, 39.0), 2, true)
+
+	# 3. Sector 3: Level 27 Upper Corridor breach (2 Shock Guards)
+	_spawn_sector_jaffa(Vector3(26.0, 5.5, 18.0), 2, true)
+
+
+func _spawn_sector_jaffa(spawn_pos: Vector3, count: int, is_shock: bool = false) -> void:
+	var scene_path: String = SHOCK_GUARD_SCENE_PATH if is_shock else JAFFA_SCENE_PATH
+	var jaffa_scene := load(scene_path) as PackedScene
+	if jaffa_scene == null or enemies_container == null:
+		return
+
+	for i in range(count):
+		var offset := Vector3(randf_range(-1.5, 1.5), 0, randf_range(-1.0, 1.0))
+		var jaffa := jaffa_scene.instantiate() as JaffaAI
+		jaffa.name = "%s_Sector_%d" % ["Shock" if is_shock else "Jaffa", i + 1]
+		jaffa.position = spawn_pos + offset
+		enemies_container.add_child(jaffa, true)
+		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))

@@ -1,4 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://b8x7y4z2w9q02"]
+[gd_scene load_steps=12 format=3 uid="uid://b8x7y4z2w9q02"]
+
+[ext_resource type="Script" path="res://scripts/props/GeneralsDefenseTerminal.gd" id="1_gen_def"]
+[ext_resource type="Script" path="res://scripts/props/SecurityMonitorConsole.gd" id="2_sec_mon"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor27"]
 albedo_color = Color(0.28, 0.30, 0.32, 1)
@@ -264,6 +267,10 @@ text = "SGC BASE DESTRUCT
 font_size = 14
 modulate = Color(1, 0.2, 0.2, 1)
 
+[node name="GeneralsDefenseTerminal" type="Node3D" parent="GeneralsOffice"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 5.9, 14.2)
+script = ExtResource("1_gen_def")
+
 [node name="OfficeLight" type="OmniLight3D" parent="GeneralsOffice"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 8.8, 15)
 light_color = Color(0.98, 0.95, 0.92, 1)
@@ -308,6 +315,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.6, 6.8, 15)
 use_collision = true
 size = Vector3(0.6, 1.6, 4)
 material = SubResource("Mat_ScreenCyan")
+script = ExtResource("2_sec_mon")
 
 [node name="SecurityLight" type="OmniLight3D" parent="SecurityStation"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 8.8, 15)
