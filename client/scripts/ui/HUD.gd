@@ -50,6 +50,7 @@ extends CanvasLayer
 
 var local_player: PlayerController3D = null
 var current_dhd: DHDDialer = null
+var current_sector_id: String = ""
 var vignette_pulse_time: float = 0.0
 var flash_alpha: float = 0.0
 var mission_seconds: float = 0.0
@@ -145,10 +146,23 @@ func _on_return_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
 
 
+func update_sector_display(sector_id: String) -> void:
+	current_sector_id = sector_id
+	if operative_label != null and local_player != null:
+		var class_names: Dictionary = {
+			SGCNetworkManager.CLASS_SG3_HEAVY: "SG-3 HEAVY",
+			SGCNetworkManager.CLASS_CARTER_TECH: "TECH (CARTER)",
+			SGCNetworkManager.CLASS_ONEILL_RECON: "RECON (O'NEILL)",
+			SGCNetworkManager.CLASS_TEALC_JAFFA: "JAFFA (TEAL'C)"
+		}
+		var c_name: String = class_names.get(local_player.class_id, "OPERATIVE")
+		var sec_name: String = sector_id.replace("_", " ")
+		operative_label.text = "%s [%s] • %s" % [local_player.player_callsign, c_name, sec_name]
+
+
 func bind_local_player(player: PlayerController3D) -> void:
 	local_player = player
 	if local_player == null or not is_inside_tree() or operative_label == null:
-		return
 		return
 
 	# Operative profile
@@ -159,7 +173,10 @@ func bind_local_player(player: PlayerController3D) -> void:
 		SGCNetworkManager.CLASS_TEALC_JAFFA: "ALLIED JAFFA (TEAL'C)"
 	}
 	var c_name: String = class_names.get(player.class_id, "SGC OPERATIVE")
-	operative_label.text = "%s [%s]" % [player.player_callsign, c_name]
+	if current_sector_id != "":
+		operative_label.text = "%s [%s] • %s" % [player.player_callsign, c_name, current_sector_id.replace("_", " ")]
+	else:
+		operative_label.text = "%s [%s]" % [player.player_callsign, c_name]
 
 	# Health component
 	var health: HealthComponent = player.get_node_or_null("HealthComponent") as HealthComponent
