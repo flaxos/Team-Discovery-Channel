@@ -5,6 +5,9 @@ extends CharacterBody3D
 ## HealthComponent integration, and Godot 4 multiplayer synchronization.
 
 signal player_died(peer_id: int)
+signal player_downed(peer_id: int)
+signal player_revived(peer_id: int)
+signal revive_progress_changed(progress: float)
 signal weapon_ammo_changed(current: int, reserve: int)
 signal class_configured(class_id: String)
 
@@ -43,6 +46,9 @@ var active_turret: DeployableTurret = null
 var mounted_turret: DeployableTurret = null
 var turret_cooldown: float = 0.0
 const TURRET_COOLDOWN_S: float = 30.0
+var active_revive_target: PlayerController3D = null
+var current_revive_time: float = 0.0
+const REVIVE_DURATION_S: float = 2.5
 
 var trauma: float = 0.0
 var max_shake_offset: float = 0.65
@@ -84,7 +90,10 @@ func _ready() -> void:
 	_apply_class_profile(class_id)
 
 	if health_component != null:
+		health_component.can_be_downed = true
 		health_component.died.connect(_on_died)
+		health_component.downed.connect(_on_downed)
+		health_component.revived.connect(_on_revived)
 		health_component.stunned.connect(_on_stunned)
 		health_component.recovered_from_stun.connect(_on_recovered_from_stun)
 		health_component.vaporized.connect(_on_vaporized)
@@ -181,8 +190,27 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	# Handle dead or stunned state
-	if health_component != null and (health_component.is_dead or health_component.is_stunned):
+	# Handle dead state
+	if health_component != null and health_component.is_dead:
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		move_and_slide()
+		return
+
+	# Handle downed / bleedout state
+	if health_component != null and health_component.is_downed:
+		if mounted_turret != null:
+			mounted_turret.dismount()
+			mounted_turret = null
+		_process_aim()
+		_process_downed_crawl(delta)
+		_update_camera_and_occlusion(delta)
+		return
+
+	# Handle stunned state
+	if health_component != null and health_component.is_stunned:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		if not is_on_floor():
@@ -195,6 +223,9 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("interact"):
 		_try_interact()
+
+	# Process reviving nearby downed teammates while holding interact
+	_process_revive(delta)
 
 	# If mounted on .50 cal tripod, lock position behind gun and process manual fire
 	if mounted_turret != null and is_instance_valid(mounted_turret):
@@ -527,6 +558,98 @@ func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = fa
 	var tween := tracer.create_tween()
 	tween.tween_property(mat, "albedo_color:a", 0.0, 0.08)
 	tween.tween_callback(tracer.queue_free)
+
+
+func _process_downed_crawl(delta: float) -> void:
+	is_crouching = true
+	is_sprinting = false
+	if body_mesh != null:
+		body_mesh.scale.y = 0.45
+		body_mesh.position.y = 0.25
+
+	var crawl_speed: float = 1.2
+	var raw_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var move_dir := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
+
+	if move_dir.length_squared() > 0.001:
+		velocity.x = move_toward(velocity.x, move_dir.x * crawl_speed, acceleration * delta)
+		velocity.z = move_toward(velocity.z, move_dir.z * crawl_speed, acceleration * delta)
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+
+	if not is_on_floor():
+		velocity.y -= gravity * delta
+
+	move_and_slide()
+
+	# Downed operative can only use secondary sidearm (Beretta M9)
+	if active_slot != 2:
+		switch_slot(2)
+
+	is_firing = Input.is_action_pressed("fire")
+	if is_firing and current_weapon != null:
+		current_weapon.try_fire(1.8)
+
+	if Input.is_action_just_pressed("reload") and current_weapon != null:
+		current_weapon.reload()
+
+
+func _process_revive(delta: float) -> void:
+	if not Input.is_action_pressed("interact"):
+		if current_revive_time > 0.0:
+			current_revive_time = 0.0
+			active_revive_target = null
+			revive_progress_changed.emit(0.0)
+		return
+
+	# Find closest downed squadmate within 2.2m
+	var closest_downed: PlayerController3D = null
+	var min_d: float = 2.2
+	var players_container := get_tree().root.find_child("Players", true, false)
+	if players_container != null:
+		for p in players_container.get_children():
+			var teammate := p as PlayerController3D
+			if teammate != null and teammate != self and teammate.health_component != null and teammate.health_component.is_downed and not teammate.health_component.is_dead:
+				var d := global_position.distance_to(teammate.global_position)
+				if d < min_d:
+					min_d = d
+					closest_downed = teammate
+
+	if closest_downed != null:
+		active_revive_target = closest_downed
+		current_revive_time += delta
+		var prog := clampf(current_revive_time / REVIVE_DURATION_S, 0.0, 1.0)
+		revive_progress_changed.emit(prog)
+		if current_revive_time >= REVIVE_DURATION_S:
+			active_revive_target.health_component.revive(self)
+			active_revive_target = null
+			current_revive_time = 0.0
+			revive_progress_changed.emit(0.0)
+			print("Player %d REVIVED squadmate!" % peer_id)
+	else:
+		if current_revive_time > 0.0:
+			current_revive_time = 0.0
+			active_revive_target = null
+			revive_progress_changed.emit(0.0)
+
+
+func _on_downed() -> void:
+	if mounted_turret != null:
+		mounted_turret.dismount()
+		mounted_turret = null
+	switch_slot(2)
+	player_downed.emit(peer_id)
+	print("Player %d is DOWNED! Bleeding out..." % peer_id)
+
+
+func _on_revived() -> void:
+	if body_mesh != null:
+		body_mesh.scale.y = 1.0
+		body_mesh.position.y = 0.9
+	switch_slot(1)
+	player_revived.emit(peer_id)
+	print("Player %d REVIVED back into the fight!" % peer_id)
 
 
 func _on_damage_taken(amount: float, _source: Node, _type: String) -> void:

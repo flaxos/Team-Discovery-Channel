@@ -100,6 +100,34 @@ theme_override_colors/font_color = Color(0.2, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "⚡ ELECTRICAL STUN: 20s ⚡"
 
+[node name="DownedLabel" type="Label" parent="VitalsPanel/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.1, 1)
+theme_override_font_sizes/font_size = 12
+text = "⚠️ DOWNED! BLEEDING OUT (20s) ⚠️"
+
+[node name="ReviveProgressBar" type="ProgressBar" parent="VitalsPanel/VBox"]
+visible = false
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBox_HP_BG")
+theme_override_styles/fill = SubResource("StyleBox_HP_Fill")
+value = 0.0
+show_percentage = false
+
+[node name="ReviveLabel" type="Label" parent="VitalsPanel/VBox/ReviveProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 11
+text = "REVIVING SQUADMATE..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="AmmoPanel" type="PanelContainer" parent="."]
 anchors_preset = 3
 anchor_left = 1.0
@@ -218,36 +246,150 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -120.0
-offset_right = 280.0
-offset_bottom = 120.0
+offset_left = -300.0
+offset_top = -180.0
+offset_right = 300.0
+offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBox_Panel")
 
 [node name="VBox" type="VBoxContainer" parent="VictoryModal"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 alignment = 1
 
 [node name="Title" type="Label" parent="VictoryModal/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "EXTRACTION SUCCESSFUL"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="VictoryModal/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
-theme_override_font_sizes/font_size = 15
-text = "SGC LEVEL 28 SECURED
-ALL FOOTHOLD ASSAULTS REPELLED"
+theme_override_font_sizes/font_size = 14
+text = "SGC AFTER ACTION DEBRIEFING REPORT"
+horizontal_alignment = 1
+
+[node name="StatsContainer" type="VBoxContainer" parent="VictoryModal/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="StatTime" type="Label" parent="VictoryModal/VBox/StatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "MISSION DURATION: 00:00"
+horizontal_alignment = 1
+
+[node name="StatKills" type="Label" parent="VictoryModal/VBox/StatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "HOSTILES ELIMINATED: 0"
+horizontal_alignment = 1
+
+[node name="StatWaves" type="Label" parent="VictoryModal/VBox/StatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "WAVES REPELLED: 3 / 3"
+horizontal_alignment = 1
+
+[node name="StatChevrons" type="Label" parent="VictoryModal/VBox/StatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "CHEVRONS LOCKED: 7 / 7"
+horizontal_alignment = 1
+
+[node name="StatStatus" type="Label" parent="VictoryModal/VBox/StatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 13
+text = "EXTRACTION STATUS: CONFIRMED"
 horizontal_alignment = 1
 
 [node name="ReturnBtn" type="Button" parent="VictoryModal/VBox"]
-custom_minimum_size = Vector2(200, 40)
+custom_minimum_size = Vector2(220, 38)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "RETURN TO SGC BRIEFING"
+
+[node name="PauseMenu" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -200.0
+offset_right = 260.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_Panel")
+
+[node name="VBox" type="VBoxContainer" parent="PauseMenu"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PauseTitle" type="Label" parent="PauseMenu/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "SGC MISSION PAUSED & SETTINGS"
+horizontal_alignment = 1
+
+[node name="MasterLabel" type="Label" parent="PauseMenu/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "MASTER VOLUME: 100%"
+
+[node name="MasterSlider" type="HSlider" parent="PauseMenu/VBox"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="SFXLabel" type="Label" parent="PauseMenu/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "SFX VOLUME: 100%"
+
+[node name="SFXSlider" type="HSlider" parent="PauseMenu/VBox"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="AmbienceLabel" type="Label" parent="PauseMenu/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "AMBIENCE & KLAXONS: 100%"
+
+[node name="AmbienceSlider" type="HSlider" parent="PauseMenu/VBox"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Spacer" type="Control" parent="PauseMenu/VBox"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+
+[node name="ResumeBtn" type="Button" parent="PauseMenu/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "RESUME MISSION"
+
+[node name="LobbyBtn" type="Button" parent="PauseMenu/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "ABORT TO SGC BRIEFING"

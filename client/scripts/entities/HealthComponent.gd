@@ -9,13 +9,20 @@ signal died()
 signal stunned(duration: float)
 signal recovered_from_stun()
 signal vaporized()
+signal downed()
+signal revived()
+signal bleedout_tick(seconds_left: float)
 
 @export var max_health: float = 100.0
+@export var can_be_downed: bool = false
 
 var current_health: float = 100.0
 var is_dead: bool = false
+var is_downed: bool = false
 var is_stunned: bool = false
 var stun_timer: float = 0.0
+var bleedout_timer: float = 0.0
+const MAX_BLEEDOUT_TIME: float = 20.0
 
 var zat_hits: int = 0
 var zat_window_timer: float = 0.0
@@ -28,8 +35,18 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Bleedout countdown when downed
+	if is_downed and not is_dead:
+		bleedout_timer -= delta
+		bleedout_tick.emit(maxf(0.0, bleedout_timer))
+		if bleedout_timer <= 0.0:
+			is_downed = false
+			is_dead = true
+			died.emit()
+			return
+
 	# Stun countdown
-	if is_stunned and not is_dead:
+	if is_stunned and not is_dead and not is_downed:
 		stun_timer -= delta
 		if stun_timer <= 0.0:
 			is_stunned = false
@@ -57,9 +74,31 @@ func take_damage(amount: float, source: Node = null, damage_type: String = "bull
 	health_changed.emit(current_health, max_health)
 
 	if current_health <= 0.0 and not is_dead:
-		is_dead = true
-		is_stunned = false
-		died.emit()
+		if can_be_downed and not is_downed and damage_type != "kawoosh_vortex" and damage_type != "zat_vaporize":
+			is_downed = true
+			is_stunned = false
+			bleedout_timer = MAX_BLEEDOUT_TIME
+			current_health = 0.0
+			downed.emit()
+		elif not is_downed:
+			is_dead = true
+			is_stunned = false
+			died.emit()
+		elif is_downed and damage_type == "kawoosh_vortex":
+			is_downed = false
+			is_dead = true
+			died.emit()
+
+
+## Revives a downed operative with 40% maximum health
+func revive(_reviver: Node = null) -> void:
+	if not is_downed or is_dead:
+		return
+	is_downed = false
+	bleedout_timer = 0.0
+	current_health = max_health * 0.40
+	health_changed.emit(current_health, max_health)
+	revived.emit()
 
 
 ## Canonical Stargate Zat'nik'tel hit logic:

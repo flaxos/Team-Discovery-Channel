@@ -26,21 +26,116 @@ extends CanvasLayer
 @onready var return_btn: Button = $VictoryModal/VBox/ReturnBtn if has_node("VictoryModal/VBox/ReturnBtn") else null
 @onready var damage_vignette: TextureRect = $DamageVignette if has_node("DamageVignette") else null
 
+@onready var downed_label: Label = $VitalsPanel/VBox/DownedLabel if has_node("VitalsPanel/VBox/DownedLabel") else null
+@onready var revive_bar: ProgressBar = $VitalsPanel/VBox/ReviveProgressBar if has_node("VitalsPanel/VBox/ReviveProgressBar") else null
+@onready var revive_label: Label = $VitalsPanel/VBox/ReviveProgressBar/ReviveLabel if has_node("VitalsPanel/VBox/ReviveProgressBar/ReviveLabel") else null
+
+@onready var pause_menu: PanelContainer = $PauseMenu if has_node("PauseMenu") else null
+@onready var master_slider: HSlider = $PauseMenu/VBox/MasterSlider if has_node("PauseMenu/VBox/MasterSlider") else null
+@onready var master_label: Label = $PauseMenu/VBox/MasterLabel if has_node("PauseMenu/VBox/MasterLabel") else null
+@onready var sfx_slider: HSlider = $PauseMenu/VBox/SFXSlider if has_node("PauseMenu/VBox/SFXSlider") else null
+@onready var sfx_label: Label = $PauseMenu/VBox/SFXLabel if has_node("PauseMenu/VBox/SFXLabel") else null
+@onready var ambience_slider: HSlider = $PauseMenu/VBox/AmbienceSlider if has_node("PauseMenu/VBox/AmbienceSlider") else null
+@onready var ambience_label: Label = $PauseMenu/VBox/AmbienceLabel if has_node("PauseMenu/VBox/AmbienceLabel") else null
+@onready var resume_btn: Button = $PauseMenu/VBox/ResumeBtn if has_node("PauseMenu/VBox/ResumeBtn") else null
+@onready var lobby_btn: Button = $PauseMenu/VBox/LobbyBtn if has_node("PauseMenu/VBox/LobbyBtn") else null
+
+@onready var debrief_title: Label = $VictoryModal/VBox/Title if has_node("VictoryModal/VBox/Title") else null
+@onready var debrief_subtitle: Label = $VictoryModal/VBox/Subtitle if has_node("VictoryModal/VBox/Subtitle") else null
+@onready var stat_time: Label = $VictoryModal/VBox/StatsContainer/StatTime if has_node("VictoryModal/VBox/StatsContainer/StatTime") else null
+@onready var stat_kills: Label = $VictoryModal/VBox/StatsContainer/StatKills if has_node("VictoryModal/VBox/StatsContainer/StatKills") else null
+@onready var stat_waves: Label = $VictoryModal/VBox/StatsContainer/StatWaves if has_node("VictoryModal/VBox/StatsContainer/StatWaves") else null
+@onready var stat_chevrons: Label = $VictoryModal/VBox/StatsContainer/StatChevrons if has_node("VictoryModal/VBox/StatsContainer/StatChevrons") else null
+@onready var stat_status: Label = $VictoryModal/VBox/StatsContainer/StatStatus if has_node("VictoryModal/VBox/StatsContainer/StatStatus") else null
+
 var local_player: PlayerController3D = null
 var current_dhd: DHDDialer = null
 var vignette_pulse_time: float = 0.0
 var flash_alpha: float = 0.0
+var mission_seconds: float = 0.0
+var total_kills: int = 0
+var is_mission_ended: bool = false
 
 
 func _ready() -> void:
 	dhd_panel.visible = false
 	victory_modal.visible = false
 	stun_label.visible = false
+	if downed_label != null:
+		downed_label.visible = false
+	if revive_bar != null:
+		revive_bar.visible = false
+	if pause_menu != null:
+		pause_menu.visible = false
+
 	objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
+
 	if return_btn != null:
 		return_btn.pressed.connect(_on_return_pressed)
+	if resume_btn != null:
+		resume_btn.pressed.connect(toggle_pause_menu)
+	if lobby_btn != null:
+		lobby_btn.pressed.connect(_on_return_pressed)
+
+	# Audio volume sliders
+	if master_slider != null:
+		master_slider.value_changed.connect(_on_master_slider_changed)
+	if sfx_slider != null:
+		sfx_slider.value_changed.connect(_on_sfx_slider_changed)
+	if ambience_slider != null:
+		ambience_slider.value_changed.connect(_on_ambience_slider_changed)
+
 	if local_player != null:
 		bind_local_player(local_player)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_pause"):
+		toggle_pause_menu()
+
+
+func toggle_pause_menu() -> void:
+	if pause_menu == null or is_mission_ended:
+		return
+	pause_menu.visible = not pause_menu.visible
+
+
+func _on_master_slider_changed(value: float) -> void:
+	var bus_idx: int = AudioServer.get_bus_index("Master")
+	if bus_idx != -1:
+		if value <= 0.001:
+			AudioServer.set_bus_mute(bus_idx, true)
+		else:
+			AudioServer.set_bus_mute(bus_idx, false)
+			AudioServer.set_bus_volume_db(bus_idx, linear_to_db(value))
+	if master_label != null:
+		master_label.text = "MASTER VOLUME: %d%%" % int(value * 100.0)
+
+
+func _on_sfx_slider_changed(value: float) -> void:
+	var bus_idx: int = AudioServer.get_bus_index("SFX")
+	if bus_idx != -1:
+		if value <= 0.001:
+			AudioServer.set_bus_mute(bus_idx, true)
+		else:
+			AudioServer.set_bus_mute(bus_idx, false)
+			AudioServer.set_bus_volume_db(bus_idx, linear_to_db(value))
+	if sfx_label != null:
+		sfx_label.text = "SFX VOLUME: %d%%" % int(value * 100.0)
+
+
+func _on_ambience_slider_changed(value: float) -> void:
+	var bus_idx: int = AudioServer.get_bus_index("Ambience")
+	if bus_idx == -1:
+		bus_idx = AudioServer.get_bus_index("Klaxons / Ambience")
+	if bus_idx != -1:
+		if value <= 0.001:
+			AudioServer.set_bus_mute(bus_idx, true)
+		else:
+			AudioServer.set_bus_mute(bus_idx, false)
+			AudioServer.set_bus_volume_db(bus_idx, linear_to_db(value))
+	if ambience_label != null:
+		ambience_label.text = "AMBIENCE & KLAXONS: %d%%" % int(value * 100.0)
 
 
 func _on_return_pressed() -> void:
@@ -77,18 +172,71 @@ func bind_local_player(player: PlayerController3D) -> void:
 			health.recovered_from_stun.connect(_on_player_recovered)
 		if not health.damage_taken.is_connected(_on_player_damage_taken):
 			health.damage_taken.connect(_on_player_damage_taken)
+		if not health.bleedout_tick.is_connected(_on_bleedout_tick):
+			health.bleedout_tick.connect(_on_bleedout_tick)
+		if not health.downed.is_connected(_on_health_downed):
+			health.downed.connect(_on_health_downed)
+		if not health.revived.is_connected(_on_health_revived):
+			health.revived.connect(_on_health_revived)
 		_on_health_changed(health.current_health, health.max_health)
+
+	if not player.player_downed.is_connected(_on_local_player_downed):
+		player.player_downed.connect(_on_local_player_downed)
+	if not player.player_revived.is_connected(_on_local_player_revived):
+		player.player_revived.connect(_on_local_player_revived)
+	if not player.revive_progress_changed.is_connected(_on_revive_progress_changed):
+		player.revive_progress_changed.connect(_on_revive_progress_changed)
 
 	# Active weapon
 	_update_weapon_display()
 
 
 func _process(delta: float) -> void:
+	if not is_mission_ended:
+		mission_seconds += delta
 	if local_player != null:
 		if operative_label != null and (operative_label.text == "" or operative_label.text.begins_with("OPERATIVE [")):
 			bind_local_player(local_player)
 		_update_weapon_display()
 	_update_damage_vignette(delta)
+
+
+func _on_health_downed() -> void:
+	if local_player != null:
+		_on_local_player_downed(local_player.peer_id)
+
+
+func _on_health_revived() -> void:
+	if local_player != null:
+		_on_local_player_revived(local_player.peer_id)
+
+
+func _on_local_player_downed(_peer_id: int) -> void:
+	if downed_label != null:
+		downed_label.visible = true
+		downed_label.text = "⚠️ DOWNED! BLEEDING OUT (20s) ⚠️"
+
+
+func _on_local_player_revived(_peer_id: int) -> void:
+	if downed_label != null:
+		downed_label.visible = false
+
+
+func _on_bleedout_tick(seconds_left: float) -> void:
+	if downed_label != null and local_player != null and local_player.health_component != null and local_player.health_component.is_downed:
+		downed_label.visible = true
+		downed_label.text = "⚠️ DOWNED! BLEEDING OUT (%ds) ⚠️" % int(ceil(seconds_left))
+
+
+func _on_revive_progress_changed(progress: float) -> void:
+	if revive_bar != null:
+		if progress > 0.0:
+			revive_bar.visible = true
+			revive_bar.value = progress * 100.0
+			if revive_label != null:
+				revive_label.text = "REVIVING SQUADMATE... (%d%%)" % int(progress * 100.0)
+		else:
+			revive_bar.visible = false
 
 
 func _on_player_damage_taken(amount: float, _source: Node, _type: String) -> void:
@@ -190,6 +338,7 @@ func on_wave_started(wave_num: int, enemy_count: int) -> void:
 
 
 func on_jaffa_count_changed(enemies_remaining: int, wave_num: int) -> void:
+	total_kills += 1
 	wave_label.text = "WAVE %d / 3" % wave_num
 	var hostile_type := "JAFFA SHOCK GUARDS" if wave_num == 3 else "JAFFA GUARDS"
 	enemies_label.text = "HOSTILES: %d %s" % [enemies_remaining, hostile_type]
@@ -339,4 +488,42 @@ func _render_glyphs() -> void:
 
 
 func show_victory() -> void:
-	victory_modal.visible = true
+	is_mission_ended = true
+	if pause_menu != null:
+		pause_menu.visible = false
+	if victory_modal != null:
+		victory_modal.visible = true
+	if debrief_title != null:
+		debrief_title.text = "EXTRACTION SUCCESSFUL"
+		debrief_title.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+	_populate_debrief_stats(true)
+
+
+func show_defeat() -> void:
+	is_mission_ended = true
+	if pause_menu != null:
+		pause_menu.visible = false
+	if victory_modal != null:
+		victory_modal.visible = true
+	if debrief_title != null:
+		debrief_title.text = "MISSION FAILED - SGC OVERRUN"
+		debrief_title.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+	if debrief_subtitle != null:
+		debrief_subtitle.text = "SGC LEVEL 28 BREACHED BY GOA'ULD FORCES"
+	_populate_debrief_stats(false)
+
+
+func _populate_debrief_stats(is_victory: bool) -> void:
+	var minutes := int(mission_seconds) / 60
+	var seconds := int(mission_seconds) % 60
+	if stat_time != null:
+		stat_time.text = "MISSION DURATION: %02d:%02d" % [minutes, seconds]
+	if stat_kills != null:
+		stat_kills.text = "HOSTILES ELIMINATED: %d" % total_kills
+	if stat_waves != null:
+		stat_waves.text = "WAVES REPELLED: %s" % ("3 / 3" if is_victory else "PARTIAL")
+	if stat_chevrons != null:
+		stat_chevrons.text = "CHEVRONS LOCKED: %s" % ("7 / 7" if is_victory else "INCOMPLETE")
+	if stat_status != null:
+		stat_status.text = "STATUS: %s" % ("ALL OPERATIVES EXTRACTED" if is_victory else "SQUAD COMPROMISED")
+		stat_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5) if is_victory else Color(1.0, 0.3, 0.3))
