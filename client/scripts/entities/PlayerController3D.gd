@@ -498,7 +498,9 @@ func _update_wall_occlusion() -> void:
 			cur_exclude.append(res.get("rid"))
 			if col is Node:
 				var node: Node = col as Node
-				if node != self and not node.name.begins_with("Floor") and not node.name.begins_with("Sandbag"):
+				# Do not occlude floors below the operative's feet/head or cover sandbags
+				var is_floor_below: bool = node.name.begins_with("Floor") and node.global_position.y <= player_head.y
+				if node != self and not is_floor_below and not node.name.begins_with("Sandbag"):
 					newly_hit[node] = true
 
 	# Fade newly occluded nodes
