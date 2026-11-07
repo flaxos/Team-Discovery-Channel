@@ -20,6 +20,7 @@ signal ammo_changed(current: int, reserve: int)
 @export var is_plasma: bool = false
 @export var is_zat: bool = false
 @export var plasma_speed_mps: float = 35.0
+@export var fire_sound_path: String = "res://audio/sfx_p90.wav"
 
 var current_ammo: int = 50
 var reserve_ammo: int = 250
@@ -27,11 +28,23 @@ var is_reloading: bool = false
 var fire_cooldown: float = 0.0
 
 @onready var muzzle_point: Marker3D = $MuzzlePoint if has_node("MuzzlePoint") else null
+var audio_player: AudioStreamPlayer3D = null
 
 
 func _ready() -> void:
 	current_ammo = mag_capacity
 	reserve_ammo = reserve_capacity
+	_setup_audio()
+
+
+func _setup_audio() -> void:
+	if ResourceLoader.exists(fire_sound_path):
+		audio_player = AudioStreamPlayer3D.new()
+		audio_player.name = "FireAudio"
+		audio_player.stream = load(fire_sound_path)
+		audio_player.max_distance = 50.0
+		audio_player.unit_size = 10.0
+		add_child(audio_player)
 
 
 func _process(delta: float) -> void:
@@ -65,6 +78,9 @@ func try_fire(spread_mult: float = 1.0) -> bool:
 
 
 func _perform_shot(origin: Vector3, dir: Vector3) -> void:
+	if audio_player != null:
+		audio_player.play()
+
 	if is_plasma:
 		var bolt_scene := load("res://scenes/entities/PlasmaBolt.tscn") as PackedScene
 		if bolt_scene != null:

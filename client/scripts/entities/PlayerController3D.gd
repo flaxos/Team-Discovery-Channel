@@ -15,6 +15,7 @@ signal class_configured(class_id: String)
 		class_id = val
 		if is_inside_tree() and weapon_holder != null:
 			_apply_class_profile(val)
+@export var player_callsign: String = "OPERATIVE"
 @export var base_speed: float = 6.0
 @export var sprint_multiplier: float = 1.35
 @export var crouch_multiplier: float = 0.55
@@ -55,6 +56,12 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null and net.peers.has(peer_id):
+		player_callsign = net.peers[peer_id].get("name", "OPERATIVE")
+	elif net != null and peer_id == 1:
+		player_callsign = net.player_name
+
 	_setup_replication()
 	_apply_class_profile(class_id)
 

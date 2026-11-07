@@ -14,3 +14,4 @@ func _init() -> void:
 	reload_time_s = 3.6
 	base_spread_deg = 3.2
 	max_range_m = 60.0
+	fire_sound_path = "res://audio/sfx_m249.wav"

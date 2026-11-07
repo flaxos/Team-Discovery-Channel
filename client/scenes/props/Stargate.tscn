@@ -46,6 +46,10 @@ top_radius = 0.4
 bottom_radius = 2.8
 height = 4.5
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Extraction"]
+height = 1.0
+radius = 3.0
+
 [node name="Stargate" type="Node3D"]
 script = ExtResource("1_sg")
 
@@ -76,6 +80,14 @@ shape = SubResource("CylinderShape3D_Kawoosh")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 2.25)
 visible = false
 mesh = SubResource("CylinderMesh_Vortex")
+
+[node name="ExtractionArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ExtractionArea"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("CylinderShape3D_Extraction")
 
 [node name="Chevrons" type="Node3D" parent="."]
 

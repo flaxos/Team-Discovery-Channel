@@ -15,3 +15,4 @@ func _init() -> void:
 	base_spread_deg = 1.0
 	max_range_m = 30.0
 	is_zat = true
+	fire_sound_path = "res://audio/sfx_zat.wav"

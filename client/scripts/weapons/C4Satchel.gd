@@ -74,3 +74,13 @@ func _spawn_explosion_fx() -> void:
 	tween.tween_property(blast_mesh, "scale", Vector3(2.5, 2.5, 2.5), 0.15)
 	tween.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.15)
 	tween.tween_callback(blast_mesh.queue_free)
+
+	if ResourceLoader.exists("res://audio/sfx_explosion.wav"):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load("res://audio/sfx_explosion.wav")
+		audio.max_distance = 60.0
+		audio.unit_size = 15.0
+		get_tree().root.add_child(audio)
+		audio.global_position = global_position
+		audio.finished.connect(audio.queue_free)
+		audio.play()

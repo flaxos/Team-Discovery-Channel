@@ -46,6 +46,18 @@ func initialize(p_origin: Vector3, p_direction: Vector3, p_shooter: Node, p_is_e
 	else:
 		collision_mask = 1 | 4  # World (1) and Jaffa (3)
 
+	_play_fire_sound()
+
+
+func _play_fire_sound() -> void:
+	if ResourceLoader.exists("res://audio/sfx_staff_fire.wav"):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load("res://audio/sfx_staff_fire.wav")
+		audio.max_distance = 60.0
+		audio.unit_size = 12.0
+		add_child(audio)
+		audio.play()
+
 
 func _on_body_entered(body: Node) -> void:
 	if body == shooter:

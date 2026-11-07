@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/Stargate.tscn" id="3_sg01"]
 [ext_resource type="PackedScene" path="res://scenes/props/DHDConsole.tscn" id="4_dhd01"]
 [ext_resource type="PackedScene" path="res://scenes/props/TransportRings.tscn" id="5_tr01"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6_hud01"]
 
 [sub_resource type="Environment" id="Environment_sgc"]
 background_mode = 1
@@ -218,3 +219,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -13.5)
 
 [node name="WaveManager" type="Node" parent="."]
 script = ExtResource("2_wm01")
+
+[node name="TacticalHUD" parent="." instance=ExtResource("6_hud01")]
