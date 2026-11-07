@@ -462,6 +462,13 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	camera_rig.global_position = target_cam_pos
 
+	# Floor-Aware Camera Elevation: smoothly adjust camera height between L28 (12m) and L27 (17.5m)
+	if camera != null:
+		var target_cam_y: float = 12.0
+		if global_position.y >= 4.5:
+			target_cam_y = 17.5
+		camera.position.y = move_toward(camera.position.y, target_cam_y, 14.0 * delta)
+
 	# 3. Dynamic Wall & Structure Occlusion Fade
 	_update_wall_occlusion()
 
@@ -564,9 +571,21 @@ func _process_aim() -> void:
 		return
 
 	var mouse_pos := get_viewport().get_mouse_position()
-	var ground_plane := Plane(Vector3.UP, global_position.y)
 	var ray_origin := camera.project_ray_origin(mouse_pos)
 	var ray_normal := camera.project_ray_normal(mouse_pos)
+
+	# High-Ground Aiming: when operative is on Level 27 looking down into the Gate Room
+	var target_plane_y: float = global_position.y
+	if global_position.y >= 4.5 and ray_normal.y < -0.1:
+		var arena_plane := Plane(Vector3.UP, 0.0)
+		var arena_hit: Variant = arena_plane.intersects_ray(ray_origin, ray_normal)
+		if arena_hit != null:
+			var hit_pt: Vector3 = arena_hit
+			# If aimed into Gate Room arena in front of Briefing window (Z <= 8.5)
+			if hit_pt.z <= 8.5 and absf(hit_pt.x) <= 18.0:
+				target_plane_y = 0.0
+
+	var ground_plane := Plane(Vector3.UP, target_plane_y)
 	var hit_variant: Variant = ground_plane.intersects_ray(ray_origin, ray_normal)
 	if hit_variant != null:
 		var hit: Vector3 = hit_variant

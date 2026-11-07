@@ -71,7 +71,7 @@ func _process(delta: float) -> bool:
 		# TEST 2: Sector Spatial Coordinate Classification
 		print("[TEST 2/5] Testing Sector Spatial Bounding Coordinate Classification...")
 		assert(gateroom.get_current_sector(Vector3(0, 0, 0)) == GateRoom.SECTOR_GATE_ROOM, "Center must be Gate Room")
-		assert(gateroom.get_current_sector(Vector3(20, 1.0, -4)) == GateRoom.SECTOR_CONTROL_ROOM, "Mezzanine coordinates must be Control Room")
+		assert(gateroom.get_current_sector(Vector3(0, 1.0, 15)) == GateRoom.SECTOR_CONTROL_ROOM, "Mezzanine coordinates directly facing gate must be Control Room")
 		assert(gateroom.get_current_sector(Vector3(0, 0, 30)) == GateRoom.SECTOR_FALLBACK_HALLWAY, "Z=30 must be Fallback Hallway")
 		assert(gateroom.get_current_sector(Vector3(12, 0, 36)) == GateRoom.SECTOR_CONNECTOR_TUNNEL, "X=12, Z=36 must be Connector Tunnel")
 		assert(gateroom.get_current_sector(Vector3(26, 0, 36)) == GateRoom.SECTOR_ROUND_HALLWAY, "X=26, Z=36 must be Round Hallway")
@@ -146,8 +146,8 @@ func _process(delta: float) -> bool:
 		gateroom._process(0.016)
 		assert(last_emitted_sector == GateRoom.SECTOR_ELEVATOR_LOBBY, "Must emit ELEVATOR_LOBBY")
 
-		# Move to Control Room Mezzanine
-		player.global_position = Vector3(20, 1.2, -4)
+		# Move to Control Room Mezzanine (directly in front of Stargate)
+		player.global_position = Vector3(0, 1.2, 15)
 		gateroom._process(0.016)
 		assert(last_emitted_sector == GateRoom.SECTOR_CONTROL_ROOM, "Must emit CONTROL_ROOM")
 

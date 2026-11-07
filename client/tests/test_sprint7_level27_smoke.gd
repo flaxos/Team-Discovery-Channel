@@ -161,28 +161,28 @@ func _process(delta: float) -> bool:
 		# TEST 5: Dynamic Sublevel 27 Sector Classification & Signal Integration
 		print("[TEST 5/5] Testing Sublevel 27 Sector Classification & Navigation Signals...")
 
-		# Move to Briefing Room
-		player.global_position = Vector3(20, 5.5, -4)
+		# Move to Briefing Room (directly overlooking Stargate)
+		player.global_position = Vector3(0, 5.5, 15)
 		gateroom._process(0.016)
 		assert(last_sector == GateRoom.SECTOR_BRIEFING_ROOM, "Must emit BRIEFING_ROOM (got %s)" % last_sector)
 
 		# Move to General's Office
-		player.global_position = Vector3(32, 5.5, -4)
+		player.global_position = Vector3(13, 5.5, 15)
 		gateroom._process(0.016)
 		assert(last_sector == GateRoom.SECTOR_GENERALS_OFFICE, "Must emit GENERALS_OFFICE (got %s)" % last_sector)
 
 		# Move to Security Operations Station
-		player.global_position = Vector3(20, 5.5, -16.5)
+		player.global_position = Vector3(-13, 5.5, 15)
 		gateroom._process(0.016)
 		assert(last_sector == GateRoom.SECTOR_SECURITY_STATION, "Must emit SECURITY_STATION (got %s)" % last_sector)
 
 		# Move to Upper Secure Corridor
-		player.global_position = Vector3(32, 5.5, -15)
+		player.global_position = Vector3(23, 5.5, 15)
 		gateroom._process(0.016)
 		assert(last_sector == GateRoom.SECTOR_UPPER_CORRIDOR, "Must emit UPPER_CORRIDOR (got %s)" % last_sector)
 
 		# Move to Upper Elevator Lobby
-		player.global_position = Vector3(26, 5.5, 18)
+		player.global_position = Vector3(32, 5.5, 18)
 		gateroom._process(0.016)
 		assert(last_sector == GateRoom.SECTOR_UPPER_ELEVATOR_LOBBY, "Must emit UPPER_ELEVATOR_LOBBY (got %s)" % last_sector)
 

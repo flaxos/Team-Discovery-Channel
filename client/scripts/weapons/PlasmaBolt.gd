@@ -36,7 +36,7 @@ func initialize(p_origin: Vector3, p_direction: Vector3, p_shooter: Node, p_is_e
 	is_enemy_bolt = p_is_enemy
 
 	# Orient mesh towards flight direction
-	if direction.length_squared() > 0.001:
+	if is_inside_tree() and direction.length_squared() > 0.001:
 		look_at(global_position + direction, Vector3.UP)
 
 	# Set collision masks based on whether bolt was fired by Jaffa or Player
@@ -61,6 +61,10 @@ func _play_fire_sound() -> void:
 
 func _on_body_entered(body: Node) -> void:
 	if is_instance_valid(shooter) and body == shooter:
+		return
+
+	# Allow high-energy plasma bolts to penetrate observation glass windows
+	if body != null and (body.name.contains("Glass") or body.name.contains("Overlook")):
 		return
 
 	# Apply damage if target has HealthComponent
@@ -91,8 +95,9 @@ func _detonate(impact_point: Vector3) -> void:
 	mat.albedo_color = Color(1.0, 0.6, 0.1, 1.0)
 	spark.material_override = mat
 
-	spark.global_position = impact_point
-	get_parent().add_child(spark)
+	if get_parent() != null:
+		get_parent().add_child(spark)
+		spark.global_position = impact_point
 
 	var tween := spark.create_tween()
 	tween.tween_property(spark, "scale", Vector3(1.8, 1.8, 1.8), 0.08)

@@ -134,24 +134,24 @@ func get_current_sector(pos: Vector3) -> String:
 	# SUBLEVEL 27 SECTORS (Y >= 4.5m)
 	# ==========================================
 	if pos.y >= 4.5:
-		# General Hammond's Office (X: 27 to 38, Z: -11 to 3)
-		if pos.x >= 26.5 and pos.x <= 38.0 and pos.z >= -11.0 and pos.z <= 3.0:
+		# General Hammond's Office (X: 7.0 to 19.5, Z: 7.5 to 22.5)
+		if pos.x >= 7.0 and pos.x <= 19.5 and pos.z >= 7.5 and pos.z <= 22.5:
 			return SECTOR_GENERALS_OFFICE
 
-		# Briefing Room & Gate Overlook (X: 12 to 27, Z: -13 to 5)
-		if pos.x >= 12.0 and pos.x <= 27.0 and pos.z >= -13.0 and pos.z <= 5.0:
+		# Briefing Room & Gate Overlook (X: -7.5 to 7.0, Z: 7.5 to 22.5)
+		if pos.x >= -7.5 and pos.x <= 7.0 and pos.z >= 7.5 and pos.z <= 22.5:
 			return SECTOR_BRIEFING_ROOM
 
-		# Security Operations Station (X: 12 to 27, Z: -22 to -12.5)
-		if pos.x >= 12.0 and pos.x <= 27.0 and pos.z >= -22.0 and pos.z <= -12.5:
+		# Security Operations Station (X: -19.5 to -7.5, Z: 7.5 to 22.5)
+		if pos.x >= -19.5 and pos.x <= -7.5 and pos.z >= 7.5 and pos.z <= 22.5:
 			return SECTOR_SECURITY_STATION
 
-		# Upper Secure Corridor (X: 26.5 to 38, Z: -21 to -10.5)
-		if pos.x >= 26.5 and pos.x <= 38.0 and pos.z >= -21.0 and pos.z <= -10.5:
+		# Upper Secure Corridor (X: 19.5 to 27.0, Z: 10.0 to 20.0)
+		if pos.x >= 19.5 and pos.x <= 27.0 and pos.z >= 10.0 and pos.z <= 20.0:
 			return SECTOR_UPPER_CORRIDOR
 
-		# Level 27 Upper Elevator Lobby (X: 16 to 36, Z: 9 to 27)
-		if pos.x >= 16.0 and pos.x <= 36.0 and pos.z >= 9.0 and pos.z <= 27.0:
+		# Level 27 Upper Elevator Lobby (X: 26.0 to 39.0, Z: 9.0 to 27.0)
+		if pos.x >= 26.0 and pos.x <= 39.0 and pos.z >= 9.0 and pos.z <= 27.0:
 			return SECTOR_UPPER_ELEVATOR_LOBBY
 
 		return "LEVEL_27_MEZZANINE"
@@ -159,36 +159,36 @@ func get_current_sector(pos: Vector3) -> String:
 	# ==========================================
 	# SUBLEVEL 28 SECTORS (Y < 4.5m)
 	# ==========================================
-	# Priority 1: Control Room Mezzanine (raised balcony Y >= 0.3)
-	if pos.x >= 13.5 and pos.x <= 26.5 and pos.z >= -12.5 and pos.z <= 4.5 and pos.y >= 0.3:
+	# Priority 1: Control Room Mezzanine (directly facing gate, raised balcony Y >= 0.3)
+	if pos.x >= -7.5 and pos.x <= 7.5 and pos.z >= 7.5 and pos.z <= 22.5 and pos.y >= 0.3:
 		return SECTOR_CONTROL_ROOM
 
-	# Priority 2: Armory (X: 35 to 54, Z: 27 to 45)
-	if pos.x >= 34.5 and pos.x <= 54.0 and pos.z >= 27.0 and pos.z <= 45.0:
+	# Priority 2: Armory (X: 35 to 55, Z: 24 to 45)
+	if pos.x >= 35.0 and pos.x <= 55.0 and pos.z >= 24.0 and pos.z <= 45.0:
 		return SECTOR_ARMORY
 
-	# Priority 3: Laboratory (X: 16.5 to 35.5, Z: 45 to 66)
-	if pos.x >= 16.5 and pos.x <= 35.5 and pos.z >= 45.0 and pos.z <= 66.0:
+	# Priority 3: Laboratory (X: 17 to 40, Z: 45 to 66)
+	if pos.x >= 17.0 and pos.x <= 40.0 and pos.z >= 45.0 and pos.z <= 66.0:
 		return SECTOR_LABORATORY
 
-	# Priority 4: Elevator Lobby (X: 16.5 to 35.5, Z: 9.5 to 26.5)
-	if pos.x >= 16.5 and pos.x <= 35.5 and pos.z >= 9.5 and pos.z <= 26.5:
+	# Priority 4: Elevator Lobby (X: 17 to 39, Z: 9.5 to 24.0)
+	if pos.x >= 17.0 and pos.x <= 39.0 and pos.z >= 9.5 and pos.z <= 24.0:
 		return SECTOR_ELEVATOR_LOBBY
 
-	# Priority 5: Round Hallway Rotunda (X: 17 to 35, Z: 26.5 to 45)
-	if pos.x >= 17.0 and pos.x <= 35.0 and pos.z >= 26.5 and pos.z <= 45.0:
+	# Priority 5: Round Hallway Rotunda (X: 17 to 37, Z: 24.0 to 45.0)
+	if pos.x >= 17.0 and pos.x <= 37.0 and pos.z >= 24.0 and pos.z <= 45.0:
 		return SECTOR_ROUND_HALLWAY
 
-	# Priority 6: East Connector Tunnel (X: 5.0 to 17.5, Z: 32.0 to 40.0)
-	if pos.x >= 5.0 and pos.x <= 17.5 and pos.z >= 32.0 and pos.z <= 40.0:
+	# Priority 6: East Connector Tunnel (X: 5.0 to 18.0, Z: 32.0 to 40.0)
+	if pos.x >= 5.0 and pos.x <= 18.0 and pos.z >= 32.0 and pos.z <= 40.0:
 		return SECTOR_CONNECTOR_TUNNEL
 
-	# Priority 7: Fallback Defensive Hallway (X: -5.5 to 5.5, Z: 21.5 to 42.5)
-	if pos.x >= -5.5 and pos.x <= 5.5 and pos.z >= 21.5 and pos.z <= 42.5:
+	# Priority 7: Fallback Defensive Hallway (X: -6.0 to 6.0, Z: 22.0 to 42.5)
+	if pos.x >= -6.0 and pos.x <= 6.0 and pos.z >= 22.0 and pos.z <= 42.5:
 		return SECTOR_FALLBACK_HALLWAY
 
-	# Priority 8: Main Gate Room Arena (X: -18.5 to 18.5, Z: -22.5 to 22.5)
-	if pos.x >= -18.5 and pos.x <= 18.5 and pos.z >= -22.5 and pos.z <= 22.5:
+	# Priority 8: Main Gate Room Arena (X: -18.5 to 18.5, Z: -22.5 to 8.0)
+	if pos.x >= -18.5 and pos.x <= 18.5 and pos.z >= -22.5 and pos.z <= 8.0:
 		return SECTOR_GATE_ROOM
 
 	return SECTOR_UNKNOWN

@@ -55,9 +55,9 @@ func _process(delta: float) -> bool:
 		# Test 2: Dynamic Occlusion Transparency
 		print("[TEST 2/3] Testing Dynamic Wall Occlusion Transparency...")
 		# Position player so WallSouthHeader is between camera and player
-		player.global_position = Vector3(0, 0, 16)
-		player.current_aim_target = Vector3(0, 0, 16)
-		player.camera_rig.global_position = Vector3(0, 0, 16)
+		player.global_position = Vector3(0, 0, 2.0)
+		player.current_aim_target = Vector3(0, 0, 2.0)
+		player.camera_rig.global_position = Vector3(0, 0, 2.0)
 
 		# Run occlusion check
 		player._update_wall_occlusion()
@@ -76,8 +76,8 @@ func _process(delta: float) -> bool:
 		# Test 3: Unocclusion Material Restoration
 		print("[TEST 3/3] Testing Wall Material Restoration when leaving occlusion...")
 		# Move player to open area (Z = 0)
-		player.global_position = Vector3(0, 0, 0)
-		player.camera_rig.global_position = Vector3(0, 0, 0)
+		player.global_position = Vector3(0, 0, -10.0)
+		player.camera_rig.global_position = Vector3(0, 0, -10.0)
 		player._update_wall_occlusion()
 
 		var header := gateroom.find_child("WallSouthHeader", true, false) as CSGBox3D
