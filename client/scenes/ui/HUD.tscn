@@ -312,6 +312,12 @@ theme_override_font_sizes/font_size = 13
 text = "EXTRACTION STATUS: CONFIRMED"
 horizontal_alignment = 1
 
+[node name="RestartBtn" type="Button" parent="VictoryModal/VBox"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "RETRY MISSION"
+
 [node name="ReturnBtn" type="Button" parent="VictoryModal/VBox"]
 custom_minimum_size = Vector2(220, 38)
 layout_mode = 2
@@ -387,6 +393,12 @@ custom_minimum_size = Vector2(220, 36)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "RESUME MISSION"
+
+[node name="RestartBtn" type="Button" parent="PauseMenu/VBox"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "RESTART MISSION"
 
 [node name="LobbyBtn" type="Button" parent="PauseMenu/VBox"]
 custom_minimum_size = Vector2(220, 36)

@@ -79,12 +79,13 @@ func input_glyph(direction: String) -> bool:
 			if target_stargate != null:
 				target_stargate.lock_chevron(current_chevron_index)
 
+			chevron_advanced.emit(current_chevron_index, TOTAL_CHEVRONS)
+
 			if current_chevron_index >= TOTAL_CHEVRONS:
 				current_phase = DialPhase.GDO_AUTH
 				phase_changed.emit(current_phase)
 				print("DHD: 7 Chevrons locked! Awaiting 4-beat GDO Iris IDC code...")
 
-			chevron_advanced.emit(current_chevron_index, TOTAL_CHEVRONS)
 			return true
 		else:
 			print("DHD: Incorrect glyph '%s' (expected '%s')! SEQUENCE RESET!" % [direction, expected])

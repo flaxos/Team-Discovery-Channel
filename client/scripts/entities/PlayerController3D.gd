@@ -56,6 +56,9 @@ var max_shake_yaw_deg: float = 1.5
 var max_aim_lead_dist: float = 2.8
 var occluded_nodes: Dictionary = {}
 var is_in_cctv_mode: bool = false
+var is_aiming_down_sights: bool = false
+var ads_blend: float = 0.0
+var current_iso_cam_y: float = 12.0
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -119,6 +122,14 @@ func _ready() -> void:
 	else:
 		if camera != null:
 			camera.current = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_local_authority or is_in_cctv_mode:
+		return
+	if is_aiming_down_sights and event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		rotation.y -= motion.relative.x * 0.003
 
 
 func _setup_replication() -> void:
@@ -333,6 +344,9 @@ func _physics_process(delta: float) -> void:
 
 	# Handle downed / bleedout state
 	if health_component != null and health_component.is_downed:
+		is_aiming_down_sights = false
+		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		if mounted_turret != null:
 			mounted_turret.dismount()
 			mounted_turret = null
@@ -343,12 +357,26 @@ func _physics_process(delta: float) -> void:
 
 	# Handle stunned state
 	if health_component != null and health_component.is_stunned:
+		is_aiming_down_sights = false
+		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		if not is_on_floor():
 			velocity.y -= gravity * delta
 		move_and_slide()
 		return
+
+	# Check Right-Click Aim Down Sights (ADS)
+	var wants_ads: bool = Input.is_action_pressed("aim") and not is_in_cctv_mode
+	is_aiming_down_sights = wants_ads
+
+	if is_local_authority:
+		if Input.is_action_just_pressed("aim") and wants_ads:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		elif Input.is_action_just_released("aim") or not wants_ads:
+			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	# Aiming towards mouse intersection on horizontal plane
 	_process_aim()
@@ -442,36 +470,70 @@ func _update_camera_and_occlusion(delta: float) -> void:
 	if is_in_cctv_mode:
 		return
 
-	# 1. Aim-Lead: offset camera toward aiming reticle for tactical forward vision
+	# Floor-Aware Culling: Show Level 27 complex only when operative is on upper floor (Y >= 4.5m)
+	var l27_node: Node3D = null
+	if get_tree() != null and get_tree().current_scene != null:
+		l27_node = get_tree().current_scene.get_node_or_null("Level27Complex") as Node3D
+	if l27_node == null and get_tree() != null and get_tree().root != null:
+		l27_node = get_tree().root.find_child("Level27Complex", true, false) as Node3D
+	if l27_node != null:
+		l27_node.visible = (global_position.y >= 4.5)
+
+	# Smooth ADS transition weight (0.0 = tactical isometric, 1.0 = over-the-shoulder semi-scoped)
+	var target_ads := 1.0 if is_aiming_down_sights else 0.0
+	ads_blend = move_toward(ads_blend, target_ads, 6.0 * delta)
+
+	# 1. Aim-Lead: offset camera toward aiming reticle for tactical forward vision in isometric mode
 	var aim_lead := Vector3.ZERO
 	if current_aim_target != Vector3.ZERO:
 		var aim_diff := (current_aim_target - global_position)
 		aim_diff.y = 0.0
 		aim_lead = aim_diff.limit_length(max_aim_lead_dist)
 
-	var desired_cam_pos := global_position + aim_lead
+	# In isometric: cam rig tracks player + aim_lead; In ADS: cam rig tracks player center
+	var iso_desired_pos := global_position + aim_lead
+	var ads_desired_pos := global_position
+	var desired_cam_pos := iso_desired_pos.lerp(ads_desired_pos, ads_blend)
 	var target_cam_pos := camera_rig.global_position.lerp(desired_cam_pos, 10.0 * delta)
 
 	# 2. Procedural trauma screen shake
+	var off_yaw: float = 0.0
 	if trauma > 0.0:
 		trauma = maxf(0.0, trauma - 1.8 * delta)
 		var shake_p := trauma * trauma
 		var off_x := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
 		var off_z := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
-		var off_yaw := deg_to_rad((randf() * 2.0 - 1.0) * max_shake_yaw_deg * shake_p)
+		off_yaw = deg_to_rad((randf() * 2.0 - 1.0) * max_shake_yaw_deg * shake_p)
 		target_cam_pos += Vector3(off_x, 0, off_z)
-		camera_rig.rotation.y = off_yaw
-	else:
-		camera_rig.rotation = Vector3.ZERO
 
 	camera_rig.global_position = target_cam_pos
 
-	# Floor-Aware Camera Elevation: smoothly adjust camera height between L28 (12m) and L27 (17.5m)
+	# Rig Yaw: in isometric mode (0.0 rad); in ADS mode follows player yaw rotation.y
+	var target_rig_yaw := lerp_angle(0.0, rotation.y, ads_blend)
+	camera_rig.rotation.y = target_rig_yaw + off_yaw
+
+	# Floor-Aware Camera Elevation: smoothly adjust isometric camera height between L28 (12m) and L27 (17.5m)
+	var target_cam_y: float = 12.0
+	if global_position.y >= 4.5:
+		target_cam_y = 17.5
+	current_iso_cam_y = move_toward(current_iso_cam_y, target_cam_y, 14.0 * delta)
+
 	if camera != null:
-		var target_cam_y: float = 12.0
-		if global_position.y >= 4.5:
-			target_cam_y = 17.5
-		camera.position.y = move_toward(camera.position.y, target_cam_y, 14.0 * delta)
+		# Isometric position: (0, current_iso_cam_y, 7.0)
+		# ADS over-shoulder position: (0.65, 1.85, 2.2)
+		var iso_cam_pos := Vector3(0.0, current_iso_cam_y, 7.0)
+		var ads_cam_pos := Vector3(0.65, 1.85, 2.2)
+		camera.position = iso_cam_pos.lerp(ads_cam_pos, ads_blend)
+
+		# Pitch angle: -60° (tactical isometric) <-> -12° (over-the-shoulder semi-scoped)
+		var iso_pitch := deg_to_rad(-60.0)
+		var ads_pitch := deg_to_rad(-12.0)
+		camera.rotation.x = lerp_angle(iso_pitch, ads_pitch, ads_blend)
+		camera.rotation.y = 0.0
+		camera.rotation.z = 0.0
+
+		# FOV: 55.0° (wide tactical) <-> 42.0° (semi-scoped optical zoom)
+		camera.fov = lerpf(55.0, 42.0, ads_blend)
 
 	# 3. Dynamic Wall & Structure Occlusion Fade
 	_update_wall_occlusion()
@@ -517,7 +579,9 @@ func _update_wall_occlusion() -> void:
 				var node: Node = col as Node
 				# Do not occlude floors below the operative's feet/head or cover sandbags
 				var is_floor_below: bool = node.name.begins_with("Floor") and node.global_position.y <= player_head.y
-				if node != self and not is_floor_below and not node.name.begins_with("Sandbag"):
+				# Do not occlude Level 27 structures when operative is on Level 28
+				var is_l27_upper: bool = global_position.y < 4.5 and (node.name.contains("27") or node.name.begins_with("Briefing") or node.name.begins_with("Office") or node.name.begins_with("Security") or node.name.begins_with("Conference") or node.name.begins_with("Chair"))
+				if node != self and not is_floor_below and not is_l27_upper and not node.name.begins_with("Sandbag"):
 					newly_hit[node] = true
 
 	# Fade newly occluded nodes
@@ -574,6 +638,11 @@ func _process_aim() -> void:
 	if camera == null:
 		return
 
+	if is_aiming_down_sights:
+		# In ADS semi-scoped mode, aim forward along weapon sightline
+		current_aim_target = global_position - global_transform.basis.z * 40.0 + Vector3(0, 1.2, 0)
+		return
+
 	var mouse_pos := get_viewport().get_mouse_position()
 	var ray_origin := camera.project_ray_origin(mouse_pos)
 	var ray_normal := camera.project_ray_normal(mouse_pos)
@@ -622,10 +691,12 @@ func _process_combat() -> void:
 	is_firing = Input.is_action_pressed("fire")
 	if is_firing:
 		var spread_mult: float = 1.0
+		if is_aiming_down_sights:
+			spread_mult *= 0.5  # Precision semi-scoped ADS zoom
 		if is_crouching:
-			spread_mult = 0.5  # Crouching / bipod stabilization
+			spread_mult *= 0.5  # Crouching / bipod stabilization
 		elif velocity.length() > 2.0:
-			spread_mult = 1.8  # Running penalty
+			spread_mult *= 1.8  # Running penalty
 
 		current_weapon.try_fire(spread_mult)
 
@@ -922,6 +993,9 @@ func set_cctv_camera(cam_pos: Vector3, cam_target: Vector3, cam_fov: float) -> v
 
 func clear_cctv_camera() -> void:
 	is_in_cctv_mode = false
+	is_aiming_down_sights = false
+	ads_blend = 0.0
+	current_iso_cam_y = 12.0
 	if camera_rig != null:
 		camera_rig.global_position = global_position
 		camera_rig.rotation = Vector3.ZERO
