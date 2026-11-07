@@ -58,11 +58,33 @@ func _ready() -> void:
 
 func _on_player_child_entered(node: Node) -> void:
 	var player := node as PlayerController3D
-	if player != null and hud != null:
-		# Check if local player
-		var local_id := multiplayer.get_unique_id()
-		if player.name == str(local_id) or (local_id == 1 and player.name == "1"):
-			hud.bind_local_player(player)
+	if player != null:
+		player.player_died.connect(_check_squad_status)
+		player.player_downed.connect(_check_squad_status)
+		player.player_revived.connect(_check_squad_status)
+
+		if hud != null:
+			# Check if local player
+			var local_id := multiplayer.get_unique_id()
+			if player.name == str(local_id) or (local_id == 1 and player.name == "1"):
+				hud.bind_local_player(player)
+
+
+func _check_squad_status(_id: int = 0) -> void:
+	if players_container == null or players_container.get_child_count() == 0:
+		return
+	var any_standing: bool = false
+	for p in players_container.get_children():
+		var player := p as PlayerController3D
+		if player != null and player.health_component != null:
+			if not player.health_component.is_dead and not player.health_component.is_downed:
+				any_standing = true
+				break
+
+	if not any_standing:
+		print("GateRoom: SQUAD WIPED! All operatives neutralized.")
+		if hud != null:
+			hud.show_defeat()
 
 
 func _on_player_extracted(_player: Node) -> void:
