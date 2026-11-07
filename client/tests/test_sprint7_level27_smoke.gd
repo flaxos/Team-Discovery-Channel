@@ -54,8 +54,10 @@ func _process(delta: float) -> bool:
 		var briefing: Node3D = l27.get_node_or_null("BriefingRoom") as Node3D
 		assert(briefing != null, "BriefingRoom sector must exist")
 
-		var overlook_window: MeshInstance3D = briefing.get_node_or_null("BriefingGateRoomOverlook") as MeshInstance3D
+		var overlook_window: Node3D = briefing.get_node_or_null("BriefingGateRoomOverlook") as Node3D
 		assert(overlook_window != null, "Reinforced glass overlook window into Gate Room must exist")
+		if overlook_window is CSGBox3D:
+			assert((overlook_window as CSGBox3D).use_collision, "Overlook window must enforce physical collision")
 
 		var table: CSGBox3D = briefing.get_node_or_null("ConferenceTable") as CSGBox3D
 		assert(table != null and table.use_collision, "Mahogany conference table must exist with collision")
