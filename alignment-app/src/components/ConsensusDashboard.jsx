@@ -109,32 +109,38 @@ export default function ConsensusDashboard({ state, analysis = {}, onSelectQuest
                     {q.title}
                   </h4>
                   <div className="text-xs text-slate-300 mt-1 flex flex-wrap items-center gap-2">
-                    <span className="text-slate-400">Current Leader:</span>
-                    <span className="font-bold text-teal-300 bg-teal-500/10 px-2 py-0.5 rounded">
+                    <span className="text-slate-400">Stack Leader:</span>
+                    <span className="font-bold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
                       {topPick?.title || 'None'}
                     </span>
-                    <span className="text-slate-400">({topPick?.votes?.length || 0} votes)</span>
+                    <span className="text-amber-400 font-mono font-bold">
+                      {topPick?.score || 0} pts
+                    </span>
+                    <span className="text-slate-500 text-[11px]">
+                      ({topPick?.rankCounts?.[1] || 0}x #1 ranks)
+                    </span>
                   </div>
                 </div>
 
                 {/* Voter Visuals */}
                 <div className="flex items-center gap-3">
                   <div className="text-right hidden sm:block">
-                    <span className="text-xs font-mono text-slate-400 block">
-                      {data.sortedOptions[0]?.voteCount} vs {data.sortedOptions[1]?.voteCount || 0}
+                    <span className="text-xs font-mono text-cyan-400 block font-bold">
+                      {data.sortedOptions[0]?.score || 0} pts vs {data.sortedOptions[1]?.score || 0} pts
                     </span>
                   </div>
 
                   <div className="flex items-center -space-x-1">
                     {team.map((member) => {
-                      const votedThisQuestion = q.options.some(opt => opt.votes?.includes(member.id));
+                      const userRankCount = q.userRankings?.[member.id]?.length || 0;
+                      const hasRanked = userRankCount > 0 || q.options.some(opt => opt.votes?.includes(member.id));
                       return (
                         <div
                           key={member.id}
-                          title={`${member.name}: ${votedThisQuestion ? 'Voted' : 'Not voted'}`}
+                          title={`${member.name}: ${hasRanked ? `${userRankCount} options ranked` : 'Not yet ranked'}`}
                           className={`w-7 h-7 rounded-full flex items-center justify-center text-xs border ${
-                            votedThisQuestion 
-                              ? 'border-teal-500/80 bg-slate-800' 
+                            hasRanked 
+                              ? 'border-cyan-500/80 bg-slate-800 ring-1 ring-cyan-500/40' 
                               : 'border-slate-800 bg-slate-900 opacity-40'
                           }`}
                         >

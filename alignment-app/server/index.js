@@ -56,7 +56,77 @@ app.get('/api/state', (req, res) => {
   });
 });
 
-// POST Vote Toggle
+// POST Preferential Stack Ranking
+app.post('/api/rank', (req, res) => {
+  const { questionId, memberId, optionId, action, targetRank, rankings } = req.body;
+  if (!questionId || !memberId) {
+    return res.status(400).json({ error: 'Missing questionId or memberId' });
+  }
+
+  const question = state.questions.find(q => q.id === questionId);
+  if (!question) {
+    return res.status(404).json({ error: 'Question not found' });
+  }
+
+  if (!question.userRankings) {
+    question.userRankings = {};
+  }
+  if (!Array.isArray(question.userRankings[memberId])) {
+    question.userRankings[memberId] = [];
+  }
+
+  const userStack = question.userRankings[memberId];
+
+  if (action === 'set_all') {
+    question.userRankings[memberId] = Array.isArray(rankings) ? rankings : [];
+  } else if (action === 'remove' || action === 'unrank') {
+    question.userRankings[memberId] = userStack.filter(id => id !== optionId);
+  } else if (action === 'move_up') {
+    const idx = userStack.indexOf(optionId);
+    if (idx > 0) {
+      const temp = userStack[idx - 1];
+      userStack[idx - 1] = userStack[idx];
+      userStack[idx] = temp;
+    }
+  } else if (action === 'move_down') {
+    const idx = userStack.indexOf(optionId);
+    if (idx >= 0 && idx < userStack.length - 1) {
+      const temp = userStack[idx + 1];
+      userStack[idx + 1] = userStack[idx];
+      userStack[idx] = temp;
+    }
+  } else if (action === 'set_rank') {
+    const filtered = userStack.filter(id => id !== optionId);
+    const insertIdx = Math.max(0, Math.min((Number(targetRank) || 1) - 1, filtered.length));
+    filtered.splice(insertIdx, 0, optionId);
+    question.userRankings[memberId] = filtered;
+  } else {
+    // Toggle / Add action
+    const existingIdx = userStack.indexOf(optionId);
+    if (existingIdx >= 0) {
+      userStack.splice(existingIdx, 1);
+    } else {
+      userStack.push(optionId);
+    }
+  }
+
+  // Sync opt.votes array for compatibility
+  question.options.forEach(opt => {
+    if (!Array.isArray(opt.votes)) opt.votes = [];
+    const isRanked = (question.userRankings[memberId] || []).includes(opt.id);
+    if (isRanked && !opt.votes.includes(memberId)) {
+      opt.votes.push(memberId);
+    } else if (!isRanked && opt.votes.includes(memberId)) {
+      opt.votes = opt.votes.filter(id => id !== memberId);
+    }
+  });
+
+  saveState();
+  const analysis = analyzeVotes(state);
+  res.json({ success: true, state, analysis });
+});
+
+// POST Vote Toggle (wraps into rank stack)
 app.post('/api/vote', (req, res) => {
   const { questionId, optionId, memberId } = req.body;
   if (!questionId || !optionId || !memberId) {
@@ -68,31 +138,27 @@ app.post('/api/vote', (req, res) => {
     return res.status(404).json({ error: 'Question not found' });
   }
 
-  const targetOption = question.options.find(o => o.id === optionId);
-  if (!targetOption) {
-    return res.status(404).json({ error: 'Option not found' });
-  }
+  if (!question.userRankings) question.userRankings = {};
+  if (!Array.isArray(question.userRankings[memberId])) question.userRankings[memberId] = [];
 
-  if (!Array.isArray(targetOption.votes)) {
-    targetOption.votes = [];
-  }
+  const userStack = question.userRankings[memberId];
+  const existingIdx = userStack.indexOf(optionId);
 
-  const alreadyVoted = targetOption.votes.includes(memberId);
-
-  if (alreadyVoted) {
-    // Unvote
-    targetOption.votes = targetOption.votes.filter(id => id !== memberId);
+  if (existingIdx >= 0) {
+    userStack.splice(existingIdx, 1);
   } else {
-    // If not multiple choice, remove voter's vote from all other options in this question
-    if (!question.allowMultiple) {
-      question.options.forEach(opt => {
-        if (Array.isArray(opt.votes)) {
-          opt.votes = opt.votes.filter(id => id !== memberId);
-        }
-      });
-    }
-    targetOption.votes.push(memberId);
+    userStack.push(optionId);
   }
+
+  question.options.forEach(opt => {
+    if (!Array.isArray(opt.votes)) opt.votes = [];
+    const isRanked = userStack.includes(opt.id);
+    if (isRanked && !opt.votes.includes(memberId)) {
+      opt.votes.push(memberId);
+    } else if (!isRanked && opt.votes.includes(memberId)) {
+      opt.votes = opt.votes.filter(id => id !== memberId);
+    }
+  });
 
   saveState();
   const analysis = analyzeVotes(state);
@@ -175,8 +241,9 @@ app.post('/api/member', (req, res) => {
 app.delete('/api/member/:id', (req, res) => {
   const { id } = req.params;
   state.team = state.team.filter(m => m.id !== id);
-  // Remove any votes by this member
+  // Remove any votes and rankings by this member
   state.questions.forEach(q => {
+    if (q.userRankings) delete q.userRankings[id];
     q.options.forEach(opt => {
       if (Array.isArray(opt.votes)) {
         opt.votes = opt.votes.filter(vId => vId !== id);
@@ -192,6 +259,7 @@ app.post('/api/member/delete', (req, res) => {
   const { id } = req.body;
   state.team = state.team.filter(m => m.id !== id);
   state.questions.forEach(q => {
+    if (q.userRankings) delete q.userRankings[id];
     q.options.forEach(opt => {
       if (Array.isArray(opt.votes)) {
         opt.votes = opt.votes.filter(vId => vId !== id);
@@ -225,6 +293,7 @@ app.post('/api/member/toggle-role', (req, res) => {
 // POST Reset ONLY Votes (Keeping all questions, custom options & members intact)
 app.post('/api/reset-votes', (req, res) => {
   state.questions.forEach(q => {
+    q.userRankings = {};
     q.options.forEach(opt => {
       opt.votes = [];
     });

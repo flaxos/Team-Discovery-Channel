@@ -7,23 +7,32 @@ import {
   Sparkles, 
   Flame, 
   Send, 
-  UserCheck,
+  ChevronUp,
   ChevronDown,
-  ChevronUp
+  X,
+  Award,
+  ListOrdered,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 
 export default function QuestionCard({ 
   question, 
   team = [], 
   activeMemberId, 
-  onVote, 
+  analysis = {}, 
+  onRank, 
   onOpenAddOption, 
   onAddComment 
 }) {
   const [showComments, setShowComments] = useState(false);
   const [commentInput, setCommentInput] = useState('');
 
-  const totalVotesInQuestion = question.options.reduce((acc, opt) => acc + (opt.votes?.length || 0), 0);
+  const qAnalysis = analysis[question.id] || {};
+  const userStack = question.userRankings?.[activeMemberId] || [];
+
+  // Find max score among options for progress bar calculation
+  const maxScore = Math.max(...(qAnalysis.sortedOptions || []).map(o => o.score || 0), 1);
 
   const handleCommentSubmit = (e) => {
     e.preventDefault();
@@ -48,16 +57,39 @@ export default function QuestionCard({
     }
   };
 
+  const getRankBadgeStyle = (rank) => {
+    switch (rank) {
+      case 1:
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-500/20';
+      case 2:
+        return 'bg-slate-300/20 text-slate-200 border-slate-400/50';
+      case 3:
+        return 'bg-orange-500/20 text-orange-300 border-orange-500/40';
+      default:
+        return 'bg-teal-500/15 text-teal-300 border-teal-500/30';
+    }
+  };
+
+  const getRankLabel = (rank) => {
+    switch (rank) {
+      case 1: return '🥇 #1 Preference (3 pts)';
+      case 2: return '🥈 #2 Preference (2 pts)';
+      case 3: return '🥉 #3 Preference (1 pt)';
+      default: return `#${rank} Preference (1 pt)`;
+    }
+  };
+
   return (
-    <div className="glass-panel rounded-2xl p-5 sm:p-6 mb-6 transition-all duration-200">
+    <div className="glass-panel rounded-2xl p-5 sm:p-6 mb-6 transition-all duration-200 border-slate-800">
       {/* Question Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-teal-400 font-mono">
+          <span className="text-xs uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-cyan-400 font-mono">
             {question.categoryName}
           </span>
-          <span className="text-xs text-slate-400 font-mono">
-            {question.allowMultiple ? 'Multi-select' : 'Single Choice'}
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25 font-mono flex items-center gap-1 font-semibold">
+            <ListOrdered className="w-3 h-3" />
+            <span>Stack-Ranked Preferences</span>
           </span>
         </div>
 
@@ -73,36 +105,87 @@ export default function QuestionCard({
       <h3 className="text-lg sm:text-xl font-bold text-white mb-1.5">
         {question.title}
       </h3>
-      <p className="text-sm text-slate-300 mb-5 leading-relaxed">
+      <p className="text-sm text-slate-300 mb-4 leading-relaxed">
         {question.subtitle}
       </p>
+
+      {/* Active Voter's Preference Stack Bar */}
+      <div className="mb-5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/90 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+          <span className="font-mono text-slate-400 flex items-center gap-1.5 font-bold">
+            <Award className="w-3.5 h-3.5 text-amber-400" />
+            <span>Your Preference Stack ({userStack.length} ranked):</span>
+          </span>
+          <span className="text-[11px] text-slate-500 font-mono">
+            1st = 3 pts • 2nd = 2 pts • 3rd = 1 pt
+          </span>
+        </div>
+
+        {userStack.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {userStack.map((optId, idx) => {
+              const opt = question.options.find(o => o.id === optId);
+              if (!opt) return null;
+              const rank = idx + 1;
+              return (
+                <div 
+                  key={optId} 
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-medium ${getRankBadgeStyle(rank)}`}
+                >
+                  <span className="font-bold">{rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'} #{rank}</span>
+                  <span className="truncate max-w-[140px] sm:max-w-[200px] text-white">{opt.title}</span>
+                  <button
+                    onClick={() => onRank(question.id, optId, 'remove')}
+                    title="Remove from stack"
+                    className="hover:text-rose-400 transition ml-1"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-slate-400 italic">
+            No options ranked yet. Click <strong>"Rank #1"</strong> or <strong>"+ Add to Stack"</strong> on the choices below to build your preferential stack!
+          </p>
+        )}
+      </div>
 
       {/* Options Grid */}
       <div className="space-y-3.5">
         {question.options.map((opt) => {
-          const votes = opt.votes || [];
-          const hasVoted = votes.includes(activeMemberId);
-          const votePercentage = totalVotesInQuestion > 0 
-            ? Math.round((votes.length / Math.max(team.length, 1)) * 100) 
-            : 0;
+          const userRank = userStack.indexOf(opt.id) + 1; // 0 if unranked
+          const isRankedByUser = userRank > 0;
+
+          // Find stats from analysis
+          const optStats = qAnalysis.sortedOptions?.find(o => o.id === opt.id);
+          const score = optStats?.score || 0;
+          const voterRanks = optStats?.voterRanks || [];
+          const isLeader = qAnalysis.topPick?.id === opt.id && score > 0;
+          const scorePercent = maxScore > 0 ? Math.round((score / (Math.max(team.length, 1) * 3)) * 100) : 0;
 
           return (
             <div
               key={opt.id}
-              onClick={() => onVote(question.id, opt.id)}
-              className={`relative rounded-xl p-4 sm:p-5 border cursor-pointer transition-all duration-150 ${
-                hasVoted
-                  ? 'bg-slate-900/90 border-teal-500/60 shadow-lg shadow-teal-500/10 ring-1 ring-teal-500/40'
+              className={`relative rounded-xl p-4 sm:p-5 border transition-all duration-150 ${
+                isRankedByUser
+                  ? 'bg-slate-900/90 border-cyan-500/60 shadow-lg shadow-cyan-500/10 ring-1 ring-cyan-500/30'
                   : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-700 hover:bg-slate-850/60'
               }`}
             >
               {/* Top row of Option */}
-              <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className="font-bold text-base text-white">
                       {opt.title}
                     </span>
+                    {isLeader && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold flex items-center gap-1">
+                        <span>👑 Squad #1 Leader</span>
+                      </span>
+                    )}
                     {opt.isCustom && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 font-medium">
                         💡 Community Idea
@@ -119,28 +202,65 @@ export default function QuestionCard({
                   </p>
                 </div>
 
-                {/* Vote Action Button */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onVote(question.id, opt.id);
-                  }}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex-shrink-0 ${
-                    hasVoted
-                      ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
-                      : 'bg-slate-800 text-slate-300 hover:bg-teal-500/20 hover:text-teal-300 border border-slate-700'
-                  }`}
-                >
-                  {hasVoted ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      <span>Voted</span>
-                    </>
+                {/* Stack Ranking Action Controls */}
+                <div className="flex items-center gap-1.5 flex-shrink-0 self-start sm:self-auto">
+                  {isRankedByUser ? (
+                    <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-cyan-500/40">
+                      <span className={`text-xs px-2.5 py-1 rounded-lg font-bold border ${getRankBadgeStyle(userRank)}`}>
+                        {getRankLabel(userRank)}
+                      </span>
+
+                      {/* Move Up/Down Controls */}
+                      <button
+                        type="button"
+                        onClick={() => onRank(question.id, opt.id, 'move_up')}
+                        disabled={userRank <= 1}
+                        title="Bump up in your preference stack"
+                        className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 transition"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onRank(question.id, opt.id, 'move_down')}
+                        disabled={userRank >= userStack.length}
+                        title="Bump down in your preference stack"
+                        className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 transition"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onRank(question.id, opt.id, 'remove')}
+                        title="Remove from your stack"
+                        className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   ) : (
-                    <span>Vote</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onRank(question.id, opt.id, 'set_rank', 1)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition shadow-sm"
+                      >
+                        <span>🥇 Rank #1</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onRank(question.id, opt.id, 'add')}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300 border border-slate-700 transition"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Add to Stack</span>
+                      </button>
+                    </div>
                   )}
-                </button>
+                </div>
               </div>
 
               {/* Pros & Caution details */}
@@ -161,40 +281,48 @@ export default function QuestionCard({
                 </div>
               )}
 
-              {/* Vote Bar & Voter Badges */}
-              <div className="mt-3.5 flex items-center justify-between gap-3">
+              {/* Squad Preferential Score Bar & Voter Rank Badges */}
+              <div className="mt-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-800/40">
                 <div className="flex-1">
+                  <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+                    <span className="flex items-center gap-1 font-bold text-slate-200">
+                      <span>Squad Score:</span>
+                      <span className="text-cyan-400 font-bold">{score} pts</span>
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      {voterRanks.length} {voterRanks.length === 1 ? 'squad member ranked' : 'squad members ranked'}
+                    </span>
+                  </div>
                   <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${
-                        hasVoted ? 'bg-gradient-to-r from-teal-500 to-emerald-400' : 'bg-slate-600'
+                        isLeader 
+                          ? 'bg-gradient-to-r from-amber-400 via-cyan-400 to-teal-300' 
+                          : isRankedByUser 
+                            ? 'bg-gradient-to-r from-cyan-500 to-teal-400' 
+                            : 'bg-slate-600'
                       }`}
-                      style={{ width: `${Math.min(votePercentage, 100)}%` }}
+                      style={{ width: `${Math.min(scorePercent, 100)}%` }}
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs font-mono text-slate-400">
-                    {votes.length} {votes.length === 1 ? 'vote' : 'votes'}
-                  </span>
-                  
-                  {/* Avatars */}
-                  <div className="flex items-center -space-x-1.5">
-                    {votes.map((voterId) => {
-                      const member = team.find(t => t.id === voterId);
-                      return (
-                        <div
-                          key={voterId}
-                          title={member ? `${member.name} voted for this` : voterId}
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-xs border border-slate-900 bg-slate-800 shadow-sm"
-                          style={{ borderColor: member?.color || '#14b8a6' }}
-                        >
-                          {member?.avatar || '👤'}
-                        </div>
-                      );
-                    })}
-                  </div>
+                {/* Squad Members who ranked this */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {voterRanks.map((vr) => (
+                    <div
+                      key={vr.memberId}
+                      title={`${vr.memberName} ranked this #${vr.rank} (${vr.points} pts)`}
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/80 border border-slate-700/80 text-[11px] font-mono shadow-sm"
+                    >
+                      <span>{vr.memberAvatar}</span>
+                      <span style={{ color: vr.memberColor }}>{vr.memberName}</span>
+                      <span className="font-bold text-amber-400">#{vr.rank}</span>
+                    </div>
+                  ))}
+                  {voterRanks.length === 0 && (
+                    <span className="text-[11px] font-mono text-slate-600 italic">Unranked</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -257,7 +385,7 @@ export default function QuestionCard({
               <button
                 type="submit"
                 disabled={!commentInput.trim()}
-                className="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 disabled:opacity-40 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1 transition"
+                className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-40 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1 transition"
               >
                 <Send className="w-3 h-3" />
                 <span>Post</span>

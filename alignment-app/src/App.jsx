@@ -83,13 +83,19 @@ export default function App() {
     fetchState();
   }, []);
 
-  // Handle vote toggle
-  const handleVote = async (questionId, optionId) => {
+  // Handle preferential stack ranking
+  const handleRank = async (questionId, optionId, action, targetRank) => {
     try {
-      const res = await fetch('/api/vote', {
+      const res = await fetch('/api/rank', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId, optionId, memberId: activeMemberId })
+        body: JSON.stringify({
+          questionId,
+          optionId,
+          action,
+          targetRank,
+          memberId: activeMemberId
+        })
       });
       if (res.ok) {
         const data = await res.json();
@@ -98,8 +104,13 @@ export default function App() {
         fetchCompiled();
       }
     } catch (err) {
-      console.error('Vote error:', err);
+      console.error('Rank error:', err);
     }
+  };
+
+  // Handle vote toggle (fallback)
+  const handleVote = async (questionId, optionId) => {
+    handleRank(questionId, optionId, 'toggle');
   };
 
   // Handle proposing custom option ("Other")
@@ -379,6 +390,8 @@ export default function App() {
                   question={q}
                   team={state.team}
                   activeMemberId={activeMemberId}
+                  analysis={analysis}
+                  onRank={handleRank}
                   onVote={handleVote}
                   onOpenAddOption={(question) => setAddOptionTargetQuestion(question)}
                   onAddComment={handleAddComment}

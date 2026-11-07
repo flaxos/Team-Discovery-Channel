@@ -1,29 +1,112 @@
 // Stargate SG-1 & SG-3 Tactical Extraction Shooter - Compiler Engine
-// Synthesizes votes, custom ideas, and squad roles into production-ready prompts and specs
+// Synthesizes preferential stack-ranked votes, custom ideas, and squad roles
+
+function getRankPoints(rank) {
+  switch (rank) {
+    case 1: return 3; // 1st Preference = 3 points
+    case 2: return 2; // 2nd Preference = 2 points
+    case 3: return 1; // 3rd Preference = 1 point
+    default: return 1;
+  }
+}
 
 function analyzeVotes(state) {
   const summary = {};
   
   state.questions.forEach((q) => {
-    // Sort options by vote count descending
-    const sortedOptions = [...q.options].map(opt => ({
-      ...opt,
-      voteCount: (opt.votes || []).length,
-      voterNames: (opt.votes || []).map(vId => {
-        const m = state.team.find(t => t.id === vId);
-        return m ? m.name : vId;
-      })
-    })).sort((a, b) => b.voteCount - a.voteCount);
+    const userRankings = q.userRankings || {};
 
-    const maxVotes = sortedOptions[0] ? sortedOptions[0].voteCount : 0;
-    const winners = sortedOptions.filter(o => o.voteCount === maxVotes && o.voteCount > 0);
-    const runnerUps = sortedOptions.filter(o => o.voteCount < maxVotes && o.voteCount > 0);
+    // Build voter ranks map for each option
+    const optionStats = {};
+    q.options.forEach((opt) => {
+      optionStats[opt.id] = {
+        score: 0,
+        rankCounts: { 1: 0, 2: 0, 3: 0 },
+        voterRanks: []
+      };
+    });
+
+    // Process explicit userRankings: { [memberId]: [optId1, optId2, optId3] }
+    Object.entries(userRankings).forEach(([memberId, rankedList]) => {
+      if (!Array.isArray(rankedList)) return;
+      const member = state.team.find(t => t.id === memberId);
+      const memberName = member ? member.name : memberId;
+      const memberAvatar = member ? member.avatar : '👤';
+      const memberColor = member ? member.color : '#14b8a6';
+
+      rankedList.forEach((optId, idx) => {
+        const rank = idx + 1;
+        const pts = getRankPoints(rank);
+        if (optionStats[optId]) {
+          optionStats[optId].score += pts;
+          if (optionStats[optId].rankCounts[rank] !== undefined) {
+            optionStats[optId].rankCounts[rank] += 1;
+          }
+          optionStats[optId].voterRanks.push({
+            memberId,
+            memberName,
+            memberAvatar,
+            memberColor,
+            rank,
+            points: pts
+          });
+        }
+      });
+    });
+
+    // Fallback: If no userRankings exist yet but legacy opt.votes exist, treat as Rank 1
+    if (Object.keys(userRankings).length === 0) {
+      q.options.forEach((opt) => {
+        if (Array.isArray(opt.votes)) {
+          opt.votes.forEach((memberId) => {
+            const member = state.team.find(t => t.id === memberId);
+            optionStats[opt.id].score += 3;
+            optionStats[opt.id].rankCounts[1] += 1;
+            optionStats[opt.id].voterRanks.push({
+              memberId,
+              memberName: member ? member.name : memberId,
+              memberAvatar: member ? member.avatar : '👤',
+              memberColor: member ? member.color : '#14b8a6',
+              rank: 1,
+              points: 3
+            });
+          });
+        }
+      });
+    }
+
+    // Sort options by score descending; tiebreak on #1 ranks, then #2 ranks
+    const sortedOptions = [...q.options].map(opt => {
+      const stats = optionStats[opt.id] || { score: 0, rankCounts: { 1: 0, 2: 0, 3: 0 }, voterRanks: [] };
+      return {
+        ...opt,
+        score: stats.score,
+        rankCounts: stats.rankCounts,
+        voterRanks: stats.voterRanks.sort((a, b) => a.rank - b.rank),
+        voteCount: stats.voterRanks.length,
+        voterNames: stats.voterRanks.map(v => `${v.memberName} (#${v.rank})`)
+      };
+    }).sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if ((b.rankCounts[1] || 0) !== (a.rankCounts[1] || 0)) {
+        return (b.rankCounts[1] || 0) - (a.rankCounts[1] || 0);
+      }
+      return (b.rankCounts[2] || 0) - (a.rankCounts[2] || 0);
+    });
+
+    const maxScore = sortedOptions[0] ? sortedOptions[0].score : 0;
+    const winners = sortedOptions.filter(o => o.score === maxScore && o.score > 0);
+    const runnerUps = sortedOptions.filter(o => o.score < maxScore && o.score > 0);
+
+    const totalVoters = Object.keys(userRankings).length || Math.max(state.team.length, 1);
+    const isConsensus = winners.length === 1 && (winners[0].score >= totalVoters * 2);
 
     summary[q.id] = {
       question: q,
+      userRankings,
       sortedOptions,
       topPick: winners[0] || sortedOptions[0],
-      isConsensus: winners.length === 1 && (winners[0].voteCount >= Math.ceil(state.team.length / 2)),
+      isConsensus,
       isTie: winners.length > 1,
       winners,
       runnerUps

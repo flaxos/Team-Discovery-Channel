@@ -91,7 +91,8 @@
           "text": "Isometric / Top-Down 3D lets us build stealth vision cones, C4 traps, and transport rings 5x faster without getting bogged down in animation blending!",
           "timestamp": "2026-11-07T10:00:00.000Z"
         }
-      ]
+      ],
+      "userRankings": {}
     },
     {
       "id": "q_stealth_to_loud_loop",
@@ -138,7 +139,8 @@
           "votes": []
         }
       ],
-      "comments": []
+      "comments": [],
+      "userRankings": {}
     },
     {
       "id": "q_mission_types",
@@ -204,7 +206,8 @@
           "text": "Starting with Outpost Sabotage + Iris Defense gives us both an extraction mode AND an awesome wave mode using the exact same weapons and Jaffa AI!",
           "timestamp": "2026-11-07T10:05:00.000Z"
         }
-      ]
+      ],
+      "userRankings": {}
     },
     {
       "id": "q_class_archetypes",
@@ -263,7 +266,8 @@
           "votes": []
         }
       ],
-      "comments": []
+      "comments": [],
+      "userRankings": {}
     },
     {
       "id": "q_signature_mechanics",
@@ -341,7 +345,8 @@
           "text": "The DHD 7-chevron dial under fire and the 2-shot Zat body vaporize mechanic are absolute must-haves!",
           "timestamp": "2026-11-07T10:10:00.000Z"
         }
-      ]
+      ],
+      "userRankings": {}
     },
     {
       "id": "q_engine_choice",
@@ -388,7 +393,8 @@
           "votes": []
         }
       ],
-      "comments": []
+      "comments": [],
+      "userRankings": {}
     },
     {
       "id": "q_visual_art_style",
@@ -435,7 +441,8 @@
           "votes": []
         }
       ],
-      "comments": []
+      "comments": [],
+      "userRankings": {}
     },
     {
       "id": "q_grounding_timeframe",
@@ -481,7 +488,8 @@
           "votes": []
         }
       ],
-      "comments": []
+      "comments": [],
+      "userRankings": {}
     },
     {
       "id": "q_division_of_labor",
@@ -556,7 +564,8 @@
           "text": "I can lead the AI agent tooling and pair with Scotty on netcode, P90 recoil, and Stargate portal shaders!",
           "timestamp": "2026-11-07T10:15:00.000Z"
         }
-      ]
+      ],
+      "userRankings": {}
     }
   ]
 }
