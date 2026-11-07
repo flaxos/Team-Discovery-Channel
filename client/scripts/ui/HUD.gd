@@ -419,6 +419,12 @@ func on_iris_malfunction() -> void:
 		objective_label.text = "UNAUTHORIZED INCOMING WORMHOLE! TRINIUM IRIS JAMMED AT 0%!"
 
 
+func update_objective(text: String, color: Color = Color.WHITE) -> void:
+	if objective_label != null:
+		objective_label.text = text
+		objective_label.add_theme_color_override("font_color", color)
+
+
 func on_lab_patch_objective_started() -> void:
 	if wave_label != null:
 		wave_label.text = "DIALING BUFFER LOCKED!"

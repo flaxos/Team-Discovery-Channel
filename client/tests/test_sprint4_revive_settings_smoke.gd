@@ -54,8 +54,8 @@ func _process(delta: float) -> bool:
 		assert(player_a.health_component.can_be_downed, "Player HealthComponent must have can_be_downed = true")
 		assert(not player_a.health_component.is_downed, "Player must start standing")
 
-		# Apply lethal bullet damage
-		player_a.health_component.take_damage(200.0, null, "bullet")
+		# Apply lethal bullet damage (500.0 overcomes potential 65% cover mitigation)
+		player_a.health_component.take_damage(500.0, null, "bullet")
 
 		assert(player_a.health_component.is_downed, "Operative must enter is_downed state on lethal non-vaporizing damage")
 		assert(not player_a.health_component.is_dead, "Operative must not be dead while bleeding out")
@@ -95,8 +95,8 @@ func _process(delta: float) -> bool:
 	elif step == 2 and ticks == 9:
 		print("[TEST 3/5] Testing Squad Wipe Defeat Condition...")
 		# Down both operatives so no one is standing
-		player_a.health_component.take_damage(200.0, null, "bullet")
-		player_b.health_component.take_damage(200.0, null, "bullet")
+		player_a.health_component.take_damage(500.0, null, "bullet")
+		player_b.health_component.take_damage(500.0, null, "bullet")
 
 		assert(player_a.health_component.is_downed and player_b.health_component.is_downed, "Both operatives must be downed")
 

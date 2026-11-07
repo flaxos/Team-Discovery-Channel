@@ -5,9 +5,9 @@ extends Area3D
 
 signal exploded(impact_point: Vector3)
 
-@export var speed: float = 40.0
-@export var damage: float = 45.0
-@export var max_lifetime_s: float = 4.0
+@export var speed: float = 22.0
+@export var damage: float = 55.0
+@export var max_lifetime_s: float = 5.0
 @export var is_enemy_bolt: bool = true
 
 var shooter: Node = null

@@ -26,7 +26,7 @@ const MAX_BLEEDOUT_TIME: float = 20.0
 
 var zat_hits: int = 0
 var zat_window_timer: float = 0.0
-const ZAT_WINDOW_DURATION: float = 25.0
+const ZAT_WINDOW_DURATION: float = 8.0
 const ZAT_STUN_DURATION: float = 20.0
 
 
@@ -74,19 +74,16 @@ func take_damage(amount: float, source: Node = null, damage_type: String = "bull
 	health_changed.emit(current_health, max_health)
 
 	if current_health <= 0.0 and not is_dead:
-		if can_be_downed and not is_downed and damage_type != "kawoosh_vortex" and damage_type != "zat_vaporize":
+		if can_be_downed and not is_downed and damage_type != "kawoosh_vortex" and damage_type != "zat_vaporize" and damage_type != "zat_kill":
 			is_downed = true
 			is_stunned = false
 			bleedout_timer = MAX_BLEEDOUT_TIME
 			current_health = 0.0
 			downed.emit()
-		elif not is_downed:
-			is_dead = true
-			is_stunned = false
-			died.emit()
-		elif is_downed and damage_type == "kawoosh_vortex":
+		elif not is_downed or damage_type == "zat_kill" or damage_type == "kawoosh_vortex":
 			is_downed = false
 			is_dead = true
+			is_stunned = false
 			died.emit()
 
 
@@ -120,6 +117,12 @@ func apply_zat_shot(source: Node = null) -> void:
 			# 2nd shot: Kill
 			zat_hits = 2
 			take_damage(current_health + 50.0, source, "zat_kill")
+		else:
+			# 3rd shot: Vaporization
+			zat_hits = 3
+			is_dead = true
+			is_downed = false
+			vaporized.emit()
 	else:
 		# Already dead: 3rd shot vaporizes
 		zat_hits = 3

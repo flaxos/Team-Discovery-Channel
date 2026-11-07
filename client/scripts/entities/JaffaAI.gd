@@ -13,8 +13,8 @@ enum State { ADVANCE, COMBAT, MELEE, STUNNED, DEAD }
 @export var move_speed: float = 4.2
 @export var combat_range: float = 22.0
 @export var melee_range: float = 2.2
-@export var plasma_damage: float = 35.0
-@export var fire_interval_s: float = 2.0
+@export var plasma_damage: float = 45.0
+@export var fire_interval_s: float = 2.8
 @export var staff_accuracy_spread_deg: float = 3.5
 
 var current_state: State = State.ADVANCE

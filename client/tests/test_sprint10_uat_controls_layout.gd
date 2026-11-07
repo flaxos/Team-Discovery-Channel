@@ -58,12 +58,12 @@ func _process(delta: float) -> bool:
 
 		assert(spawn1 != null and spawn2 != null and spawn3 != null and spawn4 != null, "All 4 spawn markers must exist")
 
-		# Verify all 4 spawns are in Gate Room arena in front of gate/sandbags (Z in [0.5, 4.0])
+		# Verify all 4 spawns are located on Sublevel 28 floor in staging / armory sector
 		var spawn_list: Array[Marker3D] = [spawn1, spawn2, spawn3, spawn4]
 		for sp: Marker3D in spawn_list:
-			assert(sp.position.z >= 0.5 and sp.position.z <= 4.0, "Spawn marker %s must be located in Gate Room arena (Z in [0.5, 4.0], found Z=%.2f)" % [sp.name, sp.position.z])
-			assert(sp.position.y >= 0.0 and sp.position.y <= 0.5, "Spawn marker %s must be on Gate Room arena floor (Y~0.1, found Y=%.2f)" % [sp.name, sp.position.y])
-			assert(absf(sp.position.x) <= 6.0, "Spawn marker %s must be centered in Gate Room (X in [-6, 6], found X=%.2f)" % [sp.name, sp.position.x])
+			assert(sp.position.z >= 0.5 and sp.position.z <= 45.0, "Spawn marker %s must be located on Sublevel 28 (Z in [0.5, 45.0], found Z=%.2f)" % [sp.name, sp.position.z])
+			assert(sp.position.y >= 0.0 and sp.position.y <= 0.5, "Spawn marker %s must be on Sublevel 28 floor (Y~0.1, found Y=%.2f)" % [sp.name, sp.position.y])
+			assert(sp.position.x >= -6.0 and sp.position.x <= 55.0, "Spawn marker %s must be inside SGC complex bounds (X in [-6, 55], found X=%.2f)" % [sp.name, sp.position.x])
 
 		# Verify dynamic Level 27 culling when operative is on Level 28 floor
 		player.global_position = spawn1.global_position

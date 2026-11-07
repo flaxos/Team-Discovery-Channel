@@ -7,8 +7,8 @@ extends WeaponBase
 func _init() -> void:
 	weapon_id = "staff_weapon"
 	display_name = "Ma'Tok Staff Weapon"
-	damage = 75.0
-	fire_rate_rpm = 120.0
+	damage = 90.0
+	fire_rate_rpm = 70.0
 	mag_capacity = 25
 	reserve_capacity = 100
 	reload_time_s = 2.5
