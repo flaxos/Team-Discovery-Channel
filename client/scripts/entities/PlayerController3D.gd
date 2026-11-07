@@ -7,6 +7,11 @@ extends CharacterBody3D
 const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
 const LabDataPatchDriveScript = preload("res://scripts/props/LabDataPatchDrive.gd")
 const IrisServoHousingScript = preload("res://scripts/props/IrisServoHousing.gd")
+const DeployableShieldScene = preload("res://scenes/props/DeployableShield.tscn")
+const DeployableShieldScript = preload("res://scripts/props/DeployableShield.gd")
+const SmokeGrenadeScene = preload("res://scenes/weapons/SmokeGrenade.tscn")
+const SmokeGrenadeScript = preload("res://scripts/weapons/SmokeGrenade.gd")
+const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
 
 signal player_died(peer_id: int)
 signal player_downed(peer_id: int)
@@ -72,6 +77,11 @@ var cover_detection_distance: float = 1.35
 var is_dragging_body: bool = false
 var dragged_body: CharacterBody3D = null
 const DRAG_SPEED: float = 3.2
+var deployable_shields_count: int = 1
+const MAX_DEPLOYABLE_SHIELDS: int = 1
+var smoke_grenades_count: int = 2
+const MAX_SMOKE_GRENADES: int = 2
+var q_press_time_ms: int = 0
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -143,13 +153,31 @@ func _unhandled_input(event: InputEvent) -> void:
 	if is_aiming_down_sights and event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		rotation.y -= motion.relative.x * 0.003
-	elif event is InputEventKey and event.pressed and not event.echo:
+	elif event is InputEventKey:
 		var key_event := event as InputEventKey
-		if key_event.keycode == KEY_G:
-			_toggle_drag_body()
-		elif key_event.keycode == KEY_C:
-			auto_cover_enabled = not auto_cover_enabled
-			print("Player %d auto-cover toggled: %s" % [peer_id, auto_cover_enabled])
+		if key_event.pressed and not key_event.echo:
+			if key_event.keycode == KEY_G:
+				_toggle_drag_body()
+			elif key_event.keycode == KEY_C:
+				auto_cover_enabled = not auto_cover_enabled
+				print("Player %d auto-cover toggled: %s" % [peer_id, auto_cover_enabled])
+			elif key_event.keycode == KEY_Q:
+				q_press_time_ms = Time.get_ticks_msec()
+			elif key_event.keycode == KEY_4:
+				deploy_shield()
+			elif key_event.keycode == KEY_5:
+				throw_smoke_grenade()
+		elif not key_event.pressed:
+			if key_event.keycode == KEY_Q:
+				var elapsed := Time.get_ticks_msec() - q_press_time_ms
+				if elapsed >= 600:
+					issue_squad_regroup()
+				else:
+					_try_issue_squad_ping()
+	elif event is InputEventMouseButton and event.pressed:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_MIDDLE:
+			_try_issue_squad_ping()
 
 
 func _setup_replication() -> void:
@@ -1141,6 +1169,162 @@ func _find_nearby_drag_target() -> CharacterBody3D:
 						best_target = body
 
 	return best_target
+
+
+func _try_issue_squad_ping() -> void:
+	if not is_inside_tree() or get_viewport() == null:
+		return
+	var mouse_pos := get_viewport().get_mouse_position()
+	var cam := camera if (camera != null and camera.current) else get_viewport().get_camera_3d()
+	if cam == null:
+		var forward_pos := global_position - global_transform.basis.z * 6.0
+		issue_squad_command(forward_pos)
+		return
+
+	var from := cam.project_ray_origin(mouse_pos)
+	var dir := cam.project_ray_normal(mouse_pos)
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return
+	var query := PhysicsRayQueryParameters3D.create(from, from + dir * 100.0)
+	query.collision_mask = 1 | 2 | 4  # World, players/allies, enemies
+	var hit := space.intersect_ray(query)
+	if not hit.is_empty():
+		var hit_pos: Vector3 = hit["position"]
+		var collider: Node = hit.get("collider") as Node
+		issue_squad_command(hit_pos, collider)
+	else:
+		var plane := Plane(Vector3.UP, 0.0)
+		var hit_pt: Variant = plane.intersects_ray(from, dir)
+		if hit_pt != null:
+			issue_squad_command(hit_pt as Vector3, null)
+
+
+func issue_squad_command(hit_pos: Vector3, target_node: Node = null) -> void:
+	var airman := _find_nearest_active_airman()
+	if airman == null:
+		print("Player %d: No active SGC Airmen available to receive orders!" % peer_id)
+		return
+
+	if target_node != null:
+		# Check if target is a DeployableTurret
+		var turret := target_node as DeployableTurret
+		if turret == null and target_node.has_node("DeployableTurret"):
+			turret = target_node.get_node("DeployableTurret") as DeployableTurret
+		if turret != null:
+			airman.order_mount_turret(turret)
+			_spawn_command_ping_fx(turret.global_position, Color(1.0, 0.85, 0.2))
+			return
+
+		# Check if target is a downed ally or squadmate
+		var body := target_node as CharacterBody3D
+		if body != null:
+			var hc := body.get_node_or_null("HealthComponent") as HealthComponent
+			if hc != null and hc.is_downed:
+				airman.order_revive(body)
+				_spawn_command_ping_fx(body.global_position, Color(0.2, 1.0, 0.4))
+				return
+
+	# Move / Take cover at pinged position
+	airman.order_move_to(hit_pos)
+	_spawn_command_ping_fx(hit_pos, Color(0.2, 0.8, 1.0))
+
+
+func issue_squad_regroup() -> void:
+	var allies := get_tree().root.find_child("Allies", true, false)
+	if allies != null:
+		for child in allies.get_children():
+			var airman := child as SGCAirmanAIScript
+			if airman != null and airman.health_component != null and not airman.health_component.is_dead and not airman.health_component.is_downed:
+				airman.order_regroup(self)
+	_spawn_command_ping_fx(global_position, Color(0.4, 0.6, 1.0))
+	print("Player %d ordered ALL SGC Airmen to REGROUP!" % peer_id)
+
+
+func _find_nearest_active_airman() -> SGCAirmanAIScript:
+	var allies := get_tree().root.find_child("Allies", true, false)
+	if allies == null:
+		return null
+	var best_airman: SGCAirmanAIScript = null
+	var min_d: float = 999999.0
+	for child in allies.get_children():
+		var a := child as SGCAirmanAIScript
+		if a != null and a.health_component != null and not a.health_component.is_dead and not a.health_component.is_downed:
+			var d := global_position.distance_to(a.global_position)
+			if d < min_d:
+				min_d = d
+				best_airman = a
+	return best_airman
+
+
+func _spawn_command_ping_fx(pos: Vector3, color: Color) -> void:
+	if not is_inside_tree():
+		return
+	var ping := Node3D.new()
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.5
+	torus.outer_radius = 0.65
+	ring.mesh = torus
+
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = color
+	ring.material_override = mat
+
+	ping.add_child(ring)
+	ring.position.y = 0.05
+	ring.scale = Vector3(0.2, 0.2, 0.2)
+	get_tree().root.add_child(ping)
+	ping.global_position = pos
+
+	var tween := ping.create_tween()
+	tween.tween_property(ring, "scale", Vector3(1.5, 1.0, 1.5), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(mat, "albedo_color:a", 0.0, 0.75)
+	tween.tween_callback(ping.queue_free)
+
+
+func deploy_shield() -> void:
+	if deployable_shields_count <= 0:
+		print("Player %d: No Deployable Ballistic Shields remaining!" % peer_id)
+		return
+	deployable_shields_count -= 1
+
+	var shield := DeployableShieldScene.instantiate() as DeployableShieldScript
+	var spawn_pos := global_position - global_transform.basis.z * 1.3
+	spawn_pos.y = global_position.y
+	shield.position = spawn_pos
+	shield.rotation.y = rotation.y
+
+	var parent := get_parent()
+	if parent != null:
+		parent.add_child(shield, true)
+	else:
+		get_tree().root.add_child(shield, true)
+
+	print("Player %d deployed Ballistic Shield at %s (Remaining: %d)" % [peer_id, str(spawn_pos), deployable_shields_count])
+
+
+func throw_smoke_grenade() -> void:
+	if smoke_grenades_count <= 0:
+		print("Player %d: No M18 Smoke Grenades remaining!" % peer_id)
+		return
+	smoke_grenades_count -= 1
+
+	var grenade := SmokeGrenadeScene.instantiate() as SmokeGrenadeScript
+	var spawn_pos := global_position + Vector3(0, 1.4, 0) - global_transform.basis.z * 0.8
+	grenade.position = spawn_pos
+	var throw_vel := (-global_transform.basis.z * 12.0) + Vector3(0, 3.5, 0)
+	grenade.linear_velocity = throw_vel
+
+	var parent := get_parent()
+	if parent != null:
+		parent.add_child(grenade, true)
+	else:
+		get_tree().root.add_child(grenade, true)
+
+	print("Player %d threw M18 Smoke Grenade! (Remaining: %d)" % [peer_id, smoke_grenades_count])
 
 
 func _on_downed() -> void:

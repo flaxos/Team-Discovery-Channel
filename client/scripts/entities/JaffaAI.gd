@@ -100,26 +100,62 @@ func _physics_process(delta: float) -> void:
 
 
 func _find_nearest_target() -> void:
-	# Find closest active SGC operative
-	var players_container := get_tree().root.find_child("Players", true, false)
-	if players_container == null:
-		return
-
-	var closest_player: Node3D = null
+	# Find closest active SGC operative or allied Airman defender
+	var closest_target: Node3D = null
 	var min_dist: float = 999999.0
 
-	for child in players_container.get_children():
-		var player := child as PlayerController3D
-		if player != null and player.health_component != null and not player.health_component.is_dead:
-			var d := global_position.distance_to(player.global_position)
-			if d < min_dist:
-				min_dist = d
-				closest_player = player
+	var players_container := get_tree().root.find_child("Players", true, false)
+	if players_container != null:
+		for child in players_container.get_children():
+			var p := child as CharacterBody3D
+			if p != null:
+				var health := p.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and not health.is_dead:
+					var d := global_position.distance_to(p.global_position)
+					if d < min_dist:
+						min_dist = d
+						closest_target = p
 
-	current_target = closest_player
+	var allies_container := get_tree().root.find_child("Allies", true, false)
+	if allies_container != null:
+		for child in allies_container.get_children():
+			var a := child as CharacterBody3D
+			if a != null:
+				var health := a.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and not health.is_dead:
+					var d := global_position.distance_to(a.global_position)
+					if d < min_dist:
+						min_dist = d
+						closest_target = a
+
+	current_target = closest_target
+
+
+func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
+	if not is_inside_tree():
+		return false
+	var seg_start := global_position + Vector3(0, 1.4, 0)
+	var seg_end := target_pos + Vector3(0, 1.0, 0)
+	var seg_dir := (seg_end - seg_start)
+	var seg_len_sq := seg_dir.length_squared()
+	if seg_len_sq < 0.001:
+		return false
+
+	for node in get_tree().get_nodes_in_group("smoke_cloud"):
+		var cloud := node as Area3D
+		if cloud != null and is_instance_valid(cloud):
+			var cloud_pos := cloud.global_position
+			var t := clampf((cloud_pos - seg_start).dot(seg_dir) / seg_len_sq, 0.0, 1.0)
+			var closest_pt := seg_start + seg_dir * t
+			if closest_pt.distance_to(cloud_pos) <= 4.5:
+				return true
+	return false
 
 
 func _has_line_of_sight(target: Node3D) -> bool:
+	if _is_target_obscured_by_smoke(target.global_position):
+		return false
+
 	var space := get_world_3d().direct_space_state
 	var from := global_position + Vector3(0, 1.4, 0)
 	var to := target.global_position + Vector3(0, 1.0, 0)

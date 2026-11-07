@@ -9,8 +9,9 @@ signal airman_revived(airman: SGCAirmanAI)
 signal airman_died(airman: SGCAirmanAI)
 signal turret_mounted(turret: DeployableTurret)
 signal turret_dismounted(turret: DeployableTurret)
+signal order_acknowledged(airman: SGCAirmanAI, order_type: String)
 
-enum State { STAGING, SCRAMBLE, COMBAT, MAN_TURRET, REVIVE_PLAYER, DOWNED, DEAD }
+enum State { STAGING, SCRAMBLE, COMBAT, MAN_TURRET, REVIVE_PLAYER, MOVE_TO_TURRET, ORDER_MOVE, ORDER_REGROUP, DOWNED, DEAD }
 
 @export var airman_callsign: String = "AIRMAN DAVIS"
 @export var move_speed: float = 5.2
@@ -26,7 +27,10 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9
 
 var mounted_turret: DeployableTurret = null
 var current_target_jaffa: JaffaAI = null
-var target_player_to_revive: PlayerController3D = null
+var target_player_to_revive: CharacterBody3D = null
+var target_turret_to_mount: DeployableTurret = null
+var ordered_position: Vector3 = Vector3.ZERO
+var order_leader: CharacterBody3D = null
 
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
 @onready var body_mesh: Node3D = $Visuals/BodyMesh if has_node("Visuals/BodyMesh") else null
@@ -78,6 +82,12 @@ func _physics_process(delta: float) -> void:
 			_process_turret(delta)
 		State.REVIVE_PLAYER:
 			_process_revive(delta)
+		State.MOVE_TO_TURRET:
+			_process_move_to_turret(delta)
+		State.ORDER_MOVE:
+			_process_order_move(delta)
+		State.ORDER_REGROUP:
+			_process_order_regroup(delta)
 		State.DOWNED:
 			_process_downed_crawl(delta)
 		State.DEAD:
@@ -231,7 +241,13 @@ func dismount_turret() -> void:
 
 
 func _process_revive(delta: float) -> void:
-	if target_player_to_revive == null or not is_instance_valid(target_player_to_revive) or not target_player_to_revive.health_component.is_downed:
+	if target_player_to_revive == null or not is_instance_valid(target_player_to_revive):
+		target_player_to_revive = null
+		current_state = State.COMBAT
+		return
+
+	var target_health := target_player_to_revive.get_node_or_null("HealthComponent") as HealthComponent
+	if target_health == null or not target_health.is_downed:
 		target_player_to_revive = null
 		current_state = State.COMBAT
 		return
@@ -248,10 +264,142 @@ func _process_revive(delta: float) -> void:
 		velocity = Vector3.ZERO
 		revive_channel_time += delta
 		if revive_channel_time >= REVIVE_DURATION_S:
-			target_player_to_revive.health_component.revive(self)
+			target_health.revive(self)
 			print("SGCAirmanAI [%s]: Operative %s successfully REVIVED!" % [airman_callsign, target_player_to_revive.name])
 			target_player_to_revive = null
 			current_state = State.COMBAT
+
+
+func order_move_to(pos: Vector3) -> void:
+	if current_state == State.DEAD or current_state == State.DOWNED:
+		return
+	if mounted_turret != null:
+		dismount_turret()
+	ordered_position = pos
+	current_state = State.ORDER_MOVE
+	order_acknowledged.emit(self, "MOVE")
+	print("SGCAirmanAI [%s]: Moving to position %s! Taking cover!" % [airman_callsign, str(pos)])
+
+
+func order_mount_turret(turret: DeployableTurret) -> void:
+	if current_state == State.DEAD or current_state == State.DOWNED or turret == null:
+		return
+	if mounted_turret != null and mounted_turret != turret:
+		dismount_turret()
+	target_turret_to_mount = turret
+	var d := global_position.distance_to(turret.global_position)
+	if d <= 2.2:
+		mount_turret(turret)
+	else:
+		current_state = State.MOVE_TO_TURRET
+	order_acknowledged.emit(self, "TURRET")
+	print("SGCAirmanAI [%s]: Acknowledged, manning .50 Cal Browning!" % airman_callsign)
+
+
+func order_revive(target: CharacterBody3D) -> void:
+	if current_state == State.DEAD or current_state == State.DOWNED or target == null:
+		return
+	if mounted_turret != null:
+		dismount_turret()
+	target_player_to_revive = target
+	current_state = State.REVIVE_PLAYER
+	revive_channel_time = 0.0
+	order_acknowledged.emit(self, "REVIVE")
+	print("SGCAirmanAI [%s]: Squadmate down! Moving to revive!" % airman_callsign)
+
+
+func order_regroup(leader: CharacterBody3D) -> void:
+	if current_state == State.DEAD or current_state == State.DOWNED:
+		return
+	if mounted_turret != null:
+		dismount_turret()
+	order_leader = leader
+	current_state = State.ORDER_REGROUP
+	order_acknowledged.emit(self, "REGROUP")
+	print("SGCAirmanAI [%s]: Regrouping on your six!" % airman_callsign)
+
+
+func _process_move_to_turret(delta: float) -> void:
+	if target_turret_to_mount == null or not is_instance_valid(target_turret_to_mount):
+		current_state = State.COMBAT
+		return
+	if target_turret_to_mount.mounted_player != null and target_turret_to_mount.mounted_player != self:
+		current_state = State.COMBAT
+		return
+
+	var dist := global_position.distance_to(target_turret_to_mount.global_position)
+	if dist > 2.0:
+		var dir := (target_turret_to_mount.global_position - global_position).normalized()
+		velocity.x = dir.x * move_speed
+		velocity.z = dir.z * move_speed
+		rotation.y = atan2(-dir.x, -dir.z)
+	else:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		mount_turret(target_turret_to_mount)
+
+
+func _process_order_move(delta: float) -> void:
+	var dist := global_position.distance_to(ordered_position)
+	var dir := (ordered_position - global_position)
+	dir.y = 0.0
+
+	if dist > 1.2:
+		velocity.x = dir.normalized().x * move_speed
+		velocity.z = dir.normalized().z * move_speed
+		rotation.y = atan2(-dir.x, -dir.z)
+		if body_mesh != null:
+			body_mesh.scale.y = 1.0
+			body_mesh.position.y = 0.0
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+		if body_mesh != null:
+			body_mesh.scale.y = 0.65
+			body_mesh.position.y = 0.15
+
+	# While moving or holding, return fire at any Jaffa in range
+	_find_nearest_jaffa()
+	if current_target_jaffa != null:
+		var jaffa_dist := global_position.distance_to(current_target_jaffa.global_position)
+		if jaffa_dist <= combat_range and fire_cooldown <= 0.0:
+			var aim_dir := (current_target_jaffa.global_position - global_position)
+			aim_dir.y = 0.0
+			if aim_dir.length_squared() > 0.01 and dist <= 1.2:
+				rotation.y = atan2(-aim_dir.x, -aim_dir.z)
+			fire_cooldown = 60.0 / fire_rate_rpm
+			_fire_mp5(aim_dir.normalized())
+
+
+func _process_order_regroup(delta: float) -> void:
+	if order_leader == null or not is_instance_valid(order_leader):
+		current_state = State.COMBAT
+		return
+
+	var dist := global_position.distance_to(order_leader.global_position)
+	var dir := (order_leader.global_position - global_position)
+	dir.y = 0.0
+
+	if dist > 2.5:
+		velocity.x = dir.normalized().x * move_speed
+		velocity.z = dir.normalized().z * move_speed
+		rotation.y = atan2(-dir.x, -dir.z)
+		if body_mesh != null:
+			body_mesh.scale.y = 1.0
+			body_mesh.position.y = 0.0
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+		rotation.y = lerp_angle(rotation.y, order_leader.rotation.y, 8.0 * delta)
+
+	# Cover fire
+	_find_nearest_jaffa()
+	if current_target_jaffa != null and fire_cooldown <= 0.0:
+		var jaffa_dist := global_position.distance_to(current_target_jaffa.global_position)
+		if jaffa_dist <= combat_range:
+			var aim_dir := (current_target_jaffa.global_position - global_position).normalized()
+			fire_cooldown = 60.0 / fire_rate_rpm
+			_fire_mp5(aim_dir)
 
 
 func _process_downed_crawl(delta: float) -> void:

@@ -6,6 +6,7 @@ extends Node3D
 
 const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
 const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
+const IrisServoHousingScript = preload("res://scripts/props/IrisServoHousing.gd")
 
 # Sector identifiers for SGC Sublevels 28 & 27
 const SECTOR_GATE_ROOM: String = "GATE_ROOM"
@@ -115,6 +116,13 @@ func _ready() -> void:
 
 	if dialing_console != null and hud != null:
 		hud.bind_dhd(dialing_console)
+
+	var iris_servo := find_child("IrisServoHousing", true, false) as IrisServoHousingScript
+	if iris_servo != null and hud != null:
+		iris_servo.stage_completed.connect(func(stg: int, sname: String) -> void:
+			hud.update_iris_repair_stage(stg, sname, float(stg) / 3.0)
+		)
+
 	if stargate_mesh != null:
 		stargate_mesh.player_extracted.connect(_on_player_extracted)
 

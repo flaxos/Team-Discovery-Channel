@@ -419,6 +419,17 @@ func on_iris_malfunction() -> void:
 		objective_label.text = "UNAUTHORIZED INCOMING WORMHOLE! TRINIUM IRIS JAMMED AT 0%!"
 
 
+func update_iris_repair_stage(completed: int, stage_name: String, total_progress: float) -> void:
+	if objective_label != null:
+		var percent := int(round(total_progress * 100.0))
+		if completed >= 3:
+			objective_label.text = "TRINIUM IRIS SECURED (100%) - HOSTILE BREACH BLOCKED!"
+			objective_label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+		else:
+			objective_label.text = "IRIS REPAIR [%d/3 SAVED] (%d%%): %s" % [completed, percent, stage_name.to_upper()]
+			objective_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
+
+
 func update_objective(text: String, color: Color = Color.WHITE) -> void:
 	if objective_label != null:
 		objective_label.text = text

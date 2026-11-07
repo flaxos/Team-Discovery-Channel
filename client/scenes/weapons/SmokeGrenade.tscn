@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://csmokegrenade01"]
+
+[ext_resource type="Script" path="res://scripts/weapons/SmokeGrenade.gd" id="1_smoke"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Canister"]
+height = 0.22
+radius = 0.08
+
+[sub_resource type="StandardMaterial3D" id="Mat_Canister"]
+albedo_color = Color(0.28, 0.32, 0.24, 1)
+roughness = 0.6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_Canister"]
+material = SubResource("Mat_Canister")
+top_radius = 0.06
+bottom_radius = 0.06
+height = 0.2
+
+[node name="SmokeGrenade" type="RigidBody3D"]
+collision_layer = 1
+collision_mask = 1
+mass = 0.5
+script = ExtResource("1_smoke")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CylinderShape3D_Canister")
+
+[node name="CanisterMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_Canister")
