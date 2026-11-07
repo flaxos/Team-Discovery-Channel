@@ -76,8 +76,12 @@ func _on_client_connected() -> void:
 	client_connected = true
 
 	stargate = host_gateroom.get_node("Stargate") as StargateRing
-	dhd = host_gateroom.get_node("DHDConsole") as DHDDialer
-	rings = host_gateroom.get_node("TransportRings") as TransportRings
+	dhd = host_gateroom.dhd_console
+	rings = host_gateroom.get_node_or_null("TransportRings") as TransportRings
+	if rings == null:
+		var ring_scene := load("res://scenes/props/TransportRings.tscn") as PackedScene
+		rings = ring_scene.instantiate() as TransportRings
+		host_gateroom.add_child(rings)
 
 	# Spawn Player for DHD interaction
 	var player_scene := load(PLAYER_SCENE) as PackedScene

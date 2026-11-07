@@ -1,7 +1,11 @@
 class_name WaveManager
 extends Node
 ## SGC Foothold Defense Wave Coordinator.
-## Manages wave progressions, Stargate gate-room spawns, enemy tracking, and intermission timers.
+## Manages 38-second wormhole incursions, sequential chevron locking, Kawoosh event horizons,
+## Iris malfunctions, inter-gate recharge windows, tiered difficulty, and Hard Mode Lab ROM objectives.
+
+const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
+const IrisServoHousingScript = preload("res://scripts/props/IrisServoHousing.gd")
 
 signal wave_started(wave_number: int, enemy_count: int)
 signal wave_cleared(wave_number: int)
@@ -9,12 +13,22 @@ signal jaffa_count_changed(remaining: int, current_wave: int)
 signal intermission_tick(seconds_left: int)
 signal all_waves_defeated()
 signal multi_sector_incursion_started(sectors: Array[String])
+signal wormhole_timer_tick(seconds_left: float, total_duration: float)
+signal wormhole_state_changed(is_open: bool, state_name: String)
+signal chevron_sequence_started()
+signal iris_malfunction_declared()
+signal lab_patch_objective_started()
+signal iris_repaired_event()
+
+enum DifficultyTier { EASY, MEDIUM, HARD }
 
 const JAFFA_SCENE_PATH: String = "res://scenes/entities/JaffaGuard.tscn"
 const SHOCK_GUARD_SCENE_PATH: String = "res://scenes/entities/JaffaShockGuard.tscn"
 
+@export var difficulty: DifficultyTier = DifficultyTier.MEDIUM
+@export var wormhole_duration_s: float = 38.0
+@export var inter_gate_recharge_s: float = 20.0
 @export var max_waves: int = 3
-@export var intermission_duration_s: float = 8.0
 
 var current_wave: int = 0
 var enemies_alive: int = 0
@@ -23,24 +37,55 @@ var is_intermission: bool = false
 var intermission_timer: float = 0.0
 var klaxon_loop_timer: float = 0.0
 
+var inbound_wormhole_timer: float = 0.0
+var is_wormhole_open: bool = false
+var stream_spawn_timer: float = 0.0
+var stream_spawn_interval: float = 7.0
+var is_iris_repaired: bool = false
+var target_activations: int = 3
+
 @onready var enemies_container: Node3D = get_node_or_null("../Enemies")
 @onready var gate_spawn_marker: Marker3D = get_node_or_null("../GateSpawnMarker")
 @onready var transport_rings: TransportRings = get_node_or_null("../TransportRings") as TransportRings
 
 
 func _ready() -> void:
-	# Waves are driven authoritatively by the host server
-	if not multiplayer.is_server():
-		return
+	_configure_difficulty()
 
-	if transport_rings != null and not transport_rings.reinforcement_spawned.is_connected(_on_ring_reinforcement_spawned):
-		transport_rings.reinforcement_spawned.connect(_on_ring_reinforcement_spawned)
+	# Connect Iris Servo Housing if present in Gate Room
+	var iris_servo := get_node_or_null("../IrisServoHousing") as IrisServoHousingScript
+	if iris_servo != null:
+		iris_servo.iris_repaired.connect(_on_iris_servo_repaired)
+
+	# Connect Dialing Console patch upload signal
+	var dialer := get_tree().root.find_child("SGCDialingConsole", true, false) as SGCDialingConsoleScript
+	if dialer != null:
+		dialer.patch_upload_completed.connect(_on_patch_upload_completed)
+
+
+func set_difficulty(tier: DifficultyTier) -> void:
+	difficulty = tier
+	_configure_difficulty()
+
+
+func _configure_difficulty() -> void:
+	match difficulty:
+		DifficultyTier.EASY:
+			target_activations = 1
+			max_waves = 1
+		DifficultyTier.MEDIUM:
+			target_activations = 3
+			max_waves = 3
+		DifficultyTier.HARD:
+			target_activations = 4
+			max_waves = 4
 
 
 func start_wave_defense() -> void:
 	if not multiplayer.is_server():
 		return
 	current_wave = 0
+	_configure_difficulty()
 	start_next_wave()
 
 
@@ -48,6 +93,22 @@ func _physics_process(delta: float) -> void:
 	if not multiplayer.is_server():
 		return
 
+	# Inbound Wormhole 38-second Countdown Engine
+	if is_wormhole_open:
+		inbound_wormhole_timer -= delta
+		wormhole_timer_tick.emit(maxf(0.0, inbound_wormhole_timer), wormhole_duration_s)
+
+		# Hostile reinforcement streaming down the ramp while wormhole is open
+		if not is_iris_repaired:
+			stream_spawn_timer -= delta
+			if stream_spawn_timer <= 0.0 and inbound_wormhole_timer > 6.0:
+				stream_spawn_timer = stream_spawn_interval
+				_spawn_ramp_reinforcements(2)
+
+		if inbound_wormhole_timer <= 0.0:
+			_collapse_inbound_wormhole()
+
+	# Inter-gate Recharge Window / Intermission
 	if is_intermission:
 		intermission_timer -= delta
 		intermission_tick.emit(int(ceil(intermission_timer)))
@@ -55,30 +116,160 @@ func _physics_process(delta: float) -> void:
 			is_intermission = false
 			start_next_wave()
 
-	# Continuous Klaxon alarm pulse during Wave 3 Overwhelming Assault
-	if is_wave_active and current_wave == 3:
+	# Klaxon alarm pulse during active breaches
+	if is_wave_active and is_wormhole_open:
 		klaxon_loop_timer -= delta
 		if klaxon_loop_timer <= 0.0:
-			klaxon_loop_timer = 3.0
+			klaxon_loop_timer = 4.0
 			_play_klaxon()
 
 
 func start_next_wave() -> void:
 	current_wave += 1
-	if current_wave > max_waves:
-		print("WaveManager: All SGC Foothold waves defeated! Iris secured.")
-		all_waves_defeated.emit()
+	if current_wave > target_activations:
+		print("WaveManager: All %d incursion activations repelled!" % target_activations)
+		_evaluate_mission_completion()
 		return
 
 	is_wave_active = true
-	var count_to_spawn := 2 + current_wave * 2  # Wave 1 = 4, Wave 2 = 6, Wave 3 = 8
-	enemies_alive = count_to_spawn
-	wave_started.emit(current_wave, count_to_spawn)
-	print("WaveManager: Starting Wave %d with %d %s!" % [current_wave, count_to_spawn, "Shock Guards" if current_wave == 3 else "Jaffa Guards"])
+	is_iris_repaired = false
+	stream_spawn_timer = stream_spawn_interval
 
+	var initial_count := 4 + (current_wave - 1) * 2
+	enemies_alive = initial_count
+	wave_started.emit(current_wave, enemies_alive)
+
+	print("WaveManager: === UNSCHEDULED OFFWORLD ACTIVATION (Incursion %d/%d) ===" % [current_wave, target_activations])
 	_play_klaxon()
-	klaxon_loop_timer = 3.0
-	_trigger_incoming_stargate(count_to_spawn)
+	_execute_inbound_gate_sequence()
+
+
+func _execute_inbound_gate_sequence() -> void:
+	chevron_sequence_started.emit()
+	var stargate := get_node_or_null("../Stargate") as StargateRing
+
+	# Step 1: Sequential Chevrons 1 through 7 locking
+	if stargate != null:
+		for c in range(1, 8):
+			await get_tree().create_timer(0.2).timeout
+			stargate.lock_chevron(c)
+		await get_tree().create_timer(0.8).timeout
+
+	# Step 2: Chevron 7 locked -> Kawoosh Eruption occurs automatically via StargateRing!
+	# Step 3: Iris Malfunction Tannoy Announcement
+	await get_tree().create_timer(0.6).timeout
+	iris_malfunction_declared.emit()
+	print("WaveManager: [TANNOY] Iris malfunction! Trinium iris jammed open! Red alert! All response teams to the Gate Room!")
+	_play_sfx("res://audio/sfx_iris_open.wav", 60.0)
+
+	# Step 4: 38-Second Incursion Window Begins
+	is_wormhole_open = true
+	inbound_wormhole_timer = wormhole_duration_s
+	wormhole_state_changed.emit(true, "INBOUND_ACTIVE")
+
+	# Initial breach squad (4 Jaffa)
+	var initial_count := 4 + (current_wave - 1) * 2
+	_spawn_wave_jaffa(initial_count)
+
+
+func _collapse_inbound_wormhole() -> void:
+	is_wormhole_open = false
+	wormhole_state_changed.emit(false, "DISENGAGED")
+	print("WaveManager: [TANNOY] Inbound wormhole collapsed! Inter-gate recharge window: %.0fs." % inter_gate_recharge_s)
+
+	var stargate := get_node_or_null("../Stargate") as StargateRing
+	if stargate != null:
+		stargate.close_wormhole()
+
+	if enemies_alive == 0:
+		_on_all_incursion_enemies_cleared()
+
+
+func _spawn_ramp_reinforcements(count: int) -> void:
+	if not is_wave_active or not is_wormhole_open:
+		return
+	enemies_alive += count
+	jaffa_count_changed.emit(enemies_alive, current_wave)
+	print("WaveManager: Reinforcements streaming through event horizon (+%d Jaffa)!" % count)
+	_spawn_wave_jaffa(count)
+
+
+func _spawn_wave_jaffa(ramp_count: int) -> void:
+	var is_shock_wave := (current_wave >= 3)
+	var scene_path: String = SHOCK_GUARD_SCENE_PATH if is_shock_wave else JAFFA_SCENE_PATH
+	var jaffa_scene := load(scene_path) as PackedScene
+	if jaffa_scene == null or enemies_container == null:
+		push_error("WaveManager: Missing Jaffa scene or Enemies container.")
+		return
+
+	var spawn_pos: Vector3 = Vector3(0, 2.2, -13.5)
+	if gate_spawn_marker != null:
+		spawn_pos = gate_spawn_marker.global_position
+
+	for i in range(ramp_count):
+		var offset := Vector3(randf_range(-3.0, 3.0), 0, randf_range(-0.5, 1.5))
+		var jaffa := jaffa_scene.instantiate() as JaffaAI
+		jaffa.name = "%s_W%d_%d" % ["Shock" if is_shock_wave else "Jaffa", current_wave, randi() % 10000]
+		jaffa.position = spawn_pos + offset
+
+		enemies_container.add_child(jaffa, true)
+		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))
+
+
+func _on_jaffa_killed(_killer: Node, _jaffa: JaffaAI) -> void:
+	enemies_alive = maxi(0, enemies_alive - 1)
+	jaffa_count_changed.emit(enemies_alive, current_wave)
+	print("WaveManager: Enemy eliminated! %d remaining in Incursion %d." % [enemies_alive, current_wave])
+
+	if enemies_alive == 0 and not is_wormhole_open and is_wave_active:
+		_on_all_incursion_enemies_cleared()
+
+
+func _on_all_incursion_enemies_cleared() -> void:
+	is_wave_active = false
+	wave_cleared.emit(current_wave)
+	print("WaveManager: Incursion %d/%d REPULSED!" % [current_wave, target_activations])
+
+	if current_wave < target_activations:
+		is_intermission = true
+		intermission_timer = inter_gate_recharge_s
+		print("WaveManager: Inter-gate recharge active (%.0f s). Resupply at Armory!" % inter_gate_recharge_s)
+	else:
+		_evaluate_mission_completion()
+
+
+func _evaluate_mission_completion() -> void:
+	if difficulty == DifficultyTier.HARD:
+		_trigger_hard_mode_buffer_lockout()
+	else:
+		print("WaveManager: SGC Sublevel 28 SECURED! Outbound dialing permitted.")
+		all_waves_defeated.emit()
+
+
+func _trigger_hard_mode_buffer_lockout() -> void:
+	print("WaveManager: [HARD MODE] Goa'uld dialing buffer encryption virus active! Corrupted buffer!")
+	var dialer := get_tree().root.find_child("SGCDialingConsole", true, false) as SGCDialingConsoleScript
+	if dialer != null:
+		dialer.set_buffer_corrupted(true)
+
+	lab_patch_objective_started.emit()
+	print("WaveManager: [OBJECTIVE] RETRIEVE CLEAN DIALING ROM FROM LEVEL 28 RESEARCH LAB!")
+
+	# Spawn ambush squad in Round Hallway and corridor
+	_spawn_sector_jaffa(Vector3(26.0, 0.0, 36.0), 3, true)
+	_spawn_sector_jaffa(Vector3(20.0, 0.0, 20.0), 2, false)
+
+
+func _on_patch_upload_completed() -> void:
+	print("WaveManager: Dialing buffer patch verified! Outbound wormhole clearance granted!")
+	all_waves_defeated.emit()
+
+
+func _on_iris_servo_repaired() -> void:
+	is_iris_repaired = true
+	iris_repaired_event.emit()
+	print("WaveManager: Iris manually engaged! Inbound matter transmission blocked!")
+	_play_sfx("res://audio/sfx_iris_open.wav", 60.0)
 
 
 func _play_klaxon() -> void:
@@ -96,106 +287,31 @@ func _play_klaxon() -> void:
 		audio.play()
 
 
-func _trigger_incoming_stargate(total_count: int) -> void:
-	var stargate := get_node_or_null("../Stargate") as StargateRing
-	if stargate != null:
-		# Lock Chevrons 1 through 7 sequentially (0.15s interval)
-		for c in range(1, 8):
-			await get_tree().create_timer(0.15).timeout
-			stargate.lock_chevron(c)
-		await get_tree().create_timer(1.2).timeout
-
-	var ramp_count: int = total_count
-	var ring_reinforcements: int = 0
-
-	if current_wave >= 2 and transport_rings != null:
-		ring_reinforcements = 2
-		ramp_count = maxi(0, total_count - ring_reinforcements)
-
-		transport_rings.reinforcements_per_beam = ring_reinforcements
-		if current_wave == 3:
-			transport_rings.reinforcement_scene = load(SHOCK_GUARD_SCENE_PATH) as PackedScene
-		else:
-			transport_rings.reinforcement_scene = load(JAFFA_SCENE_PATH) as PackedScene
-
-		var ring_timer := get_tree().create_timer(3.0)
-		ring_timer.timeout.connect(func() -> void:
-			if transport_rings != null and is_wave_active:
-				transport_rings.trigger_ring_drop()
-		)
-
-	# Spawn ramp enemies
-	_spawn_wave_jaffa(ramp_count)
-
-
-func _spawn_wave_jaffa(ramp_count: int) -> void:
-	var scene_path: String = SHOCK_GUARD_SCENE_PATH if current_wave == 3 else JAFFA_SCENE_PATH
-	var jaffa_scene := load(scene_path) as PackedScene
-	if jaffa_scene == null or enemies_container == null:
-		push_error("WaveManager: Missing Jaffa scene or Enemies container.")
-		return
-
-	var spawn_pos: Vector3 = Vector3(0, 2.2, -13.5)
-	if gate_spawn_marker != null:
-		spawn_pos = gate_spawn_marker.global_position
-
-	for i in range(ramp_count):
-		var offset := Vector3(randf_range(-3.5, 3.5), 0, randf_range(-0.5, 1.5))
-		var jaffa := jaffa_scene.instantiate() as JaffaAI
-		jaffa.name = "%s_W%d_%d" % ["Shock" if current_wave == 3 else "Jaffa", current_wave, i + 1]
-		jaffa.position = spawn_pos + offset
-
-		enemies_container.add_child(jaffa, true)
-		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))
-
-
-func _on_ring_reinforcement_spawned(jaffa: JaffaAI) -> void:
-	if jaffa != null and not jaffa.jaffa_died.is_connected(_on_jaffa_killed):
-		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))
-
-
-func _on_jaffa_killed(_killer: Node, _jaffa: JaffaAI) -> void:
-	enemies_alive = maxi(0, enemies_alive - 1)
-	jaffa_count_changed.emit(enemies_alive, current_wave)
-	print("WaveManager: Enemy eliminated! %d remaining in Wave %d." % [enemies_alive, current_wave])
-
-	if enemies_alive == 0 and is_wave_active:
-		is_wave_active = false
-		wave_cleared.emit(current_wave)
-		print("WaveManager: Wave %d CLEARED! Intermission starting (%.0f s)..." % [current_wave, intermission_duration_s])
-
-		if current_wave < max_waves:
-			is_intermission = true
-			intermission_timer = intermission_duration_s
-		else:
-			all_waves_defeated.emit()
+func _play_sfx(path: String, max_dist: float) -> void:
+	if ResourceLoader.exists(path):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load(path)
+		audio.max_distance = max_dist
+		audio.unit_size = 15.0
+		add_child(audio)
+		audio.finished.connect(audio.queue_free)
+		audio.play()
 
 
 ## Initiates Sprint 9 Foothold Climax Multi-Sector Incursion.
-## Concurrently spawns elite strike squads across Gate Room, Transport Rings, and Level 27 Upper Deck.
 func trigger_climax_incursion() -> void:
 	current_wave = 4
-	max_waves = 4
+	target_activations = 4
 	is_wave_active = true
 	var total_count := 8
 	enemies_alive = total_count
 	wave_started.emit(current_wave, total_count)
 	var sectors: Array[String] = ["GATE_ROOM", "ARMORY_HALLWAY", "LEVEL_27_CORRIDOR"]
 	multi_sector_incursion_started.emit(sectors)
-	print("WaveManager: MULTI-SECTOR CLIMAX INCURSION ENGAGED! Breaches across Gate Room, Armory Rings, and Level 27 Upper Deck!")
+	print("WaveManager: MULTI-SECTOR CLIMAX INCURSION ENGAGED! Breaches across Gate Room and Level 27!")
 
-	# 1. Sector 1: Gate Room Ramp incursion (4 hostiles)
 	_spawn_wave_jaffa(4)
-
-	# 2. Sector 2: Fallback Hallway / Armory rings incursion (2 hostiles)
-	if transport_rings != null:
-		transport_rings.reinforcements_per_beam = 2
-		transport_rings.reinforcement_scene = load(SHOCK_GUARD_SCENE_PATH) as PackedScene
-		transport_rings.trigger_ring_drop()
-	else:
-		_spawn_sector_jaffa(Vector3(3.0, 0.0, 39.0), 2, true)
-
-	# 3. Sector 3: Level 27 Upper Corridor breach (2 Shock Guards)
+	_spawn_sector_jaffa(Vector3(3.0, 0.0, 39.0), 2, true)
 	_spawn_sector_jaffa(Vector3(26.0, 5.5, 18.0), 2, true)
 
 
@@ -208,7 +324,7 @@ func _spawn_sector_jaffa(spawn_pos: Vector3, count: int, is_shock: bool = false)
 	for i in range(count):
 		var offset := Vector3(randf_range(-1.5, 1.5), 0, randf_range(-1.0, 1.0))
 		var jaffa := jaffa_scene.instantiate() as JaffaAI
-		jaffa.name = "%s_Sector_%d" % ["Shock" if is_shock else "Jaffa", i + 1]
+		jaffa.name = "%s_Sector_%d" % ["Shock" if is_shock else "Jaffa", randi() % 10000]
 		jaffa.position = spawn_pos + offset
 		enemies_container.add_child(jaffa, true)
 		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))

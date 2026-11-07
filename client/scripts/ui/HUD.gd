@@ -3,6 +3,8 @@ extends CanvasLayer
 ## In-game Tactical HUD for Project SGC.
 ## Displays operative vitals, weapon ammo, wave status, Helldivers-style DHD chords, and extraction victory.
 
+const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
+
 # Node References
 @onready var health_bar: ProgressBar = $VitalsPanel/VBox/HealthBar
 @onready var health_label: Label = $VitalsPanel/VBox/HealthBar/HealthLabel
@@ -393,6 +395,39 @@ func on_all_waves_defeated() -> void:
 	objective_label.text = "ALL WAVES CLEARED! SGC LEVEL 28 SECURED! DIAL DHD & OPEN IRIS FOR EXTRACTION!"
 
 
+func on_wormhole_timer_tick(seconds_left: float, _total_duration: float) -> void:
+	if objective_label != null:
+		var mins := int(seconds_left) / 60
+		var secs := int(seconds_left) % 60
+		objective_label.text = "INBOUND WORMHOLE: %02d:%02d [IRIS JAMMED OPEN] - HOLD GATE ROOM!" % [mins, secs]
+		objective_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2))
+
+
+func on_intermission_tick(seconds_left: int) -> void:
+	if objective_label != null:
+		var mins := seconds_left / 60
+		var secs := seconds_left % 60
+		objective_label.text = "INTER-GATE RECHARGE: %02d:%02d - RESUPPLY AT ARMORY & HOLD CORRIDORS" % [mins, secs]
+		objective_label.add_theme_color_override("font_color", Color(0.2, 0.85, 1.0))
+
+
+func on_iris_malfunction() -> void:
+	if wave_label != null:
+		wave_label.text = "RED ALERT: IRIS MALFUNCTION!"
+		wave_label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
+	if objective_label != null:
+		objective_label.text = "UNAUTHORIZED INCOMING WORMHOLE! TRINIUM IRIS JAMMED AT 0%!"
+
+
+func on_lab_patch_objective_started() -> void:
+	if wave_label != null:
+		wave_label.text = "DIALING BUFFER LOCKED!"
+		wave_label.add_theme_color_override("font_color", Color(1.0, 0.6, 0.1))
+	if objective_label != null:
+		objective_label.text = "GOA'ULD VIRUS DETECTED! RETRIEVE CLEAN DIALING ROM FROM LEVEL 28 LAB!"
+		objective_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+
+
 # --- DHD Dialing Mini-Game ---
 func bind_dhd(dhd: DHDDialer) -> void:
 	current_dhd = dhd
@@ -408,6 +443,35 @@ func bind_dhd(dhd: DHDDialer) -> void:
 		current_dhd.gdo_verified.connect(_on_gdo_verified)
 		current_dhd.sequence_completed.connect(_on_dhd_completed)
 		current_dhd.dialing_cancelled.connect(_on_dhd_cancelled)
+
+	var sgc := current_dhd as SGCDialingConsoleScript
+	if sgc != null:
+		if not sgc.buffer_lockout_triggered.is_connected(_on_buffer_lockout):
+			sgc.buffer_lockout_triggered.connect(_on_buffer_lockout)
+			sgc.patch_upload_progress.connect(_on_patch_progress)
+			sgc.buffer_restored.connect(_on_buffer_restored)
+
+
+func _on_buffer_lockout() -> void:
+	if dhd_panel != null:
+		dhd_panel.visible = true
+	if dhd_title != null:
+		dhd_title.text = "⚠️ BUFFER LOCKOUT: RETRIEVE CLEAN ROM FROM LAB ⚠️"
+		dhd_title.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
+
+
+func _on_patch_progress(progress: float) -> void:
+	if dhd_panel != null:
+		dhd_panel.visible = true
+	if dhd_title != null:
+		dhd_title.text = "UPLOADING CLEAN DIALING ROM: %d%%" % int(progress * 100)
+		dhd_title.add_theme_color_override("font_color", Color(0.2, 0.8, 1.0))
+
+
+func _on_buffer_restored() -> void:
+	if dhd_title != null:
+		dhd_title.text = "SGC DIALING COMPUTER READY - DIAL OUTBOUND"
+		dhd_title.add_theme_color_override("font_color", Color(0.2, 0.95, 0.4))
 
 
 func _on_glyph_error() -> void:

@@ -4,6 +4,10 @@ extends CharacterBody3D
 ## Handles WASD movement, mouse-plane aiming, weapon discharging,
 ## HealthComponent integration, and Godot 4 multiplayer synchronization.
 
+const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
+const LabDataPatchDriveScript = preload("res://scripts/props/LabDataPatchDrive.gd")
+const IrisServoHousingScript = preload("res://scripts/props/IrisServoHousing.gd")
+
 signal player_died(peer_id: int)
 signal player_downed(peer_id: int)
 signal player_revived(peer_id: int)
@@ -60,6 +64,7 @@ var is_aiming_down_sights: bool = false
 var ads_blend: float = 0.0
 var current_iso_cam_y: float = 12.0
 var current_iso_pan_yaw: float = 0.0
+var is_carrying_patch_rom: bool = false
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -388,6 +393,17 @@ func _physics_process(delta: float) -> void:
 	# Process reviving nearby downed teammates while holding interact
 	_process_revive(delta)
 
+	# Process Iris servo repair channeling
+	var iris_servo := get_tree().root.find_child("IrisServoHousing", true, false) as IrisServoHousingScript
+	if iris_servo != null and iris_servo.is_repairing and iris_servo.repairer_player == self:
+		iris_servo.update_repair(delta)
+
+	# Process SGC Dialing console patch upload channeling
+	var sgc_console := get_tree().root.find_child("SGCDialingConsole", true, false) as SGCDialingConsoleScript
+	if sgc_console != null and sgc_console.is_uploading_patch and sgc_console.uploader_player == self:
+		if sgc_console.update_upload(delta):
+			is_carrying_patch_rom = false
+
 	# If mounted on .50 cal tripod, lock position behind gun and process manual fire
 	if mounted_turret != null and is_instance_valid(mounted_turret):
 		velocity = Vector3.ZERO
@@ -400,8 +416,10 @@ func _physics_process(delta: float) -> void:
 		_update_camera_and_occlusion(delta)
 		return
 
-	# If actively dialing DHD console, route directional inputs to glyph entries
-	var dhd := get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
+	# If actively dialing SGC console or DHD console, route directional inputs to glyph entries
+	var dhd := get_tree().root.find_child("SGCDialingConsole", true, false) as DHDDialer
+	if dhd == null:
+		dhd = get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
 	if dhd != null and dhd.active_dialer == self:
 		if Input.is_action_just_pressed("move_up"):
 			dhd.input_glyph("UP")
@@ -995,13 +1013,39 @@ func _try_interact() -> void:
 			gateroom.toggle_blast_doors()
 		return
 
-	# 5. Check for DHD console
-	var dhd := get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
-	if dhd != null and global_position.distance_to(dhd.global_position) <= 3.2:
-		if dhd.current_phase == DHDDialer.DialPhase.INACTIVE:
-			dhd.start_dialing(self)
+	# 5. Check for Lab Data Patch Drive (Research Lab)
+	var patch_drive := get_tree().root.find_child("LabDataPatchDrive", true, false) as LabDataPatchDriveScript
+	if patch_drive != null and not patch_drive.is_retrieved and global_position.distance_to(patch_drive.global_position) <= 3.2:
+		patch_drive.pickup_patch(self)
+		is_carrying_patch_rom = true
+		return
+
+	# 6. Check for Iris Servo Housing (Gate Room ramp)
+	var iris_servo := get_tree().root.find_child("IrisServoHousing", true, false) as IrisServoHousingScript
+	if iris_servo != null and not iris_servo.is_repaired and global_position.distance_to(iris_servo.global_position) <= 3.2:
+		if not iris_servo.is_repairing:
+			iris_servo.start_repair(self)
 		else:
-			dhd.cancel_dialing()
+			iris_servo.cancel_repair()
+		return
+
+	# 7. Check for SGC Dialing Computer / DHD Console (Control Room Mezzanine)
+	var dialer := get_tree().root.find_child("SGCDialingConsole", true, false) as DHDDialer
+	if dialer == null:
+		dialer = get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
+	if dialer != null and global_position.distance_to(dialer.global_position) <= 3.5:
+		var sgc := dialer as SGCDialingConsoleScript
+		if sgc != null and is_carrying_patch_rom and sgc.is_buffer_corrupted:
+			if not sgc.is_uploading_patch:
+				sgc.start_patch_upload(self)
+			else:
+				sgc.cancel_patch_upload()
+			return
+
+		if dialer.current_phase == DHDDialer.DialPhase.INACTIVE:
+			dialer.start_dialing(self)
+		else:
+			dialer.cancel_dialing()
 
 
 func set_cctv_camera(cam_pos: Vector3, cam_target: Vector3, cam_fov: float) -> void:

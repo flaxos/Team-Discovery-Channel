@@ -31,12 +31,20 @@ const SECTOR_UNKNOWN: String = "UNKNOWN"
 @onready var stargate_mesh: StargateRing = $Stargate as StargateRing if has_node("Stargate") else null
 @onready var event_horizon: MeshInstance3D = $Stargate/EventHorizon if has_node("Stargate/EventHorizon") else null
 @onready var wave_manager: WaveManager = $WaveManager if has_node("WaveManager") else null
-@onready var dhd_console: DHDDialer = $DHDConsole if has_node("DHDConsole") else null
+@onready var dialing_console: DHDDialer = _find_dialing_console()
 @onready var hud: TacticalHUD = $TacticalHUD if has_node("TacticalHUD") else null
 @onready var door_left: CSGBox3D = $BlastDoors/BlastDoorLeft if has_node("BlastDoors/BlastDoorLeft") else null
 @onready var door_right: CSGBox3D = $BlastDoors/BlastDoorRight if has_node("BlastDoors/BlastDoorRight") else null
 @onready var console_light: OmniLight3D = $BlastDoors/BlastDoorConsole/ConsoleLight if has_node("BlastDoors/BlastDoorConsole/ConsoleLight") else null
 @onready var emergency_lights_container: Node3D = $EmergencyLights if has_node("EmergencyLights") else null
+
+var dhd_console: DHDDialer:
+	get:
+		if dialing_console == null or not is_instance_valid(dialing_console):
+			dialing_console = _find_dialing_console()
+		return dialing_console
+	set(v):
+		dialing_console = v
 
 var is_blast_doors_closed: bool = false
 var is_animating_doors: bool = false
@@ -46,6 +54,13 @@ var player_sectors: Dictionary = {}
 
 signal blast_doors_toggled(closed: bool)
 signal sector_changed(player_id: int, old_sector: String, new_sector: String)
+
+
+func _find_dialing_console() -> DHDDialer:
+	var console := find_child("SGCDialingConsole", true, false) as DHDDialer
+	if console == null:
+		console = find_child("DHDConsole", true, false) as DHDDialer
+	return console
 
 
 func _ready() -> void:
@@ -64,10 +79,7 @@ func _ready() -> void:
 		wave_manager.wave_started.connect(func(w: int, c: int) -> void:
 			if hud != null:
 				hud.on_wave_started(w, c)
-			if w == 3:
-				set_emergency_lights(true)
-			else:
-				set_emergency_lights(false)
+			set_emergency_lights(true)
 		)
 		wave_manager.jaffa_count_changed.connect(func(rem: int, cur: int) -> void:
 			if hud != null:
@@ -75,16 +87,32 @@ func _ready() -> void:
 		)
 		wave_manager.wave_cleared.connect(func(w: int) -> void:
 			if hud != null:
-				hud.on_wave_cleared(w, wave_manager.intermission_duration_s)
+				hud.on_wave_cleared(w, wave_manager.inter_gate_recharge_s)
 		)
 		wave_manager.all_waves_defeated.connect(func() -> void:
 			if hud != null:
 				hud.on_all_waves_defeated()
 			set_emergency_lights(false)
 		)
+		wave_manager.wormhole_timer_tick.connect(func(left: float, total: float) -> void:
+			if hud != null:
+				hud.on_wormhole_timer_tick(left, total)
+		)
+		wave_manager.intermission_tick.connect(func(sec: int) -> void:
+			if hud != null:
+				hud.on_intermission_tick(sec)
+		)
+		wave_manager.iris_malfunction_declared.connect(func() -> void:
+			if hud != null:
+				hud.on_iris_malfunction()
+		)
+		wave_manager.lab_patch_objective_started.connect(func() -> void:
+			if hud != null:
+				hud.on_lab_patch_objective_started()
+		)
 
-	if dhd_console != null and hud != null:
-		hud.bind_dhd(dhd_console)
+	if dialing_console != null and hud != null:
+		hud.bind_dhd(dialing_console)
 	if stargate_mesh != null:
 		stargate_mesh.player_extracted.connect(_on_player_extracted)
 

@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://clabdatapatch01"]
+
+[ext_resource type="Script" path="res://scripts/props/LabDataPatchDrive.gd" id="1_patch"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_ROMDrive"]
+albedo_color = Color(0.1, 0.5, 0.8, 1)
+metallic = 0.9
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.2, 0.7, 1, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_Case"]
+material = SubResource("Mat_ROMDrive")
+size = Vector3(0.5, 0.15, 0.4)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Trigger"]
+height = 2.0
+radius = 2.2
+
+[node name="LabDataPatchDrive" type="Node3D"]
+script = ExtResource("1_patch")
+
+[node name="ROMMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("BoxMesh_Case")
+
+[node name="GlowLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+light_color = Color(0.2, 0.75, 1, 1)
+light_energy = 2.0
+omni_range = 3.5
+
+[node name="PromptLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+billboard = 1
+text = "SGC OPTICAL ROM DRIVE"
+font_size = 16
+outline_size = 4
+modulate = Color(0.4, 0.85, 1, 1)
+
+[node name="InteractArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CylinderShape3D_Trigger")
