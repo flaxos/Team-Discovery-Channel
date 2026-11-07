@@ -123,14 +123,42 @@ func _has_line_of_sight(target: Node3D) -> bool:
 	var space := get_world_3d().direct_space_state
 	var from := global_position + Vector3(0, 1.4, 0)
 	var to := target.global_position + Vector3(0, 1.0, 0)
-	var query := PhysicsRayQueryParameters3D.create(from, to)
-	query.collision_mask = 1  # Blocked only by World walls/barricades
-	var result := space.intersect_ray(query)
-	return result.is_empty()
+	var exclude_list: Array[RID] = [get_rid()]
+	if target is CollisionObject3D:
+		exclude_list.append((target as CollisionObject3D).get_rid())
+
+	for iter in range(3):
+		var query := PhysicsRayQueryParameters3D.create(from, to)
+		query.collision_mask = 1  # Blocked only by World walls/barricades
+		query.exclude = exclude_list
+		var result := space.intersect_ray(query)
+		if result.is_empty():
+			return true
+		var col: Node = result.get("collider") as Node
+		if col != null and (col.name.contains("Glass") or col.name.contains("Overlook")):
+			if result.has("rid"):
+				exclude_list.append(result["rid"])
+			continue
+		return false
+	return true
 
 
 func _advance_towards(target_pos: Vector3, delta: float) -> void:
-	var to_target := (target_pos - global_position)
+	var move_dest := target_pos
+
+	# Multi-Level Pathfinding: If target is on Sublevel 27 (Y >= 4.5) and Jaffa is on Sublevel 28 (Y < 4.5)
+	if target_pos.y >= 4.5 and global_position.y < 4.5:
+		var stairs_landing := Vector3(-5.0, 1.0, 11.0)
+		var dist_to_landing := Vector2(global_position.x - stairs_landing.x, global_position.z - stairs_landing.z).length()
+		if dist_to_landing > 1.5:
+			# Advance toward the Spiral Staircase base in the Control Room
+			move_dest = stairs_landing
+		else:
+			# Ascend the helical spiral stairs toward Level 27
+			velocity.y = 3.5
+			move_dest = Vector3(-5.0, 5.5, 11.0)
+
+	var to_target := (move_dest - global_position)
 	to_target.y = 0.0
 	var dir := to_target.normalized()
 

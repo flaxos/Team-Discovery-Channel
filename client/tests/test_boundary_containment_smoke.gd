@@ -65,13 +65,13 @@ func _process(_delta: float) -> bool:
 		print("[TEST 3/5] Stress testing Right-Side (+X) boundaries across all sectors...")
 		var right_test_points: Dictionary = {
 			"GateRoom_East": Vector3(10.0, 0.1, 0.0),
-			"ControlRoom_East": Vector3(20.0, 1.2, -4.0),
+			"ControlRoom_East": Vector3(0.0, 1.2, 15.0),
 			"RoundHallway_East": Vector3(26.0, 0.1, 36.0),
 			"Armory_East": Vector3(44.0, 0.1, 36.0),
 			"ElevatorLobby_East": Vector3(26.0, 0.1, 18.0),
 			"Lab_East": Vector3(26.0, 0.1, 55.0),
-			"BriefingRoom_East": Vector3(20.0, 5.8, -4.0),
-			"HammondsOffice_East": Vector3(32.0, 5.8, -4.0),
+			"BriefingRoom_East": Vector3(0.0, 5.8, 15.0),
+			"HammondsOffice_East": Vector3(13.0, 5.8, 15.0),
 		}
 
 		for point_name: String in right_test_points.keys():

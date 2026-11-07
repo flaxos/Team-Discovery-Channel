@@ -258,6 +258,16 @@ func try_fire(spread_mult: float = 1.0) -> bool:
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position
 	var base_forward: Vector3 = -global_transform.basis.z
 
+	# 3D Aim-Elevation: if parent operative has an active 3D aim target, align shot vector toward it
+	var parent_entity: Node = get_parent()
+	if parent_entity != null and not ("current_aim_target" in parent_entity) and parent_entity.get_parent() != null:
+		parent_entity = parent_entity.get_parent()
+
+	if parent_entity != null and "current_aim_target" in parent_entity:
+		var target: Vector3 = parent_entity.get("current_aim_target")
+		if target != Vector3.ZERO:
+			base_forward = (target - origin).normalized()
+
 	# Apply cone spread
 	var spread_rad := deg_to_rad(base_spread_deg * spread_mult)
 	var random_yaw := randf_range(-spread_rad, spread_rad)
@@ -283,18 +293,36 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 			return
 
 	var space := get_world_3d().direct_space_state
-	var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * max_range_m)
-	query.collision_mask = 1 | 2 | 4  # World (1), Players (2), and Jaffa (4)
-	query.exclude = [get_parent()]
+	var exclude_list: Array[RID] = []
+	if get_parent() is CollisionObject3D:
+		exclude_list.append((get_parent() as CollisionObject3D).get_rid())
+	elif get_parent() != null and get_parent().get_parent() is CollisionObject3D:
+		exclude_list.append((get_parent().get_parent() as CollisionObject3D).get_rid())
 
-	var result := space.intersect_ray(query)
 	var hit_pos := origin + dir * max_range_m
 	var hit_node: Node = null
 
-	if not result.is_empty():
+	# Trace ray with ballistic penetration through reinforced observation glass
+	for iter in range(4):
+		var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * max_range_m)
+		query.collision_mask = 1 | 2 | 4  # World (1), Players (2), and Jaffa (4)
+		query.exclude = exclude_list
+		var result := space.intersect_ray(query)
+		if result.is_empty():
+			break
+
+		var col: Node = result["collider"] as Node
 		hit_pos = result["position"]
-		hit_node = result["collider"] as Node
-		_apply_hit(hit_node)
+		hit_node = col
+
+		# If hit observation glass, allow high-velocity bullet penetration through window
+		if col != null and (col.name.contains("Glass") or col.name.contains("Overlook")):
+			if result.has("rid"):
+				exclude_list.append(result["rid"])
+			continue
+		else:
+			_apply_hit(hit_node)
+			break
 
 	fired.emit(origin, dir, hit_pos, hit_node)
 
