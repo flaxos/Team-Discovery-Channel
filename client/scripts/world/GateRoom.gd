@@ -6,7 +6,7 @@ extends Node3D
 
 const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
 
-# Sector identifiers for SGC Sublevel 28
+# Sector identifiers for SGC Sublevels 28 & 27
 const SECTOR_GATE_ROOM: String = "GATE_ROOM"
 const SECTOR_CONTROL_ROOM: String = "CONTROL_ROOM"
 const SECTOR_FALLBACK_HALLWAY: String = "FALLBACK_HALLWAY"
@@ -15,6 +15,14 @@ const SECTOR_ROUND_HALLWAY: String = "ROUND_HALLWAY"
 const SECTOR_ARMORY: String = "ARMORY"
 const SECTOR_LABORATORY: String = "LABORATORY"
 const SECTOR_ELEVATOR_LOBBY: String = "ELEVATOR_LOBBY"
+
+# Sublevel 27 Sectors
+const SECTOR_BRIEFING_ROOM: String = "BRIEFING_ROOM"
+const SECTOR_GENERALS_OFFICE: String = "GENERALS_OFFICE"
+const SECTOR_SECURITY_STATION: String = "SECURITY_STATION"
+const SECTOR_UPPER_CORRIDOR: String = "UPPER_CORRIDOR"
+const SECTOR_UPPER_ELEVATOR_LOBBY: String = "UPPER_ELEVATOR_LOBBY"
+
 const SECTOR_UNKNOWN: String = "UNKNOWN"
 
 @onready var players_container: Node3D = $Players
@@ -122,6 +130,35 @@ func _process(delta: float) -> void:
 
 
 func get_current_sector(pos: Vector3) -> String:
+	# ==========================================
+	# SUBLEVEL 27 SECTORS (Y >= 4.5m)
+	# ==========================================
+	if pos.y >= 4.5:
+		# General Hammond's Office (X: 27 to 38, Z: -11 to 3)
+		if pos.x >= 26.5 and pos.x <= 38.0 and pos.z >= -11.0 and pos.z <= 3.0:
+			return SECTOR_GENERALS_OFFICE
+
+		# Briefing Room & Gate Overlook (X: 12 to 27, Z: -13 to 5)
+		if pos.x >= 12.0 and pos.x <= 27.0 and pos.z >= -13.0 and pos.z <= 5.0:
+			return SECTOR_BRIEFING_ROOM
+
+		# Security Operations Station (X: 12 to 27, Z: -22 to -12.5)
+		if pos.x >= 12.0 and pos.x <= 27.0 and pos.z >= -22.0 and pos.z <= -12.5:
+			return SECTOR_SECURITY_STATION
+
+		# Upper Secure Corridor (X: 26.5 to 38, Z: -21 to -10.5)
+		if pos.x >= 26.5 and pos.x <= 38.0 and pos.z >= -21.0 and pos.z <= -10.5:
+			return SECTOR_UPPER_CORRIDOR
+
+		# Level 27 Upper Elevator Lobby (X: 16 to 36, Z: 9 to 27)
+		if pos.x >= 16.0 and pos.x <= 36.0 and pos.z >= 9.0 and pos.z <= 27.0:
+			return SECTOR_UPPER_ELEVATOR_LOBBY
+
+		return "LEVEL_27_MEZZANINE"
+
+	# ==========================================
+	# SUBLEVEL 28 SECTORS (Y < 4.5m)
+	# ==========================================
 	# Priority 1: Control Room Mezzanine (raised balcony Y >= 0.3)
 	if pos.x >= 13.5 and pos.x <= 26.5 and pos.z >= -12.5 and pos.z <= 4.5 and pos.y >= 0.3:
 		return SECTOR_CONTROL_ROOM
@@ -175,8 +212,18 @@ func get_sector_display_name(sector_id: String) -> String:
 			return "NAQUADAH RESEARCH LAB [LVL 28]"
 		SECTOR_ELEVATOR_LOBBY:
 			return "ELEVATOR ACCESS LOBBY [LVL 28]"
+		SECTOR_BRIEFING_ROOM:
+			return "SGC BRIEFING ROOM [LVL 27]"
+		SECTOR_GENERALS_OFFICE:
+			return "GENERAL'S OFFICE [LVL 27]"
+		SECTOR_SECURITY_STATION:
+			return "SECURITY OPERATIONS [LVL 27]"
+		SECTOR_UPPER_CORRIDOR:
+			return "ADMINISTRATIVE CORRIDOR [LVL 27]"
+		SECTOR_UPPER_ELEVATOR_LOBBY:
+			return "UPPER ELEVATOR LOBBY [LVL 27]"
 		_:
-			return "SGC SUBLEVEL 28 COMPLEX"
+			return "SGC CHEYENNE MOUNTAIN COMPLEX"
 
 
 func set_emergency_lights(enabled: bool) -> void:

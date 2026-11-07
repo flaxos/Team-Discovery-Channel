@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://c8sgcgateroom01"]
+[gd_scene load_steps=18 format=3 uid="uid://c8sgcgateroom01"]
 
 [ext_resource type="Script" path="res://scripts/world/GateRoom.gd" id="1_gr01"]
 [ext_resource type="Script" path="res://scripts/world/WaveManager.gd" id="2_wm01"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://scenes/props/TransportRings.tscn" id="5_tr01"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6_hud01"]
 [ext_resource type="PackedScene" path="res://scenes/props/DeployableTurret.tscn" id="7_turret01"]
+[ext_resource type="PackedScene" path="res://scenes/world/Level27Complex.tscn" id="8_l2701"]
+[ext_resource type="PackedScene" path="res://scenes/props/SGCElevator.tscn" id="9_elev01"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Door"]
 albedo_color = Color(0.24, 0.27, 0.3, 1)
@@ -201,6 +203,30 @@ omni_range = 16.0
 
 [node name="AlarmControlRoom" type="OmniLight3D" parent="EmergencyLights"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 4.5, -4)
+light_color = Color(1, 0.12, 0.08, 1)
+light_energy = 0.0
+omni_range = 16.0
+
+[node name="AlarmBriefingRoom" type="OmniLight3D" parent="EmergencyLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 8.8, -4)
+light_color = Color(1, 0.12, 0.08, 1)
+light_energy = 0.0
+omni_range = 16.0
+
+[node name="AlarmOffice" type="OmniLight3D" parent="EmergencyLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 8.8, -4)
+light_color = Color(1, 0.12, 0.08, 1)
+light_energy = 0.0
+omni_range = 16.0
+
+[node name="AlarmSecurity" type="OmniLight3D" parent="EmergencyLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 8.8, -16.5)
+light_color = Color(1, 0.12, 0.08, 1)
+light_energy = 0.0
+omni_range = 16.0
+
+[node name="AlarmUpperElevator" type="OmniLight3D" parent="EmergencyLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 8.8, 18)
 light_color = Color(1, 0.12, 0.08, 1)
 light_energy = 0.0
 omni_range = 16.0
@@ -801,35 +827,10 @@ use_collision = true
 size = Vector3(1.2, 1, 2.4)
 material = SubResource("Mat_Door")
 
-[node name="SpiralStairsBase" type="CSGCylinder3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 2.5, 2)
+[node name="StairwayBaseLanding" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.85, 2)
 use_collision = true
-radius = 0.25
-height = 5
-material = SubResource("Mat_Door")
-
-[node name="SpiralStep1" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine/SpiralStairsBase"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, -1.8, 0)
-use_collision = true
-size = Vector3(1.2, 0.2, 0.45)
-material = SubResource("Mat_Door")
-
-[node name="SpiralStep2" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine/SpiralStairsBase"]
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0.42, -1.4, 0.42)
-use_collision = true
-size = Vector3(1.2, 0.2, 0.45)
-material = SubResource("Mat_Door")
-
-[node name="SpiralStep3" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine/SpiralStairsBase"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, -1, 0.6)
-use_collision = true
-size = Vector3(1.2, 0.2, 0.45)
-material = SubResource("Mat_Door")
-
-[node name="SpiralStep4" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine/SpiralStairsBase"]
-transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -0.42, -0.6, 0.42)
-use_collision = true
-size = Vector3(1.2, 0.2, 0.45)
+size = Vector3(1.6, 0.2, 1.6)
 material = SubResource("Mat_Door")
 
 [node name="ControlLight" type="OmniLight3D" parent="Level28Complex/ControlRoomMezzanine"]
@@ -888,3 +889,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -13.5)
 script = ExtResource("2_wm01")
 
 [node name="TacticalHUD" parent="." instance=ExtResource("6_hud01")]
+
+[node name="Level27Complex" parent="." instance=ExtResource("8_l2701")]
+
+[node name="SGCElevator" parent="." instance=ExtResource("9_elev01")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37, 0, 18)
