@@ -22,6 +22,7 @@ var mounted_player: CharacterBody3D = null
 
 
 func _ready() -> void:
+	add_to_group("turret")
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_interact_entered)
 		interact_area.body_exited.connect(_on_interact_exited)

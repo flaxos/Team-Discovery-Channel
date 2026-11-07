@@ -1,0 +1,60 @@
+[gd_scene load_steps=8 format=3 uid="uid://csgcairman01"]
+
+[ext_resource type="Script" path="res://scripts/entities/SGCAirmanAI.gd" id="1_airman"]
+[ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_Body"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_AirmanBDU"]
+albedo_color = Color(0.24, 0.32, 0.22, 1)
+roughness = 0.75
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_Torso"]
+material = SubResource("Mat_AirmanBDU")
+radius = 0.4
+height = 1.75
+
+[sub_resource type="StandardMaterial3D" id="Mat_Helmet"]
+albedo_color = Color(0.18, 0.22, 0.16, 1)
+roughness = 0.65
+
+[sub_resource type="SphereMesh" id="SphereMesh_Helmet"]
+material = SubResource("Mat_Helmet")
+radius = 0.42
+height = 0.55
+
+[node name="SGCAirman" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_airman")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_Body")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2_health")
+can_be_downed = true
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_Torso")
+
+[node name="HelmetMesh" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, -0.05)
+mesh = SubResource("SphereMesh_Helmet")
+
+[node name="Nameplate" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+billboard = 1
+text = "AIRMAN DAVIS"
+font_size = 14
+outline_size = 4
+modulate = Color(0.4, 0.85, 1, 1)
+
+[node name="MuzzlePoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.15, -0.6)

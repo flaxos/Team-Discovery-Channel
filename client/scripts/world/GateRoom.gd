@@ -5,6 +5,7 @@ extends Node3D
 ## mid-mission operative joins, defensive sandbags, gate status, and emergency alert lighting.
 
 const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
+const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
 
 # Sector identifiers for SGC Sublevels 28 & 27
 const SECTOR_GATE_ROOM: String = "GATE_ROOM"
@@ -37,6 +38,7 @@ const SECTOR_UNKNOWN: String = "UNKNOWN"
 @onready var door_right: CSGBox3D = $BlastDoors/BlastDoorRight if has_node("BlastDoors/BlastDoorRight") else null
 @onready var console_light: OmniLight3D = $BlastDoors/BlastDoorConsole/ConsoleLight if has_node("BlastDoors/BlastDoorConsole/ConsoleLight") else null
 @onready var emergency_lights_container: Node3D = $EmergencyLights if has_node("EmergencyLights") else null
+@onready var allies_container: Node3D = $Allies if has_node("Allies") else null
 
 var dhd_console: DHDDialer:
 	get:
@@ -366,12 +368,32 @@ func _play_door_sfx() -> void:
 func _start_foothold_defense() -> void:
 	if wave_manager == null:
 		return
-	# 3-second preparation time before Stargate alarms sound
-	var timer := get_tree().create_timer(3.0)
+	print("GateRoom: STAGING PHASE: Operatives resupply at Armory before incursion...")
+	if hud != null:
+		hud.update_objective("STAGE AT ARMORY: COLLECT MUNITIONS & TACTICAL GEAR", Color(0.4, 0.9, 1.0))
+
+	# 6.0-second Armory staging period for operatives to gather munitions
+	var timer := get_tree().create_timer(6.0)
 	timer.timeout.connect(func() -> void:
-		if wave_manager != null and is_instance_valid(wave_manager):
-			wave_manager.start_wave_defense()
+		if not is_instance_valid(self):
+			return
+		_trigger_base_scramble()
 	)
+
+
+func _trigger_base_scramble() -> void:
+	print("GateRoom: KLAXON SOUNDS! RED ALERT! UNSCHEDULED OFFWORLD ACTIVATION!")
+	set_emergency_lights(true)
+
+	# Scramble Airmen to Gate Room
+	if allies_container != null:
+		for child in allies_container.get_children():
+			var airman := child as SGCAirmanAIScript
+			if airman != null:
+				airman.scramble_to_gate_room()
+
+	if wave_manager != null and is_instance_valid(wave_manager):
+		wave_manager.start_wave_defense()
 
 
 func _spawn_all_players() -> void:

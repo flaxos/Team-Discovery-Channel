@@ -50,7 +50,7 @@ var active_turret: DeployableTurret = null
 var mounted_turret: DeployableTurret = null
 var turret_cooldown: float = 0.0
 const TURRET_COOLDOWN_S: float = 30.0
-var active_revive_target: PlayerController3D = null
+var active_revive_target: CharacterBody3D = null
 var current_revive_time: float = 0.0
 const REVIVE_DURATION_S: float = 2.5
 
@@ -65,6 +65,13 @@ var ads_blend: float = 0.0
 var current_iso_cam_y: float = 12.0
 var current_iso_pan_yaw: float = 0.0
 var is_carrying_patch_rom: bool = false
+var auto_cover_enabled: bool = true
+var is_in_cover: bool = false
+var is_peeking: bool = false
+var cover_detection_distance: float = 1.35
+var is_dragging_body: bool = false
+var dragged_body: CharacterBody3D = null
+const DRAG_SPEED: float = 3.2
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -136,6 +143,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if is_aiming_down_sights and event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		rotation.y -= motion.relative.x * 0.003
+	elif event is InputEventKey and event.pressed and not event.echo:
+		var key_event := event as InputEventKey
+		if key_event.keycode == KEY_G:
+			_toggle_drag_body()
+		elif key_event.keycode == KEY_C:
+			auto_cover_enabled = not auto_cover_enabled
+			print("Player %d auto-cover toggled: %s" % [peer_id, auto_cover_enabled])
 
 
 func _setup_replication() -> void:
@@ -436,20 +450,6 @@ func _physics_process(delta: float) -> void:
 		_update_camera_and_occlusion(delta)
 		return
 
-	# Stances (Sprint / Crouch)
-	is_crouching = Input.is_action_pressed("crouch")
-	is_sprinting = Input.is_action_pressed("sprint") and not is_crouching
-
-	if body_mesh != null:
-		var target_scale_y: float = 0.65 if is_crouching else 1.0
-		body_mesh.scale.y = move_toward(body_mesh.scale.y, target_scale_y, 5.0 * delta)
-
-	var speed := base_speed
-	if is_crouching:
-		speed *= crouch_multiplier
-	elif is_sprinting:
-		speed *= sprint_multiplier
-
 	# Movement vector from input actions: Camera / Sightline relative
 	var raw_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var move_dir := Vector3.ZERO
@@ -465,6 +465,26 @@ func _physics_process(delta: float) -> void:
 		var cam_forward := -Vector3(sin(cam_yaw), 0.0, cos(cam_yaw))
 		var cam_right := Vector3(cos(cam_yaw), 0.0, -sin(cam_yaw))
 		move_dir = (cam_right * raw_input.x + cam_forward * (-raw_input.y)).normalized()
+
+	# Stances (Cover / Sprint / Crouch / Peek-to-Shoot)
+	_process_cover_and_peeking(delta, move_dir)
+
+	var speed := base_speed
+	if is_dragging_body:
+		speed = DRAG_SPEED
+	elif is_crouching:
+		speed *= crouch_multiplier
+	elif is_sprinting:
+		speed *= sprint_multiplier
+
+	# Body Dragging Physics follow
+	if is_dragging_body:
+		if is_instance_valid(dragged_body) and not health_component.is_dead and not health_component.is_downed:
+			var pull_target := global_position - global_transform.basis.z * 1.1
+			dragged_body.global_position = dragged_body.global_position.lerp(pull_target, 12.0 * delta)
+			dragged_body.rotation.y = lerp_angle(dragged_body.rotation.y, rotation.y, 8.0 * delta)
+		else:
+			stop_dragging_body()
 
 	if move_dir.length_squared() > 0.001:
 		velocity.x = move_toward(velocity.x, move_dir.x * speed, acceleration * delta)
@@ -815,7 +835,7 @@ func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = fa
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	if is_zat:
-		mat.albedo_color = Color(0.2, 0.7, 1.0, 1.0)  # Zat'nik'tel electric blue arc
+		mat.albedo_color = Color(0.25, 0.85, 1.0, 1.0)  # Zat'nik'tel electric cyan lightning
 	elif is_plasma:
 		mat.albedo_color = Color(1.0, 0.5, 0.0, 1.0)  # Goa'uld golden plasma
 	else:
@@ -826,13 +846,55 @@ func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = fa
 
 	imm.clear_surfaces()
 	imm.surface_begin(Mesh.PRIMITIVE_LINES)
+	# 1. Straight core line
 	imm.surface_add_vertex(from)
 	imm.surface_add_vertex(to)
+
+	# 2. Spikey + jagged electric lightning discharge arcs for Zat'nik'tel
+	if is_zat:
+		var dist := from.distance_to(to)
+		var segments := maxi(4, int(dist * 0.8))
+		var dir := (to - from).normalized()
+		var perp := dir.cross(Vector3.UP).normalized()
+		if perp.length_squared() < 0.01:
+			perp = dir.cross(Vector3.RIGHT).normalized()
+		var perp_up := dir.cross(perp).normalized()
+
+		var prev_pt := from
+		for i in range(1, segments):
+			var t := float(i) / float(segments)
+			var base_pt := from.lerp(to, t)
+			var spike_offset := perp * randf_range(-0.25, 0.25) + perp_up * randf_range(-0.25, 0.25)
+			var cur_pt := base_pt + spike_offset
+			imm.surface_add_vertex(prev_pt)
+			imm.surface_add_vertex(cur_pt)
+			prev_pt = cur_pt
+
+			# 3. Spikey lateral branch tendrils
+			if i % 2 == 0:
+				var branch_end := cur_pt + (perp * randf_range(-0.4, 0.4) + perp_up * randf_range(-0.35, 0.35) + dir * 0.2)
+				imm.surface_add_vertex(cur_pt)
+				imm.surface_add_vertex(branch_end)
+
+		imm.surface_add_vertex(prev_pt)
+		imm.surface_add_vertex(to)
+
+		# Electric discharge impact flash
+		var flash := OmniLight3D.new()
+		flash.light_color = Color(0.2, 0.8, 1.0)
+		flash.light_energy = 4.0
+		flash.omni_range = 3.5
+		get_tree().root.add_child(flash)
+		flash.global_position = to
+		var flash_tween := flash.create_tween()
+		flash_tween.tween_property(flash, "light_energy", 0.0, 0.12)
+		flash_tween.tween_callback(flash.queue_free)
+
 	imm.surface_end()
 
-	# Fade out and clean up after 0.08s
+	# Fade out and clean up after 0.12s
 	var tween := tracer.create_tween()
-	tween.tween_property(mat, "albedo_color:a", 0.0, 0.08)
+	tween.tween_property(mat, "albedo_color:a", 0.0, 0.12 if is_zat else 0.08)
 	tween.tween_callback(tracer.queue_free)
 
 
@@ -879,18 +941,32 @@ func _process_revive(delta: float) -> void:
 			revive_progress_changed.emit(0.0)
 		return
 
-	# Find closest downed squadmate within 2.2m
-	var closest_downed: PlayerController3D = null
-	var min_d: float = 2.2
+	# Find closest downed squadmate or allied SGC Airman within 2.4m
+	var closest_downed: CharacterBody3D = null
+	var min_d: float = 2.4
 	var players_container := get_tree().root.find_child("Players", true, false)
 	if players_container != null:
 		for p in players_container.get_children():
-			var teammate := p as PlayerController3D
-			if teammate != null and teammate != self and teammate.health_component != null and teammate.health_component.is_downed and not teammate.health_component.is_dead:
-				var d := global_position.distance_to(teammate.global_position)
-				if d < min_d:
-					min_d = d
-					closest_downed = teammate
+			var teammate := p as CharacterBody3D
+			if teammate != null and teammate != self:
+				var health := teammate.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and health.is_downed and not health.is_dead:
+					var d := global_position.distance_to(teammate.global_position)
+					if d < min_d:
+						min_d = d
+						closest_downed = teammate
+
+	var allies_container := get_tree().root.find_child("Allies", true, false)
+	if allies_container != null:
+		for a in allies_container.get_children():
+			var ally := a as CharacterBody3D
+			if ally != null and ally != self:
+				var health := ally.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and health.is_downed and not health.is_dead:
+					var d := global_position.distance_to(ally.global_position)
+					if d < min_d:
+						min_d = d
+						closest_downed = ally
 
 	if closest_downed != null:
 		active_revive_target = closest_downed
@@ -898,11 +974,13 @@ func _process_revive(delta: float) -> void:
 		var prog := clampf(current_revive_time / REVIVE_DURATION_S, 0.0, 1.0)
 		revive_progress_changed.emit(prog)
 		if current_revive_time >= REVIVE_DURATION_S:
-			active_revive_target.health_component.revive(self)
+			var target_health := active_revive_target.get_node_or_null("HealthComponent") as HealthComponent
+			if target_health != null:
+				target_health.revive(self)
 			active_revive_target = null
 			current_revive_time = 0.0
 			revive_progress_changed.emit(0.0)
-			print("Player %d REVIVED squadmate!" % peer_id)
+			print("Player %d REVIVED squadmate/ally %s!" % [peer_id, closest_downed.name])
 	else:
 		if current_revive_time > 0.0:
 			current_revive_time = 0.0
@@ -910,7 +988,163 @@ func _process_revive(delta: float) -> void:
 			revive_progress_changed.emit(0.0)
 
 
+func _process_cover_and_peeking(delta: float, _move_dir: Vector3) -> void:
+	# Check cover proximity when auto-cover is enabled
+	var near_cover := false
+	if auto_cover_enabled:
+		near_cover = _check_near_cover()
+
+	is_in_cover = near_cover
+	if is_in_cover:
+		# In cover: Peeking is triggered by Aiming (ADS) or Firing
+		var wants_peek := is_aiming_down_sights or Input.is_action_pressed("fire")
+		is_peeking = wants_peek
+		is_crouching = not is_peeking
+		is_sprinting = false
+	else:
+		is_peeking = false
+		is_crouching = Input.is_action_pressed("crouch")
+		is_sprinting = Input.is_action_pressed("sprint") and not is_crouching and not is_dragging_body
+
+	if body_mesh != null:
+		var target_scale_y: float = 1.0
+		var target_pos_y: float = 0.9
+		if is_in_cover:
+			if is_peeking:
+				target_scale_y = 0.85
+				target_pos_y = 0.75
+			else:
+				target_scale_y = 0.55
+				target_pos_y = 0.50
+		elif is_crouching:
+			target_scale_y = 0.65
+			target_pos_y = 0.60
+
+		body_mesh.scale.y = move_toward(body_mesh.scale.y, target_scale_y, 6.0 * delta)
+		body_mesh.position.y = move_toward(body_mesh.position.y, target_pos_y, 6.0 * delta)
+
+
+func _check_near_cover() -> bool:
+	if not is_inside_tree():
+		return false
+
+	# 1. Check nearby nodes in 'cover' group
+	for node in get_tree().get_nodes_in_group("cover"):
+		if node is Node3D and is_instance_valid(node):
+			var n3d := node as Node3D
+			var d := global_position.distance_to(n3d.global_position)
+			if d <= cover_detection_distance + 1.2:
+				return true
+
+	# 2. Check barricades container in bunker geometry
+	var barricades := get_tree().root.find_child("Barricades", true, false)
+	if barricades != null:
+		for child in barricades.get_children():
+			if child is Node3D:
+				var c3d := child as Node3D
+				if global_position.distance_to(c3d.global_position) <= cover_detection_distance + 1.2:
+					return true
+
+	# 3. Raycast ahead and to sides for obstacle geometry
+	var world3d := get_world_3d()
+	if world3d != null and world3d.direct_space_state != null:
+		var space := world3d.direct_space_state
+		var origin := global_position + Vector3(0, 0.5, 0)
+		var dirs: Array[Vector3] = [
+			-global_transform.basis.z,
+			global_transform.basis.z,
+			-global_transform.basis.x,
+			global_transform.basis.x,
+			(-global_transform.basis.z + global_transform.basis.x).normalized(),
+			(-global_transform.basis.z - global_transform.basis.x).normalized()
+		]
+		for d: Vector3 in dirs:
+			var query := PhysicsRayQueryParameters3D.create(origin, origin + d * cover_detection_distance)
+			query.collision_mask = 1  # Environment
+			var hit := space.intersect_ray(query)
+			if not hit.is_empty():
+				var col: Node = hit.get("collider") as Node
+				if col != null:
+					if col.is_in_group("cover") or col.name.to_lower().contains("sandbag") or col.name.to_lower().contains("barricade") or col.name.to_lower().contains("crate"):
+						return true
+
+	return false
+
+
+func _toggle_drag_body() -> void:
+	if is_dragging_body:
+		stop_dragging_body()
+	else:
+		var target := _find_nearby_drag_target()
+		if target != null:
+			start_dragging_body(target)
+
+
+func start_dragging_body(body: CharacterBody3D) -> void:
+	if body == null or not is_instance_valid(body) or body == self:
+		return
+	is_dragging_body = true
+	dragged_body = body
+	print("Player %d started dragging %s into cover." % [peer_id, body.name])
+
+
+func stop_dragging_body() -> void:
+	if is_dragging_body:
+		print("Player %d released dragged body." % peer_id)
+	is_dragging_body = false
+	dragged_body = null
+
+
+func _find_nearby_drag_target() -> CharacterBody3D:
+	if not is_inside_tree():
+		return null
+	var min_d: float = 2.4
+	var best_target: CharacterBody3D = null
+
+	# 1. Downed players
+	var players_container := get_tree().root.find_child("Players", true, false)
+	if players_container != null:
+		for p in players_container.get_children():
+			var body := p as CharacterBody3D
+			if body != null and body != self:
+				var health := body.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and health.is_downed and not health.is_dead:
+					var d := global_position.distance_to(body.global_position)
+					if d < min_d:
+						min_d = d
+						best_target = body
+
+	# 2. Downed allies
+	var allies_container := get_tree().root.find_child("Allies", true, false)
+	if allies_container != null:
+		for a in allies_container.get_children():
+			var body := a as CharacterBody3D
+			if body != null and body != self:
+				var health := body.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and health.is_downed and not health.is_dead:
+					var d := global_position.distance_to(body.global_position)
+					if d < min_d:
+						min_d = d
+						best_target = body
+
+	# 3. Dead enemies (Jaffa corpses)
+	var enemies_container := get_tree().root.find_child("Enemies", true, false)
+	if enemies_container != null:
+		for e in enemies_container.get_children():
+			var body := e as CharacterBody3D
+			if body != null:
+				var health := body.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and health.is_dead:
+					var d := global_position.distance_to(body.global_position)
+					if d < min_d:
+						min_d = d
+						best_target = body
+
+	return best_target
+
+
 func _on_downed() -> void:
+	stop_dragging_body()
 	if mounted_turret != null:
 		mounted_turret.dismount()
 		mounted_turret = null
@@ -937,12 +1171,14 @@ func _on_damage_taken(amount: float, _source: Node, _type: String) -> void:
 
 
 func _on_died() -> void:
+	stop_dragging_body()
 	_restore_all_occluded_nodes()
 	player_died.emit(peer_id)
 	print("Player %d has fallen in combat." % peer_id)
 
 
 func _on_stunned(duration: float) -> void:
+	stop_dragging_body()
 	print("Player %d stunned by Zat'nik'tel for %.1f seconds." % [peer_id, duration])
 
 
@@ -969,6 +1205,11 @@ func _on_vaporized() -> void:
 
 
 func _try_interact() -> void:
+	# 0. If currently dragging a body, dropping it takes precedence
+	if is_dragging_body:
+		stop_dragging_body()
+		return
+
 	# 1. If currently mounted on a .50 cal turret, dismount
 	if mounted_turret != null:
 		mounted_turret.dismount()
@@ -1046,6 +1287,13 @@ func _try_interact() -> void:
 			dialer.start_dialing(self)
 		else:
 			dialer.cancel_dialing()
+		return
+
+	# 8. Check for nearby downed ally/squadmate or dead enemy corpse to drag
+	var drag_target := _find_nearby_drag_target()
+	if drag_target != null:
+		start_dragging_body(drag_target)
+		return
 
 
 func set_cctv_camera(cam_pos: Vector3, cam_target: Vector3, cam_fov: float) -> void:
