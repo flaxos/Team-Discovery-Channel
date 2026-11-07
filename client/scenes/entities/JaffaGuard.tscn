@@ -1,0 +1,95 @@
+[gd_scene load_steps=11 format=3 uid="uid://bjaffaguard01"]
+
+[ext_resource type="Script" path="res://scripts/entities/JaffaAI.gd" id="1_jaffa"]
+[ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jaffa"]
+radius = 0.45
+height = 1.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_GoldArmor"]
+albedo_color = Color(0.68, 0.52, 0.22, 1)
+metallic = 0.85
+roughness = 0.35
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_Armor"]
+material = SubResource("Mat_GoldArmor")
+radius = 0.45
+height = 1.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_HelmCrest"]
+albedo_color = Color(0.85, 0.68, 0.2, 1)
+metallic = 0.9
+roughness = 0.25
+
+[sub_resource type="PrismMesh" id="PrismMesh_Helm"]
+material = SubResource("Mat_HelmCrest")
+size = Vector3(0.5, 0.6, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_EyeGlow"]
+shading_mode = 0
+albedo_color = Color(1, 0.15, 0.05, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_Eyes"]
+material = SubResource("Mat_EyeGlow")
+size = Vector3(0.3, 0.08, 0.15)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_jaffa"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:current_state")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+
+[node name="JaffaGuard" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_jaffa")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_jaffa")
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="ArmorMesh" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+mesh = SubResource("CapsuleMesh_Armor")
+
+[node name="SerpentHelm" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 1.85, -0.1)
+mesh = SubResource("PrismMesh_Helm")
+
+[node name="EyeSlits" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, -0.38)
+mesh = SubResource("BoxMesh_Eyes")
+
+[node name="StunFX" type="Node3D" parent="Visuals"]
+visible = false
+
+[node name="StunLight" type="OmniLight3D" parent="Visuals/StunFX"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+light_color = Color(0.2, 0.7, 1, 1)
+light_energy = 3.5
+omni_range = 3.0
+
+[node name="StaffMount" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 1, -0.2)
+
+[node name="MuzzlePoint" type="Marker3D" parent="StaffMount"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2_health")
+max_health = 90.0
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 1.0
+target_desired_distance = 2.0
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_jaffa")

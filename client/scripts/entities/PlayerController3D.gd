@@ -30,6 +30,10 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9
 
 var current_weapon: WeaponBase = null
 var current_aim_target: Vector3 = Vector3.ZERO
+var primary_weapon_id: String = "m249"
+var secondary_weapon_id: String = "m9"
+var active_slot: int = 1
+var active_c4: C4Satchel = null
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -58,6 +62,7 @@ func _ready() -> void:
 		health_component.died.connect(_on_died)
 		health_component.stunned.connect(_on_stunned)
 		health_component.recovered_from_stun.connect(_on_recovered_from_stun)
+		health_component.vaporized.connect(_on_vaporized)
 
 	# Configure Camera and input authority
 	if is_local_authority:
@@ -87,8 +92,20 @@ func _apply_class_profile(target_class_id: String) -> void:
 		health_component.max_health = profile.get("health", 120.0)
 		health_component.current_health = health_component.max_health
 
-	_equip_weapon_by_id(profile.get("primary", "m249"))
+	primary_weapon_id = profile.get("primary", "m249")
+	secondary_weapon_id = profile.get("secondary", "m9")
+	active_slot = 1
+	_equip_weapon_by_id(primary_weapon_id)
 	class_configured.emit(class_id)
+
+
+func switch_slot(slot: int) -> void:
+	if active_slot == slot:
+		return
+	active_slot = slot
+	var target_id := primary_weapon_id if active_slot == 1 else secondary_weapon_id
+	_equip_weapon_by_id(target_id)
+	print("Player %d switched to slot %d: %s" % [peer_id, active_slot, current_weapon.display_name])
 
 
 func _equip_weapon_by_id(weapon_id: String) -> void:
@@ -112,6 +129,8 @@ func _equip_weapon_by_id(weapon_id: String) -> void:
 			new_weapon = WeaponStaff.new()
 		"zat":
 			new_weapon = WeaponZat.new()
+		"m9":
+			new_weapon = WeaponM9.new()
 		_:
 			new_weapon = WeaponP90.new()
 
@@ -196,6 +215,14 @@ func _process_combat() -> void:
 	if current_weapon == null:
 		return
 
+	if Input.is_key_pressed(KEY_1):
+		switch_slot(1)
+	elif Input.is_key_pressed(KEY_2):
+		switch_slot(2)
+
+	if Input.is_action_just_pressed("gadget"):
+		_deploy_tactical_gadget()
+
 	if Input.is_action_just_pressed("reload"):
 		current_weapon.reload()
 
@@ -210,13 +237,39 @@ func _process_combat() -> void:
 		current_weapon.try_fire(spread_mult)
 
 
+func _deploy_tactical_gadget() -> void:
+	if class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
+		var turret_scene := load("res://scenes/props/DeployableTurret.tscn") as PackedScene
+		if turret_scene != null:
+			var turret := turret_scene.instantiate() as DeployableTurret
+			turret.position = global_position - global_transform.basis.z * 1.6
+			get_parent().add_child(turret)
+			print("Player %d deployed .50 Cal Tripod Turret!" % peer_id)
+	elif class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
+		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed:
+			active_c4.detonate()
+			active_c4 = null
+			print("Player %d detonated C4 Satchel!" % peer_id)
+		else:
+			var c4_scene := load("res://scenes/props/C4Satchel.tscn") as PackedScene
+			if c4_scene != null:
+				var c4 := c4_scene.instantiate() as C4Satchel
+				c4.position = global_position + Vector3(0, 1.0, 0)
+				c4.planter = self
+				get_parent().add_child(c4)
+				c4.apply_central_impulse(-global_transform.basis.z * 10.0 + Vector3.UP * 3.0)
+				active_c4 = c4
+				print("Player %d threw C4 Satchel Charge!" % peer_id)
+
+
 func _on_weapon_fired(origin: Vector3, dir: Vector3, hit_point: Vector3, hit_node: Node) -> void:
-	# Broadcast tracer/sound RPC to all peers
-	rpc("play_shot_fx", origin, hit_point, current_weapon.is_plasma)
+	var is_zat := (current_weapon != null and current_weapon.is_zat)
+	var is_pl := (current_weapon != null and current_weapon.is_plasma)
+	rpc("play_shot_fx", origin, hit_point, is_pl, is_zat)
 
 
 @rpc("call_local", "unreliable")
-func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool) -> void:
+func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = false) -> void:
 	# Render lightweight tracer beam
 	var tracer := MeshInstance3D.new()
 	var imm := ImmediateMesh.new()
@@ -224,7 +277,9 @@ func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool) -> void:
 
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	if is_plasma:
+	if is_zat:
+		mat.albedo_color = Color(0.2, 0.7, 1.0, 1.0)  # Zat'nik'tel electric blue arc
+	elif is_plasma:
 		mat.albedo_color = Color(1.0, 0.5, 0.0, 1.0)  # Goa'uld golden plasma
 	else:
 		mat.albedo_color = Color(1.0, 0.9, 0.4, 0.8)  # Bullet tracer
@@ -255,3 +310,21 @@ func _on_stunned(duration: float) -> void:
 
 func _on_recovered_from_stun() -> void:
 	print("Player %d recovered from stun." % peer_id)
+
+
+func _on_vaporized() -> void:
+	print("Player %d disintegrated by Zat'nik'tel!" % peer_id)
+	var flash := OmniLight3D.new()
+	flash.light_color = Color(0.2, 0.6, 1.0)
+	flash.light_energy = 8.0
+	flash.omni_range = 6.0
+	get_tree().root.add_child(flash)
+	flash.global_position = global_position + Vector3(0, 0.5, 0)
+
+	var tween := create_tween()
+	if body_mesh != null:
+		tween.tween_property(body_mesh, "scale", Vector3(0.01, 0.01, 0.01), 0.25)
+	tween.tween_callback(queue_free)
+	var flash_tween := flash.create_tween()
+	flash_tween.tween_property(flash, "light_energy", 0.0, 0.25)
+	flash_tween.tween_callback(flash.queue_free)

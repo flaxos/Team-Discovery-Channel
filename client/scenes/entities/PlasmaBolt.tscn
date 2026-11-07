@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://dm6plasma01"]
+
+[ext_resource type="Script" path="res://scripts/weapons/PlasmaBolt.gd" id="1_pb01"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_1"]
+radius = 0.25
+
+[sub_resource type="StandardMaterial3D" id="Mat_Plasma"]
+shading_mode = 0
+albedo_color = Color(1, 0.55, 0.05, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_Plasma"]
+material = SubResource("Mat_Plasma")
+radius = 0.12
+height = 0.8
+
+[node name="PlasmaBolt" type="Area3D"]
+collision_layer = 8
+collision_mask = 3
+script = ExtResource("1_pb01")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_Plasma")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(1, 0.55, 0.1, 1)
+light_energy = 2.5
+omni_range = 3.5

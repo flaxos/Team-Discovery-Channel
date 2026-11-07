@@ -1,6 +1,7 @@
 [gd_scene load_steps=15 format=3 uid="uid://c8sgcgateroom01"]
 
 [ext_resource type="Script" path="res://scripts/world/GateRoom.gd" id="1_gr01"]
+[ext_resource type="Script" path="res://scripts/world/WaveManager.gd" id="2_wm01"]
 
 [sub_resource type="Environment" id="Environment_sgc"]
 background_mode = 1
@@ -188,3 +189,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1, 9.5)
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/entities/Player.tscn")
 spawn_path = NodePath("../Players")
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn")
+spawn_path = NodePath("../Enemies")
+
+[node name="GateSpawnMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -13.5)
+
+[node name="WaveManager" type="Node" parent="."]
+script = ExtResource("2_wm01")

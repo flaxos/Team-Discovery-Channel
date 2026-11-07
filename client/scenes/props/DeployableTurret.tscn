@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://dturret01"]
+
+[ext_resource type="Script" path="res://scripts/weapons/DeployableTurret.gd" id="1_turret"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_GunMetal"]
+albedo_color = Color(0.18, 0.2, 0.22, 1)
+metallic = 0.85
+roughness = 0.4
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_Tripod"]
+material = SubResource("Mat_GunMetal")
+top_radius = 0.1
+bottom_radius = 0.5
+height = 0.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_Receiver"]
+material = SubResource("Mat_GunMetal")
+size = Vector3(0.25, 0.25, 0.8)
+
+[node name="DeployableTurret" type="Node3D"]
+script = ExtResource("1_turret")
+
+[node name="TripodBase" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+mesh = SubResource("CylinderMesh_Tripod")
+
+[node name="TurretHead" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+
+[node name="ReceiverMesh" type="MeshInstance3D" parent="TurretHead"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2)
+mesh = SubResource("BoxMesh_Receiver")
+
+[node name="MuzzlePoint" type="Marker3D" parent="TurretHead"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)

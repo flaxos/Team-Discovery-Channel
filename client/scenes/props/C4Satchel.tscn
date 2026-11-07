@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://c4satchel01"]
+
+[ext_resource type="Script" path="res://scripts/weapons/C4Satchel.gd" id="1_c4"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(0.4, 0.2, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_C4"]
+albedo_color = Color(0.3, 0.35, 0.25, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_C4"]
+material = SubResource("Mat_C4")
+size = Vector3(0.4, 0.2, 0.3)
+
+[node name="C4Satchel" type="RigidBody3D"]
+collision_layer = 16
+collision_mask = 1
+mass = 2.0
+script = ExtResource("1_c4")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_C4")
+
+[node name="LEDLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+visible = false
+light_color = Color(1, 0.1, 0.1, 1)
+light_energy = 3.0
+omni_range = 1.5

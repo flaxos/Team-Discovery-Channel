@@ -65,9 +65,19 @@ func try_fire(spread_mult: float = 1.0) -> bool:
 
 
 func _perform_shot(origin: Vector3, dir: Vector3) -> void:
+	if is_plasma:
+		var bolt_scene := load("res://scenes/entities/PlasmaBolt.tscn") as PackedScene
+		if bolt_scene != null:
+			var bolt := bolt_scene.instantiate() as PlasmaBolt
+			var is_enemy := (get_parent() is CharacterBody3D and not (get_parent() is PlayerController3D))
+			get_tree().root.add_child(bolt)
+			bolt.initialize(origin, dir, get_parent(), is_enemy)
+			fired.emit(origin, dir, origin + dir * max_range_m, null)
+			return
+
 	var space := get_world_3d().direct_space_state
 	var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * max_range_m)
-	query.collision_mask = 1 | 4  # World (1) and Enemies (3) / Players (2)
+	query.collision_mask = 1 | 2 | 4  # World (1), Players (2), and Jaffa (4)
 	query.exclude = [get_parent()]
 
 	var result := space.intersect_ray(query)
