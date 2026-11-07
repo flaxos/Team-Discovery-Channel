@@ -2,6 +2,7 @@
 > Project: Team Discovery Channel // SGC Cheyenne Mountain Initiative
 > Collaborators: flaxos, Scotty
 > Repository: https://github.com/flaxos/Team-Discovery-Channel
+> Status: Live Synced with Preferential Stack-Ranked Voting
 
 ---
 
@@ -15,27 +16,49 @@ Your mission is to **enforce strict grounding**, keep architecture modular and t
 
 ### 1. HIGH-CONCEPT & LORE HOOK
 * **Title**: Stargate: SG Extraction (Team Discovery Channel)
-* **Core Loop**: Full Recon -> C4 Sabotage -> Transport Ring Alarm -> DHD Dial Under Fire
-* **Camera Perspective**: Isometric / Top-Down 3D Tactical (Helldivers 1, Alien Swarm, Synthetik)
-* **Target Delivery Window**: The 2-Week SGC Vertical Slice (Recommended)
-* **Engine & Pipeline**: Godot 4.x (GDScript) + Low-Poly Asset Packs (Synty FBX/glTF)
-* **Visual Direction**: Stylized Low-Poly 3D + Next-Gen Dynamic Lighting (Synty × Deep Rock Galactic) (Focus visual budget on Stargate puddle shader, glowing staff blasts, Zat arcs, and transport ring beams over high-poly assets)
+* **Camera Perspective (Voted #1)**: Isometric / Top-Down 3D Tactical (Helldivers 1, Alien Swarm, Synthetik)
+* **Core Tactical Loop (Voted #1)**: Full Recon -> C4 Sabotage -> Transport Ring Alarm -> DHD Dial Under Fire
+* **Engine & Pipeline (Voted #1)**: Godot 4.x (GDScript) + Low-Poly Asset Packs (Synty FBX/glTF)
+* **Visual Direction (Voted #1)**: Stylized Low-Poly 3D + Next-Gen Dynamic Lighting (Synty × Deep Rock Galactic) (Focus visual budget on Stargate puddle shader, glowing staff blasts, Zat arcs, and transport ring beams over high-poly assets)
+* **Target Delivery Window (Voted #1)**: The 2-Week SGC Vertical Slice (Recommended)
 
 ---
 
-### 2. CORE GAMEPLAY MECHANICS & STARGATE CANON
-- **The 7-Chevron DHD Dialing Mini-Game Under Fire**: Dialing isn't a simple button press! One player must punch the 7 glyph chevrons on the DHD (or hold a sequence like a Helldivers Stratagem) while teammates form a defensive firing arc. Transmit the IDC code before diving into the event horizon!
-- **Authentic Zat'nik'tel Rules (1-Shot Stun, 2-Shot Kill/Disintegrate)**: 1st shot silently incapacitates Jaffa guards for 20 seconds. 2nd shot kills and vaporizes the body completely, preventing patrols from discovering corpses and triggering alarms!
-- **Transport Rings (Enemy Spawns & Tactical Flanking)**: Five glowing metallic rings slam down with iconic audio. Enemies arrive in drop waves, but clever players can throw grenades into descending rings or step inside to teleport across the compound.
+### 2. SQUAD-RANKED SIGNATURE MECHANICS (STACK RANKED)
+- **#1 Mechanic: Remote C4 & Beacon Distractions** (3 pts • Ranked by: flaxos (#1))
+  Plant C4 on a fuel depot on a far ridge. Trigger detonation to pull Jaffa patrols away from the central temple entrance, opening a silent infiltration window.
+- **#2 Mechanic: Transport Rings (Enemy Spawns & Tactical Flanking)** (2 pts • Ranked by: flaxos (#2))
+  Five glowing metallic rings slam down with iconic audio. Enemies arrive in drop waves, but clever players can throw grenades into descending rings or step inside to teleport across the compound.
+- **#3 Mechanic: The 7-Chevron DHD Dialing Mini-Game Under Fire** (1 pts • Ranked by: flaxos (#4))
+  Dialing isn't a simple button press! One player must punch the 7 glyph chevrons on the DHD (or hold a sequence like a Helldivers Stratagem) while teammates form a defensive firing arc. Transmit the IDC code before diving into the event horizon!
+- **#4 Mechanic: Authentic Zat'nik'tel Rules (1-Shot Stun, 2-Shot Kill/Disintegrate)** (1 pts • Ranked by: flaxos (#3))
+  1st shot silently incapacitates Jaffa guards for 20 seconds. 2nd shot kills and vaporizes the body completely, preventing patrols from discovering corpses and triggering alarms!
+- **#5 Mechanic: MALP / UAV Scout Drone Recon** (1 pts • Ranked by: flaxos (#5))
+  Pilot a wheeled MALP probe or miniature UAV drone through the Stargate first to map out Jaffa sentries, alarm horns, and Naquadah deposits on the squad's HUD.
 
-### 3. SQUAD CLASSES (SGC ARCHETYPES)
-- **Pointman / Recon Leader (The O'Neill / Mitchell)**: Suppressed P90, tactical C4 satchel, flashbangs, sprint dodge. Can tag enemies through walls and set remote detonators.
-- **Tech Specialist & Archaeologist (The Carter / Daniel)**: Armed with MP5. Fast DHD chevron dialer (cuts dial time in half), carries GDO transmitter for Iris override, deploys MALP/UAV scout drones, hacks Ancient terminals.
-- **Heavy Support Marine (SG-3 Marine)**: M249 SAW light machine gun, claymore anti-personnel mines, deployable Browning .50 cal tripod, shoulder-fired rocket launcher for turret busting.
+---
 
-### 4. PRIORITY MISSION MODES (MILESTONE 1 FOCUS)
-- **Goa'uld Outpost Sabotage & Extraction**: Infiltrate a planetary fortress, plant C4 on a Naquadah power core or Tel'tak cargo ship, trigger a distraction, and fight back to the Stargate.
-- **SGC Gate Room Foothold / Iris Defense (Horde Mode)**: A foothold situation in Cheyenne Mountain! The Iris is breached. Defend the Gate Room from waves of incoming Jaffa, seal blast doors, set up Browning .50 cals, and hold until techs force-dial out.
+### 3. SQUAD-RANKED CLASSES & ARCHETYPES (STACK RANKED)
+- **#1 Core Class: Heavy Support Marine (SG-3 Marine)** (3 pts • Ranked by: flaxos (#1))
+  M249 SAW light machine gun, claymore anti-personnel mines, deployable Browning .50 cal tripod, shoulder-fired rocket launcher for turret busting.
+- **#2 Core Class: Tech Specialist & Archaeologist (The Carter / Daniel)** (2 pts • Ranked by: flaxos (#2))
+  Armed with MP5. Fast DHD chevron dialer (cuts dial time in half), carries GDO transmitter for Iris override, deploys MALP/UAV scout drones, hacks Ancient terminals.
+- **#3 Core Class: Pointman / Recon Leader (The O'Neill / Mitchell)** (1 pts • Ranked by: flaxos (#3))
+  Suppressed P90, tactical C4 satchel, flashbangs, sprint dodge. Can tag enemies through walls and set remote detonators.
+- **#4 Core Class: Allied Jaffa / Tok'ra Infiltrator (The Teal'c / Bra'tac)** (1 pts • Ranked by: flaxos (#4))
+  Ma'Tok Staff weapon (heavy plasma blasts and melee parry), Zat'nik'tel (silent 1-shot stun / 2-shot kill), healing ribbon device, symbiote regeneration.
+
+---
+
+### 4. PRIORITY MISSION MODES (STACK RANKED)
+- **#1 Priority: SGC Gate Room Foothold / Iris Defense (Horde Mode)** (3 pts • Ranked by: flaxos (#1))
+  A foothold situation in Cheyenne Mountain! The Iris is breached. Defend the Gate Room from waves of incoming Jaffa, seal blast doors, set up Browning .50 cals, and hold until techs force-dial out.
+- **#2 Priority: Goa'uld Outpost Sabotage & Extraction** (2 pts • Ranked by: flaxos (#2))
+  Infiltrate a planetary fortress, plant C4 on a Naquadah power core or Tel'tak cargo ship, trigger a distraction, and fight back to the Stargate.
+- **#3 Priority: Alpha Site / Village Evacuation Defense** (1 pts • Ranked by: flaxos (#3))
+  Protect a human settlement or off-world Alpha Site from swarms of Jaffa landing via transport rings while civilians escape through the dialed Stargate.
+- **#4 Priority: Ha'tak Mothership Infiltration (via Transport Rings)** (1 pts • Ranked by: flaxos (#4))
+  Locate hidden transport rings on a planet surface, beam up into an orbiting Goa'uld Ha'tak, plant C4 on the hyperdrive crystal room, and ring back down before detonation.
 
 ---
 
@@ -75,11 +98,12 @@ Execute step-by-step:
    ├── shared/           # Protocol constants, chevron codes, weapon stats
    └── docs/             # GDD.md, ROADMAP.md, NETCODE_SPEC.md
    ```
-2. **Milestone 1 Deliverables**:
-   - Step A: 2-player synchronized movement in a graybox desert compound.
-   - Step B: Working Stargate event horizon portal transition (walk into puddle -> teleport to off-world gate).
-   - Step C: 1 primary firearm (P90) + 1 alien weapon (Ma'Tok Staff weapon) with damage registration.
-   - Step D: Functional DHD that requires entering a 7-glyph sequence under fire to open the return wormhole.
+2. **Milestone 1 Deliverables (Tailored to Voted Stack)**:
+   - **Step A (Environment & Netcode)**: 2-player synchronized movement in graybox environment focused on: **SGC Gate Room Foothold / Iris Defense (Horde Mode)**.
+   - **Step B (Stargate Portal & Dialing)**: Working Stargate event horizon portal transition and DHD dialing sequence under fire.
+   - **Step C (Voted Classes)**: Implement **Heavy Support Marine (SG-3 Marine)** (primary weapons & kit) and **Tech Specialist & Archaeologist (The Carter / Daniel)** with damage registration and recoil.
+   - **Step D (Voted Mechanics)**: Scaffold **Remote C4 & Beacon Distractions** and **Transport Rings (Enemy Spawns & Tactical Flanking)**.
+   - **Step E (Verification)**: Headless simulated bot test script asserting zero desync over 60 ticks.
 
 ---
 *Chevron 7 is locked! Let's build and finish this game.*

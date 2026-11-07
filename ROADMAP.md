@@ -7,7 +7,7 @@
 
 ### Sacred Development Rhythms
 * **Weekly Playtest**: Every Friday at 8:00 PM on Discord (Dialing the gate together).
-* **Grounding Rule**: No bespoke art before graybox 2-player DHD dialing works.
+* **Grounding Rule**: No bespoke art before graybox 2-player co-op loop works.
 * **Sprint Target**: The 2-Week SGC Vertical Slice (Recommended)
 
 ---
@@ -15,30 +15,30 @@
 ### Sprints to Milestone 1 First Playable
 
 #### 🚀 Sprint 0: Stargate Portal & Netcode Sync (Days 1 - 3)
-* **Goal**: Two players connect, move synchronously, and walk through the Stargate event horizon.
+* **Goal**: Two players connect, move synchronously in graybox **SGC Gate Room Foothold / Iris Defense (Horde Mode)**, and walk through the event horizon.
 * **Deliverables**:
   - [ ] Authoritative room server with client-side interpolation.
-  - [ ] Stargate portal pair (Earth Gate Room <-> Alien Outpost).
+  - [ ] Stargate portal pair (Earth Gate Room <-> Off-world).
   - [ ] Synchronized player movement with flashlight & aim direction.
-  - [ ] Basic P90 firing and staff weapon hitscan/projectile raycast.
+  - [ ] Basic weapon firing with damage registration.
 * **Lead Owners**: Stargate & Netcode Czar & AI Agent Orchestrator.
 
-#### ⚔️ Sprint 1: Jaffa AI, Stealth, & The DHD Sequence (Days 4 - 8)
-* **Goal**: Complete stealth infiltration, C4 plant, alarm, and DHD dialing extraction.
+#### ⚔️ Sprint 1: Jaffa AI, Heavy Support Marine (SG-3 Marine), & Remote C4 & Beacon Distractions (Days 4 - 8)
+* **Goal**: Working squad classes, Jaffa patrol AI, and primary tactical mechanics.
 * **Deliverables**:
-  - [ ] Jaffa patrol AI with vision cones and hearing radius for gunshots.
-  - [ ] Zat'nik'tel 1-shot stun and 2-shot body disintegration logic.
-  - [ ] Deployable C4 with remote detonator.
-  - [ ] DHD dialing minigame (punching 7 chevrons to engage return wormhole).
+  - [ ] Jaffa patrol AI with vision cones and gunshot audio radius.
+  - [ ] Implement **Heavy Support Marine (SG-3 Marine)** loadout and second voted class.
+  - [ ] Deployable **Remote C4 & Beacon Distractions** with remote detonation.
+  - [ ] DHD dialing sequence (punching 7 chevrons to engage return wormhole).
   - [ ] First Friday Night SGC Playtest on Discord!
 * **Lead Owners**: Tactical Combat Lead & Jaffa AI Scripter.
 
-#### 💎 Sprint 2: Transport Rings, Iris Foothold, & Game Feel Polish (Days 9 - 14)
-* **Goal**: Polished vertical slice ready for full group play and wave survival.
+#### 💎 Sprint 2: Transport Rings, Polish & Complete Round (Days 9 - 14)
+* **Goal**: Polished vertical slice ready for full group play.
 * **Deliverables**:
   - [ ] Transport ring drop pod spawns for Jaffa shock troops.
-  - [ ] Cheyenne Mountain SGC Iris Foothold wave defense mode.
-  - [ ] Stargate kawoosh shader, sound effects, and screenshake on staff weapon impacts.
+  - [ ] Full round completion (Infiltration -> Objective -> DHD Dial -> Extraction).
+  - [ ] Stargate kawoosh shader, sound effects, and screenshake on heavy impacts.
   - [ ] GDO Iris transmitter code override mechanic.
-  - [ ] Full squad celebration playtest!
+  - [ ] Squad celebration playtest!
 * **Lead Owners**: Full Squad.

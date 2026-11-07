@@ -47,7 +47,9 @@
             "Great fit for low-poly Synty assets"
           ],
           "caution": "Less cinematic face-to-face NPC immersion, but mechanically 10/10.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_cam_third_person",
@@ -59,7 +61,9 @@
             "Impressive character presence"
           ],
           "caution": "3D camera obstacle collisions and aim-IK animations add substantial scope.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_cam_first_person",
@@ -70,7 +74,9 @@
             "Maximum immersion and horror tension during night raids"
           ],
           "caution": "Requires detailed viewmodel rigs, iron-sight aiming, and reload animation states.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_cam_hybrid",
@@ -81,7 +87,9 @@
             "Best of both worlds: iconic SGC briefing feel + crisp tactical raid gameplay"
           ],
           "caution": "Two camera rigs to support, though hub can be lightweight.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [
@@ -92,7 +100,14 @@
           "timestamp": "2026-11-07T10:00:00.000Z"
         }
       ],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_cam_isometric",
+          "opt_cam_hybrid",
+          "opt_cam_third_person",
+          "opt_cam_first_person"
+        ]
+      }
     },
     {
       "id": "q_stealth_to_loud_loop",
@@ -113,7 +128,9 @@
             "High-five extraction moments"
           ],
           "caution": "DHD dial timer must be balanced so it's clutch, not frustrating.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_loop_breech_strike",
@@ -125,7 +142,9 @@
             "Minimal stealth AI requirements"
           ],
           "caution": "Loses some of that tense SG-1 covert recon flavor.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_loop_dynamic_heat",
@@ -136,11 +155,19 @@
             "Rewards careful silenced play and hiding bodies with Zat 2-shot disintegration"
           ],
           "caution": "Requires alarm radio AI state.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_loop_full_recon_extract",
+          "opt_loop_dynamic_heat",
+          "opt_loop_breech_strike"
+        ]
+      }
     },
     {
       "id": "q_mission_types",
@@ -160,7 +187,9 @@
             "Great mix of stealth and loud gunplay"
           ],
           "caution": "Needs clear primary and secondary objectives.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_mission_iris_defense",
@@ -172,7 +201,9 @@
             "Self-contained room defense (very fast to build)"
           ],
           "caution": "Keep wave pacing tight so players don't run dry on ammo.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_mission_alpha_site",
@@ -184,7 +215,9 @@
             "Open outdoor skirmishes"
           ],
           "caution": "Civilian escort pathfinding must not be annoying.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_mission_hatak_boarding",
@@ -196,7 +229,9 @@
             "Great sense of scale"
           ],
           "caution": "Requires interior mothership tile set.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [
@@ -207,7 +242,14 @@
           "timestamp": "2026-11-07T10:05:00.000Z"
         }
       ],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_mission_iris_defense",
+          "opt_mission_sabotage",
+          "opt_mission_alpha_site",
+          "opt_mission_hatak_boarding"
+        ]
+      }
     },
     {
       "id": "q_class_archetypes",
@@ -227,7 +269,9 @@
             "All-around tactical agility"
           ],
           "caution": "Moderate armor.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_class_tech_archaeologist",
@@ -239,7 +283,9 @@
             "Vital during hot extractions"
           ],
           "caution": "Lighter combat firepower.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_class_heavy_marine",
@@ -251,7 +297,9 @@
             "Carries the squad during loud phase"
           ],
           "caution": "Slower sprint speed, noisy weapons.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_class_rebel_jaffa",
@@ -263,11 +311,20 @@
             "Versatile plasma and silent stunner"
           ],
           "caution": "Needs distinctive staff weapon firing sounds and particle FX.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_class_heavy_marine",
+          "opt_class_tech_archaeologist",
+          "opt_class_recon_lead",
+          "opt_class_rebel_jaffa"
+        ]
+      }
     },
     {
       "id": "q_signature_mechanics",
@@ -287,7 +344,9 @@
             "Every extraction is a story you talk about"
           ],
           "caution": "Ensure controls feel crisp on both keyboard and gamepad.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_mech_zat_rule",
@@ -299,7 +358,9 @@
             "Deep stealth utility (vaporizing bodies without carrying them)"
           ],
           "caution": "Zat ammo/charge should be limited to prevent trivializing encounters.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_mech_transport_rings",
@@ -311,7 +372,9 @@
             "High tactical emergent gameplay"
           ],
           "caution": "Teleport collision checking must be clean.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_mech_c4_distraction",
@@ -323,7 +386,9 @@
             "Very satisfying stealth coordination"
           ],
           "caution": "AI sensory radius must react reliably to explosion sounds.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_mech_malp_uav",
@@ -335,7 +400,9 @@
             "Great Daniel/Carter role gameplay"
           ],
           "caution": "Drone piloting controls should be streamlined.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [
@@ -346,7 +413,15 @@
           "timestamp": "2026-11-07T10:10:00.000Z"
         }
       ],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_mech_c4_distraction",
+          "opt_mech_transport_rings",
+          "opt_mech_zat_rule",
+          "opt_mech_dhd_chevron_dial",
+          "opt_mech_malp_uav"
+        ]
+      }
     },
     {
       "id": "q_engine_choice",
@@ -367,7 +442,9 @@
             "No heavy editor bloat"
           ],
           "caution": "Requires importing FBX/glTF models into Godot materials.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_engine_unity_synty",
@@ -379,7 +456,9 @@
             "Familiar C# architecture"
           ],
           "caution": "Binary scene files and meta files can cause Git friction between team members.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_engine_web_three",
@@ -390,11 +469,19 @@
             "Zero install friction for friends"
           ],
           "caution": "More boilerplate for 3D physics and character animation controllers.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_engine_godot_synty",
+          "opt_engine_unity_synty",
+          "opt_engine_web_three"
+        ]
+      }
     },
     {
       "id": "q_visual_art_style",
@@ -415,7 +502,9 @@
             "Highlights lighting and particle FX"
           ],
           "caution": "Must maintain consistent color grading across levels.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_art_ps1_retro",
@@ -427,7 +516,9 @@
             "Matches SG-1's 1990s debut era perfectly"
           ],
           "caution": "Niche aesthetic.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_art_clean_realistic",
@@ -438,11 +529,19 @@
             "High visual fidelity"
           ],
           "caution": "Massive asset pipeline bottleneck that risks abandoning the project.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_art_lowpoly_neon",
+          "opt_art_ps1_retro",
+          "opt_art_clean_realistic"
+        ]
+      }
     },
     {
       "id": "q_grounding_timeframe",
@@ -462,7 +561,9 @@
             "Guarantees a playable Friday night session"
           ],
           "caution": "Requires strict commitment to cut non-essential features.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_time_weekend_jam",
@@ -474,7 +575,9 @@
             "Zero scope creep possible"
           ],
           "caution": "Intense weekend push.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         },
         {
           "id": "opt_time_month_expanded",
@@ -485,11 +588,19 @@
             "More breathing room for audio and polished VFX"
           ],
           "caution": "Must maintain momentum every Friday.",
-          "votes": []
+          "votes": [
+            "flaxos"
+          ]
         }
       ],
       "comments": [],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": [
+          "opt_time_2weeks_vertical",
+          "opt_time_weekend_jam",
+          "opt_time_month_expanded"
+        ]
+      }
     },
     {
       "id": "q_division_of_labor",
@@ -563,9 +674,17 @@
           "memberId": "flaxos",
           "text": "I can lead the AI agent tooling and pair with Scotty on netcode, P90 recoil, and Stargate portal shaders!",
           "timestamp": "2026-11-07T10:15:00.000Z"
+        },
+        {
+          "id": "c_1794027656647",
+          "memberId": "flaxos",
+          "text": "lol gemni says some shit",
+          "timestamp": "2026-11-07T05:00:56.647Z"
         }
       ],
-      "userRankings": {}
+      "userRankings": {
+        "flaxos": []
+      }
     }
   ]
 }

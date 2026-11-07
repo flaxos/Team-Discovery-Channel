@@ -123,35 +123,43 @@ function generateBootstrapPrompt(state, analysis) {
   const artStyle = analysis['q_visual_art_style']?.topPick?.title || 'Stylized Low-Poly 3D + Next-Gen Dynamic Lighting';
   const timeframe = analysis['q_grounding_timeframe']?.topPick?.title || 'The 2-Week SGC Vertical Slice';
 
-  // Mission types
-  const missions = (analysis['q_mission_types']?.winners?.length > 0 
-    ? analysis['q_mission_types'].winners 
-    : analysis['q_mission_types']?.sortedOptions?.slice(0, 2) || []
-  ).map(m => `- **${m.title}**: ${m.description}`).join('\n');
+  // Mission types: collect all ranked choices in order of preferential score
+  const rankedMissions = (analysis['q_mission_types']?.sortedOptions || []).filter(o => o.score > 0);
+  const missionsList = (rankedMissions.length > 0 ? rankedMissions : (analysis['q_mission_types']?.sortedOptions?.slice(0, 3) || []))
+    .map((m, idx) => `- **#${idx + 1} Priority: ${m.title}** (${m.score > 0 ? `${m.score} pts` : 'Default'}${m.voterNames?.length > 0 ? ` • Ranked by: ${m.voterNames.join(', ')}` : ''})\n  ${m.description}`)
+    .join('\n');
 
-  // Classes
-  const classes = (analysis['q_class_archetypes']?.winners?.length > 0
-    ? analysis['q_class_archetypes'].winners
-    : analysis['q_class_archetypes']?.sortedOptions?.slice(0, 3) || []
-  ).map(c => `- **${c.title}**: ${c.description}`).join('\n');
+  // Classes: collect all ranked archetypes in order of preferential score
+  const rankedClasses = (analysis['q_class_archetypes']?.sortedOptions || []).filter(o => o.score > 0);
+  const classesList = (rankedClasses.length > 0 ? rankedClasses : (analysis['q_class_archetypes']?.sortedOptions?.slice(0, 4) || []))
+    .map((c, idx) => `- **#${idx + 1} Core Class: ${c.title}** (${c.score > 0 ? `${c.score} pts` : 'Default'}${c.voterNames?.length > 0 ? ` • Ranked by: ${c.voterNames.join(', ')}` : ''})\n  ${c.description}`)
+    .join('\n');
 
-  // Mechanics
-  const mechanics = (analysis['q_signature_mechanics']?.winners?.length > 0
-    ? analysis['q_signature_mechanics'].winners
-    : analysis['q_signature_mechanics']?.sortedOptions?.slice(0, 3) || []
-  ).map(m => `- **${m.title}**: ${m.description}`).join('\n');
+  // Mechanics: collect all ranked signature mechanics in order of preferential score
+  const rankedMechanics = (analysis['q_signature_mechanics']?.sortedOptions || []).filter(o => o.score > 0);
+  const mechanicsList = (rankedMechanics.length > 0 ? rankedMechanics : (analysis['q_signature_mechanics']?.sortedOptions?.slice(0, 4) || []))
+    .map((m, idx) => `- **#${idx + 1} Mechanic: ${m.title}** (${m.score > 0 ? `${m.score} pts` : 'Default'}${m.voterNames?.length > 0 ? ` • Ranked by: ${m.voterNames.join(', ')}` : ''})\n  ${m.description}`)
+    .join('\n');
 
   // Division of labor
-  const roles = analysis['q_division_of_labor']?.sortedOptions?.filter(o => o.voteCount > 0).map(r => {
+  const roles = analysis['q_division_of_labor']?.sortedOptions?.filter(o => o.voteCount > 0 || o.score > 0).map(r => {
     return `- **${r.title}**: Owned by ${r.voterNames.join(', ')} (${r.description})`;
   }).join('\n') || '- Core Architecture: Joint pair programming with AI agents (flaxos & Scotty)';
 
   const teamList = state.team.map(m => `- **${m.name}** [${m.avatar}] (${m.weeklyHours} hrs/wk): Roles: ${m.rolePreferences?.join(', ') || 'Developer'}`).join('\n');
 
+  // Dynamic values for Execution Protocol
+  const topMission = analysis['q_mission_types']?.topPick?.title || 'SGC Gate Room Foothold / Iris Defense';
+  const topClass = analysis['q_class_archetypes']?.topPick?.title || 'Heavy Support Marine (SG-3)';
+  const secondClass = analysis['q_class_archetypes']?.sortedOptions?.[1]?.title || 'Tech Specialist & Archaeologist';
+  const topMechanic = analysis['q_signature_mechanics']?.topPick?.title || 'Remote C4 & Beacon Distractions';
+  const secondMechanic = analysis['q_signature_mechanics']?.sortedOptions?.[1]?.title || 'Transport Rings';
+
   return `# AGENTIC GAME DEV BOOTSTRAP PROMPT: STARGATE SG-1 / SG-3 TACTICAL EXTRACTION
 > Project: Team Discovery Channel // SGC Cheyenne Mountain Initiative
 > Collaborators: ${state.team.map(m => m.name).join(', ')}
 > Repository: https://github.com/flaxos/Team-Discovery-Channel
+> Status: Live Synced with Preferential Stack-Ranked Voting
 
 ---
 
@@ -165,22 +173,26 @@ Your mission is to **enforce strict grounding**, keep architecture modular and t
 
 ### 1. HIGH-CONCEPT & LORE HOOK
 * **Title**: Stargate: SG Extraction (Team Discovery Channel)
-* **Core Loop**: ${loop}
-* **Camera Perspective**: ${perspective}
-* **Target Delivery Window**: ${timeframe}
-* **Engine & Pipeline**: ${engine}
-* **Visual Direction**: ${artStyle} (Focus visual budget on Stargate puddle shader, glowing staff blasts, Zat arcs, and transport ring beams over high-poly assets)
+* **Camera Perspective (Voted #1)**: ${perspective}
+* **Core Tactical Loop (Voted #1)**: ${loop}
+* **Engine & Pipeline (Voted #1)**: ${engine}
+* **Visual Direction (Voted #1)**: ${artStyle} (Focus visual budget on Stargate puddle shader, glowing staff blasts, Zat arcs, and transport ring beams over high-poly assets)
+* **Target Delivery Window (Voted #1)**: ${timeframe}
 
 ---
 
-### 2. CORE GAMEPLAY MECHANICS & STARGATE CANON
-${mechanics}
+### 2. SQUAD-RANKED SIGNATURE MECHANICS (STACK RANKED)
+${mechanicsList}
 
-### 3. SQUAD CLASSES (SGC ARCHETYPES)
-${classes}
+---
 
-### 4. PRIORITY MISSION MODES (MILESTONE 1 FOCUS)
-${missions}
+### 3. SQUAD-RANKED CLASSES & ARCHETYPES (STACK RANKED)
+${classesList}
+
+---
+
+### 4. PRIORITY MISSION MODES (STACK RANKED)
+${missionsList}
 
 ---
 
@@ -219,11 +231,12 @@ Execute step-by-step:
    ├── shared/           # Protocol constants, chevron codes, weapon stats
    └── docs/             # GDD.md, ROADMAP.md, NETCODE_SPEC.md
    \`\`\`
-2. **Milestone 1 Deliverables**:
-   - Step A: 2-player synchronized movement in a graybox desert compound.
-   - Step B: Working Stargate event horizon portal transition (walk into puddle -> teleport to off-world gate).
-   - Step C: 1 primary firearm (P90) + 1 alien weapon (Ma'Tok Staff weapon) with damage registration.
-   - Step D: Functional DHD that requires entering a 7-glyph sequence under fire to open the return wormhole.
+2. **Milestone 1 Deliverables (Tailored to Voted Stack)**:
+   - **Step A (Environment & Netcode)**: 2-player synchronized movement in graybox environment focused on: **${topMission}**.
+   - **Step B (Stargate Portal & Dialing)**: Working Stargate event horizon portal transition and DHD dialing sequence under fire.
+   - **Step C (Voted Classes)**: Implement **${topClass}** (primary weapons & kit) and **${secondClass}** with damage registration and recoil.
+   - **Step D (Voted Mechanics)**: Scaffold **${topMechanic}** and **${secondMechanic}**.
+   - **Step E (Verification)**: Headless simulated bot test script asserting zero desync over 60 ticks.
 
 ---
 *Chevron 7 is locked! Let's build and finish this game.*
@@ -237,13 +250,14 @@ function generateGDD(state, analysis) {
   const artStyle = analysis['q_visual_art_style']?.topPick?.title || 'Stylized Low-Poly 3D + Next-Gen Dynamic Lighting';
   const timeframe = analysis['q_grounding_timeframe']?.topPick?.title || 'The 2-Week SGC Vertical Slice';
 
-  const missions = (analysis['q_mission_types']?.sortedOptions || []).filter(o => o.voteCount > 0);
-  const classes = (analysis['q_class_archetypes']?.sortedOptions || []).filter(o => o.voteCount > 0);
-  const mechanics = (analysis['q_signature_mechanics']?.sortedOptions || []).filter(o => o.voteCount > 0);
+  const missions = (analysis['q_mission_types']?.sortedOptions || []).filter(o => o.score > 0);
+  const classes = (analysis['q_class_archetypes']?.sortedOptions || []).filter(o => o.score > 0);
+  const mechanics = (analysis['q_signature_mechanics']?.sortedOptions || []).filter(o => o.score > 0);
 
   return `# GAME DESIGN DOCUMENT (GDD)
 ## Project SGC: Stargate SG-1 / SG-3 Tactical Extraction Shooter
 > Team Discovery Channel Collaborative Initiative
+> Stack-Ranked Consensus Outcome
 
 ---
 
@@ -251,7 +265,7 @@ function generateGDD(state, analysis) {
 * **Tagline**: Step through the puddle. Sneak in. Plant the C4. Dial home under fire.
 * **Genre**: Co-op Tactical Extraction Shooter & Wave Survival
 * **Inspirations**: *Stargate SG-1*, *Helldivers 1*, *Door Kickers 2*, *Alien Swarm*, *GTFO*
-* **Platform**: Desktop (Windows/Linux/Mac) via ${engine}
+* **Platform**: Desktop via ${engine}
 * **Camera Perspective**: ${perspective}
 * **Target Delivery Window**: ${timeframe}
 
@@ -260,7 +274,7 @@ function generateGDD(state, analysis) {
 ### 2. The Grounding Pact & Anti-Scope Creep Rules
 > **To ensure this game is completed within our sprint window**:
 1. **Rule of Low-Poly Assets**: Zero custom high-poly modeling or 4K PBR texture baking. We use clean stylized low-poly meshes (Synty style) and invest our visual budget into shaders (Stargate kawoosh, staff plasma glow, transport ring beams).
-2. **Rule of Shared Prefabs**: Every mission mode (Outpost Sabotage, Iris Wave Defense, Ha'tak Infiltration) reuses the exact same Stargate, DHD, Jaffa AI, and weapon mechanics.
+2. **Rule of Shared Prefabs**: Every mission mode reuses the exact same Stargate, DHD, Jaffa AI, and weapon mechanics.
 3. **The 2-Week Vertical Slice Gate**: No expanded lore or galaxy map before 2 players can connect, shoot Jaffa, dial the DHD, and extract through the puddle.
 
 ---
@@ -279,38 +293,32 @@ flowchart TD
     I --> J["Dive Through Event Horizon Back to Earth!"]
 \`\`\`
 
-1. **Insertion**: Squad emerges from the off-world Stargate onto an alien planetary outpost.
-2. **Silent Recon**: Use suppressed P90s, MP5s, and 1-shot Zat stuns to clear sentries without sounding alarms.
-3. **The Sabotage**: Plant remote C4 on Naquadah generators or weapons stockpiles; plant distraction beacons.
-4. **The Alarm & Ring Drops**: Once C4 detonates, alarm klaxons sound. Transport rings slam down from orbiting Ha'taks, deploying Horus and Serpent guard strike teams.
-5. **The DHD Holdout**: The squad retreats to the Stargate. One player must punch the 7 chevrons on the DHD under heavy fire, transmit the IDC code, and the squad extracts!
-
 ---
 
-### 4. SGC Squad Classes
-${classes.length > 0 ? classes.map(c => `* **${c.title}** (${c.voteCount} votes): ${c.description}`).join('\n') : `
-* **Pointman / Recon Leader (O'Neill archetype)**: Suppressed P90, tactical C4, flashbangs, sprint dodge.
+### 4. SGC Squad Classes (Stack-Ranked)
+${classes.length > 0 ? classes.map((c, i) => `* **#${i + 1} ${c.title}** (${c.score} pts • Ranked by: ${c.voterNames?.join(', ') || 'Squad'}): ${c.description}`).join('\n') : `
+* **Heavy Support Marine (SG-3 archetype)**: M249 SAW, claymore mines, deployable .50 cal tripod, rocket launcher.
 * **Tech Specialist & Archaeologist (Carter/Daniel archetype)**: Fast DHD chevron dialer, GDO override, MALP/UAV scout drone.
-* **Heavy Marine (SG-3 archetype)**: M249 SAW, claymore mines, deployable .50 cal tripod, rocket launcher.
+* **Pointman / Recon Leader (O'Neill archetype)**: Suppressed P90, tactical C4, flashbangs, sprint dodge.
 * **Allied Jaffa / Tok'ra Infiltrator (Teal'c archetype)**: Ma'Tok Staff weapon, Zat'nik'tel (1-shot stun / 2-shot kill), symbiote resilience.
 `}
 
 ---
 
-### 5. Signature Stargate Mechanics
-${mechanics.length > 0 ? mechanics.map(m => `* **${m.title}**: ${m.description}`).join('\n') : `
-* **The 7-Chevron DHD Dialing**: Physically dialing under enemy fire; transmitting GDO IDC code to open SGC iris.
-* **Authentic Zat Rules**: 1 shot stuns silently; 2nd shot vaporizes the corpse to prevent patrol detection.
+### 5. Signature Stargate Mechanics (Stack-Ranked)
+${mechanics.length > 0 ? mechanics.map((m, i) => `* **#${i + 1} ${m.title}** (${m.score} pts • Ranked by: ${m.voterNames?.join(', ') || 'Squad'}): ${m.description}`).join('\n') : `
+* **Remote C4 & Beacon Distractions**: Luring Jaffa patrols away from objectives with remote detonators.
 * **Transport Rings**: Volumetric ring drops for enemy reinforcements and tactical player repositioning.
-* **Remote C4 Distraction**: Luring Jaffa patrols away from objectives with remote detonators.
+* **Authentic Zat Rules**: 1 shot stuns silently; 2nd shot vaporizes the corpse to prevent patrol detection.
+* **The 7-Chevron DHD Dialing**: Physically dialing under enemy fire; transmitting GDO IDC code to open SGC iris.
 `}
 
 ---
 
-### 6. Priority Mission Archetypes
-${missions.length > 0 ? missions.map(m => `* **${m.title}**: ${m.description}`).join('\n') : `
-* **Goa'uld Outpost Sabotage**: Infiltrate fortress, C4 Naquadah reactor, extract.
+### 6. Priority Mission Archetypes (Stack-Ranked)
+${missions.length > 0 ? missions.map((m, i) => `* **#${i + 1} ${m.title}** (${m.score} pts • Ranked by: ${m.voterNames?.join(', ') || 'Squad'}): ${m.description}`).join('\n') : `
 * **SGC Iris Foothold Defense**: Wave defense inside Cheyenne Mountain Gate Room against Jaffa breach.
+* **Goa'uld Outpost Sabotage**: Infiltrate fortress, C4 Naquadah reactor, extract.
 * **Alpha Site Evacuation**: Hold defensive perimeter while civilians escape through the gate.
 `}
 
@@ -319,16 +327,14 @@ ${missions.length > 0 ? missions.map(m => `* **${m.title}**: ${m.description}`).
 ### 7. Engine & Visual Polish
 * **Engine**: ${engine}
 * **Visual Direction**: ${artStyle}
-* **Key Shaders**:
-  - Event horizon water ripple & Kawoosh vortex.
-  - Ma'Tok staff weapon glowing orange/blue plasma bolts.
-  - Zat'nik'tel electrical arc particles with disintegration dissolve.
-  - Transport ring cylindrical volumetric beam.
 `;
 }
 
 function generateRoadmap(state, analysis) {
   const timeframe = analysis['q_grounding_timeframe']?.topPick?.title || 'The 2-Week SGC Vertical Slice';
+  const topMission = analysis['q_mission_types']?.topPick?.title || 'SGC Gate Room Foothold / Iris Defense';
+  const topClass = analysis['q_class_archetypes']?.topPick?.title || 'Heavy Support Marine (SG-3)';
+  const topMechanic = analysis['q_signature_mechanics']?.topPick?.title || 'Remote C4 & Beacon Distractions';
   
   const squad = state.team.map(m => {
     return `* **${m.name}** [${m.avatar}]: ${m.rolePreferences?.join(', ') || 'Developer'} (${m.weeklyHours}h/week)`;
@@ -342,7 +348,7 @@ ${squad}
 
 ### Sacred Development Rhythms
 * **Weekly Playtest**: Every Friday at 8:00 PM on Discord (Dialing the gate together).
-* **Grounding Rule**: No bespoke art before graybox 2-player DHD dialing works.
+* **Grounding Rule**: No bespoke art before graybox 2-player co-op loop works.
 * **Sprint Target**: ${timeframe}
 
 ---
@@ -350,32 +356,32 @@ ${squad}
 ### Sprints to Milestone 1 First Playable
 
 #### 🚀 Sprint 0: Stargate Portal & Netcode Sync (Days 1 - 3)
-* **Goal**: Two players connect, move synchronously, and walk through the Stargate event horizon.
+* **Goal**: Two players connect, move synchronously in graybox **${topMission}**, and walk through the event horizon.
 * **Deliverables**:
   - [ ] Authoritative room server with client-side interpolation.
-  - [ ] Stargate portal pair (Earth Gate Room <-> Alien Outpost).
+  - [ ] Stargate portal pair (Earth Gate Room <-> Off-world).
   - [ ] Synchronized player movement with flashlight & aim direction.
-  - [ ] Basic P90 firing and staff weapon hitscan/projectile raycast.
+  - [ ] Basic weapon firing with damage registration.
 * **Lead Owners**: Stargate & Netcode Czar & AI Agent Orchestrator.
 
-#### ⚔️ Sprint 1: Jaffa AI, Stealth, & The DHD Sequence (Days 4 - 8)
-* **Goal**: Complete stealth infiltration, C4 plant, alarm, and DHD dialing extraction.
+#### ⚔️ Sprint 1: Jaffa AI, ${topClass}, & ${topMechanic} (Days 4 - 8)
+* **Goal**: Working squad classes, Jaffa patrol AI, and primary tactical mechanics.
 * **Deliverables**:
-  - [ ] Jaffa patrol AI with vision cones and hearing radius for gunshots.
-  - [ ] Zat'nik'tel 1-shot stun and 2-shot body disintegration logic.
-  - [ ] Deployable C4 with remote detonator.
-  - [ ] DHD dialing minigame (punching 7 chevrons to engage return wormhole).
+  - [ ] Jaffa patrol AI with vision cones and gunshot audio radius.
+  - [ ] Implement **${topClass}** loadout and second voted class.
+  - [ ] Deployable **${topMechanic}** with remote detonation.
+  - [ ] DHD dialing sequence (punching 7 chevrons to engage return wormhole).
   - [ ] First Friday Night SGC Playtest on Discord!
 * **Lead Owners**: Tactical Combat Lead & Jaffa AI Scripter.
 
-#### 💎 Sprint 2: Transport Rings, Iris Foothold, & Game Feel Polish (Days 9 - 14)
-* **Goal**: Polished vertical slice ready for full group play and wave survival.
+#### 💎 Sprint 2: Transport Rings, Polish & Complete Round (Days 9 - 14)
+* **Goal**: Polished vertical slice ready for full group play.
 * **Deliverables**:
   - [ ] Transport ring drop pod spawns for Jaffa shock troops.
-  - [ ] Cheyenne Mountain SGC Iris Foothold wave defense mode.
-  - [ ] Stargate kawoosh shader, sound effects, and screenshake on staff weapon impacts.
+  - [ ] Full round completion (Infiltration -> Objective -> DHD Dial -> Extraction).
+  - [ ] Stargate kawoosh shader, sound effects, and screenshake on heavy impacts.
   - [ ] GDO Iris transmitter code override mechanic.
-  - [ ] Full squad celebration playtest!
+  - [ ] Squad celebration playtest!
 * **Lead Owners**: Full Squad.
 `;
 }

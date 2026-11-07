@@ -83,6 +83,12 @@ export default function App() {
     fetchState();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'compiler') {
+      fetchCompiled();
+    }
+  }, [activeTab]);
+
   // Handle preferential stack ranking
   const handleRank = async (questionId, optionId, action, targetRank) => {
     try {

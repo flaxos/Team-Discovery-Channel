@@ -43,6 +43,24 @@ if (fs.existsSync(STATE_FILE)) {
 
 function saveState() {
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
+  syncDocsToDisk();
+}
+
+function syncDocsToDisk() {
+  try {
+    const analysis = analyzeVotes(state);
+    const bootstrapPrompt = generateBootstrapPrompt(state, analysis);
+    const gdd = generateGDD(state, analysis);
+    const roadmap = generateRoadmap(state, analysis);
+    const contract = generateContract(state, analysis);
+
+    fs.writeFileSync(path.join(REPO_ROOT, 'BOOTSTRAP_PROMPT.md'), bootstrapPrompt, 'utf8');
+    fs.writeFileSync(path.join(REPO_ROOT, 'GDD.md'), gdd, 'utf8');
+    fs.writeFileSync(path.join(REPO_ROOT, 'ROADMAP.md'), roadmap, 'utf8');
+    fs.writeFileSync(path.join(REPO_ROOT, 'TEAM_CONTRACT.md'), contract, 'utf8');
+  } catch (err) {
+    console.error('Error auto-syncing docs to disk:', err);
+  }
 }
 
 // GET State & Analysis
