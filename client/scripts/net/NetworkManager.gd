@@ -1,7 +1,8 @@
 class_name SGCNetworkManager
 extends Node
 ## Core networking manager using Godot 4 native ENetMultiplayerPeer.
-## Manages 4-player co-op lobby, peer registration, authority assignment, and game start.
+## Manages 4-player co-op lobby, dedicated server hosting, CLI flags, peer registration,
+## authority assignment, auto-reconnection, and game start.
 
 signal server_started()
 signal peer_connected_event(peer_id: int)
@@ -9,6 +10,8 @@ signal peer_disconnected_event(peer_id: int)
 signal connection_succeeded()
 signal connection_failed()
 signal server_disconnected()
+signal reconnecting_tick(attempt: int, max_attempts: int)
+signal auto_reconnect_failed()
 signal player_list_updated()
 signal game_started()
 
@@ -56,6 +59,15 @@ const CLASS_PROFILES: Dictionary = {
 }
 
 var is_server: bool = false
+var is_dedicated_server: bool = false
+var is_auto_connect: bool = false
+var auto_connect_address: String = "127.0.0.1"
+var server_port: int = DEFAULT_PORT
+var auto_start_mission: bool = false
+var auto_reconnect: bool = false
+var reconnect_attempts: int = 0
+const MAX_RECONNECT_ATTEMPTS: int = 5
+
 var local_peer_id: int = 1
 var selected_class_id: String = CLASS_SG3_HEAVY
 var player_name: String = "O'Neill"
@@ -77,6 +89,84 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 
+	# Parse launch arguments if any
+	var parsed: Dictionary = parse_cli_arguments()
+	if parsed.get("dedicated", false) or parsed.get("server", false):
+		is_dedicated_server = true
+		start_dedicated_server(server_port)
+
+
+## Retrieves combined list of OS command-line arguments and user arguments.
+func get_all_cli_args() -> PackedStringArray:
+	var combined: Array[String] = []
+	for arg: String in OS.get_cmdline_args():
+		combined.append(arg)
+	for uarg: String in OS.get_cmdline_user_args():
+		if not combined.has(uarg):
+			combined.append(uarg)
+	return PackedStringArray(combined)
+
+
+## Parses command line launch arguments for dedicated server, auto-connect, and loadout overrides.
+func parse_cli_arguments(custom_args: PackedStringArray = PackedStringArray()) -> Dictionary:
+	var args: PackedStringArray = custom_args if not custom_args.is_empty() else get_all_cli_args()
+	var result: Dictionary = {}
+
+	var i: int = 0
+	while i < args.size():
+		var a: String = args[i]
+		match a:
+			"--server", "--dedicated":
+				result["dedicated"] = true
+				is_dedicated_server = true
+				is_server = true
+			"--listen", "--host":
+				result["listen"] = true
+				is_dedicated_server = false
+				is_server = true
+			"--connect", "--client":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					auto_connect_address = args[i]
+				result["connect"] = auto_connect_address
+				is_auto_connect = true
+				is_server = false
+			"--port":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					server_port = args[i].to_int()
+					result["port"] = server_port
+			"--name", "--callsign":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					player_name = args[i]
+					result["name"] = player_name
+			"--class":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					var c_candidate: String = args[i]
+					if CLASS_PROFILES.has(c_candidate):
+						selected_class_id = c_candidate
+						result["class"] = selected_class_id
+			"--auto-start":
+				result["auto_start"] = true
+				auto_start_mission = true
+			"--reconnect":
+				result["reconnect"] = true
+				auto_reconnect = true
+		i += 1
+
+	return result
+
+
+## Starts dedicated server mode on port, without physical host player controller pawn.
+func start_dedicated_server(port: int = DEFAULT_PORT) -> Error:
+	is_dedicated_server = true
+	var err := host_game(port)
+	if err == OK:
+		print("NetworkManager: SGC Dedicated Server initialized on port %d." % port)
+	return err
+
 
 ## Hosts a 4-player SGC mission server on the specified port.
 func host_game(port: int = DEFAULT_PORT) -> Error:
@@ -86,17 +176,28 @@ func host_game(port: int = DEFAULT_PORT) -> Error:
 	if err != OK:
 		push_error("NetworkManager: Failed to create server on port %d (Error %d)" % [port, err])
 		return err
-	multiplayer.multiplayer_peer = _peer
+	if is_inside_tree() and multiplayer != null:
+		multiplayer.multiplayer_peer = _peer
 	is_server = true
+	server_port = port
 	local_peer_id = 1
-	peers[1] = {
-		"name": player_name,
-		"class_id": selected_class_id,
-		"node": null
-	}
+
+	if is_dedicated_server:
+		peers[1] = {
+			"name": "SGC COMMAND (DEDICATED)",
+			"class_id": "dedicated_server",
+			"node": null
+		}
+	else:
+		peers[1] = {
+			"name": player_name,
+			"class_id": selected_class_id,
+			"node": null
+		}
+
 	server_started.emit()
 	player_list_updated.emit()
-	print("NetworkManager: Server started on port %d. Peer ID: 1" % port)
+	print("NetworkManager: Server started on port %d (Dedicated=%s). Peer ID: 1" % [port, str(is_dedicated_server)])
 	return OK
 
 
@@ -108,8 +209,11 @@ func join_game(address: String = "127.0.0.1", port: int = DEFAULT_PORT) -> Error
 	if err != OK:
 		push_error("NetworkManager: Failed to create client to %s:%d (Error %d)" % [address, port, err])
 		return err
-	multiplayer.multiplayer_peer = _peer
+	if is_inside_tree() and multiplayer != null:
+		multiplayer.multiplayer_peer = _peer
 	is_server = false
+	auto_connect_address = address
+	server_port = port
 	print("NetworkManager: Connecting to %s:%d..." % [address, port])
 	return OK
 
@@ -119,7 +223,8 @@ func disconnect_game() -> void:
 	if _peer != null:
 		_peer.close()
 		_peer = null
-	multiplayer.multiplayer_peer = null
+	if is_inside_tree() and multiplayer != null:
+		multiplayer.multiplayer_peer = null
 	peers.clear()
 	is_server = false
 	local_peer_id = 1
@@ -179,6 +284,7 @@ func _on_peer_disconnected(id: int) -> void:
 
 func _on_connected_to_server() -> void:
 	local_peer_id = multiplayer.get_unique_id()
+	reconnect_attempts = 0
 	print("NetworkManager: Successfully connected to server. Local Peer ID: %d" % local_peer_id)
 	connection_succeeded.emit()
 	# Register self with server
@@ -195,3 +301,21 @@ func _on_server_disconnected() -> void:
 	push_warning("NetworkManager: Server disconnected")
 	disconnect_game()
 	server_disconnected.emit()
+
+	if auto_reconnect and not is_server:
+		if reconnect_attempts < MAX_RECONNECT_ATTEMPTS:
+			reconnect_attempts += 1
+			print("NetworkManager: Auto-reconnecting attempt %d/%d to %s:%d..." % [
+				reconnect_attempts, MAX_RECONNECT_ATTEMPTS, auto_connect_address, server_port
+			])
+			reconnecting_tick.emit(reconnect_attempts, MAX_RECONNECT_ATTEMPTS)
+			var tree := get_tree()
+			if tree != null:
+				var timer := tree.create_timer(1.5)
+				timer.timeout.connect(func() -> void:
+					if not is_in_active_session():
+						join_game(auto_connect_address, server_port)
+				)
+		else:
+			print("NetworkManager: Auto-reconnect aborted after reaching maximum attempts.")
+			auto_reconnect_failed.emit()
