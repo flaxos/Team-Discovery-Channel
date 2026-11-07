@@ -59,6 +59,7 @@ var is_in_cctv_mode: bool = false
 var is_aiming_down_sights: bool = false
 var ads_blend: float = 0.0
 var current_iso_cam_y: float = 12.0
+var current_iso_pan_yaw: float = 0.0
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -431,9 +432,21 @@ func _physics_process(delta: float) -> void:
 	elif is_sprinting:
 		speed *= sprint_multiplier
 
-	# Movement vector from input actions
+	# Movement vector from input actions: Camera / Sightline relative
 	var raw_input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	var move_dir := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
+	var move_dir := Vector3.ZERO
+	if raw_input.length_squared() > 0.001:
+		var cam_yaw: float = 0.0
+		if is_aiming_down_sights or ads_blend > 0.2:
+			# In ADS: move forward in player's facing direction, strafe left/right
+			cam_yaw = rotation.y
+		elif camera_rig != null:
+			# In tactical isometric: move relative to camera rig yaw
+			cam_yaw = camera_rig.rotation.y
+
+		var cam_forward := -Vector3(sin(cam_yaw), 0.0, cos(cam_yaw))
+		var cam_right := Vector3(cos(cam_yaw), 0.0, -sin(cam_yaw))
+		move_dir = (cam_right * raw_input.x + cam_forward * (-raw_input.y)).normalized()
 
 	if move_dir.length_squared() > 0.001:
 		velocity.x = move_toward(velocity.x, move_dir.x * speed, acceleration * delta)
@@ -508,8 +521,20 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	camera_rig.global_position = target_cam_pos
 
-	# Rig Yaw: in isometric mode (0.0 rad); in ADS mode follows player yaw rotation.y
-	var target_rig_yaw := lerp_angle(0.0, rotation.y, ads_blend)
+	# Gentle Isometric Mouse-Pan Yaw: allow tactical peeking around corners
+	var target_iso_pan_yaw: float = 0.0
+	if is_inside_tree() and get_viewport() != null:
+		var vp_size := get_viewport().get_visible_rect().size
+		if vp_size.x > 0.0:
+			var mouse_x := get_viewport().get_mouse_position().x
+			var mouse_ratio := clampf((mouse_x / vp_size.x) - 0.5, -0.5, 0.5) * 2.0
+			# Subtle tactical pan up to +/- 22 degrees
+			target_iso_pan_yaw = -mouse_ratio * deg_to_rad(22.0)
+
+	current_iso_pan_yaw = lerp_angle(current_iso_pan_yaw, target_iso_pan_yaw, 2.5 * delta)
+
+	# Rig Yaw: in isometric mode follows current_iso_pan_yaw; in ADS mode follows player yaw rotation.y
+	var target_rig_yaw := lerp_angle(current_iso_pan_yaw, rotation.y, ads_blend)
 	camera_rig.rotation.y = target_rig_yaw + off_yaw
 
 	# Floor-Aware Camera Elevation: smoothly adjust isometric camera height between L28 (12m) and L27 (17.5m)
@@ -520,9 +545,9 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	if camera != null:
 		# Isometric position: (0, current_iso_cam_y, 7.0)
-		# ADS over-shoulder position: (0.65, 1.85, 2.2)
+		# ADS over-shoulder position: (0.80, 2.15, 1.80) - Ghost Recon: Wildlands style
 		var iso_cam_pos := Vector3(0.0, current_iso_cam_y, 7.0)
-		var ads_cam_pos := Vector3(0.65, 1.85, 2.2)
+		var ads_cam_pos := Vector3(0.80, 2.15, 1.80)
 		camera.position = iso_cam_pos.lerp(ads_cam_pos, ads_blend)
 
 		# Pitch angle: -60° (tactical isometric) <-> -12° (over-the-shoulder semi-scoped)
@@ -532,8 +557,8 @@ func _update_camera_and_occlusion(delta: float) -> void:
 		camera.rotation.y = 0.0
 		camera.rotation.z = 0.0
 
-		# FOV: 55.0° (wide tactical) <-> 42.0° (semi-scoped optical zoom)
-		camera.fov = lerpf(55.0, 42.0, ads_blend)
+		# FOV: 55.0° (wide tactical) <-> 50.0° (Ghost Recon semi-scoped clarity)
+		camera.fov = lerpf(55.0, 50.0, ads_blend)
 
 	# 3. Dynamic Wall & Structure Occlusion Fade
 	_update_wall_occlusion()
@@ -996,6 +1021,7 @@ func clear_cctv_camera() -> void:
 	is_aiming_down_sights = false
 	ads_blend = 0.0
 	current_iso_cam_y = 12.0
+	current_iso_pan_yaw = 0.0
 	if camera_rig != null:
 		camera_rig.global_position = global_position
 		camera_rig.rotation = Vector3.ZERO
