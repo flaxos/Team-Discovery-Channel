@@ -55,6 +55,7 @@ var max_shake_offset: float = 0.65
 var max_shake_yaw_deg: float = 1.5
 var max_aim_lead_dist: float = 2.8
 var occluded_nodes: Dictionary = {}
+var is_in_cctv_mode: bool = false
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -436,6 +437,9 @@ func _physics_process(delta: float) -> void:
 
 func _update_camera_and_occlusion(delta: float) -> void:
 	if not is_local_authority or camera_rig == null:
+		return
+
+	if is_in_cctv_mode:
 		return
 
 	# 1. Aim-Lead: offset camera toward aiming reticle for tactical forward vision
@@ -873,7 +877,21 @@ func _try_interact() -> void:
 		nearest_turret.mount(self)
 		return
 
-	# 3. Check for SGC Blast Door console
+	# 3. Check for nearby interactable stations (Armory, Defense Terminal, Security Console, etc.)
+	var nearest_interactable: Node = null
+	var min_interact_dist: float = 3.2
+	for node in get_tree().get_nodes_in_group("interactable"):
+		if is_instance_valid(node) and node is Node3D:
+			var d := global_position.distance_to((node as Node3D).global_position)
+			if d < min_interact_dist:
+				min_interact_dist = d
+				nearest_interactable = node
+
+	if nearest_interactable != null and nearest_interactable.has_method("interact"):
+		nearest_interactable.interact(self)
+		return
+
+	# 4. Check for SGC Blast Door console
 	var door_console := get_tree().root.find_child("BlastDoorConsole", true, false)
 	if door_console != null and global_position.distance_to(door_console.global_position) <= 2.8:
 		var gateroom := get_tree().root.find_child("GateRoom", true, false)
@@ -881,10 +899,33 @@ func _try_interact() -> void:
 			gateroom.toggle_blast_doors()
 		return
 
-	# 4. Check for DHD console
+	# 5. Check for DHD console
 	var dhd := get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
 	if dhd != null and global_position.distance_to(dhd.global_position) <= 3.2:
 		if dhd.current_phase == DHDDialer.DialPhase.INACTIVE:
 			dhd.start_dialing(self)
 		else:
 			dhd.cancel_dialing()
+
+
+func set_cctv_camera(cam_pos: Vector3, cam_target: Vector3, cam_fov: float) -> void:
+	is_in_cctv_mode = true
+	_restore_all_occluded_nodes()
+	if camera_rig != null:
+		camera_rig.global_position = cam_pos
+		camera_rig.rotation = Vector3.ZERO
+	if camera != null:
+		camera.position = Vector3.ZERO
+		camera.look_at(cam_target, Vector3.UP)
+		camera.fov = cam_fov
+
+
+func clear_cctv_camera() -> void:
+	is_in_cctv_mode = false
+	if camera_rig != null:
+		camera_rig.global_position = global_position
+		camera_rig.rotation = Vector3.ZERO
+	if camera != null:
+		camera.position = Vector3(0, 12.0, 7.0)
+		camera.rotation = Vector3(-deg_to_rad(60.0), 0, 0)
+		camera.fov = 55.0

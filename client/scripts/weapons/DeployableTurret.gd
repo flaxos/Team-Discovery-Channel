@@ -10,6 +10,7 @@ signal player_dismounted(player: Node)
 @export var fire_rate_rpm: float = 450.0
 @export var damage: float = 52.0
 @export var auto_targeting_range: float = 28.0
+@export var is_automated_sentry: bool = true
 
 var fire_cooldown: float = 0.0
 var current_target: Node3D = null

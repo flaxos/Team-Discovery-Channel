@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c8sgcgateroom01"]
+[gd_scene load_steps=19 format=3 uid="uid://c8sgcgateroom01"]
 
 [ext_resource type="Script" path="res://scripts/world/GateRoom.gd" id="1_gr01"]
 [ext_resource type="Script" path="res://scripts/world/WaveManager.gd" id="2_wm01"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/DeployableTurret.tscn" id="7_turret01"]
 [ext_resource type="PackedScene" path="res://scenes/world/Level27Complex.tscn" id="8_l2701"]
 [ext_resource type="PackedScene" path="res://scenes/props/SGCElevator.tscn" id="9_elev01"]
+[ext_resource type="Script" path="res://scripts/props/ArmoryResupplyStation.gd" id="10_armory"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Door"]
 albedo_color = Color(0.24, 0.27, 0.3, 1)
@@ -610,24 +611,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 0.5, 32.5)
 use_collision = true
 size = Vector3(1.6, 1, 1.2)
 material = SubResource("Mat_CrateOlive")
+script = ExtResource("10_armory")
+station_type = 0
 
 [node name="AmmoCrate2" type="CSGBox3D" parent="Level28Complex/ArmorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 0.5, 39.5)
 use_collision = true
 size = Vector3(1.6, 1, 1.2)
 material = SubResource("Mat_CrateOlive")
+script = ExtResource("10_armory")
+station_type = 0
 
 [node name="WeaponRackNorth" type="CSGBox3D" parent="Level28Complex/ArmorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52.5, 1.5, 31)
 use_collision = true
 size = Vector3(0.8, 2.8, 4)
 material = SubResource("Mat_Door")
+script = ExtResource("10_armory")
+station_type = 1
 
 [node name="WeaponRackSouth" type="CSGBox3D" parent="Level28Complex/ArmorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52.5, 1.5, 41)
 use_collision = true
 size = Vector3(0.8, 2.8, 4)
 material = SubResource("Mat_Door")
+script = ExtResource("10_armory")
+station_type = 1
 
 [node name="ArmoryLight" type="OmniLight3D" parent="Level28Complex/ArmorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 4.8, 36)

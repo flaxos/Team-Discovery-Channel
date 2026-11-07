@@ -353,3 +353,8 @@ func reload() -> void:
 		ammo_changed.emit(current_ammo, reserve_ammo)
 		reloaded.emit()
 	)
+
+
+func resupply() -> void:
+	reserve_ammo = reserve_capacity
+	ammo_changed.emit(current_ammo, reserve_ammo)

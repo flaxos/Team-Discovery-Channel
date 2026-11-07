@@ -340,8 +340,8 @@ func _on_player_recovered() -> void:
 
 # --- Wave Manager Signals ---
 func on_wave_started(wave_num: int, enemy_count: int) -> void:
-	wave_label.text = "WAVE %d / 3" % wave_num
-	var hostile_type := "JAFFA SHOCK GUARDS" if wave_num == 3 else "JAFFA GUARDS"
+	wave_label.text = "WAVE %d / 4" % wave_num if wave_num == 4 else "WAVE %d / 3" % wave_num
+	var hostile_type := "JAFFA SHOCK GUARDS" if (wave_num == 3 or wave_num == 4) else "JAFFA GUARDS"
 	enemies_label.text = "HOSTILES: %d %s" % [enemy_count, hostile_type]
 	match wave_num:
 		1:
@@ -350,14 +350,16 @@ func on_wave_started(wave_num: int, enemy_count: int) -> void:
 			objective_label.text = "FLANKING ASSAULT DETECTED - WATCH TRANSPORT RINGS!"
 		3:
 			objective_label.text = "⚠️ OVERWHELMING ASSAULT! FALL BACK BEHIND BLAST DOORS & SEAL CHOKE POINT!"
+		4:
+			objective_label.text = "🚨 MULTI-SECTOR CLIMAX INCURSION! DEFEND GATE ROOM, ARMORY & LEVEL 27!"
 		_:
 			objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
 
 func on_jaffa_count_changed(enemies_remaining: int, wave_num: int) -> void:
 	total_kills += 1
-	wave_label.text = "WAVE %d / 3" % wave_num
-	var hostile_type := "JAFFA SHOCK GUARDS" if wave_num == 3 else "JAFFA GUARDS"
+	wave_label.text = "WAVE %d / 4" % wave_num if wave_num == 4 else "WAVE %d / 3" % wave_num
+	var hostile_type := "JAFFA SHOCK GUARDS" if (wave_num == 3 or wave_num == 4) else "JAFFA GUARDS"
 	enemies_label.text = "HOSTILES: %d %s" % [enemies_remaining, hostile_type]
 
 
