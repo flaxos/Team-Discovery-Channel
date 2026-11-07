@@ -63,6 +63,9 @@ var occluded_nodes: Dictionary = {}
 @onready var camera: Camera3D = $CameraRig/Camera3D if has_node("CameraRig/Camera3D") else null
 @onready var laser_sight: Node3D = $WeaponHolder/LaserSight if has_node("WeaponHolder/LaserSight") else null
 @onready var body_mesh: Node3D = $Visuals/BodyMesh if has_node("Visuals/BodyMesh") else null
+@onready var visor_mesh: MeshInstance3D = $Visuals/VisorMesh if has_node("Visuals/VisorMesh") else null
+@onready var class_gear: Node3D = $Visuals/ClassGear if has_node("Visuals/ClassGear") else null
+@onready var nameplate: Node3D = $Nameplate3D if has_node("Nameplate3D") else null
 
 
 func _enter_tree() -> void:
@@ -88,6 +91,9 @@ func _ready() -> void:
 
 	_setup_replication()
 	_apply_class_profile(class_id)
+
+	if nameplate != null:
+		nameplate.setup(self, is_local_authority)
 
 	if health_component != null:
 		health_component.can_be_downed = true
@@ -135,7 +141,132 @@ func _apply_class_profile(target_class_id: String) -> void:
 	secondary_weapon_id = profile.get("secondary", "m9")
 	active_slot = 1
 	_equip_weapon_by_id(primary_weapon_id)
+	_apply_class_visuals(target_class_id)
 	class_configured.emit(class_id)
+
+
+func _apply_class_visuals(target_class_id: String) -> void:
+	if body_mesh == null or not is_inside_tree():
+		return
+
+	if class_gear != null:
+		for child in class_gear.get_children():
+			child.queue_free()
+
+	var body_inst := body_mesh as MeshInstance3D
+	var body_mat := StandardMaterial3D.new()
+
+	match target_class_id:
+		SGCNetworkManager.CLASS_SG3_HEAVY:
+			body_mat.albedo_color = Color(0.20, 0.28, 0.16)
+			body_mat.roughness = 0.8
+			body_mesh.scale = Vector3(1.15, 1.0, 1.15)
+			if visor_mesh != null:
+				var vm := StandardMaterial3D.new()
+				vm.albedo_color = Color(0.08, 0.08, 0.08)
+				visor_mesh.material_override = vm
+
+			if class_gear != null:
+				var backpack := MeshInstance3D.new()
+				var bm := BoxMesh.new()
+				bm.size = Vector3(0.42, 0.55, 0.26)
+				backpack.mesh = bm
+				var bmat := StandardMaterial3D.new()
+				bmat.albedo_color = Color(0.18, 0.24, 0.15)
+				backpack.material_override = bmat
+				backpack.position = Vector3(0, 1.0, 0.32)
+				class_gear.add_child(backpack)
+
+		SGCNetworkManager.CLASS_CARTER_TECH:
+			body_mat.albedo_color = Color(0.16, 0.21, 0.33)
+			body_mat.roughness = 0.65
+			body_mesh.scale = Vector3(0.96, 0.98, 0.96)
+			if visor_mesh != null:
+				var vm := StandardMaterial3D.new()
+				vm.albedo_color = Color(0.15, 0.85, 1.0)
+				vm.emission_enabled = true
+				vm.emission = Color(0.15, 0.85, 1.0)
+				vm.emission_energy_multiplier = 0.8
+				visor_mesh.material_override = vm
+
+			if class_gear != null:
+				var scanner := MeshInstance3D.new()
+				var sm := BoxMesh.new()
+				sm.size = Vector3(0.32, 0.38, 0.18)
+				scanner.mesh = sm
+				var smat := StandardMaterial3D.new()
+				smat.albedo_color = Color(0.22, 0.24, 0.28)
+				scanner.material_override = smat
+				scanner.position = Vector3(0, 1.0, 0.28)
+				class_gear.add_child(scanner)
+
+				var antenna := MeshInstance3D.new()
+				var am := CylinderMesh.new()
+				am.top_radius = 0.015
+				am.bottom_radius = 0.015
+				am.height = 0.6
+				antenna.mesh = am
+				var amat := StandardMaterial3D.new()
+				amat.albedo_color = Color(0.8, 0.8, 0.8)
+				amat.metallic = 0.9
+				antenna.material_override = amat
+				antenna.position = Vector3(0.12, 1.35, 0.28)
+				class_gear.add_child(antenna)
+
+		SGCNetworkManager.CLASS_ONEILL_RECON:
+			body_mat.albedo_color = Color(0.50, 0.43, 0.32)
+			body_mat.roughness = 0.75
+			body_mesh.scale = Vector3(0.96, 1.0, 0.96)
+			if visor_mesh != null:
+				var vm := StandardMaterial3D.new()
+				vm.albedo_color = Color(0.1, 0.9, 0.25)
+				vm.emission_enabled = true
+				vm.emission = Color(0.1, 0.9, 0.25)
+				vm.emission_energy_multiplier = 0.9
+				visor_mesh.material_override = vm
+
+			if class_gear != null:
+				var pouch := MeshInstance3D.new()
+				var pm := BoxMesh.new()
+				pm.size = Vector3(0.15, 0.20, 0.12)
+				pouch.mesh = pm
+				var pmat := StandardMaterial3D.new()
+				pmat.albedo_color = Color(0.35, 0.30, 0.22)
+				pouch.material_override = pmat
+				pouch.position = Vector3(0.35, 0.7, 0.0)
+				class_gear.add_child(pouch)
+
+		SGCNetworkManager.CLASS_TEALC_JAFFA:
+			body_mat.albedo_color = Color(0.68, 0.50, 0.20)
+			body_mat.metallic = 0.85
+			body_mat.roughness = 0.28
+			body_mesh.scale = Vector3(1.06, 1.10, 1.06)
+			if visor_mesh != null:
+				var vm := StandardMaterial3D.new()
+				vm.albedo_color = Color(0.9, 0.15, 0.15)
+				vm.emission_enabled = true
+				vm.emission = Color(0.9, 0.15, 0.15)
+				visor_mesh.material_override = vm
+
+			if class_gear != null:
+				var crest := MeshInstance3D.new()
+				var cm := BoxMesh.new()
+				cm.size = Vector3(0.16, 0.16, 0.08)
+				crest.mesh = cm
+				var cmat := StandardMaterial3D.new()
+				cmat.albedo_color = Color(1.0, 0.84, 0.1)
+				cmat.metallic = 0.95
+				cmat.roughness = 0.15
+				crest.material_override = cmat
+				crest.position = Vector3(0, 1.62, -0.28)
+				class_gear.add_child(crest)
+
+	if body_inst != null:
+		body_inst.material_override = body_mat
+
+	if nameplate != null:
+		var profile: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(target_class_id, {})
+		nameplate.set_callsign(player_callsign, profile.get("name", "OPERATIVE").to_upper())
 
 
 func switch_slot(slot: int) -> void:
@@ -638,6 +769,9 @@ func _on_downed() -> void:
 	if mounted_turret != null:
 		mounted_turret.dismount()
 		mounted_turret = null
+	if body_mesh != null:
+		body_mesh.scale.y = 0.45
+		body_mesh.position.y = 0.25
 	switch_slot(2)
 	player_downed.emit(peer_id)
 	print("Player %d is DOWNED! Bleeding out..." % peer_id)

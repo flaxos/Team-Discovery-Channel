@@ -1,7 +1,8 @@
 class_name GateRoom
 extends Node3D
 ## SGC Level 28 Gate Room Arena & Stargate Ramp.
-## Coordinates player spawning via MultiplayerSpawner, defensive sandbags, and gate status.
+## Coordinates player spawning via MultiplayerSpawner, dedicated server pawnless host,
+## mid-mission operative joins, defensive sandbags, gate status, and emergency alert lighting.
 
 const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
 
@@ -16,9 +17,12 @@ const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
 @onready var door_left: CSGBox3D = $BlastDoors/BlastDoorLeft if has_node("BlastDoors/BlastDoorLeft") else null
 @onready var door_right: CSGBox3D = $BlastDoors/BlastDoorRight if has_node("BlastDoors/BlastDoorRight") else null
 @onready var console_light: OmniLight3D = $BlastDoors/BlastDoorConsole/ConsoleLight if has_node("BlastDoors/BlastDoorConsole/ConsoleLight") else null
+@onready var emergency_lights_container: Node3D = $EmergencyLights if has_node("EmergencyLights") else null
 
 var is_blast_doors_closed: bool = false
 var is_animating_doors: bool = false
+var is_emergency_active: bool = false
+var emergency_strobe_timer: float = 0.0
 
 signal blast_doors_toggled(closed: bool)
 
@@ -34,26 +38,65 @@ func _ready() -> void:
 	if players_container != null:
 		players_container.child_entered_tree.connect(_on_player_child_entered)
 
-	# Connect WaveManager and DHD to HUD
-	if hud != null:
-		if wave_manager != null:
-			wave_manager.wave_started.connect(hud.on_wave_started)
-			wave_manager.jaffa_count_changed.connect(hud.on_jaffa_count_changed)
-			wave_manager.wave_cleared.connect(func(w: int) -> void:
+	# Connect WaveManager and DHD to HUD and emergency lighting
+	if wave_manager != null:
+		wave_manager.wave_started.connect(func(w: int, c: int) -> void:
+			if hud != null:
+				hud.on_wave_started(w, c)
+			if w == 3:
+				set_emergency_lights(true)
+			else:
+				set_emergency_lights(false)
+		)
+		wave_manager.jaffa_count_changed.connect(func(rem: int, cur: int) -> void:
+			if hud != null:
+				hud.on_jaffa_count_changed(rem, cur)
+		)
+		wave_manager.wave_cleared.connect(func(w: int) -> void:
+			if hud != null:
 				hud.on_wave_cleared(w, wave_manager.intermission_duration_s)
-			)
-			wave_manager.all_waves_defeated.connect(hud.on_all_waves_defeated)
-		if dhd_console != null:
-			hud.bind_dhd(dhd_console)
-		if stargate_mesh != null:
-			stargate_mesh.player_extracted.connect(_on_player_extracted)
+		)
+		wave_manager.all_waves_defeated.connect(func() -> void:
+			if hud != null:
+				hud.on_all_waves_defeated()
+			set_emergency_lights(false)
+		)
+
+	if dhd_console != null and hud != null:
+		hud.bind_dhd(dhd_console)
+	if stargate_mesh != null:
+		stargate_mesh.player_extracted.connect(_on_player_extracted)
 
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	# If host / server in an active game session, spawn all registered players and start waves
 	if net != null and net.is_server:
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+		multiplayer.peer_connected.connect(_on_peer_connected_during_mission)
 		_spawn_all_players()
-		_start_foothold_defense()
+
+		# If dedicated server without clients yet, wait for first client before starting foothold defense
+		if not net.is_dedicated_server or net.peers.size() > 1:
+			_start_foothold_defense()
+
+
+func _process(delta: float) -> void:
+	if is_emergency_active and emergency_lights_container != null:
+		emergency_strobe_timer += delta * 4.5
+		var strobe_energy: float = (sin(emergency_strobe_timer) * 0.5 + 0.5) * 2.5 + 0.4
+		for light in emergency_lights_container.get_children():
+			var omni := light as OmniLight3D
+			if omni != null:
+				omni.light_energy = strobe_energy
+
+
+func set_emergency_lights(enabled: bool) -> void:
+	is_emergency_active = enabled
+	if not enabled and emergency_lights_container != null:
+		for light in emergency_lights_container.get_children():
+			var omni := light as OmniLight3D
+			if omni != null:
+				omni.light_energy = 0.0
+	print("GateRoom: SGC Emergency alert lighting %s." % ("ACTIVATED" if enabled else "STANDBY"))
 
 
 func _on_player_child_entered(node: Node) -> void:
@@ -146,12 +189,13 @@ func _spawn_all_players() -> void:
 	var spawn_index: int = 0
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 
-	# Spawn host player first
-	var host_class: String = SGCNetworkManager.CLASS_SG3_HEAVY
-	if net != null and net.peers.has(1):
-		host_class = net.peers[1].get("class_id", net.selected_class_id)
-	_spawn_player(1, host_class, spawn_points[spawn_index % spawn_points.size()].global_position)
-	spawn_index += 1
+	# Spawn host player first (if not dedicated server)
+	if net == null or not net.is_dedicated_server:
+		var host_class: String = SGCNetworkManager.CLASS_SG3_HEAVY
+		if net != null and net.peers.has(1):
+			host_class = net.peers[1].get("class_id", net.selected_class_id)
+		_spawn_player(1, host_class, spawn_points[spawn_index % spawn_points.size()].global_position)
+		spawn_index += 1
 
 	# Spawn connected client peers
 	if net != null:
@@ -180,8 +224,30 @@ func _spawn_player(peer_id: int, p_class_id: String, spawn_pos: Vector3) -> void
 	print("GateRoom: Spawned player %d (%s) at %s" % [peer_id, p_class_id, str(spawn_pos)])
 
 
+func _on_peer_connected_during_mission(peer_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	print("GateRoom: Peer %d connected during active mission." % peer_id)
+	var timer := get_tree().create_timer(0.2)
+	timer.timeout.connect(func() -> void:
+		if not is_instance_valid(self):
+			return
+		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+		var p_class: String = SGCNetworkManager.CLASS_SG3_HEAVY
+		if net != null and net.peers.has(peer_id):
+			p_class = net.peers[peer_id].get("class_id", SGCNetworkManager.CLASS_SG3_HEAVY)
+		var spawn_points := spawns_container.get_children()
+		var spawn_pos: Vector3 = spawn_points[peer_id % spawn_points.size()].global_position
+		_spawn_player(peer_id, p_class, spawn_pos)
+
+		if net != null and net.is_dedicated_server and wave_manager != null and not wave_manager.is_wave_active and wave_manager.current_wave == 0:
+			_start_foothold_defense()
+	)
+
+
 func _on_peer_disconnected(peer_id: int) -> void:
 	var player_node := players_container.get_node_or_null(str(peer_id))
 	if player_node != null:
 		print("GateRoom: Removing disconnected player %d" % peer_id)
 		player_node.queue_free()
+	_check_squad_status()
