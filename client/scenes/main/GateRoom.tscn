@@ -10,6 +10,9 @@
 [ext_resource type="PackedScene" path="res://scenes/world/Level27Complex.tscn" id="8_l2701"]
 [ext_resource type="PackedScene" path="res://scenes/props/SGCElevator.tscn" id="9_elev01"]
 [ext_resource type="Script" path="res://scripts/props/ArmoryResupplyStation.gd" id="10_armory"]
+[ext_resource type="PackedScene" path="res://scenes/props/SGCDialingConsole.tscn" id="11_sgcdial01"]
+[ext_resource type="PackedScene" path="res://scenes/props/LabDataPatchDrive.tscn" id="12_labpatch01"]
+[ext_resource type="PackedScene" path="res://scenes/props/IrisServoHousing.tscn" id="13_irisservo01"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Door"]
 albedo_color = Color(0.24, 0.27, 0.3, 1)
@@ -537,10 +540,6 @@ material = SubResource("Mat_Sandbag")
 [node name="FixedTurretHallway" parent="FallbackHallway" instance=ExtResource("7_turret01")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 35.8)
 
-[node name="TransportRingsBeta" parent="FallbackHallway" instance=ExtResource("5_tr01")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 39)
-paired_rings_path = NodePath("../../TransportRings")
-
 [node name="Level28Complex" type="Node3D" parent="."]
 
 [node name="WestCorridorSector" type="Node3D" parent="Level28Complex"]
@@ -868,6 +867,9 @@ use_collision = true
 size = Vector3(1.2, 1, 4)
 material = SubResource("Mat_Door")
 
+[node name="LabDataPatchDrive" parent="Level28Complex/LaboratorySector" instance=ExtResource("12_labpatch01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 1.35, 52)
+
 [node name="ResearchBenchEast" type="CSGBox3D" parent="Level28Complex/LaboratorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.8, 52)
 use_collision = true
@@ -1032,11 +1034,9 @@ use_collision = true
 size = Vector3(2.4, 1, 1.2)
 material = SubResource("Mat_Door")
 
-[node name="DialingConsole2" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 10.5)
-use_collision = true
-size = Vector3(2.4, 1, 1.2)
-material = SubResource("Mat_Door")
+[node name="SGCDialingConsole" parent="Level28Complex/ControlRoomMezzanine" instance=ExtResource("11_sgcdial01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 10.5)
+stargate_path = NodePath("../../../Stargate")
 
 [node name="DialingConsole3" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.5, 10.5)
@@ -1066,12 +1066,8 @@ modulate = Color(0.9, 0.95, 1, 1)
 [node name="Stargate" parent="." instance=ExtResource("3_sg01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, -15)
 
-[node name="DHDConsole" parent="." instance=ExtResource("4_dhd01")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2, -11.5)
-
-[node name="TransportRings" parent="." instance=ExtResource("5_tr01")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 3)
-paired_rings_path = NodePath("../FallbackHallway/TransportRingsBeta")
+[node name="IrisServoHousing" parent="." instance=ExtResource("13_irisservo01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -11.5)
 
 [node name="Spawns" type="Node3D" parent="."]
 

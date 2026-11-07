@@ -31,12 +31,12 @@ func _init() -> void:
 	hud = gateroom.get_node_or_null("TacticalHUD") as TacticalHUD
 	wave_mgr = gateroom.get_node_or_null("WaveManager") as WaveManager
 	stargate = gateroom.get_node_or_null("Stargate") as StargateRing
-	dhd = gateroom.get_node_or_null("DHDConsole") as DHDDialer
+	dhd = gateroom.dhd_console
 
 	assert(hud != null, "TacticalHUD must exist in GateRoom")
 	assert(wave_mgr != null, "WaveManager must exist in GateRoom")
 	assert(stargate != null, "Stargate must exist in GateRoom")
-	assert(dhd != null, "DHDConsole must exist in GateRoom")
+	assert(dhd != null, "Dialing Console must exist in GateRoom")
 
 	# Spawn test player
 	var p_scene := load(PLAYER_SCENE) as PackedScene

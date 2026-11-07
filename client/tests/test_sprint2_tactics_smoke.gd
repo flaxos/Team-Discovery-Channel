@@ -49,6 +49,18 @@ func _init() -> void:
 
 	rings_a = gateroom.get_node_or_null("TransportRings") as TransportRings
 	rings_b = gateroom.get_node_or_null("FallbackHallway/TransportRingsBeta") as TransportRings
+	if rings_a == null or rings_b == null:
+		var rings_scene := load("res://scenes/props/TransportRings.tscn") as PackedScene
+		rings_a = rings_scene.instantiate() as TransportRings
+		rings_a.name = "TransportRingsAlpha"
+		rings_a.position = Vector3(8, 0, 3)
+		rings_b = rings_scene.instantiate() as TransportRings
+		rings_b.name = "TransportRingsBeta"
+		rings_b.position = Vector3(3, 0, 39)
+		rings_a.paired_rings_path = NodePath("../TransportRingsBeta")
+		rings_b.paired_rings_path = NodePath("../TransportRingsAlpha")
+		gateroom.add_child(rings_a)
+		gateroom.add_child(rings_b)
 
 
 func _process(delta: float) -> bool:

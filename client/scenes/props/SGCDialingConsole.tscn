@@ -1,0 +1,77 @@
+[gd_scene load_steps=10 format=3 uid="uid://csgcdialing01"]
+
+[ext_resource type="Script" path="res://scripts/props/SGCDialingConsole.gd" id="1_sgcdial"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_DeskSteel"]
+albedo_color = Color(0.16, 0.18, 0.22, 1)
+metallic = 0.8
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_Desk"]
+material = SubResource("Mat_DeskSteel")
+size = Vector3(2.6, 0.9, 1.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_CRTGreen"]
+albedo_color = Color(0.05, 0.12, 0.08, 1)
+emission_enabled = true
+emission = Color(0.15, 0.95, 0.35, 1)
+emission_energy_multiplier = 1.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_Screen"]
+material = SubResource("Mat_CRTGreen")
+size = Vector3(0.65, 0.5, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Keyboard"]
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_Keyboard"]
+material = SubResource("Mat_Keyboard")
+size = Vector3(2.2, 0.08, 0.4)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Trigger"]
+height = 2.0
+radius = 2.8
+
+[node name="SGCDialingConsole" type="Node3D"]
+script = ExtResource("1_sgcdial")
+
+[node name="DeskMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+mesh = SubResource("BoxMesh_Desk")
+
+[node name="KeyboardMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.92, 0.25)
+mesh = SubResource("BoxMesh_Keyboard")
+
+[node name="CRTScreenLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -0.85, 1.18, -0.25)
+mesh = SubResource("BoxMesh_Screen")
+
+[node name="CRTScreenCenter" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.3)
+mesh = SubResource("BoxMesh_Screen")
+
+[node name="CRTScreenRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 0.85, 1.18, -0.25)
+mesh = SubResource("BoxMesh_Screen")
+
+[node name="StatusLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+light_color = Color(0.2, 0.9, 0.4, 1)
+light_energy = 1.2
+omni_range = 3.5
+
+[node name="ConsoleLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.3)
+light_color = Color(0.8, 0.9, 1, 1)
+light_energy = 0.6
+omni_range = 2.5
+
+[node name="InteractArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_Trigger")

@@ -192,8 +192,8 @@ func _process(delta: float) -> bool:
 		assert(hud.lobby_btn != null, "PauseMenu must contain LobbyBtn (ABORT TO SGC BRIEFING)")
 
 		# Test DHD 7-Chevron to GDO Iris phase transition
-		var dhd: DHDDialer = gateroom.get_node_or_null("DHDConsole") as DHDDialer
-		assert(dhd != null, "DHDConsole must exist in GateRoom")
+		var dhd: DHDDialer = gateroom.dhd_console
+		assert(dhd != null, "Dialing console must exist in GateRoom")
 		dhd.start_dialing(player)
 		assert(dhd.current_phase == DHDDialer.DialPhase.CHEVRONS, "DHD must start in CHEVRONS phase")
 
