@@ -418,6 +418,12 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	# Void boundary containment safety recovery
+	if global_position.y < -4.0:
+		print("PlayerController3D: Operative %s recovered from void boundary (Y=%.2f)." % [name, global_position.y])
+		global_position = Vector3(0.0, 0.5, 0.0)
+		velocity = Vector3.ZERO
+
 	if turret_cooldown > 0.0:
 		turret_cooldown = maxf(0.0, turret_cooldown - delta)
 

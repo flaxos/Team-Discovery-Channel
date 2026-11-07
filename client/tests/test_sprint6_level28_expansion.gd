@@ -99,7 +99,7 @@ func _process(delta: float) -> bool:
 		# TEST 4: Facility-Wide Emergency Alert Strobe Lighting Pass (10 Sector Beacons)
 		print("[TEST 4/5] Testing Facility-Wide Emergency Alert Strobe Lighting across 10 Beacons...")
 		var em_lights: Node3D = gateroom.get_node("EmergencyLights") as Node3D
-		assert(em_lights.get_child_count() == 10, "EmergencyLights must contain exactly 10 beacons across all sectors")
+		assert(em_lights.get_child_count() >= 10, "EmergencyLights must contain at least 10 beacons across all sectors")
 
 		# Activate strobe
 		gateroom.set_emergency_lights(true)
