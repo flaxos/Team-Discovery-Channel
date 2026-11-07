@@ -15,6 +15,8 @@ enum RingState { INACTIVE, TELEGRAPH, SLAM, BEAM, RETRACT }
 @export var beam_duration_s: float = 1.0
 @export var crush_damage: float = 80.0
 @export var spawn_enemies_on_beam: bool = true
+@export var paired_rings_path: NodePath = ""
+var paired_rings: TransportRings = null
 
 var current_state: RingState = RingState.INACTIVE
 var telegraph_timer: float = 0.0
@@ -26,11 +28,19 @@ var telegraph_timer: float = 0.0
 
 
 func _ready() -> void:
+	_resolve_paired_rings()
+	call_deferred("_resolve_paired_rings")
+
 	if beam_column != null:
 		beam_column.visible = false
 	if crush_area != null:
 		crush_area.monitoring = false
 		crush_area.body_entered.connect(_on_crush_body_entered)
+
+
+func _resolve_paired_rings() -> void:
+	if paired_rings == null and not paired_rings_path.is_empty() and has_node(paired_rings_path):
+		paired_rings = get_node(paired_rings_path) as TransportRings
 
 
 ## Initiates the transport ring drop sequence
@@ -62,6 +72,13 @@ func _slam_rings_down() -> void:
 	rings_slammed.emit(global_position)
 	print("Transport Rings: SLAM! Concentric rings hit floor plate.")
 
+	# Screen shake on kinetic floor slam
+	var players_node := get_tree().root.find_child("Players", true, false)
+	if players_node != null:
+		for p in players_node.get_children():
+			if p is PlayerController3D:
+				p.add_screen_shake(0.55)
+
 	# Enable crush hitbox
 	if crush_area != null:
 		crush_area.monitoring = true
@@ -89,8 +106,34 @@ func _discharge_beam() -> void:
 		beam_column.visible = true
 		beam_column.scale = Vector3(1, 1, 1)
 
-	# If server and configured, spawn Jaffa reinforcements directly in the rings
-	if multiplayer.is_server() and spawn_enemies_on_beam:
+	var intercepted_explosive: bool = false
+
+	# 1. Check for explosives inside the rings (Tactical Interception)
+	var satchels := get_tree().root.find_children("", "C4Satchel", true, false)
+	for s in satchels:
+		var satchel := s as Node3D
+		if satchel != null and global_position.distance_to(satchel.global_position) <= 2.2:
+			intercepted_explosive = true
+			satchel.queue_free()
+			print("Transport Rings: Explosive beamed up to mothership! Reserve wave neutralized!")
+			if ResourceLoader.exists("res://audio/sfx_explosion.wav"):
+				_play_sfx("res://audio/sfx_explosion.wav", 80.0)
+
+	# 2. Check for operatives inside the rings (2-Way Teleportation)
+	if paired_rings == null:
+		_resolve_paired_rings()
+	if paired_rings != null and is_instance_valid(paired_rings):
+		var players := get_tree().root.find_children("", "PlayerController3D", true, false)
+		for p in players:
+			var player := p as PlayerController3D
+			if player != null and global_position.distance_to(player.global_position) <= 2.2:
+				var dest: Vector3 = paired_rings.global_position + Vector3(0, 0.1, 0)
+				player.global_position = dest
+				print("Transport Rings: Operative %s beamed to paired rings at %s!" % [player.name, str(dest)])
+				paired_rings.trigger_ring_drop()
+
+	# 3. If server and not intercepted, spawn reinforcements
+	if multiplayer.is_server() and spawn_enemies_on_beam and not intercepted_explosive:
 		_spawn_ring_reinforcements()
 
 	var timer := get_tree().create_timer(beam_duration_s)

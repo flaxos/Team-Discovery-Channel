@@ -105,6 +105,13 @@ func sync_trigger_kawoosh() -> void:
 	print("Stargate: KAWOOSH! Event horizon erupting forward!")
 	_play_sfx("res://audio/sfx_kawoosh.wav", 100.0)
 
+	# Cinematic camera shake for all active operatives
+	var players_node := get_tree().root.find_child("Players", true, false)
+	if players_node != null:
+		for p in players_node.get_children():
+			if p is PlayerController3D:
+				p.add_screen_shake(0.85)
+
 	if gate_light != null:
 		gate_light.light_color = Color(0.2, 0.7, 1.0)
 		gate_light.light_energy = 8.0

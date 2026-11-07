@@ -35,6 +35,18 @@ var primary_weapon_id: String = "m249"
 var secondary_weapon_id: String = "m9"
 var active_slot: int = 1
 var active_c4: C4Satchel = null
+var c4_charges_remaining: int = 3
+const MAX_C4_CHARGES: int = 3
+var claymore_charges: int = 2
+const MAX_CLAYMORE_CHARGES: int = 2
+var active_turret: DeployableTurret = null
+var mounted_turret: DeployableTurret = null
+var turret_cooldown: float = 0.0
+const TURRET_COOLDOWN_S: float = 25.0
+
+var trauma: float = 0.0
+var max_shake_offset: float = 0.65
+var max_shake_yaw_deg: float = 1.5
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -177,6 +189,19 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("interact"):
 		_try_interact()
 
+	# If mounted on .50 cal tripod, lock position behind gun and process manual fire
+	if mounted_turret != null and is_instance_valid(mounted_turret):
+		velocity = Vector3.ZERO
+		global_position = mounted_turret.global_position + mounted_turret.global_transform.basis.z * 0.75
+		if Input.is_action_pressed("fire"):
+			var aim_dir := (current_aim_target - mounted_turret.turret_head.global_position).normalized()
+			if aim_dir != Vector3.ZERO:
+				mounted_turret.try_manual_fire(aim_dir)
+				add_screen_shake(0.08)
+		if is_local_authority and camera_rig != null:
+			camera_rig.global_position = camera_rig.global_position.lerp(global_position, 14.0 * delta)
+		return
+
 	# If actively dialing DHD console, route directional inputs to glyph entries
 	var dhd := get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
 	if dhd != null and dhd.active_dialer == self:
@@ -197,6 +222,10 @@ func _physics_process(delta: float) -> void:
 	# Stances (Sprint / Crouch)
 	is_crouching = Input.is_action_pressed("crouch")
 	is_sprinting = Input.is_action_pressed("sprint") and not is_crouching
+
+	if body_mesh != null:
+		var target_scale_y: float = 0.65 if is_crouching else 1.0
+		body_mesh.scale.y = move_toward(body_mesh.scale.y, target_scale_y, 5.0 * delta)
 
 	var speed := base_speed
 	if is_crouching:
@@ -220,13 +249,30 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-	# Smoothly follow player with camera rig without rotating with character
+	if turret_cooldown > 0.0:
+		turret_cooldown = maxf(0.0, turret_cooldown - delta)
+
+	# Smoothly follow player with camera rig without rotating with character, plus trauma screen shake
 	if is_local_authority and camera_rig != null:
-		camera_rig.global_position = camera_rig.global_position.lerp(global_position, 14.0 * delta)
-		camera_rig.rotation = Vector3.ZERO
+		var target_cam_pos := camera_rig.global_position.lerp(global_position, 14.0 * delta)
+		if trauma > 0.0:
+			trauma = maxf(0.0, trauma - 1.8 * delta)
+			var shake_p := trauma * trauma
+			var off_x := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
+			var off_z := (randf() * 2.0 - 1.0) * max_shake_offset * shake_p
+			var off_yaw := deg_to_rad((randf() * 2.0 - 1.0) * max_shake_yaw_deg * shake_p)
+			target_cam_pos += Vector3(off_x, 0, off_z)
+			camera_rig.rotation.y = off_yaw
+		else:
+			camera_rig.rotation = Vector3.ZERO
+		camera_rig.global_position = target_cam_pos
 
 	# Handle firing & reloading
 	_process_combat()
+
+
+func add_screen_shake(amount: float) -> void:
+	trauma = clampf(trauma + amount, 0.0, 1.0)
 
 
 func _process_aim() -> void:
@@ -260,6 +306,9 @@ func _process_combat() -> void:
 	if Input.is_action_just_pressed("gadget"):
 		_deploy_tactical_gadget()
 
+	if Input.is_action_just_pressed("plant_claymore"):
+		_plant_claymore()
+
 	if Input.is_action_just_pressed("reload"):
 		current_weapon.reload()
 
@@ -276,18 +325,31 @@ func _process_combat() -> void:
 
 func _deploy_tactical_gadget() -> void:
 	if class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
+		if turret_cooldown > 0.0:
+			print("Player %d: Tripod Turret on cooldown (%.1fs remaining)!" % [peer_id, turret_cooldown])
+			return
+		# Free previous active turret if any
+		if active_turret != null and is_instance_valid(active_turret):
+			active_turret.queue_free()
+			active_turret = null
+
 		var turret_scene := load("res://scenes/props/DeployableTurret.tscn") as PackedScene
 		if turret_scene != null:
 			var turret := turret_scene.instantiate() as DeployableTurret
 			turret.position = global_position - global_transform.basis.z * 1.6
 			get_parent().add_child(turret)
-			print("Player %d deployed .50 Cal Tripod Turret!" % peer_id)
+			active_turret = turret
+			turret_cooldown = TURRET_COOLDOWN_S
+			print("Player %d deployed .50 Cal Tripod Turret! Cooldown started (%.0fs)." % [peer_id, TURRET_COOLDOWN_S])
 	elif class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
 		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed:
 			active_c4.detonate()
 			active_c4 = null
 			print("Player %d detonated C4 Satchel!" % peer_id)
 		else:
+			if c4_charges_remaining <= 0:
+				print("Player %d: No C4 satchels remaining!" % peer_id)
+				return
 			var c4_scene := load("res://scenes/props/C4Satchel.tscn") as PackedScene
 			if c4_scene != null:
 				var c4 := c4_scene.instantiate() as C4Satchel
@@ -296,7 +358,24 @@ func _deploy_tactical_gadget() -> void:
 				get_parent().add_child(c4)
 				c4.apply_central_impulse(-global_transform.basis.z * 10.0 + Vector3.UP * 3.0)
 				active_c4 = c4
-				print("Player %d threw C4 Satchel Charge!" % peer_id)
+				c4_charges_remaining -= 1
+				print("Player %d threw C4 Satchel Charge! (%d charges left)" % [peer_id, c4_charges_remaining])
+
+
+func _plant_claymore() -> void:
+	if claymore_charges <= 0:
+		print("Player %d: Out of M18A1 Claymore mines!" % peer_id)
+		return
+
+	var claymore_scene := load("res://scenes/props/ClaymoreMine.tscn") as PackedScene
+	if claymore_scene != null:
+		var claymore := claymore_scene.instantiate() as Node3D
+		claymore.position = global_position - global_transform.basis.z * 1.2 + Vector3(0, 0.05, 0)
+		claymore.rotation.y = rotation.y
+		claymore.set("planter", self)
+		get_parent().add_child(claymore)
+		claymore_charges -= 1
+		print("Player %d planted M18A1 Claymore! (%d charges left)" % [peer_id, claymore_charges])
 
 
 func _on_weapon_fired(origin: Vector3, dir: Vector3, hit_point: Vector3, hit_node: Node) -> void:
@@ -368,6 +447,37 @@ func _on_vaporized() -> void:
 
 
 func _try_interact() -> void:
+	# 1. If currently mounted on a .50 cal turret, dismount
+	if mounted_turret != null:
+		mounted_turret.dismount()
+		mounted_turret = null
+		return
+
+	# 2. Check for nearby DeployableTurret to mount
+	var nearest_turret: DeployableTurret = null
+	var min_turret_dist: float = 2.4
+	for node in get_tree().root.find_children("", "DeployableTurret", true, false):
+		var t := node as DeployableTurret
+		if t != null and t.mounted_player == null:
+			var d := global_position.distance_to(t.global_position)
+			if d < min_turret_dist:
+				min_turret_dist = d
+				nearest_turret = t
+
+	if nearest_turret != null:
+		mounted_turret = nearest_turret
+		nearest_turret.mount(self)
+		return
+
+	# 3. Check for SGC Blast Door console
+	var door_console := get_tree().root.find_child("BlastDoorConsole", true, false)
+	if door_console != null and global_position.distance_to(door_console.global_position) <= 2.8:
+		var gateroom := get_tree().root.find_child("GateRoom", true, false)
+		if gateroom != null and gateroom.has_method("toggle_blast_doors"):
+			gateroom.toggle_blast_doors()
+		return
+
+	# 4. Check for DHD console
 	var dhd := get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
 	if dhd != null and global_position.distance_to(dhd.global_position) <= 3.2:
 		if dhd.current_phase == DHDDialer.DialPhase.INACTIVE:
