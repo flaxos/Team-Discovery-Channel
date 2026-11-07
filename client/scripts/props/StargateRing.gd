@@ -52,6 +52,13 @@ func lock_chevron(chevron_idx: int) -> void:
 	rpc("sync_lock_chevron", chevron_idx)
 
 
+## Resets all chevrons on dialing sequence failure
+func reset_chevrons() -> void:
+	if not multiplayer.is_server():
+		return
+	rpc("sync_close_wormhole")
+
+
 @rpc("call_local", "reliable")
 func sync_lock_chevron(chevron_idx: int) -> void:
 	locked_chevrons_count = maxi(locked_chevrons_count, chevron_idx)

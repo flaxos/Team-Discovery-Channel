@@ -96,10 +96,31 @@ func _process(delta: float) -> bool:
 		# Test DHD and Extraction sequence
 		print("[TEST] Testing DHD completion & Extraction Trigger...")
 		dhd.start_dialing(player)
-		# Complete chevrons
+
+		# 1. Test wrong glyph resets sequence (UAT feedback verification)
+		var expected_first := dhd.chevron_sequence[0]
+		var wrong_first := "DOWN" if expected_first != "DOWN" else "UP"
+		print("[TEST] Intentionally inputting wrong glyph: '%s' (expected '%s')..." % [wrong_first, expected_first])
+		var wrong_result: bool = dhd.input_glyph(wrong_first)
+		assert(not wrong_result, "Wrong glyph must return false")
+		assert(dhd.current_chevron_index == 0, "DHD chevron index must reset to 0 on mismatch")
+		print("[TEST] PASS: DHD successfully reset to 0 on incorrect glyph!")
+
+		# 2. Complete chevrons correctly
 		for glyph in dhd.chevron_sequence:
 			dhd.input_glyph(glyph)
-		# Complete GDO
+		assert(dhd.current_phase == DHDDialer.DialPhase.GDO_AUTH, "DHD must advance to GDO_AUTH phase")
+
+		# 3. Test wrong GDO beat resets GDO index
+		var expected_gdo := dhd.gdo_sequence[0]
+		var wrong_gdo := "LEFT" if expected_gdo != "LEFT" else "RIGHT"
+		print("[TEST] Intentionally inputting wrong GDO beat: '%s' (expected '%s')..." % [wrong_gdo, expected_gdo])
+		var wrong_gdo_res: bool = dhd.input_glyph(wrong_gdo)
+		assert(not wrong_gdo_res, "Wrong GDO beat must return false")
+		assert(dhd.gdo_index == 0, "GDO index must reset to 0 on mismatch")
+		print("[TEST] PASS: GDO code successfully reset to 0 on incorrect beat!")
+
+		# 4. Complete GDO correctly
 		for beat in dhd.gdo_sequence:
 			dhd.input_glyph(beat)
 		assert(dhd.current_phase == DHDDialer.DialPhase.COMPLETE, "DHD must be COMPLETE")

@@ -6,6 +6,7 @@ extends Node3D
 
 signal dialing_engaged(player: Node)
 signal chevron_advanced(current_index: int, total_chevrons: int)
+signal glyph_error()
 signal gdo_verified()
 signal sequence_completed()
 signal dialing_cancelled()
@@ -82,7 +83,13 @@ func input_glyph(direction: String) -> bool:
 				print("DHD: 7 Chevrons locked! Awaiting 4-beat GDO Iris IDC code...")
 			return true
 		else:
-			print("DHD: Incorrect glyph '%s' (expected '%s')!" % [direction, expected])
+			print("DHD: Incorrect glyph '%s' (expected '%s')! SEQUENCE RESET!" % [direction, expected])
+			current_chevron_index = 0
+			if target_stargate != null:
+				target_stargate.reset_chevrons()
+			_trigger_error_feedback()
+			glyph_error.emit()
+			chevron_advanced.emit(0, TOTAL_CHEVRONS)
 			return false
 
 	elif current_phase == DialPhase.GDO_AUTH:
@@ -99,10 +106,30 @@ func input_glyph(direction: String) -> bool:
 					console_light.light_color = Color(0.1, 0.85, 0.4)
 			return true
 		else:
-			print("DHD: GDO code mismatch! Re-verify authorization code.")
+			print("DHD: GDO code mismatch! (expected '%s')! RESETTING GDO CODE!" % expected_gdo)
+			gdo_index = 0
+			_trigger_error_feedback()
+			glyph_error.emit()
 			return false
 
 	return false
+
+
+func _trigger_error_feedback() -> void:
+	if console_light != null:
+		console_light.light_color = Color(1.0, 0.1, 0.1)
+		console_light.light_energy = 4.0
+		var tween := console_light.create_tween()
+		tween.tween_property(console_light, "light_color", Color(1.0, 0.6, 0.1), 0.35)
+
+	if ResourceLoader.exists("res://audio/sfx_error_buzz.wav"):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load("res://audio/sfx_error_buzz.wav")
+		audio.max_distance = 35.0
+		audio.unit_size = 10.0
+		add_child(audio)
+		audio.finished.connect(audio.queue_free)
+		audio.play()
 
 
 func cancel_dialing() -> void:

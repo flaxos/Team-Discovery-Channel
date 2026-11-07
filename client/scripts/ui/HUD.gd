@@ -157,9 +157,21 @@ func bind_dhd(dhd: DHDDialer) -> void:
 	if not current_dhd.dialing_engaged.is_connected(_on_dhd_engaged):
 		current_dhd.dialing_engaged.connect(_on_dhd_engaged)
 		current_dhd.chevron_advanced.connect(_on_chevron_advanced)
+		current_dhd.glyph_error.connect(_on_glyph_error)
 		current_dhd.gdo_verified.connect(_on_gdo_verified)
 		current_dhd.sequence_completed.connect(_on_dhd_completed)
 		current_dhd.dialing_cancelled.connect(_on_dhd_cancelled)
+
+
+func _on_glyph_error() -> void:
+	dhd_title.text = "⚠️ CODE MISMATCH: SEQUENCE RESET! ⚠️"
+	dhd_title.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+	var tween := dhd_title.create_tween()
+	tween.tween_interval(0.6)
+	tween.tween_callback(func() -> void:
+		dhd_title.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
+	)
+	_render_glyphs()
 
 
 func _on_dhd_engaged(_player: Node) -> void:
