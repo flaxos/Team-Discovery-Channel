@@ -127,9 +127,13 @@ func _advance_towards(target_pos: Vector3, delta: float) -> void:
 
 
 func _process_combat(delta: float, dist: float) -> void:
-	# Tactical stop-and-shoot: slow down when firing
-	velocity.x = move_toward(velocity.x, 0.0, 10.0 * delta)
-	velocity.z = move_toward(velocity.z, 0.0, 10.0 * delta)
+	# Continue advancing down the ramp while in long-range combat (> 10m)
+	if dist > 10.0:
+		_advance_towards(current_target.global_position, delta)
+	else:
+		# Tactical stop-and-shoot when holding position at mid-range
+		velocity.x = move_toward(velocity.x, 0.0, 10.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 10.0 * delta)
 
 	fire_timer -= delta
 	if fire_timer <= 0.0:
