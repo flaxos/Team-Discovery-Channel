@@ -9,6 +9,7 @@ signal jaffa_vaporized()
 
 enum State { ADVANCE, COMBAT, MELEE, STUNNED, DEAD }
 
+@export var is_shock_guard: bool = false
 @export var move_speed: float = 4.2
 @export var combat_range: float = 22.0
 @export var melee_range: float = 2.2
@@ -33,16 +34,27 @@ func _ready() -> void:
 	# Server is authoritative over AI logic
 	set_multiplayer_authority(1)
 
+	if is_shock_guard:
+		if health_component != null:
+			health_component.max_health = 140.0
+			health_component.current_health = 140.0
+		move_speed = 4.8
+		plasma_damage = 42.0
+		fire_interval_s = 1.4
+
 	health_component.died.connect(_on_died)
 	health_component.stunned.connect(_on_stunned)
 	health_component.recovered_from_stun.connect(_on_recovered_from_stun)
 	health_component.vaporized.connect(_on_vaporized)
+	health_component.damage_taken.connect(_on_damage_taken)
 
 	# Randomize initial fire offset so multiple Jaffa don't shoot in unison
 	fire_timer = randf_range(0.5, fire_interval_s)
 
 
 func _physics_process(delta: float) -> void:
+	if not is_inside_tree():
+		return
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
@@ -145,6 +157,21 @@ func _fire_staff_blast() -> void:
 	if current_target == null:
 		return
 
+	_dispatch_single_plasma_bolt()
+
+	# Jaffa Shock Guard rapid double-burst logic (fires 2nd bolt after 0.18s)
+	if is_shock_guard:
+		var burst_timer := get_tree().create_timer(0.18)
+		burst_timer.timeout.connect(func() -> void:
+			if is_instance_valid(self) and is_inside_tree() and current_state != State.DEAD and current_state != State.STUNNED and current_target != null:
+				_dispatch_single_plasma_bolt()
+		)
+
+
+func _dispatch_single_plasma_bolt() -> void:
+	if current_target == null:
+		return
+
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.2, -0.6)
 	var target_chest := current_target.global_position + Vector3(0, 1.0, 0)
 	var base_dir := (target_chest - origin).normalized()
@@ -158,11 +185,31 @@ func _fire_staff_blast() -> void:
 	var bolt_scene := load("res://scenes/entities/PlasmaBolt.tscn") as PackedScene
 	if bolt_scene != null:
 		var bolt := bolt_scene.instantiate() as PlasmaBolt
+		bolt.damage = plasma_damage
 		get_parent().add_child(bolt)
 		bolt.initialize(origin, dir, self, true)
 
 	# Visual muzzle burst RPC
 	rpc("play_staff_fire_fx", origin)
+
+
+func _on_damage_taken(_amount: float, _source: Node, _damage_type: String) -> void:
+	if is_shock_guard and current_state != State.DEAD:
+		rpc("play_armor_spark_fx", global_position + Vector3(0, 1.2, 0))
+
+
+@rpc("call_local", "unreliable")
+func play_armor_spark_fx(pos: Vector3) -> void:
+	var spark := OmniLight3D.new()
+	spark.light_color = Color(1.0, 0.85, 0.4)
+	spark.light_energy = 5.0
+	spark.omni_range = 2.5
+	get_tree().root.add_child(spark)
+	spark.global_position = pos
+
+	var tween := spark.create_tween()
+	tween.tween_property(spark, "light_energy", 0.0, 0.1)
+	tween.tween_callback(spark.queue_free)
 
 
 func _process_melee(delta: float) -> void:

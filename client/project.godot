@@ -11,6 +11,10 @@ config/description="Co-op tactical top-down extraction shooter set in the Starga
 run/main_scene="res://scenes/main/Main.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 NetworkManager="*res://scripts/net/NetworkManager.gd"

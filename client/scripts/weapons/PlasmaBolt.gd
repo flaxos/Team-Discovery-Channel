@@ -60,13 +60,14 @@ func _play_fire_sound() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
-	if body == shooter:
+	if is_instance_valid(shooter) and body == shooter:
 		return
 
 	# Apply damage if target has HealthComponent
 	var health := body.get_node_or_null("HealthComponent") as HealthComponent
 	if health != null:
-		health.take_damage(damage, shooter, "plasma")
+		var src: Node = shooter if is_instance_valid(shooter) else null
+		health.take_damage(damage, src, "plasma")
 
 	_detonate(global_position)
 
