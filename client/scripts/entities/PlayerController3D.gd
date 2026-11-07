@@ -35,14 +35,14 @@ var primary_weapon_id: String = "m249"
 var secondary_weapon_id: String = "m9"
 var active_slot: int = 1
 var active_c4: C4Satchel = null
-var c4_charges_remaining: int = 3
-const MAX_C4_CHARGES: int = 3
+var c4_charges_remaining: int = 2
+const MAX_C4_CHARGES: int = 2
 var claymore_charges: int = 2
 const MAX_CLAYMORE_CHARGES: int = 2
 var active_turret: DeployableTurret = null
 var mounted_turret: DeployableTurret = null
 var turret_cooldown: float = 0.0
-const TURRET_COOLDOWN_S: float = 25.0
+const TURRET_COOLDOWN_S: float = 30.0
 
 var trauma: float = 0.0
 var max_shake_offset: float = 0.65
@@ -88,6 +88,7 @@ func _ready() -> void:
 		health_component.stunned.connect(_on_stunned)
 		health_component.recovered_from_stun.connect(_on_recovered_from_stun)
 		health_component.vaporized.connect(_on_vaporized)
+		health_component.damage_taken.connect(_on_damage_taken)
 
 	# Configure Camera and input authority
 	if is_local_authority:
@@ -526,6 +527,11 @@ func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = fa
 	var tween := tracer.create_tween()
 	tween.tween_property(mat, "albedo_color:a", 0.0, 0.08)
 	tween.tween_callback(tracer.queue_free)
+
+
+func _on_damage_taken(amount: float, _source: Node, _type: String) -> void:
+	if is_local_authority:
+		add_screen_shake(clampf(amount * 0.015, 0.15, 0.6))
 
 
 func _on_died() -> void:

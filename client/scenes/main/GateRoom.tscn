@@ -337,7 +337,7 @@ spawn_path = NodePath("../Players")
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn")
+_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn", "res://scenes/entities/JaffaShockGuard.tscn")
 spawn_path = NodePath("../Enemies")
 
 [node name="GateSpawnMarker" type="Marker3D" parent="."]

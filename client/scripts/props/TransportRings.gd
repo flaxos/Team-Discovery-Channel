@@ -7,6 +7,7 @@ signal telegraph_started()
 signal rings_slammed(ground_position: Vector3)
 signal beam_discharged()
 signal rings_retracted()
+signal reinforcement_spawned(enemy: JaffaAI)
 
 enum RingState { INACTIVE, TELEGRAPH, SLAM, BEAM, RETRACT }
 
@@ -16,6 +17,8 @@ enum RingState { INACTIVE, TELEGRAPH, SLAM, BEAM, RETRACT }
 @export var crush_damage: float = 80.0
 @export var spawn_enemies_on_beam: bool = true
 @export var paired_rings_path: NodePath = ""
+@export var reinforcement_scene: PackedScene = null
+@export var reinforcements_per_beam: int = 1
 var paired_rings: TransportRings = null
 
 var current_state: RingState = RingState.INACTIVE
@@ -141,14 +144,19 @@ func _discharge_beam() -> void:
 
 
 func _spawn_ring_reinforcements() -> void:
-	var jaffa_scene := load("res://scenes/entities/JaffaGuard.tscn") as PackedScene
+	var jaffa_scene: PackedScene = reinforcement_scene
+	if jaffa_scene == null:
+		jaffa_scene = load("res://scenes/entities/JaffaGuard.tscn") as PackedScene
 	var enemies_container := get_tree().root.find_child("Enemies", true, false)
 	if jaffa_scene != null and enemies_container != null:
-		var jaffa := jaffa_scene.instantiate() as JaffaAI
-		jaffa.name = "RingJaffa_%d" % randi()
-		jaffa.position = global_position + Vector3(0, 0.1, 0)
-		enemies_container.add_child(jaffa, true)
-		print("Transport Rings: Beamed down Jaffa Shock Guard!")
+		for i in range(reinforcements_per_beam):
+			var jaffa := jaffa_scene.instantiate() as JaffaAI
+			jaffa.name = "RingJaffa_%d" % randi()
+			var offset := Vector3(randf_range(-0.7, 0.7), 0.1, randf_range(-0.7, 0.7)) if reinforcements_per_beam > 1 else Vector3(0, 0.1, 0)
+			jaffa.position = global_position + offset
+			enemies_container.add_child(jaffa, true)
+			reinforcement_spawned.emit(jaffa)
+			print("Transport Rings: Beamed down reinforcement %s!" % ("Shock Guard" if jaffa.is_shock_guard else "Jaffa Guard"))
 
 
 func _retract_rings() -> void:
@@ -187,6 +195,7 @@ func _play_sfx(path: String, max_dist: float) -> void:
 	if ResourceLoader.exists(path):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load(path)
+		audio.bus = &"SFX"
 		audio.max_distance = max_dist
 		audio.unit_size = 12.0
 		add_child(audio)

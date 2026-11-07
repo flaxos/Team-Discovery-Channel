@@ -84,6 +84,7 @@ func _spawn_blast_fx() -> void:
 	if ResourceLoader.exists("res://audio/sfx_explosion.wav"):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load("res://audio/sfx_explosion.wav")
+		audio.bus = &"SFX"
 		audio.max_distance = 60.0
 		audio.unit_size = 15.0
 		get_tree().root.add_child(audio)

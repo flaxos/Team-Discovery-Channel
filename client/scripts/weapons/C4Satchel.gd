@@ -57,6 +57,15 @@ func detonate() -> void:
 
 
 func _spawn_explosion_fx() -> void:
+	# Screen shake for nearby operatives
+	var players := get_tree().root.find_child("Players", true, false)
+	if players != null:
+		for p in players.get_children():
+			if p is PlayerController3D:
+				var d := global_position.distance_to(p.global_position)
+				var falloff := clampf(1.0 - (d / 35.0), 0.1, 1.0)
+				p.add_screen_shake(0.85 * falloff)
+
 	var blast_mesh := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
 	sphere.radius = 2.5
@@ -78,6 +87,7 @@ func _spawn_explosion_fx() -> void:
 	if ResourceLoader.exists("res://audio/sfx_explosion.wav"):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load("res://audio/sfx_explosion.wav")
+		audio.bus = &"SFX"
 		audio.max_distance = 60.0
 		audio.unit_size = 15.0
 		get_tree().root.add_child(audio)

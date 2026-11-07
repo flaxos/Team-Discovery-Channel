@@ -24,9 +24,12 @@ extends CanvasLayer
 
 @onready var victory_modal: PanelContainer = $VictoryModal
 @onready var return_btn: Button = $VictoryModal/VBox/ReturnBtn if has_node("VictoryModal/VBox/ReturnBtn") else null
+@onready var damage_vignette: TextureRect = $DamageVignette if has_node("DamageVignette") else null
 
 var local_player: PlayerController3D = null
 var current_dhd: DHDDialer = null
+var vignette_pulse_time: float = 0.0
+var flash_alpha: float = 0.0
 
 
 func _ready() -> void:
@@ -72,17 +75,46 @@ func bind_local_player(player: PlayerController3D) -> void:
 			health.stunned.connect(_on_player_stunned)
 		if not health.recovered_from_stun.is_connected(_on_player_recovered):
 			health.recovered_from_stun.connect(_on_player_recovered)
+		if not health.damage_taken.is_connected(_on_player_damage_taken):
+			health.damage_taken.connect(_on_player_damage_taken)
 		_on_health_changed(health.current_health, health.max_health)
 
 	# Active weapon
 	_update_weapon_display()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if local_player != null:
 		if operative_label != null and (operative_label.text == "" or operative_label.text.begins_with("OPERATIVE [")):
 			bind_local_player(local_player)
 		_update_weapon_display()
+	_update_damage_vignette(delta)
+
+
+func _on_player_damage_taken(amount: float, _source: Node, _type: String) -> void:
+	flash_alpha = clampf(amount * 0.02, 0.25, 0.8)
+
+
+func _update_damage_vignette(delta: float) -> void:
+	if damage_vignette == null:
+		return
+
+	var health_ratio: float = 1.0
+	if local_player != null and local_player.health_component != null and local_player.health_component.max_health > 0.0:
+		health_ratio = local_player.health_component.current_health / local_player.health_component.max_health
+
+	var target_alpha: float = 0.0
+	if health_ratio < 0.30:
+		vignette_pulse_time += delta * 5.0
+		var pulse: float = (sin(vignette_pulse_time) + 1.0) * 0.5
+		var urgency: float = 1.0 - (health_ratio / 0.30)
+		target_alpha = lerpf(0.35, 0.85, urgency) * lerpf(0.7, 1.0, pulse)
+
+	if flash_alpha > 0.0:
+		flash_alpha = maxf(0.0, flash_alpha - 3.5 * delta)
+		target_alpha = maxf(target_alpha, flash_alpha)
+
+	damage_vignette.modulate.a = target_alpha
 
 
 func _update_weapon_display() -> void:
@@ -144,13 +176,23 @@ func _on_player_recovered() -> void:
 # --- Wave Manager Signals ---
 func on_wave_started(wave_num: int, enemy_count: int) -> void:
 	wave_label.text = "WAVE %d / 3" % wave_num
-	enemies_label.text = "HOSTILES: %d JAFFA GUARDS" % enemy_count
-	objective_label.text = "FOOTHOLD IN PROGRESS - REPEL STARGATE INVASION!"
+	var hostile_type := "JAFFA SHOCK GUARDS" if wave_num == 3 else "JAFFA GUARDS"
+	enemies_label.text = "HOSTILES: %d %s" % [enemy_count, hostile_type]
+	match wave_num:
+		1:
+			objective_label.text = "FOOTHOLD IN PROGRESS - REPEL STARGATE RAMP INVASION!"
+		2:
+			objective_label.text = "FLANKING ASSAULT DETECTED - WATCH TRANSPORT RINGS!"
+		3:
+			objective_label.text = "⚠️ OVERWHELMING ASSAULT! FALL BACK BEHIND BLAST DOORS & SEAL CHOKE POINT!"
+		_:
+			objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
 
 func on_jaffa_count_changed(enemies_remaining: int, wave_num: int) -> void:
 	wave_label.text = "WAVE %d / 3" % wave_num
-	enemies_label.text = "HOSTILES: %d JAFFA GUARDS" % enemies_remaining
+	var hostile_type := "JAFFA SHOCK GUARDS" if wave_num == 3 else "JAFFA GUARDS"
+	enemies_label.text = "HOSTILES: %d %s" % [enemies_remaining, hostile_type]
 
 
 func on_wave_cleared(wave_num: int, intermission_s: float) -> void:
@@ -162,7 +204,7 @@ func on_wave_cleared(wave_num: int, intermission_s: float) -> void:
 func on_all_waves_defeated() -> void:
 	wave_label.text = "ALL WAVES CLEARED!"
 	enemies_label.text = "SGC LEVEL 28 SECURED"
-	objective_label.text = "ACTIVATE SGC DIALING COMPUTER [E] TO STABILIZE IRIS & EXTRACT!"
+	objective_label.text = "ALL WAVES CLEARED! SGC LEVEL 28 SECURED! DIAL DHD & OPEN IRIS FOR EXTRACTION!"
 
 
 # --- DHD Dialing Mini-Game ---
