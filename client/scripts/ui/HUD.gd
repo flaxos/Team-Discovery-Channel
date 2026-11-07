@@ -23,6 +23,7 @@ extends CanvasLayer
 @onready var glyph_container: HBoxContainer = $DHDPanel/VBox/GlyphContainer
 
 @onready var victory_modal: PanelContainer = $VictoryModal
+@onready var restart_btn: Button = $VictoryModal/VBox/RestartBtn if has_node("VictoryModal/VBox/RestartBtn") else null
 @onready var return_btn: Button = $VictoryModal/VBox/ReturnBtn if has_node("VictoryModal/VBox/ReturnBtn") else null
 @onready var damage_vignette: TextureRect = $DamageVignette if has_node("DamageVignette") else null
 
@@ -38,6 +39,7 @@ extends CanvasLayer
 @onready var ambience_slider: HSlider = $PauseMenu/VBox/AmbienceSlider if has_node("PauseMenu/VBox/AmbienceSlider") else null
 @onready var ambience_label: Label = $PauseMenu/VBox/AmbienceLabel if has_node("PauseMenu/VBox/AmbienceLabel") else null
 @onready var resume_btn: Button = $PauseMenu/VBox/ResumeBtn if has_node("PauseMenu/VBox/ResumeBtn") else null
+@onready var pause_restart_btn: Button = $PauseMenu/VBox/RestartBtn if has_node("PauseMenu/VBox/RestartBtn") else null
 @onready var lobby_btn: Button = $PauseMenu/VBox/LobbyBtn if has_node("PauseMenu/VBox/LobbyBtn") else null
 
 @onready var debrief_title: Label = $VictoryModal/VBox/Title if has_node("VictoryModal/VBox/Title") else null
@@ -71,10 +73,14 @@ func _ready() -> void:
 
 	objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
+	if restart_btn != null:
+		restart_btn.pressed.connect(_on_restart_pressed)
 	if return_btn != null:
 		return_btn.pressed.connect(_on_return_pressed)
 	if resume_btn != null:
 		resume_btn.pressed.connect(toggle_pause_menu)
+	if pause_restart_btn != null:
+		pause_restart_btn.pressed.connect(_on_restart_pressed)
 	if lobby_btn != null:
 		lobby_btn.pressed.connect(_on_return_pressed)
 
@@ -139,10 +145,22 @@ func _on_ambience_slider_changed(value: float) -> void:
 		ambience_label.text = "AMBIENCE & KLAXONS: %d%%" % int(value * 100.0)
 
 
+func _on_restart_pressed() -> void:
+	if pause_menu != null:
+		pause_menu.visible = false
+	if get_tree().paused:
+		get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main/GateRoom.tscn")
+
+
 func _on_return_pressed() -> void:
+	if pause_menu != null:
+		pause_menu.visible = false
+	if get_tree().paused:
+		get_tree().paused = false
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null:
-		net.disconnect_from_session()
+		net.disconnect_game()
 	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
 
 
