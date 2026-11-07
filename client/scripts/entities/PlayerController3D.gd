@@ -66,6 +66,10 @@ func _ready() -> void:
 
 	# Configure Camera and input authority
 	if is_local_authority:
+		if camera_rig != null:
+			camera_rig.top_level = true
+			camera_rig.global_position = global_position
+			camera_rig.rotation = Vector3.ZERO
 		if camera != null:
 			camera.current = true
 		if laser_sight != null:
@@ -209,6 +213,11 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	# Smoothly follow player with camera rig without rotating with character
+	if is_local_authority and camera_rig != null:
+		camera_rig.global_position = camera_rig.global_position.lerp(global_position, 14.0 * delta)
+		camera_rig.rotation = Vector3.ZERO
+
 	# Handle firing & reloading
 	_process_combat()
 
@@ -227,7 +236,8 @@ func _process_aim() -> void:
 		current_aim_target = hit
 		var look_dir: Vector3 = (hit - global_position)
 		look_dir.y = 0.0
-		if look_dir.length_squared() > 0.01:
+		# Deadzone: only rotate if mouse is at least 0.5m away from player center
+		if look_dir.length_squared() > 0.25:
 			rotation.y = atan2(-look_dir.x, -look_dir.z)
 
 

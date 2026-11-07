@@ -8,14 +8,14 @@
 
 [sub_resource type="Environment" id="Environment_sgc"]
 background_mode = 1
-background_color = Color(0.04, 0.05, 0.07, 1)
+background_color = Color(0.06, 0.07, 0.09, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.2, 0.22, 0.26, 1)
-ambient_light_energy = 0.8
+ambient_light_color = Color(0.42, 0.45, 0.48, 1)
+ambient_light_energy = 1.2
 tonemap_mode = 2
 glow_enabled = true
-glow_intensity = 0.6
-glow_bloom = 0.2
+glow_intensity = 0.5
+glow_bloom = 0.15
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor"]
 albedo_color = Color(0.18, 0.19, 0.21, 1)
@@ -84,10 +84,31 @@ script = ExtResource("1_gr01")
 environment = SubResource("Environment_sgc")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 16, 0)
-light_color = Color(0.95, 0.92, 0.85, 1)
-light_energy = 1.4
+transform = Transform3D(1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 0, 16, 0)
+light_color = Color(0.96, 0.93, 0.88, 1)
+light_energy = 1.3
 shadow_enabled = true
+shadow_bias = 0.05
+
+[node name="CeilingFloodlights" type="Node3D" parent="."]
+
+[node name="FloodlightGate" type="OmniLight3D" parent="CeilingFloodlights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.5, -12)
+light_color = Color(0.95, 0.92, 0.82, 1)
+light_energy = 2.2
+omni_range = 18.0
+
+[node name="FloodlightCenter" type="OmniLight3D" parent="CeilingFloodlights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.5, 0)
+light_color = Color(0.95, 0.92, 0.82, 1)
+light_energy = 2.2
+omni_range = 18.0
+
+[node name="FloodlightSandbags" type="OmniLight3D" parent="CeilingFloodlights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.5, 8)
+light_color = Color(0.95, 0.92, 0.82, 1)
+light_energy = 2.2
+omni_range = 18.0
 
 [node name="BunkerGeometry" type="Node3D" parent="."]
 
@@ -132,9 +153,9 @@ size = Vector3(14, 2, 12)
 material = SubResource("Mat_Platform")
 
 [node name="GateRamp" type="CSGBox3D" parent="BunkerGeometry"]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.9, -5.5)
+transform = Transform3D(1, 0, 0, 0, 0.970143, 0.242536, 0, -0.242536, 0.970143, 0, 1, -4)
 use_collision = true
-size = Vector3(6, 0.4, 7.5)
+size = Vector3(7, 0.4, 8.25)
 material = SubResource("Mat_Platform")
 
 [node name="Barricades" type="Node3D" parent="BunkerGeometry"]
