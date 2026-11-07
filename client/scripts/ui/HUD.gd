@@ -174,6 +174,8 @@ func bind_dhd(dhd: DHDDialer) -> void:
 	if not current_dhd.dialing_engaged.is_connected(_on_dhd_engaged):
 		current_dhd.dialing_engaged.connect(_on_dhd_engaged)
 		current_dhd.chevron_advanced.connect(_on_chevron_advanced)
+		current_dhd.phase_changed.connect(_on_dhd_phase_changed)
+		current_dhd.gdo_beat_advanced.connect(_on_gdo_beat_advanced)
 		current_dhd.glyph_error.connect(_on_glyph_error)
 		current_dhd.gdo_verified.connect(_on_gdo_verified)
 		current_dhd.sequence_completed.connect(_on_dhd_completed)
@@ -192,11 +194,20 @@ func _on_glyph_error() -> void:
 
 
 func _on_dhd_engaged(_player: Node) -> void:
-	dhd_panel.visible = true
+	if dhd_panel != null:
+		dhd_panel.visible = true
 	_render_glyphs()
 
 
 func _on_chevron_advanced(_cur: int, _total: int) -> void:
+	_render_glyphs()
+
+
+func _on_dhd_phase_changed(_new_phase: DHDDialer.DialPhase) -> void:
+	_render_glyphs()
+
+
+func _on_gdo_beat_advanced(_cur_beat: int, _total_beats: int) -> void:
 	_render_glyphs()
 
 
@@ -205,21 +216,31 @@ func _on_gdo_verified() -> void:
 
 
 func _on_dhd_completed() -> void:
-	dhd_panel.visible = true
-	dhd_title.text = "IRIS OPENED! STEP THROUGH EVENT HORIZON TO EXTRACT!"
+	if dhd_panel != null:
+		dhd_panel.visible = true
+	if dhd_title != null:
+		dhd_title.text = "IRIS OPENED! STEP THROUGH EVENT HORIZON TO EXTRACT!"
+		dhd_title.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
 	_render_glyphs()
+	var timer := get_tree().create_timer(3.5)
+	timer.timeout.connect(func() -> void:
+		if is_instance_valid(dhd_panel) and current_dhd != null and current_dhd.current_phase == DHDDialer.DialPhase.COMPLETE:
+			dhd_panel.visible = false
+	)
 
 
 func _on_dhd_cancelled() -> void:
-	dhd_panel.visible = false
+	if dhd_panel != null:
+		dhd_panel.visible = false
 
 
 func _render_glyphs() -> void:
-	if current_dhd == null:
+	if current_dhd == null or glyph_container == null or dhd_title == null:
 		return
 
-	# Clear glyph container
+	# Immediately remove and free existing glyph buttons to prevent visual stacking
 	for child in glyph_container.get_children():
+		glyph_container.remove_child(child)
 		child.queue_free()
 
 	var arrow_symbols: Dictionary = {
@@ -231,6 +252,7 @@ func _render_glyphs() -> void:
 
 	if current_dhd.current_phase == DHDDialer.DialPhase.CHEVRONS:
 		dhd_title.text = "SGC DIALING COMPUTER: 7-CHEVRON LOCK SEQUENCE"
+		dhd_title.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
 		for i in range(current_dhd.chevron_sequence.size()):
 			var glyph_key: String = current_dhd.chevron_sequence[i]
 			var symbol: String = arrow_symbols.get(glyph_key, "?")
@@ -252,6 +274,7 @@ func _render_glyphs() -> void:
 
 	elif current_dhd.current_phase == DHDDialer.DialPhase.GDO_AUTH:
 		dhd_title.text = "GDO IRIS AUTHORIZATION CODE (4 BEATS)"
+		dhd_title.add_theme_color_override("font_color", Color(0.2, 0.9, 1.0))
 		for i in range(current_dhd.gdo_sequence.size()):
 			var glyph_key: String = current_dhd.gdo_sequence[i]
 			var symbol: String = arrow_symbols.get(glyph_key, "?")
@@ -263,13 +286,14 @@ func _render_glyphs() -> void:
 			if i < current_dhd.gdo_index:
 				btn.modulate = Color(0.2, 1.0, 0.4) # Green verified
 			elif i == current_dhd.gdo_index:
-				btn.modulate = Color(1.0, 1.0, 0.2)
+				btn.modulate = Color(1.0, 1.0, 0.2) # Active beat
 			else:
-				btn.modulate = Color(0.4, 0.4, 0.4)
+				btn.modulate = Color(0.4, 0.4, 0.4) # Upcoming
 			glyph_container.add_child(btn)
 
 	elif current_dhd.current_phase == DHDDialer.DialPhase.COMPLETE:
-		dhd_title.text = "EXTRACT NOW: STEP INTO WORMHOLE!"
+		dhd_title.text = "IRIS OPENED! STEP INTO WORMHOLE TO EXTRACT!"
+		dhd_title.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
 
 
 func show_victory() -> void:

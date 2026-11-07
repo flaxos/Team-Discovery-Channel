@@ -6,6 +6,8 @@ extends Node3D
 
 signal dialing_engaged(player: Node)
 signal chevron_advanced(current_index: int, total_chevrons: int)
+signal phase_changed(new_phase: DialPhase)
+signal gdo_beat_advanced(current_beat: int, total_beats: int)
 signal glyph_error()
 signal gdo_verified()
 signal sequence_completed()
@@ -71,7 +73,6 @@ func input_glyph(direction: String) -> bool:
 		var expected := chevron_sequence[current_chevron_index]
 		if direction == expected:
 			current_chevron_index += 1
-			chevron_advanced.emit(current_chevron_index, TOTAL_CHEVRONS)
 			print("DHD: Glyph '%s' accepted. Chevron %d locked." % [direction, current_chevron_index])
 
 			# Inform target Stargate
@@ -80,7 +81,10 @@ func input_glyph(direction: String) -> bool:
 
 			if current_chevron_index >= TOTAL_CHEVRONS:
 				current_phase = DialPhase.GDO_AUTH
+				phase_changed.emit(current_phase)
 				print("DHD: 7 Chevrons locked! Awaiting 4-beat GDO Iris IDC code...")
+
+			chevron_advanced.emit(current_chevron_index, TOTAL_CHEVRONS)
 			return true
 		else:
 			print("DHD: Incorrect glyph '%s' (expected '%s')! SEQUENCE RESET!" % [direction, expected])
@@ -97,11 +101,17 @@ func input_glyph(direction: String) -> bool:
 		if direction == expected_gdo:
 			gdo_index += 1
 			print("DHD: GDO Beat %d/%d accepted." % [gdo_index, GDO_CODE_LENGTH])
+			_play_sfx("res://audio/sfx_gdo_beep.wav", 25.0)
+			gdo_beat_advanced.emit(gdo_index, GDO_CODE_LENGTH)
+
 			if gdo_index >= GDO_CODE_LENGTH:
 				current_phase = DialPhase.COMPLETE
+				phase_changed.emit(current_phase)
 				gdo_verified.emit()
 				sequence_completed.emit()
+				active_dialer = null # Release operative movement so they can sprint to the gate!
 				print("DHD: SGC IRIS OPENED! WORMHOLE STABILIZED FOR EXTRACTION!")
+				_play_sfx("res://audio/sfx_iris_open.wav", 40.0)
 				if console_light != null:
 					console_light.light_color = Color(0.1, 0.85, 0.4)
 			return true
@@ -110,9 +120,21 @@ func input_glyph(direction: String) -> bool:
 			gdo_index = 0
 			_trigger_error_feedback()
 			glyph_error.emit()
+			gdo_beat_advanced.emit(0, GDO_CODE_LENGTH)
 			return false
 
 	return false
+
+
+func _play_sfx(path: String, max_dist: float) -> void:
+	if ResourceLoader.exists(path):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load(path)
+		audio.max_distance = max_dist
+		audio.unit_size = 10.0
+		add_child(audio)
+		audio.finished.connect(audio.queue_free)
+		audio.play()
 
 
 func _trigger_error_feedback() -> void:
