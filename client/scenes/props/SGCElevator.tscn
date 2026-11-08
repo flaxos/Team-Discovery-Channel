@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://c8m3q2v4x7n01"]
+[gd_scene load_steps=7 format=3 uid="uid://c8m3q2v4x7n01"]
 
 [ext_resource type="Script" path="res://scripts/props/SGCElevator.gd" id="1_elev01"]
+[ext_resource type="Script" path="res://scripts/props/SGCElevatorCallPedestal.gd" id="2_ped01"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_ElevatorFloor"]
 albedo_color = Color(0.22, 0.24, 0.26, 1)
@@ -86,8 +87,27 @@ modulate = Color(0.2, 0.9, 0.3, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
 shape = SubResource("BoxShape_RideArea")
 
+[node name="CabinControlPanel" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 2, 0)
+use_collision = true
+size = Vector3(0.2, 0.8, 0.4)
+material = SubResource("Mat_ElevatorWall")
+script = ExtResource("2_ped01")
+is_cabin_panel = true
+elevator_path = NodePath("../..")
+
+[node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.5, 0)
+text = "[E] DISPATCH LIFT"
+font_size = 18
+outline_size = 4
+modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1
+
 [node name="CallPedestal28" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0, 2.2)
+script = ExtResource("2_ped01")
+target_floor = 28
 
 [node name="PedestalMesh" type="CSGBox3D" parent="CallPedestal28"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
@@ -103,13 +123,41 @@ omni_range = 3.0
 
 [node name="Label28" type="Label3D" parent="CallPedestal28"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
-text = "[ 28 ] CALL LIFT"
+text = "[E] CALL LIFT"
 font_size = 18
 outline_size = 4
 modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1
+
+[node name="CallPedestal28Right" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0, 2.2)
+script = ExtResource("2_ped01")
+target_floor = 28
+
+[node name="PedestalMesh" type="CSGBox3D" parent="CallPedestal28Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+use_collision = true
+size = Vector3(0.4, 1.2, 0.4)
+material = SubResource("Mat_ElevatorWall")
+
+[node name="PedestalLight" type="OmniLight3D" parent="CallPedestal28Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+light_color = Color(0.2, 0.9, 0.3, 1)
+light_energy = 1.5
+omni_range = 3.0
+
+[node name="Label28Right" type="Label3D" parent="CallPedestal28Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+text = "[E] CALL LIFT"
+font_size = 18
+outline_size = 4
+modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1
 
 [node name="CallPedestal27" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 5.5, 2.2)
+script = ExtResource("2_ped01")
+target_floor = 27
 
 [node name="PedestalMesh" type="CSGBox3D" parent="CallPedestal27"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
@@ -125,7 +173,33 @@ omni_range = 3.0
 
 [node name="Label27" type="Label3D" parent="CallPedestal27"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
-text = "[ 27 ] CALL LIFT"
+text = "[E] CALL LIFT"
 font_size = 18
 outline_size = 4
 modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1
+
+[node name="CallPedestal27Right" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 5.5, 2.2)
+script = ExtResource("2_ped01")
+target_floor = 27
+
+[node name="PedestalMesh" type="CSGBox3D" parent="CallPedestal27Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+use_collision = true
+size = Vector3(0.4, 1.2, 0.4)
+material = SubResource("Mat_ElevatorWall")
+
+[node name="PedestalLight" type="OmniLight3D" parent="CallPedestal27Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+light_color = Color(0.2, 0.9, 0.3, 1)
+light_energy = 1.5
+omni_range = 3.0
+
+[node name="Label27Right" type="Label3D" parent="CallPedestal27Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+text = "[E] CALL LIFT"
+font_size = 18
+outline_size = 4
+modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1

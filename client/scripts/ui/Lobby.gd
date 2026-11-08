@@ -12,6 +12,8 @@ extends Control
 @onready var start_game_button: Button = %StartGameButton
 @onready var status_label: Label = %StatusLabel
 @onready var roster_list: ItemList = %RosterList
+@onready var keybindings_button: Button = %KeybindingsButton if has_node("%KeybindingsButton") else null
+@onready var keybindings_modal: KeybindingsModal = $KeybindingsModal if has_node("KeybindingsModal") else null
 
 
 func _ready() -> void:
@@ -26,6 +28,10 @@ func _ready() -> void:
 	start_game_button.pressed.connect(_on_start_game_pressed)
 	class_option_button.item_selected.connect(_on_class_selected)
 	player_name_edit.text_changed.connect(_on_name_changed)
+	if keybindings_button != null:
+		keybindings_button.pressed.connect(_on_keybindings_pressed)
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
 
 
 func _setup_class_options() -> void:
@@ -130,6 +136,15 @@ func _on_start_game_pressed() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null and net.is_server:
 		net.request_start_game()
+
+
+func open_keybindings() -> void:
+	if keybindings_modal != null:
+		keybindings_modal.open_modal()
+
+
+func _on_keybindings_pressed() -> void:
+	open_keybindings()
 
 
 func _refresh_roster() -> void:

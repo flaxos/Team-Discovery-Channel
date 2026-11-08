@@ -1,0 +1,233 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8keybindsgc01"]
+
+[ext_resource type="Script" path="res://scripts/ui/KeybindingsModal.gd" id="1_kb01"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Terminal"]
+bg_color = Color(0.06, 0.08, 0.11, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.18, 0.85, 0.65, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.18, 0.85, 0.65, 0.25)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ColHeader"]
+bg_color = Color(0.09, 0.14, 0.17, 0.95)
+border_width_left = 3
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.85, 0.65, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_CloseBtn"]
+bg_color = Color(0.08, 0.14, 0.16, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.85, 0.65, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="KeybindingsModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_kb01")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.05, 0.88)
+
+[node name="TerminalPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -580.0
+offset_top = -325.0
+offset_right = 580.0
+offset_bottom = 325.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_Terminal")
+
+[node name="MarginContainer" type="MarginContainer" parent="TerminalPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 18
+
+[node name="MainVBox" type="VBoxContainer" parent="TerminalPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderBox" type="VBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="SubHeaderLabel" type="Label" parent="TerminalPanel/MarginContainer/MainVBox/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.75, 0.85, 0.7)
+theme_override_font_sizes/font_size = 11
+text = "CHEYENNE MOUNTAIN COMPLEX // NORAD LEVEL 28 TACTICAL DEFENSE TERMINAL"
+horizontal_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="TerminalPanel/MarginContainer/MainVBox/HeaderBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.95, 0.65, 1)
+theme_override_font_sizes/font_size = 19
+text = "CHEYENNE MOUNTAIN COMPLEX // TACTICAL FIELD MANUAL & CONTROLS"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="TerminalPanel/MarginContainer/MainVBox"]
+layout_mode = 2
+
+[node name="ColumnsHBox" type="HBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="CombatCol" type="VBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="CombatHeaderBox" type="PanelContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/CombatCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ColHeader")
+
+[node name="Margin" type="MarginContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/CombatCol/CombatHeaderBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="CombatHeaderLabel" type="Label" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/CombatCol/CombatHeaderBox/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.95, 0.75, 1)
+theme_override_font_sizes/font_size = 13
+text = "COMBAT & WEAPON CONTROLS"
+horizontal_alignment = 1
+
+[node name="CombatScroll" type="ScrollContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/CombatCol"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CombatContainer" type="VBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/CombatCol/CombatScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="MovementCol" type="VBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="MovementHeaderBox" type="PanelContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/MovementCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ColHeader")
+
+[node name="Margin" type="MarginContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/MovementCol/MovementHeaderBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="MovementHeaderLabel" type="Label" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/MovementCol/MovementHeaderBox/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.95, 0.75, 1)
+theme_override_font_sizes/font_size = 13
+text = "MOVEMENT & STANCE CONTROLS"
+horizontal_alignment = 1
+
+[node name="MovementScroll" type="ScrollContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/MovementCol"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="MovementContainer" type="VBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/MovementCol/MovementScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="SquadCol" type="VBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="SquadHeaderBox" type="PanelContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/SquadCol"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ColHeader")
+
+[node name="Margin" type="MarginContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/SquadCol/SquadHeaderBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="SquadHeaderLabel" type="Label" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/SquadCol/SquadHeaderBox/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.95, 0.75, 1)
+theme_override_font_sizes/font_size = 13
+text = "SQUAD TACTICS & CAMERA CONTROLS"
+horizontal_alignment = 1
+
+[node name="SquadScroll" type="ScrollContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/SquadCol"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SquadContainer" type="VBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox/ColumnsHBox/SquadCol/SquadScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="HSeparator2" type="HSeparator" parent="TerminalPanel/MarginContainer/MainVBox"]
+layout_mode = 2
+
+[node name="FooterHBox" type="HBoxContainer" parent="TerminalPanel/MarginContainer/MainVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="CloseButton" type="Button" parent="TerminalPanel/MarginContainer/MainVBox/FooterHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.75, 1)
+theme_override_colors/font_hover_color = Color(0.9, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_CloseBtn")
+text = "[ CLOSE / RESUME MISSION ]"
