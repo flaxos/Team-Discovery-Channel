@@ -51,7 +51,7 @@ func _process(delta: float) -> bool:
 		# TEST 1: P0 Hallway & Central Walkway Level Connectivity
 		# -----------------------------------------------------------------
 		print("[TEST 1/8] Testing P0 Central Corridor Level Connectivity (Fallback -> Control -> Gate Room)...")
-		player.global_position = Vector3(0.0, 0.0, 22.0) # Fallback Hallway
+		player.global_position = Vector3(5.0, 0.0, 21.5) # Fallback Hallway
 		
 		# Move north toward Gate Room (Z = 22 -> Z = 5)
 		for step in range(240):
@@ -182,7 +182,7 @@ func _process(delta: float) -> bool:
 		assert(ride_box.size.x >= 3.0 and ride_box.size.z >= 3.0, "RideArea must accommodate 4 operatives")
 
 		# Doors face local +Z, which maps to basis.z in global space
-		var door_facing_vector: Vector3 = -elevator.global_transform.basis.z.normalized()
+		var door_facing_vector: Vector3 = elevator.global_transform.basis.z.normalized()
 		print("  Elevator door facing vector: ", door_facing_vector)
 		assert(door_facing_vector.x < -0.8, "Elevator doors must open West toward X negative lobby")
 		print("[TEST 7/8] PASS: 4-Player SGC freight elevator scaled and correctly oriented West.")

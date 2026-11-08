@@ -154,11 +154,13 @@ func run_test() -> void:
 
 	host.wave_manager.end_mission()
 	await frames(5)
-	host_api.multiplayer_peer = null
-	client_api.multiplayer_peer = null
+	host_api.multiplayer_peer = OfflineMultiplayerPeer.new()
+	client_api.multiplayer_peer = OfflineMultiplayerPeer.new()
 	host_root.queue_free()
 	client_root.queue_free()
 	await frames(2)
+	host_api.multiplayer_peer = null
+	client_api.multiplayer_peer = null
 	server_peer.close()
 	client_peer.close()
 	print("PASS native NPC spawn/transform/despawn, mission snapshots, doors, lift and validated station requests")

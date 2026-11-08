@@ -98,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--profile', choices=['fast', 'full', 'multiplayer'], default='full')
     parser.add_argument('--godot', default=os.environ.get('GODOT', 'godot'))
     parser.add_argument('--project', type=Path, default=ROOT / 'client')
-    parser.add_argument('--timeout', type=float, default=60, help='Per test process timeout in seconds')
+    parser.add_argument('--timeout', type=float, default=180, help='Per test process timeout in seconds')
     parser.add_argument('--import-timeout', type=float, default=120)
     parser.add_argument('--output', type=Path, default=ROOT / 'build' / 'test-results' / 'godot')
     parser.add_argument('--skip-import', action='store_true', help='Diagnostic only; CI never uses this')

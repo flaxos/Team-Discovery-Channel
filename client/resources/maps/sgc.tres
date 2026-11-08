@@ -1,0 +1,3773 @@
+[gd_resource type="Resource" script_class="SGCMapDefinition" load_steps=439 format=3]
+
+[ext_resource type="Script" path="res://scripts/map/SGCAssetSlot.gd" id="1_qra6f"]
+[ext_resource type="Script" path="res://scripts/map/SGCConnection.gd" id="2_42w4v"]
+[ext_resource type="Script" path="res://scripts/map/SGCRegion.gd" id="3_op6j4"]
+[ext_resource type="Script" path="res://scripts/map/SGCMapDefinition.gd" id="4_bjjh2"]
+[ext_resource type="Script" path="res://scripts/map/SGCAssetStyle.gd" id="5_xjry3"]
+
+[sub_resource type="Resource" id="Resource_qra6f"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMFloor"
+style_id = &"floor"
+dimensions = Vector3(36, 0.3, 30)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_42w4v"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall0_-18.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(36, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_op6j4"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall1_-18.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(21.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bjjh2"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall1_3.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(3, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xjry3"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall1_6.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(11.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_mqo3w"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall2_-22.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 24.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_pgwrn"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall2_2.20000004768372_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3.6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ckduj"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall2_5.80000019073486_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_58lic"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall3_-22.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 24.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_wi86p"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall3_2.20000004768372_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3.6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5bsd2"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMWall3_5.80000019073486_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_rg8mr"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_hub4i"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMFloor"
+style_id = &"floor"
+dimensions = Vector3(14, 0.3, 14)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_m6vcr"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMWall1_-7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_x352d"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMWall1_-3.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(6, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_oehbp"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMWall1_3.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xlvx7"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMWall2_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 14)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_k1npc"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMWall3_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_iksq2"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMWall3_12.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_uj3cn"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMWall3_17.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_un8s8"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_rtflp"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYFloor"
+style_id = &"floor"
+dimensions = Vector3(10, 0.3, 20)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_p18sf"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall0_-5.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_r5jfu"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall0_-3.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(6, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_e6r2m"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall0_3.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jleyu"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall1_-5.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(10, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_tb0m7"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall2_22.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 8.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_n2k7k"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall2_30.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_abfhv"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall2_35.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_gdbnb"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall3_22.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 11.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_cd0k3"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall3_33.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ikaxv"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYWall3_38.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 3.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bmj6h"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jm5ce"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELFloor"
+style_id = &"floor"
+dimensions = Vector3(12, 0.3, 6)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jw5w2"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall0_5.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(12, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fj317"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall1_5.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(12, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dakkr"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall2_33.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1kimb"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall2_33.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2mn1w"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall2_38.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_a18om"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall3_33.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7wm7g"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall3_33.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_hr3g3"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELWall3_38.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dbg7p"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xkx0m"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYFloor"
+style_id = &"floor"
+dimensions = Vector3(18, 0.3, 21)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jvw52"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall0_17.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(4.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7eyhh"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall0_24.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(3, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dr3q3"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall0_27.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(5, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_oxog4"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall0_32.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_oqf7o"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall1_17.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(7, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_cxel0"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall1_24.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(4, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2p7gv"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall1_28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(7, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_28omq"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall2_24.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 9.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_d2e3o"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall2_33.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ar5nj"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall2_38.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_igjxf"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall3_24.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 9.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_0e3x6"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall3_33.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_y428x"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYWall3_38.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_3xtl2"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fvb58"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYFloor"
+style_id = &"floor"
+dimensions = Vector3(18, 0.3, 16)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_8cjrv"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYWall0_35.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(18, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_nhrd3"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYWall1_35.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(18, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fswj7"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYWall2_28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ccaik"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYWall2_33.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_d2dvl"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYWall2_38.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ujcfq"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYWall3_28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 16)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ygdd8"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_k4dbe"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYFloor"
+style_id = &"floor"
+dimensions = Vector3(18, 0.3, 20)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2cib6"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYWall0_17.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(7, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_hqxj2"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYWall0_24.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(4, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4vtpd"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYWall0_28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(7, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_oljof"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYWall1_17.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(18, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fpisg"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYWall2_45.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 20)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bls4v"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYWall3_45.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 20)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_oxlig"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_lugfb"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYFloor"
+style_id = &"floor"
+dimensions = Vector3(18.4, 0.3, 14)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ff7q5"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall0_17.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(3.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_x0v7s"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall0_20.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(5, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_prxfq"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall0_25.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(9.9, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_iwcnw"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall1_17.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(4.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_tx04s"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall1_24.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(3, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7hpq4"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall1_27.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(5, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_51qhb"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall1_32.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2.9, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xhoe5"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall2_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_m8rgc"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall2_12.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_lggah"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall2_17.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7uhqi"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall3_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_aqt8y"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall3_16.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_w0c0l"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYWall3_19.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_e2tak"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vrsbw"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORFloor"
+style_id = &"floor"
+dimensions = Vector3(9, 0.3, 10)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qjb88"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall0_18.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(9, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xyefd"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall1_18.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6v7hr"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall1_20.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(5, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_d5vj5"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall1_25.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(1.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_u8f30"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall2_0.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_38uwg"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall2_2.20000004768372_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3.6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_agim3"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall2_5.80000019073486_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_pv2nf"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORWall3_0.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 10)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_11ggd"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jc3r4"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORFloor"
+style_id = &"floor"
+dimensions = Vector3(10, 0.3, 6)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7vg6p"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall0_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(10, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dq8f2"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall1_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(10, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ch60d"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall2_12.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2anwj"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall2_12.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_18lva"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall2_17.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_e3fhr"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall3_12.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_p3xf7"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall3_12.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_cm6ap"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORWall3_17.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1516q"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_knfwv"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORFloor"
+style_id = &"floor"
+dimensions = Vector3(10, 0.3, 10)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jd4w1"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall0_-28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(10, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_wgu8h"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall1_-28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6gd8s"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall1_-27.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(5, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_c6wi6"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall1_-22.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(4.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_smdtx"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall2_0.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 10)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_f3tbn"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall3_0.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ju8dy"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall3_2.20000004768372_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3.6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_sc8m6"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORWall3_5.80000019073486_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4.2)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_rvtb8"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_3hf2t"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEFloor"
+style_id = &"floor"
+dimensions = Vector3(6, 0.3, 26)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ugh38"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall0_-28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_llele"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall0_-27.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(5, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_b6ut4"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall0_-22.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5smo3"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall1_-28.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(6, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_b1mos"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall2_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 26)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_nv02r"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall3_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 20.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6sa60"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall3_30.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ghj2d"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEWall3_35.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4ba1f"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICELightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6mv54"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKFloor"
+style_id = &"floor"
+dimensions = Vector3(17, 0.3, 6)
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_164qq"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall0_-22.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(17, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_aserm"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall1_-22.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(17, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4ngjl"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall2_30.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_tdqn8"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall2_30.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_r3hxk"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall2_35.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ypk5w"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall3_30.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6lmd0"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall3_30.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_o1x23"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKWall3_35.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 0.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_g16fv"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_srw8n"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMFloorN"
+style_id = &"briefing"
+dimensions = Vector3(14, 0.3, 0.6)
+description = "Dark charcoal briefing carpet, muted concrete walls and brushed metal fittings."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_axe4l"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMFloorS"
+style_id = &"briefing"
+dimensions = Vector3(14, 0.3, 8.6)
+description = "Dark charcoal briefing carpet, muted concrete walls and brushed metal fittings."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_8bejl"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMFloorW"
+style_id = &"briefing"
+dimensions = Vector3(0.0999999, 0.3, 4.8)
+description = "Dark charcoal briefing carpet, muted concrete walls and brushed metal fittings."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fertc"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMFloorE"
+style_id = &"briefing"
+dimensions = Vector3(9.1, 0.3, 4.8)
+description = "Dark charcoal briefing carpet, muted concrete walls and brushed metal fittings."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_psr6y"]
+script = ExtResource("1_qra6f")
+id = &"SpiralTopLanding"
+style_id = &"steel"
+dimensions = Vector3(1.4, 0.3, 2.75)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_77pj0"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMWall1_-7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(14, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bkpx0"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMWall2_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4golk"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMWall2_13.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bl3tw"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMWall2_16.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4h2fu"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMWall3_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_j30ik"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMWall3_13.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_idxnl"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMWall3_16.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_0nf75"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5bn2b"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEFloor"
+style_id = &"office"
+dimensions = Vector3(12, 0.3, 14)
+description = "Warm dark wood furniture, restrained grey walls and dark office carpet."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_gd7ls"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall0_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(12, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_gikyi"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall1_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(12, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7uia3"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall2_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_n82hs"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall2_13.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qrvm5"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall2_16.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1bxm8"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall3_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_cvo85"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall3_13.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_njo7f"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEWall3_16.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_q334c"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICELightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5xn4x"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONFloor"
+style_id = &"bunker"
+dimensions = Vector3(12, 0.3, 14)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7on1t"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONWall0_-19.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(12, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qpkmu"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONWall1_-19.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(12, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_r6nee"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONWall2_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 14)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_nnpof"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONWall3_8.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7yvju"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONWall3_13.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_itr4l"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONWall3_16.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 5.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_aq210"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_efy0q"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORFloor"
+style_id = &"bunker"
+dimensions = Vector3(8, 0.3, 10)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_a8dby"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall0_19.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(8, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_si0qq"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall1_19.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_cohrt"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall1_24.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vnwg2"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall2_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 3.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ldyli"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall2_13.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4i8jm"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall2_16.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 3.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_rjs2s"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall3_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_sm33a"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall3_12.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_hj3vl"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORWall3_17.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_lh7ky"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_08bcr"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYFloor"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 0.3, 16)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vl5jp"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall0_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ti8wh"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall1_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5lxfy"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall1_33.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(1.9, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_phw8i"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall2_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 2.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_iwv2c"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall2_12.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7tikf"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall2_17.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 8.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_h76x2"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall3_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ynlvk"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall3_16.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vguva"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYWall3_19.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fm3xo"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_i4t7u"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLFloor"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 0.3, 14)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_icyge"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLWall0_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_hbp8q"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLWall0_33.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(1.9, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ijnxu"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLWall1_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vaxcq"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLWall2_26.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 14)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bmpob"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLWall3_26.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 14)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_h8bbe"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_gqxmf"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYFloor"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 0.3, 16)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fxci3"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall0_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_f1joc"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall1_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_owmt6"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall1_29.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(4, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5iw2l"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall1_33.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2.4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_8r5jw"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall2_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_72a6c"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall2_16.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_57al0"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall2_20.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_j0fvv"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall3_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ke1fq"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall3_16.5_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_11be5"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYWall3_19.5_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6.5)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_7coni"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qado1"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORFloor"
+style_id = &"bunker"
+dimensions = Vector3(8, 0.3, 16)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ht113"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall0_19.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(8, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_aikia"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall1_19.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(8, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_0ignm"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall2_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vvave"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall2_16.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xkx0e"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall2_20.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_eqn43"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall3_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_0j6bx"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall3_16.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_d8hkm"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORWall3_20.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_aj6pc"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6p8f0"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGFloor"
+style_id = &"bunker"
+dimensions = Vector3(12, 0.3, 16)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_hp6ii"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall0_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(12, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_86cbk"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall1_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_s6ciu"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall1_12.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(4, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_paomr"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall1_16.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(3, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_eqpp4"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall2_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 16)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ar4dx"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall3_10.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_gi5jw"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall3_16.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4t74g"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGWall3_20.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4jmd7"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_watga"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEFloor"
+style_id = &"bunker"
+dimensions = Vector3(20, 0.3, 12)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ueppl"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall0_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(5, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jxsvs"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall0_12.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(4, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_wk2yi"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall0_16.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(11, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_b22h5"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall1_7.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(20, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_c8i22"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall2_26.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 12)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_mwy1n"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall3_26.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_h1jwk"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall3_30.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_a6uvw"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEWall3_34.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_uaf14"]
+script = ExtResource("1_qra6f")
+id = &"STORAGELightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_wmiip"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMFloorS"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 0.3, 1.9)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4bdgx"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMFloorW"
+style_id = &"bunker"
+dimensions = Vector3(3.6, 0.3, 12.1)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_t3bhn"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMFloorE"
+style_id = &"bunker"
+dimensions = Vector3(2, 0.3, 12.1)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_thru1"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall0_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1juhf"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall0_29.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(4, 1, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_67vfk"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall0_33.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(2.4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1id2m"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall1_27.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(8.4, 3.8, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_lqw5v"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall2_26.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_pscat"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall2_30.0_2.8"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 1, 4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4i43k"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall2_34.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 6)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_cl37f"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMWall3_26.0_0.0"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 3.8, 14)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_trubg"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMLightFixture"
+style_id = &"steel"
+dimensions = Vector3(1.8, 0.12, 0.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ty8rr"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORWalkSurface"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.2, 9.90824)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4ukkj"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORRail-1.3"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 9.90824)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_d5be5"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORRail1.3"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 9.90824)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xeey1"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread0"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_h4hel"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread1"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2lqn5"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread2"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_r23e1"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread3"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bcm00"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread4"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qefeq"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread5"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_25lr4"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread6"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_40r8i"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread7"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_nm3b1"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread8"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bdsnw"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread9"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_wo53g"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread10"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1xbqe"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread11"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dvxhm"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread12"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fnaqo"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread13"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ym6gp"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread14"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_yi8il"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread15"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_b8i8h"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread16"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_valm7"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread17"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1xqxd"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread18"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_0tiec"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread19"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_cuktq"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread20"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2gu7l"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread21"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4gxfj"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread22"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_snwa7"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread23"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_yhok4"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread24"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fsu36"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread25"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bnhld"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread26"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_72t7a"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread27"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2nuqy"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread28"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_gdcvv"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread29"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_3dvda"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread30"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_si01i"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread31"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5j1re"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread32"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_30cgu"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread33"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vr2d1"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAY__UPPER_CORRIDORTread34"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.255294)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_yigpe"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMWalkSurface"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.2, 13.4004)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_3igfy"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMRail-1.3"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 13.4004)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_sg1x2"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMRail1.3"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 13.4004)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_n3u2l"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread0"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_lu757"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread1"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_v1a4g"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread2"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_s88ti"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread3"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1rbh8"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread4"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_sgevx"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread5"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qg81c"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread6"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_48i1u"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread7"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_mc14u"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread8"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_2xhbm"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread9"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ornst"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread10"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1dqle"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread11"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bmigs"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread12"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fujt0"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread13"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_oab86"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread14"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_aptox"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread15"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_mttyu"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread16"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_evgvj"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread17"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_w7yi3"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread18"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_lya7e"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread19"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_vygbq"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread20"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ulqlo"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread21"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5rv76"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread22"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_e825v"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread23"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_1btdk"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread24"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_m3b0y"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread25"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6f7d1"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread26"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_appvj"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread27"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_pgk0w"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread28"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_g68jc"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread29"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_pmd2w"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread30"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_kdsuf"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread31"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dpy44"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread32"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dlb16"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread33"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_dhst4"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread34"
+style_id = &"steel"
+dimensions = Vector3(2.4, 0.12, 0.372941)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_n1ay8"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORCover"
+style_id = &"steel"
+dimensions = Vector3(1.6, 1, 1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jx0hy"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICECover"
+style_id = &"steel"
+dimensions = Vector3(1.6, 1, 1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5gfxo"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKCover"
+style_id = &"steel"
+dimensions = Vector3(1.6, 1, 1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_gixdq"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGCover"
+style_id = &"steel"
+dimensions = Vector3(1.6, 1, 1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_yt8iw"]
+script = ExtResource("1_qra6f")
+id = &"STORAGECover"
+style_id = &"steel"
+dimensions = Vector3(1.6, 1, 1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_tbc0a"]
+script = ExtResource("1_qra6f")
+id = &"ShaftEast"
+style_id = &"bunker"
+dimensions = Vector3(0.3, 15, 4.4)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_xvvni"]
+script = ExtResource("1_qra6f")
+id = &"ShaftNorth"
+style_id = &"bunker"
+dimensions = Vector3(4, 15, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_m8nmw"]
+script = ExtResource("1_qra6f")
+id = &"ShaftSouth"
+style_id = &"bunker"
+dimensions = Vector3(4, 15, 0.3)
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ka38w"]
+script = ExtResource("1_qra6f")
+id = &"ServiceHoleGuard30.5"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 12.1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ynu4j"]
+script = ExtResource("1_qra6f")
+id = &"ServiceHoleGuard33.5"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 12.1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_yyys5"]
+script = ExtResource("1_qra6f")
+id = &"ServiceHoleNorthGuard"
+style_id = &"steel"
+dimensions = Vector3(2.8, 1.1, 0.1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ew6vu"]
+script = ExtResource("1_qra6f")
+id = &"SpiralHoleWestGuard"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 4.8)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_86fou"]
+script = ExtResource("1_qra6f")
+id = &"SpiralHoleSouthGuard"
+style_id = &"steel"
+dimensions = Vector3(3.2, 1.1, 0.1)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jo8by"]
+script = ExtResource("1_qra6f")
+id = &"SpiralHoleEastGuard"
+style_id = &"steel"
+dimensions = Vector3(0.1, 1.1, 4.8)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_aeooe"]
+script = ExtResource("1_qra6f")
+id = &"GATE_ROOMServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 29)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_5wv31"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_ROOMServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 13)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_o1p53"]
+script = ExtResource("1_qra6f")
+id = &"FALLBACK_HALLWAYServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 19)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_uiv06"]
+script = ExtResource("1_qra6f")
+id = &"CONNECTOR_TUNNELServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_onspu"]
+script = ExtResource("1_qra6f")
+id = &"ROUND_HALLWAYServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 20)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_atxe6"]
+script = ExtResource("1_qra6f")
+id = &"ARMORYServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 15)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6xynf"]
+script = ExtResource("1_qra6f")
+id = &"LABORATORYServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 19)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_6gcfr"]
+script = ExtResource("1_qra6f")
+id = &"ELEVATOR_LOBBYServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 13)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_a4f4k"]
+script = ExtResource("1_qra6f")
+id = &"EAST_CORRIDORServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 9)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_63ngt"]
+script = ExtResource("1_qra6f")
+id = &"CONTROL_CONNECTORServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_12jyv"]
+script = ExtResource("1_qra6f")
+id = &"WEST_CORRIDORServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 9)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_jpopx"]
+script = ExtResource("1_qra6f")
+id = &"WEST_SERVICEServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 25)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_o0k5x"]
+script = ExtResource("1_qra6f")
+id = &"WEST_FALLBACKServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ttlap"]
+script = ExtResource("1_qra6f")
+id = &"BRIEFING_ROOMServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 13)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_0p2pq"]
+script = ExtResource("1_qra6f")
+id = &"GENERALS_OFFICEServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 13)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_mh1bb"]
+script = ExtResource("1_qra6f")
+id = &"SECURITY_STATIONServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 13)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_fkjif"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_CORRIDORServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 9)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qh86t"]
+script = ExtResource("1_qra6f")
+id = &"UPPER_ELEVATOR_LOBBYServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 15)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_lxuig"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_STAIRWELLServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 13)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_sq6p0"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_LOBBYServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 15)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_4tttg"]
+script = ExtResource("1_qra6f")
+id = &"SUPPORT_CORRIDORServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 15)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_ig0n7"]
+script = ExtResource("1_qra6f")
+id = &"STAGINGServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 15)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_d1xk7"]
+script = ExtResource("1_qra6f")
+id = &"StagingBench0"
+style_id = &"steel"
+dimensions = Vector3(3.5, 0.7, 0.6)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_rjo2g"]
+script = ExtResource("1_qra6f")
+id = &"StagingBench1"
+style_id = &"steel"
+dimensions = Vector3(3.5, 0.7, 0.6)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_qgg03"]
+script = ExtResource("1_qra6f")
+id = &"STORAGEServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 11)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_injsy"]
+script = ExtResource("1_qra6f")
+id = &"SupplyRack0"
+style_id = &"steel"
+dimensions = Vector3(1.4, 1.8, 1.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_pc8nn"]
+script = ExtResource("1_qra6f")
+id = &"SupplyRack1"
+style_id = &"steel"
+dimensions = Vector3(1.4, 1.8, 1.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_8rjkn"]
+script = ExtResource("1_qra6f")
+id = &"SupplyRack2"
+style_id = &"steel"
+dimensions = Vector3(1.4, 1.8, 1.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_pysvo"]
+script = ExtResource("1_qra6f")
+id = &"SupplyRack3"
+style_id = &"steel"
+dimensions = Vector3(1.4, 1.8, 1.5)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_86v3s"]
+script = ExtResource("1_qra6f")
+id = &"SERVICE_ROOMServiceConduit"
+style_id = &"steel"
+dimensions = Vector3(0.12, 0.12, 13)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_io71l"]
+script = ExtResource("1_qra6f")
+id = &"ServiceCabinet"
+style_id = &"steel"
+dimensions = Vector3(1.2, 2, 1.2)
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+replacement_status = "placeholder"
+
+[sub_resource type="Resource" id="Resource_bq8bi"]
+script = ExtResource("2_42w4v")
+id = &"GATE_ROOM__CONTROL_ROOM"
+from_region = &"GATE_ROOM"
+to_region = &"CONTROL_ROOM"
+kind = "walk"
+points = PackedVector3Array(5, 0, 8)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_j2hiy"]
+script = ExtResource("2_42w4v")
+id = &"CONTROL_ROOM__FALLBACK_HALLWAY"
+from_region = &"CONTROL_ROOM"
+to_region = &"FALLBACK_HALLWAY"
+kind = "walk"
+points = PackedVector3Array(0, 0, 22)
+width = 6.0
+clearance_height = 2.4
+door = true
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_bu6ok"]
+script = ExtResource("2_42w4v")
+id = &"FALLBACK_HALLWAY__CONNECTOR_TUNNEL"
+from_region = &"FALLBACK_HALLWAY"
+to_region = &"CONNECTOR_TUNNEL"
+kind = "walk"
+points = PackedVector3Array(5, 0, 36)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_r4l8y"]
+script = ExtResource("2_42w4v")
+id = &"CONNECTOR_TUNNEL__ROUND_HALLWAY"
+from_region = &"CONNECTOR_TUNNEL"
+to_region = &"ROUND_HALLWAY"
+kind = "walk"
+points = PackedVector3Array(17, 0, 36)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_t1on0"]
+script = ExtResource("2_42w4v")
+id = &"ROUND_HALLWAY__ARMORY"
+from_region = &"ROUND_HALLWAY"
+to_region = &"ARMORY"
+kind = "walk"
+points = PackedVector3Array(35, 0, 36)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_66gqr"]
+script = ExtResource("2_42w4v")
+id = &"ROUND_HALLWAY__LABORATORY"
+from_region = &"ROUND_HALLWAY"
+to_region = &"LABORATORY"
+kind = "walk"
+points = PackedVector3Array(26, 0, 45)
+width = 4.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_ds5jx"]
+script = ExtResource("2_42w4v")
+id = &"ELEVATOR_LOBBY__ROUND_HALLWAY"
+from_region = &"ELEVATOR_LOBBY"
+to_region = &"ROUND_HALLWAY"
+kind = "walk"
+points = PackedVector3Array(30, 0, 24)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_s0b24"]
+script = ExtResource("2_42w4v")
+id = &"GATE_ROOM__EAST_CORRIDOR"
+from_region = &"GATE_ROOM"
+to_region = &"EAST_CORRIDOR"
+kind = "walk"
+points = PackedVector3Array(18, 0, 4)
+width = 3.6
+clearance_height = 2.4
+door = true
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_74kll"]
+script = ExtResource("2_42w4v")
+id = &"EAST_CORRIDOR__ELEVATOR_LOBBY"
+from_region = &"EAST_CORRIDOR"
+to_region = &"ELEVATOR_LOBBY"
+kind = "walk"
+points = PackedVector3Array(23, 0, 10)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_3b3ie"]
+script = ExtResource("2_42w4v")
+id = &"CONTROL_ROOM__CONTROL_CONNECTOR"
+from_region = &"CONTROL_ROOM"
+to_region = &"CONTROL_CONNECTOR"
+kind = "walk"
+points = PackedVector3Array(7, 0, 15)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_cfjw5"]
+script = ExtResource("2_42w4v")
+id = &"CONTROL_CONNECTOR__ELEVATOR_LOBBY"
+from_region = &"CONTROL_CONNECTOR"
+to_region = &"ELEVATOR_LOBBY"
+kind = "walk"
+points = PackedVector3Array(17, 0, 15)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_1by68"]
+script = ExtResource("2_42w4v")
+id = &"GATE_ROOM__WEST_CORRIDOR"
+from_region = &"GATE_ROOM"
+to_region = &"WEST_CORRIDOR"
+kind = "walk"
+points = PackedVector3Array(-18, 0, 4)
+width = 3.6
+clearance_height = 2.4
+door = true
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_kt1de"]
+script = ExtResource("2_42w4v")
+id = &"WEST_CORRIDOR__WEST_SERVICE"
+from_region = &"WEST_CORRIDOR"
+to_region = &"WEST_SERVICE"
+kind = "walk"
+points = PackedVector3Array(-25, 0, 10)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_y8pvh"]
+script = ExtResource("2_42w4v")
+id = &"WEST_SERVICE__WEST_FALLBACK"
+from_region = &"WEST_SERVICE"
+to_region = &"WEST_FALLBACK"
+kind = "walk"
+points = PackedVector3Array(-22, 0, 33)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_3841j"]
+script = ExtResource("2_42w4v")
+id = &"WEST_FALLBACK__FALLBACK_HALLWAY"
+from_region = &"WEST_FALLBACK"
+to_region = &"FALLBACK_HALLWAY"
+kind = "walk"
+points = PackedVector3Array(-5, 0, 33)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_okov8"]
+script = ExtResource("2_42w4v")
+id = &"BRIEFING_ROOM__GENERALS_OFFICE"
+from_region = &"BRIEFING_ROOM"
+to_region = &"GENERALS_OFFICE"
+kind = "walk"
+points = PackedVector3Array(7, 5.5, 15)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_mxgr8"]
+script = ExtResource("2_42w4v")
+id = &"BRIEFING_ROOM__SECURITY_STATION"
+from_region = &"BRIEFING_ROOM"
+to_region = &"SECURITY_STATION"
+kind = "walk"
+points = PackedVector3Array(-7, 5.5, 15)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_ho111"]
+script = ExtResource("2_42w4v")
+id = &"GENERALS_OFFICE__UPPER_CORRIDOR"
+from_region = &"GENERALS_OFFICE"
+to_region = &"UPPER_CORRIDOR"
+kind = "walk"
+points = PackedVector3Array(19, 5.5, 15)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_ejlg0"]
+script = ExtResource("2_42w4v")
+id = &"UPPER_CORRIDOR__UPPER_ELEVATOR_LOBBY"
+from_region = &"UPPER_CORRIDOR"
+to_region = &"UPPER_ELEVATOR_LOBBY"
+kind = "walk"
+points = PackedVector3Array(27, 5.5, 15)
+width = 5.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_igp6d"]
+script = ExtResource("2_42w4v")
+id = &"UPPER_ELEVATOR_LOBBY__SERVICE_STAIRWELL"
+from_region = &"UPPER_ELEVATOR_LOBBY"
+to_region = &"SERVICE_STAIRWELL"
+kind = "walk"
+points = PackedVector3Array(29, 5.5, 26)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_jv5ne"]
+script = ExtResource("2_42w4v")
+id = &"SUPPORT_LOBBY__SUPPORT_CORRIDOR"
+from_region = &"SUPPORT_LOBBY"
+to_region = &"SUPPORT_CORRIDOR"
+kind = "walk"
+points = PackedVector3Array(27, 11, 18)
+width = 4.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_708es"]
+script = ExtResource("2_42w4v")
+id = &"SUPPORT_CORRIDOR__STAGING"
+from_region = &"SUPPORT_CORRIDOR"
+to_region = &"STAGING"
+kind = "walk"
+points = PackedVector3Array(19, 11, 18)
+width = 4.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_myptr"]
+script = ExtResource("2_42w4v")
+id = &"STAGING__STORAGE"
+from_region = &"STAGING"
+to_region = &"STORAGE"
+kind = "walk"
+points = PackedVector3Array(14, 11, 26)
+width = 4.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_a4d2d"]
+script = ExtResource("2_42w4v")
+id = &"STORAGE__SERVICE_ROOM"
+from_region = &"STORAGE"
+to_region = &"SERVICE_ROOM"
+kind = "walk"
+points = PackedVector3Array(27, 11, 32)
+width = 4.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_suaql"]
+script = ExtResource("2_42w4v")
+id = &"SUPPORT_LOBBY__SERVICE_ROOM"
+from_region = &"SUPPORT_LOBBY"
+to_region = &"SERVICE_ROOM"
+kind = "walk"
+points = PackedVector3Array(31, 11, 26)
+width = 4.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 1.0
+
+[sub_resource type="Resource" id="Resource_xa85v"]
+script = ExtResource("2_42w4v")
+id = &"CONTROL_ROOM__BRIEFING_ROOM"
+from_region = &"CONTROL_ROOM"
+to_region = &"BRIEFING_ROOM"
+kind = "spiral"
+points = PackedVector3Array(-4.5, 0, 9.4, -4.39536, 0.0458333, 9.40343, -4.29116, 0.0916667, 9.41369, -4.18786, 0.1375, 9.43074, -4.08589, 0.183333, 9.45452, -3.9857, 0.229167, 9.48491, -3.88771, 0.275, 9.52179, -3.79234, 0.320833, 9.565, -3.7, 0.366667, 9.61436, -3.61109, 0.4125, 9.66965, -3.52598, 0.458333, 9.73063, -3.44505, 0.504167, 9.79706, -3.36863, 0.55, 9.86863, -3.29706, 0.595833, 9.94505, -3.23063, 0.641667, 10.026, -3.16965, 0.6875, 10.1111, -3.11436, 0.733333, 10.2, -3.065, 0.779167, 10.2923, -3.02179, 0.825, 10.3877, -2.98491, 0.870833, 10.4857, -2.95452, 0.916667, 10.5859, -2.93074, 0.9625, 10.6879, -2.91369, 1.00833, 10.7912, -2.90343, 1.05417, 10.8954, -2.9, 1.1, 11, -2.90343, 1.14583, 11.1046, -2.91369, 1.19167, 11.2088, -2.93074, 1.2375, 11.3121, -2.95452, 1.28333, 11.4141, -2.98491, 1.32917, 11.5143, -3.02179, 1.375, 11.6123, -3.065, 1.42083, 11.7077, -3.11436, 1.46667, 11.8, -3.16965, 1.5125, 11.8889, -3.23063, 1.55833, 11.974, -3.29706, 1.60417, 12.055, -3.36863, 1.65, 12.1314, -3.44505, 1.69583, 12.2029, -3.52598, 1.74167, 12.2694, -3.61109, 1.7875, 12.3304, -3.7, 1.83333, 12.3856, -3.79234, 1.87917, 12.435, -3.88771, 1.925, 12.4782, -3.9857, 1.97083, 12.5151, -4.08589, 2.01667, 12.5455, -4.18786, 2.0625, 12.5693, -4.29116, 2.10833, 12.5863, -4.39536, 2.15417, 12.5966, -4.5, 2.2, 12.6, -4.60464, 2.24583, 12.5966, -4.70884, 2.29167, 12.5863, -4.81214, 2.3375, 12.5693, -4.91411, 2.38333, 12.5455, -5.0143, 2.42917, 12.5151, -5.11229, 2.475, 12.4782, -5.20766, 2.52083, 12.435, -5.3, 2.56667, 12.3856, -5.38891, 2.6125, 12.3304, -5.47402, 2.65833, 12.2694, -5.55495, 2.70417, 12.2029, -5.63137, 2.75, 12.1314, -5.70294, 2.79583, 12.055, -5.76937, 2.84167, 11.974, -5.83035, 2.8875, 11.8889, -5.88564, 2.93333, 11.8, -5.935, 2.97917, 11.7077, -5.97821, 3.025, 11.6123, -6.01509, 3.07083, 11.5143, -6.04548, 3.11667, 11.4141, -6.06926, 3.1625, 11.3121, -6.08631, 3.20833, 11.2088, -6.09657, 3.25417, 11.1046, -6.1, 3.3, 11, -6.09657, 3.34583, 10.8954, -6.08631, 3.39167, 10.7912, -6.06926, 3.4375, 10.6879, -6.04548, 3.48333, 10.5859, -6.01509, 3.52917, 10.4857, -5.97821, 3.575, 10.3877, -5.935, 3.62083, 10.2923, -5.88564, 3.66667, 10.2, -5.83035, 3.7125, 10.1111, -5.76937, 3.75833, 10.026, -5.70294, 3.80417, 9.94505, -5.63137, 3.85, 9.86863, -5.55495, 3.89583, 9.79706, -5.47402, 3.94167, 9.73063, -5.38891, 3.9875, 9.66965, -5.3, 4.03333, 9.61436, -5.20766, 4.07917, 9.565, -5.11229, 4.125, 9.52179, -5.0143, 4.17083, 9.48491, -4.91411, 4.21667, 9.45452, -4.81214, 4.2625, 9.43074, -4.70884, 4.30833, 9.41369, -4.60464, 4.35417, 9.40343, -4.5, 4.4, 9.4, -4.39536, 4.44583, 9.40343, -4.29116, 4.49167, 9.41369, -4.18786, 4.5375, 9.43074, -4.08589, 4.58333, 9.45452, -3.9857, 4.62917, 9.48491, -3.88771, 4.675, 9.52179, -3.79234, 4.72083, 9.565, -3.7, 4.76667, 9.61436, -3.61109, 4.8125, 9.66965, -3.52598, 4.85833, 9.73063, -3.44505, 4.90417, 9.79706, -3.36863, 4.95, 9.86863, -3.29706, 4.99583, 9.94505, -3.23063, 5.04167, 10.026, -3.16965, 5.0875, 10.1111, -3.11436, 5.13333, 10.2, -3.065, 5.17917, 10.2923, -3.02179, 5.225, 10.3877, -2.98491, 5.27083, 10.4857, -2.95452, 5.31667, 10.5859, -2.93074, 5.3625, 10.6879, -2.91369, 5.40833, 10.7912, -2.90343, 5.45417, 10.8954, -2.9, 5.5, 11)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 2.0
+
+[sub_resource type="Resource" id="Resource_n1ms3"]
+script = ExtResource("2_42w4v")
+id = &"ROUND_HALLWAY__UPPER_CORRIDOR"
+from_region = &"ROUND_HALLWAY"
+to_region = &"UPPER_CORRIDOR"
+kind = "stairs"
+points = PackedVector3Array(23, 0, 28, 23, 5.5, 20)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 3.0
+
+[sub_resource type="Resource" id="Resource_x641l"]
+script = ExtResource("2_42w4v")
+id = &"SERVICE_STAIRWELL__SERVICE_ROOM"
+from_region = &"SERVICE_STAIRWELL"
+to_region = &"SERVICE_ROOM"
+kind = "stairs"
+points = PackedVector3Array(32, 5.5, 26, 32, 11, 38)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 4.0
+
+[sub_resource type="Resource" id="Resource_it8im"]
+script = ExtResource("2_42w4v")
+id = &"ELEVATOR_LOBBY__UPPER_ELEVATOR_LOBBY"
+from_region = &"ELEVATOR_LOBBY"
+to_region = &"UPPER_ELEVATOR_LOBBY"
+kind = "lift"
+points = PackedVector3Array(34.7, 0, 18, 34.7, 5.5, 18)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 12.0
+
+[sub_resource type="Resource" id="Resource_hopg8"]
+script = ExtResource("2_42w4v")
+id = &"UPPER_ELEVATOR_LOBBY__SUPPORT_LOBBY"
+from_region = &"UPPER_ELEVATOR_LOBBY"
+to_region = &"SUPPORT_LOBBY"
+kind = "lift"
+points = PackedVector3Array(34.7, 5.5, 18, 34.7, 11, 18)
+width = 3.0
+clearance_height = 2.4
+door = false
+enabled = true
+cost = 12.0
+
+[sub_resource type="Resource" id="Resource_j3oit"]
+script = ExtResource("3_op6j4")
+id = &"GATE_ROOM"
+floor_number = 28
+footprint = Rect2(-18, -22, 36, 30)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Two-storey gate atrium; preserve gate/control/briefing sightline."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+confidence = "reference_relationship"
+anchor = Vector3(5, 0, 4)
+
+[sub_resource type="Resource" id="Resource_b71b8"]
+script = ExtResource("3_op6j4")
+id = &"CONTROL_ROOM"
+floor_number = 28
+footprint = Rect2(-7, 8, 14, 14)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Operations below briefing room."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+confidence = "reference_relationship"
+anchor = Vector3(5, 0, 15)
+
+[sub_resource type="Resource" id="Resource_u7px5"]
+script = ExtResource("3_op6j4")
+id = &"FALLBACK_HALLWAY"
+floor_number = 28
+footprint = Rect2(-5, 22, 10, 20)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(2.5, 0, 29)
+
+[sub_resource type="Resource" id="Resource_7bgai"]
+script = ExtResource("3_op6j4")
+id = &"CONNECTOR_TUNNEL"
+floor_number = 28
+footprint = Rect2(5, 33, 12, 6)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(11, 0, 36)
+
+[sub_resource type="Resource" id="Resource_nx07w"]
+script = ExtResource("3_op6j4")
+id = &"ROUND_HALLWAY"
+floor_number = 28
+footprint = Rect2(17, 24, 18, 21)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(29, 0, 36)
+
+[sub_resource type="Resource" id="Resource_tbgxj"]
+script = ExtResource("3_op6j4")
+id = &"ARMORY"
+floor_number = 28
+footprint = Rect2(35, 28, 18, 16)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(43, 0, 36)
+
+[sub_resource type="Resource" id="Resource_brk3p"]
+script = ExtResource("3_op6j4")
+id = &"LABORATORY"
+floor_number = 28
+footprint = Rect2(17, 45, 18, 20)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(26, 0, 52)
+
+[sub_resource type="Resource" id="Resource_3pdfh"]
+script = ExtResource("3_op6j4")
+id = &"ELEVATOR_LOBBY"
+floor_number = 28
+footprint = Rect2(17, 10, 18.4, 14)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(30, 0, 18)
+
+[sub_resource type="Resource" id="Resource_haisj"]
+script = ExtResource("3_op6j4")
+id = &"EAST_CORRIDOR"
+floor_number = 28
+footprint = Rect2(18, 0, 9, 10)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(23, 0, 4)
+
+[sub_resource type="Resource" id="Resource_7qmhx"]
+script = ExtResource("3_op6j4")
+id = &"CONTROL_CONNECTOR"
+floor_number = 28
+footprint = Rect2(7, 12, 10, 6)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(12, 0, 15)
+
+[sub_resource type="Resource" id="Resource_0k0tp"]
+script = ExtResource("3_op6j4")
+id = &"WEST_CORRIDOR"
+floor_number = 28
+footprint = Rect2(-28, 0, 10, 10)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(-23, 0, 4)
+
+[sub_resource type="Resource" id="Resource_yrntl"]
+script = ExtResource("3_op6j4")
+id = &"WEST_SERVICE"
+floor_number = 28
+footprint = Rect2(-28, 10, 6, 26)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(-25, 0, 30)
+
+[sub_resource type="Resource" id="Resource_vknfr"]
+script = ExtResource("3_op6j4")
+id = &"WEST_FALLBACK"
+floor_number = 28
+footprint = Rect2(-22, 30, 17, 6)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(-12, 0, 33)
+
+[sub_resource type="Resource" id="Resource_5n7qx"]
+script = ExtResource("3_op6j4")
+id = &"BRIEFING_ROOM"
+floor_number = 27
+footprint = Rect2(-7, 8, 14, 14)
+surface_style = &"briefing"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Briefing room above control; corner spiral stair."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+confidence = "reference_relationship"
+anchor = Vector3(3, 5.5, 18)
+
+[sub_resource type="Resource" id="Resource_ikg7x"]
+script = ExtResource("3_op6j4")
+id = &"GENERALS_OFFICE"
+floor_number = 27
+footprint = Rect2(7, 8, 12, 14)
+surface_style = &"office"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Commander office adjoining briefing room."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+confidence = "reference_relationship"
+anchor = Vector3(16, 5.5, 17)
+
+[sub_resource type="Resource" id="Resource_g4x0k"]
+script = ExtResource("3_op6j4")
+id = &"SECURITY_STATION"
+floor_number = 27
+footprint = Rect2(-19, 8, 12, 14)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(-13, 5.5, 15)
+
+[sub_resource type="Resource" id="Resource_jeqpp"]
+script = ExtResource("3_op6j4")
+id = &"UPPER_CORRIDOR"
+floor_number = 27
+footprint = Rect2(19, 10, 8, 10)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(23, 5.5, 15)
+
+[sub_resource type="Resource" id="Resource_aou6s"]
+script = ExtResource("3_op6j4")
+id = &"UPPER_ELEVATOR_LOBBY"
+floor_number = 27
+footprint = Rect2(27, 10, 8.4, 16)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(31, 5.5, 18)
+
+[sub_resource type="Resource" id="Resource_4m14o"]
+script = ExtResource("3_op6j4")
+id = &"SERVICE_STAIRWELL"
+floor_number = 27
+footprint = Rect2(27, 26, 8.4, 14)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(29, 5.5, 30)
+
+[sub_resource type="Resource" id="Resource_jdbo7"]
+script = ExtResource("3_op6j4")
+id = &"SUPPORT_LOBBY"
+floor_number = 26
+footprint = Rect2(27, 10, 8.4, 16)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(31, 11, 18)
+
+[sub_resource type="Resource" id="Resource_jgywm"]
+script = ExtResource("3_op6j4")
+id = &"SUPPORT_CORRIDOR"
+floor_number = 26
+footprint = Rect2(19, 10, 8, 16)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(23, 11, 18)
+
+[sub_resource type="Resource" id="Resource_yeq0b"]
+script = ExtResource("3_op6j4")
+id = &"STAGING"
+floor_number = 26
+footprint = Rect2(7, 10, 12, 16)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(14, 11, 18)
+
+[sub_resource type="Resource" id="Resource_wkv1c"]
+script = ExtResource("3_op6j4")
+id = &"STORAGE"
+floor_number = 26
+footprint = Rect2(7, 26, 20, 12)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(15, 11, 32)
+
+[sub_resource type="Resource" id="Resource_f4s6s"]
+script = ExtResource("3_op6j4")
+id = &"SERVICE_ROOM"
+floor_number = 26
+footprint = Rect2(27, 26, 8.4, 14)
+surface_style = &"bunker"
+light_energy = 1.8
+light_color = Color(0.78, 0.84, 0.88, 1)
+description = "Combat/support extension with clear passage and recessed cover."
+reference = "Authored gameplay extension"
+confidence = "gameplay_extension"
+anchor = Vector3(29, 11, 38)
+
+[sub_resource type="Resource" id="Resource_rtdjy"]
+script = ExtResource("5_xjry3")
+id = &"bunker"
+description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
+palette = PackedColorArray(0.3, 0.33, 0.35, 1)
+roughness = 0.85
+metallic = 0.0
+texture_scale_m = 2.0
+wear = "Scuffed edges, restrained grime around joints; legible signage."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+replacement_status = "placeholder"
+material_slots = PackedStringArray("base_color", "normal", "roughness")
+
+[sub_resource type="Resource" id="Resource_muctw"]
+script = ExtResource("5_xjry3")
+id = &"floor"
+description = "Worn grey non-slip flooring with restrained yellow hazard markings at thresholds."
+palette = PackedColorArray(0.19, 0.22, 0.24, 1)
+roughness = 0.85
+metallic = 0.0
+texture_scale_m = 2.0
+wear = "Scuffed edges, restrained grime around joints; legible signage."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+replacement_status = "placeholder"
+material_slots = PackedStringArray("base_color", "normal", "roughness")
+
+[sub_resource type="Resource" id="Resource_q0ola"]
+script = ExtResource("5_xjry3")
+id = &"briefing"
+description = "Dark charcoal briefing carpet, muted concrete walls and brushed metal fittings."
+palette = PackedColorArray(0.18, 0.19, 0.22, 1)
+roughness = 0.85
+metallic = 0.0
+texture_scale_m = 2.0
+wear = "Scuffed edges, restrained grime around joints; legible signage."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+replacement_status = "placeholder"
+material_slots = PackedStringArray("base_color", "normal", "roughness")
+
+[sub_resource type="Resource" id="Resource_eo6yv"]
+script = ExtResource("5_xjry3")
+id = &"office"
+description = "Warm dark wood furniture, restrained grey walls and dark office carpet."
+palette = PackedColorArray(0.24, 0.16, 0.11, 1)
+roughness = 0.85
+metallic = 0.0
+texture_scale_m = 2.0
+wear = "Scuffed edges, restrained grime around joints; legible signage."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+replacement_status = "placeholder"
+material_slots = PackedStringArray("base_color", "normal", "roughness")
+
+[sub_resource type="Resource" id="Resource_wjs8f"]
+script = ExtResource("5_xjry3")
+id = &"steel"
+description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
+palette = PackedColorArray(0.2, 0.23, 0.25, 1)
+roughness = 0.85
+metallic = 0.0
+texture_scale_m = 2.0
+wear = "Scuffed edges, restrained grime around joints; legible signage."
+reference = "https://rdanderson.com/stargate/cheyenne/index.htm"
+replacement_status = "placeholder"
+material_slots = PackedStringArray("base_color", "normal", "roughness")
+
+[resource]
+script = ExtResource("4_bjjh2")
+regions = Array[ExtResource("3_op6j4")]([SubResource("Resource_j3oit"), SubResource("Resource_b71b8"), SubResource("Resource_u7px5"), SubResource("Resource_7bgai"), SubResource("Resource_nx07w"), SubResource("Resource_tbgxj"), SubResource("Resource_brk3p"), SubResource("Resource_3pdfh"), SubResource("Resource_haisj"), SubResource("Resource_7qmhx"), SubResource("Resource_0k0tp"), SubResource("Resource_yrntl"), SubResource("Resource_vknfr"), SubResource("Resource_5n7qx"), SubResource("Resource_ikg7x"), SubResource("Resource_g4x0k"), SubResource("Resource_jeqpp"), SubResource("Resource_aou6s"), SubResource("Resource_4m14o"), SubResource("Resource_jdbo7"), SubResource("Resource_jgywm"), SubResource("Resource_yeq0b"), SubResource("Resource_wkv1c"), SubResource("Resource_f4s6s")])
+connections = Array[ExtResource("2_42w4v")]([SubResource("Resource_bq8bi"), SubResource("Resource_j2hiy"), SubResource("Resource_bu6ok"), SubResource("Resource_r4l8y"), SubResource("Resource_t1on0"), SubResource("Resource_66gqr"), SubResource("Resource_ds5jx"), SubResource("Resource_s0b24"), SubResource("Resource_74kll"), SubResource("Resource_3b3ie"), SubResource("Resource_cfjw5"), SubResource("Resource_1by68"), SubResource("Resource_kt1de"), SubResource("Resource_y8pvh"), SubResource("Resource_3841j"), SubResource("Resource_okov8"), SubResource("Resource_mxgr8"), SubResource("Resource_ho111"), SubResource("Resource_ejlg0"), SubResource("Resource_igp6d"), SubResource("Resource_jv5ne"), SubResource("Resource_708es"), SubResource("Resource_myptr"), SubResource("Resource_a4d2d"), SubResource("Resource_suaql"), SubResource("Resource_xa85v"), SubResource("Resource_n1ms3"), SubResource("Resource_x641l"), SubResource("Resource_it8im"), SubResource("Resource_hopg8")])
+styles = Array[ExtResource("5_xjry3")]([SubResource("Resource_rtdjy"), SubResource("Resource_muctw"), SubResource("Resource_q0ola"), SubResource("Resource_eo6yv"), SubResource("Resource_wjs8f")])
+asset_slots = Array[ExtResource("1_qra6f")]([SubResource("Resource_qra6f"), SubResource("Resource_42w4v"), SubResource("Resource_op6j4"), SubResource("Resource_bjjh2"), SubResource("Resource_xjry3"), SubResource("Resource_mqo3w"), SubResource("Resource_pgwrn"), SubResource("Resource_ckduj"), SubResource("Resource_58lic"), SubResource("Resource_wi86p"), SubResource("Resource_5bsd2"), SubResource("Resource_rg8mr"), SubResource("Resource_hub4i"), SubResource("Resource_m6vcr"), SubResource("Resource_x352d"), SubResource("Resource_oehbp"), SubResource("Resource_xlvx7"), SubResource("Resource_k1npc"), SubResource("Resource_iksq2"), SubResource("Resource_uj3cn"), SubResource("Resource_un8s8"), SubResource("Resource_rtflp"), SubResource("Resource_p18sf"), SubResource("Resource_r5jfu"), SubResource("Resource_e6r2m"), SubResource("Resource_jleyu"), SubResource("Resource_tb0m7"), SubResource("Resource_n2k7k"), SubResource("Resource_abfhv"), SubResource("Resource_gdbnb"), SubResource("Resource_cd0k3"), SubResource("Resource_ikaxv"), SubResource("Resource_bmj6h"), SubResource("Resource_jm5ce"), SubResource("Resource_jw5w2"), SubResource("Resource_fj317"), SubResource("Resource_dakkr"), SubResource("Resource_1kimb"), SubResource("Resource_2mn1w"), SubResource("Resource_a18om"), SubResource("Resource_7wm7g"), SubResource("Resource_hr3g3"), SubResource("Resource_dbg7p"), SubResource("Resource_xkx0m"), SubResource("Resource_jvw52"), SubResource("Resource_7eyhh"), SubResource("Resource_dr3q3"), SubResource("Resource_oxog4"), SubResource("Resource_oqf7o"), SubResource("Resource_cxel0"), SubResource("Resource_2p7gv"), SubResource("Resource_28omq"), SubResource("Resource_d2e3o"), SubResource("Resource_ar5nj"), SubResource("Resource_igjxf"), SubResource("Resource_0e3x6"), SubResource("Resource_y428x"), SubResource("Resource_3xtl2"), SubResource("Resource_fvb58"), SubResource("Resource_8cjrv"), SubResource("Resource_nhrd3"), SubResource("Resource_fswj7"), SubResource("Resource_ccaik"), SubResource("Resource_d2dvl"), SubResource("Resource_ujcfq"), SubResource("Resource_ygdd8"), SubResource("Resource_k4dbe"), SubResource("Resource_2cib6"), SubResource("Resource_hqxj2"), SubResource("Resource_4vtpd"), SubResource("Resource_oljof"), SubResource("Resource_fpisg"), SubResource("Resource_bls4v"), SubResource("Resource_oxlig"), SubResource("Resource_lugfb"), SubResource("Resource_ff7q5"), SubResource("Resource_x0v7s"), SubResource("Resource_prxfq"), SubResource("Resource_iwcnw"), SubResource("Resource_tx04s"), SubResource("Resource_7hpq4"), SubResource("Resource_51qhb"), SubResource("Resource_xhoe5"), SubResource("Resource_m8rgc"), SubResource("Resource_lggah"), SubResource("Resource_7uhqi"), SubResource("Resource_aqt8y"), SubResource("Resource_w0c0l"), SubResource("Resource_e2tak"), SubResource("Resource_vrsbw"), SubResource("Resource_qjb88"), SubResource("Resource_xyefd"), SubResource("Resource_6v7hr"), SubResource("Resource_d5vj5"), SubResource("Resource_u8f30"), SubResource("Resource_38uwg"), SubResource("Resource_agim3"), SubResource("Resource_pv2nf"), SubResource("Resource_11ggd"), SubResource("Resource_jc3r4"), SubResource("Resource_7vg6p"), SubResource("Resource_dq8f2"), SubResource("Resource_ch60d"), SubResource("Resource_2anwj"), SubResource("Resource_18lva"), SubResource("Resource_e3fhr"), SubResource("Resource_p3xf7"), SubResource("Resource_cm6ap"), SubResource("Resource_1516q"), SubResource("Resource_knfwv"), SubResource("Resource_jd4w1"), SubResource("Resource_wgu8h"), SubResource("Resource_6gd8s"), SubResource("Resource_c6wi6"), SubResource("Resource_smdtx"), SubResource("Resource_f3tbn"), SubResource("Resource_ju8dy"), SubResource("Resource_sc8m6"), SubResource("Resource_rvtb8"), SubResource("Resource_3hf2t"), SubResource("Resource_ugh38"), SubResource("Resource_llele"), SubResource("Resource_b6ut4"), SubResource("Resource_5smo3"), SubResource("Resource_b1mos"), SubResource("Resource_nv02r"), SubResource("Resource_6sa60"), SubResource("Resource_ghj2d"), SubResource("Resource_4ba1f"), SubResource("Resource_6mv54"), SubResource("Resource_164qq"), SubResource("Resource_aserm"), SubResource("Resource_4ngjl"), SubResource("Resource_tdqn8"), SubResource("Resource_r3hxk"), SubResource("Resource_ypk5w"), SubResource("Resource_6lmd0"), SubResource("Resource_o1x23"), SubResource("Resource_g16fv"), SubResource("Resource_srw8n"), SubResource("Resource_axe4l"), SubResource("Resource_8bejl"), SubResource("Resource_fertc"), SubResource("Resource_psr6y"), SubResource("Resource_77pj0"), SubResource("Resource_bkpx0"), SubResource("Resource_4golk"), SubResource("Resource_bl3tw"), SubResource("Resource_4h2fu"), SubResource("Resource_j30ik"), SubResource("Resource_idxnl"), SubResource("Resource_0nf75"), SubResource("Resource_5bn2b"), SubResource("Resource_gd7ls"), SubResource("Resource_gikyi"), SubResource("Resource_7uia3"), SubResource("Resource_n82hs"), SubResource("Resource_qrvm5"), SubResource("Resource_1bxm8"), SubResource("Resource_cvo85"), SubResource("Resource_njo7f"), SubResource("Resource_q334c"), SubResource("Resource_5xn4x"), SubResource("Resource_7on1t"), SubResource("Resource_qpkmu"), SubResource("Resource_r6nee"), SubResource("Resource_nnpof"), SubResource("Resource_7yvju"), SubResource("Resource_itr4l"), SubResource("Resource_aq210"), SubResource("Resource_efy0q"), SubResource("Resource_a8dby"), SubResource("Resource_si0qq"), SubResource("Resource_cohrt"), SubResource("Resource_vnwg2"), SubResource("Resource_ldyli"), SubResource("Resource_4i8jm"), SubResource("Resource_rjs2s"), SubResource("Resource_sm33a"), SubResource("Resource_hj3vl"), SubResource("Resource_lh7ky"), SubResource("Resource_08bcr"), SubResource("Resource_vl5jp"), SubResource("Resource_ti8wh"), SubResource("Resource_5lxfy"), SubResource("Resource_phw8i"), SubResource("Resource_iwv2c"), SubResource("Resource_7tikf"), SubResource("Resource_h76x2"), SubResource("Resource_ynlvk"), SubResource("Resource_vguva"), SubResource("Resource_fm3xo"), SubResource("Resource_i4t7u"), SubResource("Resource_icyge"), SubResource("Resource_hbp8q"), SubResource("Resource_ijnxu"), SubResource("Resource_vaxcq"), SubResource("Resource_bmpob"), SubResource("Resource_h8bbe"), SubResource("Resource_gqxmf"), SubResource("Resource_fxci3"), SubResource("Resource_f1joc"), SubResource("Resource_owmt6"), SubResource("Resource_5iw2l"), SubResource("Resource_8r5jw"), SubResource("Resource_72a6c"), SubResource("Resource_57al0"), SubResource("Resource_j0fvv"), SubResource("Resource_ke1fq"), SubResource("Resource_11be5"), SubResource("Resource_7coni"), SubResource("Resource_qado1"), SubResource("Resource_ht113"), SubResource("Resource_aikia"), SubResource("Resource_0ignm"), SubResource("Resource_vvave"), SubResource("Resource_xkx0e"), SubResource("Resource_eqn43"), SubResource("Resource_0j6bx"), SubResource("Resource_d8hkm"), SubResource("Resource_aj6pc"), SubResource("Resource_6p8f0"), SubResource("Resource_hp6ii"), SubResource("Resource_86cbk"), SubResource("Resource_s6ciu"), SubResource("Resource_paomr"), SubResource("Resource_eqpp4"), SubResource("Resource_ar4dx"), SubResource("Resource_gi5jw"), SubResource("Resource_4t74g"), SubResource("Resource_4jmd7"), SubResource("Resource_watga"), SubResource("Resource_ueppl"), SubResource("Resource_jxsvs"), SubResource("Resource_wk2yi"), SubResource("Resource_b22h5"), SubResource("Resource_c8i22"), SubResource("Resource_mwy1n"), SubResource("Resource_h1jwk"), SubResource("Resource_a6uvw"), SubResource("Resource_uaf14"), SubResource("Resource_wmiip"), SubResource("Resource_4bdgx"), SubResource("Resource_t3bhn"), SubResource("Resource_thru1"), SubResource("Resource_1juhf"), SubResource("Resource_67vfk"), SubResource("Resource_1id2m"), SubResource("Resource_lqw5v"), SubResource("Resource_pscat"), SubResource("Resource_4i43k"), SubResource("Resource_cl37f"), SubResource("Resource_trubg"), SubResource("Resource_ty8rr"), SubResource("Resource_4ukkj"), SubResource("Resource_d5be5"), SubResource("Resource_xeey1"), SubResource("Resource_h4hel"), SubResource("Resource_2lqn5"), SubResource("Resource_r23e1"), SubResource("Resource_bcm00"), SubResource("Resource_qefeq"), SubResource("Resource_25lr4"), SubResource("Resource_40r8i"), SubResource("Resource_nm3b1"), SubResource("Resource_bdsnw"), SubResource("Resource_wo53g"), SubResource("Resource_1xbqe"), SubResource("Resource_dvxhm"), SubResource("Resource_fnaqo"), SubResource("Resource_ym6gp"), SubResource("Resource_yi8il"), SubResource("Resource_b8i8h"), SubResource("Resource_valm7"), SubResource("Resource_1xqxd"), SubResource("Resource_0tiec"), SubResource("Resource_cuktq"), SubResource("Resource_2gu7l"), SubResource("Resource_4gxfj"), SubResource("Resource_snwa7"), SubResource("Resource_yhok4"), SubResource("Resource_fsu36"), SubResource("Resource_bnhld"), SubResource("Resource_72t7a"), SubResource("Resource_2nuqy"), SubResource("Resource_gdcvv"), SubResource("Resource_3dvda"), SubResource("Resource_si01i"), SubResource("Resource_5j1re"), SubResource("Resource_30cgu"), SubResource("Resource_vr2d1"), SubResource("Resource_yigpe"), SubResource("Resource_3igfy"), SubResource("Resource_sg1x2"), SubResource("Resource_n3u2l"), SubResource("Resource_lu757"), SubResource("Resource_v1a4g"), SubResource("Resource_s88ti"), SubResource("Resource_1rbh8"), SubResource("Resource_sgevx"), SubResource("Resource_qg81c"), SubResource("Resource_48i1u"), SubResource("Resource_mc14u"), SubResource("Resource_2xhbm"), SubResource("Resource_ornst"), SubResource("Resource_1dqle"), SubResource("Resource_bmigs"), SubResource("Resource_fujt0"), SubResource("Resource_oab86"), SubResource("Resource_aptox"), SubResource("Resource_mttyu"), SubResource("Resource_evgvj"), SubResource("Resource_w7yi3"), SubResource("Resource_lya7e"), SubResource("Resource_vygbq"), SubResource("Resource_ulqlo"), SubResource("Resource_5rv76"), SubResource("Resource_e825v"), SubResource("Resource_1btdk"), SubResource("Resource_m3b0y"), SubResource("Resource_6f7d1"), SubResource("Resource_appvj"), SubResource("Resource_pgk0w"), SubResource("Resource_g68jc"), SubResource("Resource_pmd2w"), SubResource("Resource_kdsuf"), SubResource("Resource_dpy44"), SubResource("Resource_dlb16"), SubResource("Resource_dhst4"), SubResource("Resource_n1ay8"), SubResource("Resource_jx0hy"), SubResource("Resource_5gfxo"), SubResource("Resource_gixdq"), SubResource("Resource_yt8iw"), SubResource("Resource_tbc0a"), SubResource("Resource_xvvni"), SubResource("Resource_m8nmw"), SubResource("Resource_ka38w"), SubResource("Resource_ynu4j"), SubResource("Resource_yyys5"), SubResource("Resource_ew6vu"), SubResource("Resource_86fou"), SubResource("Resource_jo8by"), SubResource("Resource_aeooe"), SubResource("Resource_5wv31"), SubResource("Resource_o1p53"), SubResource("Resource_uiv06"), SubResource("Resource_onspu"), SubResource("Resource_atxe6"), SubResource("Resource_6xynf"), SubResource("Resource_6gcfr"), SubResource("Resource_a4f4k"), SubResource("Resource_63ngt"), SubResource("Resource_12jyv"), SubResource("Resource_jpopx"), SubResource("Resource_o0k5x"), SubResource("Resource_ttlap"), SubResource("Resource_0p2pq"), SubResource("Resource_mh1bb"), SubResource("Resource_fkjif"), SubResource("Resource_qh86t"), SubResource("Resource_lxuig"), SubResource("Resource_sq6p0"), SubResource("Resource_4tttg"), SubResource("Resource_ig0n7"), SubResource("Resource_d1xk7"), SubResource("Resource_rjo2g"), SubResource("Resource_qgg03"), SubResource("Resource_injsy"), SubResource("Resource_pc8nn"), SubResource("Resource_8rjkn"), SubResource("Resource_pysvo"), SubResource("Resource_86v3s"), SubResource("Resource_io71l")])

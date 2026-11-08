@@ -170,6 +170,10 @@ func _process(delta: float) -> bool:
 
 
 func _cleanup() -> void:
+	if host_api != null: host_api.multiplayer_peer = OfflineMultiplayerPeer.new()
+	if client_api != null: client_api.multiplayer_peer = OfflineMultiplayerPeer.new()
+	if is_instance_valid(client_gateroom): client_gateroom.free()
+	if is_instance_valid(host_gateroom): host_gateroom.free()
 	if host_api != null:
 		host_api.multiplayer_peer = null
 	if client_api != null:

@@ -66,14 +66,7 @@ var is_providing_cover_fire: bool = false
 var is_hallway_secured: bool = false
 
 var current_scramble_waypoint_index: int = 0
-const SCRAMBLE_WAYPOINTS: Array[Vector3] = [
-	Vector3(35.0, 0.1, 36.0),   # Armory doorway
-	Vector3(26.0, 0.1, 36.0),   # Round Hallway rotunda
-	Vector3(24.0, 0.1, 18.0),   # Elevator Lobby
-	Vector3(22.5, 0.1, 8.0),    # East Corridor entrance
-	Vector3(18.0, 0.1, 4.0),    # BlastDoorsEast portal
-	Vector3(5.0, 0.1, 4.0)      # Gate Room defense line
-]
+var navigator: SGCNavigator
 
 const TACTICAL_ANCHORS: Array[Dictionary] = [
 	# Gate Room Arena & Sandbags
@@ -135,6 +128,8 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	navigator = SGCNavigator.new(self)
+	add_to_group("sgc_airmen")
 	add_to_group("allies")
 	add_to_group("airmen")
 
@@ -235,28 +230,16 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
-func _process_scramble(delta: float) -> void:
-	if current_scramble_waypoint_index >= SCRAMBLE_WAYPOINTS.size():
-		current_state = State.COMBAT
+func _process_scramble(_delta: float) -> void:
+	var goal := Vector3(5.0,0.0,4.0)
+	if global_position.distance_to(goal)<1.0:
+		current_state=State.COMBAT
 		return
-
-	var wp: Vector3 = SCRAMBLE_WAYPOINTS[current_scramble_waypoint_index]
-	var to_wp: Vector3 = (wp - global_position)
-	to_wp.y = 0.0
-
-	if to_wp.length() < 1.5:
-		current_scramble_waypoint_index += 1
-		if current_scramble_waypoint_index >= SCRAMBLE_WAYPOINTS.size():
-			current_state = State.COMBAT
-			return
-		wp = SCRAMBLE_WAYPOINTS[current_scramble_waypoint_index]
-		to_wp = (wp - global_position)
-		to_wp.y = 0.0
-
-	var dir: Vector3 = to_wp.normalized()
-	velocity.x = dir.x * move_speed
-	velocity.z = dir.z * move_speed
-	rotation.y = atan2(-dir.x, -dir.z)
+	var to_wp := _get_hallway_destination(goal)-global_position
+	to_wp.y=0
+	var dir:=to_wp.normalized()
+	velocity.x=dir.x*move_speed;velocity.z=dir.z*move_speed
+	if dir.length_squared()>0.01: rotation.y=atan2(-dir.x,-dir.z)
 
 
 func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
@@ -333,68 +316,7 @@ func _cast_los_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
 
 
 func _get_hallway_destination(target_pos: Vector3) -> Vector3:
-	# 1. Target in East Wing (Armory / Elevator Lobby / Round Hallway / Lab / East Corridor)
-	if target_pos.x >= 16.0:
-		if global_position.x < 17.0 and global_position.z <= 8.0:
-			return Vector3(18.0, 0.1, 4.0)   # Head to East Blast Door
-		elif global_position.x >= 17.0 and global_position.z < 9.6:
-			return Vector3(22.5, 0.1, 8.0)   # Head through East Corridor
-		elif global_position.z >= 8.0 and global_position.z < 24.0:
-			if target_pos.x >= 35.0 or target_pos.z >= 24.0:
-				return Vector3(24.0, 0.1, 22.0) # Head into Round Hallway
-			else:
-				return target_pos
-		elif global_position.z >= 24.0 and global_position.x < 35.0:
-			if target_pos.x >= 35.0:
-				return Vector3(35.0, 0.1, 36.0) # Head into Armory
-			elif target_pos.z >= 45.0:
-				return Vector3(26.0, 0.1, 46.0) # Head into Lab
-			else:
-				return target_pos
-		elif global_position.x >= 35.0:
-			return target_pos
-
-	# 2. Target in Fallback Hallway (South of Control Room)
-	elif target_pos.z >= 20.0 and absf(target_pos.x) <= 6.0:
-		if global_position.z <= 8.0:
-			return Vector3(5.0, 0.75, 8.5)   # Enter Control Room North ramp
-		elif global_position.z > 8.0 and global_position.z < 14.0:
-			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
-		elif global_position.z >= 14.0 and global_position.z < 22.0:
-			return Vector3(0.0, 0.75, 22.0)  # Head to Central Blast Door
-		elif global_position.z >= 22.0 and global_position.z < 28.0:
-			return Vector3(2.5, 0.1, 28.0)   # Fallback Hallway
-		else:
-			return target_pos
-
-	# 3. Target in Control Room
-	elif absf(target_pos.x) <= 7.5 and target_pos.z >= 7.8 and target_pos.z <= 22.0:
-		if global_position.z <= 8.0:
-			return Vector3(5.0, 0.75, 8.5)   # North ramp into Control Room
-		elif global_position.z > 8.0 and global_position.z < 14.0:
-			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
-		else:
-			return target_pos
-
-	# 4. Target in Gate Room Arena
-	elif target_pos.z <= 8.0 and target_pos.x < 17.0:
-		if global_position.x >= 35.0:
-			return Vector3(35.0, 0.1, 36.0)   # Exit Armory
-		elif global_position.z >= 24.0 and global_position.x >= 17.0:
-			return Vector3(24.0, 0.1, 22.0)   # Round Hallway to Elevator Lobby
-		elif global_position.z >= 9.6 and global_position.x >= 17.0:
-			return Vector3(22.5, 0.1, 8.0)    # Elevator Lobby to East Corridor
-		elif global_position.x >= 17.0 and global_position.z < 9.6:
-			return Vector3(18.0, 0.1, 4.0)    # East Corridor into Gate Room
-		elif global_position.z >= 22.0 and absf(global_position.x) <= 6.0:
-			return Vector3(0.0, 0.75, 22.0)   # Exit Fallback Hallway
-		elif global_position.z > 8.0 and global_position.z < 22.0 and absf(global_position.x) <= 7.5:
-			if global_position.z > 14.0:
-				return Vector3(5.0, 0.75, 14.0)
-			else:
-				return Vector3(5.0, 0.75, 8.5) # Down ramp into Gate Room
-
-	return target_pos
+	return navigator.next_position(target_pos) if navigator != null else global_position
 
 
 func _process_combat(delta: float) -> void:
@@ -438,8 +360,10 @@ func _process_combat(delta: float) -> void:
 
 	if dist > 8.0:
 		# Advance toward sandbag line
-		velocity.x = aim_dir.normalized().x * (move_speed * 0.7)
-		velocity.z = aim_dir.normalized().z * (move_speed * 0.7)
+		var move_dir := _get_hallway_destination(current_target_jaffa.global_position) - global_position
+		move_dir.y = 0
+		velocity.x = move_dir.normalized().x * (move_speed * 0.7)
+		velocity.z = move_dir.normalized().z * (move_speed * 0.7)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
@@ -1321,6 +1245,7 @@ func _on_revived() -> void:
 
 
 func _on_died() -> void:
+	if navigator != null: navigator.reset()
 	current_state = State.DEAD
 	if mounted_turret != null:
 		dismount_turret()

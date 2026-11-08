@@ -55,7 +55,7 @@ func run_test() -> void:
 	host.call_elevator(28)
 	await wait_frames(30)
 	check(host.is_doors_open and client.is_doors_open, "Host same-floor door opening must replicate")
-	client.call_elevator(28)
+	client.select_floor(27)
 	await wait_frames(30)
 	check(host.is_moving and client.is_moving, "Client dispatch must move both peers")
 	await wait_frames(260)
@@ -71,6 +71,11 @@ func run_test() -> void:
 	client.call_elevator(28)
 	await wait_frames(30)
 	check(host.is_doors_open and client.is_doors_open, "Client same-floor door opening must replicate")
+	host.select_floor(26)
+	await wait_frames(300)
+	check(host.current_floor == 26 and client.current_floor == 26, "Level 26 arrival must replicate")
+	check(host.state == SGCElevator.ElevatorState.AT_26 and client.state == host.state, "Level 26 state must replicate")
+
 	host_root.queue_free()
 	client_root.queue_free()
 	await process_frame

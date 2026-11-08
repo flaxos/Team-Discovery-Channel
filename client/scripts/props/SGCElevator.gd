@@ -1,6 +1,6 @@
 class_name SGCElevator
 extends Node3D
-## SGC Hydraulic Freight Elevator connecting Sublevel 28, 27, 26, and 25.
+## SGC Hydraulic Freight Elevator connecting Sublevels 28, 27 and 26.
 ## Provides automated vertical transit, animated sliding doors, multiplayer RPC synchronization,
 ## dynamic floor indicator displays, dual-pedestal call stations, and arrival audio cues.
 
@@ -9,10 +9,10 @@ signal elevator_arrived(floor_num: int)
 
 enum ElevatorState { AT_28, MOVING_UP, AT_27, MOVING_DOWN, AT_26, AT_25 }
 
-const FLOOR_28_Y: float = 0.0
-const FLOOR_27_Y: float = 5.5
-const FLOOR_26_Y: float = 11.0
-const FLOOR_25_Y: float = 16.5
+const FLOOR_28_Y: float = SGCMapDefinition.FLOOR_HEIGHTS[28]
+const FLOOR_27_Y: float = SGCMapDefinition.FLOOR_HEIGHTS[27]
+const FLOOR_26_Y: float = SGCMapDefinition.FLOOR_HEIGHTS[26]
+const SUPPORTED_FLOORS: Array[int] = [28, 27, 26]
 const TRANSIT_DURATION: float = 3.0
 
 const DOOR_CLOSED_LEFT_X: float = -0.8
@@ -27,6 +27,9 @@ var is_moving: bool = false
 var is_doors_open: bool = false
 var riders: Array[CharacterBody3D] = []
 var destination_floor: int = 28
+var pending_calls: Array[int] = []
+var arrival_dwell: float = 0.0
+var landing_gates: Dictionary = {}
 var travel_elapsed: float = 0.0
 var travel_started: bool = false
 var transit_tween: Tween
@@ -62,6 +65,7 @@ func _ready() -> void:
 	_set_pedestal_lights_status(Color(0.2, 0.9, 0.3))
 	if cabin != null:
 		cabin.position.y = get_floor_y(current_floor)
+	_build_landing_gates()
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_elevator_snapshot.rpc_id(1)
 
@@ -128,6 +132,9 @@ func _can_interact_with_elevator(player: Node = null) -> bool:
 	if call_pedestal_27_right != null and p_pos.distance_to(call_pedestal_27_right.global_position) < 3.5:
 		return true
 
+	var upper_call := get_node_or_null("CallPedestal26") as Node3D
+	if upper_call != null and p_pos.distance_to(upper_call.global_position) < 3.5: return true
+
 	# Proximity to cabin itself if standing in doorway
 	if cabin != null and p_pos.distance_to(cabin.global_position) < 3.0:
 		return true
@@ -150,6 +157,9 @@ func _handle_interaction(player: Node = null) -> void:
 			return
 
 		var p_pos: Vector3 = target_player.global_position
+		if p_pos.y > 9.0:
+			call_elevator(26)
+			return
 		var dist_28: float = INF
 		if call_pedestal_28 != null:
 			dist_28 = minf(dist_28, p_pos.distance_to(call_pedestal_28.global_position))
@@ -182,7 +192,6 @@ func get_floor_y(fl: int) -> float:
 		28: return FLOOR_28_Y
 		27: return FLOOR_27_Y
 		26: return FLOOR_26_Y
-		25: return FLOOR_25_Y
 		_: return FLOOR_28_Y
 
 
@@ -197,16 +206,15 @@ func call_elevator(target_floor: int) -> void:
 func server_request_call(target_floor: int) -> void:
 	if not _request_allowed():
 		return
-	if not multiplayer.is_server() or is_moving or target_floor not in [28, 27]:
+	if not multiplayer.is_server() or target_floor not in SUPPORTED_FLOORS: return
+	if is_moving:
+		if target_floor != destination_floor and target_floor not in pending_calls: pending_calls.append(target_floor)
 		return
-	if target_floor == current_floor and not is_doors_open:
-		if multiplayer.has_multiplayer_peer():
-			sync_open_doors.rpc()
-		else:
-			sync_open_doors()
+	if target_floor == current_floor:
+		if multiplayer.has_multiplayer_peer(): sync_open_doors.rpc()
+		else: sync_open_doors()
 	else:
-		var destination: int = (27 if current_floor == 28 else 28) if target_floor == current_floor else target_floor
-		server_request_elevator(destination)
+		server_request_elevator(target_floor)
 
 
 @rpc("authority", "call_local", "reliable")
@@ -225,7 +233,7 @@ func _dispatch_elevator(destination_floor: int) -> void:
 func server_request_elevator(target_floor: int) -> void:
 	if not _request_allowed():
 		return
-	if not multiplayer.is_server() or is_moving or target_floor not in [28, 27] or target_floor == current_floor:
+	if not multiplayer.is_server() or is_moving or target_floor not in SUPPORTED_FLOORS or target_floor == current_floor:
 		return
 	if multiplayer.has_multiplayer_peer():
 		sync_move_elevator.rpc(target_floor)
@@ -271,7 +279,8 @@ func _animate_cabin_transit(target_floor: int, duration: float = TRANSIT_DURATIO
 
 	tween.tween_callback(func() -> void:
 		current_floor = target_floor
-		state = ElevatorState.AT_27 if current_floor == 27 else ElevatorState.AT_28
+		arrival_dwell = 2.0
+		state = _arrival_state()
 		is_moving = false
 		travel_started = false
 		_update_floor_indicator(current_floor)
@@ -362,6 +371,10 @@ func _request_allowed() -> bool:
 
 
 func _process(delta: float) -> void:
+	_update_landing_gates()
+	arrival_dwell = maxf(0.0, arrival_dwell-delta)
+	if multiplayer.is_server() and not is_moving and arrival_dwell <= 0.0 and not pending_calls.is_empty():
+		server_request_call(pending_calls.pop_front())
 	if is_moving and travel_started:
 		travel_elapsed += delta
 
@@ -406,4 +419,30 @@ func sync_elevator_snapshot(floor_number: int, destination: int, moving: bool, o
 		_animate_cabin_transit(destination, remaining)
 	else:
 		travel_started = false
-		state = ElevatorState.AT_27 if current_floor == 27 else ElevatorState.AT_28
+		state = _arrival_state()
+
+
+func select_floor(floor_number: int) -> void:
+	if floor_number in SUPPORTED_FLOORS: _dispatch_elevator(floor_number)
+
+func _arrival_state() -> ElevatorState:
+	match current_floor:
+		26: return ElevatorState.AT_26
+		27: return ElevatorState.AT_27
+		_: return ElevatorState.AT_28
+
+func _build_landing_gates() -> void:
+	for fl in SUPPORTED_FLOORS:
+		var body := StaticBody3D.new(); body.name="LandingGate"+str(fl)
+		body.position=Vector3(0,get_floor_y(fl)+1.35,1.65)
+		var collider:=CollisionShape3D.new();var shape:=BoxShape3D.new();shape.size=Vector3(3.2,2.7,0.10);collider.shape=shape;body.add_child(collider)
+		var visual:=MeshInstance3D.new();var box:=BoxMesh.new();box.size=shape.size;visual.mesh=box
+		var mat:=StandardMaterial3D.new();mat.albedo_color=Color(0.24,0.28,0.30);mat.metallic=0.5;visual.material_override=mat;body.add_child(visual)
+		add_child(body);landing_gates[fl]=body
+
+func _update_landing_gates() -> void:
+	for fl: int in landing_gates:
+		var closed: bool=is_moving or current_floor!=fl or not is_doors_open
+		var body:StaticBody3D=landing_gates[fl]
+		body.visible=closed
+		(body.get_child(0) as CollisionShape3D).set_deferred("disabled",not closed)

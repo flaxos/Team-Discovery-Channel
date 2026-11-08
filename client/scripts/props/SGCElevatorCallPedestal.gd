@@ -16,7 +16,7 @@ func _ready() -> void:
 	add_to_group("interactable")
 	if prompt_label != null:
 		if is_cabin_panel:
-			prompt_label.text = _bindings().format_prompt("[E] DISPATCH LIFT")
+			prompt_label.text = _bindings().format_prompt("[E] LEVEL " + str(target_floor))
 		else:
 			prompt_label.text = _bindings().format_prompt("[E] CALL LIFT")
 		prompt_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -43,7 +43,7 @@ func interact(_player: Node = null) -> void:
 
 	if is_cabin_panel:
 		print("SGCElevatorCallPedestal: Cabin dispatch panel pressed by %s." % (_player.name if _player != null else "operative"))
-		elev.toggle_elevator()
+		elev.select_floor(target_floor)
 	else:
 		print("SGCElevatorCallPedestal: Floor %d call button pressed by %s." % [target_floor, _player.name if _player != null else "operative"])
 		elev.call_elevator(target_floor)
