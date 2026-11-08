@@ -35,3 +35,11 @@ Open [http://localhost:5173](http://localhost:5173) to cast votes, propose custo
 * **Scotty** (⚡) - Multiplayer & Netcode, Game Feel & Combat, Weapons & Perks Scripter
 
 *Built with passion, caffeine, and agentic AI.*
+
+## Current Godot game
+
+The SGC co-op game is in `client/` (Godot 4.4.1). Run `godot --path client` to open the lobby.
+Run `python3 tools/run_godot_tests.py` for the takeover regression suites; this runner rejects script/engine errors and timeouts even if a suite prints a success banner.
+
+Sprint plans and review notes are in `docs/plans/` and `docs/reviews/`.
+The alignment API binds to localhost by default. Remote repository exports require `ALIGNMENT_EXPORT_TOKEN` and an `Authorization: Bearer …` header; set `ALIGNMENT_HOST` explicitly when remote API access is intended.

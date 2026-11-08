@@ -6,6 +6,7 @@ extends CharacterBody3D
 
 signal jaffa_died(killer: Node)
 signal jaffa_vaporized()
+signal staff_fired(origin: Vector3, direction: Vector3)
 
 enum State {
 	IDLE,
@@ -49,6 +50,7 @@ var is_tactical_flanking: bool = false
 var tactical_destination: Vector3 = Vector3.ZERO
 var flank_route_target: Vector3 = Vector3.ZERO
 var tactical_cover_position: Vector3 = Vector3.ZERO
+var suppressive_hold_timer: float = 0.0
 
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D if has_node("NavigationAgent3D") else null
@@ -150,17 +152,16 @@ func _process_marching_formation(delta: float) -> void:
 		_reset_staff_position()
 		return
 
-	# Maintain column lane X while marching forward down the ramp (+Z) at march_speed (2.4 m/s)
+	# Maintain column lane X while marching forward down the ramp (+Z) at march_speed (2.4 m/s) in disciplined synchronized lockstep
 	var x_offset: float = column_x_lane - global_position.x
 	var steer_x: float = clampf(x_offset * 3.0, -1.0, 1.0)
-	var march_dir: Vector3 = Vector3(steer_x, 0.0, 1.0).normalized()
 
-	velocity.x = move_toward(velocity.x, march_dir.x * march_speed, 12.0 * delta)
-	velocity.z = move_toward(velocity.z, march_dir.z * march_speed, 12.0 * delta)
+	velocity.x = move_toward(velocity.x, steer_x * (march_speed * 0.75), 12.0 * delta)
+	velocity.z = move_toward(velocity.z, march_speed, 12.0 * delta)
 
-	# Keep orientation locked forward down the ramp (+Z direction)
-	if march_dir.length_squared() > 0.01:
-		rotation.y = atan2(-march_dir.x, -march_dir.z)
+	# Keep orientation locked forward down the ramp (+Z direction) with smooth lane steering
+	var target_rot_y: float = atan2(-steer_x * 0.2, -1.0)
+	rotation.y = lerp_angle(rotation.y, target_rot_y, clampf(12.0 * delta, 0.0, 1.0))
 
 
 ## Triggers tactical reaction when column formation is engaged.
@@ -173,7 +174,8 @@ func break_formation_and_engage() -> void:
 		current_state = State.COMBAT
 		_set_crouching(true)
 		velocity = Vector3.ZERO
-		fire_timer = randf_range(0.1, 0.4)
+		suppressive_hold_timer = 4.0
+		fire_timer = randf_range(0.1, 0.3)
 		print("JaffaAI [%s]: Front rank halting & crouching to unleash plasma barrage!" % name)
 	else:
 		# Trailing ranks break into tactical combat (flanking via West/East corridors or taking cover behind sandbags)
@@ -206,7 +208,9 @@ func _alert_nearby_formation_jaffa() -> void:
 	for child: Node in enemies.get_children():
 		var other: JaffaAI = child as JaffaAI
 		if other != null and other != self and is_instance_valid(other):
-			if other.current_state == State.MARCHING_FORMATION:
+			if other.current_state == State.MARCHING_FORMATION or other.current_state == State.ADVANCE:
+				if other.current_target == null and current_target != null:
+					other.current_target = current_target
 				other.break_formation_and_engage()
 
 
@@ -303,10 +307,16 @@ func _process_combat_state(delta: float) -> void:
 	_find_nearest_target()
 
 	if current_target == null:
+		if suppressive_hold_timer > 0.0:
+			suppressive_hold_timer -= delta
+			velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+			velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+			return
 		_set_crouching(false)
 		_reset_staff_position()
 		current_state = State.ADVANCE
-		_advance_towards(Vector3(0.0, 0.0, 6.0), delta)
+		var advance_target := Vector3(column_x_lane, 0.0, 24.0)
+		_advance_towards(advance_target, delta, march_speed)
 		return
 
 	var dist: float = global_position.distance_to(current_target.global_position)
@@ -319,6 +329,7 @@ func _process_combat_state(delta: float) -> void:
 	var has_los: bool = _has_line_of_sight(current_target)
 
 	if is_crouching:
+		suppressive_hold_timer = 4.0
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 
@@ -334,13 +345,13 @@ func _process_combat_state(delta: float) -> void:
 				_fire_staff_blast()
 		else:
 			_set_crouching(false)
-			_advance_towards(current_target.global_position, delta)
+			_advance_towards(current_target.global_position, delta, move_speed)
 	else:
 		if has_los and dist <= combat_range:
 			_process_combat(delta, dist)
 		else:
 			current_state = State.ADVANCE
-			_advance_towards(current_target.global_position, delta)
+			_advance_towards(current_target.global_position, delta, move_speed)
 
 
 func _process_advance_state(delta: float) -> void:
@@ -349,7 +360,9 @@ func _process_advance_state(delta: float) -> void:
 	_find_nearest_target()
 
 	if current_target == null:
-		_advance_towards(Vector3(0.0, 0.0, 6.0), delta)
+		# Proceed to march steadily into the base preserving tactical lane cohesion
+		var advance_target := Vector3(column_x_lane, 0.0, 24.0)
+		_advance_towards(advance_target, delta, march_speed)
 		return
 
 	var dist: float = global_position.distance_to(current_target.global_position)
@@ -360,7 +373,7 @@ func _process_advance_state(delta: float) -> void:
 		current_state = State.COMBAT
 		_process_combat(delta, dist)
 	else:
-		_advance_towards(current_target.global_position, delta)
+		_advance_towards(current_target.global_position, delta, move_speed)
 
 
 func _set_crouching(crouched: bool) -> void:
@@ -435,9 +448,13 @@ func _setup_staff_visual() -> void:
 
 
 func _find_nearest_target() -> void:
-	# Find closest active SGC operative or allied Airman defender
-	var closest_target: Node3D = null
-	var min_dist: float = 999999.0
+	# Find closest active SGC operative or allied Airman defender in perception range
+	var closest_los_target: Node3D = null
+	var closest_los_dist: float = combat_range * 1.5  # ~33m visual awareness
+	var closest_any_target: Node3D = null
+	var min_any_dist: float = combat_range
+
+	var candidates: Array[Node3D] = []
 
 	var players_container := get_tree().root.find_child("Players", true, false)
 	if players_container != null:
@@ -446,10 +463,7 @@ func _find_nearest_target() -> void:
 			if p != null:
 				var health := p.get_node_or_null("HealthComponent") as HealthComponent
 				if health != null and not health.is_dead:
-					var d := global_position.distance_to(p.global_position)
-					if d < min_dist:
-						min_dist = d
-						closest_target = p
+					candidates.append(p)
 
 	var allies_container := get_tree().root.find_child("Allies", true, false)
 	if allies_container != null:
@@ -458,12 +472,25 @@ func _find_nearest_target() -> void:
 			if a != null:
 				var health := a.get_node_or_null("HealthComponent") as HealthComponent
 				if health != null and not health.is_dead:
-					var d := global_position.distance_to(a.global_position)
-					if d < min_dist:
-						min_dist = d
-						closest_target = a
+					candidates.append(a)
 
-	current_target = closest_target
+	for c in candidates:
+		var d := global_position.distance_to(c.global_position)
+		if _has_line_of_sight(c):
+			if d < closest_los_dist:
+				closest_los_dist = d
+				closest_los_target = c
+		else:
+			if d < min_any_dist:
+				min_any_dist = d
+				closest_any_target = c
+
+	if closest_los_target != null:
+		current_target = closest_los_target
+	elif closest_any_target != null and min_any_dist <= combat_range:
+		current_target = closest_any_target
+	else:
+		current_target = null
 
 
 func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
@@ -535,7 +562,8 @@ func _cast_los_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
 	return false
 
 
-func _advance_towards(target_pos: Vector3, delta: float) -> void:
+func _advance_towards(target_pos: Vector3, delta: float, target_speed: float = -1.0) -> void:
+	var move_speed_to_use: float = target_speed if target_speed > 0.0 else move_speed
 	var move_dest := target_pos
 
 	# Multi-Level Pathfinding: If target is on Sublevel 27 (Y >= 4.5) and Jaffa is on Sublevel 28 (Y < 4.5)
@@ -549,18 +577,18 @@ func _advance_towards(target_pos: Vector3, delta: float) -> void:
 			# Ascend the helical spiral stairs toward Level 27
 			velocity.y = 3.5
 			move_dest = Vector3(-5.0, 5.5, 11.0)
-	elif target_pos.y < 4.5 and not _has_line_of_sight(current_target):
+	elif target_pos.y < 4.5 and (current_target == null or not _has_line_of_sight(current_target)):
 		move_dest = _get_hallway_destination(target_pos)
 
 	var to_target := (move_dest - global_position)
 	to_target.y = 0.0
 	var dir := to_target.normalized()
 
-	velocity.x = move_toward(velocity.x, dir.x * move_speed, 20.0 * delta)
-	velocity.z = move_toward(velocity.z, dir.z * move_speed, 20.0 * delta)
+	velocity.x = move_toward(velocity.x, dir.x * move_speed_to_use, 20.0 * delta)
+	velocity.z = move_toward(velocity.z, dir.z * move_speed_to_use, 20.0 * delta)
 
 	# If no line of sight to target, orient strictly to corridor movement direction
-	if not _has_line_of_sight(current_target) and dir.length_squared() > 0.01:
+	if (current_target == null or not _has_line_of_sight(current_target)) and dir.length_squared() > 0.01:
 		rotation.y = atan2(-dir.x, -dir.z)
 
 
@@ -588,7 +616,9 @@ func _get_hallway_destination(target_pos: Vector3) -> Vector3:
 
 	# 2. Target in Fallback Hallway (South of Control Room)
 	elif target_pos.z >= 20.0 and absf(target_pos.x) <= 6.0:
-		if global_position.z <= 8.0:
+		if global_position.z < 4.0:
+			return Vector3(target_pos.x, 0.0, 6.0) # March through Gate Room center in tactical lane
+		elif global_position.z <= 8.0:
 			return Vector3(5.0, 0.75, 8.5)   # Enter Control Room North ramp
 		elif global_position.z > 8.0 and global_position.z < 14.0:
 			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
@@ -678,18 +708,28 @@ func _dispatch_single_plasma_bolt() -> void:
 	if bolt_scene != null:
 		var bolt := bolt_scene.instantiate() as PlasmaBolt
 		bolt.damage = plasma_damage
-		get_parent().add_child(bolt)
-		bolt.initialize(origin, dir, self, true)
+		var root_node := get_tree().root if is_inside_tree() else null
+		if root_node != null:
+			root_node.add_child(bolt)
+			bolt.initialize(origin, dir, self, true)
+		elif get_parent() != null:
+			get_parent().add_child(bolt)
+			bolt.initialize(origin, dir, self, true)
+
+	staff_fired.emit(origin, dir)
 
 	# Visual muzzle burst RPC
 	rpc("play_staff_fire_fx", origin)
 
 
-func _on_damage_taken(_amount: float, _source: Node, _damage_type: String) -> void:
+func _on_damage_taken(_amount: float, source: Node, _damage_type: String) -> void:
 	if is_shock_guard and current_state != State.DEAD:
 		rpc("play_armor_spark_fx", global_position + Vector3(0, 1.2, 0))
 
-	if current_state == State.MARCHING_FORMATION:
+	if source is Node3D and is_instance_valid(source):
+		current_target = source as Node3D
+
+	if current_state == State.MARCHING_FORMATION or current_state == State.ADVANCE:
 		break_formation_and_engage()
 		_alert_nearby_formation_jaffa()
 
@@ -723,6 +763,8 @@ func _process_melee(delta: float) -> void:
 
 @rpc("call_local", "unreliable")
 func play_staff_fire_fx(origin_pos: Vector3) -> void:
+	if not is_inside_tree() or get_tree() == null:
+		return
 	# Orange muzzle burst light
 	var burst := OmniLight3D.new()
 	burst.light_color = Color(1.0, 0.5, 0.1)

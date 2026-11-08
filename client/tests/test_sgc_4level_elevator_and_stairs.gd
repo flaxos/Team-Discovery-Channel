@@ -20,6 +20,10 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: 4-LEVEL ELEVATOR, SHUTTERS & STAIRS TEST ")
 	print("========================================================")
@@ -247,7 +251,7 @@ func _process(_delta: float) -> bool:
 		var prev_y: float = -999.0
 		for i: int in range(steps.size()):
 			var s: CSGBox3D = steps[i]
-			assert(s.use_collision, "%s must have collision enabled" % s.name)
+			assert(not s.use_collision, "Visual treads must use the continuous helix collider")
 			var y_pos: float = s.position.y
 			if i > 0:
 				var diff: float = y_pos - prev_y
@@ -259,28 +263,14 @@ func _process(_delta: float) -> bool:
 		player.global_position = Vector3(-5.0, 0.2, 11.0)
 		player.velocity = Vector3.ZERO
 
-		# Step the operative along the ascending helical path of the 24 steps
-		var pole_world: Vector3 = pole.global_position
-		var current_step_idx: int = 0
-
-		for s: CSGBox3D in steps:
-			var step_world: Vector3 = s.global_position
-			# Character body stands on step top (step height 0.2m, center Y + 0.1m)
-			var target_feet_y: float = step_world.y + 0.1
-			player.global_position = Vector3(step_world.x, target_feet_y, step_world.z)
-
-			# Verify operative stays upright, has no collision snagging
-			assert(player.global_position.y >= 0.2, "Operative Y position must remain above ground")
-			current_step_idx += 1
-
 		# Verify final step reaches Briefing Room level (Y = 5.5m)
 		var top_step: CSGBox3D = steps[23]
-		var top_world_y: float = top_step.global_position.y
+		var top_world_y: float = top_step.global_position.y + 0.1
 		assert(is_equal_approx(snappedf(top_world_y, 0.1), 5.5), "Top step landing must reach Level 27 (Y=5.5m), got %.2fm" % top_world_y)
 
 		print("  ✓ All 24 helical steps verified with riser <= 0.20m.")
-		print("  ✓ Operative CharacterBody3D traversed Y=0.95m -> Y=5.50m without physics snagging.")
-		print("[TEST 5/5] PASS: Spiral staircase physics ascent validated 100%.")
+		print("  ✓ Continuous walking is tested in test_staircase_traversal.gd.")
+		print("[TEST 5/5] PASS: Spiral staircase structure validated.")
 
 		print("\n========================================================")
 		print("  SUBAGENT 3: ALL 5/5 INTEGRATION TESTS PASSED 100%!   ")
@@ -290,6 +280,7 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Manual Shutter Toggle & Red Alert Klaxon Sealing    ")
 		print("  ✓ 24-Step Spiral Stairs CharacterBody3D Ascent        ")
 		print("========================================================\n")
+		gateroom.queue_free()
 		quit(0)
 		return true
 

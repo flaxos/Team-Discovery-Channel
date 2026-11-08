@@ -211,10 +211,10 @@ func toggle_keybindings_modal() -> void:
 
 
 func _on_keybindings_modal_closed() -> void:
-	if local_player != null and local_player.is_aiming_down_sights:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if local_player != null and local_player.has_method("_update_mouse_mode"):
+		local_player._update_mouse_mode()
 	else:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func toggle_pause_menu() -> void:
@@ -226,10 +226,10 @@ func toggle_pause_menu() -> void:
 	if pause_menu.visible:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:
-		if local_player != null and local_player.is_aiming_down_sights:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		if local_player != null and local_player.has_method("_update_mouse_mode"):
+			local_player._update_mouse_mode()
 		else:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _on_master_slider_changed(value: float) -> void:

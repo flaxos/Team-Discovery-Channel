@@ -241,9 +241,9 @@ func _spawn_next_column_rank() -> void:
 	var count_this_rank: int = mini(2, pending_column_spawns)
 	pending_column_spawns -= count_this_rank
 
-	var offsets: Array[float] = [-1.2, 1.2]
+	var offsets: Array[float] = [-0.8, 0.8]
 	if count_this_rank == 1:
-		offsets = [-1.2]
+		offsets = [-0.8]
 
 	for i: int in range(count_this_rank):
 		var x_offset: float = offsets[i]
@@ -332,6 +332,8 @@ func _on_iris_servo_repaired() -> void:
 
 
 func _play_klaxon() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists("res://audio/sfx_klaxon.wav"):
 		var audio := AudioStreamPlayer.new()
 		audio.stream = load("res://audio/sfx_klaxon.wav")
@@ -347,6 +349,8 @@ func _play_klaxon() -> void:
 
 
 func _play_sfx(path: String, max_dist: float) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists(path):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load(path)

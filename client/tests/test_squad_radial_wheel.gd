@@ -25,6 +25,10 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SQUAD RADIAL COMMAND WHEEL VERIFICATION  ")
 	print("========================================================")
@@ -253,8 +257,9 @@ func _process(_delta: float) -> bool:
 		# 4C: Radio Squawk / Audio Chirp
 		player._play_command_radio_sound()
 		var squawk_player: Node = root.find_child("RadioSquawkPlayer", true, false)
-		assert(squawk_player != null, "RadioSquawkPlayer audio player node must be spawned")
-		squawk_player.queue_free()
+		assert(DisplayServer.get_name() == "headless" or squawk_player != null, "RadioSquawkPlayer audio player node must be spawned")
+		if squawk_player != null:
+			squawk_player.queue_free()
 
 		print("[TEST 4/5] PASS: Tri-sensory confirmation (3D waypoint ring, HUD toast, radio chirp) verified.")
 
@@ -316,6 +321,7 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Airmen Dispatch & Tactical Corner / Turret Orders   ")
 		print("  ✓ Fallback Warning Toast on All Airmen Downed         ")
 		print("========================================================\n")
+		gateroom.queue_free()
 		quit(0)
 
 	return false

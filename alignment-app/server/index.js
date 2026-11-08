@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
+const { isAuthorized, commitDocuments } = require('./repoExport');
 const initialState = require('./initialState');
 const {
   analyzeVotes,
@@ -372,6 +373,9 @@ app.post('/api/compile', (req, res) => {
 
 // POST Export to Repository Root & Optional Git Commit
 app.post('/api/export-to-repo', (req, res) => {
+  if (!isAuthorized(req, process.env.ALIGNMENT_EXPORT_TOKEN)) {
+    return res.status(403).json({ error: 'Repository export requires local access or an export token.' });
+  }
   try {
     const { gitCommit, commitMessage } = req.body;
     const analysis = analyzeVotes(state);
@@ -435,11 +439,11 @@ ${state.team.map(m => `* **${m.name}** (${m.avatar}) - ${m.rolePreferences?.join
     if (gitCommit) {
       try {
         const msg = commitMessage || 'feat: align on game dev specs, GDD, and bootstrap prompt';
-        execSync(`git add . && git commit -m "${msg}"`, { cwd: REPO_ROOT, encoding: 'utf8' });
+        commitDocuments(REPO_ROOT, msg);
         gitCommitted = true;
 
         try {
-          execSync(`git push origin main`, { cwd: REPO_ROOT, encoding: 'utf8' });
+          execFileSync('git', ['push', 'origin', 'HEAD'], { cwd: REPO_ROOT, encoding: 'utf8' });
           gitPushed = true;
         } catch (pushErr) {
           console.warn('Git push failed or remote not reachable:', pushErr.message);
@@ -480,6 +484,6 @@ if (fs.existsSync(DIST_DIR)) {
   });
 }
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, process.env.ALIGNMENT_HOST || '127.0.0.1', () => {
   console.log(`Alignment Engine Backend running on http://localhost:${PORT}`);
 });

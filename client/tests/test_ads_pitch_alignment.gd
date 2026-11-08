@@ -15,6 +15,10 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  TEST: ADS GHOST RECON WILDLANDS PITCH & ANGLE ALIGNMENT")
 	print("========================================================")
@@ -32,6 +36,7 @@ func _init() -> void:
 	player.is_local_authority = true
 	players_container.add_child(player)
 	player.global_position = Vector3(0.0, 0.0, 0.0)
+	player.set_physics_process(false)
 
 
 func _process(delta: float) -> bool:
@@ -56,6 +61,7 @@ func _process(delta: float) -> bool:
 	elif ticks == 4:
 		# TEST 2: Vertical Mouse Motion ADS Pitch Control
 		print("[TEST 2/4] Testing Vertical Mouse Motion Pitching (Looking Up & Down)...")
+		player.is_aiming_down_sights = true
 		# Simulate moving mouse up (negative relative Y in screen space -> pitches camera UP)
 		var mouse_up := InputEventMouseMotion.new()
 		mouse_up.relative = Vector2(0, -100)
@@ -80,6 +86,7 @@ func _process(delta: float) -> bool:
 	elif ticks == 6:
 		# TEST 3: 3D Raycast Sightline Aim Target in ADS
 		print("[TEST 3/4] Testing 3D Raycast Aiming in ADS Mode...")
+		player.is_aiming_down_sights = true
 		player.ads_pitch_rad = 0.0
 		player._update_camera_and_occlusion(0.016)
 		
