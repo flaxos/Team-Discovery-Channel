@@ -962,37 +962,11 @@ use_collision = true
 size = Vector3(0.8, 6, 8)
 material = SubResource("Mat_Wall")
 
-[node name="ElevatorDoorFrame" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.4, 2.5, 18)
+[node name="ElevatorDoorHeader" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.4, 5.2, 18)
 use_collision = true
-size = Vector3(0.6, 5, 4)
+size = Vector3(0.6, 1.6, 4)
 material = SubResource("Mat_WhiteTrim")
-
-[node name="ElevatorDoors" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.6, 2.2, 18)
-use_collision = true
-size = Vector3(0.4, 4.4, 3.2)
-material = SubResource("Mat_Door")
-
-[node name="ElevatorIndicatorLabel" type="Label3D" parent="Level28Complex/ElevatorSector"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 35.1, 4.6, 18)
-text = "[ 28 ]"
-font_size = 28
-outline_size = 6
-outline_modulate = Color(0.2, 0.1, 0, 1)
-modulate = Color(1, 0.75, 0.1, 1)
-
-[node name="ElevatorCallPedestal" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.8, 1, 15.6)
-use_collision = true
-size = Vector3(0.3, 1.2, 0.3)
-material = SubResource("Mat_Door")
-
-[node name="PedestalLight" type="OmniLight3D" parent="Level28Complex/ElevatorSector/ElevatorCallPedestal"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
-light_color = Color(0.2, 0.9, 0.3, 1)
-light_energy = 1.2
-omni_range = 2.0
 
 [node name="ElevatorLight" type="OmniLight3D" parent="Level28Complex/ElevatorSector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 4.8, 18)
@@ -1207,7 +1181,7 @@ script = ExtResource("2_wm01")
 [node name="Level27Complex" parent="." instance=ExtResource("8_l2701")]
 
 [node name="SGCElevator" parent="." instance=ExtResource("9_elev01")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 37, 0, 18)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37, 0, 18)
 
 [node name="ElevatorShaftWallEast" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 4.5, 18)

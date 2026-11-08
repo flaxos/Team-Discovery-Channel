@@ -75,19 +75,25 @@ var current_iso_pan_yaw: float = 0.0
 var ads_pitch_rad: float = 0.0
 var current_locked_aim_y: float = 0.0
 
-# Sprint 19: ADS Mouse Scroll Zoom & Near-FPS View
-@export var ads_zoom_distance: float = 1.65 # Default Wildlands over-shoulder distance (0.35m to 2.6m)
+# Third-Person Shooter (TPS) Camera & Zoom System
+@export var tps_zoom_distance: float = 4.2 # Default zoomed-out third person distance (1.2m to 6.5m)
+const TPS_MIN_ZOOM: float = 1.2 # Close over-shoulder view
+const TPS_MAX_ZOOM: float = 6.5 # Wide tactical third person view
+const TPS_ZOOM_STEP: float = 0.35 # Distance step per mouse wheel notch
+
+# Right-Click ADS Extra Zoom (Wildlands close sightline to Near-FPS)
+@export var ads_zoom_distance: float = 0.85 # Extra tight ADS sightline (0.35m to 1.65m)
 const ADS_MIN_ZOOM: float = 0.35 # Near-FPS sightline
-const ADS_MAX_ZOOM: float = 2.60 # Wide tactical pan view
-const ADS_ZOOM_STEP: float = 0.20 # Distance step per mouse wheel notch
+const ADS_MAX_ZOOM: float = 1.65 # Over-shoulder sightline
+const ADS_ZOOM_STEP: float = 0.15 # Distance step per mouse wheel notch in ADS
 
 # Sprint 19: Dynamic Proximity Transparency / Fade on Player Model
 var original_visual_materials: Dictionary = {}
 var current_player_alpha: float = 1.0
 
-# Sprint 19: Windowed Mode Mouse Cursor Confinement
+# Windowed Mode Mouse Cursor Confinement (Captured in gameplay)
 var is_window_focused: bool = true
-var current_mouse_mode: int = Input.MOUSE_MODE_CONFINED_HIDDEN
+var current_mouse_mode: int = Input.MOUSE_MODE_CAPTURED
 @export var auto_y_aim_enabled: bool = true
 var is_crouch_toggled: bool = false
 var active_c4_timer_mode: int = 0  # 0: Remote, 1: 5s, 2: 10s, 3: 30s
@@ -223,14 +229,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		if hud != null:
 			hud.update_radial_command_wheel(motion.position)
 		return
-	if is_aiming_down_sights and event is InputEventMouseMotion:
+	if event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
-		rotation.y -= motion.relative.x * 0.003
-		ads_pitch_rad = clampf(ads_pitch_rad - motion.relative.y * 0.0025, deg_to_rad(-35.0), deg_to_rad(35.0))
-	elif not is_aiming_down_sights and event is InputEventMouseMotion:
-		var motion := event as InputEventMouseMotion
-		current_iso_pan_yaw -= motion.relative.x * 0.0018
-		current_iso_pan_yaw = wrapf(current_iso_pan_yaw, -PI, PI)
+		if is_command_wheel_open:
+			var hud := _get_tactical_hud()
+			if hud != null:
+				hud.update_radial_command_wheel(motion.position)
+			return
+
+		# Unified Third-Person Shooter Look: mouse pitch and yaw control always active
+		# Sensitivity scaling: scale down during ADS for precision tracking
+		var sens_mult: float = lerpf(1.0, 0.55, ads_blend)
+		rotation.y -= motion.relative.x * 0.0028 * sens_mult
+		ads_pitch_rad = clampf(ads_pitch_rad - motion.relative.y * 0.0022 * sens_mult, deg_to_rad(-35.0), deg_to_rad(35.0))
+		current_iso_pan_yaw = rotation.y
 	elif event is InputEventKey:
 		var key_event := event as InputEventKey
 		if key_event.pressed and not key_event.echo:
@@ -259,14 +271,20 @@ func _unhandled_input(event: InputEvent) -> void:
 			if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 				_update_mouse_mode()
 
-		# Sprint 19: ADS Mouse Scroll Zoom (Near-FPS <-> Wide Shoulder Pan)
-		if is_aiming_down_sights and mb.pressed:
+		# Seamless Mouse Scroll Zoom: adjusts TPS distance in default view, and ADS distance in ADS view
+		if mb.pressed:
 			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
-				ads_zoom_distance = clampf(ads_zoom_distance - ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
+				if is_aiming_down_sights:
+					ads_zoom_distance = clampf(ads_zoom_distance - ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
+				else:
+					tps_zoom_distance = clampf(tps_zoom_distance - TPS_ZOOM_STEP, TPS_MIN_ZOOM, TPS_MAX_ZOOM)
 				get_viewport().set_input_as_handled()
 				return
 			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				ads_zoom_distance = clampf(ads_zoom_distance + ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
+				if is_aiming_down_sights:
+					ads_zoom_distance = clampf(ads_zoom_distance + ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
+				else:
+					tps_zoom_distance = clampf(tps_zoom_distance + TPS_ZOOM_STEP, TPS_MIN_ZOOM, TPS_MAX_ZOOM)
 				get_viewport().set_input_as_handled()
 				return
 
@@ -667,33 +685,24 @@ func _update_camera_and_occlusion(delta: float) -> void:
 	if is_in_cctv_mode:
 		return
 
-	# Floor-Aware Culling: Show Level 27 complex only when operative is on upper floor (Y >= 4.5m)
+	# Level 27 Complex remains visible so Observation Lounge overlooks the Gate Room
 	var l27_node: Node3D = null
 	if get_tree() != null and get_tree().current_scene != null:
 		l27_node = get_tree().current_scene.get_node_or_null("Level27Complex") as Node3D
 	if l27_node == null and get_tree() != null and get_tree().root != null:
 		l27_node = get_tree().root.find_child("Level27Complex", true, false) as Node3D
-	if l27_node != null:
-		l27_node.visible = (global_position.y >= 4.5)
+	if l27_node != null and not l27_node.visible:
+		l27_node.visible = true
 
-	# Smooth ADS transition weight (0.0 = tactical isometric, 1.0 = over-the-shoulder semi-scoped)
+	# Smooth ADS transition weight (0.0 = TPS default, 1.0 = ADS extra zoom & precision)
 	var target_ads := 1.0 if is_aiming_down_sights else 0.0
-	ads_blend = move_toward(ads_blend, target_ads, 6.0 * delta)
+	ads_blend = move_toward(ads_blend, target_ads, 8.0 * delta)
 
-	# 1. Aim-Lead: offset camera toward aiming reticle for tactical forward vision in isometric mode
-	var aim_lead := Vector3.ZERO
-	if current_aim_target != Vector3.ZERO:
-		var aim_diff := (current_aim_target - global_position)
-		aim_diff.y = 0.0
-		aim_lead = aim_diff.limit_length(max_aim_lead_dist)
+	# Camera rig tracks player operative center
+	var desired_cam_pos := global_position
+	var target_cam_pos := camera_rig.global_position.lerp(desired_cam_pos, 15.0 * delta)
 
-	# In isometric: cam rig tracks player + aim_lead; In ADS: cam rig tracks player center
-	var iso_desired_pos := global_position + aim_lead
-	var ads_desired_pos := global_position
-	var desired_cam_pos := iso_desired_pos.lerp(ads_desired_pos, ads_blend)
-	var target_cam_pos := camera_rig.global_position.lerp(desired_cam_pos, 10.0 * delta)
-
-	# 2. Procedural trauma screen shake
+	# Procedural trauma screen shake
 	var off_yaw: float = 0.0
 	if trauma > 0.0:
 		trauma = maxf(0.0, trauma - 1.8 * delta)
@@ -704,39 +713,31 @@ func _update_camera_and_occlusion(delta: float) -> void:
 		target_cam_pos += Vector3(off_x, 0, off_z)
 
 	camera_rig.global_position = target_cam_pos
-
-	# Rig Yaw: in isometric mode follows unconstrained 360 orbit; in ADS mode follows player yaw rotation.y
-	var target_rig_yaw := lerp_angle(current_iso_pan_yaw, rotation.y, ads_blend)
-	camera_rig.rotation.y = target_rig_yaw + off_yaw
-
-	# Floor-Aware Camera Elevation: smoothly adjust isometric camera height between L28 (12m) and L27 (17.5m)
-	var target_cam_y: float = 12.0
-	if global_position.y >= 4.5:
-		target_cam_y = 17.5
-	current_iso_cam_y = move_toward(current_iso_cam_y, target_cam_y, 14.0 * delta)
+	camera_rig.rotation.y = rotation.y + off_yaw
 
 	if camera != null:
-		# Isometric position: (0, current_iso_cam_y, 7.0)
-		# ADS over-shoulder position: dynamic ads_cam_pos based on ads_zoom_distance (0.35m to 2.6m)
-		var iso_cam_pos := Vector3(0.0, current_iso_cam_y, 7.0)
-		var zoom_t: float = clampf((ads_zoom_distance - ADS_MIN_ZOOM) / (ADS_MAX_ZOOM - ADS_MIN_ZOOM), 0.0, 1.0)
-		var target_ads_x: float = lerpf(0.28, 0.55, zoom_t)
-		var ads_cam_pos := Vector3(target_ads_x, ads_cam_offset.y, ads_zoom_distance)
-		camera.position = iso_cam_pos.lerp(ads_cam_pos, ads_blend)
+		# Effective distance blending between TPS default and tight ADS
+		var eff_dist: float = lerpf(tps_zoom_distance, ads_zoom_distance, ads_blend)
 
-		# Pitch angle: -60° (tactical isometric) <-> Ghost Recon Wildlands over-shoulder level sightline
-		var iso_pitch := deg_to_rad(-60.0)
-		var ads_pitch := deg_to_rad(ads_cam_pitch_deg) + ads_pitch_rad
-		camera.rotation.x = lerp_angle(iso_pitch, ads_pitch, ads_blend)
+		# Lateral shoulder offset X (0.28m at tight sightline up to 0.75m at wide third-person)
+		var dist_ratio: float = clampf((eff_dist - ADS_MIN_ZOOM) / (TPS_MAX_ZOOM - ADS_MIN_ZOOM), 0.0, 1.0)
+		var target_x: float = lerpf(0.28, 0.75, dist_ratio)
+
+		# Elevation height Y (1.55m eye-level at close sightline up to 2.10m at wide view)
+		var target_y: float = lerpf(1.55, 2.10, dist_ratio)
+
+		camera.position = Vector3(target_x, target_y, eff_dist)
+
+		# Pitch angle: slightly downward base pitch when zoomed out, leveling to -1.5 deg in tight sightline, plus mouse pitch
+		var base_pitch: float = lerpf(deg_to_rad(-8.0), deg_to_rad(ads_cam_pitch_deg), ads_blend)
+		camera.rotation.x = base_pitch + ads_pitch_rad
 		camera.rotation.y = 0.0
 		camera.rotation.z = 0.0
 
-		if not is_aiming_down_sights:
-			ads_pitch_rad = move_toward(ads_pitch_rad, 0.0, 4.0 * delta)
-
-		# FOV: 55.0° (wide tactical isometric) <-> 44.0°-54.0° (near-FPS to wide shoulder ADS)
-		var target_ads_fov: float = lerpf(44.0, 54.0, zoom_t)
-		camera.fov = lerpf(55.0, target_ads_fov, ads_blend)
+		# FOV: 60 deg in wide third person, tightening to 46 deg in ADS (or 44 deg at min zoom)
+		var wide_fov: float = lerpf(55.0, 62.0, dist_ratio)
+		var ads_fov: float = lerpf(44.0, 50.0, clampf((ads_zoom_distance - ADS_MIN_ZOOM) / (ADS_MAX_ZOOM - ADS_MIN_ZOOM), 0.0, 1.0))
+		camera.fov = lerpf(wide_fov, ads_fov, ads_blend)
 
 	# 3. Dynamic Player Model Proximity Fade
 	_update_proximity_fade(delta)
@@ -840,17 +841,15 @@ func _update_mouse_mode() -> void:
 	if not is_local_authority:
 		return
 
-	var target_mode: int = Input.MOUSE_MODE_CONFINED_HIDDEN
+	var target_mode: int = Input.MOUSE_MODE_CAPTURED
 	if not is_window_focused or _is_ui_modal_open():
 		target_mode = Input.MOUSE_MODE_VISIBLE
 	elif health_component != null and (health_component.is_dead or health_component.is_downed or health_component.is_stunned):
 		target_mode = Input.MOUSE_MODE_VISIBLE
 	elif is_in_cctv_mode:
 		target_mode = Input.MOUSE_MODE_VISIBLE
-	elif is_aiming_down_sights:
-		target_mode = Input.MOUSE_MODE_CAPTURED
 	else:
-		target_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
+		target_mode = Input.MOUSE_MODE_CAPTURED
 
 	current_mouse_mode = target_mode
 	Input.mouse_mode = target_mode
@@ -884,11 +883,11 @@ func _update_proximity_fade(delta: float = 1.0) -> void:
 	if original_visual_materials.is_empty():
 		_setup_visual_materials()
 
+	var eff_dist: float = lerpf(tps_zoom_distance, ads_zoom_distance, ads_blend)
 	var target_alpha: float = 1.0
-	if ads_blend > 0.001:
-		var t_fade: float = clampf((ads_zoom_distance - ADS_MIN_ZOOM) / (1.60 - ADS_MIN_ZOOM), 0.0, 1.0)
-		var ads_alpha: float = lerpf(0.15, 1.0, t_fade)
-		target_alpha = lerpf(1.0, ads_alpha, ads_blend)
+	if eff_dist < 1.60:
+		var t_fade: float = clampf((eff_dist - ADS_MIN_ZOOM) / (1.60 - ADS_MIN_ZOOM), 0.0, 1.0)
+		target_alpha = lerpf(0.15, 1.0, t_fade)
 
 	current_player_alpha = move_toward(current_player_alpha, target_alpha, 8.0 * delta)
 
@@ -938,96 +937,24 @@ func add_screen_shake(amount: float) -> void:
 	trauma = clampf(trauma + amount, 0.0, 1.0)
 
 
-func _calculate_auto_y_aim_target(mouse_pos: Vector2) -> Vector3:
+func _calculate_auto_y_aim_target(_mouse_pos: Vector2 = Vector2.ZERO) -> Vector3:
 	if camera == null:
 		return Vector3.ZERO
 
-	if is_aiming_down_sights:
-		# Ghost Recon Wildlands over-the-shoulder crosshair 3D raycast
-		var cam_forward := -camera.global_transform.basis.z
-		var ray_start := camera.global_position
-		var ray_end := ray_start + cam_forward * 60.0
-		if is_inside_tree():
-			var space_state := get_world_3d().direct_space_state
-			if space_state != null:
-				var query := PhysicsRayQueryParameters3D.create(ray_start, ray_end)
-				query.collision_mask = 1 | 4  # World geometry + Enemies
-				query.exclude = [get_rid()]
-				var res := space_state.intersect_ray(query)
-				if not res.is_empty():
-					return res["position"] as Vector3
-		return ray_end
-
-	var ray_origin := camera.project_ray_origin(mouse_pos)
-	var ray_normal := camera.project_ray_normal(mouse_pos)
-
-	var target_plane_y: float = global_position.y
-
-	# 1. Target Enemy Height Snapping: check if crosshair ray hovers near any hostile entity
-	var snapped_enemy_y: float = -999.0
-	var enemies_container := get_tree().root.find_child("Enemies", true, false)
-	if enemies_container != null:
-		var min_dist_sq: float = 2.25 # within 1.5m radius
-		for child in enemies_container.get_children():
-			var enemy := child as CharacterBody3D
-			if enemy != null and is_instance_valid(enemy):
-				var enemy_center := enemy.global_position + Vector3(0, 1.0, 0)
-				var to_enemy := enemy_center - ray_origin
-				var proj := to_enemy.dot(ray_normal)
-				if proj > 0.0:
-					var closest_pt := ray_origin + ray_normal * proj
-					var d2 := closest_pt.distance_squared_to(enemy_center)
-					if d2 < min_dist_sq:
-						min_dist_sq = d2
-						snapped_enemy_y = enemy_center.y
-
-	if snapped_enemy_y > -900.0:
-		target_plane_y = snapped_enemy_y
-	elif auto_y_aim_enabled and is_inside_tree():
-		# 2. Dynamic Ground / Platform Elevation Auto-Detection:
-		# Raycast into world to find floor/ramp/platform beneath mouse
+	# Third-Person Shooter Sightline 3D raycast
+	var cam_forward := -camera.global_transform.basis.z
+	var ray_start := camera.global_position
+	var ray_end := ray_start + cam_forward * 80.0
+	if is_inside_tree():
 		var space_state := get_world_3d().direct_space_state
 		if space_state != null:
-			var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_origin + ray_normal * 120.0)
-			query.collision_mask = 1 # World geometry
+			var query := PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+			query.collision_mask = 1 | 4  # World geometry + Enemies
 			query.exclude = [get_rid()]
 			var res := space_state.intersect_ray(query)
 			if not res.is_empty():
-				var hit_normal: Vector3 = res["normal"]
-				var hit_pos: Vector3 = res["position"]
-				# If surface is floor or walkable slope (normal.y > 0.35)
-				if hit_normal.y > 0.35:
-					target_plane_y = hit_pos.y
-				else:
-					# 3. Anti-Wall Climbing Filter: ray hit vertical wall face.
-					# Trace straight down from hit point to find ground height in front of wall!
-					var down_query := PhysicsRayQueryParameters3D.create(hit_pos + Vector3(0, 0.5, 0), hit_pos + Vector3(0, -10.0, 0))
-					down_query.collision_mask = 1
-					var down_res := space_state.intersect_ray(down_query)
-					if not down_res.is_empty():
-						target_plane_y = down_res["position"].y
-					else:
-						target_plane_y = global_position.y
-
-	# High-Ground Aiming fallback for Level 27 overlooking Gate Room
-	if global_position.y >= 4.5 and ray_normal.y < -0.1 and target_plane_y >= 4.5:
-		var arena_plane := Plane(Vector3.UP, 0.0)
-		var arena_hit: Variant = arena_plane.intersects_ray(ray_origin, ray_normal)
-		if arena_hit != null:
-			var hit_pt: Vector3 = arena_hit
-			if hit_pt.z <= 8.5 and absf(hit_pt.x) <= 18.0:
-				target_plane_y = 0.0
-
-	# Smooth elevation interpolation
-	var dt := get_physics_process_delta_time()
-	current_locked_aim_y = move_toward(current_locked_aim_y, target_plane_y, 35.0 * dt)
-
-	var ground_plane := Plane(Vector3.UP, current_locked_aim_y)
-	var hit_variant: Variant = ground_plane.intersects_ray(ray_origin, ray_normal)
-	if hit_variant != null:
-		return hit_variant as Vector3
-
-	return ray_origin + ray_normal * 30.0
+				return res["position"] as Vector3
+	return ray_end
 
 
 func _process_aim() -> void:
@@ -1038,25 +965,10 @@ func _process_aim() -> void:
 		current_aim_target = locked_target_world_pos
 		return
 
-	var mouse_pos := get_viewport().get_mouse_position()
-	var hit := _calculate_auto_y_aim_target(mouse_pos)
+	var hit := _calculate_auto_y_aim_target()
 	current_aim_target = hit
 
-	if is_aiming_down_sights:
-		# 3D Weapon visual pitch alignment in ADS mode
-		if weapon_holder != null and hit != Vector3.ZERO:
-			var local_target := weapon_holder.to_local(hit)
-			var pitch_rad := -atan2(local_target.y, -local_target.z)
-			weapon_holder.rotation.x = clampf(pitch_rad, deg_to_rad(-45.0), deg_to_rad(45.0))
-		return
-
-	var look_dir: Vector3 = (hit - global_position)
-	look_dir.y = 0.0
-	# Deadzone: only rotate if mouse is at least 0.5m away from player center
-	if look_dir.length_squared() > 0.25:
-		rotation.y = atan2(-look_dir.x, -look_dir.z)
-
-	# 3D Weapon visual pitch alignment
+	# 3D Weapon visual pitch alignment towards aim target
 	if weapon_holder != null and hit != Vector3.ZERO:
 		var local_target := weapon_holder.to_local(hit)
 		var pitch_rad := -atan2(local_target.y, -local_target.z)
@@ -1084,10 +996,12 @@ func _process_combat() -> void:
 	is_firing = Input.is_action_pressed("fire") and not is_command_wheel_open
 	if is_firing:
 		var spread_mult: float = 1.0
-		if is_aiming_down_sights:
-			spread_mult *= 0.5  # Precision semi-scoped ADS zoom
-		if is_crouching:
-			spread_mult *= 0.5  # Crouching / bipod stabilization
+		if is_aiming_down_sights and is_crouching:
+			spread_mult = 0.01  # 99% pinpoint laser accuracy when crouched + ADS
+		elif is_aiming_down_sights:
+			spread_mult *= 0.35  # ADS tight precision
+		elif is_crouching:
+			spread_mult *= 0.40  # Crouched bipod stabilization
 		elif velocity.length() > 2.0:
 			spread_mult *= 1.8  # Running penalty
 

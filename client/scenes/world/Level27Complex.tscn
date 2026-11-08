@@ -388,10 +388,22 @@ use_collision = true
 size = Vector3(8, 4, 0.8)
 material = SubResource("Mat_Wall27")
 
-[node name="CorridorWallSouth" type="CSGBox3D" parent="UpperCorridor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 7.5, 19.4)
+[node name="CorridorWallSouthWest" type="CSGBox3D" parent="UpperCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 7.5, 19.4)
 use_collision = true
-size = Vector3(8, 4, 0.8)
+size = Vector3(2, 4, 0.8)
+material = SubResource("Mat_Wall27")
+
+[node name="CorridorWallSouthEast" type="CSGBox3D" parent="UpperCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 7.5, 19.4)
+use_collision = true
+size = Vector3(2, 4, 0.8)
+material = SubResource("Mat_Wall27")
+
+[node name="CorridorWallSouthHeader" type="CSGBox3D" parent="UpperCorridor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 8.7, 19.4)
+use_collision = true
+size = Vector3(4, 1.6, 0.8)
 material = SubResource("Mat_Wall27")
 
 [node name="CorridorLight" type="OmniLight3D" parent="UpperCorridor"]
@@ -446,7 +458,7 @@ material = SubResource("Mat_Wall27")
 
 [node name="LobbyDoorFrame" type="CSGBox3D" parent="UpperElevatorLobby"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37, 7.5, 18)
-use_collision = true
+use_collision = false
 size = Vector3(0.6, 3.4, 4)
 material = SubResource("Mat_WhiteTrim")
 
@@ -627,4 +639,259 @@ material = SubResource("Mat_Floor27")
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.6, 2.25, 0)
 use_collision = true
 size = Vector3(1.2, 0.2, 0.45)
+material = SubResource("Mat_Floor27")
+[node name="EastServiceStaircase" type="Node3D" parent="."]
+
+[node name="EastServiceStairRamp" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 0.824126, -0.566406, 0, 0.566406, 0.824126, 23, 2.75, 23)
+use_collision = true
+size = Vector3(2.4, 0.4, 10.2)
+material = SubResource("Mat_Floor27")
+
+[node name="HandrailWest" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 0.824126, -0.566406, 0, 0.566406, 0.824126, 21.8, 3.65, 23)
+use_collision = true
+size = Vector3(0.08, 0.9, 10.2)
+material = SubResource("Mat_WhiteTrim")
+
+[node name="HandrailEast" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 0.824126, -0.566406, 0, 0.566406, 0.824126, 24.2, 3.65, 23)
+use_collision = true
+size = Vector3(0.08, 0.9, 10.2)
+material = SubResource("Mat_WhiteTrim")
+
+[node name="StairLandingL28" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, -0.1, 27.5)
+use_collision = true
+size = Vector3(2.4, 0.2, 1)
+material = SubResource("Mat_Floor27")
+
+[node name="StairLight" type="OmniLight3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 5, 23)
+light_color = Color(0.96, 0.94, 0.88, 1)
+light_energy = 2
+omni_range = 14
+
+[node name="SignStairsL28" type="Label3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 2.5, 27.2)
+text = "EAST SERVICE STAIRCASE - TO LEVEL 27"
+font_size = 18
+outline_size = 4
+modulate = Color(0.9, 0.95, 1, 1)
+
+[node name="SignStairsL27" type="Label3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 8, 19.8)
+text = "EAST SERVICE STAIRCASE - TO LEVEL 28"
+font_size = 18
+outline_size = 4
+modulate = Color(0.9, 0.95, 1, 1)
+
+[node name="ServiceStep01" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0.079, 26.886)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep02" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0.236, 26.657)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep03" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0.393, 26.429)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep04" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0.550, 26.200)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep05" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0.707, 25.971)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep06" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0.864, 25.743)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep07" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.021, 25.514)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep08" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.179, 25.286)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep09" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.336, 25.057)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep10" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.493, 24.829)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep11" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.650, 24.600)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep12" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.807, 24.371)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep13" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.964, 24.143)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep14" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 2.121, 23.914)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep15" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 2.279, 23.686)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep16" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 2.436, 23.457)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep17" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 2.593, 23.229)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep18" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 2.750, 23.000)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep19" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 2.907, 22.771)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep20" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.064, 22.543)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep21" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.221, 22.314)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep22" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.379, 22.086)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep23" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.536, 21.857)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep24" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.693, 21.629)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep25" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 3.850, 21.400)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep26" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.007, 21.171)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep27" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.164, 20.943)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep28" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.321, 20.714)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep29" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.479, 20.486)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep30" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.636, 20.257)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep31" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.793, 20.029)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep32" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.950, 19.800)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep33" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 5.107, 19.571)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep34" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 5.264, 19.343)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
+material = SubResource("Mat_Floor27")
+
+[node name="ServiceStep35" type="CSGBox3D" parent="EastServiceStaircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 5.421, 19.114)
+use_collision = true
+size = Vector3(2.2, 0.16, 0.24)
 material = SubResource("Mat_Floor27")

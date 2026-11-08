@@ -50,6 +50,8 @@ func initialize(p_origin: Vector3, p_direction: Vector3, p_shooter: Node, p_is_e
 
 
 func _play_fire_sound() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists("res://audio/sfx_staff_fire.wav"):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load("res://audio/sfx_staff_fire.wav")

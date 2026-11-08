@@ -33,6 +33,14 @@ func interact(_player: Node = null) -> void:
 		print("SGCElevatorCallPedestal: Elevator reference not found!")
 		return
 
+	# Responsive feedback flash on pedestal light
+	if pedestal_light != null:
+		var orig_energy := pedestal_light.light_energy
+		pedestal_light.light_energy = 3.0
+		var tw := create_tween()
+		if tw != null:
+			tw.tween_property(pedestal_light, "light_energy", orig_energy, 0.3)
+
 	if is_cabin_panel:
 		print("SGCElevatorCallPedestal: Cabin dispatch panel pressed by %s." % (_player.name if _player != null else "operative"))
 		elev.toggle_elevator()

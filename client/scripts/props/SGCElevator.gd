@@ -24,6 +24,7 @@ const DOOR_OPEN_RIGHT_X: float = 2.4
 @export var current_floor: int = 28
 var state: ElevatorState = ElevatorState.AT_28
 var is_moving: bool = false
+var is_doors_open: bool = false
 var riders: Array[CharacterBody3D] = []
 
 @onready var cabin: AnimatableBody3D = $Cabin if has_node("Cabin") else null
@@ -53,6 +54,7 @@ func _ready() -> void:
 		ride_area.body_exited.connect(_on_ride_area_exited)
 
 	_update_floor_indicator(current_floor)
+	_set_pedestal_lights_status(Color(0.2, 0.9, 0.3))
 	if cabin != null:
 		cabin.position.y = get_floor_y(current_floor)
 
@@ -170,7 +172,7 @@ func _handle_interaction(player: Node = null) -> void:
 
 func toggle_elevator() -> void:
 	var target_floor: int = 27 if current_floor == 28 else 28
-	call_elevator(target_floor)
+	_dispatch_elevator(target_floor)
 
 
 func get_floor_y(fl: int) -> float:
@@ -185,14 +187,29 @@ func get_floor_y(fl: int) -> float:
 func call_elevator(target_floor: int) -> void:
 	if is_moving:
 		return
-	if target_floor == current_floor and not is_moving:
-		_open_doors()
+
+	# If the elevator is already on that floor:
+	if target_floor == current_floor:
+		if is_doors_open:
+			# If doors are open, pressing call dispatches to the other floor (e.g. 28 -> 27 or 27 -> 28)
+			var other_floor: int = 27 if current_floor == 28 else 28
+			_dispatch_elevator(other_floor)
+		else:
+			# If doors are closed, open the doors
+			_open_doors()
 		return
 
+	# If on the other floor, call the elevator to target_floor
+	_dispatch_elevator(target_floor)
+
+
+func _dispatch_elevator(destination_floor: int) -> void:
+	if is_moving:
+		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
-		rpc_id(1, "server_request_elevator", target_floor)
+		rpc_id(1, "server_request_elevator", destination_floor)
 	else:
-		sync_move_elevator(target_floor)
+		sync_move_elevator(destination_floor)
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -250,6 +267,7 @@ func _animate_cabin_transit(target_floor: int) -> void:
 
 
 func _close_doors(on_closed: Callable) -> void:
+	is_doors_open = false
 	var tween: Tween = create_tween()
 	if door_left != null and door_right != null:
 		tween.tween_property(door_left, "position:x", DOOR_CLOSED_LEFT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
@@ -258,6 +276,7 @@ func _close_doors(on_closed: Callable) -> void:
 
 
 func _open_doors() -> void:
+	is_doors_open = true
 	var tween: Tween = create_tween()
 	if door_left != null and door_right != null:
 		tween.tween_property(door_left, "position:x", DOOR_OPEN_LEFT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)

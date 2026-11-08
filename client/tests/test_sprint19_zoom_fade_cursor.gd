@@ -44,26 +44,26 @@ func _process(_delta: float) -> bool:
 	ticks += 1
 
 	if ticks == 2:
-		# TEST 1: Cursor Confinement Modes (Isometric vs ADS vs Modal)
-		print("[TEST 1/5] Verifying Windowed Mode Cursor Confinement...")
+		# TEST 1: Unified Third-Person Shooter Cursor Capture Modes
+		print("[TEST 1/5] Verifying Unified TPS Mouse Cursor Capture...")
 		player.is_aiming_down_sights = false
 		player._update_mouse_mode()
-		assert(player.current_mouse_mode == Input.MOUSE_MODE_CONFINED_HIDDEN,
-			"Isometric mode must confine and hide system cursor (got %d)" % player.current_mouse_mode)
-		print("  Isometric cursor mode: CONFINED_HIDDEN (Confirmed)")
+		assert(player.current_mouse_mode == Input.MOUSE_MODE_CAPTURED,
+			"TPS mode must capture mouse for Wildlands pitch/yaw (got %d)" % player.current_mouse_mode)
+		print("  TPS default cursor mode: CAPTURED (Confirmed)")
 
 		# Switch to ADS
 		player.is_aiming_down_sights = true
 		player._update_mouse_mode()
 		assert(player.current_mouse_mode == Input.MOUSE_MODE_CAPTURED,
-			"ADS mode must capture mouse for Wildlands pitch/yaw (got %d)" % player.current_mouse_mode)
+			"ADS mode must maintain CAPTURED mouse (got %d)" % player.current_mouse_mode)
 		print("  ADS cursor mode: CAPTURED (Confirmed)")
 
 		# Release ADS
 		player.is_aiming_down_sights = false
 		player._update_mouse_mode()
-		assert(player.current_mouse_mode == Input.MOUSE_MODE_CONFINED_HIDDEN,
-			"Releasing ADS must restore CONFINED_HIDDEN (got %d)" % player.current_mouse_mode)
+		assert(player.current_mouse_mode == Input.MOUSE_MODE_CAPTURED,
+			"Releasing ADS must maintain CAPTURED mouse (got %d)" % player.current_mouse_mode)
 
 		# Open Pause Menu
 		if hud != null and hud.pause_menu != null:
@@ -73,9 +73,9 @@ func _process(_delta: float) -> bool:
 				"Pause menu or modal must free mouse to VISIBLE (got %d)" % player.current_mouse_mode)
 			hud.pause_menu.visible = false
 			player._update_mouse_mode()
-			assert(player.current_mouse_mode == Input.MOUSE_MODE_CONFINED_HIDDEN,
-				"Closing Pause menu must restore CONFINED_HIDDEN (got %d)" % player.current_mouse_mode)
-		print("[TEST 1/5] PASS: Cursor properly confined in isometric, captured in ADS, and freed in modals.")
+			assert(player.current_mouse_mode == Input.MOUSE_MODE_CAPTURED,
+				"Closing Pause menu must restore CAPTURED (got %d)" % player.current_mouse_mode)
+		print("[TEST 1/5] PASS: Cursor properly captured in gameplay and freed in modals.")
 
 	elif ticks == 4:
 		# TEST 2: Focus Loss and Regain
@@ -89,8 +89,8 @@ func _process(_delta: float) -> bool:
 		# Simulate regaining focus
 		player.notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 		assert(player.is_window_focused == true, "Focus in must mark is_window_focused true")
-		assert(player.current_mouse_mode == Input.MOUSE_MODE_CONFINED_HIDDEN,
-			"Focus in must restore CONFINED_HIDDEN (got %d)" % player.current_mouse_mode)
+		assert(player.current_mouse_mode == Input.MOUSE_MODE_CAPTURED,
+			"Focus in must restore CAPTURED (got %d)" % player.current_mouse_mode)
 
 		# Simulate click inside window after losing focus
 		player.is_window_focused = false
@@ -101,29 +101,51 @@ func _process(_delta: float) -> bool:
 		mb_click.pressed = true
 		player.is_window_focused = true
 		player._unhandled_input(mb_click)
-		assert(player.current_mouse_mode == Input.MOUSE_MODE_CONFINED_HIDDEN,
-			"Left-clicking back into game must restore CONFINED_HIDDEN (got %d)" % player.current_mouse_mode)
-		print("[TEST 2/5] PASS: Focus loss releases cursor; focus gain or clicking window re-confines cursor.")
+		assert(player.current_mouse_mode == Input.MOUSE_MODE_CAPTURED,
+			"Left-clicking back into game must restore CAPTURED (got %d)" % player.current_mouse_mode)
+		print("[TEST 2/5] PASS: Focus loss releases cursor; focus gain or clicking window captures cursor.")
 
 	elif ticks == 6:
-		# TEST 3: Mouse Wheel Zoom in ADS
-		print("[TEST 3/5] Testing ADS Mouse Scroll Zoom (Near-FPS <-> Wide Shoulder Pan)...")
-		player.is_aiming_down_sights = true
-		player.ads_zoom_distance = 1.65
+		# TEST 3: Mouse Wheel Zoom in TPS and ADS
+		print("[TEST 3/5] Testing TPS & ADS Mouse Scroll Zoom (Seamless Dynamic Distance)...")
+		player.is_aiming_down_sights = false
+		player.tps_zoom_distance = 4.2
 
-		# Scroll UP 10 times to zoom in to near-FPS view
-		for i in range(10):
+		# Scroll UP in TPS default view to zoom in to close shoulder
+		for i in range(15):
 			var wheel_up := InputEventMouseButton.new()
 			wheel_up.button_index = MOUSE_BUTTON_WHEEL_UP
 			wheel_up.pressed = true
 			player._unhandled_input(wheel_up)
 
-		assert(absf(player.ads_zoom_distance - PlayerController3D.ADS_MIN_ZOOM) < 0.001,
-			"Zooming in must clamp at ADS_MIN_ZOOM (0.35m, got %.2f)" % player.ads_zoom_distance)
-		print("  Near-FPS minimum zoom distance: %.2fm (Confirmed)" % player.ads_zoom_distance)
+		assert(absf(player.tps_zoom_distance - PlayerController3D.TPS_MIN_ZOOM) < 0.001,
+			"Zooming in must clamp at TPS_MIN_ZOOM (1.2m, got %.2f)" % player.tps_zoom_distance)
+		print("  TPS minimum zoom distance: %.2fm (Confirmed)" % player.tps_zoom_distance)
 
-		# Update camera to verify Near-FPS FOV and X offset
+		# Scroll DOWN to zoom out to wide third-person tactical pan
+		for i in range(25):
+			var wheel_down := InputEventMouseButton.new()
+			wheel_down.button_index = MOUSE_BUTTON_WHEEL_DOWN
+			wheel_down.pressed = true
+			player._unhandled_input(wheel_down)
+
+		assert(absf(player.tps_zoom_distance - PlayerController3D.TPS_MAX_ZOOM) < 0.001,
+			"Zooming out must clamp at TPS_MAX_ZOOM (6.5m, got %.2f)" % player.tps_zoom_distance)
+		print("  TPS maximum zoom distance: %.2fm (Confirmed)" % player.tps_zoom_distance)
+
+		# Now test Right-Click ADS Extra Zoom
+		player.is_aiming_down_sights = true
 		player.ads_blend = 1.0
+		for i in range(15):
+			var wheel_up_ads := InputEventMouseButton.new()
+			wheel_up_ads.button_index = MOUSE_BUTTON_WHEEL_UP
+			wheel_up_ads.pressed = true
+			player._unhandled_input(wheel_up_ads)
+
+		assert(absf(player.ads_zoom_distance - PlayerController3D.ADS_MIN_ZOOM) < 0.001,
+			"ADS zoom in must clamp at ADS_MIN_ZOOM (0.35m, got %.2f)" % player.ads_zoom_distance)
+		print("  Near-FPS ADS zoom distance: %.2fm (Confirmed)" % player.ads_zoom_distance)
+
 		player._update_camera_and_occlusion(0.016)
 		assert(player.camera != null, "Player camera must exist")
 		assert(absf(player.camera.fov - 44.0) < 1.0,
@@ -131,24 +153,7 @@ func _process(_delta: float) -> bool:
 		assert(player.camera.position.x < 0.35,
 			"Near-FPS sightline X offset should align closer to eye center (got %.2f)" % player.camera.position.x)
 		print("  Near-FPS FOV: %.1f deg, Camera X: %.2fm (Confirmed)" % [player.camera.fov, player.camera.position.x])
-
-		# Scroll DOWN 20 times to zoom out to wide tactical shoulder pan
-		for i in range(20):
-			var wheel_down := InputEventMouseButton.new()
-			wheel_down.button_index = MOUSE_BUTTON_WHEEL_DOWN
-			wheel_down.pressed = true
-			player._unhandled_input(wheel_down)
-
-		assert(absf(player.ads_zoom_distance - PlayerController3D.ADS_MAX_ZOOM) < 0.001,
-			"Zooming out must clamp at ADS_MAX_ZOOM (2.60m, got %.2f)" % player.ads_zoom_distance)
-		print("  Wide shoulder maximum zoom distance: %.2fm (Confirmed)" % player.ads_zoom_distance)
-
-		player._update_camera_and_occlusion(0.016)
-		assert(absf(player.camera.fov - 54.0) < 1.0,
-			"Wide shoulder FOV should expand to ~54.0 deg (got %.2f)" % player.camera.fov)
-		assert(player.camera.position.x >= 0.50,
-			"Wide shoulder X offset should be ~0.55m (got %.2f)" % player.camera.position.x)
-		print("[TEST 3/5] PASS: ADS mouse scroll zoom smoothly navigates and clamps between 0.35m and 2.60m.")
+		print("[TEST 3/5] PASS: Seamless mouse scroll zoom smoothly navigates TPS and ADS ranges.")
 
 	elif ticks == 8:
 		# TEST 4: Proximity Transparency on Player Model ($Visuals)
@@ -175,8 +180,10 @@ func _process(_delta: float) -> bool:
 		assert(body_mat.albedo_color.a <= 0.20,
 			"BodyMesh alpha must be <= 0.20 (got %.2f)" % body_mat.albedo_color.a)
 
-		# Zoom back out to 2.0m: model should return to full opacity (1.0)
-		player.ads_zoom_distance = 2.0
+		# Zoom back out to 4.2m in TPS mode: model should return to full opacity (1.0)
+		player.is_aiming_down_sights = false
+		player.ads_blend = 0.0
+		player.tps_zoom_distance = 4.2
 		for step in range(5):
 			player._update_proximity_fade(1.0)
 
