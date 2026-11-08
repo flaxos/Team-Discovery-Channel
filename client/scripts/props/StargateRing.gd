@@ -11,6 +11,12 @@ signal wormhole_closed()
 signal player_extracted(player: Node)
 
 enum GateState { INACTIVE, DIALING, KAWOOSH, ACTIVE }
+enum GateDirection { NONE, INBOUND, OUTBOUND }
+
+var direction: GateDirection = GateDirection.NONE
+var extraction_authorized: bool = false
+var activation_id: int = 0
+var kawoosh_tween: Tween = null
 
 @export var max_chevrons: int = 7
 @export var kawoosh_reach_m: float = 4.5
@@ -37,31 +43,104 @@ func _ready() -> void:
 		kawoosh_mesh.visible = false
 	if event_horizon_mesh != null:
 		event_horizon_mesh.visible = false
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_gate_snapshot.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_gate_snapshot() -> void:
+	if multiplayer.is_server():
+		sync_gate_snapshot.rpc_id(multiplayer.get_remote_sender_id(), current_state, direction, locked_chevrons_count, extraction_authorized)
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_gate_snapshot(state: int, connection: int, chevrons: int, authorized: bool) -> void:
+	activation_id += 1
+	current_state = state as GateState
+	direction = connection as GateDirection
+	locked_chevrons_count = chevrons
+	extraction_authorized = authorized
+	if event_horizon_mesh != null:
+		event_horizon_mesh.visible = current_state in [GateState.KAWOOSH, GateState.ACTIVE]
+	if gate_light != null:
+		gate_light.light_energy = 2.5 if current_state == GateState.ACTIVE else 0.0
 
 
 func _on_extraction_entered(body: Node) -> void:
-	if current_state == GateState.ACTIVE and body is PlayerController3D:
+	if multiplayer.is_server() and current_state == GateState.ACTIVE and direction == GateDirection.OUTBOUND and extraction_authorized and body is PlayerController3D:
 		print("Stargate: Operative %s stepped into active event horizon! Extraction sequence initiated!" % body.name)
 		player_extracted.emit(body)
 
 
+func reserve_connection(incoming: bool) -> bool:
+	if not multiplayer.is_server() or current_state != GateState.INACTIVE or direction != GateDirection.NONE:
+		return false
+	var connection: int = GateDirection.INBOUND if incoming else GateDirection.OUTBOUND
+	if multiplayer.has_multiplayer_peer():
+		sync_reserve_connection.rpc(connection)
+	else:
+		sync_reserve_connection(connection)
+	return true
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_reserve_connection(connection: int) -> void:
+	activation_id += 1
+	direction = connection as GateDirection
+	extraction_authorized = false
+	locked_chevrons_count = 0
+	current_state = GateState.DIALING
+
+
+func authorize_extraction() -> void:
+	if not multiplayer.is_server() or direction != GateDirection.OUTBOUND:
+		return
+	if multiplayer.has_multiplayer_peer():
+		sync_authorize_extraction.rpc()
+	else:
+		sync_authorize_extraction()
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_authorize_extraction() -> void:
+	extraction_authorized = direction == GateDirection.OUTBOUND
+
+
 ## Locks an individual chevron in sequence (1 through 7)
 func lock_chevron(chevron_idx: int) -> void:
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() or chevron_idx < 1 or chevron_idx > max_chevrons:
 		return
-	rpc("sync_lock_chevron", chevron_idx)
+	if direction == GateDirection.NONE and not reserve_connection(false):
+		return
+	if current_state != GateState.DIALING:
+		return
+	if multiplayer.has_multiplayer_peer():
+		sync_lock_chevron.rpc(chevron_idx)
+	else:
+		sync_lock_chevron(chevron_idx)
 
 
 ## Resets all chevrons on dialing sequence failure
 func reset_chevrons() -> void:
 	if not multiplayer.is_server():
 		return
-	rpc("sync_close_wormhole")
+	if multiplayer.has_multiplayer_peer():
+		sync_reset_chevrons.rpc()
+	else:
+		sync_reset_chevrons()
 
 
-@rpc("call_local", "reliable")
+@rpc("authority", "call_local", "reliable")
+func sync_reset_chevrons() -> void:
+	locked_chevrons_count = 0
+	_reset_chevron_visuals()
+
+
+@rpc("authority", "call_local", "reliable")
 func sync_lock_chevron(chevron_idx: int) -> void:
-	locked_chevrons_count = maxi(locked_chevrons_count, chevron_idx)
+	if current_state != GateState.DIALING or chevron_idx != locked_chevrons_count + 1:
+		return
+	locked_chevrons_count = chevron_idx
 	current_state = GateState.DIALING
 
 	# Light up corresponding chevron visual
@@ -95,10 +174,13 @@ func sync_lock_chevron(chevron_idx: int) -> void:
 func trigger_kawoosh() -> void:
 	if not multiplayer.is_server():
 		return
-	rpc("sync_trigger_kawoosh")
+	if multiplayer.has_multiplayer_peer():
+		sync_trigger_kawoosh.rpc()
+	else:
+		sync_trigger_kawoosh()
 
 
-@rpc("call_local", "reliable")
+@rpc("authority", "call_local", "reliable")
 func sync_trigger_kawoosh() -> void:
 	current_state = GateState.KAWOOSH
 	kawoosh_erupted.emit()
@@ -125,26 +207,51 @@ func sync_trigger_kawoosh() -> void:
 	if kawoosh_mesh != null:
 		kawoosh_mesh.visible = true
 		kawoosh_mesh.scale = Vector3(0.1, 0.1, 0.1)
-		var tween := create_tween()
-		# Erupt forward
-		tween.tween_property(kawoosh_mesh, "scale", Vector3(1.0, 1.0, 1.0), kawoosh_duration_s * 0.45)
-		# Retract back into stable vertical puddle
-		tween.tween_property(kawoosh_mesh, "scale", Vector3(0.01, 0.01, 0.01), kawoosh_duration_s * 0.55)
-		tween.tween_callback(func() -> void:
-			if kawoosh_mesh != null:
-				kawoosh_mesh.visible = false
-			if kawoosh_area != null:
-				kawoosh_area.monitoring = false
-			_stabilize_wormhole()
-		)
+	kawoosh_tween = create_tween()
+	if kawoosh_mesh != null:
+		kawoosh_tween.tween_property(kawoosh_mesh, "scale", Vector3.ONE, kawoosh_duration_s * 0.45)
+		kawoosh_tween.tween_property(kawoosh_mesh, "scale", Vector3.ONE * 0.01, kawoosh_duration_s * 0.55)
+	else:
+		kawoosh_tween.tween_interval(kawoosh_duration_s)
+	kawoosh_tween.tween_callback(_finish_kawoosh.bind(activation_id))
+
+
+func _finish_kawoosh(token: int) -> void:
+	if token != activation_id or current_state != GateState.KAWOOSH:
+		return
+	if kawoosh_mesh != null:
+		kawoosh_mesh.visible = false
+	if kawoosh_area != null:
+		kawoosh_area.set_deferred("monitoring", false)
+	_stabilize_wormhole()
 
 
 func _stabilize_wormhole() -> void:
+	if current_state != GateState.KAWOOSH:
+		return
+	if event_horizon_mesh != null:
+		event_horizon_mesh.visible = true
 	current_state = GateState.ACTIVE
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		sync_stabilized.rpc()
 	wormhole_opened.emit()
 	print("Stargate: Wormhole stabilized! Extraction aperture open.")
 	if gate_light != null:
 		gate_light.light_energy = 2.5
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_stabilized() -> void:
+	if current_state not in [GateState.DIALING, GateState.KAWOOSH]:
+		return
+	current_state = GateState.ACTIVE
+	if event_horizon_mesh != null:
+		event_horizon_mesh.visible = true
+	if kawoosh_mesh != null:
+		kawoosh_mesh.hide()
+	if kawoosh_area != null:
+		kawoosh_area.set_deferred("monitoring", false)
+	wormhole_opened.emit()
 
 
 func _on_kawoosh_hit_body(body: Node) -> void:
@@ -162,11 +269,23 @@ func _on_kawoosh_hit_body(body: Node) -> void:
 func close_wormhole() -> void:
 	if not multiplayer.is_server():
 		return
-	rpc("sync_close_wormhole")
+	if multiplayer.has_multiplayer_peer():
+		sync_close_wormhole.rpc()
+	else:
+		sync_close_wormhole()
 
 
-@rpc("call_local", "reliable")
+@rpc("authority", "call_local", "reliable")
 func sync_close_wormhole() -> void:
+	activation_id += 1
+	if kawoosh_tween != null and kawoosh_tween.is_valid():
+		kawoosh_tween.kill()
+	direction = GateDirection.NONE
+	extraction_authorized = false
+	if kawoosh_mesh != null:
+		kawoosh_mesh.visible = false
+	if kawoosh_area != null:
+		kawoosh_area.set_deferred("monitoring", false)
 	current_state = GateState.INACTIVE
 	locked_chevrons_count = 0
 	if event_horizon_mesh != null:
@@ -174,18 +293,22 @@ func sync_close_wormhole() -> void:
 	if gate_light != null:
 		gate_light.light_energy = 0.0
 
-	# Reset chevron materials
-	if chevron_container != null:
-		for child in chevron_container.get_children():
-			var chev := child as GeometryInstance3D
-			if chev != null:
-				chev.material_override = null
-
+	_reset_chevron_visuals()
 	wormhole_closed.emit()
 	print("Stargate: Wormhole collapsed. Gate disengaged.")
 
 
+func _reset_chevron_visuals() -> void:
+	if chevron_container != null:
+		for child: Node in chevron_container.get_children():
+			var chev := child as GeometryInstance3D
+			if chev != null:
+				chev.material_override = null
+
+
 func _play_sfx(path: String, max_dist: float) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists(path):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load(path)

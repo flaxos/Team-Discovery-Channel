@@ -4,7 +4,7 @@ extends SceneTree
 ##  1. Control Room & Briefing Room direct alignment facing Stargate along Z-axis.
 ##  2. Elevated High-Ground downward weapon raycast & ballistic penetration through glass.
 ##  3. Jaffa AI upward staff weapon counter-fire through observation glass into Briefing Room.
-##  4. Floor-Aware dynamic camera height transition (L28: 12.0m <-> L27: 17.5m).
+##  4. TPS camera rig follows the operative between floors.
 ##  5. Jaffa AI multi-level pathfinding to spiral staircase and ascent to Level 27.
 
 const GATE_ROOM_SCENE: String = "res://scenes/main/GateRoom.tscn"
@@ -18,6 +18,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 8 MULTI-FLOOR COMBAT TEST         ")
 	print("========================================================")
@@ -128,24 +131,22 @@ func _process(delta: float) -> bool:
 		print("[TEST 4/5] Testing Floor-Aware Dynamic Camera Elevation Controller...")
 		assert(player.camera != null, "Player camera must exist")
 
-		# Operative on Level 28 (Floor Y=0.0)
-		player.global_position = Vector3(0.0, 0.0, 0.0)
-		player.camera.position.y = 12.0
-		player._update_camera_and_occlusion(0.1)
-		assert(is_equal_approx(player.camera.position.y, 12.0), "Camera height on Sublevel 28 must target 12.0m (got %.2f)" % player.camera.position.y)
-
-		# Operative ascends to Level 27 (Floor Y=5.5)
-		player.global_position = Vector3(0.0, 5.5, 15.0)
-		for step in range(30):
-			player._update_camera_and_occlusion(0.05)
-		assert(player.camera.position.y > 17.0, "Camera height on Sublevel 27 must lerp up toward 17.5m (got %.2f)" % player.camera.position.y)
-
-		# Operative descends back to Level 28
-		player.global_position = Vector3(0.0, 0.0, 0.0)
-		for step in range(30):
-			player._update_camera_and_occlusion(0.05)
-		assert(player.camera.position.y < 13.0, "Camera height returning to Sublevel 28 must lerp down toward 12.0m (got %.2f)" % player.camera.position.y)
-		print("[TEST 4/5] PASS: Floor-Aware dynamic camera elevation transitions verified (12.0m <-> 17.5m).")
+		# The current TPS rig follows world elevation with a stable shoulder offset.
+		player.global_position = Vector3(0, 0, 0)
+		for _step: int in range(60):
+			player._update_camera_and_occlusion(1.0 / 60.0)
+		var shoulder_y: float = player.camera.position.y
+		assert(player.camera_rig.global_position.distance_to(player.global_position) < 0.01)
+		player.global_position = Vector3(0, 5.5, 15)
+		for _step: int in range(60):
+			player._update_camera_and_occlusion(1.0 / 60.0)
+		assert(player.camera_rig.global_position.distance_to(player.global_position) < 0.01, "TPS rig must reach the upper floor")
+		assert(is_equal_approx(player.camera.position.y, shoulder_y), "Shoulder offset stays relative to the operative on each floor")
+		player.global_position = Vector3.ZERO
+		for _step: int in range(60):
+			player._update_camera_and_occlusion(1.0 / 60.0)
+		assert(player.camera_rig.global_position.distance_to(player.global_position) < 0.01, "TPS rig must return to the lower floor")
+		print("[TEST 4/5] PASS: TPS floor following and stable shoulder offset.")
 
 	elif ticks == 10:
 		# TEST 5: Jaffa AI Multi-Level Pathfinding & Staircase Flanking
@@ -173,10 +174,10 @@ func _process(delta: float) -> bool:
 		print("  ✓ Direct Front Stargate Alignment (L28 & L27 Windows) ")
 		print("  ✓ Downward High-Ground Ballistic Penetration Shooting ")
 		print("  ✓ Upward Staff Weapon Plasma Fire & LOS Verification  ")
-		print("  ✓ Floor-Aware Dynamic Camera Elevation (12m <-> 17.5m)")
+		print("  ✓ TPS Camera Rig Follows Between Floors")
 		print("  ✓ Jaffa AI Spiral Staircase Flanking & Ascent         ")
 		print("========================================================\n")
-		quit(0)
-		return true
+		preload("res://tests/support/finish.gd").success(self)
+		return false
 
 	return false

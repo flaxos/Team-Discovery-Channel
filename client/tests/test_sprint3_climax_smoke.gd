@@ -21,6 +21,9 @@ var test_passed: bool = false
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 3 CLIMAX & MULTI-SECTOR SMOKE TEST")
 	print("========================================================")
@@ -99,6 +102,8 @@ func _process(delta: float) -> bool:
 		print("[TEST 3/5] Testing Low-Health Red Vignette & Trauma Screenshake...")
 		assert(hud.damage_vignette != null, "TacticalHUD must contain DamageVignette overlay")
 
+		player.health_component.current_health = player.health_component.max_health
+		hud.flash_alpha = 0.0
 		# At 100% health, vignette must be invisible (modulate.a = 0)
 		hud._update_damage_vignette(0.016)
 		assert(hud.damage_vignette.modulate.a <= 0.01, "Damage vignette must be transparent at full health")
@@ -127,39 +132,24 @@ func _process(delta: float) -> bool:
 	elif step == 3 and ticks == 15:
 		print("[TEST 4/5] Testing Multi-Sector Wave Escalation & Flank Assault...")
 
-		# Fast-track wave defense:
+		# Component fixture: establish and close each gate before recording the clear.
+		# Natural timing/health-kill progression is covered by test_gate_three_wave_extraction.
+		wave_mgr.set_physics_process(false)
 		wave_mgr.start_wave_defense()
-		assert(wave_mgr.current_wave == 1, "WaveManager must start at Wave 1")
-		assert(wave_mgr.enemies_alive == 4, "Wave 1 must field 4 Jaffa Guards (Found: %d)" % wave_mgr.enemies_alive)
-		assert(hud.objective_label.text == "FOOTHOLD IN PROGRESS - REPEL STARGATE RAMP INVASION!", "Wave 1 HUD objective must match Ramp Assault banner")
-
-		# Simulate clearing Wave 1
-		wave_mgr.enemies_alive = 0
-		wave_mgr._on_jaffa_killed(player, null)
-
-		# Progress to Wave 2
-		wave_mgr.start_next_wave()
-		assert(wave_mgr.current_wave == 2, "WaveManager must advance to Wave 2")
-		assert(wave_mgr.enemies_alive == 6, "Wave 2 must field 6 hostiles (Found: %d)" % wave_mgr.enemies_alive)
-		assert(hud.objective_label.text == "FLANKING ASSAULT DETECTED - WATCH TRANSPORT RINGS!", "Wave 2 HUD objective must match Rings Flank banner")
-
-		# Simulate clearing Wave 2
-		wave_mgr.enemies_alive = 0
-		wave_mgr._on_jaffa_killed(player, null)
-
-		# Progress to Wave 3 (Overwhelming Assault with Shock Guards)
-		wave_mgr.start_next_wave()
-		assert(wave_mgr.current_wave == 3, "WaveManager must advance to Wave 3")
-		assert(wave_mgr.enemies_alive == 8, "Wave 3 must field 8 heavy hostiles (Found: %d)" % wave_mgr.enemies_alive)
-		assert(hud.objective_label.text == "⚠️ OVERWHELMING ASSAULT! FALL BACK BEHIND BLAST DOORS & SEAL CHOKE POINT!", "Wave 3 HUD objective must match Choke Point Fallback banner")
-
-		# Simulate clearing Wave 3
-		wave_mgr.enemies_alive = 0
-		wave_mgr._on_jaffa_killed(player, null)
-
-		assert(hud.objective_label.text == "ALL WAVES CLEARED! SGC LEVEL 28 SECURED! DIAL DHD & OPEN IRIS FOR EXTRACTION!", "Victory banner must instruct squad to dial DHD and open iris")
-
-		print("[TEST 4/5] PASS: Multi-Sector Waves (Ramp -> Rings Flank -> Choke Point Fallback -> Secured) verified!")
+		for number: int in range(1, 4):
+			if number > 1:
+				wave_mgr.start_next_wave()
+			assert(wave_mgr.current_wave == number, "Wave number must advance only after prior clear")
+			var gate: StargateRing = gateroom.stargate_mesh
+			gate.sync_trigger_kawoosh()
+			gate._finish_kawoosh(gate.activation_id)
+			wave_mgr.incursion_established = true
+			wave_mgr.is_wormhole_open = true
+			wave_mgr.enemies_alive = 0
+			wave_mgr._collapse_inbound_wormhole()
+			assert(wave_mgr.completed_incursions == number, "Each closed, cleared fixture increments progression")
+		assert(wave_mgr.requirements_met(), "Three completed Easy incursions must qualify for outbound")
+		print("[TEST 4/5] PASS: Three-wave lifecycle progression and eligibility verified.")
 		step = 4
 
 	# STEP 4: End-to-End Extraction Climax (DHD Chords -> GDO Iris -> Wormhole Extraction)
@@ -210,6 +200,8 @@ func _process(delta: float) -> bool:
 		print("  ✓ Stargate Event Horizon Squad Extraction Victory     ")
 		print("========================================================\n")
 		test_passed = true
+		wave_mgr.end_mission()
+		gateroom.queue_free()
 		quit(0)
 		return true
 

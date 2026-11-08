@@ -19,6 +19,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 10 UAT CONTROLS & LAYOUT TEST     ")
 	print("========================================================")
@@ -70,7 +73,7 @@ func _process(delta: float) -> bool:
 		player._update_camera_and_occlusion(0.1)
 		var l27_complex: Node3D = gateroom.get_node_or_null("Level27Complex") as Node3D
 		assert(l27_complex != null, "Level27Complex must exist")
-		assert(not l27_complex.visible, "Level 27 must be culled (invisible) when operative is on Sublevel 28 to prevent disorienting occlusion")
+		assert(l27_complex.visible, "Upper overlook must remain visible from Level 28 in the current TPS layout")
 
 		# Verify Level 27 becomes visible when ascending to upper deck
 		player.global_position = Vector3(0.0, 5.5, 12.0)
@@ -85,33 +88,22 @@ func _process(delta: float) -> bool:
 		player.rotation = Vector3.ZERO
 		player._update_camera_and_occlusion(0.1)
 
-		# Baseline: Tactical Isometric view
-		assert(is_equal_approx(player.camera.fov, 55.0), "Default camera FOV must be 55.0 (found %.1f)" % player.camera.fov)
-		assert(is_equal_approx(player.camera.rotation.x, -deg_to_rad(60.0)), "Default camera pitch must be -60 deg (found %.2f rad)" % player.camera.rotation.x)
-		assert(is_equal_approx(player.camera.position.x, 0.0), "Default camera X offset must be 0.0 (found %.2f)" % player.camera.position.x)
-
-		# Engage ADS (Right-Click Hold)
+		# Current unified TPS framing (replaced the earlier isometric camera).
+		assert(player.camera.fov >= 55.0 and player.camera.fov <= 62.0, "TPS FOV must follow the configured zoom range")
+		assert(is_equal_approx(player.camera.rotation.x, deg_to_rad(-8.0)), "TPS neutral pitch is -8 degrees")
+		var wide_distance: float = player.camera.position.z
 		player.is_aiming_down_sights = true
-		for step in range(30):
+		for _step: int in range(30):
 			player._update_camera_and_occlusion(0.05)
-
-		# Verify Ghost Recon Wildlands Over-The-Shoulder Camera parameters (higher, offset right, FOV ~50 deg)
-		assert(player.camera.fov <= 51.0 and player.camera.fov >= 49.0, "ADS camera FOV must be ~50 deg for Ghost Recon clarity (found %.1f)" % player.camera.fov)
-		assert(player.camera.position.x >= 0.50, "ADS camera must sit over right shoulder X >= 0.50m (found X=%.2f)" % player.camera.position.x)
-		assert(player.camera.position.y >= 1.45 and player.camera.position.y <= 2.2, "ADS camera height must be elevated over shoulder (found Y=%.2f)" % player.camera.position.y)
-		assert(player.camera.position.z >= 1.50 and player.camera.position.z <= 2.0, "ADS camera distance behind shoulder (found Z=%.2f)" % player.camera.position.z)
-		assert(player.camera.rotation.x >= -deg_to_rad(16.0) and player.camera.rotation.x <= -deg_to_rad(10.0), "ADS camera pitch must flatten to ~-12 to -15 deg (found %.2f rad)" % player.camera.rotation.x)
-
-		# Release ADS (Right-Click Release)
+		assert(player.camera.fov >= 44.0 and player.camera.fov <= 50.0, "ADS FOV must tighten within the precision range")
+		assert(player.camera.position.x >= 0.28 and player.camera.position.x <= 0.75, "ADS must preserve shoulder offset")
+		assert(player.camera.position.z < wide_distance, "ADS must move closer to the operative")
+		assert(is_equal_approx(player.camera.rotation.x, deg_to_rad(player.ads_cam_pitch_deg)), "ADS neutral pitch must match the level sightline")
 		player.is_aiming_down_sights = false
-		for step in range(30):
+		for _step: int in range(30):
 			player._update_camera_and_occlusion(0.05)
-
-		# Verify return to Tactical Isometric view
-		assert(player.camera.fov > 54.0, "Camera FOV on ADS release must return to ~55 deg (found %.1f)" % player.camera.fov)
-		assert(player.camera.position.y > 11.5, "Camera Y on ADS release must return to ~12.0m (found %.2f)" % player.camera.position.y)
-		assert(player.camera.rotation.x < -deg_to_rad(55.0), "Camera pitch on ADS release must return to ~-60 deg (found %.2f rad)" % player.camera.rotation.x)
-		print("[TEST 2/5] PASS: Ghost Recon: Wildlands style ADS over-the-shoulder framing and smooth isometric return verified.")
+		assert(is_equal_approx(player.camera.position.z, wide_distance), "Releasing ADS restores TPS distance")
+		print("[TEST 2/5] PASS: Current TPS/ADS framing and restoration")
 
 	elif ticks == 6:
 		# TEST 3: WASD Camera-Relative Movement & Gentle Isometric Mouse-Pan Yaw
@@ -195,6 +187,7 @@ func _process(delta: float) -> bool:
 		# Test DHD 7-Chevron to GDO Iris phase transition
 		var dhd: DHDDialer = gateroom.dhd_console
 		assert(dhd != null, "Dialing console must exist in GateRoom")
+		preload("res://tests/support/mission_fixture.gd").extraction_ready(gateroom)
 		dhd.start_dialing(player)
 		assert(dhd.current_phase == DHDDialer.DialPhase.CHEVRONS, "DHD must start in CHEVRONS phase")
 

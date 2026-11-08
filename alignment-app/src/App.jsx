@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
+import { apiFetch, setAccessToken } from './api';
 import QuestionCard from './components/QuestionCard';
 import SquadRoster from './components/SquadRoster';
 import ConsensusDashboard from './components/ConsensusDashboard';
@@ -40,6 +41,9 @@ export default function App() {
   const [activeMemberId, setActiveMemberId] = useState('flaxos');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authRequired, setAuthRequired] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
+  const [mutationError, setMutationError] = useState('');
 
   // Modals state
   const [addOptionTargetQuestion, setAddOptionTargetQuestion] = useState(null);
@@ -50,7 +54,7 @@ export default function App() {
   const fetchState = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/state');
+      const res = await apiFetch('/api/state');
       if (!res.ok) throw new Error('Failed to load state');
       const data = await res.json();
       setState(data.state);
@@ -68,7 +72,7 @@ export default function App() {
 
   const fetchCompiled = async () => {
     try {
-      const res = await fetch('/api/compile', { method: 'POST' });
+      const res = await apiFetch('/api/compile');
       if (res.ok) {
         const data = await res.json();
         setCompiled(data.compiled);
@@ -80,8 +84,29 @@ export default function App() {
   };
 
   useEffect(() => {
+    const onApiError = event => {
+      setMutationError(event.detail.message);
+      if (event.detail.status === 401) setAuthRequired(true);
+    };
+    window.addEventListener('alignment-api-error', onApiError);
     fetchState();
+    return () => window.removeEventListener('alignment-api-error', onApiError);
   }, []);
+
+  const handleConnect = async event => {
+    event.preventDefault();
+    try {
+      await apiFetch('/api/state', {}, tokenInput.trim());
+      setAccessToken(tokenInput.trim());
+      setTokenInput('');
+      setError(null);
+      setMutationError('');
+      setAuthRequired(false);
+      fetchState();
+    } catch (err) {
+      setMutationError(err.message);
+    }
+  };
 
   useEffect(() => {
     if (activeTab === 'compiler') {
@@ -92,7 +117,7 @@ export default function App() {
   // Handle preferential stack ranking
   const handleRank = async (questionId, optionId, action, targetRank) => {
     try {
-      const res = await fetch('/api/rank', {
+      const res = await apiFetch('/api/rank', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -122,7 +147,7 @@ export default function App() {
   // Handle proposing custom option ("Other")
   const handleAddOption = async (optionData) => {
     try {
-      const res = await fetch('/api/option', {
+      const res = await apiFetch('/api/option', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(optionData)
@@ -141,7 +166,7 @@ export default function App() {
   // Handle saving team member (create or update)
   const handleSaveMember = async (memberData) => {
     try {
-      const res = await fetch('/api/member', {
+      const res = await apiFetch('/api/member', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(memberData)
@@ -163,7 +188,7 @@ export default function App() {
   // Handle deleting team member
   const handleDeleteMember = async (memberId) => {
     try {
-      const res = await fetch('/api/member/delete', {
+      const res = await apiFetch('/api/member/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: memberId })
@@ -186,7 +211,7 @@ export default function App() {
   // Handle toggling steward role for a member directly
   const handleToggleStewardRole = async (memberId, roleKey) => {
     try {
-      const res = await fetch('/api/member/toggle-role', {
+      const res = await apiFetch('/api/member/toggle-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ memberId, roleName: roleKey })
@@ -205,7 +230,7 @@ export default function App() {
   // Handle adding comment
   const handleAddComment = async (questionId, text) => {
     try {
-      const res = await fetch('/api/comment', {
+      const res = await apiFetch('/api/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ questionId, memberId: activeMemberId, text })
@@ -227,10 +252,16 @@ export default function App() {
   // Handle exporting to repository root
   const handleExportToRepo = async (options = {}) => {
     try {
-      setExportStatus({ success: true, message: 'Exporting files to repository...' });
-      const res = await fetch('/api/export-to-repo', {
+      setExportStatus({ success: true, message: 'Exporting planning snapshots...' });
+      const exportHeaders = { 'Content-Type': 'application/json' };
+      if (options.gitCommit) {
+        const exportToken = window.prompt('Enter the separate Git export token. Cancel to export nothing.');
+        if (!exportToken) { setExportStatus(null); return; }
+        exportHeaders['X-Alignment-Export-Token'] = exportToken;
+      }
+      const res = await apiFetch('/api/export-to-repo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: exportHeaders,
         body: JSON.stringify(options)
       });
       const data = await res.json();
@@ -259,7 +290,7 @@ export default function App() {
   const handleResetVotes = async () => {
     if (!window.confirm('Reset all cast votes to 0? Your questions, custom options, and stewards will remain intact.')) return;
     try {
-      const res = await fetch('/api/reset-votes', { method: 'POST' });
+      const res = await apiFetch('/api/reset-votes', { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         setState(data.state);
@@ -275,7 +306,7 @@ export default function App() {
   const handleFullReset = async () => {
     if (!window.confirm('Warning: Reset everything (questions, options, members) back to factory default?')) return;
     try {
-      const res = await fetch('/api/reset', { method: 'POST' });
+      const res = await apiFetch('/api/reset', { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         setState(data.state);
@@ -286,6 +317,23 @@ export default function App() {
       console.error('Full reset error:', err);
     }
   };
+
+  if (authRequired) {
+    return (
+      <div className="min-h-screen bg-[#070a13] flex items-center justify-center p-6 text-slate-100">
+        <form onSubmit={handleConnect} className="glass-panel rounded-2xl p-8 max-w-lg w-full space-y-4">
+          <h1 className="text-xl font-bold">Connect to the Alignment Engine</h1>
+          <p className="text-sm text-slate-300">Enter the access token supplied by the server operator. For local development, run <code>npm run auth-token</code> in the alignment-app folder.</p>
+          <label className="block text-sm">Access token
+            <input type="password" autoComplete="current-password" value={tokenInput} onChange={event => setTokenInput(event.target.value)} required maxLength={256} className="mt-2 block w-full p-3 bg-slate-950 border border-slate-600 rounded-lg" />
+          </label>
+          {mutationError && <p role="alert" className="text-rose-300 text-sm">{mutationError}</p>}
+          <button className="bg-teal-400 text-slate-950 font-bold rounded-lg px-5 py-2">Connect</button>
+          <p className="text-xs text-slate-400">The token is kept only in this browser tab's session.</p>
+        </form>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -329,6 +377,10 @@ export default function App() {
         onAddMemberClick={() => setMemberModalTarget('new')}
       />
 
+      <div className="max-w-7xl w-full mx-auto px-4 pt-3 flex items-center justify-between gap-4">
+        {mutationError && <p role="alert" className="text-rose-300 text-sm">{mutationError}</p>}
+        <button className="ml-auto text-xs text-slate-400 hover:text-white" onClick={() => { setAccessToken(''); setMutationError(''); setAuthRequired(true); }}>Disconnect access token</button>
+      </div>
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tab 1: Alignment Polls */}

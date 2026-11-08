@@ -162,7 +162,7 @@ func play_turret_fx(origin: Vector3, hit_point: Vector3) -> void:
 	tween.tween_property(mat, "albedo_color:a", 0.0, 0.06)
 	tween.tween_callback(tracer.queue_free)
 
-	if ResourceLoader.exists("res://audio/sfx_m249.wav"):
+	if DisplayServer.get_name() != "headless" and ResourceLoader.exists("res://audio/sfx_m249.wav"):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load("res://audio/sfx_m249.wav")
 		audio.max_distance = 60.0

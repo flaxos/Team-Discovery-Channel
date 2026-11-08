@@ -12,13 +12,19 @@ extends Control
 @onready var start_game_button: Button = %StartGameButton
 @onready var status_label: Label = %StatusLabel
 @onready var roster_list: ItemList = %RosterList
+@onready var difficulty_option_button: OptionButton = %DifficultyOptionButton
+@onready var difficulty_description_label: Label = %DifficultyDescriptionLabel
 @onready var keybindings_button: Button = %KeybindingsButton if has_node("%KeybindingsButton") else null
 @onready var keybindings_modal: KeybindingsModal = $KeybindingsModal if has_node("KeybindingsModal") else null
+
+
+var _network_manager: SGCNetworkManager = null
 
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_setup_class_options()
+	_setup_difficulty_options()
 	_connect_network_signals()
 	_update_ui_state()
 
@@ -27,6 +33,7 @@ func _ready() -> void:
 	join_button.pressed.connect(_on_join_pressed)
 	start_game_button.pressed.connect(_on_start_game_pressed)
 	class_option_button.item_selected.connect(_on_class_selected)
+	difficulty_option_button.item_selected.connect(_on_difficulty_selected)
 	player_name_edit.text_changed.connect(_on_name_changed)
 	if keybindings_button != null:
 		keybindings_button.pressed.connect(_on_keybindings_pressed)
@@ -53,6 +60,34 @@ func _setup_class_options() -> void:
 	_update_class_description(classes[0])
 
 
+func _setup_difficulty_options() -> void:
+	difficulty_option_button.clear()
+	for tier: int in range(SGCNetworkManager.DIFFICULTY_NAMES.size()):
+		difficulty_option_button.add_item(SGCNetworkManager.DIFFICULTY_NAMES[tier], tier)
+	_sync_difficulty_selection()
+
+
+func _sync_difficulty_selection() -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	var tier: int = net.mission_difficulty if net != null else SGCNetworkManager.DIFFICULTY_EASY
+	difficulty_option_button.select(tier)
+	difficulty_description_label.text = SGCNetworkManager.DIFFICULTY_DESCRIPTIONS[tier]
+	if net != null and net.is_in_active_session() and not net.is_server:
+		difficulty_description_label.text += "\nMission mode is selected by the host."
+
+
+func _on_difficulty_selected(index: int) -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null:
+		net.set_mission_difficulty(difficulty_option_button.get_item_id(index))
+	_sync_difficulty_selection()
+
+
+func _on_mission_settings_changed(_tier: int) -> void:
+	_sync_difficulty_selection()
+	_update_ui_state()
+
+
 func _update_class_description(c_id: String) -> void:
 	var info: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(c_id, {})
 	var primary_name: String = info.get("primary", "").to_upper()
@@ -70,27 +105,54 @@ func _update_class_description(c_id: String) -> void:
 
 
 func _connect_network_signals() -> void:
-	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-	if net == null:
+	_network_manager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if _network_manager == null:
 		return
+	_network_manager.mission_settings_changed.connect(_on_mission_settings_changed)
+	_network_manager.server_started.connect(_on_server_started)
+	_network_manager.connection_succeeded.connect(_on_connection_succeeded)
+	_network_manager.connection_failed.connect(_on_connection_failed)
+	_network_manager.server_disconnected.connect(_on_server_disconnected)
+	_network_manager.player_list_updated.connect(_refresh_roster)
 
-	net.server_started.connect(func() -> void:
-		status_label.text = "SGC Command Base active on port %d. Waiting for squad..." % SGCNetworkManager.DEFAULT_PORT
-		_update_ui_state()
-	)
-	net.connection_succeeded.connect(func() -> void:
-		status_label.text = "Connected to SGC Command Base. Awaiting mission dispatch..."
-		_update_ui_state()
-	)
-	net.connection_failed.connect(func() -> void:
-		status_label.text = "Connection failed. Check target IP and firewall."
-		_update_ui_state()
-	)
-	net.server_disconnected.connect(func() -> void:
-		status_label.text = "Disconnected from command base."
-		_update_ui_state()
-	)
-	net.player_list_updated.connect(_refresh_roster)
+
+func _exit_tree() -> void:
+	if not is_instance_valid(_network_manager):
+		return
+	var connections: Array[Dictionary] = [
+		{"signal": _network_manager.mission_settings_changed, "callback": _on_mission_settings_changed},
+		{"signal": _network_manager.server_started, "callback": _on_server_started},
+		{"signal": _network_manager.connection_succeeded, "callback": _on_connection_succeeded},
+		{"signal": _network_manager.connection_failed, "callback": _on_connection_failed},
+		{"signal": _network_manager.server_disconnected, "callback": _on_server_disconnected},
+		{"signal": _network_manager.player_list_updated, "callback": _refresh_roster}
+	]
+	for connection: Dictionary in connections:
+		var source: Signal = connection.signal
+		var callback: Callable = connection.callback
+		if source.is_connected(callback):
+			source.disconnect(callback)
+	_network_manager = null
+
+
+func _on_server_started() -> void:
+	status_label.text = "SGC Command Base active on port %d. Waiting for squad..." % _network_manager.server_port
+	_update_ui_state()
+
+
+func _on_connection_succeeded() -> void:
+	status_label.text = "Connected to SGC Command Base. Awaiting mission dispatch..."
+	_update_ui_state()
+
+
+func _on_connection_failed() -> void:
+	status_label.text = "Connection failed. Check target IP and firewall."
+	_update_ui_state()
+
+
+func _on_server_disconnected() -> void:
+	status_label.text = "Disconnected from command base."
+	_update_ui_state()
 
 
 func _on_host_pressed() -> void:
@@ -173,3 +235,5 @@ func _update_ui_state() -> void:
 	join_button.disabled = is_connected
 	start_game_button.visible = is_server
 	start_game_button.disabled = not is_server
+	difficulty_option_button.disabled = (is_connected and not is_server) or (net != null and net.mission_started)
+	_sync_difficulty_selection()

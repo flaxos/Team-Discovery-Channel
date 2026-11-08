@@ -3,7 +3,7 @@ extends SceneTree
 ## Validates:
 ## 1. SGCElevator orientation facing West (-X), removal of static duplicate doors/pedestals,
 ##    and Left/Right pedestal interactable dispatch logic on Floor 28 and 27.
-## 2. Staircase 1: Continuous 24-step spiral staircase ascent from Y=0.95m to Y=5.5m without jumping.
+## 2. Staircase 1: Continuous 29-step spiral staircase ascent from Y=0.00m to Y=5.5m without jumping.
 ## 3. Staircase 2: East Service Staircase (gentle risers <= 0.18m, collision ramp) physics ascent from Y=0.0m to Y=5.5m without jumping.
 ## 4. Observation Lounge 12m glass overlook and blast shutters visibility from Level 28.
 
@@ -125,7 +125,7 @@ func _process(delta: float) -> bool:
 		# -------------------------------------------------------------
 		# TEST 2: Staircase 1 (Spiral Staircase Ascent)
 		# -------------------------------------------------------------
-		print("\n[TEST 2/4] Testing Staircase 1: Continuous 24-step Spiral Staircase Ascent...")
+		print("\n[TEST 2/4] Testing Staircase 1: Continuous 29-step Spiral Staircase Ascent...")
 
 		var stairs: Node3D = gateroom.get_node_or_null("Level27Complex/SpiralStairsInterconnect") as Node3D
 		assert(stairs != null, "SpiralStairsInterconnect must exist in Level27Complex")
@@ -142,7 +142,7 @@ func _process(delta: float) -> bool:
 			return a.position.y < b.position.y
 		)
 
-		assert(steps.size() == 24, "Spiral staircase must contain exactly 24 continuous steps (got %d)" % steps.size())
+		assert(steps.size() == 29, "Spiral staircase must contain exactly 29 continuous steps (got %d)" % steps.size())
 
 		# Verify gentle step risers (consecutive riser <= 0.20m)
 		var prev_y: float = -999.0
@@ -155,11 +155,11 @@ func _process(delta: float) -> bool:
 				assert(diff <= 0.201, "%s riser height %.3fm exceeds max safe riser height" % [s.name, diff])
 			prev_y = y_pos
 
-		var top_step: CSGBox3D = steps[23]
+		var top_step: CSGBox3D = steps[28]
 		var top_y: float = top_step.global_position.y + 0.1
 		assert(is_equal_approx(snappedf(top_y, 0.1), 5.5), "Spiral staircase top landing must reach Briefing Room (Y=5.5m), got %.2fm" % top_y)
 
-		print("  ✓ All 24 continuous helical steps verified from Y=0.95m to Y=5.50m.")
+		print("  ✓ All 29 continuous helical steps verified from Y=0.00m to Y=5.50m.")
 		print("  ✓ Continuous walking is tested in test_staircase_traversal.gd.")
 		print("[TEST 2/4] PASS: Staircase 1 (Spiral Stairs) structure validated.")
 
@@ -266,8 +266,8 @@ func _process(delta: float) -> bool:
 		print("  ALL 4/4 SGC DUAL STAIRCASE & ELEVATOR TESTS PASSED 100% GREEN!  ")
 		print("  ✓ 1. SGCElevator aligned West, duplicate doors removed,         ")
 		print("        Left & Right pedestals on L28 & L27 call and dispatch.    ")
-		print("  ✓ 2. Staircase 1: Continuous 24-step spiral stairs ascent       ")
-		print("        (Y=0.95m -> Y=5.50m) without jumping.                     ")
+		print("  ✓ 2. Staircase 1: Continuous 29-step spiral stairs ascent       ")
+		print("        (Y=0.00m -> Y=5.50m) without jumping.                     ")
 		print("  ✓ 3. Staircase 2: East Service Stairs (risers <= 0.18m, ramp)   ")
 		print("        smooth WASD climb (Y=0.0m -> Y=5.50m) without jumping.    ")
 		print("  ✓ 4. Observation Lounge 12m glass window & blast shutters      ")

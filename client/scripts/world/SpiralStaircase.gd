@@ -3,7 +3,7 @@ extends Node3D
 const CENTER: Vector3 = Vector3(-5.0, 0.0, 11.0)
 const RADIUS: float = 1.6
 const WIDTH: float = 1.2
-const BASE_Y: float = 0.95
+const BASE_Y: float = 0.0
 const TOP_Y: float = 5.5
 const SWEEP: float = TAU * 1.25
 

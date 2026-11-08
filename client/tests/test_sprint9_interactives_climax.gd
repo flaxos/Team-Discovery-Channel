@@ -21,6 +21,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 9 INTERACTIVES & CLIMAX TEST      ")
 	print("========================================================")
@@ -195,7 +198,7 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Security Station CCTV (Multi-Camera Surveillance)   ")
 		print("  ✓ Foothold Climax Incursion (Multi-Sector Assault)    ")
 		print("========================================================\n")
-		quit(0)
-		return true
+		preload("res://tests/support/finish.gd").success(self)
+		return false
 
 	return false

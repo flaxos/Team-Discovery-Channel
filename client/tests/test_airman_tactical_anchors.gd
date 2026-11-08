@@ -25,6 +25,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: TACTICAL AIRMEN AI & LEAPFROGGING TEST  ")
 	print("========================================================")
@@ -288,7 +291,7 @@ func _process(delta: float) -> bool:
 		print("  ✓ Player-Led Progression (Human Pointman Waiting)     ")
 		print("  ✓ Tactical Leapfrogging (Bounding Overwatch)          ")
 		print("========================================================\n")
-		quit(0)
-		return true
+		preload("res://tests/support/finish.gd").success(self)
+		return false
 
 	return false

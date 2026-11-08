@@ -32,6 +32,9 @@ var test_passed: bool = false
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 2 TACTICS & COVER PHYSICS TEST    ")
 	print("========================================================")
@@ -190,12 +193,12 @@ func _process(delta: float) -> bool:
 		print("  ✓ Level 28 Sliding Blast Doors & Choke Point Fallback ")
 		print("========================================================\n")
 		test_passed = true
-		quit(0)
-		return true
+		preload("res://tests/support/finish.gd").success(self)
+		return false
 
 	if elapsed_time > 8.0 and not test_passed:
 		push_error("[TEST FAILURE] Sprint 2 tactics test timed out after %.2fs." % elapsed_time)
 		quit(1)
-		return true
+		return false
 
 	return false

@@ -45,6 +45,10 @@ func _process(_delta: float) -> bool:
 	if ticks == 2:
 		# TEST 1: 2-by-2 Spawning at Event Horizon with Lane Offsets (X=-0.8 and X=+0.8)
 		print("[TEST 1/5] Testing 2-by-2 Spawning at Event Horizon (Offsets X=-0.8m, X=+0.8m)...")
+		var gate: StargateRing = gateroom.get_node("Stargate") as StargateRing
+		gate.reserve_connection(true)
+		gate.sync_trigger_kawoosh()
+		gate._finish_kawoosh(gate.activation_id)
 		wave_mgr.is_wave_active = true
 		wave_mgr.is_wormhole_open = true
 		wave_mgr.inbound_wormhole_timer = 38.0

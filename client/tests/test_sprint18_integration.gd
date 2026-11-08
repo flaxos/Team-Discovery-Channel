@@ -5,7 +5,7 @@ extends SceneTree
 ##   3. Keybindings & Tactical Controls Field Manual Terminal (Lobby & In-Game [ESC] / [F1]).
 ##   4. SGC 4-Level Architecture & Multi-Side Elevator Call Pedestals (Left & Right).
 ##   5. Observation Lounge Overlook Blast Shutters & Emergency Klaxon Sealing.
-##   6. 24-Step Continuous Helical Spiral Staircase CharacterBody3D Physics.
+##   6. 29-tread Continuous Helical Spiral Staircase CharacterBody3D Physics.
 
 const GATE_ROOM_SCENE_PATH: String = "res://scenes/main/GateRoom.tscn"
 const LOBBY_SCENE_PATH: String = "res://scenes/main/Lobby.tscn"
@@ -17,6 +17,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 18 MASTER INTEGRATION TEST        ")
 	print("========================================================")
@@ -145,7 +148,7 @@ func _process(_delta: float) -> bool:
 			modal.get_bindings_for_category(KeybindingsModal.CATEGORY_MOVEMENT).size() +
 			modal.get_bindings_for_category(KeybindingsModal.CATEGORY_SQUAD).size()
 		)
-		assert(total_bindings == 17, "Must contain all 17 tactical keybinding entries")
+		assert(total_bindings == root.get_node("KeybindingManager").ACTIONS.size(), "Must contain all implemented canonical action entries")
 
 		# Close modal
 		hud.toggle_keybindings_modal()
@@ -163,7 +166,7 @@ func _process(_delta: float) -> bool:
 		assert("TACTICAL CONTROLS" in lobby_btn.text, "Button text must reference TACTICAL CONTROLS")
 		lobby.queue_free()
 
-		print("[TEST 3/6] PASS: Keybindings phosphor terminal, 17 controls, Lobby button & input pause verified.")
+		print("[TEST 3/6] PASS: Keybindings phosphor terminal, canonical controls, Lobby button & input pause verified.")
 
 	elif ticks == 7:
 		# -------------------------------------------------------------
@@ -262,9 +265,9 @@ func _process(_delta: float) -> bool:
 
 	elif ticks == 11:
 		# -------------------------------------------------------------
-		# TEST 6: Continuous 24-Step Spiral Staircase CharacterBody3D Physics Ascent
+		# TEST 6: Continuous 29-tread Spiral Staircase CharacterBody3D Physics Ascent
 		# -------------------------------------------------------------
-		print("[TEST 6/6] Testing Continuous 24-Step Spiral Staircase CharacterBody3D Physics...")
+		print("[TEST 6/6] Testing Continuous 29-tread Spiral Staircase CharacterBody3D Physics...")
 
 		var stairs: Node3D = gateroom.get_node_or_null("Level27Complex/SpiralStairsInterconnect") as Node3D
 		assert(stairs != null, "SpiralStairsInterconnect must exist")
@@ -282,33 +285,28 @@ func _process(_delta: float) -> bool:
 			return a.position.y < b.position.y
 		)
 
-		assert(steps.size() == 24, "Spiral staircase must contain exactly 24 helical steps")
+		assert(steps.size() == 29, "Spiral staircase must contain exactly 29 helical steps")
 
 		# Validate step risers (height difference <= 0.201m)
 		var prev_y: float = -999.0
 		for i: int in range(steps.size()):
 			var s: CSGBox3D = steps[i]
-			assert(s.use_collision, "%s must have collision enabled" % s.name)
+			assert(not s.use_collision, "%s must have visual treads; the helix owns collision" % s.name)
 			var y_pos: float = s.position.y
 			if i > 0:
 				var diff: float = y_pos - prev_y
 				assert(diff <= 0.201, "%s riser height %.3fm exceeds safe step height" % [s.name, diff])
 			prev_y = y_pos
 
-		# Validate CharacterBody3D can traverse every step without snagging
-		for s: CSGBox3D in steps:
-			var step_world: Vector3 = s.global_position
-			player.global_position = Vector3(step_world.x, step_world.y + 0.1, step_world.z)
-			assert(player.global_position.y >= 0.2, "Operative Y position must remain valid")
-
-		var top_step: CSGBox3D = steps[23]
-		var top_world_y: float = top_step.global_position.y
+		# Full continuous traversal is covered by test_staircase_traversal.
+		var top_step: CSGBox3D = steps[28]
+		var top_world_y: float = top_step.global_position.y + 0.1
 		assert(is_equal_approx(snappedf(top_world_y, 0.1), 5.5),
 			"Top step must connect to Level 27 floor height (~5.5m), got %.2fm" % top_world_y)
 
-		print("  ✓ All 24 helical steps have collision enabled with riser <= 0.20m.")
-		print("  ✓ Operative CharacterBody3D verified climbing to Level 27 (Y=5.5m) with 0 collision snags.")
-		print("[TEST 6/6] PASS: 24-step continuous helical spiral staircase verified 100%.")
+		print("  ✓ All 29 helical steps have visual treads; the helix owns collision with riser <= 0.20m.")
+		print("  ✓ Visual tread spacing and Level27 landing verified; continuous travel is tested separately.")
+		print("[TEST 6/6] PASS: 29-tread visual spiral structure verified; see full route suite for passage.")
 
 		print("\n========================================================")
 		print("  SPRINT 18 MASTER INTEGRATION TEST PASSED! (6/6)       ")
@@ -317,7 +315,7 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Keybindings Terminal (Lobby & In-Game [ESC]/[F1])    ")
 		print("  ✓ SGC Elevator Multi-Side Call Pedestals (Left/Right) ")
 		print("  ✓ Observation Lounge 12m Overlook Blast Shutters      ")
-		print("  ✓ 24-Step Continuous Helical Spiral Staircase Physics ")
+		print("  ✓ 29-tread Continuous Helical Spiral Staircase Physics ")
 		print("========================================================\n")
 		quit(0)
 		return true

@@ -7,7 +7,7 @@ extends SceneTree
 ##  2. SGCElevator group "interactable" membership and robust interact(player) dispatch.
 ##  3. Observation Lounge (Briefing Room) trinium blast shutters over Gate Room overlook.
 ##  4. Manual toggle via BriefingBlastDoorConsole & automatic emergency red alert sealing.
-##  5. 24-Step Spiral Staircase CharacterBody3D operative physics ascent without snagging.
+##  5. 29-Step Spiral Staircase CharacterBody3D operative physics ascent without snagging.
 ##  6. Multi-level service stairwell engineering parameters (riser <= 0.20m).
 
 const GATE_ROOM_SCENE: String = "res://scenes/main/GateRoom.tscn"
@@ -227,7 +227,7 @@ func _process(_delta: float) -> bool:
 		# -------------------------------------------------------------
 		# TEST 5: Spiral Staircase CharacterBody3D Ascent Physics
 		# -------------------------------------------------------------
-		print("[TEST 5/5] Testing 24-Step Spiral Staircase CharacterBody3D Physics Ascent...")
+		print("[TEST 5/5] Testing 29-Step Spiral Staircase CharacterBody3D Physics Ascent...")
 
 		var stairs: Node3D = gateroom.get_node_or_null("Level27Complex/SpiralStairsInterconnect") as Node3D
 		assert(stairs != null, "SpiralStairsInterconnect must exist")
@@ -245,7 +245,7 @@ func _process(_delta: float) -> bool:
 			return a.position.y < b.position.y
 		)
 
-		assert(steps.size() == 24, "Must contain exactly 24 helical steps")
+		assert(steps.size() == 29, "Must contain exactly 29 helical steps")
 
 		# Validate step risers (step height <= 0.20m)
 		var prev_y: float = -999.0
@@ -258,17 +258,13 @@ func _process(_delta: float) -> bool:
 				assert(diff <= 0.201, "%s riser height %.3fm exceeds 0.20m safe step height" % [s.name, diff])
 			prev_y = y_pos
 
-		# Validate CharacterBody3D physics ascent up the helical staircase
-		# Place player at the base of the stairs (Control Room landing at (-5.0, 0.2, 11.0))
-		player.global_position = Vector3(-5.0, 0.2, 11.0)
-		player.velocity = Vector3.ZERO
-
+		# Bidirectional, corridor-to-room walking is covered by test_staircase_traversal.gd.
 		# Verify final step reaches Briefing Room level (Y = 5.5m)
-		var top_step: CSGBox3D = steps[23]
+		var top_step: CSGBox3D = steps[28]
 		var top_world_y: float = top_step.global_position.y + 0.1
 		assert(is_equal_approx(snappedf(top_world_y, 0.1), 5.5), "Top step landing must reach Level 27 (Y=5.5m), got %.2fm" % top_world_y)
 
-		print("  ✓ All 24 helical steps verified with riser <= 0.20m.")
+		print("  ✓ All 29 helical steps verified with riser <= 0.20m.")
 		print("  ✓ Continuous walking is tested in test_staircase_traversal.gd.")
 		print("[TEST 5/5] PASS: Spiral staircase structure validated.")
 
@@ -278,7 +274,7 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Interactable Group & Robust Player Name Resolution  ")
 		print("  ✓ Observation Lounge 12m Overlook Blast Shutters      ")
 		print("  ✓ Manual Shutter Toggle & Red Alert Klaxon Sealing    ")
-		print("  ✓ 24-Step Spiral Stairs CharacterBody3D Ascent        ")
+		print("  ✓ 29-Step Spiral Stairs Structure        ")
 		print("========================================================\n")
 		gateroom.queue_free()
 		quit(0)

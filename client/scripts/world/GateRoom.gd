@@ -70,8 +70,10 @@ var is_animating_observation_shutters: bool = false
 var is_emergency_active: bool = false
 var emergency_strobe_timer: float = 0.0
 var player_sectors: Dictionary = {}
+var mission_result: int = -1
 var visited_sectors: Dictionary = {}
 
+var neutralized_players: Dictionary = {}
 var sector_shrouds: Dictionary = {}
 var shroud_mat_opaque: StandardMaterial3D = null
 var shroud_mat_adjacent: StandardMaterial3D = null
@@ -152,6 +154,10 @@ func _ready() -> void:
 			if hud != null:
 				hud.on_iris_malfunction()
 		)
+		wave_manager.objective_status_changed.connect(func(text: String) -> void:
+			if hud != null:
+				hud.update_objective(text)
+		)
 		wave_manager.lab_patch_objective_started.connect(func() -> void:
 			if hud != null:
 				hud.on_lab_patch_objective_started()
@@ -170,12 +176,14 @@ func _ready() -> void:
 		stargate_mesh.player_extracted.connect(_on_player_extracted)
 
 	_setup_sector_shrouds()
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_room_snapshot.rpc_id(1)
 
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	# If host / server in an active game session, spawn all registered players and start waves
 	if net != null and net.is_server:
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
-		multiplayer.peer_connected.connect(_on_peer_connected_during_mission)
+		net.mission_peer_ready.connect(_on_peer_connected_during_mission)
 		_spawn_all_players()
 
 		# If dedicated server without clients yet, wait for first client before starting foothold defense
@@ -309,6 +317,13 @@ func _update_sector_shrouding(local_sec: String) -> void:
 		visited_sectors[local_sec] = true
 
 	var adj: Array = sector_adjacency.get(local_sec, [])
+	var upstairs: bool = false
+	if players_container != null:
+		for body: Node in players_container.get_children():
+			var operative := body as PlayerController3D
+			if operative != null and operative.is_local_authority and operative.global_position.y >= 4.5:
+				upstairs = true
+				break
 
 	# Shroud management:
 	# - Current room: shroud hidden (fully clear and visible to operative).
@@ -319,7 +334,8 @@ func _update_sector_shrouding(local_sec: String) -> void:
 		if shroud == null:
 			continue
 
-		if sec_id == local_sec:
+		# Lower-level fog caps sit at Y=5.8; hide them from upstairs without revealing enemy entities.
+		if upstairs or sec_id == local_sec:
 			shroud.visible = false
 		elif sec_id in adj:
 			shroud.visible = true
@@ -533,32 +549,81 @@ func _on_player_child_entered(node: Node) -> void:
 				hud.bind_local_player(player)
 
 
-func _check_squad_status(_id: int = 0) -> void:
+func _check_squad_status(id: int = 0) -> void:
+	if not multiplayer.is_server():
+		var local_id: int = multiplayer.get_unique_id()
+		var local: PlayerController3D = players_container.get_node_or_null(str(local_id)) as PlayerController3D
+		if local != null and local.health_component != null:
+			report_squad_status.rpc_id(1, local_id, local.health_component.is_dead or local.health_component.is_downed)
+		return
+	if id != 0:
+		var operative: PlayerController3D = players_container.get_node_or_null(str(id)) as PlayerController3D
+		if operative != null and operative.health_component != null:
+			neutralized_players[id] = operative.health_component.is_dead or operative.health_component.is_downed
+	_evaluate_squad_status()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func report_squad_status(id: int, neutralized: bool) -> void:
+	if not multiplayer.is_server() or multiplayer.get_remote_sender_id() != id:
+		return
+	if players_container.get_node_or_null(str(id)) == null:
+		return
+	neutralized_players[id] = neutralized
+	_evaluate_squad_status()
+
+
+func _evaluate_squad_status() -> void:
 	if players_container == null or players_container.get_child_count() == 0:
 		return
-	var any_standing: bool = false
-	for p in players_container.get_children():
-		var player := p as PlayerController3D
-		if player != null and player.health_component != null:
-			if not player.health_component.is_dead and not player.health_component.is_downed:
-				any_standing = true
-				break
-
-	if not any_standing:
-		print("GateRoom: SQUAD WIPED! All operatives neutralized.")
-		if hud != null:
-			hud.show_defeat()
+	for body: Node in players_container.get_children():
+		var operative := body as PlayerController3D
+		if operative != null and operative.health_component != null:
+			if not neutralized_players.get(operative.peer_id, false) and not operative.health_component.is_dead and not operative.health_component.is_downed:
+				return
+	_finish_mission(false)
 
 
 func _on_player_extracted(_player: Node) -> void:
+	if multiplayer.is_server():
+		_finish_mission(true)
+
+
+func _finish_mission(victory: bool) -> void:
+	if wave_manager != null:
+		wave_manager.end_mission()
+	if multiplayer.has_multiplayer_peer():
+		sync_mission_result.rpc(victory)
+	else:
+		sync_mission_result(victory)
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_mission_result(victory: bool) -> void:
+	mission_result = 1 if victory else 0
+	if wave_manager != null:
+		wave_manager.mission_ended = true
 	if hud != null:
-		hud.show_victory()
+		if victory:
+			hud.show_victory()
+		else:
+			hud.show_defeat()
 
 
 func toggle_blast_doors() -> void:
+	if not multiplayer.is_server():
+		return
+	if multiplayer.has_multiplayer_peer():
+		sync_blast_doors.rpc(not is_blast_doors_closed)
+	else:
+		sync_blast_doors(not is_blast_doors_closed)
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_blast_doors(closed: bool) -> void:
 	if is_animating_doors:
 		return
-	is_blast_doors_closed = not is_blast_doors_closed
+	is_blast_doors_closed = closed
 	is_animating_doors = true
 	blast_doors_toggled.emit(is_blast_doors_closed)
 
@@ -621,6 +686,17 @@ func _play_door_sfx() -> void:
 
 
 func toggle_observation_shutters(force_closed: Variant = null) -> void:
+	if not multiplayer.is_server():
+		return
+	var closed: bool = force_closed if force_closed is bool else not is_observation_shutters_closed
+	if multiplayer.has_multiplayer_peer():
+		sync_observation_shutters.rpc(closed)
+	else:
+		sync_observation_shutters(closed)
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_observation_shutters(force_closed: bool) -> void:
 	if is_animating_observation_shutters:
 		return
 
@@ -711,6 +787,8 @@ func _spawn_all_players() -> void:
 
 
 func _spawn_player(peer_id: int, p_class_id: String, spawn_pos: Vector3) -> void:
+	if players_container.has_node(str(peer_id)):
+		return
 	var player_scene := load(PLAYER_SCENE_PATH) as PackedScene
 	if player_scene == null:
 		push_error("GateRoom: Failed to load player scene at %s" % PLAYER_SCENE_PATH)
@@ -726,24 +804,17 @@ func _spawn_player(peer_id: int, p_class_id: String, spawn_pos: Vector3) -> void
 
 
 func _on_peer_connected_during_mission(peer_id: int) -> void:
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() or players_container.has_node(str(peer_id)) or not multiplayer.get_peers().has(peer_id):
 		return
-	print("GateRoom: Peer %d connected during active mission." % peer_id)
-	var timer := get_tree().create_timer(0.2)
-	timer.timeout.connect(func() -> void:
-		if not is_instance_valid(self):
-			return
-		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-		var p_class: String = SGCNetworkManager.CLASS_SG3_HEAVY
-		if net != null and net.peers.has(peer_id):
-			p_class = net.peers[peer_id].get("class_id", SGCNetworkManager.CLASS_SG3_HEAVY)
-		var spawn_points := spawns_container.get_children()
-		var spawn_pos: Vector3 = spawn_points[peer_id % spawn_points.size()].global_position
-		_spawn_player(peer_id, p_class, spawn_pos)
-
-		if net != null and net.is_dedicated_server and wave_manager != null and not wave_manager.is_wave_active and wave_manager.current_wave == 0:
-			_start_foothold_defense()
-	)
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net == null or not net.peers.has(peer_id):
+		# Registration and scene-ready messages may cross on the first connection.
+		return
+	var points: Array[Node] = spawns_container.get_children()
+	var profile: String = net.peers[peer_id].get("class_id", SGCNetworkManager.CLASS_SG3_HEAVY)
+	_spawn_player(peer_id, profile, (points[peer_id % points.size()] as Node3D).global_position)
+	if net.is_dedicated_server and wave_manager != null and not wave_manager.defense_started:
+		_start_foothold_defense()
 
 
 func _on_peer_disconnected(peer_id: int) -> void:
@@ -751,4 +822,22 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	if player_node != null:
 		print("GateRoom: Removing disconnected player %d" % peer_id)
 		player_node.queue_free()
-	_check_squad_status()
+	call_deferred("_check_squad_status")
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_room_snapshot() -> void:
+	if not multiplayer.is_server():
+		return
+	sync_room_snapshot.rpc_id(multiplayer.get_remote_sender_id(), is_blast_doors_closed, is_observation_shutters_closed, is_emergency_active, mission_result)
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_room_snapshot(doors: bool, shutters: bool, alarm: bool, result: int) -> void:
+	is_animating_doors = false
+	is_animating_observation_shutters = false
+	sync_blast_doors(doors)
+	sync_observation_shutters(shutters)
+	set_emergency_lights(alarm)
+	if result >= 0:
+		sync_mission_result(result == 1)

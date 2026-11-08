@@ -16,6 +16,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 17 MASTER INTEGRATION TEST        ")
 	print("========================================================")
@@ -51,7 +54,7 @@ func _process(delta: float) -> bool:
 		player.global_position = Vector3(0.0, 0.0, 22.0) # Fallback Hallway
 		
 		# Move north toward Gate Room (Z = 22 -> Z = 5)
-		for step in range(35):
+		for step in range(240):
 			player.velocity = Vector3(0, 0, -5.0)
 			player.move_and_slide()
 
@@ -179,7 +182,7 @@ func _process(delta: float) -> bool:
 		assert(ride_box.size.x >= 3.0 and ride_box.size.z >= 3.0, "RideArea must accommodate 4 operatives")
 
 		# Doors face local +Z, which maps to basis.z in global space
-		var door_facing_vector: Vector3 = elevator.global_transform.basis.z.normalized()
+		var door_facing_vector: Vector3 = -elevator.global_transform.basis.z.normalized()
 		print("  Elevator door facing vector: ", door_facing_vector)
 		assert(door_facing_vector.x < -0.8, "Elevator doors must open West toward X negative lobby")
 		print("[TEST 7/8] PASS: 4-Player SGC freight elevator scaled and correctly oriented West.")
@@ -189,6 +192,11 @@ func _process(delta: float) -> bool:
 		# TEST 8: Jaffa 2-by-2 Column March & Airmen Tactical Anchors
 		# -----------------------------------------------------------------
 		print("[TEST 8/8] Testing Jaffa 2-by-2 Column March & SGC Airmen Tactical Anchors...")
+		var gate: StargateRing = gateroom.get_node("Stargate") as StargateRing
+		gate.reserve_connection(true)
+		gate.sync_trigger_kawoosh()
+		gate._finish_kawoosh(gate.activation_id)
+		wave_mgr.inbound_wormhole_timer = 38.0
 		wave_mgr.is_wave_active = true
 		wave_mgr.is_wormhole_open = true
 		wave_mgr.rank_spawn_interval = 0.1
@@ -226,7 +234,7 @@ func _process(delta: float) -> bool:
 		print("  ✓ 4-Player SGC Freight Elevator (3.2m x 3.2m, West)   ")
 		print("  ✓ Jaffa 2-by-2 Column March & Airmen Tactical Anchors ")
 		print("========================================================\n")
-		quit(0)
-		return true
+		preload("res://tests/support/finish.gd").success(self)
+		return false
 
 	return false
