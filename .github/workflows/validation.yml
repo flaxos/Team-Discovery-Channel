@@ -1,0 +1,92 @@
+name: Validate vertical slice
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '18 17 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runner-contract:
+    name: Failure-reporting contract
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 -m unittest discover -s tools/tests -v
+
+  godot:
+    name: Godot ${{ matrix.profile }} (4.4.1)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [fast, multiplayer, full]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned official engine
+        run: python3 tools/install_godot_ci.py --destination "$RUNNER_TEMP/godot"
+      - name: Strict import and headless validation
+        run: >-
+          python3 tools/run_godot_tests.py
+          --godot "$RUNNER_TEMP/godot/godot"
+          --profile "${{ matrix.profile }}"
+          --output "build/test-results/${{ matrix.profile }}"
+      - name: Retain logs and machine-readable reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-${{ matrix.profile }}-${{ github.run_attempt }}
+          path: build/test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  alignment:
+    name: Alignment API security and frontend build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: alignment-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+          cache: npm
+          cache-dependency-path: alignment-app/package-lock.json
+      - run: npm ci
+      - name: API tests and server syntax
+        run: |
+          mkdir -p ../build/test-results/alignment
+          set -o pipefail
+          node --test server/*.test.js 2>&1 | tee ../build/test-results/alignment/api.log
+          find server -name '*.js' -print0 | xargs -0 -n 1 node --check
+      - name: Production frontend build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee ../build/test-results/alignment/build.log
+      - name: Retain backend and build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alignment-${{ github.run_attempt }}
+          path: build/test-results/alignment/
+          if-no-files-found: warn
+          retention-days: 14
