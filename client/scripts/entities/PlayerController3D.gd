@@ -513,8 +513,9 @@ func _equip_weapon_by_id(weapon_id: String) -> void:
 	current_weapon.position = Vector3(0.3, 0.9, -0.4)
 
 	# Connect weapon signals
-	current_weapon.ammo_changed.connect(func(cur: int, res: int) -> void:
-		weapon_ammo_changed.emit(cur, res)
+	new_weapon.ammo_changed.connect(func(cur: int, res: int) -> void:
+		if current_weapon == new_weapon:
+			weapon_ammo_changed.emit(cur, res)
 	)
 	current_weapon.fired.connect(_on_weapon_fired)
 

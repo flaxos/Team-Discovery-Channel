@@ -151,6 +151,21 @@ func run_test() -> void:
 	assert(shoot(client_player))
 	await frames(10)
 	assert(health(durable_host).current_health == 978, "Client cannot invent ammunition")
+	# A reload keeps its own inventory state when the operative changes slots.
+	var primary: WeaponBase = server_remote.current_weapon
+	primary.current_ammo = 0
+	primary.reserve_ammo = 10
+	primary.reload_time_s = 0.1
+	primary.reload()
+	server_remote.switch_slot(2)
+	var hud_ammo: Array[int] = [-1]
+	server_remote.weapon_ammo_changed.connect(func(value: int, _reserve: int) -> void: hud_ammo[0] = value)
+	await frames(15)
+	assert(primary.current_ammo == 10 and primary.reserve_ammo == 0 and not primary.is_reloading, "Holstered reload must complete without replacing inventory")
+	assert(hud_ammo[0] == -1, "Holstered reload cannot overwrite active weapon HUD")
+	server_remote.switch_slot(1)
+	assert(server_remote.current_weapon == primary and hud_ammo[0] == 10, "Re-equipping shows the completed reload")
+
 	durable_host.collision_layer = 0
 	durable_client.collision_layer = 0
 	print("PASS sender/class/origin/direction/rate/ammo validation and inventory persistence")
