@@ -69,6 +69,8 @@ var is_aiming_down_sights: bool = false
 var ads_blend: float = 0.0
 var current_iso_cam_y: float = 12.0
 var current_iso_pan_yaw: float = 0.0
+@export var ads_cam_offset: Vector3 = Vector3(0.55, 1.65, 1.75)
+@export var ads_cam_pitch_deg: float = -13.0
 var is_carrying_patch_rom: bool = false
 var auto_cover_enabled: bool = true
 var is_in_cover: bool = false
@@ -139,6 +141,9 @@ func _ready() -> void:
 			camera_rig.global_position = global_position
 			camera_rig.rotation = Vector3.ZERO
 		if camera != null:
+			camera.position = Vector3(0.0, current_iso_cam_y, 7.0)
+			camera.rotation.x = deg_to_rad(-60.0)
+		if camera != null:
 			camera.current = true
 		if laser_sight != null:
 			laser_sight.visible = true
@@ -147,12 +152,32 @@ func _ready() -> void:
 			camera.current = false
 
 
+func _is_ui_modal_open() -> bool:
+	if not is_inside_tree() or get_tree() == null:
+		return false
+	var hud := get_tree().root.find_child("TacticalHUD", true, false)
+	if hud != null:
+		if hud.get("is_mission_ended") == true:
+			return true
+		var vm: Control = hud.get("victory_modal") as Control
+		if vm != null and vm.visible:
+			return true
+		var pm: Control = hud.get("pause_menu") as Control
+		if pm != null and pm.visible:
+			return true
+	return false
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_local_authority or is_in_cctv_mode:
+	if not is_local_authority or is_in_cctv_mode or _is_ui_modal_open():
 		return
 	if is_aiming_down_sights and event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		rotation.y -= motion.relative.x * 0.003
+	elif not is_aiming_down_sights and event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		current_iso_pan_yaw -= motion.relative.x * 0.0018
+		current_iso_pan_yaw = wrapf(current_iso_pan_yaw, -PI, PI)
 	elif event is InputEventKey:
 		var key_event := event as InputEventKey
 		if key_event.pressed and not key_event.echo:
@@ -381,8 +406,24 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
+	if _is_ui_modal_open():
+		is_aiming_down_sights = false
+		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		move_and_slide()
+		_update_camera_and_occlusion(delta)
+		return
+
 	# Handle dead state
 	if health_component != null and health_component.is_dead:
+		is_aiming_down_sights = false
+		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		if not is_on_floor():
@@ -425,6 +466,7 @@ func _physics_process(delta: float) -> void:
 		elif Input.is_action_just_released("aim") or not wants_ads:
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				current_iso_pan_yaw = rotation.y
 
 	# Aiming towards mouse intersection on horizontal plane
 	_process_aim()
@@ -587,19 +629,7 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	camera_rig.global_position = target_cam_pos
 
-	# Gentle Isometric Mouse-Pan Yaw: allow tactical peeking around corners
-	var target_iso_pan_yaw: float = 0.0
-	if is_inside_tree() and get_viewport() != null:
-		var vp_size := get_viewport().get_visible_rect().size
-		if vp_size.x > 0.0:
-			var mouse_x := get_viewport().get_mouse_position().x
-			var mouse_ratio := clampf((mouse_x / vp_size.x) - 0.5, -0.5, 0.5) * 2.0
-			# Subtle tactical pan up to +/- 22 degrees
-			target_iso_pan_yaw = -mouse_ratio * deg_to_rad(22.0)
-
-	current_iso_pan_yaw = lerp_angle(current_iso_pan_yaw, target_iso_pan_yaw, 2.5 * delta)
-
-	# Rig Yaw: in isometric mode follows current_iso_pan_yaw; in ADS mode follows player yaw rotation.y
+	# Rig Yaw: in isometric mode follows unconstrained 360 orbit; in ADS mode follows player yaw rotation.y
 	var target_rig_yaw := lerp_angle(current_iso_pan_yaw, rotation.y, ads_blend)
 	camera_rig.rotation.y = target_rig_yaw + off_yaw
 
@@ -611,14 +641,14 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	if camera != null:
 		# Isometric position: (0, current_iso_cam_y, 7.0)
-		# ADS over-shoulder position: (0.80, 2.15, 1.80) - Ghost Recon: Wildlands style
+		# ADS over-shoulder position: ads_cam_offset - Ghost Recon: Wildlands style
 		var iso_cam_pos := Vector3(0.0, current_iso_cam_y, 7.0)
-		var ads_cam_pos := Vector3(0.80, 2.15, 1.80)
+		var ads_cam_pos := ads_cam_offset
 		camera.position = iso_cam_pos.lerp(ads_cam_pos, ads_blend)
 
-		# Pitch angle: -60° (tactical isometric) <-> -12° (over-the-shoulder semi-scoped)
+		# Pitch angle: -60° (tactical isometric) <-> -13° (over-the-shoulder semi-scoped)
 		var iso_pitch := deg_to_rad(-60.0)
-		var ads_pitch := deg_to_rad(-12.0)
+		var ads_pitch := deg_to_rad(ads_cam_pitch_deg)
 		camera.rotation.x = lerp_angle(iso_pitch, ads_pitch, ads_blend)
 		camera.rotation.y = 0.0
 		camera.rotation.z = 0.0
@@ -1357,6 +1387,9 @@ func _on_damage_taken(amount: float, _source: Node, _type: String) -> void:
 func _on_died() -> void:
 	stop_dragging_body()
 	_restore_all_occluded_nodes()
+	is_aiming_down_sights = false
+	if is_local_authority:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	player_died.emit(peer_id)
 	print("Player %d has fallen in combat." % peer_id)
 
@@ -1372,6 +1405,12 @@ func _on_recovered_from_stun() -> void:
 
 func _on_vaporized() -> void:
 	print("Player %d disintegrated by Zat'nik'tel!" % peer_id)
+	stop_dragging_body()
+	_restore_all_occluded_nodes()
+	is_aiming_down_sights = false
+	if is_local_authority:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	player_died.emit(peer_id)
 	var flash := OmniLight3D.new()
 	flash.light_color = Color(0.2, 0.6, 1.0)
 	flash.light_energy = 8.0
@@ -1430,13 +1469,17 @@ func _try_interact() -> void:
 		nearest_interactable.interact(self)
 		return
 
-	# 4. Check for SGC Blast Door console
-	var door_console := get_tree().root.find_child("BlastDoorConsole", true, false)
-	if door_console != null and global_position.distance_to(door_console.global_position) <= 2.8:
-		var gateroom := get_tree().root.find_child("GateRoom", true, false)
-		if gateroom != null and gateroom.has_method("toggle_blast_doors"):
-			gateroom.toggle_blast_doors()
-		return
+	# 4. Check for SGC Blast Door console (any console in complex)
+	for console_node in get_tree().get_nodes_in_group("blast_door_console"):
+		var c := console_node as Node3D
+		if c != null and global_position.distance_to(c.global_position) <= 3.0:
+			if c.has_method("interact"):
+				c.interact(self)
+			else:
+				var gateroom := get_tree().root.find_child("GateRoom", true, false)
+				if gateroom != null and gateroom.has_method("toggle_blast_doors"):
+					gateroom.toggle_blast_doors()
+			return
 
 	# 5. Check for Lab Data Patch Drive (Research Lab)
 	var patch_drive := get_tree().root.find_child("LabDataPatchDrive", true, false) as LabDataPatchDriveScript

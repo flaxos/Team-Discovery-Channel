@@ -15,6 +15,7 @@ extends Control
 
 
 func _ready() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_setup_class_options()
 	_connect_network_signals()
 	_update_ui_state()

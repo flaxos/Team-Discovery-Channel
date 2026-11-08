@@ -107,6 +107,13 @@ func toggle_pause_menu() -> void:
 	if pause_menu == null or is_mission_ended:
 		return
 	pause_menu.visible = not pause_menu.visible
+	if pause_menu.visible:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	else:
+		if local_player != null and local_player.is_aiming_down_sights:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _on_master_slider_changed(value: float) -> void:
@@ -150,20 +157,32 @@ func _on_ambience_slider_changed(value: float) -> void:
 func _on_restart_pressed() -> void:
 	if pause_menu != null:
 		pause_menu.visible = false
+	if victory_modal != null:
+		victory_modal.visible = false
 	if get_tree().paused:
 		get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/main/GateRoom.tscn")
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	is_mission_ended = false
+	var err := get_tree().reload_current_scene()
+	if err != OK or get_tree().current_scene == null or get_tree().current_scene.scene_file_path == "":
+		get_tree().change_scene_to_file("res://scenes/main/GateRoom.tscn")
 
 
 func _on_return_pressed() -> void:
 	if pause_menu != null:
 		pause_menu.visible = false
+	if victory_modal != null:
+		victory_modal.visible = false
 	if get_tree().paused:
 		get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	is_mission_ended = false
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null:
 		net.disconnect_game()
-	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+	var err := get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+	if err != OK:
+		get_tree().change_scene_to_file("res://scenes/main/Lobby.tscn")
 
 
 func update_sector_display(sector_id: String) -> void:
@@ -221,6 +240,8 @@ func bind_local_player(player: PlayerController3D) -> void:
 		player.player_downed.connect(_on_local_player_downed)
 	if not player.player_revived.is_connected(_on_local_player_revived):
 		player.player_revived.connect(_on_local_player_revived)
+	if not player.player_died.is_connected(_on_local_player_died):
+		player.player_died.connect(_on_local_player_died)
 	if not player.revive_progress_changed.is_connected(_on_revive_progress_changed):
 		player.revive_progress_changed.connect(_on_revive_progress_changed)
 
@@ -246,6 +267,14 @@ func _on_health_downed() -> void:
 func _on_health_revived() -> void:
 	if local_player != null:
 		_on_local_player_revived(local_player.peer_id)
+
+
+func _on_local_player_died(pid: int) -> void:
+	var gateroom := get_tree().root.find_child("GateRoom", true, false)
+	if gateroom != null and gateroom.has_method("_check_squad_status"):
+		gateroom.call_deferred("_check_squad_status", pid)
+	elif not is_mission_ended:
+		show_defeat()
 
 
 func _on_local_player_downed(_peer_id: int) -> void:
@@ -607,6 +636,7 @@ func _render_glyphs() -> void:
 
 func show_victory() -> void:
 	is_mission_ended = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
 	if victory_modal != null:
@@ -614,11 +644,18 @@ func show_victory() -> void:
 	if debrief_title != null:
 		debrief_title.text = "EXTRACTION SUCCESSFUL"
 		debrief_title.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+	if debrief_subtitle != null:
+		debrief_subtitle.text = "SGC AFTER ACTION DEBRIEFING REPORT"
+	if restart_btn != null:
+		restart_btn.text = "RETRY MISSION"
+	if return_btn != null:
+		return_btn.text = "RETURN TO SGC BRIEFING"
 	_populate_debrief_stats(true)
 
 
 func show_defeat() -> void:
 	is_mission_ended = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
 	if victory_modal != null:
@@ -628,6 +665,10 @@ func show_defeat() -> void:
 		debrief_title.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
 	if debrief_subtitle != null:
 		debrief_subtitle.text = "SGC LEVEL 28 BREACHED BY GOA'ULD FORCES"
+	if restart_btn != null:
+		restart_btn.text = "RETRY MISSION"
+	if return_btn != null:
+		return_btn.text = "RETURN TO SGC BRIEFING"
 	_populate_debrief_stats(false)
 
 

@@ -25,6 +25,16 @@ var revive_channel_time: float = 0.0
 const REVIVE_DURATION_S: float = 2.5
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
+var current_scramble_waypoint_index: int = 0
+const SCRAMBLE_WAYPOINTS: Array[Vector3] = [
+	Vector3(35.0, 0.1, 36.0),   # Armory doorway
+	Vector3(26.0, 0.1, 36.0),   # Round Hallway rotunda
+	Vector3(24.0, 0.1, 18.0),   # Elevator Lobby
+	Vector3(22.5, 0.1, 8.0),    # East Corridor entrance
+	Vector3(18.0, 0.1, 4.0),    # BlastDoorsEast portal
+	Vector3(5.0, 0.1, 4.0)      # Gate Room defense line
+]
+
 var mounted_turret: DeployableTurret = null
 var current_target_jaffa: JaffaAI = null
 var target_player_to_revive: CharacterBody3D = null
@@ -53,6 +63,7 @@ func _ready() -> void:
 func scramble_to_gate_room() -> void:
 	if current_state == State.DEAD or current_state == State.DOWNED:
 		return
+	current_scramble_waypoint_index = 0
 	current_state = State.SCRAMBLE
 	print("SGCAirmanAI [%s]: Scrambling to Gate Room! Engaging hostiles!" % airman_callsign)
 
@@ -98,17 +109,161 @@ func _physics_process(delta: float) -> void:
 
 
 func _process_scramble(delta: float) -> void:
-	# Advance toward the Gate Room arena center (0, 0, 5)
-	var target_pos := Vector3(randf_range(-3.0, 3.0), 0.1, 5.0)
-	var dir := (target_pos - global_position)
-	dir.y = 0.0
-
-	if dir.length() > 2.0:
-		velocity.x = dir.normalized().x * move_speed
-		velocity.z = dir.normalized().z * move_speed
-		rotation.y = atan2(-dir.x, -dir.z)
-	else:
+	if current_scramble_waypoint_index >= SCRAMBLE_WAYPOINTS.size():
 		current_state = State.COMBAT
+		return
+
+	var wp := SCRAMBLE_WAYPOINTS[current_scramble_waypoint_index]
+	var to_wp := (wp - global_position)
+	to_wp.y = 0.0
+
+	if to_wp.length() < 1.5:
+		current_scramble_waypoint_index += 1
+		if current_scramble_waypoint_index >= SCRAMBLE_WAYPOINTS.size():
+			current_state = State.COMBAT
+			return
+		wp = SCRAMBLE_WAYPOINTS[current_scramble_waypoint_index]
+		to_wp = (wp - global_position)
+		to_wp.y = 0.0
+
+	var dir := to_wp.normalized()
+	velocity.x = dir.x * move_speed
+	velocity.z = dir.z * move_speed
+	rotation.y = atan2(-dir.x, -dir.z)
+
+
+func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
+	if not is_inside_tree():
+		return false
+	var seg_start := global_position + Vector3(0, 1.3, 0)
+	var seg_end := target_pos + Vector3(0, 1.0, 0)
+	var seg_dir := (seg_end - seg_start)
+	var seg_len_sq := seg_dir.length_squared()
+	if seg_len_sq < 0.001:
+		return false
+
+	for node in get_tree().get_nodes_in_group("smoke_cloud"):
+		var cloud := node as Area3D
+		if cloud != null and is_instance_valid(cloud):
+			var cloud_pos := cloud.global_position
+			var t := clampf((cloud_pos - seg_start).dot(seg_dir) / seg_len_sq, 0.0, 1.0)
+			var closest_pt := seg_start + seg_dir * t
+			if closest_pt.distance_to(cloud_pos) <= 4.5:
+				return true
+	return false
+
+
+func _has_line_of_sight(target: Node3D) -> bool:
+	if target == null or not is_inside_tree() or not target.is_inside_tree():
+		return false
+	if _is_target_obscured_by_smoke(target.global_position):
+		return false
+
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return false
+
+	var from := global_position + Vector3(0, 1.3, 0)
+	var exclude_list: Array[RID] = [get_rid()]
+	if target is CollisionObject3D:
+		exclude_list.append((target as CollisionObject3D).get_rid())
+
+	# Test both head and torso for clear unoccluded LOS
+	var test_points: Array[Vector3] = [
+		target.global_position + Vector3(0, 1.5, 0),  # Head
+		target.global_position + Vector3(0, 1.0, 0)   # Torso
+	]
+	var health := target.get_node_or_null("HealthComponent") as HealthComponent
+	if health != null and health.is_downed:
+		test_points.append(target.global_position + Vector3(0, 0.35, 0))
+
+	for to in test_points:
+		if _cast_los_ray(space, from, to, exclude_list.duplicate()):
+			return true
+
+	return false
+
+
+func _cast_los_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3, exclude_list: Array[RID]) -> bool:
+	for iter in range(3):
+		var query := PhysicsRayQueryParameters3D.create(from, to)
+		query.collision_mask = 1  # Blocked only by World walls/doors
+		query.exclude = exclude_list
+		var result := space.intersect_ray(query)
+		if result.is_empty():
+			return true
+		var col: Node = result.get("collider") as Node
+		if col != null and (col.name.contains("Glass") or col.name.contains("Overlook")):
+			if result.has("rid"):
+				exclude_list.append(result["rid"])
+			continue
+		return false
+	return false
+
+
+func _get_hallway_destination(target_pos: Vector3) -> Vector3:
+	# 1. Target in East Wing (Armory / Elevator Lobby / Round Hallway / Lab / East Corridor)
+	if target_pos.x >= 16.0:
+		if global_position.x < 17.0 and global_position.z <= 8.0:
+			return Vector3(18.0, 0.1, 4.0)   # Head to East Blast Door
+		elif global_position.x >= 17.0 and global_position.z < 9.6:
+			return Vector3(22.5, 0.1, 8.0)   # Head through East Corridor
+		elif global_position.z >= 8.0 and global_position.z < 24.0:
+			if target_pos.x >= 35.0 or target_pos.z >= 24.0:
+				return Vector3(24.0, 0.1, 22.0) # Head into Round Hallway
+			else:
+				return target_pos
+		elif global_position.z >= 24.0 and global_position.x < 35.0:
+			if target_pos.x >= 35.0:
+				return Vector3(35.0, 0.1, 36.0) # Head into Armory
+			elif target_pos.z >= 45.0:
+				return Vector3(26.0, 0.1, 46.0) # Head into Lab
+			else:
+				return target_pos
+		elif global_position.x >= 35.0:
+			return target_pos
+
+	# 2. Target in Fallback Hallway (South of Control Room)
+	elif target_pos.z >= 20.0 and absf(target_pos.x) <= 6.0:
+		if global_position.z <= 8.0:
+			return Vector3(5.0, 0.75, 8.5)   # Enter Control Room North ramp
+		elif global_position.z > 8.0 and global_position.z < 14.0:
+			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
+		elif global_position.z >= 14.0 and global_position.z < 22.0:
+			return Vector3(0.0, 0.75, 22.0)  # Head to Central Blast Door
+		elif global_position.z >= 22.0 and global_position.z < 28.0:
+			return Vector3(2.5, 0.1, 28.0)   # Fallback Hallway
+		else:
+			return target_pos
+
+	# 3. Target in Control Room
+	elif absf(target_pos.x) <= 7.5 and target_pos.z >= 7.8 and target_pos.z <= 22.0:
+		if global_position.z <= 8.0:
+			return Vector3(5.0, 0.75, 8.5)   # North ramp into Control Room
+		elif global_position.z > 8.0 and global_position.z < 14.0:
+			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
+		else:
+			return target_pos
+
+	# 4. Target in Gate Room Arena
+	elif target_pos.z <= 8.0 and target_pos.x < 17.0:
+		if global_position.x >= 35.0:
+			return Vector3(35.0, 0.1, 36.0)   # Exit Armory
+		elif global_position.z >= 24.0 and global_position.x >= 17.0:
+			return Vector3(24.0, 0.1, 22.0)   # Round Hallway to Elevator Lobby
+		elif global_position.z >= 9.6 and global_position.x >= 17.0:
+			return Vector3(22.5, 0.1, 8.0)    # Elevator Lobby to East Corridor
+		elif global_position.x >= 17.0 and global_position.z < 9.6:
+			return Vector3(18.0, 0.1, 4.0)    # East Corridor into Gate Room
+		elif global_position.z >= 22.0 and absf(global_position.x) <= 6.0:
+			return Vector3(0.0, 0.75, 22.0)   # Exit Fallback Hallway
+		elif global_position.z > 8.0 and global_position.z < 22.0 and absf(global_position.x) <= 7.5:
+			if global_position.z > 14.0:
+				return Vector3(5.0, 0.75, 14.0)
+			else:
+				return Vector3(5.0, 0.75, 8.5) # Down ramp into Gate Room
+
+	return target_pos
 
 
 func _process_combat(delta: float) -> void:
@@ -127,10 +282,12 @@ func _process_combat(delta: float) -> void:
 		mount_turret(turret)
 		return
 
-	# Acquire target Jaffa
+	# Acquire target Jaffa (filtered by line of sight)
 	_find_nearest_jaffa()
-	if current_target_jaffa == null:
-		# Hold tactical sandbag line
+	if current_target_jaffa == null or not _has_line_of_sight(current_target_jaffa):
+		# Hold tactical sandbag line without aiming or shooting into walls
+		if velocity.length_squared() > 0.05:
+			rotation.y = atan2(-velocity.x, -velocity.z)
 		velocity.x = move_toward(velocity.x, 0.0, 12.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 12.0 * delta)
 		return
@@ -138,8 +295,11 @@ func _process_combat(delta: float) -> void:
 	var dist := global_position.distance_to(current_target_jaffa.global_position)
 	var aim_dir := (current_target_jaffa.global_position - global_position)
 	aim_dir.y = 0.0
-	if aim_dir.length_squared() > 0.01:
-		rotation.y = atan2(-aim_dir.x, -aim_dir.z)
+	if _has_line_of_sight(current_target_jaffa):
+		if aim_dir.length_squared() > 0.01:
+			rotation.y = atan2(-aim_dir.x, -aim_dir.z)
+	elif velocity.length_squared() > 0.05:
+		rotation.y = atan2(-velocity.x, -velocity.z)
 
 	if dist > 8.0:
 		# Advance toward sandbag line
@@ -150,16 +310,20 @@ func _process_combat(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 
 	# Fire MP5 bursts at Jaffa
-	if fire_cooldown <= 0.0 and dist <= combat_range:
+	if fire_cooldown <= 0.0 and dist <= combat_range and _has_line_of_sight(current_target_jaffa):
 		fire_cooldown = 60.0 / fire_rate_rpm
 		_fire_mp5(aim_dir.normalized())
 
 
 func _fire_mp5(dir: Vector3) -> void:
+	if current_target_jaffa == null or not _has_line_of_sight(current_target_jaffa):
+		return
+
 	var origin := global_position + Vector3(0, 1.2, 0)
 	var space := get_world_3d().direct_space_state
 	var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * combat_range)
 	query.collision_mask = 1 | 4  # World and Jaffa
+	query.exclude = [get_rid()]
 
 	var result := space.intersect_ray(query)
 	var hit_pos := origin + dir * combat_range
@@ -214,7 +378,7 @@ func _process_turret(delta: float) -> void:
 
 	# Acquire target descending the ramp
 	_find_nearest_jaffa()
-	if current_target_jaffa != null:
+	if current_target_jaffa != null and _has_line_of_sight(current_target_jaffa):
 		var target_pos := current_target_jaffa.global_position + Vector3(0, 1.0, 0)
 		var aim_dir := (target_pos - mounted_turret.global_position).normalized()
 		mounted_turret.try_manual_fire(aim_dir)
@@ -254,8 +418,11 @@ func _process_revive(delta: float) -> void:
 
 	var dist := global_position.distance_to(target_player_to_revive.global_position)
 	if dist > 1.8:
-		# Sprint to downed squadmate
-		var dir := (target_player_to_revive.global_position - global_position).normalized()
+		# Sprint to downed squadmate via hallway pathfinding
+		var move_dest := _get_hallway_destination(target_player_to_revive.global_position)
+		var to_dest := (move_dest - global_position)
+		to_dest.y = 0.0
+		var dir := to_dest.normalized()
 		velocity.x = dir.x * move_speed
 		velocity.z = dir.z * move_speed
 		rotation.y = atan2(-dir.x, -dir.z)
@@ -329,7 +496,10 @@ func _process_move_to_turret(delta: float) -> void:
 
 	var dist := global_position.distance_to(target_turret_to_mount.global_position)
 	if dist > 2.0:
-		var dir := (target_turret_to_mount.global_position - global_position).normalized()
+		var move_dest := _get_hallway_destination(target_turret_to_mount.global_position)
+		var to_dest := (move_dest - global_position)
+		to_dest.y = 0.0
+		var dir := to_dest.normalized()
 		velocity.x = dir.x * move_speed
 		velocity.z = dir.z * move_speed
 		rotation.y = atan2(-dir.x, -dir.z)
@@ -341,12 +511,14 @@ func _process_move_to_turret(delta: float) -> void:
 
 func _process_order_move(delta: float) -> void:
 	var dist := global_position.distance_to(ordered_position)
-	var dir := (ordered_position - global_position)
-	dir.y = 0.0
+	var move_dest := _get_hallway_destination(ordered_position)
+	var to_dest := (move_dest - global_position)
+	to_dest.y = 0.0
 
 	if dist > 1.2:
-		velocity.x = dir.normalized().x * move_speed
-		velocity.z = dir.normalized().z * move_speed
+		var dir := to_dest.normalized()
+		velocity.x = dir.x * move_speed
+		velocity.z = dir.z * move_speed
 		rotation.y = atan2(-dir.x, -dir.z)
 		if body_mesh != null:
 			body_mesh.scale.y = 1.0
@@ -358,9 +530,9 @@ func _process_order_move(delta: float) -> void:
 			body_mesh.scale.y = 0.65
 			body_mesh.position.y = 0.15
 
-	# While moving or holding, return fire at any Jaffa in range
+	# While moving or holding, return fire at any Jaffa in range only with clear line of sight
 	_find_nearest_jaffa()
-	if current_target_jaffa != null:
+	if current_target_jaffa != null and _has_line_of_sight(current_target_jaffa):
 		var jaffa_dist := global_position.distance_to(current_target_jaffa.global_position)
 		if jaffa_dist <= combat_range and fire_cooldown <= 0.0:
 			var aim_dir := (current_target_jaffa.global_position - global_position)
@@ -369,6 +541,8 @@ func _process_order_move(delta: float) -> void:
 				rotation.y = atan2(-aim_dir.x, -aim_dir.z)
 			fire_cooldown = 60.0 / fire_rate_rpm
 			_fire_mp5(aim_dir.normalized())
+	elif velocity.length_squared() > 0.05:
+		rotation.y = atan2(-velocity.x, -velocity.z)
 
 
 func _process_order_regroup(delta: float) -> void:
@@ -377,12 +551,14 @@ func _process_order_regroup(delta: float) -> void:
 		return
 
 	var dist := global_position.distance_to(order_leader.global_position)
-	var dir := (order_leader.global_position - global_position)
-	dir.y = 0.0
+	var move_dest := _get_hallway_destination(order_leader.global_position)
+	var to_dest := (move_dest - global_position)
+	to_dest.y = 0.0
 
 	if dist > 2.5:
-		velocity.x = dir.normalized().x * move_speed
-		velocity.z = dir.normalized().z * move_speed
+		var dir := to_dest.normalized()
+		velocity.x = dir.x * move_speed
+		velocity.z = dir.z * move_speed
 		rotation.y = atan2(-dir.x, -dir.z)
 		if body_mesh != null:
 			body_mesh.scale.y = 1.0
@@ -392,14 +568,17 @@ func _process_order_regroup(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 		rotation.y = lerp_angle(rotation.y, order_leader.rotation.y, 8.0 * delta)
 
-	# Cover fire
+	# Cover fire only when clear line of sight is confirmed
 	_find_nearest_jaffa()
-	if current_target_jaffa != null and fire_cooldown <= 0.0:
+	if current_target_jaffa != null and _has_line_of_sight(current_target_jaffa) and fire_cooldown <= 0.0:
 		var jaffa_dist := global_position.distance_to(current_target_jaffa.global_position)
 		if jaffa_dist <= combat_range:
-			var aim_dir := (current_target_jaffa.global_position - global_position).normalized()
+			var aim_dir := (current_target_jaffa.global_position - global_position)
+			aim_dir.y = 0.0
+			if dist <= 2.5 and aim_dir.length_squared() > 0.01:
+				rotation.y = atan2(-aim_dir.x, -aim_dir.z)
 			fire_cooldown = 60.0 / fire_rate_rpm
-			_fire_mp5(aim_dir)
+			_fire_mp5(aim_dir.normalized())
 
 
 func _process_downed_crawl(delta: float) -> void:
@@ -424,7 +603,7 @@ func _find_nearest_jaffa() -> void:
 		var jaffa := child as JaffaAI
 		if jaffa != null and jaffa.health_component != null and not jaffa.health_component.is_dead:
 			var d := global_position.distance_to(jaffa.global_position)
-			if d < min_dist:
+			if d < min_dist and _has_line_of_sight(jaffa):
 				min_dist = d
 				nearest = jaffa
 	current_target_jaffa = nearest

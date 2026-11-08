@@ -79,11 +79,15 @@ func _physics_process(delta: float) -> void:
 
 	var dist := global_position.distance_to(current_target.global_position)
 
-	# Look towards target on horizontal plane
-	var look_dir := (current_target.global_position - global_position)
-	look_dir.y = 0.0
-	if look_dir.length_squared() > 0.01:
-		rotation.y = atan2(-look_dir.x, -look_dir.z)
+	# Look towards target on horizontal plane only if line of sight is clear
+	if _has_line_of_sight(current_target):
+		var look_dir := (current_target.global_position - global_position)
+		look_dir.y = 0.0
+		if look_dir.length_squared() > 0.01:
+			rotation.y = atan2(-look_dir.x, -look_dir.z)
+	elif velocity.length_squared() > 0.05:
+		# When behind walls, face movement direction rather than staring through solid walls
+		rotation.y = atan2(-velocity.x, -velocity.z)
 
 	# State evaluations
 	if dist <= melee_range:
@@ -153,16 +157,37 @@ func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
 
 
 func _has_line_of_sight(target: Node3D) -> bool:
+	if target == null or not is_inside_tree() or not target.is_inside_tree():
+		return false
 	if _is_target_obscured_by_smoke(target.global_position):
 		return false
 
 	var space := get_world_3d().direct_space_state
-	var from := global_position + Vector3(0, 1.4, 0)
-	var to := target.global_position + Vector3(0, 1.0, 0)
+	if space == null:
+		return false
+
+	var from: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.4, 0)
 	var exclude_list: Array[RID] = [get_rid()]
 	if target is CollisionObject3D:
 		exclude_list.append((target as CollisionObject3D).get_rid())
 
+	# Test both head and torso for clear unoccluded LOS
+	var test_points: Array[Vector3] = [
+		target.global_position + Vector3(0, 1.5, 0),  # Head
+		target.global_position + Vector3(0, 1.0, 0)   # Torso
+	]
+	var health := target.get_node_or_null("HealthComponent") as HealthComponent
+	if health != null and health.is_downed:
+		test_points.append(target.global_position + Vector3(0, 0.35, 0))
+
+	for to in test_points:
+		if _cast_los_ray(space, from, to, exclude_list.duplicate()):
+			return true
+
+	return false
+
+
+func _cast_los_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3, exclude_list: Array[RID]) -> bool:
 	for iter in range(3):
 		var query := PhysicsRayQueryParameters3D.create(from, to)
 		query.collision_mask = 1  # Blocked only by World walls/barricades
@@ -176,7 +201,7 @@ func _has_line_of_sight(target: Node3D) -> bool:
 				exclude_list.append(result["rid"])
 			continue
 		return false
-	return true
+	return false
 
 
 func _advance_towards(target_pos: Vector3, delta: float) -> void:
@@ -193,6 +218,8 @@ func _advance_towards(target_pos: Vector3, delta: float) -> void:
 			# Ascend the helical spiral stairs toward Level 27
 			velocity.y = 3.5
 			move_dest = Vector3(-5.0, 5.5, 11.0)
+	elif target_pos.y < 4.5 and not _has_line_of_sight(current_target):
+		move_dest = _get_hallway_destination(target_pos)
 
 	var to_target := (move_dest - global_position)
 	to_target.y = 0.0
@@ -200,6 +227,75 @@ func _advance_towards(target_pos: Vector3, delta: float) -> void:
 
 	velocity.x = move_toward(velocity.x, dir.x * move_speed, 20.0 * delta)
 	velocity.z = move_toward(velocity.z, dir.z * move_speed, 20.0 * delta)
+
+	# If no line of sight to target, orient strictly to corridor movement direction
+	if not _has_line_of_sight(current_target) and dir.length_squared() > 0.01:
+		rotation.y = atan2(-dir.x, -dir.z)
+
+
+func _get_hallway_destination(target_pos: Vector3) -> Vector3:
+	# 1. Target in East Wing (Armory / Elevator Lobby / Round Hallway / Lab / East Corridor)
+	if target_pos.x >= 16.0:
+		if global_position.x < 17.0 and global_position.z <= 8.0:
+			return Vector3(18.0, 0.1, 4.0)   # Head to East Blast Door
+		elif global_position.x >= 17.0 and global_position.z < 9.6:
+			return Vector3(22.5, 0.1, 8.0)   # Head through East Corridor
+		elif global_position.z >= 8.0 and global_position.z < 24.0:
+			if target_pos.x >= 35.0 or target_pos.z >= 24.0:
+				return Vector3(24.0, 0.1, 22.0) # Head into Round Hallway
+			else:
+				return target_pos
+		elif global_position.z >= 24.0 and global_position.x < 35.0:
+			if target_pos.x >= 35.0:
+				return Vector3(35.0, 0.1, 36.0) # Head into Armory
+			elif target_pos.z >= 45.0:
+				return Vector3(26.0, 0.1, 46.0) # Head into Lab
+			else:
+				return target_pos
+		elif global_position.x >= 35.0:
+			return target_pos
+
+	# 2. Target in Fallback Hallway (South of Control Room)
+	elif target_pos.z >= 20.0 and absf(target_pos.x) <= 6.0:
+		if global_position.z <= 8.0:
+			return Vector3(5.0, 0.75, 8.5)   # Enter Control Room North ramp
+		elif global_position.z > 8.0 and global_position.z < 14.0:
+			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
+		elif global_position.z >= 14.0 and global_position.z < 22.0:
+			return Vector3(0.0, 0.75, 22.0)  # Head to Central Blast Door
+		elif global_position.z >= 22.0 and global_position.z < 28.0:
+			return Vector3(2.5, 0.1, 28.0)   # Fallback Hallway
+		else:
+			return target_pos
+
+	# 3. Target in Control Room
+	elif absf(target_pos.x) <= 7.5 and target_pos.z >= 7.8 and target_pos.z <= 22.0:
+		if global_position.z <= 8.0:
+			return Vector3(5.0, 0.75, 8.5)   # North ramp into Control Room
+		elif global_position.z > 8.0 and global_position.z < 14.0:
+			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
+		else:
+			return target_pos
+
+	# 4. Target in Gate Room Arena
+	elif target_pos.z <= 8.0 and target_pos.x < 17.0:
+		if global_position.x >= 35.0:
+			return Vector3(35.0, 0.1, 36.0)   # Exit Armory
+		elif global_position.z >= 24.0 and global_position.x >= 17.0:
+			return Vector3(24.0, 0.1, 22.0)   # Round Hallway to Elevator Lobby
+		elif global_position.z >= 9.6 and global_position.x >= 17.0:
+			return Vector3(22.5, 0.1, 8.0)    # Elevator Lobby to East Corridor
+		elif global_position.x >= 17.0 and global_position.z < 9.6:
+			return Vector3(18.0, 0.1, 4.0)    # East Corridor into Gate Room
+		elif global_position.z >= 22.0 and absf(global_position.x) <= 6.0:
+			return Vector3(0.0, 0.75, 22.0)   # Exit Fallback Hallway
+		elif global_position.z > 8.0 and global_position.z < 22.0 and absf(global_position.x) <= 7.5:
+			if global_position.z > 14.0:
+				return Vector3(5.0, 0.75, 14.0)
+			else:
+				return Vector3(5.0, 0.75, 8.5) # Down ramp into Gate Room
+
+	return target_pos
 
 
 func _process_combat(delta: float, dist: float) -> void:
@@ -218,7 +314,7 @@ func _process_combat(delta: float, dist: float) -> void:
 
 
 func _fire_staff_blast() -> void:
-	if current_target == null:
+	if current_target == null or not _has_line_of_sight(current_target):
 		return
 
 	_dispatch_single_plasma_bolt()
@@ -228,12 +324,13 @@ func _fire_staff_blast() -> void:
 		var burst_timer := get_tree().create_timer(0.18)
 		burst_timer.timeout.connect(func() -> void:
 			if is_instance_valid(self) and is_inside_tree() and current_state != State.DEAD and current_state != State.STUNNED and current_target != null:
-				_dispatch_single_plasma_bolt()
+				if _has_line_of_sight(current_target):
+					_dispatch_single_plasma_bolt()
 		)
 
 
 func _dispatch_single_plasma_bolt() -> void:
-	if current_target == null:
+	if current_target == null or not _has_line_of_sight(current_target):
 		return
 
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.2, -0.6)
