@@ -19,6 +19,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 11 LORE DECOUPLING & CONSOLES TEST")
 	print("========================================================")
@@ -77,6 +80,7 @@ func _process(_delta: float) -> bool:
 		var sgc_dialer := gateroom.dhd_console as SGCDialingConsoleScript
 		assert(sgc_dialer != null, "Dialing console accessor must return SGCDialingConsole")
 
+		preload("res://tests/support/mission_fixture.gd").extraction_ready(gateroom)
 		sgc_dialer.start_dialing(player)
 		assert(sgc_dialer.current_phase == DHDDialer.DialPhase.CHEVRONS, "Console must enter CHEVRONS phase")
 

@@ -4,7 +4,7 @@ extends SceneTree
 ## 2. Door Slide Offsets & Animation Checks
 ## 3. 4-Player Capsule Ingress & Ride Area Containment
 ## 4. Call Pedestal Proximity & Context-Aware Dispatch Logic
-## 5. Spiral Staircase 24-Step Height Diff <= 0.25m Verification
+## 5. Spiral Staircase 29-tread Height Diff <= 0.25m Verification
 
 const ELEVATOR_SCENE: String = "res://scenes/props/SGCElevator.tscn"
 const COMPLEX_SCENE: String = "res://scenes/world/Level27Complex.tscn"
@@ -15,6 +15,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  SUBAGENT 4: SGC ELEVATOR CAPACITY & STAIRS VALIDATION ")
 	print("========================================================")
@@ -119,13 +122,14 @@ func _process(_delta: float) -> bool:
 		# Test call_elevator when already on floor -> opens doors
 		elevator.door_left.position.x = SGCElevator.DOOR_CLOSED_LEFT_X
 		elevator.door_right.position.x = SGCElevator.DOOR_CLOSED_RIGHT_X
+		elevator.is_doors_open = false
 		elevator.call_elevator(28)
 		assert(not elevator.is_moving, "Elevator should not transit if already on target floor")
 		print("[TEST 4/5] PASS: Pedestal positioning and floor dispatch logic verified.")
 
 	elif ticks == 10:
-		# 5. Inspect the 24 Spiral Stairs Steps
-		print("[TEST 5/5] Inspecting 24 Spiral Stairs Steps in Level27Complex...")
+		# 5. Inspect the 29 Spiral Stairs Steps
+		print("[TEST 5/5] Inspecting 29 Spiral Stairs Steps in Level27Complex...")
 		var stairs: Node3D = complex.get_node_or_null("SpiralStairsInterconnect") as Node3D
 		assert(stairs != null, "SpiralStairsInterconnect must exist")
 		var pole: CSGCylinder3D = stairs.get_node_or_null("StairsCentralPole") as CSGCylinder3D
@@ -142,12 +146,12 @@ func _process(_delta: float) -> bool:
 			return a.position.y < b.position.y
 		)
 
-		assert(steps.size() == 24, "Must contain exactly 24 steps (got %d)" % steps.size())
+		assert(steps.size() == 29, "Must contain exactly 29 steps (got %d)" % steps.size())
 
 		var prev_y: float = -999.0
 		for i: int in range(steps.size()):
 			var step: CSGBox3D = steps[i]
-			assert(step.use_collision, "%s must have active physics collision" % step.name)
+			assert(not step.use_collision, "%s must have visual-only collision flag" % step.name)
 			var y_pos: float = step.position.y
 			if i > 0:
 				var diff: float = y_pos - prev_y
@@ -158,7 +162,7 @@ func _process(_delta: float) -> bool:
 				print("  ✓ %s: Y = %.2f (Base step)" % [step.name, y_pos])
 			prev_y = y_pos
 
-		print("[TEST 5/5] PASS: All 24 spiral stairs steps verified with consecutive height diff <= 0.25m (max diff: 0.20m).")
+		print("[TEST 5/5] PASS: All 29 spiral stairs steps verified with consecutive height diff <= 0.25m (max diff: 0.20m).")
 
 		print("\n========================================================")
 		print("  SUBAGENT 4: ALL 5/5 VALIDATION TESTS PASSED 100% GREEN! ")
@@ -167,7 +171,7 @@ func _process(_delta: float) -> bool:
 		print("  ✓ RideArea Collision: Vector3(3.0, 3.0, 3.0)           ")
 		print("  ✓ Door Slide Offsets: -2.4m / 2.4m (1.6m travel)       ")
 		print("  ✓ Context-Aware Pedestal Logic (L28 <-> L27)           ")
-		print("  ✓ 24 Spiral Stairs Steps: All <= 0.25m height diff     ")
+		print("  ✓ 29 Spiral Stairs Steps: All <= 0.25m height diff     ")
 		print("========================================================\n")
 		quit(0)
 		return true

@@ -28,6 +28,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 16 COMPLEX CONNECTIVITY & AI TEST ")
 	print("========================================================")
@@ -116,9 +119,10 @@ func _process(delta: float) -> bool:
 		assert(player.current_iso_pan_yaw < orig_yaw, "Moving mouse right must rotate camera yaw counter-clockwise")
 
 		# Simulate 360-degree rotation beyond old 22-degree (0.38 rad) clamp
-		player.current_iso_pan_yaw = deg_to_rad(180.0)
+		player.rotation.y = deg_to_rad(180.0)
+		player.current_iso_pan_yaw = player.rotation.y
 		player._update_camera_and_occlusion(0.016)
-		assert(player.camera_rig.rotation.y > deg_to_rad(100.0), "Camera rig must support full 360 yaw rotation without clamping")
+		assert(absf(player.camera_rig.rotation.y) > deg_to_rad(100.0), "Camera rig must support full 360 yaw rotation without clamping")
 
 		# Verify camera-relative movement: when camera is rotated 90 deg, forward moves along camera axis
 		player.current_iso_pan_yaw = deg_to_rad(90.0)

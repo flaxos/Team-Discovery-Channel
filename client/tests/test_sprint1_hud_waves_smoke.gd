@@ -20,6 +20,9 @@ var dhd_verified: bool = false
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n==================================================")
 	print("  PROJECT SGC: SPRINT 1 HUD, WAVES & AUDIO TEST   ")
 	print("==================================================")
@@ -95,6 +98,7 @@ func _process(delta: float) -> bool:
 	if wave_spawn_verified and not dhd_verified:
 		# Test DHD and Extraction sequence
 		print("[TEST] Testing DHD completion & Extraction Trigger...")
+		preload("res://tests/support/mission_fixture.gd").extraction_ready(gateroom)
 		dhd.start_dialing(player)
 
 		# 1. Test wrong glyph resets sequence (UAT feedback verification)
@@ -129,7 +133,7 @@ func _process(delta: float) -> bool:
 
 	if dhd_verified and not test_passed:
 		# Simulate operative stepping into event horizon
-		stargate.current_state = StargateRing.GateState.ACTIVE
+		stargate._finish_kawoosh(stargate.activation_id)
 		stargate._on_extraction_entered(player)
 		assert(hud.victory_modal.visible, "Victory modal must be visible on extraction")
 		print("[TEST] PASS: Extraction triggered and Victory modal displayed!")
