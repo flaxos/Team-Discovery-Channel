@@ -4,6 +4,7 @@ extends CanvasLayer
 ## Displays operative vitals, weapon ammo, wave status, Helldivers-style DHD chords, and extraction victory.
 
 const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
+const RadialCommandWheelScript = preload("res://scripts/ui/RadialCommandWheel.gd")
 
 class CrosshairControl extends Control:
 	var hud: TacticalHUD = null
@@ -57,6 +58,8 @@ class CrosshairControl extends Control:
 @onready var resume_btn: Button = $PauseMenu/VBox/ResumeBtn if has_node("PauseMenu/VBox/ResumeBtn") else null
 @onready var pause_restart_btn: Button = $PauseMenu/VBox/RestartBtn if has_node("PauseMenu/VBox/RestartBtn") else null
 @onready var lobby_btn: Button = $PauseMenu/VBox/LobbyBtn if has_node("PauseMenu/VBox/LobbyBtn") else null
+@onready var pause_keybindings_btn: Button = $PauseMenu/VBox/KeybindingsBtn if has_node("PauseMenu/VBox/KeybindingsBtn") else null
+@onready var keybindings_modal: KeybindingsModal = $KeybindingsModal if has_node("KeybindingsModal") else null
 
 @onready var debrief_title: Label = $VictoryModal/VBox/Title if has_node("VictoryModal/VBox/Title") else null
 @onready var debrief_subtitle: Label = $VictoryModal/VBox/Subtitle if has_node("VictoryModal/VBox/Subtitle") else null
@@ -65,6 +68,9 @@ class CrosshairControl extends Control:
 @onready var stat_waves: Label = $VictoryModal/VBox/StatsContainer/StatWaves if has_node("VictoryModal/VBox/StatsContainer/StatWaves") else null
 @onready var stat_chevrons: Label = $VictoryModal/VBox/StatsContainer/StatChevrons if has_node("VictoryModal/VBox/StatsContainer/StatChevrons") else null
 @onready var stat_status: Label = $VictoryModal/VBox/StatsContainer/StatStatus if has_node("VictoryModal/VBox/StatsContainer/StatStatus") else null
+@onready var radial_wheel: RadialCommandWheel = $RadialCommandWheel if has_node("RadialCommandWheel") else null
+@onready var squad_toast_panel: PanelContainer = $SquadToastPanel if has_node("SquadToastPanel") else null
+@onready var squad_toast_label: Label = $SquadToastPanel/ToastLabel if has_node("SquadToastPanel/ToastLabel") else null
 
 var local_player: PlayerController3D = null
 var current_dhd: DHDDialer = null
@@ -74,6 +80,7 @@ var flash_alpha: float = 0.0
 var mission_seconds: float = 0.0
 var total_kills: int = 0
 var is_mission_ended: bool = false
+var toast_tween: Tween = null
 
 # Crosshair and Heat Gauge Variables
 var crosshair_override_pos: Vector2 = Vector2.ZERO
@@ -93,6 +100,9 @@ func _ready() -> void:
 		revive_bar.visible = false
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
+		keybindings_modal.closed.connect(_on_keybindings_modal_closed)
 
 	# Tactical 4-Pip Crosshair Overlay initialization
 	if crosshair_overlay == null:
@@ -112,6 +122,17 @@ func _ready() -> void:
 	if heat_container != null:
 		heat_container.visible = false
 
+	# Radial Command Wheel initialization
+	if radial_wheel == null:
+		radial_wheel = RadialCommandWheel.new()
+		radial_wheel.name = "RadialCommandWheel"
+		add_child(radial_wheel)
+	radial_wheel.visible = false
+
+	# Squad Order Military Toast Banner initialization
+	if squad_toast_panel == null:
+		_create_squad_toast_ui()
+
 	objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
 	if restart_btn != null:
@@ -124,6 +145,12 @@ func _ready() -> void:
 		pause_restart_btn.pressed.connect(_on_restart_pressed)
 	if lobby_btn != null:
 		lobby_btn.pressed.connect(_on_return_pressed)
+	if pause_keybindings_btn != null:
+		pause_keybindings_btn.pressed.connect(func() -> void:
+			if pause_menu != null:
+				pause_menu.visible = false
+			toggle_keybindings_modal()
+		)
 
 	# Audio volume sliders
 	if master_slider != null:
@@ -138,13 +165,63 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_mission_ended:
+		return
+
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if key_event.pressed and not key_event.echo:
+			if key_event.keycode == KEY_F1:
+				toggle_keybindings_modal()
+				get_viewport().set_input_as_handled()
+				return
+			elif key_event.keycode == KEY_ESCAPE:
+				if keybindings_modal != null and keybindings_modal.visible:
+					toggle_keybindings_modal()
+					get_viewport().set_input_as_handled()
+					return
+				elif pause_menu != null and pause_menu.visible:
+					toggle_pause_menu()
+					get_viewport().set_input_as_handled()
+					return
+				else:
+					toggle_keybindings_modal()
+					get_viewport().set_input_as_handled()
+					return
+
 	if event.is_action_pressed("toggle_pause"):
-		toggle_pause_menu()
+		if keybindings_modal != null and keybindings_modal.visible:
+			toggle_keybindings_modal()
+		elif pause_menu != null and pause_menu.visible:
+			toggle_pause_menu()
+		else:
+			toggle_keybindings_modal()
+
+
+func toggle_keybindings_modal() -> void:
+	if keybindings_modal == null or is_mission_ended:
+		return
+	if keybindings_modal.visible:
+		keybindings_modal.close_modal()
+	else:
+		if pause_menu != null:
+			pause_menu.visible = false
+		keybindings_modal.open_modal()
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _on_keybindings_modal_closed() -> void:
+	if local_player != null and local_player.is_aiming_down_sights:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func toggle_pause_menu() -> void:
 	if pause_menu == null or is_mission_ended:
 		return
+	if keybindings_modal != null and keybindings_modal.visible:
+		keybindings_modal.visible = false
 	pause_menu.visible = not pause_menu.visible
 	if pause_menu.visible:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -196,6 +273,8 @@ func _on_ambience_slider_changed(value: float) -> void:
 func _on_restart_pressed() -> void:
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
 	if victory_modal != null:
 		victory_modal.visible = false
 	if get_tree().paused:
@@ -210,6 +289,8 @@ func _on_restart_pressed() -> void:
 func _on_return_pressed() -> void:
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
 	if victory_modal != null:
 		victory_modal.visible = false
 	if get_tree().paused:
@@ -236,6 +317,104 @@ func update_sector_display(sector_id: String) -> void:
 		var c_name: String = class_names.get(local_player.class_id, "OPERATIVE")
 		var sec_name: String = sector_id.replace("_", " ")
 		operative_label.text = "%s [%s] • %s" % [local_player.player_callsign, c_name, sec_name]
+
+
+func _create_squad_toast_ui() -> void:
+	if squad_toast_panel != null:
+		return
+	var panel := PanelContainer.new()
+	panel.name = "SquadToastPanel"
+	panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	panel.offset_left = -320.0
+	panel.offset_right = 320.0
+	panel.offset_top = 64.0
+	panel.offset_bottom = 104.0
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.08, 0.12, 0.90)
+	sb.border_width_left = 2
+	sb.border_width_top = 2
+	sb.border_width_right = 2
+	sb.border_width_bottom = 2
+	sb.border_color = Color(0.2, 0.85, 0.65, 0.9)
+	sb.corner_radius_top_left = 4
+	sb.corner_radius_top_right = 4
+	sb.corner_radius_bottom_right = 4
+	sb.corner_radius_bottom_left = 4
+	panel.add_theme_stylebox_override("panel", sb)
+
+	var lbl := Label.new()
+	lbl.name = "ToastLabel"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_color_override("font_color", Color(0.3, 1.0, 0.75))
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.text = ""
+	panel.add_child(lbl)
+
+	add_child(panel)
+	squad_toast_panel = panel
+	squad_toast_label = lbl
+	panel.visible = false
+	panel.modulate = Color(1.0, 1.0, 1.0, 0.0)
+
+
+func show_squad_order_toast(text: String, duration: float = 3.5) -> void:
+	if squad_toast_panel == null or squad_toast_label == null:
+		_create_squad_toast_ui()
+	if squad_toast_panel == null or squad_toast_label == null:
+		return
+
+	squad_toast_label.text = text
+	squad_toast_panel.visible = true
+
+	if toast_tween != null and toast_tween.is_valid():
+		toast_tween.kill()
+
+	toast_tween = squad_toast_panel.create_tween()
+	toast_tween.tween_property(squad_toast_panel, "modulate:a", 1.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var stay_time: float = maxf(0.5, duration - 0.58)
+	toast_tween.tween_interval(stay_time)
+	toast_tween.tween_property(squad_toast_panel, "modulate:a", 0.0, 0.40).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	toast_tween.tween_callback(func() -> void:
+		if is_instance_valid(squad_toast_panel):
+			squad_toast_panel.visible = false
+	)
+
+
+func open_radial_command_wheel(screen_pos: Vector2, world_target_pos: Vector3) -> void:
+	if radial_wheel != null:
+		radial_wheel.open_wheel(screen_pos, world_target_pos)
+
+
+func update_radial_command_wheel(mouse_pos: Vector2) -> void:
+	if radial_wheel != null and radial_wheel.is_wheel_active:
+		radial_wheel.update_mouse_position(mouse_pos)
+
+
+func update_radial_command_wheel_rel(mouse_rel: Vector2) -> void:
+	if radial_wheel != null and radial_wheel.is_wheel_active:
+		radial_wheel.update_mouse_direction(mouse_rel)
+
+
+func get_radial_selected_command() -> int:
+	if radial_wheel != null:
+		return radial_wheel.get_selected_command()
+	return -1
+
+
+func close_radial_command_wheel() -> int:
+	if radial_wheel != null:
+		var cmd: int = radial_wheel.get_selected_command()
+		radial_wheel.close_wheel()
+		return cmd
+	return -1
+
+
+func is_radial_wheel_open() -> bool:
+	return radial_wheel != null and radial_wheel.is_wheel_active
 
 
 func bind_local_player(player: PlayerController3D) -> void:
@@ -596,6 +775,8 @@ func _draw_crosshair(ci: Control) -> void:
 		return
 	if pause_menu != null and pause_menu.visible:
 		return
+	if keybindings_modal != null and keybindings_modal.visible:
+		return
 	if local_player != null and local_player.health_component != null and local_player.health_component.is_dead:
 		return
 
@@ -917,6 +1098,8 @@ func show_victory() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
 	if victory_modal != null:
 		victory_modal.visible = true
 	if debrief_title != null:
@@ -936,6 +1119,8 @@ func show_defeat() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
 	if victory_modal != null:
 		victory_modal.visible = true
 	if debrief_title != null:

@@ -52,8 +52,21 @@ var dhd_console: DHDDialer:
 	set(v):
 		dialing_console = v
 
+var keybindings_modal: KeybindingsModal:
+	get:
+		if hud != null:
+			return hud.keybindings_modal
+		return null
+
+
+func toggle_keybindings_modal() -> void:
+	if hud != null:
+		hud.toggle_keybindings_modal()
+
 var is_blast_doors_closed: bool = false
 var is_animating_doors: bool = false
+var is_observation_shutters_closed: bool = false
+var is_animating_observation_shutters: bool = false
 var is_emergency_active: bool = false
 var emergency_strobe_timer: float = 0.0
 var player_sectors: Dictionary = {}
@@ -83,6 +96,7 @@ var sector_adjacency: Dictionary = {
 }
 
 signal blast_doors_toggled(closed: bool)
+signal observation_shutters_toggled(closed: bool)
 signal sector_changed(player_id: int, old_sector: String, new_sector: String)
 
 
@@ -604,6 +618,36 @@ func _play_door_sfx() -> void:
 		audio.play()
 
 
+func toggle_observation_shutters(force_closed: Variant = null) -> void:
+	if is_animating_observation_shutters:
+		return
+
+	var target_state: bool = not is_observation_shutters_closed
+	if force_closed != null and force_closed is bool:
+		if is_observation_shutters_closed == (force_closed as bool):
+			return
+		target_state = force_closed as bool
+
+	is_observation_shutters_closed = target_state
+	is_animating_observation_shutters = true
+	observation_shutters_toggled.emit(is_observation_shutters_closed)
+
+	# Target Y: 7.35m when lowered (closed over glass), 10.75m when retracted (open above ceiling)
+	var target_y: float = 7.35 if is_observation_shutters_closed else 10.75
+
+	var shutters: CSGBox3D = find_child("BriefingBlastShutters", true, false) as CSGBox3D
+	var tween: Tween = create_tween()
+	if shutters != null:
+		tween.tween_property(shutters, "position:y", target_y, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+	_play_door_sfx()
+
+	tween.tween_callback(func() -> void:
+		is_animating_observation_shutters = false
+		print("GateRoom: Observation Lounge blast shutters %s." % ("LOWERED (SEALED)" if is_observation_shutters_closed else "RAISED (OPEN)"))
+	)
+
+
 func _start_foothold_defense() -> void:
 	if wave_manager == null:
 		return
@@ -623,6 +667,10 @@ func _start_foothold_defense() -> void:
 func _trigger_base_scramble() -> void:
 	print("GateRoom: KLAXON SOUNDS! RED ALERT! UNSCHEDULED OFFWORLD ACTIVATION!")
 	set_emergency_lights(true)
+
+	# Automatically seal observation lounge blast shutters on red alert klaxon
+	if not is_observation_shutters_closed:
+		toggle_observation_shutters(true)
 
 	# Scramble Airmen to Gate Room
 	if allies_container != null:

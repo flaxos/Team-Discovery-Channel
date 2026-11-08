@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://b2sgclobby01"]
+[gd_scene load_steps=3 format=3 uid="uid://b2sgclobby01"]
 
 [ext_resource type="Script" path="res://scripts/ui/Lobby.gd" id="1_lobby"]
+[ext_resource type="PackedScene" uid="uid://c8keybindsgc01" path="res://scenes/ui/KeybindingsModal.tscn" id="2_kb01"]
 
 [node name="Lobby" type="Control"]
 layout_mode = 3
@@ -145,6 +146,13 @@ theme_override_font_sizes/font_size = 12
 text = "Ready to initialize wormhole connection."
 autowrap_mode = 2
 
+[node name="KeybindingsButton" type="Button" parent="MarginContainer/MainVBox/ColumnsHBox/LeftCol/NetSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.95, 0.7, 1)
+text = "[ TACTICAL CONTROLS & FIELD MANUAL ]"
+
 [node name="RightCol" type="VBoxContainer" parent="MarginContainer/MainVBox/ColumnsHBox"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -166,3 +174,6 @@ custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "OPEN IRIS • ENGAGE STARGATE • COMMENCE MISSION"
+
+[node name="KeybindingsModal" parent="." instance=ExtResource("2_kb01")]
+visible = false
