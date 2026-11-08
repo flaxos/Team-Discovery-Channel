@@ -136,6 +136,9 @@ func _enter_tree() -> void:
 	is_local_authority = (multiplayer.get_unique_id() == peer_id)
 	if has_node("MultiplayerSynchronizer"):
 		$MultiplayerSynchronizer.set_multiplayer_authority(peer_id)
+		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+		if net != null:
+			net.configure_mission_sync($MultiplayerSynchronizer)
 
 
 func _notification(what: int) -> void:
@@ -163,6 +166,7 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null and net.peers.has(peer_id):
+		class_id = net.peers[peer_id].get("class_id", class_id)
 		player_callsign = net.peers[peer_id].get("name", "OPERATIVE")
 	elif net != null and peer_id == 1:
 		player_callsign = net.player_name
@@ -890,6 +894,9 @@ func _update_proximity_fade(delta: float = 1.0) -> void:
 	var mesh_keys: Array = original_visual_materials.keys()
 	if current_player_alpha >= 0.999:
 		for mi_obj: Variant in mesh_keys:
+			if not is_instance_valid(mi_obj):
+				original_visual_materials.erase(mi_obj)
+				continue
 			var mi := mi_obj as MeshInstance3D
 			if mi != null and is_instance_valid(mi):
 				if mi.material_override != null and mi.material_override.has_meta("is_proximity_fade_mat"):
@@ -897,6 +904,9 @@ func _update_proximity_fade(delta: float = 1.0) -> void:
 		return
 
 	for mi_obj: Variant in mesh_keys:
+		if not is_instance_valid(mi_obj):
+			original_visual_materials.erase(mi_obj)
+			continue
 		var mi := mi_obj as MeshInstance3D
 		if mi != null and is_instance_valid(mi):
 			var base_mat: Material = original_visual_materials.get(mi, null) as Material
@@ -922,6 +932,9 @@ func _update_proximity_fade(delta: float = 1.0) -> void:
 func _restore_visual_materials() -> void:
 	var mesh_keys: Array = original_visual_materials.keys()
 	for mi_obj: Variant in mesh_keys:
+		if not is_instance_valid(mi_obj):
+			original_visual_materials.erase(mi_obj)
+			continue
 		var mi := mi_obj as MeshInstance3D
 		if mi != null and is_instance_valid(mi):
 			var orig_mat: Material = original_visual_materials.get(mi, null) as Material

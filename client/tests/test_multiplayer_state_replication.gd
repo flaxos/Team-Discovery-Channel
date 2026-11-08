@@ -110,9 +110,10 @@ func run_test() -> void:
 	host_lift.current_floor = 27
 	host_lift.cabin.position.y = 5.5
 	host_lift.is_doors_open = true
+	await physics_frame
+	await physics_frame
 	client_lift.request_elevator_snapshot.rpc_id(1)
 	await frames(20)
-	print("LIFT snapshot host=", host_lift.cabin.position, " client=", client_lift.cabin.position, " floor=", client_lift.current_floor, " doors=", client_lift.is_doors_open)
 	assert(client_lift.current_floor == 27 and client_lift.is_doors_open and is_equal_approx(client_lift.cabin.position.y, 5.5), "Late join lift snapshot includes floor, doors and cabin position")
 
 	var id: int = client_api.get_unique_id()
@@ -137,13 +138,13 @@ func run_test() -> void:
 	assert(player.health_component.current_health == player.health_component.max_health, "Nearby remote armor request heals on server")
 
 	host.wave_manager.end_mission()
-	for body: Node in host.players_container.get_children():
-		body.queue_free()
-	await frames(30)
-	server_peer.close()
-	client_peer.close()
+	await frames(5)
+	host_api.multiplayer_peer = null
+	client_api.multiplayer_peer = null
 	host_root.queue_free()
 	client_root.queue_free()
-	await process_frame
+	await frames(2)
+	server_peer.close()
+	client_peer.close()
 	print("PASS native NPC spawn/transform/despawn, mission snapshots, doors, lift and validated station requests")
 	quit(0)

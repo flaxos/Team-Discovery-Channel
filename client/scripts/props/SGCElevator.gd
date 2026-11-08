@@ -30,6 +30,7 @@ var destination_floor: int = 28
 var travel_elapsed: float = 0.0
 var travel_started: bool = false
 var transit_tween: Tween
+var door_tween: Tween
 
 @onready var cabin: AnimatableBody3D = $Cabin if has_node("Cabin") else null
 @onready var door_left: Node3D = $Cabin/DoorLeft if has_node("Cabin/DoorLeft") else null
@@ -263,7 +264,7 @@ func sync_move_elevator(target_floor: int) -> void:
 func _animate_cabin_transit(target_floor: int, duration: float = TRANSIT_DURATION) -> void:
 	var target_y: float = get_floor_y(target_floor)
 	travel_started = true
-	var tween: Tween = create_tween()
+	var tween: Tween = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	transit_tween = tween
 	if cabin != null:
 		tween.tween_property(cabin, "position:y", target_y, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
@@ -284,7 +285,10 @@ func _animate_cabin_transit(target_floor: int, duration: float = TRANSIT_DURATIO
 
 func _close_doors(on_closed: Callable) -> void:
 	is_doors_open = false
+	if door_tween != null and door_tween.is_valid():
+		door_tween.kill()
 	var tween: Tween = create_tween()
+	door_tween = tween
 	if door_left != null and door_right != null:
 		tween.tween_property(door_left, "position:x", DOOR_CLOSED_LEFT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 		tween.parallel().tween_property(door_right, "position:x", DOOR_CLOSED_RIGHT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
@@ -293,9 +297,12 @@ func _close_doors(on_closed: Callable) -> void:
 
 func _open_doors() -> void:
 	is_doors_open = true
+	if door_tween != null and door_tween.is_valid():
+		door_tween.kill()
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		_send_elevator_snapshot()
 	var tween: Tween = create_tween()
+	door_tween = tween
 	if door_left != null and door_right != null:
 		tween.tween_property(door_left, "position:x", DOOR_OPEN_LEFT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 		tween.parallel().tween_property(door_right, "position:x", DOOR_OPEN_RIGHT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
@@ -376,6 +383,8 @@ func _send_elevator_snapshot(peer: int = 0) -> void:
 
 @rpc("authority", "call_remote", "reliable")
 func sync_elevator_snapshot(floor_number: int, destination: int, moving: bool, opened: bool, y: float, remaining: float) -> void:
+	if door_tween != null and door_tween.is_valid():
+		door_tween.kill()
 	if transit_tween != null and transit_tween.is_valid():
 		transit_tween.kill()
 	current_floor = floor_number
@@ -383,7 +392,10 @@ func sync_elevator_snapshot(floor_number: int, destination: int, moving: bool, o
 	is_moving = moving
 	is_doors_open = opened
 	if cabin != null:
+		# Snapshot correction is a teleport, not an animated-body velocity update.
+		cabin.sync_to_physics = false
 		cabin.position.y = y
+		cabin.sync_to_physics = true
 	if door_left != null:
 		door_left.position.x = DOOR_OPEN_LEFT_X if opened else DOOR_CLOSED_LEFT_X
 	if door_right != null:

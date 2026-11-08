@@ -128,6 +128,12 @@ var current_sector: String = "GATE_ROOM"
 @onready var nameplate: Label3D = $Nameplate if has_node("Nameplate") else null
 
 
+func _enter_tree() -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null and has_node("MultiplayerSynchronizer"):
+		net.configure_mission_sync($MultiplayerSynchronizer)
+
+
 func _ready() -> void:
 	add_to_group("allies")
 	add_to_group("airmen")

@@ -63,6 +63,12 @@ var _death_notified: bool = false
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D if has_node("CollisionShape3D") else null
 
 
+func _enter_tree() -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null and has_node("MultiplayerSynchronizer"):
+		net.configure_mission_sync($MultiplayerSynchronizer)
+
+
 func _ready() -> void:
 	# Server is authoritative over AI logic
 	set_multiplayer_authority(1)
