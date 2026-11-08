@@ -71,7 +71,10 @@ var current_rank_index: int = 0
 @onready var transport_rings: TransportRings = get_node_or_null("../TransportRings") as TransportRings
 
 
+var hostile_gate_activation_enabled: bool = true
+
 func _ready() -> void:
+	hostile_gate_activation_enabled = get_parent().get("mission_id") != SGCNetworkManager.MISSION_SGC_UAT
 	var net: Node = get_node_or_null("/root/NetworkManager")
 	if net != null and net.get("mission_difficulty") != null:
 		difficulty = clampi(int(net.get("mission_difficulty")), 0, 2) as DifficultyTier
@@ -120,6 +123,7 @@ func requirements_met() -> bool:
 
 
 func dialing_block_reason() -> String:
+	if not hostile_gate_activation_enabled: return "UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION"
 	if mission_ended:
 		return "MISSION ENDED"
 	if completed_incursions < target_activations:
@@ -135,6 +139,7 @@ func dialing_block_reason() -> String:
 
 
 func request_outbound() -> bool:
+	if not hostile_gate_activation_enabled: return false
 	if not multiplayer.is_server() or not dialing_block_reason().is_empty():
 		objective_status_changed.emit(dialing_block_reason())
 		return false
@@ -172,6 +177,7 @@ func end_mission() -> void:
 
 
 func start_wave_defense() -> void:
+	if not hostile_gate_activation_enabled: return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	current_wave = 0
@@ -184,6 +190,7 @@ func start_wave_defense() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not hostile_gate_activation_enabled: return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 
@@ -245,6 +252,7 @@ func _physics_process(delta: float) -> void:
 
 
 func start_next_wave() -> void:
+	if not hostile_gate_activation_enabled: return
 	if not multiplayer.is_server() or mission_ended or outbound_reserved or is_wave_active:
 		return
 	var gate: StargateRing = _gate()

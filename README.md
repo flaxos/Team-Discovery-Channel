@@ -49,3 +49,10 @@ Sprint 20 controls: open Tactical Controls from the lobby or press F1/ESC in a m
 Mission modes are selectable in the lobby by the host: **Easy** requires at least three cleared incursions; **Medium** also requires the lab ROM computer upgrade; **Hard** additionally requires iris repair during an incoming breach. Incoming pressure continues until the objectives are met. Starting an eligible outbound dial reserves the gate against new incoming connections.
 
 The active cleanup and larger map/mission refactor plans are tracked in [plan/](plan/README.md).
+
+
+The host can select **SGC Defense — Levels 28/27/26** or **SGC UAT Base — No Hostile Activation** in the lobby's **LEVEL / MISSION** menu. UAT uses the same three-level map, friendly personnel, equipment, lifts and stairs, with automatic hostile gate activations and waves disabled. Difficulty applies to Defense. The host's mission selection is shared with clients and preserved on retry.
+
+For a quiet dedicated UAT server: `godot --headless --path client -- --server --mission sgc_uat`. The inherited scene is `client/scenes/main/SGCUATBase.tscn`.
+
+Changes in a separate worktree do not update an already running game or another checkout. Launch Godot with `--path` pointing at the `client/` directory of the checkout containing the changes.
