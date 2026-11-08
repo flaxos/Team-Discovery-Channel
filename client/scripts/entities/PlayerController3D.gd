@@ -74,6 +74,20 @@ var current_iso_pan_yaw: float = 0.0
 @export var ads_cam_pitch_deg: float = -1.5
 var ads_pitch_rad: float = 0.0
 var current_locked_aim_y: float = 0.0
+
+# Sprint 19: ADS Mouse Scroll Zoom & Near-FPS View
+@export var ads_zoom_distance: float = 1.65 # Default Wildlands over-shoulder distance (0.35m to 2.6m)
+const ADS_MIN_ZOOM: float = 0.35 # Near-FPS sightline
+const ADS_MAX_ZOOM: float = 2.60 # Wide tactical pan view
+const ADS_ZOOM_STEP: float = 0.20 # Distance step per mouse wheel notch
+
+# Sprint 19: Dynamic Proximity Transparency / Fade on Player Model
+var original_visual_materials: Dictionary = {}
+var current_player_alpha: float = 1.0
+
+# Sprint 19: Windowed Mode Mouse Cursor Confinement
+var is_window_focused: bool = true
+var current_mouse_mode: int = Input.MOUSE_MODE_CONFINED_HIDDEN
 @export var auto_y_aim_enabled: bool = true
 var is_crouch_toggled: bool = false
 var active_c4_timer_mode: int = 0  # 0: Remote, 1: 5s, 2: 10s, 3: 30s
@@ -118,8 +132,21 @@ func _enter_tree() -> void:
 		$MultiplayerSynchronizer.set_multiplayer_authority(peer_id)
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		is_window_focused = false
+		if is_local_authority:
+			current_mouse_mode = Input.MOUSE_MODE_VISIBLE
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
+		is_window_focused = true
+		if is_local_authority and not _is_ui_modal_open():
+			_update_mouse_mode()
+
+
 func _exit_tree() -> void:
 	_restore_all_occluded_nodes()
+	_restore_visual_materials()
 
 
 func _ready() -> void:
@@ -131,6 +158,8 @@ func _ready() -> void:
 
 	_setup_replication()
 	_apply_class_profile(class_id)
+	_setup_visual_materials()
+	_update_mouse_mode()
 
 	if nameplate != null:
 		nameplate.setup(self, is_local_authority)
@@ -225,6 +254,22 @@ func _unhandled_input(event: InputEvent) -> void:
 				_on_command_input_released()
 	elif event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
+		# Re-confine cursor if player clicked back into the window after losing focus
+		if mb.pressed and is_local_authority and not _is_ui_modal_open():
+			if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+				_update_mouse_mode()
+
+		# Sprint 19: ADS Mouse Scroll Zoom (Near-FPS <-> Wide Shoulder Pan)
+		if is_aiming_down_sights and mb.pressed:
+			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+				ads_zoom_distance = clampf(ads_zoom_distance - ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
+				get_viewport().set_input_as_handled()
+				return
+			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				ads_zoom_distance = clampf(ads_zoom_distance + ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
+				get_viewport().set_input_as_handled()
+				return
+
 		if mb.button_index == MOUSE_BUTTON_XBUTTON1:
 			if mb.pressed:
 				_on_command_input_pressed()
@@ -382,6 +427,8 @@ func _apply_class_visuals(target_class_id: String) -> void:
 		var profile: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(target_class_id, {})
 		nameplate.set_callsign(player_callsign, profile.get("name", "OPERATIVE").to_upper())
 
+	_setup_visual_materials()
+
 
 func switch_slot(slot: int) -> void:
 	if active_slot == slot:
@@ -438,8 +485,7 @@ func _physics_process(delta: float) -> void:
 	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
 	if _is_ui_modal_open():
 		is_aiming_down_sights = false
-		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		_update_mouse_mode()
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		if not is_on_floor():
@@ -451,8 +497,7 @@ func _physics_process(delta: float) -> void:
 	# Handle dead state
 	if health_component != null and health_component.is_dead:
 		is_aiming_down_sights = false
-		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		_update_mouse_mode()
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		if not is_on_floor():
@@ -463,8 +508,7 @@ func _physics_process(delta: float) -> void:
 	# Handle downed / bleedout state
 	if health_component != null and health_component.is_downed:
 		is_aiming_down_sights = false
-		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		_update_mouse_mode()
 		if mounted_turret != null:
 			mounted_turret.dismount()
 			mounted_turret = null
@@ -476,8 +520,7 @@ func _physics_process(delta: float) -> void:
 	# Handle stunned state
 	if health_component != null and health_component.is_stunned:
 		is_aiming_down_sights = false
-		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		_update_mouse_mode()
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		if not is_on_floor():
@@ -487,15 +530,13 @@ func _physics_process(delta: float) -> void:
 
 	# Check Right-Click Aim Down Sights (ADS)
 	var wants_ads: bool = Input.is_action_pressed("aim") and not is_in_cctv_mode
+	var ads_state_changed: bool = (is_aiming_down_sights != wants_ads)
 	is_aiming_down_sights = wants_ads
 
-	if is_local_authority:
-		if Input.is_action_just_pressed("aim") and wants_ads:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		elif Input.is_action_just_released("aim") or not wants_ads:
-			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-				current_iso_pan_yaw = rotation.y
+	if is_local_authority and ads_state_changed:
+		_update_mouse_mode()
+		if not wants_ads:
+			current_iso_pan_yaw = rotation.y
 
 	# Radial Squad Command Wheel hold threshold (>= 200ms)
 	if is_holding_command_input and not is_command_wheel_open:
@@ -676,9 +717,11 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	if camera != null:
 		# Isometric position: (0, current_iso_cam_y, 7.0)
-		# ADS over-shoulder position: ads_cam_offset - Ghost Recon: Wildlands style
+		# ADS over-shoulder position: dynamic ads_cam_pos based on ads_zoom_distance (0.35m to 2.6m)
 		var iso_cam_pos := Vector3(0.0, current_iso_cam_y, 7.0)
-		var ads_cam_pos := ads_cam_offset
+		var zoom_t: float = clampf((ads_zoom_distance - ADS_MIN_ZOOM) / (ADS_MAX_ZOOM - ADS_MIN_ZOOM), 0.0, 1.0)
+		var target_ads_x: float = lerpf(0.28, 0.55, zoom_t)
+		var ads_cam_pos := Vector3(target_ads_x, ads_cam_offset.y, ads_zoom_distance)
 		camera.position = iso_cam_pos.lerp(ads_cam_pos, ads_blend)
 
 		# Pitch angle: -60° (tactical isometric) <-> Ghost Recon Wildlands over-shoulder level sightline
@@ -691,10 +734,14 @@ func _update_camera_and_occlusion(delta: float) -> void:
 		if not is_aiming_down_sights:
 			ads_pitch_rad = move_toward(ads_pitch_rad, 0.0, 4.0 * delta)
 
-		# FOV: 55.0° (wide tactical) <-> 50.0° (Ghost Recon semi-scoped clarity)
-		camera.fov = lerpf(55.0, 50.0, ads_blend)
+		# FOV: 55.0° (wide tactical isometric) <-> 44.0°-54.0° (near-FPS to wide shoulder ADS)
+		var target_ads_fov: float = lerpf(44.0, 54.0, zoom_t)
+		camera.fov = lerpf(55.0, target_ads_fov, ads_blend)
 
-	# 3. Dynamic Wall & Structure Occlusion Fade
+	# 3. Dynamic Player Model Proximity Fade
+	_update_proximity_fade(delta)
+
+	# 4. Dynamic Wall & Structure Occlusion Fade
 	_update_wall_occlusion()
 
 
@@ -787,6 +834,104 @@ func _restore_all_occluded_nodes() -> void:
 			elif "material_override" in node:
 				node.set("material_override", orig_mat)
 	occluded_nodes.clear()
+
+
+func _update_mouse_mode() -> void:
+	if not is_local_authority:
+		return
+
+	var target_mode: int = Input.MOUSE_MODE_CONFINED_HIDDEN
+	if not is_window_focused or _is_ui_modal_open():
+		target_mode = Input.MOUSE_MODE_VISIBLE
+	elif health_component != null and (health_component.is_dead or health_component.is_downed or health_component.is_stunned):
+		target_mode = Input.MOUSE_MODE_VISIBLE
+	elif is_in_cctv_mode:
+		target_mode = Input.MOUSE_MODE_VISIBLE
+	elif is_aiming_down_sights:
+		target_mode = Input.MOUSE_MODE_CAPTURED
+	else:
+		target_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
+
+	current_mouse_mode = target_mode
+	Input.mouse_mode = target_mode
+
+
+func _setup_visual_materials() -> void:
+	original_visual_materials.clear()
+	var visuals := get_node_or_null("Visuals") as Node3D
+	if visuals == null:
+		return
+	_collect_mesh_instances(visuals)
+
+
+func _collect_mesh_instances(parent: Node) -> void:
+	for child: Node in parent.get_children():
+		if child is MeshInstance3D:
+			var mi := child as MeshInstance3D
+			var orig: Material = null
+			if mi.material_override != null and not mi.material_override.has_meta("is_proximity_fade_mat"):
+				orig = mi.material_override
+			elif mi.get_surface_override_material(0) != null:
+				orig = mi.get_surface_override_material(0)
+			elif mi.mesh != null and mi.mesh.surface_get_material(0) != null:
+				orig = mi.mesh.surface_get_material(0)
+			original_visual_materials[mi] = orig
+		if child.get_child_count() > 0:
+			_collect_mesh_instances(child)
+
+
+func _update_proximity_fade(delta: float = 1.0) -> void:
+	if original_visual_materials.is_empty():
+		_setup_visual_materials()
+
+	var target_alpha: float = 1.0
+	if ads_blend > 0.001:
+		var t_fade: float = clampf((ads_zoom_distance - ADS_MIN_ZOOM) / (1.60 - ADS_MIN_ZOOM), 0.0, 1.0)
+		var ads_alpha: float = lerpf(0.15, 1.0, t_fade)
+		target_alpha = lerpf(1.0, ads_alpha, ads_blend)
+
+	current_player_alpha = move_toward(current_player_alpha, target_alpha, 8.0 * delta)
+
+	var mesh_keys: Array = original_visual_materials.keys()
+	if current_player_alpha >= 0.999:
+		for mi_obj: Variant in mesh_keys:
+			var mi := mi_obj as MeshInstance3D
+			if mi != null and is_instance_valid(mi):
+				if mi.material_override != null and mi.material_override.has_meta("is_proximity_fade_mat"):
+					mi.material_override = original_visual_materials.get(mi, null) as Material
+		return
+
+	for mi_obj: Variant in mesh_keys:
+		var mi := mi_obj as MeshInstance3D
+		if mi != null and is_instance_valid(mi):
+			var base_mat: Material = original_visual_materials.get(mi, null) as Material
+			var fade_mat: StandardMaterial3D = null
+
+			if mi.material_override != null and mi.material_override.has_meta("is_proximity_fade_mat"):
+				fade_mat = mi.material_override as StandardMaterial3D
+			else:
+				if base_mat is StandardMaterial3D:
+					fade_mat = (base_mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+				else:
+					fade_mat = StandardMaterial3D.new()
+					if base_mat != null and "albedo_color" in base_mat:
+						fade_mat.albedo_color = base_mat.get("albedo_color") as Color
+				fade_mat.set_meta("is_proximity_fade_mat", true)
+				fade_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				mi.material_override = fade_mat
+
+			if fade_mat != null:
+				fade_mat.albedo_color.a = current_player_alpha
+
+
+func _restore_visual_materials() -> void:
+	var mesh_keys: Array = original_visual_materials.keys()
+	for mi_obj: Variant in mesh_keys:
+		var mi := mi_obj as MeshInstance3D
+		if mi != null and is_instance_valid(mi):
+			var orig_mat: Material = original_visual_materials.get(mi, null) as Material
+			mi.material_override = orig_mat
+	current_player_alpha = 1.0
 
 
 func add_screen_shake(amount: float) -> void:
@@ -1800,9 +1945,9 @@ func _on_damage_taken(amount: float, _source: Node, _type: String) -> void:
 func _on_died() -> void:
 	stop_dragging_body()
 	_restore_all_occluded_nodes()
+	_restore_visual_materials()
 	is_aiming_down_sights = false
-	if is_local_authority:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_update_mouse_mode()
 	player_died.emit(peer_id)
 	print("Player %d has fallen in combat." % peer_id)
 
@@ -1820,9 +1965,9 @@ func _on_vaporized() -> void:
 	print("Player %d disintegrated by Zat'nik'tel!" % peer_id)
 	stop_dragging_body()
 	_restore_all_occluded_nodes()
+	_restore_visual_materials()
 	is_aiming_down_sights = false
-	if is_local_authority:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_update_mouse_mode()
 	player_died.emit(peer_id)
 	var flash := OmniLight3D.new()
 	flash.light_color = Color(0.2, 0.6, 1.0)
@@ -1954,6 +2099,8 @@ func clear_cctv_camera() -> void:
 	ads_blend = 0.0
 	current_iso_cam_y = 12.0
 	current_iso_pan_yaw = 0.0
+	_restore_visual_materials()
+	_update_mouse_mode()
 	if camera_rig != null:
 		camera_rig.global_position = global_position
 		camera_rig.rotation = Vector3.ZERO
