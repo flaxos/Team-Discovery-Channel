@@ -13,31 +13,13 @@ const CATEGORY_COMBAT: String = "COMBAT & WEAPON CONTROLS"
 const CATEGORY_MOVEMENT: String = "MOVEMENT & STANCE CONTROLS"
 const CATEGORY_SQUAD: String = "SQUAD TACTICS & CAMERA CONTROLS"
 
-const CONTROLS_DATA: Dictionary = {
-	CATEGORY_COMBAT: [
-		{"action": "Aim Down Sights (ADS / Wildlands Shoulder View)", "key": "[Right Mouse Button (Hold)]"},
-		{"action": "Fire Primary / Sidearm", "key": "[Left Mouse Button]"},
-		{"action": "Reload Weapon", "key": "[R]"},
-		{"action": "Switch Primary / Secondary", "key": "[1] / [2]"},
-		{"action": "Deploy Ballistic Shield", "key": "[4]"},
-		{"action": "Throw M18 Smoke Grenade", "key": "[5]"},
-		{"action": "Tactical C4 Timer Mode (Remote / 5s / 10s / 30s)", "key": "[T]"},
-		{"action": "Deploy .50 Cal Tripod", "key": "[G]"},
-	],
-	CATEGORY_MOVEMENT: [
-		{"action": "Move Operative", "key": "[W] [A] [S] [D]"},
-		{"action": "Toggle Crouch / Duck Behind Cover", "key": "[C]"},
-		{"action": "Tactical Sprint", "key": "[Shift (Hold)]"},
-		{"action": "Drag Downed Ally / Corpse", "key": "[G (Hold near body)]"},
-		{"action": "Interact / Mount .50 Cal / Repair Iris / Re-Armor", "key": "[E]"},
-	],
-	CATEGORY_SQUAD: [
-		{"action": "Squad Command Radial Wheel", "key": "[Q] or [Mouse 4 (Hold)]"},
-		{"action": "Quick Squad Context Ping", "key": "[Q] or [Middle Mouse (Tap)]"},
-		{"action": "360 Tactical Orbit / Camera Pan", "key": "[Middle Mouse + Drag] or [Alt + Mouse]"},
-		{"action": "Field Manual / Pause Menu", "key": "[ESC] or [F1]"},
-	],
-}
+var CONTROLS_DATA: Dictionary = {}
+var binding_buttons: Dictionary = {}
+var awaiting_action: String = ""
+var pending_event: InputEvent = null
+var status_label: Label
+var conflict_buttons: HBoxContainer
+var capture_armed: bool = false
 
 @onready var backdrop: ColorRect = %Backdrop if has_node("%Backdrop") else null
 @onready var terminal_panel: PanelContainer = %TerminalPanel if has_node("%TerminalPanel") else null
@@ -62,7 +44,15 @@ func _ready() -> void:
 	if title_label != null:
 		title_label.text = HEADER_TITLE
 
+	for action: String in _bindings().ACTIONS:
+		var info: Dictionary = _bindings().ACTIONS[action]
+		if not CONTROLS_DATA.has(info.category):
+			CONTROLS_DATA[info.category] = []
+		CONTROLS_DATA[info.category].append({"action": info.label, "key": _bindings().binding_text(action), "id": action})
 	_build_ui()
+	_build_remapping_controls()
+	_bindings().bindings_changed.connect(_refresh_bindings)
+	_refresh_bindings()
 
 
 func _build_ui() -> void:
@@ -84,11 +74,11 @@ func _populate_category(container: VBoxContainer, category_name: String) -> void
 		var item: Dictionary = items[idx]
 		var action_text: String = item.get("action", "")
 		var key_text: String = item.get("key", "")
-		var row: Control = _create_binding_row(action_text, key_text, idx)
+		var row: Control = _create_binding_row(action_text, key_text, idx, item.get("id", ""))
 		container.add_child(row)
 
 
-func _create_binding_row(action_text: String, key_text: String, index: int) -> Control:
+func _create_binding_row(action_text: String, key_text: String, index: int, action_id: String = "") -> Control:
 	var row := PanelContainer.new()
 	row.name = "BindingRow_%d" % index
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -123,32 +113,16 @@ func _create_binding_row(action_text: String, key_text: String, index: int) -> C
 	badge_align.alignment = BoxContainer.ALIGNMENT_END
 	vbox.add_child(badge_align)
 
-	var badge := PanelContainer.new()
-	badge.name = "KeyBadge"
-	var badge_style := StyleBoxFlat.new()
-	badge_style.bg_color = Color(0.12, 0.20, 0.22, 0.95)
-	badge_style.border_width_left = 1
-	badge_style.border_width_top = 1
-	badge_style.border_width_right = 1
-	badge_style.border_width_bottom = 1
-	badge_style.border_color = Color(0.25, 0.9, 0.75, 0.8)
-	badge_style.content_margin_left = 8.0
-	badge_style.content_margin_top = 3.0
-	badge_style.content_margin_right = 8.0
-	badge_style.content_margin_bottom = 3.0
-	badge_style.corner_radius_top_left = 3
-	badge_style.corner_radius_top_right = 3
-	badge_style.corner_radius_bottom_right = 3
-	badge_style.corner_radius_bottom_left = 3
-	badge.add_theme_stylebox_override("panel", badge_style)
+	var badge := Button.new()
+	badge.name = "BindingButton"
+	badge.text = key_text
+	badge.tooltip_text = "Click to replace this action's bindings. ESC cancels."
+	badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	badge.add_theme_color_override("font_color", Color(0.35, 1.0, 0.85))
+	badge.add_theme_font_size_override("font_size", 12)
 	badge_align.add_child(badge)
-
-	var key_label := Label.new()
-	key_label.name = "KeyLabel"
-	key_label.text = key_text
-	key_label.add_theme_color_override("font_color", Color(0.35, 1.0, 0.85, 1.0))
-	key_label.add_theme_font_size_override("font_size", 11)
-	badge.add_child(key_label)
+	binding_buttons[action_id] = badge
+	badge.pressed.connect(begin_capture.bind(action_id))
 
 	return row
 
@@ -188,7 +162,7 @@ func _create_directive_panel() -> Control:
 
 	var body := Label.new()
 	body.name = "DirectiveBody"
-	body.text = "• Maintain continuous 360° situational awareness.\n• Coordinate squad focus-fire with Radial Wheel [Q].\n• Deploy Ballistic Shield [4] & Smoke [5] during Iris breach.\n• Press [ESC] or [F1] to return to active combat."
+	body.text = "Hold squad command, flick to an order, then release to confirm. Mouse look stays active in TPS and ADS. ESC always cancels input capture or resumes the mission."
 	body.add_theme_color_override("font_color", Color(0.70, 0.80, 0.90, 0.85))
 	body.add_theme_font_size_override("font_size", 10)
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -197,16 +171,142 @@ func _create_directive_panel() -> Control:
 	return panel
 
 
+func _build_remapping_controls() -> void:
+	var footer: Node = close_button.get_parent() if close_button != null else null
+	if footer == null:
+		return
+	var main_box: Node = footer.get_parent()
+	status_label = Label.new()
+	status_label.name = "RebindingStatus"
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.add_theme_font_size_override("font_size", 12)
+	main_box.add_child(status_label)
+	main_box.move_child(status_label, footer.get_index())
+	conflict_buttons = HBoxContainer.new()
+	conflict_buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	main_box.add_child(conflict_buttons)
+	main_box.move_child(conflict_buttons, footer.get_index())
+	for choice: String in ["swap", "replace", "cancel"]:
+		var button := Button.new()
+		button.text = choice.capitalize()
+		button.pressed.connect(resolve_conflict.bind(choice))
+		conflict_buttons.add_child(button)
+	conflict_buttons.hide()
+	var reset := Button.new()
+	reset.name = "ResetDefaultsButton"
+	reset.text = "RESET DEFAULTS"
+	reset.pressed.connect(func() -> void:
+		cancel_capture()
+		var saved: bool = _bindings().reset_defaults()
+		status_label.text = "Defaults restored." if saved else _bindings().last_error
+	)
+	footer.add_child(reset)
+
+
+func _refresh_bindings() -> void:
+	for action: String in binding_buttons:
+		var button: Button = binding_buttons[action]
+		button.text = _bindings().binding_text(action)
+		button.modulate.a = 1.0
+	for category: String in CONTROLS_DATA:
+		for item: Dictionary in CONTROLS_DATA[category]:
+			item.key = _bindings().binding_text(item.id)
+
+
+func begin_capture(action: String) -> void:
+	cancel_capture()
+	awaiting_action = action
+	binding_buttons[action].text = "PRESS KEY / MOUSE…"
+	status_label.text = "Press an input for %s. ESC cancels." % _bindings().ACTIONS[action].label
+	# Button.pressed is emitted on mouse release; defer to exclude that event.
+	capture_armed = false
+	call_deferred("_arm_capture")
+
+
+func _arm_capture() -> void:
+	capture_armed = not awaiting_action.is_empty()
+
+
+func cancel_capture() -> void:
+	awaiting_action = ""
+	pending_event = null
+	capture_armed = false
+	if conflict_buttons != null:
+		conflict_buttons.hide()
+	_refresh_bindings()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		cancel_capture()
+
+
+func _process(_delta: float) -> void:
+	if not awaiting_action.is_empty() and binding_buttons.has(awaiting_action):
+		binding_buttons[awaiting_action].modulate.a = 0.75 + sin(Time.get_ticks_msec() * 0.008) * 0.25
+
+
+func _input(event: InputEvent) -> void:
+	if not visible or awaiting_action.is_empty():
+		return
+	if event is InputEventMouseMotion:
+		return
+	# While resolving a conflict, let GUI buttons receive clicks.
+	if pending_event != null:
+		if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+			cancel_capture()
+			get_viewport().set_input_as_handled()
+		return
+	get_viewport().set_input_as_handled()
+	if not capture_armed or not event.is_pressed() or (event is InputEventKey and event.echo):
+		return
+	if event is InputEventKey and event.keycode == KEY_ESCAPE:
+		cancel_capture()
+		status_label.text = "Binding unchanged."
+		return
+	if not (event is InputEventKey or event is InputEventMouseButton):
+		return
+	var error: String = _bindings().validate_event(awaiting_action, event)
+	if not error.is_empty():
+		status_label.text = error
+		return
+	pending_event = _bindings().decode_event(_bindings().event_data(event))
+	var conflicts: Array[String] = _bindings().conflicts_for(awaiting_action, pending_event)
+	if not conflicts.is_empty():
+		var labels: PackedStringArray = []
+		for conflict: String in conflicts:
+			labels.append(_bindings().ACTIONS[conflict].label)
+		status_label.text = "Already assigned: %s. Swap bindings, replace an alternate, or cancel." % ", ".join(labels)
+		conflict_buttons.show()
+	else:
+		resolve_conflict("replace")
+
+
+func resolve_conflict(choice: String) -> void:
+	if choice == "cancel":
+		cancel_capture()
+		status_label.text = "Binding unchanged."
+		return
+	if pending_event == null:
+		return
+	if _bindings().rebind(awaiting_action, pending_event, choice):
+		cancel_capture()
+		status_label.text = "Binding saved."
+	else:
+		status_label.text = _bindings().last_error
+		pending_event = null
+		conflict_buttons.hide()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
-
-	if event is InputEventKey:
-		var key_event := event as InputEventKey
-		if key_event.pressed and not key_event.echo:
-			if key_event.keycode == KEY_ESCAPE or key_event.keycode == KEY_F1:
-				close_modal(animate_transitions)
-				get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.echo:
+		return
+	var escape: bool = event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE
+	if escape or event.is_action_pressed("toggle_pause"):
+		close_modal(animate_transitions)
+		get_viewport().set_input_as_handled()
 
 
 func _on_close_pressed() -> void:
@@ -214,6 +314,10 @@ func _on_close_pressed() -> void:
 
 
 func open_modal(animated: bool = true) -> void:
+	cancel_capture()
+	_bindings().release_all()
+	if status_label != null:
+		status_label.text = "Click a binding to change it. ESC cancels / resumes."
 	is_modal_open = true
 	visible = true
 
@@ -229,6 +333,8 @@ func open_modal(animated: bool = true) -> void:
 
 
 func close_modal(animated: bool = true) -> void:
+	cancel_capture()
+	_bindings().release_all()
 	is_modal_open = false
 
 	if _fade_tween != null and _fade_tween.is_valid():
@@ -273,3 +379,7 @@ func get_key_labels(category_name: String) -> Array[String]:
 	for entry: Dictionary in entries:
 		list.append(entry.get("key", ""))
 	return list
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

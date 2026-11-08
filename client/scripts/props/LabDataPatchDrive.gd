@@ -55,7 +55,7 @@ func _on_body_entered(body: Node) -> void:
 	var player := body as PlayerController3D
 	if player != null and not is_retrieved and player.is_local_authority:
 		if prompt_label != null:
-			prompt_label.text = "[E] RETRIEVE CLEAN DIALING ROM"
+			prompt_label.text = _bindings().format_prompt("[E] RETRIEVE CLEAN DIALING ROM")
 
 
 func _on_body_exited(body: Node) -> void:
@@ -74,3 +74,7 @@ func _play_sfx(path: String, max_dist: float) -> void:
 		add_child(audio)
 		audio.finished.connect(audio.queue_free)
 		audio.play()
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

@@ -21,6 +21,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: KEYBINDINGS & TACTICAL CONTROLS MENU TEST")
 	print("========================================================")
@@ -55,73 +58,21 @@ func _process(_delta: float) -> bool:
 
 	elif ticks == 2:
 		# TEST 2: Verification of All Key Categories and Binding Labels
-		print("[TEST 2/5] Testing categories and all 17 binding labels...")
+		print("[TEST 2/5] Testing categories and all live binding buttons...")
 		var categories: Array[String] = modal.get_categories()
 		assert(categories.size() == 3, "Must have exactly 3 categories (found %d)" % categories.size())
 		assert(categories.has(KeybindingsModal.CATEGORY_COMBAT), "Must have CATEGORY_COMBAT")
 		assert(categories.has(KeybindingsModal.CATEGORY_MOVEMENT), "Must have CATEGORY_MOVEMENT")
 		assert(categories.has(KeybindingsModal.CATEGORY_SQUAD), "Must have CATEGORY_SQUAD")
 
-		# 1. COMBAT & WEAPON CONTROLS
-		var combat_bindings: Array = modal.get_bindings_for_category(KeybindingsModal.CATEGORY_COMBAT)
-		assert(combat_bindings.size() == 8, "Combat category must have 8 bindings (found %d)" % combat_bindings.size())
-		var expected_combat: Dictionary = {
-			"Aim Down Sights (ADS / Wildlands Shoulder View)": "[Right Mouse Button (Hold)]",
-			"Fire Primary / Sidearm": "[Left Mouse Button]",
-			"Reload Weapon": "[R]",
-			"Switch Primary / Secondary": "[1] / [2]",
-			"Deploy Ballistic Shield": "[4]",
-			"Throw M18 Smoke Grenade": "[5]",
-			"Tactical C4 Timer Mode (Remote / 5s / 10s / 30s)": "[T]",
-			"Deploy .50 Cal Tripod": "[G]",
-		}
-		for entry: Dictionary in combat_bindings:
-			var action: String = entry.get("action", "")
-			var key: String = entry.get("key", "")
-			assert(expected_combat.has(action), "Unexpected combat action: %s" % action)
-			assert(expected_combat[action] == key, "Key mismatch for %s: expected %s, got %s" % [action, expected_combat[action], key])
-
-		# 2. MOVEMENT & STANCE CONTROLS
-		var movement_bindings: Array = modal.get_bindings_for_category(KeybindingsModal.CATEGORY_MOVEMENT)
-		assert(movement_bindings.size() == 5, "Movement category must have 5 bindings (found %d)" % movement_bindings.size())
-		var expected_movement: Dictionary = {
-			"Move Operative": "[W] [A] [S] [D]",
-			"Toggle Crouch / Duck Behind Cover": "[C]",
-			"Tactical Sprint": "[Shift (Hold)]",
-			"Drag Downed Ally / Corpse": "[G (Hold near body)]",
-			"Interact / Mount .50 Cal / Repair Iris / Re-Armor": "[E]",
-		}
-		for entry: Dictionary in movement_bindings:
-			var action: String = entry.get("action", "")
-			var key: String = entry.get("key", "")
-			assert(expected_movement.has(action), "Unexpected movement action: %s" % action)
-			assert(expected_movement[action] == key, "Key mismatch for %s: expected %s, got %s" % [action, expected_movement[action], key])
-
-		# 3. SQUAD TACTICS & CAMERA CONTROLS
-		var squad_bindings: Array = modal.get_bindings_for_category(KeybindingsModal.CATEGORY_SQUAD)
-		assert(squad_bindings.size() == 4, "Squad category must have 4 bindings (found %d)" % squad_bindings.size())
-		var expected_squad: Dictionary = {
-			"Squad Command Radial Wheel": "[Q] or [Mouse 4 (Hold)]",
-			"Quick Squad Context Ping": "[Q] or [Middle Mouse (Tap)]",
-			"360 Tactical Orbit / Camera Pan": "[Middle Mouse + Drag] or [Alt + Mouse]",
-			"Field Manual / Pause Menu": "[ESC] or [F1]",
-		}
-		for entry: Dictionary in squad_bindings:
-			var action: String = entry.get("action", "")
-			var key: String = entry.get("key", "")
-			assert(expected_squad.has(action), "Unexpected squad action: %s" % action)
-			assert(expected_squad[action] == key, "Key mismatch for %s: expected %s, got %s" % [action, expected_squad[action], key])
-
-		# Verify UI Node hierarchy in containers
-		assert(modal.combat_container != null, "CombatContainer must exist")
-		assert(modal.combat_container.get_child_count() == 8, "CombatContainer must contain 8 child rows")
-		var first_row: Node = modal.combat_container.get_child(0)
-		var first_action: Label = first_row.find_child("ActionLabel", true, false) as Label
-		var first_key: Label = first_row.find_child("KeyLabel", true, false) as Label
-		assert(first_action != null and first_action.text == "Aim Down Sights (ADS / Wildlands Shoulder View)", "First action label must match ADS")
-		assert(first_key != null and first_key.text == "[Right Mouse Button (Hold)]", "First key label must match Right Mouse Button (Hold)")
-
-		print("[TEST 2/5] PASS: All 17 keybinding actions and keys matched specification perfectly.")
+		var manager: Node = root.get_node("KeybindingManager")
+		assert(modal.binding_buttons.size() == manager.ACTIONS.size(), "Every implemented action must have a binding button")
+		for action: String in manager.ACTIONS:
+			assert(modal.binding_buttons.has(action), "Missing action row: " + action)
+			var button: Button = modal.binding_buttons[action]
+			assert(button.text == manager.binding_text(action), "Button must reflect active InputMap")
+		assert(modal.combat_container.get_child_count() == 10, "Combat actions need individual rows")
+		print("[TEST 2/5] PASS: Canonical actions and live binding buttons verified.")
 
 	elif ticks == 3:
 		# TEST 3: Modal Open, Close, and ESC Input
@@ -225,7 +176,7 @@ func _process(_delta: float) -> bool:
 
 		# Test F1 InputEventKey handling in HUD
 		var f1_event := InputEventKey.new()
-		f1_event.keycode = KEY_F1
+		f1_event.physical_keycode = KEY_F1
 		f1_event.pressed = true
 		hud._unhandled_input(f1_event)
 		assert(hud.keybindings_modal.visible, "Pressing [F1] must toggle KeybindingsModal open")
@@ -248,7 +199,7 @@ func _process(_delta: float) -> bool:
 		print("\n========================================================")
 		print("  SPRINT 18 KEYBINDINGS & TACTICAL CONTROLS TEST PASSED! ")
 		print("  ✓ SGC Cheyenne Mountain Terminal UI & Phosphor Aesthetic")
-		print("  ✓ 3 Categories & All 17 Keybinding Labels Verified     ")
+		print("  ✓ 3 Categories & Canonical InputMap Bindings Verified     ")
 		print("  ✓ Open, Close, Button, and ESC Interception Functional  ")
 		print("  ✓ Lobby [ TACTICAL CONTROLS & FIELD MANUAL ] Integration")
 		print("  ✓ In-Game [ESC] / [F1] Toggle & Input Pause Cleanly Resumes")

@@ -79,7 +79,7 @@ func update_repair(delta: float) -> bool:
 			current_stage = completed_stages + 1
 			stage_repair_time = 0.0
 			if prompt_label != null:
-				prompt_label.text = "[E] STAGE %d: %s" % [current_stage, STAGE_NAMES[current_stage - 1].to_upper()]
+				prompt_label.text = _bindings().format_prompt("[E] STAGE %d: %s" % [current_stage, STAGE_NAMES[current_stage - 1].to_upper()])
 	return false
 
 
@@ -107,7 +107,7 @@ func _on_body_entered(body: Node) -> void:
 	var player := body as PlayerController3D
 	if player != null and not is_repaired and player.is_local_authority:
 		if prompt_label != null:
-			prompt_label.text = "[E] STAGE %d/3: %s" % [current_stage, STAGE_NAMES[current_stage - 1].to_upper()]
+			prompt_label.text = _bindings().format_prompt("[E] STAGE %d/3: %s" % [current_stage, STAGE_NAMES[current_stage - 1].to_upper()])
 
 
 func _on_body_exited(body: Node) -> void:
@@ -126,3 +126,7 @@ func _play_sfx(path: String, max_dist: float) -> void:
 		add_child(audio)
 		audio.finished.connect(audio.queue_free)
 		audio.play()
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

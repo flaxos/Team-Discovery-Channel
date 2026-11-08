@@ -16,9 +16,9 @@ func _ready() -> void:
 	add_to_group("interactable")
 	if prompt_label != null:
 		if is_cabin_panel:
-			prompt_label.text = "[E] DISPATCH LIFT"
+			prompt_label.text = _bindings().format_prompt("[E] DISPATCH LIFT")
 		else:
-			prompt_label.text = "[E] CALL LIFT"
+			prompt_label.text = _bindings().format_prompt("[E] CALL LIFT")
 		prompt_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 
 
@@ -47,3 +47,7 @@ func interact(_player: Node = null) -> void:
 	else:
 		print("SGCElevatorCallPedestal: Floor %d call button pressed by %s." % [target_floor, _player.name if _player != null else "operative"])
 		elev.call_elevator(target_floor)
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

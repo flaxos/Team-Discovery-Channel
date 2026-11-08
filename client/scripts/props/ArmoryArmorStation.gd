@@ -26,7 +26,7 @@ func _process(delta: float) -> void:
 		current_cooldown -= delta
 		if current_cooldown <= 0.0:
 			if prompt_label != null:
-				prompt_label.text = "[E] RE-ARMOR TACTICAL PLATES"
+				prompt_label.text = _bindings().format_prompt("[E] RE-ARMOR TACTICAL PLATES")
 			if station_light != null:
 				station_light.light_color = Color(0.2, 0.9, 0.4, 1.0)
 
@@ -63,7 +63,7 @@ func _on_body_entered(body: Node) -> void:
 	var player := body as PlayerController3D
 	if player != null and player.is_local_authority:
 		if prompt_label != null and current_cooldown <= 0.0:
-			prompt_label.text = "[E] RE-ARMOR TACTICAL PLATES"
+			prompt_label.text = _bindings().format_prompt("[E] RE-ARMOR TACTICAL PLATES")
 
 
 func _on_body_exited(body: Node) -> void:
@@ -82,3 +82,7 @@ func _play_sfx(path: String, max_dist: float) -> void:
 		add_child(audio)
 		audio.finished.connect(audio.queue_free)
 		audio.play()
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")
