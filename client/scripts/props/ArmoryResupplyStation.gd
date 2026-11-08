@@ -1,5 +1,6 @@
 class_name ArmoryResupplyStation
 extends Node3D
+const Interaction = preload("res://scripts/net/ServerInteraction.gd")
 ## Interactive SGC Munitions & Weapon Station on Sublevel 28.
 ## Operatives interact with [E] to replenish ammunition, Claymores, and C4,
 ## or swap weapon loadouts at the armory weapon racks.
@@ -39,6 +40,22 @@ func _setup_visual_indicator() -> void:
 func interact(player: PlayerController3D) -> void:
 	if player == null:
 		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_interact.rpc_id(1, get_path_to(player))
+	else:
+		request_interact(get_path_to(player))
+
+
+@rpc("any_peer", "call_local", "reliable")
+func request_interact(player_path: NodePath) -> void:
+	var player: PlayerController3D = Interaction.resolve(self, player_path)
+	if player != null:
+		_apply_interaction(player)
+
+
+func _apply_interaction(player: PlayerController3D) -> void:
+	if player == null:
+		return
 
 	if station_type == StationType.AMMO_CRATE:
 		_perform_ammo_resupply(player)
@@ -65,6 +82,8 @@ func _perform_ammo_resupply(player: PlayerController3D) -> void:
 		player.deployable_shields_count,
 		player.smoke_grenades_count
 	])
+	if multiplayer.has_multiplayer_peer():
+		sync_inventory.rpc(get_path_to(player), player.primary_weapon_id, false)
 	resupplied.emit(player)
 
 
@@ -75,6 +94,7 @@ func _perform_weapon_swap(player: PlayerController3D) -> void:
 	rack_index = (rack_index + 1) % rack_weapons.size()
 	var new_weapon_id := rack_weapons[rack_index]
 
+	player.active_slot = 1
 	player.primary_weapon_id = new_weapon_id
 	player._equip_weapon_by_id(new_weapon_id)
 
@@ -85,6 +105,10 @@ func _perform_weapon_swap(player: PlayerController3D) -> void:
 		player.peer_id,
 		new_weapon_id
 	])
+	if player.has_method("_broadcast_weapon_state"):
+		player.call("_broadcast_weapon_state")
+	if multiplayer.has_multiplayer_peer():
+		sync_inventory.rpc(get_path_to(player), new_weapon_id, true)
 	weapon_swapped.emit(player, new_weapon_id)
 
 
@@ -110,3 +134,16 @@ func _play_resupply_sfx() -> void:
 		add_child(audio)
 		audio.finished.connect(audio.queue_free)
 		audio.play()
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_inventory(player_path: NodePath, primary_id: String, swapped: bool) -> void:
+	var player := get_node_or_null(player_path) as PlayerController3D
+	if player == null:
+		return
+	player.primary_weapon_id = primary_id
+	if not swapped:
+		player.claymore_charges = player.MAX_CLAYMORE_CHARGES
+		player.c4_charges_remaining = player.MAX_C4_CHARGES
+		player.deployable_shields_count = player.MAX_DEPLOYABLE_SHIELDS
+		player.smoke_grenades_count = player.MAX_SMOKE_GRENADES

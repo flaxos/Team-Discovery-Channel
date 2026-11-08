@@ -61,6 +61,9 @@ func _load_gate_room() -> void:
 	if gate_scene != null:
 		current_gate_room = gate_scene.instantiate() as Node3D
 		world_container.add_child(current_gate_room)
+		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+		if net != null and net.is_in_active_session() and not net.is_server:
+			net.report_mission_ready.rpc_id(1)
 
 
 func _on_game_started() -> void:

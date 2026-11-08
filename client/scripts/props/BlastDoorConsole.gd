@@ -1,5 +1,6 @@
 class_name BlastDoorConsole
 extends CSGBox3D
+const Interaction = preload("res://scripts/net/ServerInteraction.gd")
 ## Interactive SGC Hydraulic Blast Door Control Console.
 ## Installed adjacent to all primary blast door portals (Central, West, East)
 ## and in the Briefing Room for the Observation Lounge Overlook Blast Shutters.
@@ -33,7 +34,7 @@ func _ready() -> void:
 		if door_id == "observation":
 			prompt_label.text = _bindings().format_prompt("[E] TOGGLE OBSERVATION BLAST SHUTTERS")
 
-	var gr: Node = get_tree().root.find_child("GateRoom", true, false)
+	var gr: Node = _room()
 	if gr != null:
 		if door_id == "observation":
 			if gr.has_signal("observation_shutters_toggled"):
@@ -45,17 +46,38 @@ func _ready() -> void:
 				gr.connect("blast_doors_toggled", _on_doors_toggled)
 
 
-func interact(_operative: Node = null) -> void:
-	if is_locked:
-		print("BlastDoorConsole [%s]: Console is LOCKED by base lockdown!" % door_id)
-		return
+func _room() -> Node:
+	var node: Node = get_parent()
+	while node != null:
+		if node is GateRoom:
+			return node
+		node = node.get_parent()
+	return null
 
-	var gr: Node = get_tree().root.find_child("GateRoom", true, false)
-	if gr != null:
-		if door_id == "observation" and gr.has_method("toggle_observation_shutters"):
-			gr.call("toggle_observation_shutters")
-		elif gr.has_method("toggle_blast_doors"):
-			gr.call("toggle_blast_doors")
+
+func interact(operative: Node = null) -> void:
+	if is_locked:
+		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		if operative is PlayerController3D:
+			request_interact.rpc_id(1, get_path_to(operative))
+		return
+	_apply_interaction()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func request_interact(player_path: NodePath) -> void:
+	if not is_locked and Interaction.resolve(self, player_path) != null:
+		_apply_interaction()
+
+
+func _apply_interaction() -> void:
+	var room: Node = _room()
+	if room != null:
+		if door_id == "observation":
+			room.toggle_observation_shutters()
+		else:
+			room.toggle_blast_doors()
 
 
 func _on_doors_toggled(closed: bool) -> void:

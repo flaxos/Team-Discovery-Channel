@@ -51,6 +51,7 @@ var tactical_destination: Vector3 = Vector3.ZERO
 var flank_route_target: Vector3 = Vector3.ZERO
 var tactical_cover_position: Vector3 = Vector3.ZERO
 var suppressive_hold_timer: float = 0.0
+var _death_notified: bool = false
 
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D if has_node("NavigationAgent3D") else null
@@ -103,13 +104,10 @@ func start_column_march(march_target_pos: Vector3) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_inside_tree():
 		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-
-	# Only server executes state machine and movement decisions
-	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
-		move_and_slide()
-		return
 
 	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
@@ -795,9 +793,12 @@ func _on_recovered_from_stun() -> void:
 
 
 func _on_died() -> void:
+	if _death_notified:
+		return
+	_death_notified = true
 	current_state = State.DEAD
 	_set_crouching(false)
-	collision_layer = 0  # No longer blocks bullets or players
+	collision_layer = 64  # Corpse-only ray layer: Zat can vaporize, players/bullets pass through.
 	if stun_fx != null:
 		stun_fx.visible = false
 
@@ -807,7 +808,8 @@ func _on_died() -> void:
 		tween.tween_property(body_mesh, "rotation:x", deg_to_rad(-85.0), 0.35)
 		tween.parallel().tween_property(body_mesh, "position:y", 0.2, 0.35)
 
-	jaffa_died.emit(self)
+	if multiplayer.is_server():
+		jaffa_died.emit(self)
 	print("Jaffa Guard eliminated.")
 
 
@@ -826,7 +828,8 @@ func _on_vaporized() -> void:
 	var tween := create_tween()
 	if body_mesh != null:
 		tween.tween_property(body_mesh, "scale", Vector3(0.01, 0.01, 0.01), 0.25)
-	tween.tween_callback(queue_free)
+	if multiplayer.is_server():
+		tween.tween_callback(queue_free)
 	var flash_tween := flash.create_tween()
 	flash_tween.tween_property(flash, "light_energy", 0.0, 0.25)
 	flash_tween.tween_callback(flash.queue_free)

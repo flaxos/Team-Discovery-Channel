@@ -57,6 +57,7 @@ var sequence_chevron: int = 0
 var sequence_wait: float = 0.0
 var completion_announced: bool = false
 var snapshot_timer: float = 0.0
+var counted_deaths: Dictionary = {}
 signal objective_status_changed(text: String)
 
 
@@ -167,12 +168,14 @@ func end_mission() -> void:
 	var gate: StargateRing = _gate()
 	if gate != null and multiplayer.is_server():
 		gate.close_wormhole()
+	_broadcast_mission_snapshot()
 
 
 func start_wave_defense() -> void:
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	current_wave = 0
+	counted_deaths.clear()
 	completed_incursions = 0
 	defense_started = true
 	mission_ended = false
@@ -184,6 +187,8 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 
+	if mission_ended:
+		return
 	snapshot_timer -= delta
 	if snapshot_timer <= 0.0:
 		snapshot_timer = 0.25
@@ -409,6 +414,9 @@ func _spawn_next_column_rank() -> void:
 
 
 func _on_jaffa_killed(_killer: Node, _jaffa: JaffaAI) -> void:
+	if not multiplayer.is_server() or _jaffa == null or counted_deaths.has(_jaffa.get_instance_id()):
+		return
+	counted_deaths[_jaffa.get_instance_id()] = true
 	enemies_alive = maxi(0, enemies_alive - 1)
 	jaffa_count_changed.emit(enemies_alive, current_wave)
 	print("WaveManager: Enemy eliminated! %d remaining in Incursion %d." % [enemies_alive, current_wave])
@@ -552,6 +560,8 @@ func sync_mission_snapshot(values: Array) -> void:
 	if values.size() != 13:
 		return
 	var previous_wave: int = current_wave
+	var previous_count: int = enemies_alive
+	var previous_completed: int = completed_incursions
 	current_wave = values[0]
 	completed_incursions = values[1]
 	enemies_alive = values[2]
@@ -567,7 +577,10 @@ func sync_mission_snapshot(values: Array) -> void:
 	is_iris_repaired = values[12]
 	if current_wave != previous_wave:
 		wave_started.emit(current_wave, enemies_alive)
-	jaffa_count_changed.emit(enemies_alive, current_wave)
+	if enemies_alive != previous_count:
+		jaffa_count_changed.emit(enemies_alive, current_wave)
+	if completed_incursions > previous_completed:
+		wave_cleared.emit(current_wave)
 	if is_wormhole_open:
 		wormhole_timer_tick.emit(inbound_wormhole_timer, wormhole_duration_s)
 	elif is_intermission:

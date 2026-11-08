@@ -157,12 +157,10 @@ func scramble_to_gate_room() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_inside_tree():
 		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-
-	if not multiplayer.is_server():
-		move_and_slide()
-		return
 
 	if fire_cooldown > 0.0:
 		fire_cooldown -= delta

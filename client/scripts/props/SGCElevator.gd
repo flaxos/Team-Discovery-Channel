@@ -26,6 +26,10 @@ var state: ElevatorState = ElevatorState.AT_28
 var is_moving: bool = false
 var is_doors_open: bool = false
 var riders: Array[CharacterBody3D] = []
+var destination_floor: int = 28
+var travel_elapsed: float = 0.0
+var travel_started: bool = false
+var transit_tween: Tween
 
 @onready var cabin: AnimatableBody3D = $Cabin if has_node("Cabin") else null
 @onready var door_left: Node3D = $Cabin/DoorLeft if has_node("Cabin/DoorLeft") else null
@@ -57,6 +61,8 @@ func _ready() -> void:
 	_set_pedestal_lights_status(Color(0.2, 0.9, 0.3))
 	if cabin != null:
 		cabin.position.y = get_floor_y(current_floor)
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_elevator_snapshot.rpc_id(1)
 
 
 # PlayerController3D routes interact once; a second input listener would double-call the lift.
@@ -188,6 +194,8 @@ func call_elevator(target_floor: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func server_request_call(target_floor: int) -> void:
+	if not _request_allowed():
+		return
 	if not multiplayer.is_server() or is_moving or target_floor not in [28, 27]:
 		return
 	if target_floor == current_floor and not is_doors_open:
@@ -214,6 +222,8 @@ func _dispatch_elevator(destination_floor: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func server_request_elevator(target_floor: int) -> void:
+	if not _request_allowed():
+		return
 	if not multiplayer.is_server() or is_moving or target_floor not in [28, 27] or target_floor == current_floor:
 		return
 	if multiplayer.has_multiplayer_peer():
@@ -228,6 +238,9 @@ func sync_move_elevator(target_floor: int) -> void:
 		return
 
 	is_moving = true
+	destination_floor = target_floor
+	travel_elapsed = 0.0
+	travel_started = false
 	var from_floor: int = current_floor
 	var target_y: float = get_floor_y(target_floor)
 	var current_y: float = get_floor_y(from_floor)
@@ -247,17 +260,19 @@ func sync_move_elevator(target_floor: int) -> void:
 	)
 
 
-func _animate_cabin_transit(target_floor: int) -> void:
+func _animate_cabin_transit(target_floor: int, duration: float = TRANSIT_DURATION) -> void:
 	var target_y: float = get_floor_y(target_floor)
-
+	travel_started = true
 	var tween: Tween = create_tween()
+	transit_tween = tween
 	if cabin != null:
-		tween.tween_property(cabin, "position:y", target_y, TRANSIT_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(cabin, "position:y", target_y, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 	tween.tween_callback(func() -> void:
 		current_floor = target_floor
 		state = ElevatorState.AT_27 if current_floor == 27 else ElevatorState.AT_28
 		is_moving = false
+		travel_started = false
 		_update_floor_indicator(current_floor)
 		_set_pedestal_lights_status(Color(0.2, 0.9, 0.3)) # Green when arrived
 		_play_sfx("res://audio/sfx_gate_lock.wav", 40.0)
@@ -278,6 +293,8 @@ func _close_doors(on_closed: Callable) -> void:
 
 func _open_doors() -> void:
 	is_doors_open = true
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		_send_elevator_snapshot()
 	var tween: Tween = create_tween()
 	if door_left != null and door_right != null:
 		tween.tween_property(door_left, "position:x", DOOR_OPEN_LEFT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
@@ -324,3 +341,57 @@ func _play_sfx(res_path: String, max_dist: float) -> void:
 		audio.global_position = cabin.global_position if cabin != null else global_position
 		audio.finished.connect(audio.queue_free)
 		audio.play()
+
+
+func _request_allowed() -> bool:
+	if not multiplayer.is_server():
+		return false
+	var sender: int = multiplayer.get_remote_sender_id()
+	if sender == 0:
+		return true
+	var room: Node = get_parent()
+	var player: Node = room.get_node_or_null("Players/" + str(sender))
+	return player != null and _can_interact_with_elevator(player)
+
+
+func _process(delta: float) -> void:
+	if is_moving and travel_started:
+		travel_elapsed += delta
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_elevator_snapshot() -> void:
+	if multiplayer.is_server():
+		_send_elevator_snapshot(multiplayer.get_remote_sender_id())
+
+
+func _send_elevator_snapshot(peer: int = 0) -> void:
+	var y: float = cabin.position.y if cabin != null else get_floor_y(current_floor)
+	var remaining: float = maxf(0.01, TRANSIT_DURATION - travel_elapsed)
+	if peer > 0:
+		sync_elevator_snapshot.rpc_id(peer, current_floor, destination_floor, is_moving, is_doors_open, y, remaining)
+	else:
+		sync_elevator_snapshot.rpc(current_floor, destination_floor, is_moving, is_doors_open, y, remaining)
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_elevator_snapshot(floor_number: int, destination: int, moving: bool, opened: bool, y: float, remaining: float) -> void:
+	if transit_tween != null and transit_tween.is_valid():
+		transit_tween.kill()
+	current_floor = floor_number
+	destination_floor = destination
+	is_moving = moving
+	is_doors_open = opened
+	if cabin != null:
+		cabin.position.y = y
+	if door_left != null:
+		door_left.position.x = DOOR_OPEN_LEFT_X if opened else DOOR_CLOSED_LEFT_X
+	if door_right != null:
+		door_right.position.x = DOOR_OPEN_RIGHT_X if opened else DOOR_CLOSED_RIGHT_X
+	_update_floor_indicator(current_floor)
+	if moving:
+		state = ElevatorState.MOVING_UP if get_floor_y(destination) > y else ElevatorState.MOVING_DOWN
+		_animate_cabin_transit(destination, remaining)
+	else:
+		travel_started = false
+		state = ElevatorState.AT_27 if current_floor == 27 else ElevatorState.AT_28

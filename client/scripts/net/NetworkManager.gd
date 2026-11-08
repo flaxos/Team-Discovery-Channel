@@ -14,6 +14,7 @@ signal reconnecting_tick(attempt: int, max_attempts: int)
 signal auto_reconnect_failed()
 signal player_list_updated()
 signal game_started()
+signal mission_peer_ready(peer_id: int)
 signal mission_settings_changed(difficulty: int)
 signal mission_restart_preparing()
 
@@ -373,6 +374,8 @@ func sync_peer_info(peer_id: int, p_name: String, p_class_id: String) -> void:
 
 func _on_peer_connected(id: int) -> void:
 	print("NetworkManager: Peer connected with ID: %d" % id)
+	if is_server and mission_started and id != 1:
+		start_game.rpc_id(id, mission_difficulty)
 	peer_connected_event.emit(id)
 
 
@@ -420,3 +423,12 @@ func _on_server_disconnected() -> void:
 		else:
 			print("NetworkManager: Auto-reconnect aborted after reaching maximum attempts.")
 			auto_reconnect_failed.emit()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func report_mission_ready() -> void:
+	if not is_server or not mission_started:
+		return
+	var sender: int = multiplayer.get_remote_sender_id()
+	if sender > 1:
+		mission_peer_ready.emit(sender)
