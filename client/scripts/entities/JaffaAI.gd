@@ -52,6 +52,8 @@ var flank_route_target: Vector3 = Vector3.ZERO
 var tactical_cover_position: Vector3 = Vector3.ZERO
 var suppressive_hold_timer: float = 0.0
 var _death_notified: bool = false
+var navigator: SGCNavigator
+var overrun_destination_index: int = 0
 
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D if has_node("NavigationAgent3D") else null
@@ -72,6 +74,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	# Server is authoritative over AI logic
 	set_multiplayer_authority(1)
+	navigator = SGCNavigator.new(self)
 
 	if is_shock_guard:
 		if health_component != null:
@@ -270,7 +273,7 @@ func _process_cover(delta: float) -> void:
 
 	if dist_to_dest > 1.2:
 		_set_crouching(false)
-		var to_dest: Vector3 = (tactical_destination - global_position)
+		var to_dest: Vector3 = (_get_hallway_destination(tactical_destination) - global_position)
 		to_dest.y = 0.0
 		var dir: Vector3 = to_dest.normalized()
 
@@ -319,7 +322,7 @@ func _process_combat_state(delta: float) -> void:
 		_set_crouching(false)
 		_reset_staff_position()
 		current_state = State.ADVANCE
-		var advance_target := Vector3(column_x_lane, 0.0, 24.0)
+		var advance_target := _overrun_destination()
 		_advance_towards(advance_target, delta, march_speed)
 		return
 
@@ -365,7 +368,7 @@ func _process_advance_state(delta: float) -> void:
 
 	if current_target == null:
 		# Proceed to march steadily into the base preserving tactical lane cohesion
-		var advance_target := Vector3(column_x_lane, 0.0, 24.0)
+		var advance_target := _overrun_destination()
 		_advance_towards(advance_target, delta, march_speed)
 		return
 
@@ -568,21 +571,7 @@ func _cast_los_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
 
 func _advance_towards(target_pos: Vector3, delta: float, target_speed: float = -1.0) -> void:
 	var move_speed_to_use: float = target_speed if target_speed > 0.0 else move_speed
-	var move_dest := target_pos
-
-	# Multi-Level Pathfinding: If target is on Sublevel 27 (Y >= 4.5) and Jaffa is on Sublevel 28 (Y < 4.5)
-	if target_pos.y >= 4.5 and global_position.y < 4.5:
-		var stairs_landing := Vector3(-5.0, 1.0, 11.0)
-		var dist_to_landing := Vector2(global_position.x - stairs_landing.x, global_position.z - stairs_landing.z).length()
-		if dist_to_landing > 1.5:
-			# Advance toward the Spiral Staircase base in the Control Room
-			move_dest = stairs_landing
-		else:
-			# Ascend the helical spiral stairs toward Level 27
-			velocity.y = 3.5
-			move_dest = Vector3(-5.0, 5.5, 11.0)
-	elif target_pos.y < 4.5 and (current_target == null or not _has_line_of_sight(current_target)):
-		move_dest = _get_hallway_destination(target_pos)
+	var move_dest := navigator.next_position(target_pos, delta) if navigator != null else target_pos
 
 	var to_target := (move_dest - global_position)
 	to_target.y = 0.0
@@ -597,70 +586,7 @@ func _advance_towards(target_pos: Vector3, delta: float, target_speed: float = -
 
 
 func _get_hallway_destination(target_pos: Vector3) -> Vector3:
-	# 1. Target in East Wing (Armory / Elevator Lobby / Round Hallway / Lab / East Corridor)
-	if target_pos.x >= 16.0:
-		if global_position.x < 17.0 and global_position.z <= 8.0:
-			return Vector3(18.0, 0.1, 4.0)   # Head to East Blast Door
-		elif global_position.x >= 17.0 and global_position.z < 9.6:
-			return Vector3(22.5, 0.1, 8.0)   # Head through East Corridor
-		elif global_position.z >= 8.0 and global_position.z < 24.0:
-			if target_pos.x >= 35.0 or target_pos.z >= 24.0:
-				return Vector3(24.0, 0.1, 22.0) # Head into Round Hallway
-			else:
-				return target_pos
-		elif global_position.z >= 24.0 and global_position.x < 35.0:
-			if target_pos.x >= 35.0:
-				return Vector3(35.0, 0.1, 36.0) # Head into Armory
-			elif target_pos.z >= 45.0:
-				return Vector3(26.0, 0.1, 46.0) # Head into Lab
-			else:
-				return target_pos
-		elif global_position.x >= 35.0:
-			return target_pos
-
-	# 2. Target in Fallback Hallway (South of Control Room)
-	elif target_pos.z >= 20.0 and absf(target_pos.x) <= 6.0:
-		if global_position.z < 4.0:
-			return Vector3(target_pos.x, 0.0, 6.0) # March through Gate Room center in tactical lane
-		elif global_position.z <= 8.0:
-			return Vector3(5.0, 0.75, 8.5)   # Enter Control Room North ramp
-		elif global_position.z > 8.0 and global_position.z < 14.0:
-			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
-		elif global_position.z >= 14.0 and global_position.z < 22.0:
-			return Vector3(0.0, 0.75, 22.0)  # Head to Central Blast Door
-		elif global_position.z >= 22.0 and global_position.z < 28.0:
-			return Vector3(2.5, 0.1, 28.0)   # Fallback Hallway
-		else:
-			return target_pos
-
-	# 3. Target in Control Room
-	elif absf(target_pos.x) <= 7.5 and target_pos.z >= 7.8 and target_pos.z <= 22.0:
-		if global_position.z <= 8.0:
-			return Vector3(5.0, 0.75, 8.5)   # North ramp into Control Room
-		elif global_position.z > 8.0 and global_position.z < 14.0:
-			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
-		else:
-			return target_pos
-
-	# 4. Target in Gate Room Arena
-	elif target_pos.z <= 8.0 and target_pos.x < 17.0:
-		if global_position.x >= 35.0:
-			return Vector3(35.0, 0.1, 36.0)   # Exit Armory
-		elif global_position.z >= 24.0 and global_position.x >= 17.0:
-			return Vector3(24.0, 0.1, 22.0)   # Round Hallway to Elevator Lobby
-		elif global_position.z >= 9.6 and global_position.x >= 17.0:
-			return Vector3(22.5, 0.1, 8.0)    # Elevator Lobby to East Corridor
-		elif global_position.x >= 17.0 and global_position.z < 9.6:
-			return Vector3(18.0, 0.1, 4.0)    # East Corridor into Gate Room
-		elif global_position.z >= 22.0 and absf(global_position.x) <= 6.0:
-			return Vector3(0.0, 0.75, 22.0)   # Exit Fallback Hallway
-		elif global_position.z > 8.0 and global_position.z < 22.0 and absf(global_position.x) <= 7.5:
-			if global_position.z > 14.0:
-				return Vector3(5.0, 0.75, 14.0)
-			else:
-				return Vector3(5.0, 0.75, 8.5) # Down ramp into Gate Room
-
-	return target_pos
+	return navigator.next_position(target_pos) if navigator != null else global_position
 
 
 func _process_combat(delta: float, dist: float) -> void:
@@ -799,6 +725,7 @@ func _on_recovered_from_stun() -> void:
 
 
 func _on_died() -> void:
+	if navigator != null: navigator.reset()
 	if _death_notified:
 		return
 	_death_notified = true
@@ -839,3 +766,15 @@ func _on_vaporized() -> void:
 	var flash_tween := flash.create_tween()
 	flash_tween.tween_property(flash, "light_energy", 0.0, 0.25)
 	flash_tween.tween_callback(flash.queue_free)
+
+
+func _overrun_destination() -> Vector3:
+	var map := get_tree().get_first_node_in_group("sgc_map") as SGCMap
+	if map == null: return Vector3(column_x_lane, 0.0, 24.0)
+	var destinations: Array[StringName] = [&"EAST_CORRIDOR", &"ROUND_HALLWAY", &"BRIEFING_ROOM", &"STAGING"]
+	if column_x_lane < 0: destinations[0] = &"WEST_CORRIDOR"
+	var goal := map.definition.region(destinations[overrun_destination_index]).anchor
+	if global_position.distance_to(goal) < 1.2 and overrun_destination_index < destinations.size()-1:
+		overrun_destination_index += 1
+		goal = map.definition.region(destinations[overrun_destination_index]).anchor
+	return goal

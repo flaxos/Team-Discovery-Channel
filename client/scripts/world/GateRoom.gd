@@ -175,6 +175,14 @@ func _ready() -> void:
 	if stargate_mesh != null:
 		stargate_mesh.player_extracted.connect(_on_player_extracted)
 
+	var map := get_node_or_null("SGCMap") as SGCMap
+	if map != null:
+		sector_adjacency.clear()
+		for c in map.definition.connections:
+			if not sector_adjacency.has(str(c.from_region)): sector_adjacency[str(c.from_region)] = []
+			if not sector_adjacency.has(str(c.to_region)): sector_adjacency[str(c.to_region)] = []
+			sector_adjacency[str(c.from_region)].append(str(c.to_region))
+			sector_adjacency[str(c.to_region)].append(str(c.from_region))
 	_setup_sector_shrouds()
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_room_snapshot.rpc_id(1)
@@ -187,7 +195,7 @@ func _ready() -> void:
 		_spawn_all_players()
 
 		# If dedicated server without clients yet, wait for first client before starting foothold defense
-		if not net.is_dedicated_server or net.peers.size() > 1:
+		if not net.is_dedicated_server:
 			_start_foothold_defense()
 
 
@@ -413,6 +421,10 @@ func _update_sector_shrouding(local_sec: String) -> void:
 
 
 func get_current_sector(pos: Vector3) -> String:
+	var map := get_node_or_null("SGCMap") as SGCMap
+	if map != null:
+		var sector := map.definition.region_at(pos)
+		if sector != &"": return str(sector)
 	# ==========================================
 	# SUBLEVEL 27 SECTORS (Y >= 4.5m)
 	# ==========================================
@@ -522,6 +534,10 @@ func get_sector_display_name(sector_id: String) -> String:
 		SECTOR_UPPER_ELEVATOR_LOBBY:
 			return "UPPER ELEVATOR LOBBY [LVL 27]"
 		_:
+			var map := get_node_or_null("SGCMap") as SGCMap
+			var region := map.definition.region(StringName(sector_id)) if map != null else null
+			if region != null:
+				return sector_id.replace("_", " ") + " [LVL %d]" % region.floor_number
 			return "SGC CHEYENNE MOUNTAIN COMPLEX"
 
 
@@ -544,7 +560,7 @@ func _on_player_child_entered(node: Node) -> void:
 
 		if hud != null:
 			# Check if local player
-			var local_id := multiplayer.get_unique_id()
+			var local_id := multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else 1
 			if player.name == str(local_id) or (local_id == 1 and player.name == "1"):
 				hud.bind_local_player(player)
 
@@ -777,7 +793,7 @@ func _spawn_all_players() -> void:
 	# Spawn connected client peers
 	if net != null:
 		for peer_id: int in net.peers:
-			if peer_id == 1:
+			if peer_id == 1 or not net.mission_ready_peers.has(peer_id):
 				continue
 			var peer_data: Dictionary = net.peers[peer_id]
 			var p_class: String = peer_data.get("class_id", SGCNetworkManager.CLASS_SG3_HEAVY)

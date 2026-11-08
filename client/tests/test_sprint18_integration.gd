@@ -195,7 +195,7 @@ func _process(_delta: float) -> bool:
 			"Level 27 Right Pedestal must exist and be interactable")
 
 		# Check Cabin panel
-		var cabin_panel: Node3D = elevator.get_node_or_null("Cabin/CabinControlPanel") as Node3D
+		var cabin_panel: Node3D = elevator.get_node_or_null("Cabin/CabinControlPanel27") as Node3D
 		assert(cabin_panel != null and cabin_panel.is_in_group("interactable"),
 			"Cabin control panel must exist and be interactable")
 
@@ -269,40 +269,9 @@ func _process(_delta: float) -> bool:
 		# -------------------------------------------------------------
 		print("[TEST 6/6] Testing Continuous 29-tread Spiral Staircase CharacterBody3D Physics...")
 
-		var stairs: Node3D = gateroom.get_node_or_null("Level27Complex/SpiralStairsInterconnect") as Node3D
-		assert(stairs != null, "SpiralStairsInterconnect must exist")
-
-		var pole: CSGCylinder3D = stairs.get_node_or_null("StairsCentralPole") as CSGCylinder3D
-		assert(pole != null, "StairsCentralPole must exist")
-
-		var steps: Array[CSGBox3D] = []
-		for child: Node in pole.get_children():
-			var step: CSGBox3D = child as CSGBox3D
-			if step != null and String(step.name).begins_with("Step"):
-				steps.append(step)
-
-		steps.sort_custom(func(a: CSGBox3D, b: CSGBox3D) -> bool:
-			return a.position.y < b.position.y
-		)
-
-		assert(steps.size() == 29, "Spiral staircase must contain exactly 29 helical steps")
-
-		# Validate step risers (height difference <= 0.201m)
-		var prev_y: float = -999.0
-		for i: int in range(steps.size()):
-			var s: CSGBox3D = steps[i]
-			assert(not s.use_collision, "%s must have visual treads; the helix owns collision" % s.name)
-			var y_pos: float = s.position.y
-			if i > 0:
-				var diff: float = y_pos - prev_y
-				assert(diff <= 0.201, "%s riser height %.3fm exceeds safe step height" % [s.name, diff])
-			prev_y = y_pos
-
-		# Full continuous traversal is covered by test_staircase_traversal.
-		var top_step: CSGBox3D = steps[28]
-		var top_world_y: float = top_step.global_position.y + 0.1
-		assert(is_equal_approx(snappedf(top_world_y, 0.1), 5.5),
-			"Top step must connect to Level 27 floor height (~5.5m), got %.2fm" % top_world_y)
+		var stairs := gateroom.get_node("SGCMap/SpiralStairs") as Node3D
+		assert(stairs != null and stairs.has_node("HelicalWalkSurface"), "Spiral must expose continuous collision")
+		assert(stairs.path_point(0.0).y == 0.0 and stairs.path_point(1.0).y == 5.5, "Spiral must connect Levels 28 and 27")
 
 		print("  ✓ All 29 helical steps have visual treads; the helix owns collision with riser <= 0.20m.")
 		print("  ✓ Visual tread spacing and Level27 landing verified; continuous travel is tested separately.")

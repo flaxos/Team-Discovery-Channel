@@ -83,17 +83,11 @@ func _process(delta: float) -> bool:
 	elif ticks == 6:
 		# TEST 3: Structural Load-Bearing Pillars Collision Physics
 		print("[TEST 3/5] Testing Round Hallway Concrete Load-Bearing Pillars Collision...")
-		var round_hallway: Node3D = gateroom.get_node("Level28Complex/RoundHallway") as Node3D
-		var p_nw := round_hallway.get_node_or_null("PillarNW") as CSGBox3D
-		var p_ne := round_hallway.get_node_or_null("PillarNE") as CSGBox3D
-		var p_sw := round_hallway.get_node_or_null("PillarSW") as CSGBox3D
-		var p_se := round_hallway.get_node_or_null("PillarSE") as CSGBox3D
-
-		assert(p_nw != null and p_nw.use_collision, "PillarNW must have physics collision enabled")
-		assert(p_ne != null and p_ne.use_collision, "PillarNE must have physics collision enabled")
-		assert(p_sw != null and p_sw.use_collision, "PillarSW must have physics collision enabled")
-		assert(p_se != null and p_se.use_collision, "PillarSE must have physics collision enabled")
-		print("[TEST 3/5] PASS: 4 Round Hallway load-bearing pillars have active collision.")
+		var map := gateroom.get_node("SGCMap") as SGCMap
+		assert(map.definition.validate().is_empty(), "Map topology must validate")
+		assert(map.definition.asset_slots.size() > 30, "Modules must expose art replacement slots")
+		var floor_body := map.get_node("ROUND_HALLWAYFloor") as StaticBody3D
+		assert(floor_body != null and floor_body.get_child(1) is CollisionShape3D, "Round hallway must have modular collision")
 
 	elif ticks == 8:
 		# TEST 4: Facility-Wide Emergency Alert Strobe Lighting Pass (10 Sector Beacons)

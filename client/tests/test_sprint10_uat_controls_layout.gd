@@ -12,14 +12,15 @@ const GATE_ROOM_SCENE: String = "res://scenes/main/GateRoom.tscn"
 const PLAYER_SCENE: String = "res://scenes/entities/Player.tscn"
 const HUD_SCENE: String = "res://scenes/ui/HUD.tscn"
 
-var gateroom: GateRoom = null
-var player: PlayerController3D = null
-var hud: TacticalHUD = null
+var gateroom: Node3D = null
+var player: CharacterBody3D = null
+var hud: CanvasLayer = null
 var ticks: int = 0
 
 
 func _init() -> void:
 	call_deferred("_setup")
+
 
 func _setup() -> void:
 	print("\n========================================================")
@@ -28,21 +29,18 @@ func _setup() -> void:
 
 	var scene := load(GATE_ROOM_SCENE) as PackedScene
 	assert(scene != null, "GateRoom scene must load successfully")
-	gateroom = scene.instantiate() as GateRoom
+	gateroom = scene.instantiate() as Node3D
 	root.add_child(gateroom)
 
 	var p_scene := load(PLAYER_SCENE) as PackedScene
 	assert(p_scene != null, "Player scene must load")
-	player = p_scene.instantiate() as PlayerController3D
+	player = p_scene.instantiate() as CharacterBody3D
 	player.name = "1"
 	player.class_id = SGCNetworkManager.CLASS_ONEILL_RECON
 	gateroom.get_node("Players").add_child(player, true)
 
-	var hud_scene := load(HUD_SCENE) as PackedScene
-	assert(hud_scene != null, "HUD scene must load")
-	hud = hud_scene.instantiate() as TacticalHUD
-	root.add_child(hud)
-	hud.bind_local_player(player)
+	hud = gateroom.get_node("TacticalHUD") as CanvasLayer
+	assert(hud != null, "Production HUD must exist")
 
 
 func _process(delta: float) -> bool:
@@ -137,8 +135,8 @@ func _process(delta: float) -> bool:
 		print("[TEST 4/5] Testing 2x .50 Cal turrets by gate and blast doors on both sides (West & East)...")
 
 		# Verify 2x .50 Cal Tripod Turrets flanking Stargate ramp
-		var turret_west := gateroom.get_node_or_null("BunkerGeometry/TurretWest") as DeployableTurret
-		var turret_east := gateroom.get_node_or_null("BunkerGeometry/TurretEast") as DeployableTurret
+		var turret_west := gateroom.get_node_or_null("BunkerGeometry/TurretWest") as Node3D
+		var turret_east := gateroom.get_node_or_null("BunkerGeometry/TurretEast") as Node3D
 		assert(turret_west != null, "TurretWest must exist flanking left of gate ramp")
 		assert(turret_east != null, "TurretEast must exist flanking right of gate ramp")
 		assert(turret_west.position.x < -3.5, "TurretWest must be placed at X < -3.5 (found X=%.2f)" % turret_west.position.x)
@@ -148,23 +146,14 @@ func _process(delta: float) -> bool:
 		# Verify Left (West) Blast Door and West Corridor Sector
 		var blast_door_west := gateroom.get_node_or_null("BlastDoorsWest") as Node3D
 		assert(blast_door_west != null, "BlastDoorsWest must exist on West bunker wall")
-		var west_corridor_floor := gateroom.get_node_or_null("Level28Complex/WestCorridorSector/WestCorridorFloor") as CSGBox3D
-		assert(west_corridor_floor != null and west_corridor_floor.use_collision, "WestCorridorFloor must exist with collision allowing hallway exploration")
-
-		# Verify Right (East) Blast Door and East Connector Corridor into Elevator & Round Hallway
-		var blast_door_east := gateroom.get_node_or_null("BlastDoorsEast") as Node3D
-		assert(blast_door_east != null, "BlastDoorsEast must exist on East bunker wall")
-		var east_corridor_floor := gateroom.get_node_or_null("Level28Complex/EastConnectorCorridor/EastConnectorFloor") as CSGBox3D
-		assert(east_corridor_floor != null and east_corridor_floor.use_collision, "EastConnectorFloor must exist with collision connecting into Elevator Sector")
-
-		# Floor continuity test: East Connector floor (max Z=12) overlaps Elevator floor (min Z=10)
-		var elev_floor := gateroom.get_node("Level28Complex/ElevatorSector/ElevatorFloor") as CSGBox3D
-		var elev_min_z: float = elev_floor.position.z - elev_floor.size.z * 0.5
-		var east_max_z: float = east_corridor_floor.position.z + east_corridor_floor.size.z * 0.5
-		assert(east_max_z >= elev_min_z, "East Connector floor must connect seamlessly to Elevator floor (east_max=%.2f, elev_min=%.2f)" % [east_max_z, elev_min_z])
+		var map := gateroom.get_node("SGCMap") as Node3D
+		assert(map.get_node("WEST_CORRIDORFloor") is StaticBody3D, "West corridor must have collision")
+		assert(gateroom.has_node("BlastDoorsEast"), "East blast doors must exist")
+		assert(map.get_node("EAST_CORRIDORFloor") is StaticBody3D, "East corridor must have collision")
+		assert(map.definition.region(&"EAST_CORRIDOR").footprint.end.y == map.definition.region(&"ELEVATOR_LOBBY").footprint.position.y, "East corridor and lobby floors must meet")
 
 		# Verify Blast Doors can be toggled
-		var initial_closed := gateroom.is_blast_doors_closed
+		var initial_closed: bool = gateroom.is_blast_doors_closed
 		gateroom.toggle_blast_doors()
 		assert(gateroom.is_blast_doors_closed != initial_closed, "toggle_blast_doors() must toggle door state")
 
@@ -185,20 +174,20 @@ func _process(delta: float) -> bool:
 		assert(hud.lobby_btn != null, "PauseMenu must contain LobbyBtn (ABORT TO SGC BRIEFING)")
 
 		# Test DHD 7-Chevron to GDO Iris phase transition
-		var dhd: DHDDialer = gateroom.dhd_console
+		var dhd: Node3D = gateroom.dhd_console
 		assert(dhd != null, "Dialing console must exist in GateRoom")
 		preload("res://tests/support/mission_fixture.gd").extraction_ready(gateroom)
 		dhd.start_dialing(player)
-		assert(dhd.current_phase == DHDDialer.DialPhase.CHEVRONS, "DHD must start in CHEVRONS phase")
+		assert(dhd.current_phase == dhd.DialPhase.CHEVRONS, "DHD must start in CHEVRONS phase")
 
 		# Advance all 7 chevrons correctly
 		for i in range(7):
 			var expected_glyph: String = dhd.chevron_sequence[dhd.current_chevron_index]
-			var success := dhd.input_glyph(expected_glyph)
+			var success: bool = dhd.input_glyph(expected_glyph)
 			assert(success, "Glyph %d ('%s') must be accepted" % [i + 1, expected_glyph])
 
 		# Verify seamless transition to GDO_AUTH phase
-		assert(dhd.current_phase == DHDDialer.DialPhase.GDO_AUTH, "DHD must transition to GDO_AUTH phase after 7 chevrons (found phase: %s)" % dhd.current_phase)
+		assert(dhd.current_phase == dhd.DialPhase.GDO_AUTH, "DHD must transition to GDO_AUTH phase after 7 chevrons (found phase: %s)" % dhd.current_phase)
 		assert(dhd.current_chevron_index == 7, "All 7 chevrons must be locked")
 		assert(dhd.gdo_index == 0, "GDO index must be 0 awaiting beats")
 
@@ -215,7 +204,7 @@ func _process(delta: float) -> bool:
 		print("  ✓ HUD Retry / Return / Lobby Navigation Buttons       ")
 		print("  ✓ DHD 7-Chevron to GDO Iris Seamless Phase Transition ")
 		print("========================================================\n")
-		quit(0)
-		return true
+		preload("res://tests/support/finish.gd").success(self)
+		return false
 
 	return false

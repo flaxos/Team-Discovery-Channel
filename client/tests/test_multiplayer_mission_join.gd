@@ -84,8 +84,10 @@ func run_test() -> void:
 		await frames(30)
 		var log_text := FileAccess.get_file_as_string(output_dir.path_join("client.log"))
 		assert(not "ERROR:" in log_text and not "ObjectDB" in log_text, log_text)
-	net.disconnect_game()
+	# Stop packet delivery before removing RPC targets; keep a valid local peer for teardown.
+	net.multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	main.queue_free()
 	await frames(2)
+	net.disconnect_game()
 	print("PASS production late join, registered class, objective snapshot and coordinated retry" if not child else "PASS late client")
 	quit(0)

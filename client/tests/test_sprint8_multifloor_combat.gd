@@ -166,7 +166,8 @@ func _process(delta: float) -> bool:
 		jaffa.global_position = Vector3(-5.0, 1.0, 11.0)
 		jaffa._physics_process(0.1)
 
-		assert(jaffa.velocity.y > 0.4, "Jaffa at staircase landing must gain upward vertical velocity to ascend stairs")
+		assert(jaffa.velocity.y <= 0.0, "Stair navigation must rely on physical ramps rather than invented upward velocity")
+		assert(jaffa.navigator != null, "Jaffa must use the shared traversal controller")
 		print("[TEST 5/5] PASS: Jaffa AI pathfinds to spiral staircase and ascends toward Level 27.")
 
 		print("\n========================================================")

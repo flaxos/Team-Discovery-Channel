@@ -185,7 +185,7 @@ func _process(delta: float) -> bool:
 		# --------------------------------------------------------
 		print("  -> Verifying Control Room <-> Gate Room through North Doorway (Z=7.8) with NO step/ramp obstacle...")
 		var r3_control_north := Vector3(5.0, 0.1, 14.0)
-		var r3_north_door := Vector3(5.0, 0.1, 7.8)
+		var r3_north_door := Vector3(5.0, 0.1, 8.2)
 		var r3_gate_room := Vector3(5.0, 0.1, 4.0)
 
 		_verify_route_segment(space, r3_control_north, r3_north_door, "Control Room -> North Doorway")
@@ -253,12 +253,12 @@ func _process(delta: float) -> bool:
 			{"pos": Vector3(22.5, 0.1, 6.0), "sector": GateRoom.SECTOR_EAST_CORRIDOR},
 			{"pos": Vector3(18.0, 0.1, 4.0), "sector": GateRoom.SECTOR_EAST_CORRIDOR},
 			{"pos": Vector3(5.0, 0.1, 4.0), "sector": GateRoom.SECTOR_GATE_ROOM},
-			{"pos": Vector3(5.0, 0.1, 7.8), "sector": GateRoom.SECTOR_CONTROL_ROOM},
+			{"pos": Vector3(5.0, 0.1, 8.2), "sector": GateRoom.SECTOR_CONTROL_ROOM},
 			{"pos": Vector3(5.0, 0.1, 14.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
 			{"pos": Vector3(0.0, 0.1, 15.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
-			{"pos": Vector3(12.0, 0.1, 15.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
+			{"pos": Vector3(12.0, 0.1, 15.0), "sector": "CONTROL_CONNECTOR"},
 			{"pos": Vector3(0.0, 0.1, 15.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
-			{"pos": Vector3(0.0, 0.1, 22.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
+			{"pos": Vector3(0.0, 0.1, 22.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},
 			{"pos": Vector3(0.0, 0.1, 28.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},
 			{"pos": Vector3(2.5, 0.1, 28.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},
 			{"pos": Vector3(2.5, 0.1, 36.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},

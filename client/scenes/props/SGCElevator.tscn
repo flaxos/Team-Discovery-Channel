@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c8m3q2v4x7n01"]
+[gd_scene load_steps=8 format=3 uid="uid://c8m3q2v4x7n01"]
 
 [ext_resource type="Script" path="res://scripts/props/SGCElevator.gd" id="1_elev01"]
 [ext_resource type="Script" path="res://scripts/props/SGCElevatorCallPedestal.gd" id="2_ped01"]
@@ -20,15 +20,22 @@ metallic = 0.6
 [sub_resource type="BoxShape3D" id="BoxShape_RideArea"]
 size = Vector3(3, 3, 3)
 
+[sub_resource type="BoxShape3D" id="CabinFloorShape"]
+size = Vector3(3.2, 0.4, 3.2)
+
 [node name="SGCElevator" type="Node3D"]
 script = ExtResource("1_elev01")
 
 [node name="Cabin" type="AnimatableBody3D" parent="."]
 sync_to_physics = true
 
+[node name="CabinFloorCollision" type="CollisionShape3D" parent="Cabin"]
+position = Vector3(0, -0.2, 0)
+shape = SubResource("CabinFloorShape")
+
 [node name="CabinFloor" type="CSGBox3D" parent="Cabin"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
-use_collision = true
+position = Vector3(0, -0.2, 0)
+use_collision = false
 size = Vector3(3.2, 0.4, 3.2)
 material = SubResource("Mat_ElevatorFloor")
 
@@ -87,18 +94,55 @@ modulate = Color(0.2, 0.9, 0.3, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
 shape = SubResource("BoxShape_RideArea")
 
-[node name="CabinControlPanel" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 2, 0)
+[node name="CabinControlPanel28" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.1, 0)
 use_collision = true
 size = Vector3(0.2, 0.8, 0.4)
 material = SubResource("Mat_ElevatorWall")
 script = ExtResource("2_ped01")
 is_cabin_panel = true
+target_floor = 28
 elevator_path = NodePath("../..")
 
-[node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel"]
+[node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel28"]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.5, 0)
-text = "[E] DISPATCH LIFT"
+text = "[E] LEVEL 28"
+font_size = 18
+outline_size = 4
+modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1
+
+[node name="CabinControlPanel27" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.8, 0)
+use_collision = true
+size = Vector3(0.2, 0.8, 0.4)
+material = SubResource("Mat_ElevatorWall")
+script = ExtResource("2_ped01")
+is_cabin_panel = true
+target_floor = 27
+elevator_path = NodePath("../..")
+
+[node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel27"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.5, 0)
+text = "[E] LEVEL 27"
+font_size = 18
+outline_size = 4
+modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1
+
+[node name="CabinControlPanel26" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 2.5, 0)
+use_collision = true
+size = Vector3(0.2, 0.8, 0.4)
+material = SubResource("Mat_ElevatorWall")
+script = ExtResource("2_ped01")
+is_cabin_panel = true
+target_floor = 26
+elevator_path = NodePath("../..")
+
+[node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel26"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.5, 0)
+text = "[E] LEVEL 26"
 font_size = 18
 outline_size = 4
 modulate = Color(0.2, 0.9, 0.3, 1)
@@ -197,6 +241,31 @@ light_energy = 1.5
 omni_range = 3.0
 
 [node name="Label27Right" type="Label3D" parent="CallPedestal27Right"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+text = "[E] CALL LIFT"
+font_size = 18
+outline_size = 4
+modulate = Color(0.2, 0.9, 0.3, 1)
+billboard = 1
+
+[node name="CallPedestal26" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 11, 2.2)
+script = ExtResource("2_ped01")
+target_floor = 26
+
+[node name="PedestalMesh" type="CSGBox3D" parent="CallPedestal26"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+use_collision = true
+size = Vector3(0.4, 1.2, 0.4)
+material = SubResource("Mat_ElevatorWall")
+
+[node name="PedestalLight" type="OmniLight3D" parent="CallPedestal26"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+light_color = Color(0.2, 0.9, 0.3, 1)
+light_energy = 1.5
+omni_range = 3.0
+
+[node name="Label26" type="Label3D" parent="CallPedestal26"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
 text = "[E] CALL LIFT"
 font_size = 18

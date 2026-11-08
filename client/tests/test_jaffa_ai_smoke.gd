@@ -204,6 +204,16 @@ func _process(delta: float) -> bool:
 
 
 func _cleanup() -> void:
+	# Retire active audio before freeing the worlds; the mixer runs asynchronously.
+	for node: Node in root.find_children("*", "", true, false):
+		if node is AudioStreamPlayer or node is AudioStreamPlayer3D:
+			node.stop()
+			node.stream = null
+	OS.delay_msec(50)
+	if host_api != null: host_api.multiplayer_peer = OfflineMultiplayerPeer.new()
+	if client_api != null: client_api.multiplayer_peer = OfflineMultiplayerPeer.new()
+	if is_instance_valid(client_gateroom): client_gateroom.free()
+	if is_instance_valid(host_gateroom): host_gateroom.free()
 	if host_api != null:
 		host_api.multiplayer_peer = null
 	if client_api != null:

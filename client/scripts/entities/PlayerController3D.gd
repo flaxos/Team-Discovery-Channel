@@ -144,7 +144,7 @@ func _enter_tree() -> void:
 	if name.is_valid_int():
 		peer_id = name.to_int()
 	set_multiplayer_authority(peer_id)
-	is_local_authority = (multiplayer.get_unique_id() == peer_id)
+	is_local_authority = ((multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else 1) == peer_id)
 	if has_node("MultiplayerSynchronizer"):
 		$MultiplayerSynchronizer.set_multiplayer_authority(peer_id)
 		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
@@ -819,6 +819,8 @@ func _update_wall_occlusion() -> void:
 			cur_exclude.append(res.get("rid"))
 			if col is Node:
 				var node: Node = col as Node
+				if node.has_meta("asset_slot") and node.get_child_count() > 0:
+					node = node.get_child(0)
 				# Do not occlude floors below the operative's feet/head or cover sandbags
 				var is_floor_below: bool = node.name.begins_with("Floor") and node.global_position.y <= player_head.y
 				# Do not occlude Level 27 structures when operative is on Level 28
@@ -846,8 +848,9 @@ func _update_wall_occlusion() -> void:
 					node.set("material_override", fade_mat)
 
 	# Restore nodes that are no longer occluding
-	var to_remove: Array[Node] = []
-	for node: Node in occluded_nodes.keys():
+	var to_remove: Array[Variant] = []
+	@warning_ignore("untyped_declaration") # Freed object keys must be checked before casting.
+	for node: Variant in occluded_nodes.keys():
 		if not newly_hit.has(node):
 			if is_instance_valid(node):
 				var orig_mat: Material = occluded_nodes[node]
@@ -857,12 +860,14 @@ func _update_wall_occlusion() -> void:
 					node.set("material_override", orig_mat)
 			to_remove.append(node)
 
+	@warning_ignore("untyped_declaration")
 	for node in to_remove:
 		occluded_nodes.erase(node)
 
 
 func _restore_all_occluded_nodes() -> void:
-	for node: Node in occluded_nodes.keys():
+	@warning_ignore("untyped_declaration") # Freed object keys must be checked before casting.
+	for node: Variant in occluded_nodes.keys():
 		if is_instance_valid(node):
 			var orig_mat: Material = occluded_nodes[node]
 			if "material" in node:
