@@ -71,6 +71,10 @@ var current_iso_cam_y: float = 12.0
 var current_iso_pan_yaw: float = 0.0
 @export var ads_cam_offset: Vector3 = Vector3(0.55, 1.65, 1.75)
 @export var ads_cam_pitch_deg: float = -13.0
+var current_locked_aim_y: float = 0.0
+@export var auto_y_aim_enabled: bool = true
+var is_crouch_toggled: bool = false
+var active_c4_timer_mode: int = 0  # 0: Remote, 1: 5s, 2: 10s, 3: 30s
 var is_carrying_patch_rom: bool = false
 var auto_cover_enabled: bool = true
 var is_in_cover: bool = false
@@ -184,8 +188,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			if key_event.keycode == KEY_G:
 				_toggle_drag_body()
 			elif key_event.keycode == KEY_C:
-				auto_cover_enabled = not auto_cover_enabled
-				print("Player %d auto-cover toggled: %s" % [peer_id, auto_cover_enabled])
+				is_crouch_toggled = not is_crouch_toggled
+				print("Player %d crouch toggled: %s" % [peer_id, is_crouch_toggled])
+			elif key_event.keycode == KEY_T:
+				active_c4_timer_mode = (active_c4_timer_mode + 1) % 4
+				var c4_names: Array[String] = ["REMOTE DETONATOR", "5s TIMER", "10s TIMER", "30s TIMER"]
+				print("Player %d C4 mode: %s" % [peer_id, c4_names[active_c4_timer_mode]])
 			elif key_event.keycode == KEY_Q:
 				q_press_time_ms = Time.get_ticks_msec()
 			elif key_event.keycode == KEY_4:
@@ -495,8 +503,8 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_pressed("fire"):
 			var aim_dir := (current_aim_target - mounted_turret.turret_head.global_position).normalized()
 			if aim_dir != Vector3.ZERO:
-				mounted_turret.try_manual_fire(aim_dir)
-				add_screen_shake(0.08)
+				if mounted_turret.try_manual_fire(aim_dir):
+					add_screen_shake(0.20)
 		_update_camera_and_occlusion(delta)
 		return
 
@@ -755,40 +763,108 @@ func add_screen_shake(amount: float) -> void:
 	trauma = clampf(trauma + amount, 0.0, 1.0)
 
 
-func _process_aim() -> void:
+func _calculate_auto_y_aim_target(mouse_pos: Vector2) -> Vector3:
 	if camera == null:
-		return
+		return Vector3.ZERO
 
 	if is_aiming_down_sights:
 		# In ADS semi-scoped mode, aim forward along weapon sightline
-		current_aim_target = global_position - global_transform.basis.z * 40.0 + Vector3(0, 1.2, 0)
-		return
+		return global_position - global_transform.basis.z * 40.0 + Vector3(0, 1.2, 0)
 
-	var mouse_pos := get_viewport().get_mouse_position()
 	var ray_origin := camera.project_ray_origin(mouse_pos)
 	var ray_normal := camera.project_ray_normal(mouse_pos)
 
-	# High-Ground Aiming: when operative is on Level 27 looking down into the Gate Room
 	var target_plane_y: float = global_position.y
-	if global_position.y >= 4.5 and ray_normal.y < -0.1:
+
+	# 1. Target Enemy Height Snapping: check if crosshair ray hovers near any hostile entity
+	var snapped_enemy_y: float = -999.0
+	var enemies_container := get_tree().root.find_child("Enemies", true, false)
+	if enemies_container != null:
+		var min_dist_sq: float = 2.25 # within 1.5m radius
+		for child in enemies_container.get_children():
+			var enemy := child as CharacterBody3D
+			if enemy != null and is_instance_valid(enemy):
+				var enemy_center := enemy.global_position + Vector3(0, 1.0, 0)
+				var to_enemy := enemy_center - ray_origin
+				var proj := to_enemy.dot(ray_normal)
+				if proj > 0.0:
+					var closest_pt := ray_origin + ray_normal * proj
+					var d2 := closest_pt.distance_squared_to(enemy_center)
+					if d2 < min_dist_sq:
+						min_dist_sq = d2
+						snapped_enemy_y = enemy_center.y
+
+	if snapped_enemy_y > -900.0:
+		target_plane_y = snapped_enemy_y
+	elif auto_y_aim_enabled and is_inside_tree():
+		# 2. Dynamic Ground / Platform Elevation Auto-Detection:
+		# Raycast into world to find floor/ramp/platform beneath mouse
+		var space_state := get_world_3d().direct_space_state
+		if space_state != null:
+			var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_origin + ray_normal * 120.0)
+			query.collision_mask = 1 # World geometry
+			query.exclude = [get_rid()]
+			var res := space_state.intersect_ray(query)
+			if not res.is_empty():
+				var hit_normal: Vector3 = res["normal"]
+				var hit_pos: Vector3 = res["position"]
+				# If surface is floor or walkable slope (normal.y > 0.35)
+				if hit_normal.y > 0.35:
+					target_plane_y = hit_pos.y
+				else:
+					# 3. Anti-Wall Climbing Filter: ray hit vertical wall face.
+					# Trace straight down from hit point to find ground height in front of wall!
+					var down_query := PhysicsRayQueryParameters3D.create(hit_pos + Vector3(0, 0.5, 0), hit_pos + Vector3(0, -10.0, 0))
+					down_query.collision_mask = 1
+					var down_res := space_state.intersect_ray(down_query)
+					if not down_res.is_empty():
+						target_plane_y = down_res["position"].y
+					else:
+						target_plane_y = global_position.y
+
+	# High-Ground Aiming fallback for Level 27 overlooking Gate Room
+	if global_position.y >= 4.5 and ray_normal.y < -0.1 and target_plane_y >= 4.5:
 		var arena_plane := Plane(Vector3.UP, 0.0)
 		var arena_hit: Variant = arena_plane.intersects_ray(ray_origin, ray_normal)
 		if arena_hit != null:
 			var hit_pt: Vector3 = arena_hit
-			# If aimed into Gate Room arena in front of Briefing window (Z <= 8.5)
 			if hit_pt.z <= 8.5 and absf(hit_pt.x) <= 18.0:
 				target_plane_y = 0.0
 
-	var ground_plane := Plane(Vector3.UP, target_plane_y)
+	# Smooth elevation interpolation
+	var dt := get_physics_process_delta_time()
+	current_locked_aim_y = move_toward(current_locked_aim_y, target_plane_y, 35.0 * dt)
+
+	var ground_plane := Plane(Vector3.UP, current_locked_aim_y)
 	var hit_variant: Variant = ground_plane.intersects_ray(ray_origin, ray_normal)
 	if hit_variant != null:
-		var hit: Vector3 = hit_variant
-		current_aim_target = hit
-		var look_dir: Vector3 = (hit - global_position)
-		look_dir.y = 0.0
-		# Deadzone: only rotate if mouse is at least 0.5m away from player center
-		if look_dir.length_squared() > 0.25:
-			rotation.y = atan2(-look_dir.x, -look_dir.z)
+		return hit_variant as Vector3
+
+	return ray_origin + ray_normal * 30.0
+
+
+func _process_aim() -> void:
+	if camera == null:
+		return
+
+	var mouse_pos := get_viewport().get_mouse_position()
+	var hit := _calculate_auto_y_aim_target(mouse_pos)
+	current_aim_target = hit
+
+	if is_aiming_down_sights:
+		return
+
+	var look_dir: Vector3 = (hit - global_position)
+	look_dir.y = 0.0
+	# Deadzone: only rotate if mouse is at least 0.5m away from player center
+	if look_dir.length_squared() > 0.25:
+		rotation.y = atan2(-look_dir.x, -look_dir.z)
+
+	# 3D Weapon visual pitch alignment
+	if weapon_holder != null and hit != Vector3.ZERO:
+		var local_target := weapon_holder.to_local(hit)
+		var pitch_rad := -atan2(local_target.y, -local_target.z)
+		weapon_holder.rotation.x = clampf(pitch_rad, deg_to_rad(-45.0), deg_to_rad(45.0))
 
 
 func _process_combat() -> void:
@@ -841,7 +917,7 @@ func _deploy_tactical_gadget() -> void:
 			turret_cooldown = TURRET_COOLDOWN_S
 			print("Player %d deployed .50 Cal Tripod Turret! Cooldown started (%.0fs)." % [peer_id, TURRET_COOLDOWN_S])
 	elif class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
-		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed:
+		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed and active_c4.mode == C4Satchel.C4Mode.REMOTE:
 			active_c4.detonate()
 			active_c4 = null
 			print("Player %d detonated C4 Satchel!" % peer_id)
@@ -854,11 +930,18 @@ func _deploy_tactical_gadget() -> void:
 				var c4 := c4_scene.instantiate() as C4Satchel
 				c4.position = global_position + Vector3(0, 1.0, 0)
 				c4.planter = self
+				if active_c4_timer_mode == 1:
+					c4.set_timer_mode(5.0)
+				elif active_c4_timer_mode == 2:
+					c4.set_timer_mode(10.0)
+				elif active_c4_timer_mode == 3:
+					c4.set_timer_mode(30.0)
 				get_parent().add_child(c4)
 				c4.apply_central_impulse(-global_transform.basis.z * 10.0 + Vector3.UP * 3.0)
-				active_c4 = c4
+				if c4.mode == C4Satchel.C4Mode.REMOTE:
+					active_c4 = c4
 				c4_charges_remaining -= 1
-				print("Player %d threw C4 Satchel Charge! (%d charges left)" % [peer_id, c4_charges_remaining])
+				print("Player %d threw C4 Satchel Charge (Mode: %d)! (%d charges left)" % [peer_id, active_c4_timer_mode, c4_charges_remaining])
 
 
 func _plant_claymore() -> void:
@@ -1061,7 +1144,7 @@ func _process_cover_and_peeking(delta: float, _move_dir: Vector3) -> void:
 		is_sprinting = false
 	else:
 		is_peeking = false
-		is_crouching = Input.is_action_pressed("crouch")
+		is_crouching = is_crouch_toggled or Input.is_action_pressed("crouch")
 		is_sprinting = Input.is_action_pressed("sprint") and not is_crouching and not is_dragging_body
 
 	if body_mesh != null:

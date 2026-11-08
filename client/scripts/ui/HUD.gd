@@ -5,16 +5,30 @@ extends CanvasLayer
 
 const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
 
+class CrosshairControl extends Control:
+	var hud: TacticalHUD = null
+
+	func _draw() -> void:
+		if hud != null:
+			hud._draw_crosshair(self)
+
 # Node References
 @onready var health_bar: ProgressBar = $VitalsPanel/VBox/HealthBar
 @onready var health_label: Label = $VitalsPanel/VBox/HealthBar/HealthLabel
 @onready var operative_label: Label = $VitalsPanel/VBox/OperativeLabel
 @onready var stun_label: Label = $VitalsPanel/VBox/StunLabel
 
+@onready var ammo_panel: PanelContainer = $AmmoPanel if has_node("AmmoPanel") else null
 @onready var weapon_name_label: Label = $AmmoPanel/VBox/WeaponNameLabel
 @onready var ammo_label: Label = $AmmoPanel/VBox/AmmoLabel
 @onready var slot_label: Label = $AmmoPanel/VBox/SlotLabel
 @onready var gadget_label: Label = $AmmoPanel/VBox/GadgetLabel
+
+@onready var heat_container: VBoxContainer = $AmmoPanel/VBox/HeatContainer if has_node("AmmoPanel/VBox/HeatContainer") else null
+@onready var heat_bar: ProgressBar = $AmmoPanel/VBox/HeatContainer/HeatBar if has_node("AmmoPanel/VBox/HeatContainer/HeatBar") else null
+@onready var heat_label: Label = $AmmoPanel/VBox/HeatContainer/HeatBar/HeatLabel if has_node("AmmoPanel/VBox/HeatContainer/HeatBar/HeatLabel") else null
+@onready var heat_warning_label: Label = $AmmoPanel/VBox/HeatContainer/HeatWarningLabel if has_node("AmmoPanel/VBox/HeatContainer/HeatWarningLabel") else null
+@onready var crosshair_overlay: Control = $CrosshairOverlay if has_node("CrosshairOverlay") else null
 
 @onready var wave_label: Label = $TopBanner/VBox/WaveLabel
 @onready var enemies_label: Label = $TopBanner/VBox/EnemiesLabel
@@ -61,6 +75,13 @@ var mission_seconds: float = 0.0
 var total_kills: int = 0
 var is_mission_ended: bool = false
 
+# Crosshair and Heat Gauge Variables
+var crosshair_override_pos: Vector2 = Vector2.ZERO
+var crosshair_color: Color = Color(0.2, 0.95, 1.0, 0.9)
+var crosshair_shadow_color: Color = Color(0.0, 0.0, 0.0, 0.6)
+var current_bound_weapon: WeaponBase = null
+var heat_pulse_time: float = 0.0
+
 
 func _ready() -> void:
 	dhd_panel.visible = false
@@ -72,6 +93,24 @@ func _ready() -> void:
 		revive_bar.visible = false
 	if pause_menu != null:
 		pause_menu.visible = false
+
+	# Tactical 4-Pip Crosshair Overlay initialization
+	if crosshair_overlay == null:
+		var cho := CrosshairControl.new()
+		cho.name = "CrosshairOverlay"
+		cho.hud = self
+		cho.set_anchors_preset(Control.PRESET_FULL_RECT)
+		cho.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(cho)
+		crosshair_overlay = cho
+	else:
+		crosshair_overlay.set_script(CrosshairControl)
+		(crosshair_overlay as CrosshairControl).hud = self
+
+	# Energy Weapon Heat Gauge initialization
+	_ensure_heat_ui_exists()
+	if heat_container != null:
+		heat_container.visible = false
 
 	objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
@@ -252,11 +291,14 @@ func bind_local_player(player: PlayerController3D) -> void:
 func _process(delta: float) -> void:
 	if not is_mission_ended:
 		mission_seconds += delta
+	heat_pulse_time += delta * 6.0
 	if local_player != null:
 		if operative_label != null and (operative_label.text == "" or operative_label.text.begins_with("OPERATIVE [")):
 			bind_local_player(local_player)
 		_update_weapon_display()
 	_update_damage_vignette(delta)
+	if crosshair_overlay != null:
+		crosshair_overlay.queue_redraw()
 
 
 func _on_health_downed() -> void:
@@ -340,10 +382,25 @@ func _update_weapon_display() -> void:
 	var slot_text: String = "[1] PRIMARY" if local_player.active_slot == 1 else "[2] SIDEARM"
 	slot_label.text = slot_text
 
-	if weapon.is_reloading:
-		ammo_label.text = "RELOADING..."
+	if weapon.uses_heat:
+		if heat_container != null:
+			heat_container.visible = true
+		_bind_energy_weapon(weapon)
+		_update_heat_gauge(weapon)
+		if weapon.is_overheated:
+			ammo_label.text = "VENTING..."
+			ammo_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+		else:
+			ammo_label.text = "%d%% HEAT" % int(weapon.current_heat)
+			ammo_label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.2) if (weapon.is_plasma or weapon.weapon_id == "staff_weapon") else Color(0.3, 0.85, 1.0))
 	else:
-		ammo_label.text = "%d / %d" % [weapon.current_ammo, weapon.reserve_ammo]
+		if heat_container != null:
+			heat_container.visible = false
+		ammo_label.add_theme_color_override("font_color", Color.WHITE)
+		if weapon.is_reloading:
+			ammo_label.text = "RELOADING..."
+		else:
+			ammo_label.text = "%d / %d" % [weapon.current_ammo, weapon.reserve_ammo]
 
 	# Gadget display
 	if local_player.class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
@@ -370,6 +427,227 @@ func _update_weapon_display() -> void:
 	# Append Claymore indicator
 	var claymore_str := "  |  [3] CLAYMORE (%d/2)" % local_player.claymore_charges
 	gadget_label.text += claymore_str
+
+
+func _ensure_heat_ui_exists() -> void:
+	if heat_container != null:
+		return
+	if ammo_panel == null:
+		return
+	var vbox := ammo_panel.get_node_or_null("VBox") as VBoxContainer
+	if vbox == null:
+		return
+
+	heat_container = VBoxContainer.new()
+	heat_container.name = "HeatContainer"
+	heat_container.visible = false
+	heat_container.add_theme_constant_override("separation", 2)
+
+	if gadget_label != null:
+		vbox.add_child(heat_container)
+		vbox.move_child(heat_container, gadget_label.get_index())
+	else:
+		vbox.add_child(heat_container)
+
+	heat_bar = ProgressBar.new()
+	heat_bar.name = "HeatBar"
+	heat_bar.custom_minimum_size = Vector2(0, 16)
+	heat_bar.max_value = 100.0
+	heat_bar.value = 0.0
+	heat_bar.show_percentage = false
+	heat_container.add_child(heat_bar)
+
+	heat_label = Label.new()
+	heat_label.name = "HeatLabel"
+	heat_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	heat_label.text = "HEAT: 0%"
+	heat_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heat_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	heat_label.add_theme_font_size_override("font_size", 11)
+	heat_bar.add_child(heat_label)
+
+	heat_warning_label = Label.new()
+	heat_warning_label.name = "HeatWarningLabel"
+	heat_warning_label.text = "OVERHEATING / VENTING..."
+	heat_warning_label.visible = false
+	heat_warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heat_warning_label.add_theme_font_size_override("font_size", 11)
+	heat_warning_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+	heat_container.add_child(heat_warning_label)
+
+
+func _bind_energy_weapon(weapon: WeaponBase) -> void:
+	if current_bound_weapon == weapon:
+		return
+	if current_bound_weapon != null and is_instance_valid(current_bound_weapon):
+		if current_bound_weapon.heat_changed.is_connected(_on_weapon_heat_changed):
+			current_bound_weapon.heat_changed.disconnect(_on_weapon_heat_changed)
+	current_bound_weapon = weapon
+	if weapon != null and weapon.uses_heat:
+		if not weapon.heat_changed.is_connected(_on_weapon_heat_changed):
+			weapon.heat_changed.connect(_on_weapon_heat_changed)
+
+
+func _on_weapon_heat_changed(cur_heat: float, overheated: bool) -> void:
+	if current_bound_weapon != null:
+		_apply_heat_state(cur_heat, overheated, current_bound_weapon)
+
+
+func _update_heat_gauge(weapon: WeaponBase) -> void:
+	_apply_heat_state(weapon.current_heat, weapon.is_overheated, weapon)
+
+
+func _apply_heat_state(cur_heat: float, overheated: bool, weapon: WeaponBase) -> void:
+	if heat_bar != null:
+		heat_bar.max_value = 100.0
+		heat_bar.value = cur_heat
+
+		# Authentic orange (Staff) or blue (Zat) heat meter
+		var fill_sb: StyleBoxFlat = null
+		if heat_bar.has_theme_stylebox_override("fill"):
+			fill_sb = heat_bar.get_theme_stylebox("fill") as StyleBoxFlat
+		elif heat_bar.has_theme_stylebox("fill"):
+			fill_sb = heat_bar.get_theme_stylebox("fill").duplicate() as StyleBoxFlat
+		if fill_sb == null:
+			fill_sb = StyleBoxFlat.new()
+			fill_sb.corner_radius_top_left = 4
+			fill_sb.corner_radius_top_right = 4
+			fill_sb.corner_radius_bottom_right = 4
+			fill_sb.corner_radius_bottom_left = 4
+
+		if weapon.is_zat or weapon.weapon_id == "zat":
+			# Electric Goa'uld blue arc
+			var base_blue := Color(0.2, 0.75, 1.0, 1.0)
+			fill_sb.bg_color = base_blue.lerp(Color(0.55, 0.35, 1.0, 1.0), cur_heat / 100.0)
+		else:
+			# Liquid Naquadah fiery orange plasma
+			var base_orange := Color(1.0, 0.55, 0.1, 1.0)
+			fill_sb.bg_color = base_orange.lerp(Color(1.0, 0.2, 0.08, 1.0), cur_heat / 100.0)
+
+		heat_bar.add_theme_stylebox_override("fill", fill_sb)
+
+	if heat_label != null:
+		heat_label.text = "HEAT: %d%%" % int(cur_heat)
+
+	if heat_warning_label != null:
+		if overheated:
+			heat_warning_label.visible = true
+			heat_warning_label.text = "OVERHEATING / VENTING..."
+			var flash_bright: bool = (int(heat_pulse_time) % 2) == 0
+			heat_warning_label.modulate = Color(1.0, 0.15, 0.15, 1.0) if flash_bright else Color(1.0, 0.55, 0.55, 0.3)
+		else:
+			heat_warning_label.visible = false
+
+
+## Computes current operative stance multiplier for spread & crosshair calculation.
+func get_stance_multiplier() -> float:
+	if local_player == null:
+		return 1.0
+
+	# 1. Mounted on .50 cal tripod / deployed: 99% laser accuracy pinpoint
+	if local_player.mounted_turret != null and is_instance_valid(local_player.mounted_turret):
+		return 0.01
+
+	var mult: float = 1.0
+
+	# ADS precision zoom
+	if local_player.is_aiming_down_sights:
+		mult *= 0.5
+
+	# Crouched stance vs moving stance
+	if local_player.is_crouching:
+		mult *= 0.5
+	elif local_player.velocity.length() > 2.0:
+		# Moving / running penalty
+		mult *= 1.8
+	else:
+		# Standing still: crisp close cluster
+		mult *= 0.75
+
+	return mult
+
+
+func get_current_weapon_spread() -> float:
+	if local_player != null and local_player.current_weapon != null:
+		return local_player.current_weapon.current_spread_deg
+	return 2.0
+
+
+func get_effective_spread() -> float:
+	return get_current_weapon_spread() * get_stance_multiplier()
+
+
+func get_crosshair_gap() -> float:
+	var eff_spread: float = get_effective_spread()
+	var is_mounted: bool = (local_player != null and local_player.mounted_turret != null and is_instance_valid(local_player.mounted_turret))
+	if is_mounted or eff_spread < 0.1:
+		return 2.0
+	# Proportional to current_spread_deg * stance_multiplier
+	return clampf(eff_spread * 6.0, 2.0, 120.0)
+
+
+func _draw() -> void:
+	if crosshair_overlay != null:
+		crosshair_overlay.queue_redraw()
+
+
+func _draw_crosshair(ci: Control) -> void:
+	if ci == null or not is_inside_tree() or is_mission_ended:
+		return
+	if pause_menu != null and pause_menu.visible:
+		return
+	if local_player != null and local_player.health_component != null and local_player.health_component.is_dead:
+		return
+
+	var v_size: Vector2 = ci.get_viewport_rect().size
+	if v_size == Vector2.ZERO:
+		v_size = Vector2(1280, 720)
+
+	var aim_pos: Vector2 = Vector2.ZERO
+	if crosshair_override_pos != Vector2.ZERO:
+		aim_pos = crosshair_override_pos
+	elif local_player != null and local_player.is_aiming_down_sights:
+		aim_pos = v_size * 0.5
+	elif local_player != null and local_player.camera != null and local_player.current_aim_target != Vector3.ZERO:
+		if not local_player.camera.is_position_behind(local_player.current_aim_target):
+			aim_pos = local_player.camera.unproject_position(local_player.current_aim_target)
+		else:
+			aim_pos = ci.get_viewport().get_mouse_position()
+	else:
+		aim_pos = ci.get_viewport().get_mouse_position()
+
+	if aim_pos == Vector2.ZERO or aim_pos.x < 0.0 or aim_pos.y < 0.0 or aim_pos.x > v_size.x or aim_pos.y > v_size.y:
+		aim_pos = v_size * 0.5
+
+	var is_mounted: bool = (local_player != null and local_player.mounted_turret != null and is_instance_valid(local_player.mounted_turret))
+	var gap: float = get_crosshair_gap()
+	var pip_len: float = 3.0 if is_mounted else 7.0
+	var pip_width: float = 2.0
+
+	var draw_col: Color = crosshair_color
+	if is_mounted:
+		# Laser pinpoint accuracy indicator
+		draw_col = Color(0.2, 1.0, 0.45, 0.95)
+
+	# 1. Center pinpoint dot
+	ci.draw_circle(aim_pos, 1.5, draw_col)
+
+	# 2. Render 4 pips: Top, Bottom, Left, Right around center/aim target
+	# Top pip
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y - gap - pip_len), Vector2(aim_pos.x, aim_pos.y - gap), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y - gap - pip_len), Vector2(aim_pos.x, aim_pos.y - gap), draw_col, pip_width)
+
+	# Bottom pip
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y + gap), Vector2(aim_pos.x, aim_pos.y + gap + pip_len), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y + gap), Vector2(aim_pos.x, aim_pos.y + gap + pip_len), draw_col, pip_width)
+
+	# Left pip
+	ci.draw_line(Vector2(aim_pos.x - gap - pip_len, aim_pos.y), Vector2(aim_pos.x - gap, aim_pos.y), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x - gap - pip_len, aim_pos.y), Vector2(aim_pos.x - gap, aim_pos.y), draw_col, pip_width)
+
+	# Right pip
+	ci.draw_line(Vector2(aim_pos.x + gap, aim_pos.y), Vector2(aim_pos.x + gap + pip_len, aim_pos.y), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x + gap, aim_pos.y), Vector2(aim_pos.x + gap + pip_len, aim_pos.y), draw_col, pip_width)
 
 
 func _on_health_changed(cur: float, max_h: float) -> void:

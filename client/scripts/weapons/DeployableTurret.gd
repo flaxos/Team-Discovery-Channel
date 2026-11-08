@@ -7,10 +7,12 @@ signal turret_fired(origin: Vector3, dir: Vector3)
 signal player_mounted(player: Node)
 signal player_dismounted(player: Node)
 
-@export var fire_rate_rpm: float = 450.0
+@export var fire_rate_rpm: float = 500.0
 @export var damage: float = 52.0
 @export var auto_targeting_range: float = 28.0
-@export var is_automated_sentry: bool = true
+@export var is_automated_sentry: bool = false
+@export var mounted_spread_deg: float = 0.25
+@export var gun_shield_damage_reduction: float = 0.65
 
 var fire_cooldown: float = 0.0
 var current_target: Node3D = null
@@ -23,6 +25,7 @@ var mounted_player: CharacterBody3D = null
 
 func _ready() -> void:
 	add_to_group("turret")
+	add_to_group("mounted_turret")
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_interact_entered)
 		interact_area.body_exited.connect(_on_interact_exited)
@@ -72,6 +75,10 @@ func mount(player: CharacterBody3D) -> void:
 	mounted_player = player
 	player_mounted.emit(player)
 	print("DeployableTurret: Operative %s mounted the .50 Cal Browning!" % player.name)
+
+
+func mount_airman(airman: CharacterBody3D) -> void:
+	mount(airman)
 
 
 func dismount() -> void:

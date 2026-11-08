@@ -17,6 +17,10 @@ height = 0.7
 material = SubResource("Mat_GunMetal")
 size = Vector3(0.25, 0.25, 0.8)
 
+[sub_resource type="BoxMesh" id="BoxMesh_GunShield"]
+material = SubResource("Mat_GunMetal")
+size = Vector3(0.9, 0.7, 0.05)
+
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_Interact"]
 height = 2.0
 radius = 1.8
@@ -42,6 +46,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 [node name="ReceiverMesh" type="MeshInstance3D" parent="TurretHead"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.2)
 mesh = SubResource("BoxMesh_Receiver")
+
+[node name="GunShieldMesh" type="MeshInstance3D" parent="TurretHead"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -0.45)
+mesh = SubResource("BoxMesh_GunShield")
 
 [node name="MuzzlePoint" type="Marker3D" parent="TurretHead"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)

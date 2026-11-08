@@ -44,6 +44,11 @@ var stream_spawn_interval: float = 7.0
 var is_iris_repaired: bool = false
 var target_activations: int = 3
 
+@export var rank_spawn_interval: float = 2.0
+var pending_column_spawns: int = 0
+var column_stream_timer: float = 0.0
+var current_rank_index: int = 0
+
 @onready var enemies_container: Node3D = get_node_or_null("../Enemies")
 @onready var gate_spawn_marker: Marker3D = get_node_or_null("../GateSpawnMarker")
 @onready var transport_rings: TransportRings = get_node_or_null("../TransportRings") as TransportRings
@@ -82,7 +87,7 @@ func _configure_difficulty() -> void:
 
 
 func start_wave_defense() -> void:
-	if not multiplayer.is_server():
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	current_wave = 0
 	_configure_difficulty()
@@ -90,7 +95,7 @@ func start_wave_defense() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not multiplayer.is_server():
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 
 	# Inbound Wormhole 38-second Countdown Engine
@@ -100,6 +105,14 @@ func _physics_process(delta: float) -> void:
 
 		# Hostile reinforcement streaming down the ramp while wormhole is open
 		if not is_iris_repaired:
+			# Cadenced 2-by-2 column stream spawner
+			if pending_column_spawns > 0:
+				column_stream_timer -= delta
+				if column_stream_timer <= 0.0:
+					column_stream_timer = rank_spawn_interval
+					_spawn_next_column_rank()
+
+			# Continuous reinforcements while gate is active
 			stream_spawn_timer -= delta
 			if stream_spawn_timer <= 0.0 and inbound_wormhole_timer > 6.0:
 				stream_spawn_timer = stream_spawn_interval
@@ -134,8 +147,11 @@ func start_next_wave() -> void:
 	is_wave_active = true
 	is_iris_repaired = false
 	stream_spawn_timer = stream_spawn_interval
+	column_stream_timer = 0.0
+	current_rank_index = 0
+	pending_column_spawns = 0
 
-	var initial_count := 4 + (current_wave - 1) * 2
+	var initial_count: int = 4 + (current_wave - 1) * 2
 	enemies_alive = initial_count
 	wave_started.emit(current_wave, enemies_alive)
 
@@ -177,6 +193,11 @@ func _collapse_inbound_wormhole() -> void:
 	wormhole_state_changed.emit(false, "DISENGAGED")
 	print("WaveManager: [TANNOY] Inbound wormhole collapsed! Inter-gate recharge window: %.0fs." % inter_gate_recharge_s)
 
+	if pending_column_spawns > 0:
+		enemies_alive = maxi(0, enemies_alive - pending_column_spawns)
+		pending_column_spawns = 0
+		jaffa_count_changed.emit(enemies_alive, current_wave)
+
 	var stargate := get_node_or_null("../Stargate") as StargateRing
 	if stargate != null:
 		stargate.close_wormhole()
@@ -195,25 +216,59 @@ func _spawn_ramp_reinforcements(count: int) -> void:
 
 
 func _spawn_wave_jaffa(ramp_count: int) -> void:
-	var is_shock_wave := (current_wave >= 3)
+	pending_column_spawns += ramp_count
+	# Immediately spawn the first rank upon event horizon activation
+	if column_stream_timer <= 0.0:
+		_spawn_next_column_rank()
+		column_stream_timer = rank_spawn_interval
+
+
+func _spawn_next_column_rank() -> void:
+	if pending_column_spawns <= 0:
+		return
+
+	var is_shock_wave: bool = (current_wave >= 3)
 	var scene_path: String = SHOCK_GUARD_SCENE_PATH if is_shock_wave else JAFFA_SCENE_PATH
-	var jaffa_scene := load(scene_path) as PackedScene
+	var jaffa_scene: PackedScene = load(scene_path) as PackedScene
 	if jaffa_scene == null or enemies_container == null:
 		push_error("WaveManager: Missing Jaffa scene or Enemies container.")
 		return
 
-	var spawn_pos: Vector3 = Vector3(0, 2.2, -13.5)
+	var spawn_origin: Vector3 = Vector3(0.0, 2.2, -13.5)
 	if gate_spawn_marker != null:
-		spawn_pos = gate_spawn_marker.global_position
+		spawn_origin = gate_spawn_marker.global_position
 
-	for i in range(ramp_count):
-		var offset := Vector3(randf_range(-3.0, 3.0), 0, randf_range(-0.5, 1.5))
-		var jaffa := jaffa_scene.instantiate() as JaffaAI
-		jaffa.name = "%s_W%d_%d" % ["Shock" if is_shock_wave else "Jaffa", current_wave, randi() % 10000]
-		jaffa.position = spawn_pos + offset
+	var count_this_rank: int = mini(2, pending_column_spawns)
+	pending_column_spawns -= count_this_rank
+
+	var offsets: Array[float] = [-1.2, 1.2]
+	if count_this_rank == 1:
+		offsets = [-1.2]
+
+	for i: int in range(count_this_rank):
+		var x_offset: float = offsets[i]
+		var jaffa: JaffaAI = jaffa_scene.instantiate() as JaffaAI
+		if jaffa == null:
+			continue
+		jaffa.name = "%s_W%d_R%d_%d" % [
+			"Shock" if is_shock_wave else "Jaffa",
+			current_wave,
+			current_rank_index,
+			randi() % 10000
+		]
+		jaffa.position = Vector3(spawn_origin.x + x_offset, spawn_origin.y, spawn_origin.z)
+		jaffa.formation_rank = current_rank_index
+		jaffa.is_front_rank = (current_rank_index == 0)
+		jaffa.column_x_lane = spawn_origin.x + x_offset
 
 		enemies_container.add_child(jaffa, true)
 		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))
+
+		# Symmetrically march down the ramp toward Gate Room center (Z = 0.0)
+		var march_target_pos: Vector3 = Vector3(spawn_origin.x + x_offset, 0.0, 0.0)
+		jaffa.start_column_march(march_target_pos)
+
+	current_rank_index += 1
 
 
 func _on_jaffa_killed(_killer: Node, _jaffa: JaffaAI) -> void:
@@ -269,6 +324,10 @@ func _on_iris_servo_repaired() -> void:
 	is_iris_repaired = true
 	iris_repaired_event.emit()
 	print("WaveManager: Iris manually engaged! Inbound matter transmission blocked!")
+	if pending_column_spawns > 0:
+		enemies_alive = maxi(0, enemies_alive - pending_column_spawns)
+		pending_column_spawns = 0
+		jaffa_count_changed.emit(enemies_alive, current_wave)
 	_play_sfx("res://audio/sfx_iris_open.wav", 60.0)
 
 

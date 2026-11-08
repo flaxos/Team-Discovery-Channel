@@ -13,6 +13,12 @@ const FLOOR_28_Y: float = 0.0
 const FLOOR_27_Y: float = 5.5
 const TRANSIT_DURATION: float = 3.0
 
+const DOOR_CLOSED_LEFT_X: float = -0.8
+const DOOR_CLOSED_RIGHT_X: float = 0.8
+const DOOR_OPEN_OFFSET: float = 1.6
+const DOOR_OPEN_LEFT_X: float = -2.4
+const DOOR_OPEN_RIGHT_X: float = 2.4
+
 @export var current_floor: int = 28
 var state: ElevatorState = ElevatorState.AT_28
 var is_moving: bool = false
@@ -43,7 +49,7 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		if _can_interact_with_elevator():
-			toggle_elevator()
+			_handle_interaction()
 
 
 func _can_interact_with_elevator() -> bool:
@@ -55,14 +61,14 @@ func _can_interact_with_elevator() -> bool:
 	if net != null and net.multiplayer_peer != null:
 		local_id = net.get_unique_id()
 
-	for rider in riders:
-		if rider.name == str(local_id):
+	for rider: CharacterBody3D in riders:
+		if rider != null and rider.name == str(local_id):
 			return true
 
 	# Check proximity to pedestals
-	var players_container := get_tree().root.find_child("Players", true, false)
+	var players_container: Node = get_tree().root.find_child("Players", true, false)
 	if players_container != null:
-		var local_p := players_container.get_node_or_null(str(local_id)) as CharacterBody3D
+		var local_p: CharacterBody3D = players_container.get_node_or_null(str(local_id)) as CharacterBody3D
 		if local_p != null:
 			if call_pedestal_28 != null and local_p.global_position.distance_to(call_pedestal_28.global_position) < 3.5:
 				return true
@@ -70,6 +76,41 @@ func _can_interact_with_elevator() -> bool:
 				return true
 
 	return false
+
+
+func _handle_interaction() -> void:
+	if is_moving:
+		return
+
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	var local_id: int = 1
+	if net != null and net.multiplayer_peer != null:
+		local_id = net.get_unique_id()
+
+	# If riding inside the cabin, toggle destination floor
+	for rider: CharacterBody3D in riders:
+		if rider != null and rider.name == str(local_id):
+			toggle_elevator()
+			return
+
+	# Outside cabin: call elevator to the floor corresponding to nearest pedestal
+	var players_container: Node = get_tree().root.find_child("Players", true, false)
+	if players_container != null:
+		var local_p: CharacterBody3D = players_container.get_node_or_null(str(local_id)) as CharacterBody3D
+		if local_p != null:
+			var dist_28: float = INF
+			var dist_27: float = INF
+			if call_pedestal_28 != null:
+				dist_28 = local_p.global_position.distance_to(call_pedestal_28.global_position)
+			if call_pedestal_27 != null:
+				dist_27 = local_p.global_position.distance_to(call_pedestal_27.global_position)
+
+			if dist_28 < 3.5 and dist_28 <= dist_27:
+				call_elevator(28)
+			elif dist_27 < 3.5 and dist_27 < dist_28:
+				call_elevator(27)
+			else:
+				toggle_elevator()
 
 
 func toggle_elevator() -> void:
@@ -105,7 +146,7 @@ func sync_move_elevator(target_floor: int) -> void:
 		return
 
 	is_moving = true
-	var from_floor := current_floor
+	var from_floor: int = current_floor
 	state = ElevatorState.MOVING_UP if target_floor == 27 else ElevatorState.MOVING_DOWN
 	elevator_started.emit(from_floor, target_floor)
 	print("SGCElevator: Transit initiated from Level %d to Level %d" % [from_floor, target_floor])
@@ -120,10 +161,10 @@ func sync_move_elevator(target_floor: int) -> void:
 
 
 func _animate_cabin_transit(target_floor: int) -> void:
-	var target_y := FLOOR_27_Y if target_floor == 27 else FLOOR_28_Y
-	var start_y := cabin.position.y if cabin != null else 0.0
+	var target_y: float = FLOOR_27_Y if target_floor == 27 else FLOOR_28_Y
+	var start_y: float = cabin.position.y if cabin != null else 0.0
 
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	if cabin != null:
 		tween.tween_property(cabin, "position:y", target_y, TRANSIT_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
@@ -141,18 +182,18 @@ func _animate_cabin_transit(target_floor: int) -> void:
 
 
 func _close_doors(on_closed: Callable) -> void:
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	if door_left != null and door_right != null:
-		tween.tween_property(door_left, "position:x", -0.7, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-		tween.parallel().tween_property(door_right, "position:x", 0.7, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(door_left, "position:x", DOOR_CLOSED_LEFT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.parallel().tween_property(door_right, "position:x", DOOR_CLOSED_RIGHT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_callback(on_closed)
 
 
 func _open_doors() -> void:
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	if door_left != null and door_right != null:
-		tween.tween_property(door_left, "position:x", -1.9, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-		tween.parallel().tween_property(door_right, "position:x", 1.9, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(door_left, "position:x", DOOR_OPEN_LEFT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.parallel().tween_property(door_right, "position:x", DOOR_OPEN_RIGHT_X, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 
 func _update_floor_indicator(fl: int) -> void:
@@ -168,21 +209,21 @@ func _set_pedestal_lights_status(color: Color) -> void:
 
 
 func _on_ride_area_entered(body: Node3D) -> void:
-	var player := body as CharacterBody3D
+	var player: CharacterBody3D = body as CharacterBody3D
 	if player != null and not riders.has(player):
 		riders.append(player)
 
 
 func _on_ride_area_exited(body: Node3D) -> void:
-	var player := body as CharacterBody3D
+	var player: CharacterBody3D = body as CharacterBody3D
 	if player != null:
 		riders.erase(player)
 
 
 func _play_sfx(res_path: String, max_dist: float) -> void:
 	if ResourceLoader.exists(res_path):
-		var audio := AudioStreamPlayer3D.new()
-		audio.stream = load(res_path)
+		var audio: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+		audio.stream = load(res_path) as AudioStream
 		audio.max_distance = max_dist
 		audio.unit_size = 12.0
 		add_child(audio)
