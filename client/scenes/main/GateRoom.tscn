@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://c8sgcgateroom01"]
+[gd_scene load_steps=22 format=3 uid="uid://c8sgcgateroom01"]
 
 [ext_resource type="Script" path="res://scripts/world/GateRoom.gd" id="1_gr01"]
 [ext_resource type="Script" path="res://scripts/world/WaveManager.gd" id="2_wm01"]
@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" path="res://scenes/props/LabDataPatchDrive.tscn" id="12_labpatch01"]
 [ext_resource type="PackedScene" path="res://scenes/props/IrisServoHousing.tscn" id="13_irisservo01"]
 [ext_resource type="PackedScene" path="res://scenes/entities/SGCAirman.tscn" id="14_airman01"]
+[ext_resource type="Script" path="res://scripts/props/BlastDoorConsole.gd" id="15_bdconsole"]
+[ext_resource type="PackedScene" path="res://scenes/props/ArmoryArmorStation.tscn" id="16_armor01"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Door"]
 albedo_color = Color(0.24, 0.27, 0.3, 1)
@@ -274,10 +276,16 @@ use_collision = true
 size = Vector3(14, 0.5, 1)
 material = SubResource("Mat_Wall")
 
-[node name="WallControlLower" type="CSGBox3D" parent="BunkerGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 7.8)
+[node name="WallControlLowerWest" type="CSGBox3D" parent="BunkerGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 0.5, 7.8)
 use_collision = true
-size = Vector3(14, 1, 1)
+size = Vector3(2.2, 1, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="WallControlLowerEast" type="CSGBox3D" parent="BunkerGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0.5, 7.8)
+use_collision = true
+size = Vector3(2.2, 1, 0.8)
 material = SubResource("Mat_Wall")
 
 [node name="WallWestNorth" type="CSGBox3D" parent="BunkerGeometry"]
@@ -324,12 +332,6 @@ is_automated_sentry = false
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 4.2, 0, 0.5)
 is_automated_sentry = false
 
-[node name="ControlRoomEntryRamp" type="CSGBox3D" parent="BunkerGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 0.5, 7.5)
-use_collision = true
-size = Vector3(2, 1, 2)
-material = SubResource("Mat_Platform")
-
 [node name="StargatePlatform" type="CSGBox3D" parent="BunkerGeometry"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -14)
 use_collision = true
@@ -352,9 +354,9 @@ material = SubResource("Mat_Sandbag")
 groups = ["cover"]
 
 [node name="SandbagsEast" type="CSGBox3D" parent="BunkerGeometry/Barricades"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.6, 5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.6, 5)
 use_collision = true
-size = Vector3(5, 1.2, 0.8)
+size = Vector3(3.5, 1.2, 0.8)
 material = SubResource("Mat_Sandbag")
 groups = ["cover"]
 
@@ -380,11 +382,13 @@ use_collision = true
 size = Vector3(3.2, 5, 0.6)
 material = SubResource("Mat_Door")
 
-[node name="BlastDoorConsole" type="CSGBox3D" parent="BlastDoors"]
+[node name="BlastDoorConsole" type="CSGBox3D" parent="BlastDoors" groups=["blast_door_console", "interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 1, -0.6)
 use_collision = true
 size = Vector3(0.6, 1.2, 0.4)
 material = SubResource("Mat_Door")
+script = ExtResource("15_bdconsole")
+door_id = "center"
 
 [node name="ConsoleLight" type="OmniLight3D" parent="BlastDoors/BlastDoorConsole"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -0.3)
@@ -414,11 +418,13 @@ use_collision = true
 size = Vector3(2.4, 4.4, 0.6)
 material = SubResource("Mat_Door")
 
-[node name="BlastDoorConsole" type="CSGBox3D" parent="BlastDoorsWest"]
+[node name="BlastDoorConsole" type="CSGBox3D" parent="BlastDoorsWest" groups=["blast_door_console", "interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 1, -0.6)
 use_collision = true
 size = Vector3(0.6, 1.2, 0.4)
 material = SubResource("Mat_Door")
+script = ExtResource("15_bdconsole")
+door_id = "west"
 
 [node name="ConsoleLight" type="OmniLight3D" parent="BlastDoorsWest/BlastDoorConsole"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -0.3)
@@ -448,11 +454,13 @@ use_collision = true
 size = Vector3(2.4, 4.4, 0.6)
 material = SubResource("Mat_Door")
 
-[node name="BlastDoorConsole" type="CSGBox3D" parent="BlastDoorsEast"]
+[node name="BlastDoorConsole" type="CSGBox3D" parent="BlastDoorsEast" groups=["blast_door_console", "interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 1, -0.6)
 use_collision = true
 size = Vector3(0.6, 1.2, 0.4)
 material = SubResource("Mat_Door")
+script = ExtResource("15_bdconsole")
+door_id = "east"
 
 [node name="ConsoleLight" type="OmniLight3D" parent="BlastDoorsEast/BlastDoorConsole"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -0.3)
@@ -536,14 +544,15 @@ light_energy = 1.6
 omni_range = 14.0
 
 [node name="SandbagsHallway" type="CSGBox3D" parent="FallbackHallway"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 35)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.6, 35)
 use_collision = true
-size = Vector3(7, 1.2, 0.8)
+size = Vector3(4.5, 1.2, 0.8)
 material = SubResource("Mat_Sandbag")
 groups = ["cover"]
 
 [node name="FixedTurretHallway" parent="FallbackHallway" instance=ExtResource("7_turret01")]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 35.8)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -1.5, 0, 35.8)
+is_automated_sentry = false
 
 [node name="Level28Complex" type="Node3D" parent="."]
 
@@ -808,6 +817,9 @@ light_color = Color(0.95, 0.95, 0.9, 1)
 light_energy = 2.0
 omni_range = 16.0
 
+[node name="ArmoryArmorStation" parent="Level28Complex/ArmorySector" instance=ExtResource("16_armor01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 29)
+
 [node name="SignArmory" type="Label3D" parent="Level28Complex/ArmorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 4.5, 36)
 text = "SGC ARMORY & MUNITIONS - LEVEL 28"
@@ -902,16 +914,40 @@ use_collision = true
 size = Vector3(18, 0.5, 17.5)
 material = SubResource("Mat_Floor")
 
-[node name="ElevatorWallWest" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6, 3, 18.75)
+[node name="ElevatorWallWestNorth" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6, 3, 11.5)
 use_collision = true
-size = Vector3(0.8, 6, 17.5)
+size = Vector3(0.8, 6, 3)
 material = SubResource("Mat_Wall")
 
-[node name="ElevatorWallNorth" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 3, 9.6)
+[node name="ElevatorWallWestSouth" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6, 3, 22.5)
 use_collision = true
-size = Vector3(18, 6, 0.8)
+size = Vector3(0.8, 6, 10)
+material = SubResource("Mat_Wall")
+
+[node name="ElevatorDoorHeaderWest" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6, 5.2, 15.25)
+use_collision = true
+size = Vector3(0.8, 1.6, 4.5)
+material = SubResource("Mat_Wall")
+
+[node name="ElevatorWallNorthWest" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 3, 9.6)
+use_collision = true
+size = Vector3(3, 6, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="ElevatorWallNorthEast" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.5, 3, 9.6)
+use_collision = true
+size = Vector3(9, 6, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="ElevatorDoorHeaderNorth" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 5.2, 9.6)
+use_collision = true
+size = Vector3(6, 1.6, 0.8)
 material = SubResource("Mat_Wall")
 
 [node name="ElevatorWallEastNorth" type="CSGBox3D" parent="Level28Complex/ElevatorSector"]
@@ -974,15 +1010,33 @@ modulate = Color(0.9, 0.95, 1, 1)
 [node name="ControlRoomMezzanine" type="Node3D" parent="Level28Complex"]
 
 [node name="ControlFloor" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 15)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 15)
 use_collision = true
 size = Vector3(14, 0.5, 14)
 material = SubResource("Mat_Floor")
 
-[node name="ControlWallSouth" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 22.4)
+[node name="ControlWallNorthWest" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 3, 7.8)
 use_collision = true
-size = Vector3(14, 6, 0.8)
+size = Vector3(3, 6, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="ControlWallSouthWest" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.75, 3, 22.4)
+use_collision = true
+size = Vector3(4.5, 6, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="ControlWallSouthEast" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.75, 3, 22.4)
+use_collision = true
+size = Vector3(4.5, 6, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="ControlDoorHeaderSouth" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.2, 22.4)
+use_collision = true
+size = Vector3(5, 1.6, 0.8)
 material = SubResource("Mat_Wall")
 
 [node name="ControlWallWest" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
@@ -1009,23 +1063,29 @@ use_collision = true
 size = Vector3(0.8, 2, 2)
 material = SubResource("Mat_Wall")
 
-[node name="ControlBalconyRailNorth" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 7.7)
+[node name="ControlBalconyRailWest" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 0.6, 7.7)
 use_collision = true
-size = Vector3(12, 0.8, 0.4)
+size = Vector3(2.2, 1.2, 0.4)
+material = SubResource("Mat_Door")
+
+[node name="ControlBalconyRailEast" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0.6, 7.7)
+use_collision = true
+size = Vector3(2.2, 1.2, 0.4)
 material = SubResource("Mat_Door")
 
 [node name="ControlObservationGlassNorth" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 7.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 7.7)
 use_collision = true
-size = Vector3(12, 3.2, 0.2)
+size = Vector3(8.4, 1.6, 0.2)
 material = SubResource("Mat_Glass")
 
-[node name="ControlDoorFrame" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.4, 2.5, 15)
+[node name="ControlCenterArchHeader" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 7.8)
 use_collision = true
-size = Vector3(0.7, 3.2, 2.2)
-material = SubResource("Mat_WhiteTrim")
+size = Vector3(4.0, 0.4, 0.8)
+material = SubResource("Mat_Wall")
 
 [node name="ControlDoorHeader" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.4, 4.8, 15)
@@ -1034,23 +1094,23 @@ size = Vector3(0.6, 2, 2)
 material = SubResource("Mat_Wall")
 
 [node name="DialingConsole1" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.5, 10.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 13.5)
 use_collision = true
-size = Vector3(2.4, 1, 1.2)
+size = Vector3(2, 1, 1)
 material = SubResource("Mat_Door")
 
 [node name="SGCDialingConsole" parent="Level28Complex/ControlRoomMezzanine" instance=ExtResource("11_sgcdial01")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 10.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0, 10.5)
 stargate_path = NodePath("../../../Stargate")
 
 [node name="DialingConsole3" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.5, 10.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0.5, 10.5)
 use_collision = true
-size = Vector3(2.4, 1, 1.2)
+size = Vector3(2.2, 1, 1.2)
 material = SubResource("Mat_Door")
 
 [node name="StairwayBaseLanding" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.85, 11)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.1, 11)
 use_collision = true
 size = Vector3(1.6, 0.2, 1.6)
 material = SubResource("Mat_Door")
@@ -1067,6 +1127,32 @@ text = "SGC GATE CONTROL - SUBLEVEL 28"
 font_size = 18
 outline_size = 4
 modulate = Color(0.9, 0.95, 1, 1)
+
+[node name="ControlElevatorConnector" type="Node3D" parent="Level28Complex"]
+
+[node name="ConnectorFloor" type="CSGBox3D" parent="Level28Complex/ControlElevatorConnector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, -0.25, 15)
+use_collision = true
+size = Vector3(10, 0.5, 6)
+material = SubResource("Mat_Floor")
+
+[node name="ConnectorWallNorth" type="CSGBox3D" parent="Level28Complex/ControlElevatorConnector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 3, 11.6)
+use_collision = true
+size = Vector3(10, 6, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="ConnectorWallSouth" type="CSGBox3D" parent="Level28Complex/ControlElevatorConnector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 3, 18.4)
+use_collision = true
+size = Vector3(10, 6, 0.8)
+material = SubResource("Mat_Wall")
+
+[node name="ConnectorLight" type="OmniLight3D" parent="Level28Complex/ControlElevatorConnector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4.5, 15)
+light_color = Color(0.95, 0.92, 0.82, 1)
+light_energy = 1.6
+omni_range = 10.0
 
 [node name="Stargate" parent="." instance=ExtResource("3_sg01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, -15)
@@ -1121,10 +1207,10 @@ script = ExtResource("2_wm01")
 [node name="Level27Complex" parent="." instance=ExtResource("8_l2701")]
 
 [node name="SGCElevator" parent="." instance=ExtResource("9_elev01")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37, 0, 18)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 37, 0, 18)
 
 [node name="ElevatorShaftWallEast" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.8, 4.5, 18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 4.5, 18)
 use_collision = true
 size = Vector3(0.8, 13, 4.2)
 material = SubResource("Mat_Wall")

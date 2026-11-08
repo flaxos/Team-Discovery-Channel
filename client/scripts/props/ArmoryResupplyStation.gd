@@ -52,14 +52,18 @@ func _perform_ammo_resupply(player: PlayerController3D) -> void:
 
 	player.claymore_charges = player.MAX_CLAYMORE_CHARGES
 	player.c4_charges_remaining = player.MAX_C4_CHARGES
+	player.deployable_shields_count = player.MAX_DEPLOYABLE_SHIELDS
+	player.smoke_grenades_count = player.MAX_SMOKE_GRENADES
 
 	_pulse_indicator(Color(0.1, 1.0, 0.4))
 	_play_resupply_sfx()
 
-	print("ArmoryResupplyStation: Operative %d resupplied ammo, Claymores (%d), and C4 (%d)!" % [
+	print("ArmoryResupplyStation: Operative %d resupplied ammo, Claymores (%d), C4 (%d), Shields (%d), and Smoke (%d)!" % [
 		player.peer_id,
 		player.claymore_charges,
-		player.c4_charges_remaining
+		player.c4_charges_remaining,
+		player.deployable_shields_count,
+		player.smoke_grenades_count
 	])
 	resupplied.emit(player)
 

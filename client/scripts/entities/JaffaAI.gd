@@ -7,10 +7,26 @@ extends CharacterBody3D
 signal jaffa_died(killer: Node)
 signal jaffa_vaporized()
 
-enum State { ADVANCE, COMBAT, MELEE, STUNNED, DEAD }
+enum State {
+	IDLE,
+	MARCHING_FORMATION,
+	PATROL,
+	CHASE,
+	ATTACK,
+	ADVANCE,
+	COMBAT,
+	MELEE,
+	COVER,
+	RETREAT,
+	STUNNED,
+	DOWNED,
+	DEAD
+}
 
 @export var is_shock_guard: bool = false
 @export var move_speed: float = 4.2
+@export var march_speed: float = 2.4
+@export var combat_run_speed: float = 5.5
 @export var combat_range: float = 22.0
 @export var melee_range: float = 2.2
 @export var plasma_damage: float = 45.0
@@ -23,11 +39,25 @@ var fire_timer: float = 0.0
 var melee_cooldown: float = 0.0
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
+# Formation March & Tactical Maneuver Variables
+var march_target: Vector3 = Vector3.ZERO
+var column_x_lane: float = 0.0
+var formation_rank: int = 0
+var is_front_rank: bool = false
+var is_crouching: bool = false
+var is_tactical_flanking: bool = false
+var tactical_destination: Vector3 = Vector3.ZERO
+var flank_route_target: Vector3 = Vector3.ZERO
+var tactical_cover_position: Vector3 = Vector3.ZERO
+
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D if has_node("NavigationAgent3D") else null
+@onready var staff_mount: Node3D = $StaffMount if has_node("StaffMount") else null
 @onready var muzzle_point: Marker3D = $StaffMount/MuzzlePoint if has_node("StaffMount/MuzzlePoint") else null
 @onready var stun_fx: Node3D = $Visuals/StunFX if has_node("Visuals/StunFX") else null
 @onready var body_mesh: MeshInstance3D = $Visuals/ArmorMesh if has_node("Visuals/ArmorMesh") else null
+@onready var visuals_root: Node3D = $Visuals if has_node("Visuals") else null
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D if has_node("CollisionShape3D") else null
 
 
 func _ready() -> void:
@@ -39,17 +69,33 @@ func _ready() -> void:
 			health_component.max_health = 140.0
 			health_component.current_health = 140.0
 		move_speed = 4.8
+		combat_run_speed = 5.8
 		plasma_damage = 42.0
 		fire_interval_s = 1.4
 
-	health_component.died.connect(_on_died)
-	health_component.stunned.connect(_on_stunned)
-	health_component.recovered_from_stun.connect(_on_recovered_from_stun)
-	health_component.vaporized.connect(_on_vaporized)
-	health_component.damage_taken.connect(_on_damage_taken)
+	if health_component != null:
+		health_component.died.connect(_on_died)
+		health_component.stunned.connect(_on_stunned)
+		health_component.recovered_from_stun.connect(_on_recovered_from_stun)
+		health_component.vaporized.connect(_on_vaporized)
+		health_component.damage_taken.connect(_on_damage_taken)
 
 	# Randomize initial fire offset so multiple Jaffa don't shoot in unison
 	fire_timer = randf_range(0.5, fire_interval_s)
+
+	_setup_staff_visual()
+
+
+## Initializes disciplined Stargate 2-by-2 column march mode down the ramp.
+func start_column_march(march_target_pos: Vector3) -> void:
+	current_state = State.MARCHING_FORMATION
+	march_target = march_target_pos
+	column_x_lane = march_target_pos.x
+	_set_crouching(false)
+	_set_staff_ready_position()
+	print("JaffaAI [%s]: Commencing column march toward %s (Lane X=%.1f, Rank %d, Front=%s)." % [
+		name, str(march_target), column_x_lane, formation_rank, str(is_front_rank)
+	])
 
 
 func _physics_process(delta: float) -> void:
@@ -59,33 +105,254 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 
 	# Only server executes state machine and movement decisions
-	if not multiplayer.is_server():
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		move_and_slide()
 		return
 
-	if current_state == State.DEAD or current_state == State.STUNNED:
+	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 		move_and_slide()
 		return
 
+	# State evaluations
+	match current_state:
+		State.MARCHING_FORMATION:
+			_process_marching_formation(delta)
+		State.COVER, State.RETREAT:
+			_process_cover(delta)
+		State.COMBAT, State.ATTACK:
+			_process_combat_state(delta)
+		State.MELEE:
+			_process_melee(delta)
+		State.ADVANCE, State.CHASE, State.PATROL, State.IDLE:
+			_process_advance_state(delta)
+
+	move_and_slide()
+
+
+func _process_marching_formation(delta: float) -> void:
+	_set_staff_ready_position()
+
+	# Check engagement triggers: target in LOS within combat range
+	_find_nearest_target()
+	if current_target != null:
+		var dist: float = global_position.distance_to(current_target.global_position)
+		if dist <= combat_range and _has_line_of_sight(current_target):
+			break_formation_and_engage()
+			_alert_nearby_formation_jaffa()
+			return
+
+	# Reached Gate Room center (Z >= march_target.z, where march_target.z is 0.0)
+	if global_position.z >= march_target.z:
+		print("JaffaAI [%s]: Column reached Gate Room center (Z=%.1f). Transitioning to base advance." % [name, global_position.z])
+		current_state = State.ADVANCE
+		_reset_staff_position()
+		return
+
+	# Maintain column lane X while marching forward down the ramp (+Z) at march_speed (2.4 m/s)
+	var x_offset: float = column_x_lane - global_position.x
+	var steer_x: float = clampf(x_offset * 3.0, -1.0, 1.0)
+	var march_dir: Vector3 = Vector3(steer_x, 0.0, 1.0).normalized()
+
+	velocity.x = move_toward(velocity.x, march_dir.x * march_speed, 12.0 * delta)
+	velocity.z = move_toward(velocity.z, march_dir.z * march_speed, 12.0 * delta)
+
+	# Keep orientation locked forward down the ramp (+Z direction)
+	if march_dir.length_squared() > 0.01:
+		rotation.y = atan2(-march_dir.x, -march_dir.z)
+
+
+## Triggers tactical reaction when column formation is engaged.
+func break_formation_and_engage() -> void:
+	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
+		return
+
+	if is_front_rank or _is_lead_jaffa_on_ramp():
+		# Front ranks halt and crouch to lay down suppressive plasma bolt fire
+		current_state = State.COMBAT
+		_set_crouching(true)
+		velocity = Vector3.ZERO
+		fire_timer = randf_range(0.1, 0.4)
+		print("JaffaAI [%s]: Front rank halting & crouching to unleash plasma barrage!" % name)
+	else:
+		# Trailing ranks break into tactical combat (flanking via West/East corridors or taking cover behind sandbags)
+		current_state = State.COVER
+		_set_crouching(false)
+		_assign_tactical_role()
+		print("JaffaAI [%s]: Trailing rank breaking into tactical cover / corridor flanking!" % name)
+
+
+func _is_lead_jaffa_on_ramp() -> bool:
+	if is_front_rank or formation_rank == 0:
+		return true
+	var enemies: Node = get_parent()
+	if enemies == null:
+		return false
+	# Only step up to lead rank if all Jaffa in earlier ranks are eliminated
+	for child: Node in enemies.get_children():
+		var other: JaffaAI = child as JaffaAI
+		if other != null and other != self and is_instance_valid(other):
+			if other.formation_rank < formation_rank:
+				if other.current_state != State.DEAD and other.current_state != State.DOWNED:
+					return false
+	return true
+
+
+func _alert_nearby_formation_jaffa() -> void:
+	var enemies: Node = get_parent()
+	if enemies == null:
+		return
+	for child: Node in enemies.get_children():
+		var other: JaffaAI = child as JaffaAI
+		if other != null and other != self and is_instance_valid(other):
+			if other.current_state == State.MARCHING_FORMATION:
+				other.break_formation_and_engage()
+
+
+func _assign_tactical_role() -> void:
+	var is_west: bool = (global_position.x < 0.0 or column_x_lane < 0.0)
+
+	if formation_rank == 1:
+		# Rank 1 takes sandbag cover
+		is_tactical_flanking = false
+		tactical_cover_position = _find_nearest_cover(is_west)
+		tactical_destination = tactical_cover_position
+	else:
+		# Rank >= 2 flanks via corridor
+		is_tactical_flanking = true
+		flank_route_target = Vector3(-18.0, 0.1, 4.0) if is_west else Vector3(18.0, 0.1, 4.0)
+		tactical_destination = flank_route_target
+
+
+func _find_nearest_cover(is_west: bool) -> Vector3:
+	var default_pos: Vector3 = Vector3(-5.0, 0.1, 4.0) if is_west else Vector3(2.5, 0.1, 4.0)
+	if not is_inside_tree():
+		return default_pos
+
+	var cover_nodes: Array[Node] = get_tree().get_nodes_in_group("cover")
+	var min_dist: float = 99999.0
+	var chosen_pos: Vector3 = default_pos
+
+	for node: Node in cover_nodes:
+		var n3d: Node3D = node as Node3D
+		if n3d != null:
+			var pos: Vector3 = n3d.global_position
+			if (is_west and pos.x < 0.0) or (not is_west and pos.x >= 0.0):
+				var d: float = global_position.distance_to(pos)
+				if d < min_dist:
+					min_dist = d
+					chosen_pos = Vector3(pos.x, 0.1, pos.z - 0.8)
+
+	return chosen_pos
+
+
+func _process_cover(delta: float) -> void:
+	_find_nearest_target()
+
+	if current_target != null:
+		var dist_to_target: float = global_position.distance_to(current_target.global_position)
+		if dist_to_target <= melee_range:
+			_set_crouching(false)
+			current_state = State.MELEE
+			_process_melee(delta)
+			return
+
+	var dist_to_dest: float = Vector2(global_position.x - tactical_destination.x, global_position.z - tactical_destination.z).length()
+
+	if dist_to_dest > 1.2:
+		_set_crouching(false)
+		var to_dest: Vector3 = (tactical_destination - global_position)
+		to_dest.y = 0.0
+		var dir: Vector3 = to_dest.normalized()
+
+		velocity.x = move_toward(velocity.x, dir.x * combat_run_speed, 20.0 * delta)
+		velocity.z = move_toward(velocity.z, dir.z * combat_run_speed, 20.0 * delta)
+
+		if dir.length_squared() > 0.01:
+			rotation.y = atan2(-dir.x, -dir.z)
+
+		if current_target != null and _has_line_of_sight(current_target):
+			fire_timer -= delta
+			if fire_timer <= 0.0:
+				fire_timer = fire_interval_s + randf_range(-0.2, 0.3)
+				_fire_staff_blast()
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+
+		if not is_tactical_flanking:
+			_set_crouching(true)
+
+		if current_target != null and _has_line_of_sight(current_target):
+			var look_dir: Vector3 = (current_target.global_position - global_position)
+			look_dir.y = 0.0
+			if look_dir.length_squared() > 0.01:
+				rotation.y = atan2(-look_dir.x, -look_dir.z)
+
+			fire_timer -= delta
+			if fire_timer <= 0.0:
+				fire_timer = fire_interval_s + randf_range(-0.3, 0.3)
+				_fire_staff_blast()
+		elif current_target != null:
+			_set_crouching(false)
+			current_state = State.COMBAT
+
+
+func _process_combat_state(delta: float) -> void:
 	_find_nearest_target()
 
 	if current_target == null:
-		# Advance towards defensive zone center if no targets found
-		_advance_towards(Vector3(0, 0, 6), delta)
-		move_and_slide()
+		_set_crouching(false)
+		_reset_staff_position()
+		current_state = State.ADVANCE
+		_advance_towards(Vector3(0.0, 0.0, 6.0), delta)
 		return
 
-	var dist := global_position.distance_to(current_target.global_position)
+	var dist: float = global_position.distance_to(current_target.global_position)
+	if dist <= melee_range:
+		_set_crouching(false)
+		current_state = State.MELEE
+		_process_melee(delta)
+		return
 
-	# Look towards target on horizontal plane
-	var look_dir := (current_target.global_position - global_position)
-	look_dir.y = 0.0
-	if look_dir.length_squared() > 0.01:
-		rotation.y = atan2(-look_dir.x, -look_dir.z)
+	var has_los: bool = _has_line_of_sight(current_target)
 
-	# State evaluations
+	if is_crouching:
+		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+
+		if has_los:
+			var look_dir: Vector3 = (current_target.global_position - global_position)
+			look_dir.y = 0.0
+			if look_dir.length_squared() > 0.01:
+				rotation.y = atan2(-look_dir.x, -look_dir.z)
+
+			fire_timer -= delta
+			if fire_timer <= 0.0:
+				fire_timer = fire_interval_s + randf_range(-0.3, 0.4)
+				_fire_staff_blast()
+		else:
+			_set_crouching(false)
+			_advance_towards(current_target.global_position, delta)
+	else:
+		if has_los and dist <= combat_range:
+			_process_combat(delta, dist)
+		else:
+			current_state = State.ADVANCE
+			_advance_towards(current_target.global_position, delta)
+
+
+func _process_advance_state(delta: float) -> void:
+	_set_crouching(false)
+	_reset_staff_position()
+	_find_nearest_target()
+
+	if current_target == null:
+		_advance_towards(Vector3(0.0, 0.0, 6.0), delta)
+		return
+
+	var dist: float = global_position.distance_to(current_target.global_position)
 	if dist <= melee_range:
 		current_state = State.MELEE
 		_process_melee(delta)
@@ -93,40 +360,165 @@ func _physics_process(delta: float) -> void:
 		current_state = State.COMBAT
 		_process_combat(delta, dist)
 	else:
-		current_state = State.ADVANCE
 		_advance_towards(current_target.global_position, delta)
 
-	move_and_slide()
+
+func _set_crouching(crouched: bool) -> void:
+	is_crouching = crouched
+	var target_y: float = -0.35 if crouched else 0.0
+	var col_y: float = 0.65 if crouched else 0.95
+	var staff_y: float = 0.75 if crouched else (1.05 if is_shock_guard else 1.0)
+
+	if visuals_root != null:
+		visuals_root.position.y = target_y
+	if collision_shape != null:
+		collision_shape.position.y = col_y
+	if staff_mount != null:
+		staff_mount.position.y = staff_y
+
+
+func _set_staff_ready_position() -> void:
+	if staff_mount == null:
+		return
+	staff_mount.position = Vector3(0.05, 0.75 if is_crouching else 1.1, -0.4)
+	staff_mount.rotation_degrees = Vector3(-6.0, 0.0, 0.0)
+
+
+func _reset_staff_position() -> void:
+	if staff_mount == null:
+		return
+	staff_mount.position = Vector3(
+		0.38 if is_shock_guard else 0.35,
+		0.75 if is_crouching else (1.05 if is_shock_guard else 1.0),
+		-0.2
+	)
+	staff_mount.rotation_degrees = Vector3.ZERO
+
+
+func _setup_staff_visual() -> void:
+	if staff_mount == null:
+		return
+	if staff_mount.has_node("StaffVisual"):
+		return
+
+	var visual_root: Node3D = Node3D.new()
+	visual_root.name = "StaffVisual"
+	staff_mount.add_child(visual_root)
+
+	var shaft: MeshInstance3D = MeshInstance3D.new()
+	var cyl: CylinderMesh = CylinderMesh.new()
+	cyl.top_radius = 0.025
+	cyl.bottom_radius = 0.025
+	cyl.height = 1.9
+	var shaft_mat: StandardMaterial3D = StandardMaterial3D.new()
+	shaft_mat.albedo_color = Color(0.4, 0.3, 0.15)
+	shaft_mat.metallic = 0.8
+	shaft_mat.roughness = 0.3
+	cyl.material = shaft_mat
+	shaft.mesh = cyl
+	shaft.rotation_degrees.x = 90.0
+	shaft.position.z = -0.1
+	visual_root.add_child(shaft)
+
+	var head: MeshInstance3D = MeshInstance3D.new()
+	var prism: PrismMesh = PrismMesh.new()
+	prism.size = Vector3(0.08, 0.3, 0.08)
+	var head_mat: StandardMaterial3D = StandardMaterial3D.new()
+	head_mat.albedo_color = Color(0.85, 0.65, 0.2)
+	head_mat.metallic = 0.95
+	head_mat.roughness = 0.2
+	prism.material = head_mat
+	head.mesh = prism
+	head.rotation_degrees.x = -90.0
+	head.position.z = -1.0
+	visual_root.add_child(head)
 
 
 func _find_nearest_target() -> void:
-	# Find closest active SGC operative
-	var players_container := get_tree().root.find_child("Players", true, false)
-	if players_container == null:
-		return
-
-	var closest_player: Node3D = null
+	# Find closest active SGC operative or allied Airman defender
+	var closest_target: Node3D = null
 	var min_dist: float = 999999.0
 
-	for child in players_container.get_children():
-		var player := child as PlayerController3D
-		if player != null and player.health_component != null and not player.health_component.is_dead:
-			var d := global_position.distance_to(player.global_position)
-			if d < min_dist:
-				min_dist = d
-				closest_player = player
+	var players_container := get_tree().root.find_child("Players", true, false)
+	if players_container != null:
+		for child in players_container.get_children():
+			var p := child as CharacterBody3D
+			if p != null:
+				var health := p.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and not health.is_dead:
+					var d := global_position.distance_to(p.global_position)
+					if d < min_dist:
+						min_dist = d
+						closest_target = p
 
-	current_target = closest_player
+	var allies_container := get_tree().root.find_child("Allies", true, false)
+	if allies_container != null:
+		for child in allies_container.get_children():
+			var a := child as CharacterBody3D
+			if a != null:
+				var health := a.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and not health.is_dead:
+					var d := global_position.distance_to(a.global_position)
+					if d < min_dist:
+						min_dist = d
+						closest_target = a
+
+	current_target = closest_target
+
+
+func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
+	if not is_inside_tree():
+		return false
+	var seg_start := global_position + Vector3(0, 1.4, 0)
+	var seg_end := target_pos + Vector3(0, 1.0, 0)
+	var seg_dir := (seg_end - seg_start)
+	var seg_len_sq := seg_dir.length_squared()
+	if seg_len_sq < 0.001:
+		return false
+
+	for node in get_tree().get_nodes_in_group("smoke_cloud"):
+		var cloud := node as Area3D
+		if cloud != null and is_instance_valid(cloud):
+			var cloud_pos := cloud.global_position
+			var t := clampf((cloud_pos - seg_start).dot(seg_dir) / seg_len_sq, 0.0, 1.0)
+			var closest_pt := seg_start + seg_dir * t
+			if closest_pt.distance_to(cloud_pos) <= 4.5:
+				return true
+	return false
 
 
 func _has_line_of_sight(target: Node3D) -> bool:
+	if target == null or not is_inside_tree() or not target.is_inside_tree():
+		return false
+	if _is_target_obscured_by_smoke(target.global_position):
+		return false
+
 	var space := get_world_3d().direct_space_state
-	var from := global_position + Vector3(0, 1.4, 0)
-	var to := target.global_position + Vector3(0, 1.0, 0)
+	if space == null:
+		return false
+
+	var from: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.4, 0)
 	var exclude_list: Array[RID] = [get_rid()]
 	if target is CollisionObject3D:
 		exclude_list.append((target as CollisionObject3D).get_rid())
 
+	# Test both head and torso for clear unoccluded LOS
+	var test_points: Array[Vector3] = [
+		target.global_position + Vector3(0, 1.5, 0),  # Head
+		target.global_position + Vector3(0, 1.0, 0)   # Torso
+	]
+	var health := target.get_node_or_null("HealthComponent") as HealthComponent
+	if health != null and health.is_downed:
+		test_points.append(target.global_position + Vector3(0, 0.35, 0))
+
+	for to in test_points:
+		if _cast_los_ray(space, from, to, exclude_list.duplicate()):
+			return true
+
+	return false
+
+
+func _cast_los_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3, exclude_list: Array[RID]) -> bool:
 	for iter in range(3):
 		var query := PhysicsRayQueryParameters3D.create(from, to)
 		query.collision_mask = 1  # Blocked only by World walls/barricades
@@ -140,7 +532,7 @@ func _has_line_of_sight(target: Node3D) -> bool:
 				exclude_list.append(result["rid"])
 			continue
 		return false
-	return true
+	return false
 
 
 func _advance_towards(target_pos: Vector3, delta: float) -> void:
@@ -157,6 +549,8 @@ func _advance_towards(target_pos: Vector3, delta: float) -> void:
 			# Ascend the helical spiral stairs toward Level 27
 			velocity.y = 3.5
 			move_dest = Vector3(-5.0, 5.5, 11.0)
+	elif target_pos.y < 4.5 and not _has_line_of_sight(current_target):
+		move_dest = _get_hallway_destination(target_pos)
 
 	var to_target := (move_dest - global_position)
 	to_target.y = 0.0
@@ -164,6 +558,75 @@ func _advance_towards(target_pos: Vector3, delta: float) -> void:
 
 	velocity.x = move_toward(velocity.x, dir.x * move_speed, 20.0 * delta)
 	velocity.z = move_toward(velocity.z, dir.z * move_speed, 20.0 * delta)
+
+	# If no line of sight to target, orient strictly to corridor movement direction
+	if not _has_line_of_sight(current_target) and dir.length_squared() > 0.01:
+		rotation.y = atan2(-dir.x, -dir.z)
+
+
+func _get_hallway_destination(target_pos: Vector3) -> Vector3:
+	# 1. Target in East Wing (Armory / Elevator Lobby / Round Hallway / Lab / East Corridor)
+	if target_pos.x >= 16.0:
+		if global_position.x < 17.0 and global_position.z <= 8.0:
+			return Vector3(18.0, 0.1, 4.0)   # Head to East Blast Door
+		elif global_position.x >= 17.0 and global_position.z < 9.6:
+			return Vector3(22.5, 0.1, 8.0)   # Head through East Corridor
+		elif global_position.z >= 8.0 and global_position.z < 24.0:
+			if target_pos.x >= 35.0 or target_pos.z >= 24.0:
+				return Vector3(24.0, 0.1, 22.0) # Head into Round Hallway
+			else:
+				return target_pos
+		elif global_position.z >= 24.0 and global_position.x < 35.0:
+			if target_pos.x >= 35.0:
+				return Vector3(35.0, 0.1, 36.0) # Head into Armory
+			elif target_pos.z >= 45.0:
+				return Vector3(26.0, 0.1, 46.0) # Head into Lab
+			else:
+				return target_pos
+		elif global_position.x >= 35.0:
+			return target_pos
+
+	# 2. Target in Fallback Hallway (South of Control Room)
+	elif target_pos.z >= 20.0 and absf(target_pos.x) <= 6.0:
+		if global_position.z <= 8.0:
+			return Vector3(5.0, 0.75, 8.5)   # Enter Control Room North ramp
+		elif global_position.z > 8.0 and global_position.z < 14.0:
+			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
+		elif global_position.z >= 14.0 and global_position.z < 22.0:
+			return Vector3(0.0, 0.75, 22.0)  # Head to Central Blast Door
+		elif global_position.z >= 22.0 and global_position.z < 28.0:
+			return Vector3(2.5, 0.1, 28.0)   # Fallback Hallway
+		else:
+			return target_pos
+
+	# 3. Target in Control Room
+	elif absf(target_pos.x) <= 7.5 and target_pos.z >= 7.8 and target_pos.z <= 22.0:
+		if global_position.z <= 8.0:
+			return Vector3(5.0, 0.75, 8.5)   # North ramp into Control Room
+		elif global_position.z > 8.0 and global_position.z < 14.0:
+			return Vector3(5.0, 0.75, 14.0)  # Aisle past dialing consoles
+		else:
+			return target_pos
+
+	# 4. Target in Gate Room Arena
+	elif target_pos.z <= 8.0 and target_pos.x < 17.0:
+		if global_position.x >= 35.0:
+			return Vector3(35.0, 0.1, 36.0)   # Exit Armory
+		elif global_position.z >= 24.0 and global_position.x >= 17.0:
+			return Vector3(24.0, 0.1, 22.0)   # Round Hallway to Elevator Lobby
+		elif global_position.z >= 9.6 and global_position.x >= 17.0:
+			return Vector3(22.5, 0.1, 8.0)    # Elevator Lobby to East Corridor
+		elif global_position.x >= 17.0 and global_position.z < 9.6:
+			return Vector3(18.0, 0.1, 4.0)    # East Corridor into Gate Room
+		elif global_position.z >= 22.0 and absf(global_position.x) <= 6.0:
+			return Vector3(0.0, 0.75, 22.0)   # Exit Fallback Hallway
+		elif global_position.z > 8.0 and global_position.z < 22.0 and absf(global_position.x) <= 7.5:
+			if global_position.z > 14.0:
+				return Vector3(5.0, 0.75, 14.0)
+			else:
+				return Vector3(5.0, 0.75, 8.5) # Down ramp into Gate Room
+
+	return target_pos
 
 
 func _process_combat(delta: float, dist: float) -> void:
@@ -182,7 +645,7 @@ func _process_combat(delta: float, dist: float) -> void:
 
 
 func _fire_staff_blast() -> void:
-	if current_target == null:
+	if current_target == null or not _has_line_of_sight(current_target):
 		return
 
 	_dispatch_single_plasma_bolt()
@@ -192,12 +655,13 @@ func _fire_staff_blast() -> void:
 		var burst_timer := get_tree().create_timer(0.18)
 		burst_timer.timeout.connect(func() -> void:
 			if is_instance_valid(self) and is_inside_tree() and current_state != State.DEAD and current_state != State.STUNNED and current_target != null:
-				_dispatch_single_plasma_bolt()
+				if _has_line_of_sight(current_target):
+					_dispatch_single_plasma_bolt()
 		)
 
 
 func _dispatch_single_plasma_bolt() -> void:
-	if current_target == null:
+	if current_target == null or not _has_line_of_sight(current_target):
 		return
 
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.2, -0.6)
@@ -224,6 +688,10 @@ func _dispatch_single_plasma_bolt() -> void:
 func _on_damage_taken(_amount: float, _source: Node, _damage_type: String) -> void:
 	if is_shock_guard and current_state != State.DEAD:
 		rpc("play_armor_spark_fx", global_position + Vector3(0, 1.2, 0))
+
+	if current_state == State.MARCHING_FORMATION:
+		break_formation_and_engage()
+		_alert_nearby_formation_jaffa()
 
 
 @rpc("call_local", "unreliable")
@@ -270,6 +738,7 @@ func play_staff_fire_fx(origin_pos: Vector3) -> void:
 
 func _on_stunned(duration: float) -> void:
 	current_state = State.STUNNED
+	_set_crouching(false)
 	if stun_fx != null:
 		stun_fx.visible = true
 	print("Jaffa Guard incapacitated by Zat'nik'tel stun for %.1f s." % duration)
@@ -285,6 +754,7 @@ func _on_recovered_from_stun() -> void:
 
 func _on_died() -> void:
 	current_state = State.DEAD
+	_set_crouching(false)
 	collision_layer = 0  # No longer blocks bullets or players
 	if stun_fx != null:
 		stun_fx.visible = false

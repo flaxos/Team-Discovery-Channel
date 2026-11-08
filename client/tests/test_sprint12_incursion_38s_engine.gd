@@ -111,9 +111,11 @@ func _process(delta: float) -> bool:
 		iris_servo.start_repair(player)
 		assert(iris_servo.is_repairing, "IrisServoHousing must enter repairing state")
 
-		# Channel repair for 6.0 seconds
-		var repaired := iris_servo.update_repair(6.5)
-		assert(repaired, "Iris servo repair must complete after 6.0 seconds")
+		# Channel repair across the 3 stages (3.0s each)
+		var repaired: bool = false
+		for i in range(3):
+			repaired = iris_servo.update_repair(3.1)
+		assert(repaired, "Iris servo repair must complete after 3 stages (9.0s)")
 		assert(iris_servo.is_repaired, "IrisServoHousing must be marked repaired")
 		assert(wave_mgr.is_iris_repaired, "WaveManager must acknowledge Iris repair")
 		print("[TEST 4/4] PASS: Gate Room Iris servo manually repaired, sealing gate and blocking reinforcements.")

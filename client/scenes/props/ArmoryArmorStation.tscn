@@ -1,0 +1,57 @@
+[gd_scene load_steps=7 format=3 uid="uid://carmoryarmor01"]
+
+[ext_resource type="Script" path="res://scripts/props/ArmoryArmorStation.gd" id="1_armor"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_RackSteel"]
+albedo_color = Color(0.18, 0.22, 0.2, 1)
+metallic = 0.8
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_Rack"]
+material = SubResource("Mat_RackSteel")
+size = Vector3(1.4, 2.0, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Plates"]
+albedo_color = Color(0.12, 0.14, 0.13, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_Plates"]
+material = SubResource("Mat_Plates")
+size = Vector3(1.1, 0.8, 0.25)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Area"]
+height = 2.0
+radius = 2.0
+
+[node name="ArmoryArmorStation" type="Node3D" groups=["interactable"]]
+script = ExtResource("1_armor")
+
+[node name="RackMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+mesh = SubResource("BoxMesh_Rack")
+
+[node name="PlatesMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0.2)
+mesh = SubResource("BoxMesh_Plates")
+
+[node name="StationLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0.3)
+light_color = Color(0.2, 0.9, 0.4, 1)
+light_energy = 1.5
+omni_range = 3.5
+
+[node name="PromptLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 0.3)
+billboard = 1
+text = "[E] RE-ARMOR TACTICAL PLATES"
+font_size = 14
+outline_size = 4
+modulate = Color(0.4, 0.95, 0.5, 1)
+
+[node name="InteractArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("CylinderShape3D_Area")

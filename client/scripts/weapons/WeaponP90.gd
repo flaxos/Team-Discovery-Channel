@@ -13,4 +13,7 @@ func _init() -> void:
 	reserve_capacity = 300
 	reload_time_s = 1.9
 	base_spread_deg = 1.8
+	bloom_per_shot_deg = 0.40
+	max_spread_deg = 6.5
+	spread_recovery_rate = 18.0
 	max_range_m = 45.0

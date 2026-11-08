@@ -6,6 +6,8 @@ extends Node3D
 
 const PLAYER_SCENE_PATH: String = "res://scenes/entities/Player.tscn"
 const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
+const IrisServoHousingScript = preload("res://scripts/props/IrisServoHousing.gd")
+const LabDataPatchDriveScript = preload("res://scripts/props/LabDataPatchDrive.gd")
 
 # Sector identifiers for SGC Sublevels 28 & 27
 const SECTOR_GATE_ROOM: String = "GATE_ROOM"
@@ -16,6 +18,8 @@ const SECTOR_ROUND_HALLWAY: String = "ROUND_HALLWAY"
 const SECTOR_ARMORY: String = "ARMORY"
 const SECTOR_LABORATORY: String = "LABORATORY"
 const SECTOR_ELEVATOR_LOBBY: String = "ELEVATOR_LOBBY"
+const SECTOR_EAST_CORRIDOR: String = "EAST_CORRIDOR"
+const SECTOR_WEST_CORRIDOR: String = "WEST_CORRIDOR"
 
 # Sublevel 27 Sectors
 const SECTOR_BRIEFING_ROOM: String = "BRIEFING_ROOM"
@@ -48,13 +52,51 @@ var dhd_console: DHDDialer:
 	set(v):
 		dialing_console = v
 
+var keybindings_modal: KeybindingsModal:
+	get:
+		if hud != null:
+			return hud.keybindings_modal
+		return null
+
+
+func toggle_keybindings_modal() -> void:
+	if hud != null:
+		hud.toggle_keybindings_modal()
+
 var is_blast_doors_closed: bool = false
 var is_animating_doors: bool = false
+var is_observation_shutters_closed: bool = false
+var is_animating_observation_shutters: bool = false
 var is_emergency_active: bool = false
 var emergency_strobe_timer: float = 0.0
 var player_sectors: Dictionary = {}
+var visited_sectors: Dictionary = {}
+
+var sector_shrouds: Dictionary = {}
+var shroud_mat_opaque: StandardMaterial3D = null
+var shroud_mat_adjacent: StandardMaterial3D = null
+var shroud_mat_visited: StandardMaterial3D = null
+
+var sector_adjacency: Dictionary = {
+	SECTOR_GATE_ROOM: [SECTOR_EAST_CORRIDOR, SECTOR_WEST_CORRIDOR, SECTOR_CONTROL_ROOM, SECTOR_BRIEFING_ROOM],
+	SECTOR_CONTROL_ROOM: [SECTOR_GATE_ROOM, SECTOR_FALLBACK_HALLWAY, SECTOR_ELEVATOR_LOBBY],
+	SECTOR_FALLBACK_HALLWAY: [SECTOR_CONTROL_ROOM, SECTOR_CONNECTOR_TUNNEL],
+	SECTOR_CONNECTOR_TUNNEL: [SECTOR_FALLBACK_HALLWAY, SECTOR_ROUND_HALLWAY],
+	SECTOR_ROUND_HALLWAY: [SECTOR_ARMORY, SECTOR_CONNECTOR_TUNNEL, SECTOR_ELEVATOR_LOBBY, SECTOR_LABORATORY],
+	SECTOR_ARMORY: [SECTOR_ROUND_HALLWAY],
+	SECTOR_ELEVATOR_LOBBY: [SECTOR_EAST_CORRIDOR, SECTOR_ROUND_HALLWAY, SECTOR_CONTROL_ROOM, SECTOR_UPPER_ELEVATOR_LOBBY],
+	SECTOR_EAST_CORRIDOR: [SECTOR_GATE_ROOM, SECTOR_ELEVATOR_LOBBY],
+	SECTOR_WEST_CORRIDOR: [SECTOR_GATE_ROOM],
+	SECTOR_LABORATORY: [SECTOR_ROUND_HALLWAY],
+	SECTOR_BRIEFING_ROOM: [SECTOR_GATE_ROOM, SECTOR_GENERALS_OFFICE, SECTOR_SECURITY_STATION, SECTOR_UPPER_CORRIDOR],
+	SECTOR_GENERALS_OFFICE: [SECTOR_BRIEFING_ROOM],
+	SECTOR_SECURITY_STATION: [SECTOR_BRIEFING_ROOM],
+	SECTOR_UPPER_CORRIDOR: [SECTOR_BRIEFING_ROOM, SECTOR_UPPER_ELEVATOR_LOBBY],
+	SECTOR_UPPER_ELEVATOR_LOBBY: [SECTOR_UPPER_CORRIDOR, SECTOR_ELEVATOR_LOBBY]
+}
 
 signal blast_doors_toggled(closed: bool)
+signal observation_shutters_toggled(closed: bool)
 signal sector_changed(player_id: int, old_sector: String, new_sector: String)
 
 
@@ -75,6 +117,8 @@ func _ready() -> void:
 	# Connect players container to bind HUD
 	if players_container != null:
 		players_container.child_entered_tree.connect(_on_player_child_entered)
+		for existing_p: Node in players_container.get_children():
+			_on_player_child_entered(existing_p)
 
 	# Connect WaveManager and DHD to HUD and emergency lighting
 	if wave_manager != null:
@@ -115,8 +159,17 @@ func _ready() -> void:
 
 	if dialing_console != null and hud != null:
 		hud.bind_dhd(dialing_console)
+
+	var iris_servo := find_child("IrisServoHousing", true, false) as IrisServoHousingScript
+	if iris_servo != null and hud != null:
+		iris_servo.stage_completed.connect(func(stg: int, sname: String) -> void:
+			hud.update_iris_repair_stage(stg, sname, float(stg) / 3.0)
+		)
+
 	if stargate_mesh != null:
 		stargate_mesh.player_extracted.connect(_on_player_extracted)
+
+	_setup_sector_shrouds()
 
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	# If host / server in an active game session, spawn all registered players and start waves
@@ -145,10 +198,14 @@ func _process(delta: float) -> void:
 			var player := p as PlayerController3D
 			if player != null:
 				var pid: int = player.name.to_int()
+				if pid == 0 and player.name == "1":
+					pid = 1
 				var cur_sec: String = get_current_sector(player.global_position)
 				var prev_sec: String = player_sectors.get(pid, "")
 				if cur_sec != prev_sec:
 					player_sectors[pid] = cur_sec
+					if cur_sec != SECTOR_UNKNOWN:
+						visited_sectors[cur_sec] = true
 					sector_changed.emit(pid, prev_sec, cur_sec)
 					print("GateRoom: Operative %s entered sector: %s" % [player.name, cur_sec])
 					if hud != null:
@@ -157,6 +214,186 @@ func _process(delta: float) -> void:
 							local_id = multiplayer.get_unique_id()
 						if player.name == str(local_id) or (local_id == 1 and player.name == "1"):
 							hud.update_sector_display(cur_sec)
+
+	# Update sector shrouds and fog-of-war culling for local operative
+	var local_pid := 1
+	if multiplayer != null and multiplayer.has_multiplayer_peer():
+		local_pid = multiplayer.get_unique_id()
+	var local_sector: String = player_sectors.get(local_pid, "")
+	if local_sector.is_empty():
+		if players_container != null and players_container.get_child_count() > 0:
+			var local_player := players_container.get_child(0) as CharacterBody3D
+			if local_player != null:
+				local_sector = get_current_sector(local_player.global_position)
+		if local_sector.is_empty():
+			local_sector = SECTOR_GATE_ROOM
+	_update_sector_shrouding(local_sector)
+
+
+func _setup_sector_shrouds() -> void:
+	var shroud_container := Node3D.new()
+	shroud_container.name = "SectorShrouds"
+	add_child(shroud_container)
+
+	# 1. Fully occluded / deep fog of war material for unvisited distant rooms (Alpha 1.0)
+	shroud_mat_opaque = StandardMaterial3D.new()
+	shroud_mat_opaque.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	shroud_mat_opaque.albedo_color = Color(0.04, 0.05, 0.06, 1.0)
+	shroud_mat_opaque.roughness = 0.95
+	shroud_mat_opaque.metallic = 0.2
+	shroud_mat_opaque.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+
+	# 2. Known / previously visited room material: shows opaque hallway / room structure but conceals contents (Alpha 1.0)
+	shroud_mat_visited = StandardMaterial3D.new()
+	shroud_mat_visited.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	shroud_mat_visited.albedo_color = Color(0.12, 0.13, 0.16, 1.0)
+	shroud_mat_visited.roughness = 0.85
+	shroud_mat_visited.metallic = 0.25
+	shroud_mat_visited.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+
+	# 3. Adjacent room material: subtle ambient lighting with low-opacity structural silhouette (Alpha 0.90)
+	shroud_mat_adjacent = StandardMaterial3D.new()
+	shroud_mat_adjacent.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	shroud_mat_adjacent.albedo_color = Color(0.11, 0.13, 0.17, 0.90)
+	shroud_mat_adjacent.roughness = 0.85
+	shroud_mat_adjacent.metallic = 0.2
+	shroud_mat_adjacent.emission_enabled = true
+	shroud_mat_adjacent.emission = Color(0.03, 0.05, 0.08)
+	shroud_mat_adjacent.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+
+	# Level 28 sector bounding shroud caps at ceiling height Y = 5.8m
+	var shroud_defs: Dictionary = {
+		SECTOR_GATE_ROOM: {"pos": Vector3(0.0, 5.8, -7.0), "size": Vector3(37.0, 0.2, 30.0)},
+		SECTOR_CONTROL_ROOM: {"pos": Vector3(0.0, 5.8, 15.0), "size": Vector3(14.0, 0.2, 14.0)},
+		SECTOR_ARMORY: {"pos": Vector3(44.0, 5.8, 36.0), "size": Vector3(18.0, 0.2, 16.0)},
+		SECTOR_LABORATORY: {"pos": Vector3(26.0, 5.8, 55.0), "size": Vector3(18.0, 0.2, 20.0)},
+		SECTOR_ELEVATOR_LOBBY: {"pos": Vector3(26.0, 5.8, 18.75), "size": Vector3(18.0, 0.2, 17.5)},
+		SECTOR_ROUND_HALLWAY: {"pos": Vector3(26.0, 5.8, 36.0), "size": Vector3(18.0, 0.2, 18.0)},
+		SECTOR_CONNECTOR_TUNNEL: {"pos": Vector3(11.5, 5.8, 36.0), "size": Vector3(13.0, 0.2, 6.0)},
+		SECTOR_FALLBACK_HALLWAY: {"pos": Vector3(0.0, 5.8, 32.0), "size": Vector3(10.0, 0.2, 20.0)},
+		SECTOR_EAST_CORRIDOR: {"pos": Vector3(22.5, 5.8, 6.0), "size": Vector3(9.0, 0.2, 12.0)},
+		SECTOR_WEST_CORRIDOR: {"pos": Vector3(-23.0, 5.8, 4.0), "size": Vector3(10.0, 0.2, 12.0)}
+	}
+
+	for sec_id: String in shroud_defs:
+		var data: Dictionary = shroud_defs[sec_id]
+		var shroud := MeshInstance3D.new()
+		shroud.name = "Shroud_" + sec_id
+		var box := BoxMesh.new()
+		box.size = data["size"]
+		shroud.mesh = box
+		shroud.material_override = shroud_mat_opaque
+		shroud.position = data["pos"]
+		shroud.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		shroud_container.add_child(shroud)
+		sector_shrouds[sec_id] = shroud
+
+		# Control room has an attached connector corridor to Elevator Lobby (X: 7 to 17, Z: 12 to 18)
+		if sec_id == SECTOR_CONTROL_ROOM:
+			var sub_shroud := MeshInstance3D.new()
+			sub_shroud.name = "SubShroud_ControlConnector"
+			var sub_box := BoxMesh.new()
+			sub_box.size = Vector3(10.0, 0.2, 6.0)
+			sub_shroud.mesh = sub_box
+			sub_shroud.material_override = shroud_mat_opaque
+			sub_shroud.position = Vector3(12.0, 0.0, 0.0) # Relative to shroud (0, 5.8, 15) -> world (12, 5.8, 15)
+			sub_shroud.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			shroud.add_child(sub_shroud)
+
+
+func _update_sector_shrouding(local_sec: String) -> void:
+	if sector_shrouds.is_empty():
+		return
+
+	if local_sec != SECTOR_UNKNOWN and not visited_sectors.has(local_sec):
+		visited_sectors[local_sec] = true
+
+	var adj: Array = sector_adjacency.get(local_sec, [])
+
+	# Shroud management:
+	# - Current room: shroud hidden (fully clear and visible to operative).
+	# - Adjacent rooms: visible shroud with subtle structural silhouette (alpha ~0.90) and ambient emission.
+	# - Other rooms: visible shroud, fully opaque (alpha 1.0) showing structure of known hallways, hiding contents.
+	for sec_id: String in sector_shrouds:
+		var shroud := sector_shrouds[sec_id] as MeshInstance3D
+		if shroud == null:
+			continue
+
+		if sec_id == local_sec:
+			shroud.visible = false
+		elif sec_id in adj:
+			shroud.visible = true
+			shroud.material_override = shroud_mat_adjacent
+		elif visited_sectors.has(sec_id):
+			shroud.visible = true
+			shroud.material_override = shroud_mat_visited
+		else:
+			shroud.visible = true
+			shroud.material_override = shroud_mat_opaque
+
+		for child in shroud.get_children():
+			var sub_shroud := child as MeshInstance3D
+			if sub_shroud != null:
+				sub_shroud.material_override = shroud.material_override
+
+	# Dynamic Fog of War: cull enemies and pickups in non-current / non-visited sectors
+	var local_pid := 1
+	if multiplayer != null and multiplayer.has_multiplayer_peer():
+		local_pid = multiplayer.get_unique_id()
+
+	var local_player: CharacterBody3D = null
+	if players_container != null:
+		var target_node := players_container.get_node_or_null(str(local_pid)) as CharacterBody3D
+		if target_node != null:
+			local_player = target_node
+		elif players_container.get_child_count() > 0:
+			local_player = players_container.get_child(0) as CharacterBody3D
+
+	var enemies := get_node_or_null("Enemies") as Node3D
+	if enemies != null:
+		for child in enemies.get_children():
+			var jaffa := child as JaffaAI
+			if jaffa != null and is_instance_valid(jaffa):
+				var jaffa_sec := get_current_sector(jaffa.global_position)
+				if jaffa_sec == local_sec:
+					jaffa.visible = true
+				elif jaffa_sec in adj and local_player != null:
+					# Only visible if operative has direct line of sight through open doorway
+					jaffa.visible = jaffa._has_line_of_sight(local_player)
+				else:
+					# Non-adjacent / shrouded room: cull hostile entity
+					jaffa.visible = false
+			elif child is Node3D and is_instance_valid(child):
+				var enemy_node := child as Node3D
+				var e_sec := get_current_sector(enemy_node.global_position)
+				enemy_node.visible = (e_sec == local_sec)
+
+	# Dynamic Fog of War: cull objective pickups in shrouded / unvisited sectors
+	var lab_patch := find_child("LabDataPatchDrive", true, false) as LabDataPatchDriveScript
+	if lab_patch != null and is_instance_valid(lab_patch) and not lab_patch.is_retrieved:
+		var patch_sec := get_current_sector(lab_patch.global_position)
+		if patch_sec == local_sec:
+			lab_patch.visible = true
+		elif patch_sec in adj and local_player != null:
+			var space_state := get_world_3d().direct_space_state if get_world_3d() != null else null
+			if space_state != null:
+				var query := PhysicsRayQueryParameters3D.create(local_player.global_position + Vector3(0, 1.2, 0), lab_patch.global_position + Vector3(0, 0.5, 0))
+				query.collision_mask = 1
+				var hit := space_state.intersect_ray(query)
+				lab_patch.visible = hit.is_empty()
+			else:
+				lab_patch.visible = false
+		else:
+			lab_patch.visible = false
+
+	# Cull generic pickup items in non-current sectors
+	var tree := get_tree()
+	if tree != null:
+		for p_item in tree.get_nodes_in_group("pickups"):
+			var p_node := p_item as Node3D
+			if p_node != null and is_instance_valid(p_node):
+				var p_sec := get_current_sector(p_node.global_position)
+				p_node.visible = (p_sec == local_sec)
 
 
 func get_current_sector(pos: Vector3) -> String:
@@ -189,8 +426,8 @@ func get_current_sector(pos: Vector3) -> String:
 	# ==========================================
 	# SUBLEVEL 28 SECTORS (Y < 4.5m)
 	# ==========================================
-	# Priority 1: Control Room Mezzanine (directly facing gate, raised balcony Y >= 0.3)
-	if pos.x >= -7.5 and pos.x <= 7.5 and pos.z >= 7.5 and pos.z <= 22.5 and pos.y >= 0.3:
+	# Priority 1: Control Room (directly facing gate, Sublevel 28)
+	if pos.x >= -7.5 and pos.x <= 7.5 and pos.z >= 7.8 and pos.z <= 22.0:
 		return SECTOR_CONTROL_ROOM
 
 	# Priority 2: Armory (X: 35 to 55, Z: 24 to 45)
@@ -201,11 +438,23 @@ func get_current_sector(pos: Vector3) -> String:
 	if pos.x >= 17.0 and pos.x <= 40.0 and pos.z >= 45.0 and pos.z <= 66.0:
 		return SECTOR_LABORATORY
 
-	# Priority 4: Elevator Lobby (X: 17 to 39, Z: 9.5 to 24.0)
+	# Priority 4: East Defense Corridor (X: 17.5 to 27.5, Z: 0.0 to 10.0)
+	if pos.x >= 17.5 and pos.x <= 27.5 and pos.z >= 0.0 and pos.z <= 10.0:
+		return SECTOR_EAST_CORRIDOR
+
+	# Priority 4b: West Defense Corridor (X: -28.5 to -17.5, Z: -2.0 to 10.0)
+	if pos.x >= -28.5 and pos.x <= -17.5 and pos.z >= -2.0 and pos.z <= 10.0:
+		return SECTOR_WEST_CORRIDOR
+
+	# Priority 5: Elevator Lobby (X: 17 to 39, Z: 9.5 to 24.0)
 	if pos.x >= 17.0 and pos.x <= 39.0 and pos.z >= 9.5 and pos.z <= 24.0:
 		return SECTOR_ELEVATOR_LOBBY
 
-	# Priority 5: Round Hallway Rotunda (X: 17 to 37, Z: 24.0 to 45.0)
+	# Priority 5b: Control-Elevator Connector Corridor
+	if pos.x >= 7.0 and pos.x <= 17.0 and pos.z >= 12.0 and pos.z <= 18.0:
+		return SECTOR_CONTROL_ROOM
+
+	# Priority 6: Round Hallway Rotunda (X: 17 to 37, Z: 24.0 to 45.0)
 	if pos.x >= 17.0 and pos.x <= 37.0 and pos.z >= 24.0 and pos.z <= 45.0:
 		return SECTOR_ROUND_HALLWAY
 
@@ -242,6 +491,10 @@ func get_sector_display_name(sector_id: String) -> String:
 			return "NAQUADAH RESEARCH LAB [LVL 28]"
 		SECTOR_ELEVATOR_LOBBY:
 			return "ELEVATOR ACCESS LOBBY [LVL 28]"
+		SECTOR_EAST_CORRIDOR:
+			return "EAST DEFENSE CORRIDOR [LVL 28]"
+		SECTOR_WEST_CORRIDOR:
+			return "WEST DEFENSE CORRIDOR [LVL 28]"
 		SECTOR_BRIEFING_ROOM:
 			return "SGC BRIEFING ROOM [LVL 27]"
 		SECTOR_GENERALS_OFFICE:
@@ -365,6 +618,36 @@ func _play_door_sfx() -> void:
 		audio.play()
 
 
+func toggle_observation_shutters(force_closed: Variant = null) -> void:
+	if is_animating_observation_shutters:
+		return
+
+	var target_state: bool = not is_observation_shutters_closed
+	if force_closed != null and force_closed is bool:
+		if is_observation_shutters_closed == (force_closed as bool):
+			return
+		target_state = force_closed as bool
+
+	is_observation_shutters_closed = target_state
+	is_animating_observation_shutters = true
+	observation_shutters_toggled.emit(is_observation_shutters_closed)
+
+	# Target Y: 7.35m when lowered (closed over glass), 10.75m when retracted (open above ceiling)
+	var target_y: float = 7.35 if is_observation_shutters_closed else 10.75
+
+	var shutters: CSGBox3D = find_child("BriefingBlastShutters", true, false) as CSGBox3D
+	var tween: Tween = create_tween()
+	if shutters != null:
+		tween.tween_property(shutters, "position:y", target_y, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+	_play_door_sfx()
+
+	tween.tween_callback(func() -> void:
+		is_animating_observation_shutters = false
+		print("GateRoom: Observation Lounge blast shutters %s." % ("LOWERED (SEALED)" if is_observation_shutters_closed else "RAISED (OPEN)"))
+	)
+
+
 func _start_foothold_defense() -> void:
 	if wave_manager == null:
 		return
@@ -384,6 +667,10 @@ func _start_foothold_defense() -> void:
 func _trigger_base_scramble() -> void:
 	print("GateRoom: KLAXON SOUNDS! RED ALERT! UNSCHEDULED OFFWORLD ACTIVATION!")
 	set_emergency_lights(true)
+
+	# Automatically seal observation lounge blast shutters on red alert klaxon
+	if not is_observation_shutters_closed:
+		toggle_observation_shutters(true)
 
 	# Scramble Airmen to Gate Room
 	if allies_container != null:

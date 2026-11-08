@@ -66,8 +66,18 @@ func take_damage(amount: float, source: Node = null, damage_type: String = "bull
 
 	var final_dmg := amount
 	var parent_node := get_parent()
-	if parent_node is PlayerController3D and (parent_node as PlayerController3D).is_crouching:
-		final_dmg *= 0.35  # 65% damage mitigation while crouched behind cover
+	if parent_node is PlayerController3D:
+		var pc := parent_node as PlayerController3D
+		if pc.mounted_turret != null:
+			final_dmg *= 0.35  # 65% damage mitigation from .50 cal heavy armor gun shield
+		elif pc.is_crouching:
+			final_dmg *= 0.35  # 65% damage mitigation while crouched behind cover
+	elif parent_node is SGCAirmanAI:
+		var airman := parent_node as SGCAirmanAI
+		if airman.mounted_turret != null:
+			final_dmg *= 0.35  # 65% damage mitigation from .50 cal heavy armor gun shield
+		elif airman.is_crouching or airman.is_in_cover:
+			final_dmg *= 0.35  # 65% damage mitigation while crouched behind cover
 
 	current_health = maxf(0.0, current_health - final_dmg)
 	damage_taken.emit(final_dmg, source, damage_type)

@@ -4,6 +4,14 @@ extends CanvasLayer
 ## Displays operative vitals, weapon ammo, wave status, Helldivers-style DHD chords, and extraction victory.
 
 const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
+const RadialCommandWheelScript = preload("res://scripts/ui/RadialCommandWheel.gd")
+
+class CrosshairControl extends Control:
+	var hud: TacticalHUD = null
+
+	func _draw() -> void:
+		if hud != null:
+			hud._draw_crosshair(self)
 
 # Node References
 @onready var health_bar: ProgressBar = $VitalsPanel/VBox/HealthBar
@@ -11,10 +19,17 @@ const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.g
 @onready var operative_label: Label = $VitalsPanel/VBox/OperativeLabel
 @onready var stun_label: Label = $VitalsPanel/VBox/StunLabel
 
+@onready var ammo_panel: PanelContainer = $AmmoPanel if has_node("AmmoPanel") else null
 @onready var weapon_name_label: Label = $AmmoPanel/VBox/WeaponNameLabel
 @onready var ammo_label: Label = $AmmoPanel/VBox/AmmoLabel
 @onready var slot_label: Label = $AmmoPanel/VBox/SlotLabel
 @onready var gadget_label: Label = $AmmoPanel/VBox/GadgetLabel
+
+@onready var heat_container: VBoxContainer = $AmmoPanel/VBox/HeatContainer if has_node("AmmoPanel/VBox/HeatContainer") else null
+@onready var heat_bar: ProgressBar = $AmmoPanel/VBox/HeatContainer/HeatBar if has_node("AmmoPanel/VBox/HeatContainer/HeatBar") else null
+@onready var heat_label: Label = $AmmoPanel/VBox/HeatContainer/HeatBar/HeatLabel if has_node("AmmoPanel/VBox/HeatContainer/HeatBar/HeatLabel") else null
+@onready var heat_warning_label: Label = $AmmoPanel/VBox/HeatContainer/HeatWarningLabel if has_node("AmmoPanel/VBox/HeatContainer/HeatWarningLabel") else null
+@onready var crosshair_overlay: Control = $CrosshairOverlay if has_node("CrosshairOverlay") else null
 
 @onready var wave_label: Label = $TopBanner/VBox/WaveLabel
 @onready var enemies_label: Label = $TopBanner/VBox/EnemiesLabel
@@ -43,6 +58,8 @@ const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.g
 @onready var resume_btn: Button = $PauseMenu/VBox/ResumeBtn if has_node("PauseMenu/VBox/ResumeBtn") else null
 @onready var pause_restart_btn: Button = $PauseMenu/VBox/RestartBtn if has_node("PauseMenu/VBox/RestartBtn") else null
 @onready var lobby_btn: Button = $PauseMenu/VBox/LobbyBtn if has_node("PauseMenu/VBox/LobbyBtn") else null
+@onready var pause_keybindings_btn: Button = $PauseMenu/VBox/KeybindingsBtn if has_node("PauseMenu/VBox/KeybindingsBtn") else null
+@onready var keybindings_modal: KeybindingsModal = $KeybindingsModal if has_node("KeybindingsModal") else null
 
 @onready var debrief_title: Label = $VictoryModal/VBox/Title if has_node("VictoryModal/VBox/Title") else null
 @onready var debrief_subtitle: Label = $VictoryModal/VBox/Subtitle if has_node("VictoryModal/VBox/Subtitle") else null
@@ -51,6 +68,9 @@ const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.g
 @onready var stat_waves: Label = $VictoryModal/VBox/StatsContainer/StatWaves if has_node("VictoryModal/VBox/StatsContainer/StatWaves") else null
 @onready var stat_chevrons: Label = $VictoryModal/VBox/StatsContainer/StatChevrons if has_node("VictoryModal/VBox/StatsContainer/StatChevrons") else null
 @onready var stat_status: Label = $VictoryModal/VBox/StatsContainer/StatStatus if has_node("VictoryModal/VBox/StatsContainer/StatStatus") else null
+@onready var radial_wheel: RadialCommandWheel = $RadialCommandWheel if has_node("RadialCommandWheel") else null
+@onready var squad_toast_panel: PanelContainer = $SquadToastPanel if has_node("SquadToastPanel") else null
+@onready var squad_toast_label: Label = $SquadToastPanel/ToastLabel if has_node("SquadToastPanel/ToastLabel") else null
 
 var local_player: PlayerController3D = null
 var current_dhd: DHDDialer = null
@@ -60,6 +80,14 @@ var flash_alpha: float = 0.0
 var mission_seconds: float = 0.0
 var total_kills: int = 0
 var is_mission_ended: bool = false
+var toast_tween: Tween = null
+
+# Crosshair and Heat Gauge Variables
+var crosshair_override_pos: Vector2 = Vector2.ZERO
+var crosshair_color: Color = Color(0.2, 0.95, 1.0, 0.9)
+var crosshair_shadow_color: Color = Color(0.0, 0.0, 0.0, 0.6)
+var current_bound_weapon: WeaponBase = null
+var heat_pulse_time: float = 0.0
 
 
 func _ready() -> void:
@@ -72,6 +100,38 @@ func _ready() -> void:
 		revive_bar.visible = false
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
+		keybindings_modal.closed.connect(_on_keybindings_modal_closed)
+
+	# Tactical 4-Pip Crosshair Overlay initialization
+	if crosshair_overlay == null:
+		var cho := CrosshairControl.new()
+		cho.name = "CrosshairOverlay"
+		cho.hud = self
+		cho.set_anchors_preset(Control.PRESET_FULL_RECT)
+		cho.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(cho)
+		crosshair_overlay = cho
+	else:
+		crosshair_overlay.set_script(CrosshairControl)
+		(crosshair_overlay as CrosshairControl).hud = self
+
+	# Energy Weapon Heat Gauge initialization
+	_ensure_heat_ui_exists()
+	if heat_container != null:
+		heat_container.visible = false
+
+	# Radial Command Wheel initialization
+	if radial_wheel == null:
+		radial_wheel = RadialCommandWheel.new()
+		radial_wheel.name = "RadialCommandWheel"
+		add_child(radial_wheel)
+	radial_wheel.visible = false
+
+	# Squad Order Military Toast Banner initialization
+	if squad_toast_panel == null:
+		_create_squad_toast_ui()
 
 	objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
@@ -85,6 +145,12 @@ func _ready() -> void:
 		pause_restart_btn.pressed.connect(_on_restart_pressed)
 	if lobby_btn != null:
 		lobby_btn.pressed.connect(_on_return_pressed)
+	if pause_keybindings_btn != null:
+		pause_keybindings_btn.pressed.connect(func() -> void:
+			if pause_menu != null:
+				pause_menu.visible = false
+			toggle_keybindings_modal()
+		)
 
 	# Audio volume sliders
 	if master_slider != null:
@@ -99,14 +165,71 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_mission_ended:
+		return
+
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if key_event.pressed and not key_event.echo:
+			if key_event.keycode == KEY_F1:
+				toggle_keybindings_modal()
+				get_viewport().set_input_as_handled()
+				return
+			elif key_event.keycode == KEY_ESCAPE:
+				if keybindings_modal != null and keybindings_modal.visible:
+					toggle_keybindings_modal()
+					get_viewport().set_input_as_handled()
+					return
+				elif pause_menu != null and pause_menu.visible:
+					toggle_pause_menu()
+					get_viewport().set_input_as_handled()
+					return
+				else:
+					toggle_keybindings_modal()
+					get_viewport().set_input_as_handled()
+					return
+
 	if event.is_action_pressed("toggle_pause"):
-		toggle_pause_menu()
+		if keybindings_modal != null and keybindings_modal.visible:
+			toggle_keybindings_modal()
+		elif pause_menu != null and pause_menu.visible:
+			toggle_pause_menu()
+		else:
+			toggle_keybindings_modal()
+
+
+func toggle_keybindings_modal() -> void:
+	if keybindings_modal == null or is_mission_ended:
+		return
+	if keybindings_modal.visible:
+		keybindings_modal.close_modal()
+	else:
+		if pause_menu != null:
+			pause_menu.visible = false
+		keybindings_modal.open_modal()
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _on_keybindings_modal_closed() -> void:
+	if local_player != null and local_player.is_aiming_down_sights:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func toggle_pause_menu() -> void:
 	if pause_menu == null or is_mission_ended:
 		return
+	if keybindings_modal != null and keybindings_modal.visible:
+		keybindings_modal.visible = false
 	pause_menu.visible = not pause_menu.visible
+	if pause_menu.visible:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	else:
+		if local_player != null and local_player.is_aiming_down_sights:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _on_master_slider_changed(value: float) -> void:
@@ -150,20 +273,36 @@ func _on_ambience_slider_changed(value: float) -> void:
 func _on_restart_pressed() -> void:
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
+	if victory_modal != null:
+		victory_modal.visible = false
 	if get_tree().paused:
 		get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/main/GateRoom.tscn")
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	is_mission_ended = false
+	var err := get_tree().reload_current_scene()
+	if err != OK or get_tree().current_scene == null or get_tree().current_scene.scene_file_path == "":
+		get_tree().change_scene_to_file("res://scenes/main/GateRoom.tscn")
 
 
 func _on_return_pressed() -> void:
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
+	if victory_modal != null:
+		victory_modal.visible = false
 	if get_tree().paused:
 		get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	is_mission_ended = false
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null:
 		net.disconnect_game()
-	get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+	var err := get_tree().change_scene_to_file("res://scenes/main/Main.tscn")
+	if err != OK:
+		get_tree().change_scene_to_file("res://scenes/main/Lobby.tscn")
 
 
 func update_sector_display(sector_id: String) -> void:
@@ -178,6 +317,104 @@ func update_sector_display(sector_id: String) -> void:
 		var c_name: String = class_names.get(local_player.class_id, "OPERATIVE")
 		var sec_name: String = sector_id.replace("_", " ")
 		operative_label.text = "%s [%s] • %s" % [local_player.player_callsign, c_name, sec_name]
+
+
+func _create_squad_toast_ui() -> void:
+	if squad_toast_panel != null:
+		return
+	var panel := PanelContainer.new()
+	panel.name = "SquadToastPanel"
+	panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	panel.offset_left = -320.0
+	panel.offset_right = 320.0
+	panel.offset_top = 64.0
+	panel.offset_bottom = 104.0
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.08, 0.12, 0.90)
+	sb.border_width_left = 2
+	sb.border_width_top = 2
+	sb.border_width_right = 2
+	sb.border_width_bottom = 2
+	sb.border_color = Color(0.2, 0.85, 0.65, 0.9)
+	sb.corner_radius_top_left = 4
+	sb.corner_radius_top_right = 4
+	sb.corner_radius_bottom_right = 4
+	sb.corner_radius_bottom_left = 4
+	panel.add_theme_stylebox_override("panel", sb)
+
+	var lbl := Label.new()
+	lbl.name = "ToastLabel"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_color_override("font_color", Color(0.3, 1.0, 0.75))
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.text = ""
+	panel.add_child(lbl)
+
+	add_child(panel)
+	squad_toast_panel = panel
+	squad_toast_label = lbl
+	panel.visible = false
+	panel.modulate = Color(1.0, 1.0, 1.0, 0.0)
+
+
+func show_squad_order_toast(text: String, duration: float = 3.5) -> void:
+	if squad_toast_panel == null or squad_toast_label == null:
+		_create_squad_toast_ui()
+	if squad_toast_panel == null or squad_toast_label == null:
+		return
+
+	squad_toast_label.text = text
+	squad_toast_panel.visible = true
+
+	if toast_tween != null and toast_tween.is_valid():
+		toast_tween.kill()
+
+	toast_tween = squad_toast_panel.create_tween()
+	toast_tween.tween_property(squad_toast_panel, "modulate:a", 1.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var stay_time: float = maxf(0.5, duration - 0.58)
+	toast_tween.tween_interval(stay_time)
+	toast_tween.tween_property(squad_toast_panel, "modulate:a", 0.0, 0.40).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	toast_tween.tween_callback(func() -> void:
+		if is_instance_valid(squad_toast_panel):
+			squad_toast_panel.visible = false
+	)
+
+
+func open_radial_command_wheel(screen_pos: Vector2, world_target_pos: Vector3) -> void:
+	if radial_wheel != null:
+		radial_wheel.open_wheel(screen_pos, world_target_pos)
+
+
+func update_radial_command_wheel(mouse_pos: Vector2) -> void:
+	if radial_wheel != null and radial_wheel.is_wheel_active:
+		radial_wheel.update_mouse_position(mouse_pos)
+
+
+func update_radial_command_wheel_rel(mouse_rel: Vector2) -> void:
+	if radial_wheel != null and radial_wheel.is_wheel_active:
+		radial_wheel.update_mouse_direction(mouse_rel)
+
+
+func get_radial_selected_command() -> int:
+	if radial_wheel != null:
+		return radial_wheel.get_selected_command()
+	return -1
+
+
+func close_radial_command_wheel() -> int:
+	if radial_wheel != null:
+		var cmd: int = radial_wheel.get_selected_command()
+		radial_wheel.close_wheel()
+		return cmd
+	return -1
+
+
+func is_radial_wheel_open() -> bool:
+	return radial_wheel != null and radial_wheel.is_wheel_active
 
 
 func bind_local_player(player: PlayerController3D) -> void:
@@ -221,6 +458,8 @@ func bind_local_player(player: PlayerController3D) -> void:
 		player.player_downed.connect(_on_local_player_downed)
 	if not player.player_revived.is_connected(_on_local_player_revived):
 		player.player_revived.connect(_on_local_player_revived)
+	if not player.player_died.is_connected(_on_local_player_died):
+		player.player_died.connect(_on_local_player_died)
 	if not player.revive_progress_changed.is_connected(_on_revive_progress_changed):
 		player.revive_progress_changed.connect(_on_revive_progress_changed)
 
@@ -231,11 +470,14 @@ func bind_local_player(player: PlayerController3D) -> void:
 func _process(delta: float) -> void:
 	if not is_mission_ended:
 		mission_seconds += delta
+	heat_pulse_time += delta * 6.0
 	if local_player != null:
 		if operative_label != null and (operative_label.text == "" or operative_label.text.begins_with("OPERATIVE [")):
 			bind_local_player(local_player)
 		_update_weapon_display()
 	_update_damage_vignette(delta)
+	if crosshair_overlay != null:
+		crosshair_overlay.queue_redraw()
 
 
 func _on_health_downed() -> void:
@@ -246,6 +488,14 @@ func _on_health_downed() -> void:
 func _on_health_revived() -> void:
 	if local_player != null:
 		_on_local_player_revived(local_player.peer_id)
+
+
+func _on_local_player_died(pid: int) -> void:
+	var gateroom := get_tree().root.find_child("GateRoom", true, false)
+	if gateroom != null and gateroom.has_method("_check_squad_status"):
+		gateroom.call_deferred("_check_squad_status", pid)
+	elif not is_mission_ended:
+		show_defeat()
 
 
 func _on_local_player_downed(_peer_id: int) -> void:
@@ -311,10 +561,25 @@ func _update_weapon_display() -> void:
 	var slot_text: String = "[1] PRIMARY" if local_player.active_slot == 1 else "[2] SIDEARM"
 	slot_label.text = slot_text
 
-	if weapon.is_reloading:
-		ammo_label.text = "RELOADING..."
+	if weapon.uses_heat:
+		if heat_container != null:
+			heat_container.visible = true
+		_bind_energy_weapon(weapon)
+		_update_heat_gauge(weapon)
+		if weapon.is_overheated:
+			ammo_label.text = "VENTING..."
+			ammo_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+		else:
+			ammo_label.text = "%d%% HEAT" % int(weapon.current_heat)
+			ammo_label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.2) if (weapon.is_plasma or weapon.weapon_id == "staff_weapon") else Color(0.3, 0.85, 1.0))
 	else:
-		ammo_label.text = "%d / %d" % [weapon.current_ammo, weapon.reserve_ammo]
+		if heat_container != null:
+			heat_container.visible = false
+		ammo_label.add_theme_color_override("font_color", Color.WHITE)
+		if weapon.is_reloading:
+			ammo_label.text = "RELOADING..."
+		else:
+			ammo_label.text = "%d / %d" % [weapon.current_ammo, weapon.reserve_ammo]
 
 	# Gadget display
 	if local_player.class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
@@ -341,6 +606,229 @@ func _update_weapon_display() -> void:
 	# Append Claymore indicator
 	var claymore_str := "  |  [3] CLAYMORE (%d/2)" % local_player.claymore_charges
 	gadget_label.text += claymore_str
+
+
+func _ensure_heat_ui_exists() -> void:
+	if heat_container != null:
+		return
+	if ammo_panel == null:
+		return
+	var vbox := ammo_panel.get_node_or_null("VBox") as VBoxContainer
+	if vbox == null:
+		return
+
+	heat_container = VBoxContainer.new()
+	heat_container.name = "HeatContainer"
+	heat_container.visible = false
+	heat_container.add_theme_constant_override("separation", 2)
+
+	if gadget_label != null:
+		vbox.add_child(heat_container)
+		vbox.move_child(heat_container, gadget_label.get_index())
+	else:
+		vbox.add_child(heat_container)
+
+	heat_bar = ProgressBar.new()
+	heat_bar.name = "HeatBar"
+	heat_bar.custom_minimum_size = Vector2(0, 16)
+	heat_bar.max_value = 100.0
+	heat_bar.value = 0.0
+	heat_bar.show_percentage = false
+	heat_container.add_child(heat_bar)
+
+	heat_label = Label.new()
+	heat_label.name = "HeatLabel"
+	heat_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	heat_label.text = "HEAT: 0%"
+	heat_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heat_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	heat_label.add_theme_font_size_override("font_size", 11)
+	heat_bar.add_child(heat_label)
+
+	heat_warning_label = Label.new()
+	heat_warning_label.name = "HeatWarningLabel"
+	heat_warning_label.text = "OVERHEATING / VENTING..."
+	heat_warning_label.visible = false
+	heat_warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heat_warning_label.add_theme_font_size_override("font_size", 11)
+	heat_warning_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+	heat_container.add_child(heat_warning_label)
+
+
+func _bind_energy_weapon(weapon: WeaponBase) -> void:
+	if current_bound_weapon == weapon:
+		return
+	if current_bound_weapon != null and is_instance_valid(current_bound_weapon):
+		if current_bound_weapon.heat_changed.is_connected(_on_weapon_heat_changed):
+			current_bound_weapon.heat_changed.disconnect(_on_weapon_heat_changed)
+	current_bound_weapon = weapon
+	if weapon != null and weapon.uses_heat:
+		if not weapon.heat_changed.is_connected(_on_weapon_heat_changed):
+			weapon.heat_changed.connect(_on_weapon_heat_changed)
+
+
+func _on_weapon_heat_changed(cur_heat: float, overheated: bool) -> void:
+	if current_bound_weapon != null:
+		_apply_heat_state(cur_heat, overheated, current_bound_weapon)
+
+
+func _update_heat_gauge(weapon: WeaponBase) -> void:
+	_apply_heat_state(weapon.current_heat, weapon.is_overheated, weapon)
+
+
+func _apply_heat_state(cur_heat: float, overheated: bool, weapon: WeaponBase) -> void:
+	if heat_bar != null:
+		heat_bar.max_value = 100.0
+		heat_bar.value = cur_heat
+
+		# Authentic orange (Staff) or blue (Zat) heat meter
+		var fill_sb: StyleBoxFlat = null
+		if heat_bar.has_theme_stylebox_override("fill"):
+			fill_sb = heat_bar.get_theme_stylebox("fill") as StyleBoxFlat
+		elif heat_bar.has_theme_stylebox("fill"):
+			fill_sb = heat_bar.get_theme_stylebox("fill").duplicate() as StyleBoxFlat
+		if fill_sb == null:
+			fill_sb = StyleBoxFlat.new()
+			fill_sb.corner_radius_top_left = 4
+			fill_sb.corner_radius_top_right = 4
+			fill_sb.corner_radius_bottom_right = 4
+			fill_sb.corner_radius_bottom_left = 4
+
+		if weapon.is_zat or weapon.weapon_id == "zat":
+			# Electric Goa'uld blue arc
+			var base_blue := Color(0.2, 0.75, 1.0, 1.0)
+			fill_sb.bg_color = base_blue.lerp(Color(0.55, 0.35, 1.0, 1.0), cur_heat / 100.0)
+		else:
+			# Liquid Naquadah fiery orange plasma
+			var base_orange := Color(1.0, 0.55, 0.1, 1.0)
+			fill_sb.bg_color = base_orange.lerp(Color(1.0, 0.2, 0.08, 1.0), cur_heat / 100.0)
+
+		heat_bar.add_theme_stylebox_override("fill", fill_sb)
+
+	if heat_label != null:
+		heat_label.text = "HEAT: %d%%" % int(cur_heat)
+
+	if heat_warning_label != null:
+		if overheated:
+			heat_warning_label.visible = true
+			heat_warning_label.text = "OVERHEATING / VENTING..."
+			var flash_bright: bool = (int(heat_pulse_time) % 2) == 0
+			heat_warning_label.modulate = Color(1.0, 0.15, 0.15, 1.0) if flash_bright else Color(1.0, 0.55, 0.55, 0.3)
+		else:
+			heat_warning_label.visible = false
+
+
+## Computes current operative stance multiplier for spread & crosshair calculation.
+func get_stance_multiplier() -> float:
+	if local_player == null:
+		return 1.0
+
+	# 1. Mounted on .50 cal tripod / deployed: 99% laser accuracy pinpoint
+	if local_player.mounted_turret != null and is_instance_valid(local_player.mounted_turret):
+		return 0.01
+
+	var mult: float = 1.0
+
+	# ADS precision zoom
+	if local_player.is_aiming_down_sights:
+		mult *= 0.5
+
+	# Crouched stance vs moving stance
+	if local_player.is_crouching:
+		mult *= 0.5
+	elif local_player.velocity.length() > 2.0:
+		# Moving / running penalty
+		mult *= 1.8
+	else:
+		# Standing still: crisp close cluster
+		mult *= 0.75
+
+	return mult
+
+
+func get_current_weapon_spread() -> float:
+	if local_player != null and local_player.current_weapon != null:
+		return local_player.current_weapon.current_spread_deg
+	return 2.0
+
+
+func get_effective_spread() -> float:
+	return get_current_weapon_spread() * get_stance_multiplier()
+
+
+func get_crosshair_gap() -> float:
+	var eff_spread: float = get_effective_spread()
+	var is_mounted: bool = (local_player != null and local_player.mounted_turret != null and is_instance_valid(local_player.mounted_turret))
+	if is_mounted or eff_spread < 0.1:
+		return 2.0
+	# Proportional to current_spread_deg * stance_multiplier
+	return clampf(eff_spread * 6.0, 2.0, 120.0)
+
+
+func _draw() -> void:
+	if crosshair_overlay != null:
+		crosshair_overlay.queue_redraw()
+
+
+func _draw_crosshair(ci: Control) -> void:
+	if ci == null or not is_inside_tree() or is_mission_ended:
+		return
+	if pause_menu != null and pause_menu.visible:
+		return
+	if keybindings_modal != null and keybindings_modal.visible:
+		return
+	if local_player != null and local_player.health_component != null and local_player.health_component.is_dead:
+		return
+
+	var v_size: Vector2 = ci.get_viewport_rect().size
+	if v_size == Vector2.ZERO:
+		v_size = Vector2(1280, 720)
+
+	var aim_pos: Vector2 = Vector2.ZERO
+	if crosshair_override_pos != Vector2.ZERO:
+		aim_pos = crosshair_override_pos
+	elif local_player != null and local_player.is_aiming_down_sights:
+		aim_pos = v_size * 0.5
+	elif local_player != null and local_player.camera != null and local_player.current_aim_target != Vector3.ZERO:
+		if not local_player.camera.is_position_behind(local_player.current_aim_target):
+			aim_pos = local_player.camera.unproject_position(local_player.current_aim_target)
+		else:
+			aim_pos = ci.get_viewport().get_mouse_position()
+	else:
+		aim_pos = ci.get_viewport().get_mouse_position()
+
+	if aim_pos == Vector2.ZERO or aim_pos.x < 0.0 or aim_pos.y < 0.0 or aim_pos.x > v_size.x or aim_pos.y > v_size.y:
+		aim_pos = v_size * 0.5
+
+	var is_mounted: bool = (local_player != null and local_player.mounted_turret != null and is_instance_valid(local_player.mounted_turret))
+	var gap: float = get_crosshair_gap()
+	var pip_len: float = 3.0 if is_mounted else 7.0
+	var pip_width: float = 2.0
+
+	var draw_col: Color = crosshair_color
+	if is_mounted:
+		# Laser pinpoint accuracy indicator
+		draw_col = Color(0.2, 1.0, 0.45, 0.95)
+
+	# 1. Center pinpoint dot
+	ci.draw_circle(aim_pos, 1.5, draw_col)
+
+	# 2. Render 4 pips: Top, Bottom, Left, Right around center/aim target
+	# Top pip
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y - gap - pip_len), Vector2(aim_pos.x, aim_pos.y - gap), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y - gap - pip_len), Vector2(aim_pos.x, aim_pos.y - gap), draw_col, pip_width)
+
+	# Bottom pip
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y + gap), Vector2(aim_pos.x, aim_pos.y + gap + pip_len), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x, aim_pos.y + gap), Vector2(aim_pos.x, aim_pos.y + gap + pip_len), draw_col, pip_width)
+
+	# Left pip
+	ci.draw_line(Vector2(aim_pos.x - gap - pip_len, aim_pos.y), Vector2(aim_pos.x - gap, aim_pos.y), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x - gap - pip_len, aim_pos.y), Vector2(aim_pos.x - gap, aim_pos.y), draw_col, pip_width)
+
+	# Right pip
+	ci.draw_line(Vector2(aim_pos.x + gap, aim_pos.y), Vector2(aim_pos.x + gap + pip_len, aim_pos.y), crosshair_shadow_color, pip_width + 2.0)
+	ci.draw_line(Vector2(aim_pos.x + gap, aim_pos.y), Vector2(aim_pos.x + gap + pip_len, aim_pos.y), draw_col, pip_width)
 
 
 func _on_health_changed(cur: float, max_h: float) -> void:
@@ -417,6 +905,17 @@ func on_iris_malfunction() -> void:
 		wave_label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
 	if objective_label != null:
 		objective_label.text = "UNAUTHORIZED INCOMING WORMHOLE! TRINIUM IRIS JAMMED AT 0%!"
+
+
+func update_iris_repair_stage(completed: int, stage_name: String, total_progress: float) -> void:
+	if objective_label != null:
+		var percent := int(round(total_progress * 100.0))
+		if completed >= 3:
+			objective_label.text = "TRINIUM IRIS SECURED (100%) - HOSTILE BREACH BLOCKED!"
+			objective_label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+		else:
+			objective_label.text = "IRIS REPAIR [%d/3 SAVED] (%d%%): %s" % [completed, percent, stage_name.to_upper()]
+			objective_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
 
 
 func update_objective(text: String, color: Color = Color.WHITE) -> void:
@@ -596,20 +1095,32 @@ func _render_glyphs() -> void:
 
 func show_victory() -> void:
 	is_mission_ended = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
 	if victory_modal != null:
 		victory_modal.visible = true
 	if debrief_title != null:
 		debrief_title.text = "EXTRACTION SUCCESSFUL"
 		debrief_title.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
+	if debrief_subtitle != null:
+		debrief_subtitle.text = "SGC AFTER ACTION DEBRIEFING REPORT"
+	if restart_btn != null:
+		restart_btn.text = "RETRY MISSION"
+	if return_btn != null:
+		return_btn.text = "RETURN TO SGC BRIEFING"
 	_populate_debrief_stats(true)
 
 
 func show_defeat() -> void:
 	is_mission_ended = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
+	if keybindings_modal != null:
+		keybindings_modal.visible = false
 	if victory_modal != null:
 		victory_modal.visible = true
 	if debrief_title != null:
@@ -617,6 +1128,10 @@ func show_defeat() -> void:
 		debrief_title.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
 	if debrief_subtitle != null:
 		debrief_subtitle.text = "SGC LEVEL 28 BREACHED BY GOA'ULD FORCES"
+	if restart_btn != null:
+		restart_btn.text = "RETRY MISSION"
+	if return_btn != null:
+		return_btn.text = "RETURN TO SGC BRIEFING"
 	_populate_debrief_stats(false)
 
 

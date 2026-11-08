@@ -16,17 +16,36 @@ signal ammo_changed(current: int, reserve: int)
 @export var reserve_capacity: int = 250
 @export var reload_time_s: float = 2.0
 @export var base_spread_deg: float = 2.0
+@export var bloom_per_shot_deg: float = 0.45
+@export var max_spread_deg: float = 7.5
+@export var spread_recovery_rate: float = 16.0
 @export var max_range_m: float = 50.0
 
 @export var is_plasma: bool = false
 @export var is_zat: bool = false
+@export var uses_heat: bool = false
+@export var heat_per_shot: float = 18.0
+@export var heat_dissipation_rate: float = 22.0
+@export var overheat_cooldown_time: float = 3.0
 @export var plasma_speed_mps: float = 35.0
 @export var fire_sound_path: String = "res://audio/sfx_p90.wav"
 
 var current_ammo: int = 50
 var reserve_ammo: int = 250
+var magazine_size: int:
+	get:
+		return mag_capacity
+	set(val):
+		mag_capacity = val
+		current_ammo = val
+var current_spread_deg: float = 2.0
+var current_heat: float = 0.0
+var is_overheated: bool = false
+var overheat_timer: float = 0.0
 var is_reloading: bool = false
 var fire_cooldown: float = 0.0
+
+signal heat_changed(current_heat: float, is_overheated: bool)
 
 @onready var muzzle_point: Marker3D = $MuzzlePoint if has_node("MuzzlePoint") else null
 var audio_player: AudioStreamPlayer3D = null
@@ -35,6 +54,7 @@ var audio_player: AudioStreamPlayer3D = null
 func _ready() -> void:
 	current_ammo = mag_capacity
 	reserve_ammo = reserve_capacity
+	current_spread_deg = base_spread_deg
 	_setup_audio()
 	_build_weapon_visual_mesh()
 
@@ -242,18 +262,52 @@ func _process(delta: float) -> void:
 	if fire_cooldown > 0.0:
 		fire_cooldown = maxf(0.0, fire_cooldown - delta)
 
+	# Bloom recovery toward base spread
+	if current_spread_deg > base_spread_deg:
+		current_spread_deg = move_toward(current_spread_deg, base_spread_deg, spread_recovery_rate * delta)
+
+	# Heat dissipation & venting for energy weapons
+	if uses_heat:
+		if is_overheated:
+			overheat_timer -= delta
+			if overheat_timer <= 0.0:
+				is_overheated = false
+				current_heat = 0.0
+				heat_changed.emit(current_heat, is_overheated)
+		elif current_heat > 0.0:
+			current_heat = maxf(0.0, current_heat - heat_dissipation_rate * delta)
+			heat_changed.emit(current_heat, is_overheated)
+
 
 ## Attempts to discharge the weapon, factoring in spread modifier (moving, crouch).
 func try_fire(spread_mult: float = 1.0) -> bool:
-	if is_reloading or fire_cooldown > 0.0 or current_ammo <= 0:
-		if current_ammo <= 0 and not is_reloading and reserve_ammo > 0:
-			reload()
+	if is_reloading or fire_cooldown > 0.0:
 		return false
+
+	if uses_heat:
+		if is_overheated:
+			return false
+		current_heat += heat_per_shot
+		if current_heat >= 100.0:
+			current_heat = 100.0
+			is_overheated = true
+			overheat_timer = overheat_cooldown_time
+			heat_changed.emit(current_heat, is_overheated)
+		else:
+			heat_changed.emit(current_heat, is_overheated)
+	else:
+		if current_ammo <= 0:
+			if not is_reloading and reserve_ammo > 0:
+				reload()
+			return false
+		current_ammo -= 1
+		ammo_changed.emit(current_ammo, reserve_ammo)
 
 	var shot_interval := 60.0 / fire_rate_rpm
 	fire_cooldown = shot_interval
-	current_ammo -= 1
-	ammo_changed.emit(current_ammo, reserve_ammo)
+
+	# Accumulate spread bloom
+	current_spread_deg = minf(max_spread_deg, current_spread_deg + bloom_per_shot_deg)
 
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position
 	var base_forward: Vector3 = -global_transform.basis.z
@@ -269,7 +323,8 @@ func try_fire(spread_mult: float = 1.0) -> bool:
 			base_forward = (target - origin).normalized()
 
 	# Apply cone spread
-	var spread_rad := deg_to_rad(base_spread_deg * spread_mult)
+	var effective_spread_deg := current_spread_deg * spread_mult
+	var spread_rad := deg_to_rad(effective_spread_deg)
 	var random_yaw := randf_range(-spread_rad, spread_rad)
 	var random_pitch := randf_range(-spread_rad * 0.5, spread_rad * 0.5)
 	var dir := (base_forward.rotated(Vector3.UP, random_yaw)).rotated(base_forward.cross(Vector3.UP).normalized(), random_pitch).normalized()
@@ -292,7 +347,12 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 			fired.emit(origin, dir, origin + dir * max_range_m, null)
 			return
 
-	var space := get_world_3d().direct_space_state
+	var world := get_world_3d()
+	if world == null:
+		fired.emit(origin, dir, origin + dir * max_range_m, null)
+		return
+
+	var space := world.direct_space_state
 	var exclude_list: Array[RID] = []
 	if get_parent() is CollisionObject3D:
 		exclude_list.append((get_parent() as CollisionObject3D).get_rid())
@@ -340,7 +400,7 @@ func _apply_hit(target: Node) -> void:
 
 
 func reload() -> void:
-	if is_reloading or current_ammo >= mag_capacity or reserve_ammo <= 0:
+	if uses_heat or is_reloading or current_ammo >= mag_capacity or reserve_ammo <= 0:
 		return
 	is_reloading = true
 	var timer := get_tree().create_timer(reload_time_s)

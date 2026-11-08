@@ -1,21 +1,42 @@
 class_name C4Satchel
 extends RigidBody3D
-## Tactical C4 Satchel Charge with Remote Detonator.
-## Can be thrown at choke points and detonated remotely to wipe Jaffa squads.
+## Tactical C4 Satchel Charge with Remote Detonator or Configurable Timers.
+## Can be thrown at choke points and detonated remotely or set on timed fuses (5s/10s/30s).
 
 signal exploded(origin: Vector3)
 
+enum C4Mode { REMOTE, TIMER_5S, TIMER_10S, TIMER_30S }
+
 @export var blast_damage: float = 200.0
 @export var blast_radius: float = 7.5
+@export var mode: C4Mode = C4Mode.REMOTE
+@export var countdown_seconds: float = 0.0
 
 var is_armed: bool = false
 var is_detonated: bool = false
+var timer_remaining: float = 0.0
 var planter: Node = null
+var last_beep_second: int = 999
 
 @onready var led_light: OmniLight3D = $LEDLight if has_node("LEDLight") else null
 
 
+func set_timer_mode(seconds: float) -> void:
+	if seconds <= 5.5:
+		mode = C4Mode.TIMER_5S
+	elif seconds <= 15.0:
+		mode = C4Mode.TIMER_10S
+	else:
+		mode = C4Mode.TIMER_30S
+	countdown_seconds = seconds
+	timer_remaining = seconds
+
+
 func _ready() -> void:
+	if mode != C4Mode.REMOTE and countdown_seconds > 0.0:
+		timer_remaining = countdown_seconds
+		last_beep_second = int(ceilf(timer_remaining))
+
 	# Arm charge 0.5s after throw
 	var timer := get_tree().create_timer(0.5)
 	timer.timeout.connect(func() -> void:
@@ -23,6 +44,33 @@ func _ready() -> void:
 		if led_light != null:
 			led_light.visible = true
 	)
+
+
+func _process(delta: float) -> void:
+	if is_armed and mode != C4Mode.REMOTE and not is_detonated:
+		timer_remaining -= delta
+		var current_sec := int(ceilf(timer_remaining))
+		if current_sec != last_beep_second and current_sec >= 0:
+			last_beep_second = current_sec
+			_play_beep_sfx()
+			if led_light != null:
+				led_light.light_energy = 4.0
+				var tween := create_tween()
+				tween.tween_property(led_light, "light_energy", 1.0, 0.2)
+
+		if timer_remaining <= 0.0:
+			detonate()
+
+
+func _play_beep_sfx() -> void:
+	if ResourceLoader.exists("res://audio/sfx_gdo_beep.wav"):
+		var audio := AudioStreamPlayer3D.new()
+		audio.stream = load("res://audio/sfx_gdo_beep.wav")
+		audio.max_distance = 25.0
+		audio.unit_size = 4.0
+		add_child(audio)
+		audio.finished.connect(audio.queue_free)
+		audio.play()
 
 
 func detonate() -> void:

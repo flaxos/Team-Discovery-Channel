@@ -7,6 +7,12 @@ extends CharacterBody3D
 const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
 const LabDataPatchDriveScript = preload("res://scripts/props/LabDataPatchDrive.gd")
 const IrisServoHousingScript = preload("res://scripts/props/IrisServoHousing.gd")
+const DeployableShieldScene = preload("res://scenes/props/DeployableShield.tscn")
+const DeployableShieldScript = preload("res://scripts/props/DeployableShield.gd")
+const SmokeGrenadeScene = preload("res://scenes/weapons/SmokeGrenade.tscn")
+const SmokeGrenadeScript = preload("res://scripts/weapons/SmokeGrenade.gd")
+const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
+const RadialCommandWheelScript = preload("res://scripts/ui/RadialCommandWheel.gd")
 
 signal player_died(peer_id: int)
 signal player_downed(peer_id: int)
@@ -64,6 +70,13 @@ var is_aiming_down_sights: bool = false
 var ads_blend: float = 0.0
 var current_iso_cam_y: float = 12.0
 var current_iso_pan_yaw: float = 0.0
+@export var ads_cam_offset: Vector3 = Vector3(0.55, 1.55, 1.65)
+@export var ads_cam_pitch_deg: float = -1.5
+var ads_pitch_rad: float = 0.0
+var current_locked_aim_y: float = 0.0
+@export var auto_y_aim_enabled: bool = true
+var is_crouch_toggled: bool = false
+var active_c4_timer_mode: int = 0  # 0: Remote, 1: 5s, 2: 10s, 3: 30s
 var is_carrying_patch_rom: bool = false
 var auto_cover_enabled: bool = true
 var is_in_cover: bool = false
@@ -72,6 +85,16 @@ var cover_detection_distance: float = 1.35
 var is_dragging_body: bool = false
 var dragged_body: CharacterBody3D = null
 const DRAG_SPEED: float = 3.2
+var deployable_shields_count: int = 1
+const MAX_DEPLOYABLE_SHIELDS: int = 1
+var smoke_grenades_count: int = 2
+const MAX_SMOKE_GRENADES: int = 2
+var q_press_time_ms: int = 0
+var command_press_time_ms: int = 0
+var is_holding_command_input: bool = false
+var is_command_wheel_open: bool = false
+var command_press_start_pos: Vector2 = Vector2.ZERO
+var locked_target_world_pos: Vector3 = Vector3.ZERO
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -129,6 +152,9 @@ func _ready() -> void:
 			camera_rig.global_position = global_position
 			camera_rig.rotation = Vector3.ZERO
 		if camera != null:
+			camera.position = Vector3(0.0, current_iso_cam_y, 7.0)
+			camera.rotation.x = deg_to_rad(-60.0)
+		if camera != null:
 			camera.current = true
 		if laser_sight != null:
 			laser_sight.visible = true
@@ -137,19 +163,75 @@ func _ready() -> void:
 			camera.current = false
 
 
+func _is_ui_modal_open() -> bool:
+	if not is_inside_tree() or get_tree() == null:
+		return false
+	var hud := get_tree().root.find_child("TacticalHUD", true, false)
+	if hud != null:
+		if hud.get("is_mission_ended") == true:
+			return true
+		var vm: Control = hud.get("victory_modal") as Control
+		if vm != null and vm.visible:
+			return true
+		var pm: Control = hud.get("pause_menu") as Control
+		if pm != null and pm.visible:
+			return true
+		var km: Control = hud.get("keybindings_modal") as Control
+		if km != null and km.visible:
+			return true
+	var standalone_km := get_tree().root.find_child("KeybindingsModal", true, false) as Control
+	if standalone_km != null and standalone_km.visible:
+		return true
+	return false
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_local_authority or is_in_cctv_mode:
+	if not is_local_authority or is_in_cctv_mode or _is_ui_modal_open():
+		return
+	if is_command_wheel_open and event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		var hud := _get_tactical_hud()
+		if hud != null:
+			hud.update_radial_command_wheel(motion.position)
 		return
 	if is_aiming_down_sights and event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		rotation.y -= motion.relative.x * 0.003
-	elif event is InputEventKey and event.pressed and not event.echo:
+		ads_pitch_rad = clampf(ads_pitch_rad - motion.relative.y * 0.0025, deg_to_rad(-35.0), deg_to_rad(35.0))
+	elif not is_aiming_down_sights and event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		current_iso_pan_yaw -= motion.relative.x * 0.0018
+		current_iso_pan_yaw = wrapf(current_iso_pan_yaw, -PI, PI)
+	elif event is InputEventKey:
 		var key_event := event as InputEventKey
-		if key_event.keycode == KEY_G:
-			_toggle_drag_body()
-		elif key_event.keycode == KEY_C:
-			auto_cover_enabled = not auto_cover_enabled
-			print("Player %d auto-cover toggled: %s" % [peer_id, auto_cover_enabled])
+		if key_event.pressed and not key_event.echo:
+			if key_event.keycode == KEY_G:
+				_toggle_drag_body()
+			elif key_event.keycode == KEY_C:
+				is_crouch_toggled = not is_crouch_toggled
+				print("Player %d crouch toggled: %s" % [peer_id, is_crouch_toggled])
+			elif key_event.keycode == KEY_T:
+				active_c4_timer_mode = (active_c4_timer_mode + 1) % 4
+				var c4_names: Array[String] = ["REMOTE DETONATOR", "5s TIMER", "10s TIMER", "30s TIMER"]
+				print("Player %d C4 mode: %s" % [peer_id, c4_names[active_c4_timer_mode]])
+			elif key_event.keycode == KEY_Q:
+				_on_command_input_pressed()
+			elif key_event.keycode == KEY_4:
+				deploy_shield()
+			elif key_event.keycode == KEY_5:
+				throw_smoke_grenade()
+		elif not key_event.pressed:
+			if key_event.keycode == KEY_Q:
+				_on_command_input_released()
+	elif event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_XBUTTON1:
+			if mb.pressed:
+				_on_command_input_pressed()
+			else:
+				_on_command_input_released()
+		elif mb.button_index == MOUSE_BUTTON_MIDDLE and mb.pressed:
+			_try_issue_squad_ping()
 
 
 func _setup_replication() -> void:
@@ -353,8 +435,24 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
+	if _is_ui_modal_open():
+		is_aiming_down_sights = false
+		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		move_and_slide()
+		_update_camera_and_occlusion(delta)
+		return
+
 	# Handle dead state
 	if health_component != null and health_component.is_dead:
+		is_aiming_down_sights = false
+		if is_local_authority and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 		if not is_on_floor():
@@ -397,6 +495,13 @@ func _physics_process(delta: float) -> void:
 		elif Input.is_action_just_released("aim") or not wants_ads:
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				current_iso_pan_yaw = rotation.y
+
+	# Radial Squad Command Wheel hold threshold (>= 200ms)
+	if is_holding_command_input and not is_command_wheel_open:
+		var elapsed_hold: int = Time.get_ticks_msec() - command_press_time_ms
+		if elapsed_hold >= 200:
+			open_squad_command_wheel()
 
 	# Aiming towards mouse intersection on horizontal plane
 	_process_aim()
@@ -425,8 +530,8 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_pressed("fire"):
 			var aim_dir := (current_aim_target - mounted_turret.turret_head.global_position).normalized()
 			if aim_dir != Vector3.ZERO:
-				mounted_turret.try_manual_fire(aim_dir)
-				add_screen_shake(0.08)
+				if mounted_turret.try_manual_fire(aim_dir):
+					add_screen_shake(0.20)
 		_update_camera_and_occlusion(delta)
 		return
 
@@ -559,19 +664,7 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	camera_rig.global_position = target_cam_pos
 
-	# Gentle Isometric Mouse-Pan Yaw: allow tactical peeking around corners
-	var target_iso_pan_yaw: float = 0.0
-	if is_inside_tree() and get_viewport() != null:
-		var vp_size := get_viewport().get_visible_rect().size
-		if vp_size.x > 0.0:
-			var mouse_x := get_viewport().get_mouse_position().x
-			var mouse_ratio := clampf((mouse_x / vp_size.x) - 0.5, -0.5, 0.5) * 2.0
-			# Subtle tactical pan up to +/- 22 degrees
-			target_iso_pan_yaw = -mouse_ratio * deg_to_rad(22.0)
-
-	current_iso_pan_yaw = lerp_angle(current_iso_pan_yaw, target_iso_pan_yaw, 2.5 * delta)
-
-	# Rig Yaw: in isometric mode follows current_iso_pan_yaw; in ADS mode follows player yaw rotation.y
+	# Rig Yaw: in isometric mode follows unconstrained 360 orbit; in ADS mode follows player yaw rotation.y
 	var target_rig_yaw := lerp_angle(current_iso_pan_yaw, rotation.y, ads_blend)
 	camera_rig.rotation.y = target_rig_yaw + off_yaw
 
@@ -583,17 +676,20 @@ func _update_camera_and_occlusion(delta: float) -> void:
 
 	if camera != null:
 		# Isometric position: (0, current_iso_cam_y, 7.0)
-		# ADS over-shoulder position: (0.80, 2.15, 1.80) - Ghost Recon: Wildlands style
+		# ADS over-shoulder position: ads_cam_offset - Ghost Recon: Wildlands style
 		var iso_cam_pos := Vector3(0.0, current_iso_cam_y, 7.0)
-		var ads_cam_pos := Vector3(0.80, 2.15, 1.80)
+		var ads_cam_pos := ads_cam_offset
 		camera.position = iso_cam_pos.lerp(ads_cam_pos, ads_blend)
 
-		# Pitch angle: -60° (tactical isometric) <-> -12° (over-the-shoulder semi-scoped)
+		# Pitch angle: -60° (tactical isometric) <-> Ghost Recon Wildlands over-shoulder level sightline
 		var iso_pitch := deg_to_rad(-60.0)
-		var ads_pitch := deg_to_rad(-12.0)
+		var ads_pitch := deg_to_rad(ads_cam_pitch_deg) + ads_pitch_rad
 		camera.rotation.x = lerp_angle(iso_pitch, ads_pitch, ads_blend)
 		camera.rotation.y = 0.0
 		camera.rotation.z = 0.0
+
+		if not is_aiming_down_sights:
+			ads_pitch_rad = move_toward(ads_pitch_rad, 0.0, 4.0 * delta)
 
 		# FOV: 55.0° (wide tactical) <-> 50.0° (Ghost Recon semi-scoped clarity)
 		camera.fov = lerpf(55.0, 50.0, ads_blend)
@@ -697,40 +793,129 @@ func add_screen_shake(amount: float) -> void:
 	trauma = clampf(trauma + amount, 0.0, 1.0)
 
 
-func _process_aim() -> void:
+func _calculate_auto_y_aim_target(mouse_pos: Vector2) -> Vector3:
 	if camera == null:
-		return
+		return Vector3.ZERO
 
 	if is_aiming_down_sights:
-		# In ADS semi-scoped mode, aim forward along weapon sightline
-		current_aim_target = global_position - global_transform.basis.z * 40.0 + Vector3(0, 1.2, 0)
-		return
+		# Ghost Recon Wildlands over-the-shoulder crosshair 3D raycast
+		var cam_forward := -camera.global_transform.basis.z
+		var ray_start := camera.global_position
+		var ray_end := ray_start + cam_forward * 60.0
+		if is_inside_tree():
+			var space_state := get_world_3d().direct_space_state
+			if space_state != null:
+				var query := PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+				query.collision_mask = 1 | 4  # World geometry + Enemies
+				query.exclude = [get_rid()]
+				var res := space_state.intersect_ray(query)
+				if not res.is_empty():
+					return res["position"] as Vector3
+		return ray_end
 
-	var mouse_pos := get_viewport().get_mouse_position()
 	var ray_origin := camera.project_ray_origin(mouse_pos)
 	var ray_normal := camera.project_ray_normal(mouse_pos)
 
-	# High-Ground Aiming: when operative is on Level 27 looking down into the Gate Room
 	var target_plane_y: float = global_position.y
-	if global_position.y >= 4.5 and ray_normal.y < -0.1:
+
+	# 1. Target Enemy Height Snapping: check if crosshair ray hovers near any hostile entity
+	var snapped_enemy_y: float = -999.0
+	var enemies_container := get_tree().root.find_child("Enemies", true, false)
+	if enemies_container != null:
+		var min_dist_sq: float = 2.25 # within 1.5m radius
+		for child in enemies_container.get_children():
+			var enemy := child as CharacterBody3D
+			if enemy != null and is_instance_valid(enemy):
+				var enemy_center := enemy.global_position + Vector3(0, 1.0, 0)
+				var to_enemy := enemy_center - ray_origin
+				var proj := to_enemy.dot(ray_normal)
+				if proj > 0.0:
+					var closest_pt := ray_origin + ray_normal * proj
+					var d2 := closest_pt.distance_squared_to(enemy_center)
+					if d2 < min_dist_sq:
+						min_dist_sq = d2
+						snapped_enemy_y = enemy_center.y
+
+	if snapped_enemy_y > -900.0:
+		target_plane_y = snapped_enemy_y
+	elif auto_y_aim_enabled and is_inside_tree():
+		# 2. Dynamic Ground / Platform Elevation Auto-Detection:
+		# Raycast into world to find floor/ramp/platform beneath mouse
+		var space_state := get_world_3d().direct_space_state
+		if space_state != null:
+			var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_origin + ray_normal * 120.0)
+			query.collision_mask = 1 # World geometry
+			query.exclude = [get_rid()]
+			var res := space_state.intersect_ray(query)
+			if not res.is_empty():
+				var hit_normal: Vector3 = res["normal"]
+				var hit_pos: Vector3 = res["position"]
+				# If surface is floor or walkable slope (normal.y > 0.35)
+				if hit_normal.y > 0.35:
+					target_plane_y = hit_pos.y
+				else:
+					# 3. Anti-Wall Climbing Filter: ray hit vertical wall face.
+					# Trace straight down from hit point to find ground height in front of wall!
+					var down_query := PhysicsRayQueryParameters3D.create(hit_pos + Vector3(0, 0.5, 0), hit_pos + Vector3(0, -10.0, 0))
+					down_query.collision_mask = 1
+					var down_res := space_state.intersect_ray(down_query)
+					if not down_res.is_empty():
+						target_plane_y = down_res["position"].y
+					else:
+						target_plane_y = global_position.y
+
+	# High-Ground Aiming fallback for Level 27 overlooking Gate Room
+	if global_position.y >= 4.5 and ray_normal.y < -0.1 and target_plane_y >= 4.5:
 		var arena_plane := Plane(Vector3.UP, 0.0)
 		var arena_hit: Variant = arena_plane.intersects_ray(ray_origin, ray_normal)
 		if arena_hit != null:
 			var hit_pt: Vector3 = arena_hit
-			# If aimed into Gate Room arena in front of Briefing window (Z <= 8.5)
 			if hit_pt.z <= 8.5 and absf(hit_pt.x) <= 18.0:
 				target_plane_y = 0.0
 
-	var ground_plane := Plane(Vector3.UP, target_plane_y)
+	# Smooth elevation interpolation
+	var dt := get_physics_process_delta_time()
+	current_locked_aim_y = move_toward(current_locked_aim_y, target_plane_y, 35.0 * dt)
+
+	var ground_plane := Plane(Vector3.UP, current_locked_aim_y)
 	var hit_variant: Variant = ground_plane.intersects_ray(ray_origin, ray_normal)
 	if hit_variant != null:
-		var hit: Vector3 = hit_variant
-		current_aim_target = hit
-		var look_dir: Vector3 = (hit - global_position)
-		look_dir.y = 0.0
-		# Deadzone: only rotate if mouse is at least 0.5m away from player center
-		if look_dir.length_squared() > 0.25:
-			rotation.y = atan2(-look_dir.x, -look_dir.z)
+		return hit_variant as Vector3
+
+	return ray_origin + ray_normal * 30.0
+
+
+func _process_aim() -> void:
+	if camera == null:
+		return
+
+	if is_command_wheel_open:
+		current_aim_target = locked_target_world_pos
+		return
+
+	var mouse_pos := get_viewport().get_mouse_position()
+	var hit := _calculate_auto_y_aim_target(mouse_pos)
+	current_aim_target = hit
+
+	if is_aiming_down_sights:
+		# 3D Weapon visual pitch alignment in ADS mode
+		if weapon_holder != null and hit != Vector3.ZERO:
+			var local_target := weapon_holder.to_local(hit)
+			var pitch_rad := -atan2(local_target.y, -local_target.z)
+			weapon_holder.rotation.x = clampf(pitch_rad, deg_to_rad(-45.0), deg_to_rad(45.0))
+		return
+
+	var look_dir: Vector3 = (hit - global_position)
+	look_dir.y = 0.0
+	# Deadzone: only rotate if mouse is at least 0.5m away from player center
+	if look_dir.length_squared() > 0.25:
+		rotation.y = atan2(-look_dir.x, -look_dir.z)
+
+	# 3D Weapon visual pitch alignment
+	if weapon_holder != null and hit != Vector3.ZERO:
+		var local_target := weapon_holder.to_local(hit)
+		var pitch_rad := -atan2(local_target.y, -local_target.z)
+		weapon_holder.rotation.x = clampf(pitch_rad, deg_to_rad(-45.0), deg_to_rad(45.0))
 
 
 func _process_combat() -> void:
@@ -751,7 +936,7 @@ func _process_combat() -> void:
 	if Input.is_action_just_pressed("reload"):
 		current_weapon.reload()
 
-	is_firing = Input.is_action_pressed("fire")
+	is_firing = Input.is_action_pressed("fire") and not is_command_wheel_open
 	if is_firing:
 		var spread_mult: float = 1.0
 		if is_aiming_down_sights:
@@ -783,7 +968,7 @@ func _deploy_tactical_gadget() -> void:
 			turret_cooldown = TURRET_COOLDOWN_S
 			print("Player %d deployed .50 Cal Tripod Turret! Cooldown started (%.0fs)." % [peer_id, TURRET_COOLDOWN_S])
 	elif class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
-		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed:
+		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed and active_c4.mode == C4Satchel.C4Mode.REMOTE:
 			active_c4.detonate()
 			active_c4 = null
 			print("Player %d detonated C4 Satchel!" % peer_id)
@@ -796,11 +981,18 @@ func _deploy_tactical_gadget() -> void:
 				var c4 := c4_scene.instantiate() as C4Satchel
 				c4.position = global_position + Vector3(0, 1.0, 0)
 				c4.planter = self
+				if active_c4_timer_mode == 1:
+					c4.set_timer_mode(5.0)
+				elif active_c4_timer_mode == 2:
+					c4.set_timer_mode(10.0)
+				elif active_c4_timer_mode == 3:
+					c4.set_timer_mode(30.0)
 				get_parent().add_child(c4)
 				c4.apply_central_impulse(-global_transform.basis.z * 10.0 + Vector3.UP * 3.0)
-				active_c4 = c4
+				if c4.mode == C4Satchel.C4Mode.REMOTE:
+					active_c4 = c4
 				c4_charges_remaining -= 1
-				print("Player %d threw C4 Satchel Charge! (%d charges left)" % [peer_id, c4_charges_remaining])
+				print("Player %d threw C4 Satchel Charge (Mode: %d)! (%d charges left)" % [peer_id, active_c4_timer_mode, c4_charges_remaining])
 
 
 func _plant_claymore() -> void:
@@ -1003,7 +1195,7 @@ func _process_cover_and_peeking(delta: float, _move_dir: Vector3) -> void:
 		is_sprinting = false
 	else:
 		is_peeking = false
-		is_crouching = Input.is_action_pressed("crouch")
+		is_crouching = is_crouch_toggled or Input.is_action_pressed("crouch")
 		is_sprinting = Input.is_action_pressed("sprint") and not is_crouching and not is_dragging_body
 
 	if body_mesh != null:
@@ -1143,6 +1335,441 @@ func _find_nearby_drag_target() -> CharacterBody3D:
 	return best_target
 
 
+func _try_issue_squad_ping() -> void:
+	if not is_inside_tree() or get_viewport() == null:
+		return
+	var mouse_pos := get_viewport().get_mouse_position()
+	var cam := camera if (camera != null and camera.current) else get_viewport().get_camera_3d()
+	if cam == null:
+		var forward_pos := global_position - global_transform.basis.z * 6.0
+		issue_squad_command(forward_pos)
+		return
+
+	var from := cam.project_ray_origin(mouse_pos)
+	var dir := cam.project_ray_normal(mouse_pos)
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return
+	var query := PhysicsRayQueryParameters3D.create(from, from + dir * 100.0)
+	query.collision_mask = 1 | 2 | 4  # World, players/allies, enemies
+	var hit := space.intersect_ray(query)
+	if not hit.is_empty():
+		var hit_pos: Vector3 = hit["position"]
+		var collider: Node = hit.get("collider") as Node
+		issue_squad_command(hit_pos, collider)
+	else:
+		var plane := Plane(Vector3.UP, 0.0)
+		var hit_pt: Variant = plane.intersects_ray(from, dir)
+		if hit_pt != null:
+			issue_squad_command(hit_pt as Vector3, null)
+
+
+func _on_command_input_pressed() -> void:
+	if is_holding_command_input:
+		return
+	is_holding_command_input = true
+	command_press_time_ms = Time.get_ticks_msec()
+	q_press_time_ms = command_press_time_ms
+	var vp: Viewport = get_viewport()
+	command_press_start_pos = vp.get_mouse_position() if vp != null else Vector2(640.0, 360.0)
+	locked_target_world_pos = _calculate_auto_y_aim_target(command_press_start_pos)
+	if locked_target_world_pos == Vector3.ZERO:
+		locked_target_world_pos = global_position - global_transform.basis.z * 5.0
+
+
+func _on_command_input_released() -> void:
+	if not is_holding_command_input and not is_command_wheel_open:
+		return
+	var elapsed: int = Time.get_ticks_msec() - command_press_time_ms
+	is_holding_command_input = false
+
+	if is_command_wheel_open or elapsed >= 200:
+		var cmd: int = RadialCommandWheel.CMD_CANCEL
+		var hud := _get_tactical_hud()
+		if hud != null:
+			cmd = hud.get_radial_selected_command()
+			hud.close_radial_command_wheel()
+		is_command_wheel_open = false
+		if cmd >= 0:
+			execute_squad_radial_command(cmd, locked_target_world_pos)
+		else:
+			print("Player %d cancelled squad radial command wheel." % peer_id)
+	else:
+		# Quick tap (< 200ms): fire contextual squad quick ping
+		is_command_wheel_open = false
+		var hud := _get_tactical_hud()
+		if hud != null and hud.is_radial_wheel_open():
+			hud.close_radial_command_wheel()
+		_try_issue_squad_ping()
+
+
+func open_squad_command_wheel() -> void:
+	is_command_wheel_open = true
+	var hud := _get_tactical_hud()
+	if hud != null:
+		hud.open_radial_command_wheel(command_press_start_pos, locked_target_world_pos)
+
+
+func close_squad_command_wheel() -> void:
+	is_command_wheel_open = false
+	is_holding_command_input = false
+	var hud := _get_tactical_hud()
+	if hud != null:
+		hud.close_radial_command_wheel()
+
+
+func execute_squad_radial_command(cmd_index: int, target_world_pos: Vector3) -> void:
+	close_squad_command_wheel()
+	var hud := _get_tactical_hud()
+	var sector_name: String = _get_sector_name_for_pos(target_world_pos)
+
+	if cmd_index == RadialCommandWheel.CMD_REGROUP_ON_ME:
+		issue_squad_regroup()
+		return
+
+	var airman: SGCAirmanAIScript = _find_nearest_active_airman()
+	if airman == null:
+		if hud != null:
+			hud.show_squad_order_toast("[SQUAD WARNING: NO ACTIVE AIRMEN AVAILABLE]")
+		print("Player %d: [SQUAD WARNING: NO ACTIVE AIRMEN AVAILABLE]" % peer_id)
+		return
+
+	match cmd_index:
+		RadialCommandWheel.CMD_MOVE_TO_COVER:
+			airman.order_move_to(target_world_pos)
+			_spawn_command_waypoint_fx(target_world_pos, cmd_index)
+			_play_command_radio_sound()
+			if hud != null:
+				hud.show_squad_order_toast("[TACTICAL ORDER: %s -> MOVE TO COVER (SECTOR: %s)]" % [airman.airman_callsign, sector_name])
+			print("[RADIO SQUAWK] %s: 'Moving to position! Covering the lane!'" % airman.airman_callsign)
+
+		RadialCommandWheel.CMD_HOLD_CORNER:
+			var facing: Vector3 = (target_world_pos - global_position).normalized()
+			facing.y = 0.0
+			if facing.length_squared() < 0.01:
+				facing = Vector3(0.0, 0.0, -1.0)
+			airman.hold_corner(target_world_pos, facing, "corner")
+			_spawn_command_waypoint_fx(target_world_pos, cmd_index)
+			_play_command_radio_sound()
+			if hud != null:
+				hud.show_squad_order_toast("[TACTICAL ORDER: %s -> HOLD CORNER (SECTOR: %s)]" % [airman.airman_callsign, sector_name])
+			print("[RADIO SQUAWK] %s: 'Acknowledged! Holding corner! Watching hallway!'" % airman.airman_callsign)
+
+		RadialCommandWheel.CMD_SUPPRESS_HALLWAY:
+			var suppress_dir: Vector3 = (target_world_pos - airman.global_position).normalized()
+			suppress_dir.y = 0.0
+			if suppress_dir.length_squared() < 0.01:
+				suppress_dir = (target_world_pos - global_position).normalized()
+				suppress_dir.y = 0.0
+			if suppress_dir.length_squared() < 0.01:
+				suppress_dir = Vector3(0.0, 0.0, -1.0)
+			airman.suppress_hallway(suppress_dir, 3.0)
+			_spawn_command_waypoint_fx(target_world_pos, cmd_index)
+			_play_command_radio_sound()
+			if hud != null:
+				hud.show_squad_order_toast("[TACTICAL ORDER: %s -> SUPPRESS HALLWAY (SECTOR: %s)]" % [airman.airman_callsign, sector_name])
+			print("[RADIO SQUAWK] %s: 'Laying down suppressive fire! Keep your heads down!'" % airman.airman_callsign)
+
+		RadialCommandWheel.CMD_MAN_50_CAL:
+			var turret: DeployableTurret = _find_nearest_turret(target_world_pos)
+			if turret != null:
+				airman.order_mount_turret(turret)
+				_spawn_command_waypoint_fx(turret.global_position, cmd_index)
+			else:
+				airman.order_move_to(target_world_pos)
+				_spawn_command_waypoint_fx(target_world_pos, cmd_index)
+			_play_command_radio_sound()
+			if hud != null:
+				hud.show_squad_order_toast("[TACTICAL ORDER: %s -> MAN .50 CAL (SECTOR: %s)]" % [airman.airman_callsign, sector_name])
+			print("[RADIO SQUAWK] %s: 'Manning the .50 Cal Browning! Gun ready!'" % airman.airman_callsign)
+
+
+func _spawn_command_waypoint_fx(pos: Vector3, command_type: int) -> void:
+	if not is_inside_tree():
+		return
+	var col := Color(0.2, 0.85, 1.0, 0.9)
+	match command_type:
+		RadialCommandWheel.CMD_MOVE_TO_COVER:
+			col = Color(0.2, 0.85, 1.0, 0.9) # Cyan
+		RadialCommandWheel.CMD_HOLD_CORNER:
+			col = Color(0.25, 0.45, 1.0, 0.9) # Blue
+		RadialCommandWheel.CMD_SUPPRESS_HALLWAY:
+			col = Color(1.0, 0.55, 0.1, 0.9) # Orange
+		RadialCommandWheel.CMD_MAN_50_CAL:
+			col = Color(1.0, 0.82, 0.2, 0.9) # Gold
+		RadialCommandWheel.CMD_REGROUP_ON_ME:
+			col = Color(0.2, 0.95, 0.4, 0.9) # Green
+
+	var waypoint := Node3D.new()
+	waypoint.name = "CommandWaypointFX"
+	waypoint.add_to_group("squad_waypoint")
+
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.65
+	torus.outer_radius = 0.85
+	ring.mesh = torus
+
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = col
+	mat.emission_enabled = true
+	mat.emission = col
+	mat.emission_energy_multiplier = 2.0
+	ring.material_override = mat
+
+	var beacon := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.04
+	cyl.bottom_radius = 0.08
+	cyl.height = 2.2
+	beacon.mesh = cyl
+	beacon.position.y = 1.1
+	var b_mat := StandardMaterial3D.new()
+	b_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	b_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	b_mat.albedo_color = Color(col.r, col.g, col.b, 0.5)
+	beacon.material_override = b_mat
+
+	waypoint.add_child(ring)
+	waypoint.add_child(beacon)
+	ring.position.y = 0.05
+	ring.scale = Vector3(0.2, 0.2, 0.2)
+
+	get_tree().root.add_child(waypoint)
+	waypoint.global_position = pos
+
+	var tween := waypoint.create_tween()
+	tween.tween_property(ring, "scale", Vector3(1.3, 1.0, 1.3), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(ring, "scale", Vector3(1.1, 1.0, 1.1), 0.25)
+	tween.tween_property(ring, "scale", Vector3(1.4, 1.0, 1.4), 0.35)
+	tween.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.9)
+	tween.parallel().tween_property(b_mat, "albedo_color:a", 0.0, 0.9)
+	tween.tween_callback(waypoint.queue_free)
+
+
+func _play_command_radio_sound() -> void:
+	if not is_inside_tree():
+		return
+	var asp := AudioStreamPlayer.new()
+	asp.name = "RadioSquawkPlayer"
+	var sfx: AudioStream = load("res://audio/sfx_gdo_beep.wav") as AudioStream
+	if sfx == null:
+		sfx = load("res://audio/sfx_chevron.wav") as AudioStream
+	if sfx != null:
+		asp.stream = sfx
+		asp.volume_db = -3.0
+		var bus_idx: int = AudioServer.get_bus_index("SFX")
+		if bus_idx != -1:
+			asp.bus = "SFX"
+		get_tree().root.add_child(asp)
+		asp.play()
+		asp.finished.connect(asp.queue_free)
+	else:
+		asp.queue_free()
+
+
+func _get_tactical_hud() -> TacticalHUD:
+	if not is_inside_tree():
+		return null
+	return get_tree().root.find_child("TacticalHUD", true, false) as TacticalHUD
+
+
+func _get_all_active_airmen() -> Array[SGCAirmanAIScript]:
+	var result: Array[SGCAirmanAIScript] = []
+	var allies := get_tree().root.find_child("Allies", true, false)
+	if allies != null:
+		for child: Node in allies.get_children():
+			var a := child as SGCAirmanAIScript
+			if a != null and a.health_component != null and not a.health_component.is_dead and not a.health_component.is_downed:
+				result.append(a)
+	return result
+
+
+func _find_nearest_turret(pos: Vector3) -> DeployableTurret:
+	var turrets := get_tree().get_nodes_in_group("turret")
+	var best_turret: DeployableTurret = null
+	var min_d: float = 999999.0
+	for t: Node in turrets:
+		var dt := t as DeployableTurret
+		if dt != null:
+			var d: float = pos.distance_to(dt.global_position)
+			if d < min_d:
+				min_d = d
+				best_turret = dt
+	return best_turret
+
+
+func _get_sector_name_for_pos(pos: Vector3) -> String:
+	var gateroom := get_tree().root.find_child("GateRoom", true, false)
+	if gateroom != null and gateroom.has_method("get_current_sector"):
+		var sec: String = gateroom.call("get_current_sector", pos) as String
+		if not sec.is_empty() and sec != "UNKNOWN":
+			return sec.replace("_", " ")
+	var hud := _get_tactical_hud()
+	if hud != null and not hud.current_sector_id.is_empty() and hud.current_sector_id != "UNKNOWN":
+		return hud.current_sector_id.replace("_", " ")
+	return "GATE ROOM"
+
+
+func issue_squad_command(hit_pos: Vector3, target_node: Node = null) -> void:
+	var airman := _find_nearest_active_airman()
+	if airman == null:
+		var hud := _get_tactical_hud()
+		if hud != null:
+			hud.show_squad_order_toast("[SQUAD WARNING: NO ACTIVE AIRMEN AVAILABLE]")
+		print("Player %d: [SQUAD WARNING: NO ACTIVE AIRMEN AVAILABLE]" % peer_id)
+		return
+
+	var sector_name: String = _get_sector_name_for_pos(hit_pos)
+
+	if target_node != null:
+		# Check if target is a DeployableTurret
+		var turret := target_node as DeployableTurret
+		if turret == null and target_node.has_node("DeployableTurret"):
+			turret = target_node.get_node("DeployableTurret") as DeployableTurret
+		if turret != null:
+			airman.order_mount_turret(turret)
+			_spawn_command_waypoint_fx(turret.global_position, RadialCommandWheel.CMD_MAN_50_CAL)
+			_play_command_radio_sound()
+			var hud := _get_tactical_hud()
+			if hud != null:
+				hud.show_squad_order_toast("[TACTICAL ORDER: %s -> MAN .50 CAL (SECTOR: %s)]" % [airman.airman_callsign, sector_name])
+			print("[RADIO SQUAWK] %s: 'Manning the .50 Cal Browning! Gun ready!'" % airman.airman_callsign)
+			return
+
+		# Check if target is a downed ally or squadmate
+		var body := target_node as CharacterBody3D
+		if body != null:
+			var hc := body.get_node_or_null("HealthComponent") as HealthComponent
+			if hc != null and hc.is_downed:
+				airman.order_revive(body)
+				_spawn_command_ping_fx(body.global_position, Color(0.2, 1.0, 0.4))
+				_play_command_radio_sound()
+				var hud := _get_tactical_hud()
+				if hud != null:
+					hud.show_squad_order_toast("[TACTICAL ORDER: %s -> REVIVE SQUADMATE (SECTOR: %s)]" % [airman.airman_callsign, sector_name])
+				print("[RADIO SQUAWK] %s: 'Squadmate down! Moving to revive!'" % airman.airman_callsign)
+				return
+
+	# Move / Take cover at pinged position
+	airman.order_move_to(hit_pos)
+	_spawn_command_waypoint_fx(hit_pos, RadialCommandWheel.CMD_MOVE_TO_COVER)
+	_play_command_radio_sound()
+	var hud := _get_tactical_hud()
+	if hud != null:
+		hud.show_squad_order_toast("[TACTICAL ORDER: %s -> MOVE TO COVER (SECTOR: %s)]" % [airman.airman_callsign, sector_name])
+	print("[RADIO SQUAWK] %s: 'Moving to position! Covering the lane!'" % airman.airman_callsign)
+
+
+func issue_squad_regroup() -> void:
+	var hud := _get_tactical_hud()
+	var active_airmen := _get_all_active_airmen()
+	if active_airmen.is_empty():
+		if hud != null:
+			hud.show_squad_order_toast("[SQUAD WARNING: NO ACTIVE AIRMEN AVAILABLE]")
+		print("Player %d: [SQUAD WARNING: NO ACTIVE AIRMEN AVAILABLE]" % peer_id)
+		return
+
+	for airman: SGCAirmanAIScript in active_airmen:
+		airman.order_regroup(self)
+
+	var sector_name: String = _get_sector_name_for_pos(global_position)
+	_spawn_command_waypoint_fx(global_position, RadialCommandWheel.CMD_REGROUP_ON_ME)
+	_play_command_radio_sound()
+	if hud != null:
+		hud.show_squad_order_toast("[TACTICAL ORDER: SQUAD -> REGROUP ON ME (SECTOR: %s)]" % sector_name)
+	print("[RADIO SQUAWK] %s: 'Roger that, regrouping on your six!'" % active_airmen[0].airman_callsign)
+	print("Player %d ordered ALL SGC Airmen to REGROUP!" % peer_id)
+
+
+func _find_nearest_active_airman() -> SGCAirmanAIScript:
+	var allies := get_tree().root.find_child("Allies", true, false)
+	if allies == null:
+		return null
+	var best_airman: SGCAirmanAIScript = null
+	var min_d: float = 999999.0
+	for child in allies.get_children():
+		var a := child as SGCAirmanAIScript
+		if a != null and a.health_component != null and not a.health_component.is_dead and not a.health_component.is_downed:
+			var d := global_position.distance_to(a.global_position)
+			if d < min_d:
+				min_d = d
+				best_airman = a
+	return best_airman
+
+
+func _spawn_command_ping_fx(pos: Vector3, color: Color) -> void:
+	if not is_inside_tree():
+		return
+	var ping := Node3D.new()
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.5
+	torus.outer_radius = 0.65
+	ring.mesh = torus
+
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = color
+	ring.material_override = mat
+
+	ping.add_child(ring)
+	ring.position.y = 0.05
+	ring.scale = Vector3(0.2, 0.2, 0.2)
+	get_tree().root.add_child(ping)
+	ping.global_position = pos
+
+	var tween := ping.create_tween()
+	tween.tween_property(ring, "scale", Vector3(1.5, 1.0, 1.5), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(mat, "albedo_color:a", 0.0, 0.75)
+	tween.tween_callback(ping.queue_free)
+
+
+func deploy_shield() -> void:
+	if deployable_shields_count <= 0:
+		print("Player %d: No Deployable Ballistic Shields remaining!" % peer_id)
+		return
+	deployable_shields_count -= 1
+
+	var shield := DeployableShieldScene.instantiate() as DeployableShieldScript
+	var spawn_pos := global_position - global_transform.basis.z * 1.3
+	spawn_pos.y = global_position.y
+	shield.position = spawn_pos
+	shield.rotation.y = rotation.y
+
+	var parent := get_parent()
+	if parent != null:
+		parent.add_child(shield, true)
+	else:
+		get_tree().root.add_child(shield, true)
+
+	print("Player %d deployed Ballistic Shield at %s (Remaining: %d)" % [peer_id, str(spawn_pos), deployable_shields_count])
+
+
+func throw_smoke_grenade() -> void:
+	if smoke_grenades_count <= 0:
+		print("Player %d: No M18 Smoke Grenades remaining!" % peer_id)
+		return
+	smoke_grenades_count -= 1
+
+	var grenade := SmokeGrenadeScene.instantiate() as SmokeGrenadeScript
+	var spawn_pos := global_position + Vector3(0, 1.4, 0) - global_transform.basis.z * 0.8
+	grenade.position = spawn_pos
+	var throw_vel := (-global_transform.basis.z * 12.0) + Vector3(0, 3.5, 0)
+	grenade.linear_velocity = throw_vel
+
+	var parent := get_parent()
+	if parent != null:
+		parent.add_child(grenade, true)
+	else:
+		get_tree().root.add_child(grenade, true)
+
+	print("Player %d threw M18 Smoke Grenade! (Remaining: %d)" % [peer_id, smoke_grenades_count])
+
+
 func _on_downed() -> void:
 	stop_dragging_body()
 	if mounted_turret != null:
@@ -1173,6 +1800,9 @@ func _on_damage_taken(amount: float, _source: Node, _type: String) -> void:
 func _on_died() -> void:
 	stop_dragging_body()
 	_restore_all_occluded_nodes()
+	is_aiming_down_sights = false
+	if is_local_authority:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	player_died.emit(peer_id)
 	print("Player %d has fallen in combat." % peer_id)
 
@@ -1188,6 +1818,12 @@ func _on_recovered_from_stun() -> void:
 
 func _on_vaporized() -> void:
 	print("Player %d disintegrated by Zat'nik'tel!" % peer_id)
+	stop_dragging_body()
+	_restore_all_occluded_nodes()
+	is_aiming_down_sights = false
+	if is_local_authority:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	player_died.emit(peer_id)
 	var flash := OmniLight3D.new()
 	flash.light_color = Color(0.2, 0.6, 1.0)
 	flash.light_energy = 8.0
@@ -1246,13 +1882,17 @@ func _try_interact() -> void:
 		nearest_interactable.interact(self)
 		return
 
-	# 4. Check for SGC Blast Door console
-	var door_console := get_tree().root.find_child("BlastDoorConsole", true, false)
-	if door_console != null and global_position.distance_to(door_console.global_position) <= 2.8:
-		var gateroom := get_tree().root.find_child("GateRoom", true, false)
-		if gateroom != null and gateroom.has_method("toggle_blast_doors"):
-			gateroom.toggle_blast_doors()
-		return
+	# 4. Check for SGC Blast Door console (any console in complex)
+	for console_node in get_tree().get_nodes_in_group("blast_door_console"):
+		var c := console_node as Node3D
+		if c != null and global_position.distance_to(c.global_position) <= 3.0:
+			if c.has_method("interact"):
+				c.interact(self)
+			else:
+				var gateroom := get_tree().root.find_child("GateRoom", true, false)
+				if gateroom != null and gateroom.has_method("toggle_blast_doors"):
+					gateroom.toggle_blast_doors()
+			return
 
 	# 5. Check for Lab Data Patch Drive (Research Lab)
 	var patch_drive := get_tree().root.find_child("LabDataPatchDrive", true, false) as LabDataPatchDriveScript
