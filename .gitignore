@@ -24,3 +24,6 @@ yarn-error.log*
 # Godot 4
 .godot/
 *.translation
+
+# Python test runner caches
+__pycache__/

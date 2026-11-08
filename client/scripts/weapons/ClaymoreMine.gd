@@ -81,7 +81,7 @@ func _spawn_blast_fx() -> void:
 				p.add_screen_shake(0.70 * falloff)
 
 	# Audio
-	if ResourceLoader.exists("res://audio/sfx_explosion.wav"):
+	if DisplayServer.get_name() != "headless" and ResourceLoader.exists("res://audio/sfx_explosion.wav"):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load("res://audio/sfx_explosion.wav")
 		audio.bus = &"SFX"

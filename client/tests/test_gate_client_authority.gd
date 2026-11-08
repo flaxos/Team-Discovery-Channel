@@ -102,6 +102,8 @@ func run_test() -> void:
 	host_waves.end_mission()
 	await frames(20)
 	assert(not client_gate.event_horizon_mesh.visible, "Server closure must hide horizon on client")
+	host_api.multiplayer_peer = null
+	client_api.multiplayer_peer = null
 	server_peer.close()
 	client_peer.close()
 	host_branch.queue_free()

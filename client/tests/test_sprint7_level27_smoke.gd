@@ -3,7 +3,7 @@ extends SceneTree
 ## Validates:
 ##  1. Sublevel 27 Architectural Geometry (Briefing Room, General's Office, Security Station, Overlook Window).
 ##  2. SGC Hydraulic Elevator 2-Stop Vertical Transit (Sublevel 28 <-> Sublevel 27, animated doors, arrival cues).
-##  3. Continuous 24-Step Spiral Staircase Interconnect with full physics collisions.
+##  3. Continuous 29-tread Spiral Staircase Interconnect with full physics collisions.
 ##  4. Multi-Level Emergency Alert Strobe Lighting across all 14 sector beacons.
 ##  5. Dynamic Sublevel 27 Sector Classification & Signal Integration.
 
@@ -18,6 +18,9 @@ var last_sector: String = ""
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 7 LEVEL 27 & VERTICAL TRANSIT     ")
 	print("========================================================")
@@ -117,23 +120,25 @@ func _process(delta: float) -> bool:
 		print("[TEST 2/5] PASS: SGC Elevator 2-stop vertical transit and states verified.")
 
 	elif ticks == 6:
-		# TEST 3: Continuous 24-Step Spiral Staircase Interconnect
-		print("[TEST 3/5] Testing Continuous 24-Step Spiral Staircase Interconnect...")
+		# TEST 3: Continuous 29-tread Spiral Staircase Interconnect
+		print("[TEST 3/5] Testing Continuous 29-tread Spiral Staircase Interconnect...")
 		var stairs: Node3D = gateroom.get_node("Level27Complex/SpiralStairsInterconnect") as Node3D
 		assert(stairs != null, "SpiralStairsInterconnect node must exist")
 
 		var pole: CSGCylinder3D = stairs.get_node_or_null("StairsCentralPole") as CSGCylinder3D
-		assert(pole != null and pole.use_collision, "StairsCentralPole must have physics collision")
+		assert(pole != null and not pole.use_collision, "Central pole is visual; the continuous helix owns collision")
+		var surface := stairs.get_node("HelicalWalkSurface") as StaticBody3D
+		assert(surface != null and surface.get_child(0).shape is ConcavePolygonShape3D, "Continuous helical walk surface must supply collision")
 
 		var step_count: int = 0
 		for child in pole.get_children():
 			var step := child as CSGBox3D
 			if step != null and step.name.begins_with("Step"):
-				assert(step.use_collision, "Each spiral stair step must have active collision")
+				assert(not step.use_collision, "Visual treads must not snag the operative capsule")
 				step_count += 1
 
-		assert(step_count == 24, "Spiral staircase must contain exactly 24 helical collision steps (found %d)" % step_count)
-		print("[TEST 3/5] PASS: 24-step continuous helical collision stairs verified.")
+		assert(step_count == 29, "Spiral staircase must contain exactly 29 visual treads (found %d)" % step_count)
+		print("[TEST 3/5] PASS: 29-tread visual treads and continuous helical collision verified; physical traversal has its own suite.")
 
 	elif ticks == 8:
 		# TEST 4: Multi-Level Emergency Strobe Lighting (14 Beacons Across L28 & L27)
@@ -198,11 +203,11 @@ func _process(delta: float) -> bool:
 		print("  ✓ Level 27 Command Deck (Briefing, Hammond, Security) ")
 		print("  ✓ Gate Room Overlook Observation Window               ")
 		print("  ✓ SGC Hydraulic Elevator 2-Stop Vertical Transit      ")
-		print("  ✓ 24-Step Helical Spiral Staircase Interconnect       ")
+		print("  ✓ 29-tread Helical Spiral Staircase Interconnect       ")
 		print("  ✓ 14 Synchronous Emergency Strobe Beacons (L28 & L27) ")
 		print("  ✓ Dynamic Multi-Level Sector Tracking & Navigation    ")
 		print("========================================================\n")
-		quit(0)
-		return true
+		preload("res://tests/support/finish.gd").success(self)
+		return false
 
 	return false

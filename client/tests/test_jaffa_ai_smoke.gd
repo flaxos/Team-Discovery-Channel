@@ -197,13 +197,17 @@ func _process(delta: float) -> bool:
 			print("==================================================")
 			test_passed = true
 			_cleanup()
-			quit(0)
-			return true
+			preload("res://tests/support/finish.gd").success(self)
+			return false
 
 	return false
 
 
 func _cleanup() -> void:
+	if host_api != null:
+		host_api.multiplayer_peer = null
+	if client_api != null:
+		client_api.multiplayer_peer = null
 	if host_peer != null:
 		host_peer.close()
 	if client_peer != null:

@@ -160,8 +160,8 @@ func _process(delta: float) -> bool:
 			print("==================================================")
 			test_passed = true
 			_cleanup()
-			quit(0)
-			return true
+			preload("res://tests/support/finish.gd").success(self)
+			return false
 		else:
 			_fail("Desync detected! P1 Delta: %.4f m, P2 Delta: %.4f m" % [p1_delta, p2_delta])
 			return true
@@ -170,6 +170,10 @@ func _process(delta: float) -> bool:
 
 
 func _cleanup() -> void:
+	if host_api != null:
+		host_api.multiplayer_peer = null
+	if client_api != null:
+		client_api.multiplayer_peer = null
 	if host_peer != null:
 		host_peer.close()
 	if client_peer != null:

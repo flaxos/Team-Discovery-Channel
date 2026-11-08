@@ -509,6 +509,8 @@ func _play_sfx(path: String, max_dist: float) -> void:
 
 ## Initiates Sprint 9 Foothold Climax Multi-Sector Incursion.
 func trigger_climax_incursion() -> void:
+	if not multiplayer.is_server() or mission_ended:
+		return
 	current_wave = 4
 	target_activations = 4
 	is_wave_active = true
@@ -519,7 +521,8 @@ func trigger_climax_incursion() -> void:
 	multi_sector_incursion_started.emit(sectors)
 	print("WaveManager: MULTI-SECTOR CLIMAX INCURSION ENGAGED! Breaches across Gate Room and Level 27!")
 
-	_spawn_wave_jaffa(4)
+	# This multi-sector breach must not depend on an already-open inbound gate.
+	_spawn_sector_jaffa(Vector3(0.0, 0.0, -6.0), 4, true)
 	_spawn_sector_jaffa(Vector3(3.0, 0.0, 39.0), 2, true)
 	_spawn_sector_jaffa(Vector3(26.0, 5.5, 18.0), 2, true)
 
