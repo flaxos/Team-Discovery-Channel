@@ -86,7 +86,7 @@ func _on_health_changed(cur_hp: float, max_hp: float) -> void:
 func _on_downed() -> void:
 	if downed_beacon != null:
 		downed_beacon.visible = true
-		downed_beacon.text = "⚠️ DOWNED - HOLD [E] TO REVIVE (20s) ⚠️"
+		downed_beacon.text = _bindings().format_prompt("⚠️ DOWNED - HOLD [E] TO REVIVE (20s) ⚠️")
 	if health_label != null:
 		health_label.modulate = Color(1.0, 0.2, 0.2)
 		health_label.text = "[BLEEDING OUT]"
@@ -115,4 +115,8 @@ func _process(delta: float) -> void:
 		downed_beacon.modulate = Color(1.0, 0.15 + pulse * 0.65, 0.1)
 
 		var seconds_left: int = int(ceil(health_component.bleedout_timer))
-		downed_beacon.text = "⚠️ DOWNED - HOLD [E] TO REVIVE (%ds) ⚠️" % maxi(0, seconds_left)
+		downed_beacon.text = _bindings().format_prompt("⚠️ DOWNED - HOLD [E] TO REVIVE (%ds) ⚠️" % maxi(0, seconds_left))
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

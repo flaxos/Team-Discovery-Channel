@@ -118,3 +118,12 @@ Implementation is now authorized. The original approval note above describes the
 - ESC remains an emergency close/cancel key. Wheel pulses can bind discrete actions and zoom; hold actions (movement, fire, aim, sprint, interact, squad hold) reject wheel pulses with an explanation.
 - Conflict capture offers swap, replace or cancel. Never silently strip the last binding of a critical action. Ignore key echoes and the click that initiated capture. Consume captured events before gameplay sees them.
 - Test relative input through controller/HUD with ADS held, all wheel slices/deadzone, retained target/look/ADS, remapped gameplay actions, conflict paths, config corruption/reset/write errors, and persistence in a fresh process. Isolate test user data. Use `python3 tools/run_godot_tests.py`; a successful exit code alone is insufficient.
+
+## Implemented behavior
+
+- 23 implemented actions are editable in the three existing scrollable terminal columns. Unimplemented melee/orbit features are not advertised as configurable gameplay.
+- The canonical defaults use Q/M4 for squad tap/hold, MMB for a quick ping, G for contextual gadget/body interaction, and H as a dedicated body-drag toggle. Keyboard modifiers and alternate defaults persist.
+- Replace removes a conflicting alternate only when the other action retains a binding. Swap exchanges the complete previous action binding set with one conflicting action; ambiguous multiple-action swaps are rejected. ESC is reserved. Modifier/plain-key overlaps also require conflict resolution.
+- Missing/unsupported config entries recover safely, conflicting files restore defaults, failed saves report an error, and ordinary rebind failures roll back the live InputMap. The config is written through a temporary file.
+- Prompts reflect current bindings in the controls menu, gadget/claymore HUD, static scene labels and dynamic interaction text. Input capture, modal close, focus loss and incapacitation cancel pending squad input.
+- Verification includes actual controller/HUD relative mouse routing, every radial slice and deadzone under held ADS, idempotent release, interactive capture/cancel/conflict paths, typed config validation, every requested mouse input, gameplay weapon remapping, and fresh-process keyboard/mouse persistence.

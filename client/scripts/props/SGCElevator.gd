@@ -59,12 +59,7 @@ func _ready() -> void:
 		cabin.position.y = get_floor_y(current_floor)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("interact"):
-		if _can_interact_with_elevator():
-			_handle_interaction()
-
-
+# PlayerController3D routes interact once; a second input listener would double-call the lift.
 func interact(player: Node = null) -> void:
 	if _can_interact_with_elevator(player):
 		_handle_interaction(player)
