@@ -144,6 +144,10 @@ func run_test() -> void:
 	server_remote.switch_slot(2)
 	server_remote.switch_slot(1)
 	assert(server_remote.current_weapon.current_ammo == remaining, "Switching slots cannot refill ammunition")
+	client_player.current_weapon.current_ammo = 999
+	client_player.request_weapon_snapshot.rpc_id(1)
+	await frames(10)
+	assert(client_player.current_weapon.current_ammo == server_remote.current_weapon.current_ammo, "Initial/reloaded weapon snapshot must restore server ammunition")
 	server_remote.current_weapon.current_ammo = 0
 	server_remote.current_weapon.reserve_ammo = 0
 	client_player.current_weapon.current_ammo = 50

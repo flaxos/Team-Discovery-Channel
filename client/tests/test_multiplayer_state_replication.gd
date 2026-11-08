@@ -137,6 +137,21 @@ func run_test() -> void:
 	await frames(20)
 	assert(player.health_component.current_health == player.health_component.max_health, "Nearby remote armor request heals on server")
 
+	var rack: ArmoryResupplyStation = host.get_node("Level28Complex/ArmorySector/WeaponRackNorth") as ArmoryResupplyStation
+	assert(rack != null)
+	var local_rack: ArmoryResupplyStation = client.get_node(host.get_path_to(rack)) as ArmoryResupplyStation
+	rack.rack_index = 1 # Next server-owned rack selection is the MP5.
+	local.global_position = rack.global_position
+	await frames(40)
+	local_rack.interact(local)
+	await frames(20)
+	assert(player.primary_weapon_id == "mp5" and local.current_weapon.weapon_id == "mp5", "Server-approved rack weapon must equip on both peers")
+	var before_shot: int = player.current_weapon.current_ammo
+	local.current_aim_target = local.global_position + Vector3(0, 1, -10)
+	assert(local.current_weapon.try_fire())
+	await frames(10)
+	assert(player.current_weapon.current_ammo == before_shot - 1, "Combat validation must accept the weapon selected by the server armory")
+
 	host.wave_manager.end_mission()
 	await frames(5)
 	host_api.multiplayer_peer = null

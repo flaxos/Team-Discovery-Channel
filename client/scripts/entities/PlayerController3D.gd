@@ -175,8 +175,6 @@ func _exit_tree() -> void:
 
 
 func _ready() -> void:
-	if multiplayer.is_server():
-		_server_class_id = class_id
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null and net.peers.has(peer_id):
 		class_id = net.peers[peer_id].get("class_id", class_id)
@@ -184,10 +182,14 @@ func _ready() -> void:
 	elif net != null and peer_id == 1:
 		player_callsign = net.player_name
 
+	if multiplayer.is_server():
+		_server_class_id = class_id
 	_setup_replication()
 	_apply_class_profile(class_id)
 	_setup_visual_materials()
 	_update_mouse_mode()
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_weapon_snapshot.rpc_id(1)
 
 	if nameplate != null:
 		nameplate.setup(self, is_local_authority)
@@ -2116,8 +2118,8 @@ func server_request_fire(sequence: int, slot: int, weapon_id: String, origin: Ve
 	if not _valid_combat_sender() or sequence <= _last_shot_request or slot not in [1, 2] or not _can_use_weapon(slot):
 		return
 	_last_shot_request = sequence
-	var profile: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(_server_class_id, {})
-	var allowed: String = profile.get("primary" if slot == 1 else "secondary", "")
+	# These IDs are chosen by the server class profile or an authenticated armory interaction.
+	var allowed: String = primary_weapon_id if slot == 1 else secondary_weapon_id
 	if weapon_id != allowed or not origin.is_finite() or not direction.is_finite() or absf(direction.length() - 1.0) > 0.02:
 		return
 	_equip_slot_local(slot)
@@ -2152,11 +2154,20 @@ func server_request_reload() -> void:
 		_broadcast_weapon_state()
 
 
-func _broadcast_weapon_state() -> void:
+@rpc("any_peer", "call_remote", "reliable")
+func request_weapon_snapshot() -> void:
+	if multiplayer.is_server() and multiplayer.get_remote_sender_id() in multiplayer.get_peers():
+		_broadcast_weapon_state(multiplayer.get_remote_sender_id())
+
+
+func _broadcast_weapon_state(peer: int = 0) -> void:
 	if not multiplayer.has_multiplayer_peer() or not multiplayer.is_server() or current_weapon == null:
 		return
 	var weapon: WeaponBase = current_weapon
-	sync_weapon_state.rpc(active_slot, weapon.weapon_id, weapon.current_ammo, weapon.reserve_ammo, weapon.current_heat, weapon.is_overheated, weapon.is_reloading)
+	if peer > 0:
+		sync_weapon_state.rpc_id(peer, active_slot, weapon.weapon_id, weapon.current_ammo, weapon.reserve_ammo, weapon.current_heat, weapon.is_overheated, weapon.is_reloading)
+	else:
+		sync_weapon_state.rpc(active_slot, weapon.weapon_id, weapon.current_ammo, weapon.reserve_ammo, weapon.current_heat, weapon.is_overheated, weapon.is_reloading)
 
 
 @rpc("any_peer", "call_remote", "reliable")

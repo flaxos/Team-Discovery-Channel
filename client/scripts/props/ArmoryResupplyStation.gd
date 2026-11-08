@@ -105,10 +105,10 @@ func _perform_weapon_swap(player: PlayerController3D) -> void:
 		player.peer_id,
 		new_weapon_id
 	])
-	if player.has_method("_broadcast_weapon_state"):
-		player.call("_broadcast_weapon_state")
 	if multiplayer.has_multiplayer_peer():
 		sync_inventory.rpc(get_path_to(player), new_weapon_id, true)
+	if player.has_method("_broadcast_weapon_state"):
+		player.call("_broadcast_weapon_state")
 	weapon_swapped.emit(player, new_weapon_id)
 
 
@@ -142,6 +142,9 @@ func sync_inventory(player_path: NodePath, primary_id: String, swapped: bool) ->
 	if player == null:
 		return
 	player.primary_weapon_id = primary_id
+	if swapped:
+		player.active_slot = 1
+		player._equip_weapon_by_id(primary_id)
 	if not swapped:
 		player.claymore_charges = player.MAX_CLAYMORE_CHARGES
 		player.c4_charges_remaining = player.MAX_C4_CHARGES
