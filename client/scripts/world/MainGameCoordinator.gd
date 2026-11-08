@@ -57,9 +57,12 @@ func _load_gate_room() -> void:
 		current_lobby.queue_free()
 		current_lobby = null
 
-	var gate_scene := load(GATE_ROOM_SCENE_PATH) as PackedScene
+	var mission_net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	var mission_id := mission_net.selected_mission_id if mission_net != null else SGCNetworkManager.MISSION_SGC_DEFENSE
+	var gate_scene := load(SGCNetworkManager.MISSIONS[mission_id]["scene"]) as PackedScene
 	if gate_scene != null:
 		current_gate_room = gate_scene.instantiate() as Node3D
+		current_gate_room.set("mission_id", mission_id)
 		world_container.add_child(current_gate_room)
 		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 		if net != null and net.is_in_active_session() and not net.is_server:

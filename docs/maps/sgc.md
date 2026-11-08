@@ -9,6 +9,12 @@ The playable mode contains Sublevels 28 (gate/operations/combat loop), 27 (brief
 - Preserve the gate → operations → briefing sightline, adjoining commander's office, and control/briefing corner stair. The playable spiral has been aligned with its actual landings and opening. Coordinates and circulation widths are gameplay adaptations, not claims of measured production-blueprint accuracy.
 - The west return loop, peripheral combat corridors, security room, service stairs and Level 26 support layout are authored extensions. Level 26's exact room placement is not established by these references. Resource `confidence` and `reference` fields distinguish the core relationships from these extensions.
 
+## Launch and mission selection
+
+Use the lobby's **LEVEL / MISSION** selector before dispatch: **SGC Defense — Levels 28/27/26** enables incursions; **SGC UAT Base — No Hostile Activation** loads `SGCUATBase.tscn`, which inherits the same GateRoom map. UAT retains traversal, props and friendly personnel, but guards the staging scramble and wave start/update paths, so an incoming hostile connection cannot begin automatically. Difficulty is disabled for UAT. Mission IDs are carried in start/retry RPCs and sent to joining clients; clients cannot change the host selection. CLI: `--mission sgc_defense` or `--mission sgc_uat`.
+
+`test_mission_selection_uat` launches through the actual lobby/coordinator, checks the inherited scene and Level 26, runs 30 simulated seconds without enemies or gate activation, verifies retry and checks Defense still activates. The settings synchronization suite covers client selection authority and stale start/retry caches.
+
 ## Authoring contract
 
 `client/resources/maps/sgc.tres` is the editable map resource. `SGCMapDefinition.create_default()` supplies the factory layout; runtime loads a private copy of the authored resource. Regions define footprint, floor, anchor, style and lighting. Connections define stable endpoints, walk/stair/spiral/lift action, clearance, optional door and availability. Floors are 0, 5.5 and 11 m; player clearance derives from the existing 0.4 m radius / 1.8 m capsule.

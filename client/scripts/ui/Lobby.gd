@@ -3,6 +3,9 @@ extends Control
 ## SGC Mission Briefing Terminal & Netcode Lobby UI.
 ## Handles Host/Join actions, operative class selection, and squad roster updates.
 
+@onready var mission_option_button: OptionButton = %MissionOptionButton
+@onready var mission_description_label: Label = %MissionDescriptionLabel
+
 @onready var player_name_edit: LineEdit = %PlayerNameEdit
 @onready var class_option_button: OptionButton = %ClassOptionButton
 @onready var class_desc_label: Label = %ClassDescLabel
@@ -25,6 +28,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_setup_class_options()
 	_setup_difficulty_options()
+	_setup_mission_options()
 	_connect_network_signals()
 	_update_ui_state()
 
@@ -33,6 +37,7 @@ func _ready() -> void:
 	join_button.pressed.connect(_on_join_pressed)
 	start_game_button.pressed.connect(_on_start_game_pressed)
 	class_option_button.item_selected.connect(_on_class_selected)
+	mission_option_button.item_selected.connect(_on_mission_selected)
 	difficulty_option_button.item_selected.connect(_on_difficulty_selected)
 	player_name_edit.text_changed.connect(_on_name_changed)
 	if keybindings_button != null:
@@ -71,6 +76,7 @@ func _sync_difficulty_selection() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	var tier: int = net.mission_difficulty if net != null else SGCNetworkManager.DIFFICULTY_EASY
 	difficulty_option_button.select(tier)
+	difficulty_option_button.get_parent().visible = net == null or net.selected_mission_id != SGCNetworkManager.MISSION_SGC_UAT
 	difficulty_description_label.text = SGCNetworkManager.DIFFICULTY_DESCRIPTIONS[tier]
 	if net != null and net.is_in_active_session() and not net.is_server:
 		difficulty_description_label.text += "\nMission mode is selected by the host."
@@ -108,6 +114,7 @@ func _connect_network_signals() -> void:
 	_network_manager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if _network_manager == null:
 		return
+	_network_manager.mission_selection_changed.connect(_on_mission_selection_changed)
 	_network_manager.mission_settings_changed.connect(_on_mission_settings_changed)
 	_network_manager.server_started.connect(_on_server_started)
 	_network_manager.connection_succeeded.connect(_on_connection_succeeded)
@@ -120,6 +127,7 @@ func _exit_tree() -> void:
 	if not is_instance_valid(_network_manager):
 		return
 	var connections: Array[Dictionary] = [
+		{"signal": _network_manager.mission_selection_changed, "callback": _on_mission_selection_changed},
 		{"signal": _network_manager.mission_settings_changed, "callback": _on_mission_settings_changed},
 		{"signal": _network_manager.server_started, "callback": _on_server_started},
 		{"signal": _network_manager.connection_succeeded, "callback": _on_connection_succeeded},
@@ -235,5 +243,30 @@ func _update_ui_state() -> void:
 	join_button.disabled = is_connected
 	start_game_button.visible = is_server
 	start_game_button.disabled = not is_server
-	difficulty_option_button.disabled = (is_connected and not is_server) or (net != null and net.mission_started)
+	mission_option_button.disabled = (is_connected and not is_server) or (net != null and net.mission_started)
+	difficulty_option_button.disabled = (is_connected and not is_server) or (net != null and (net.mission_started or net.selected_mission_id == SGCNetworkManager.MISSION_SGC_UAT))
+	_sync_mission_selection()
 	_sync_difficulty_selection()
+
+
+func _setup_mission_options() -> void:
+	mission_option_button.clear()
+	for mission_id: String in SGCNetworkManager.MISSIONS:
+		mission_option_button.add_item(SGCNetworkManager.MISSIONS[mission_id]["name"])
+		mission_option_button.set_item_metadata(mission_option_button.item_count - 1, mission_id)
+	_sync_mission_selection()
+
+func _sync_mission_selection() -> void:
+	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	var mission_id := net.selected_mission_id if net != null else SGCNetworkManager.MISSION_SGC_DEFENSE
+	for i in range(mission_option_button.item_count):
+		if mission_option_button.get_item_metadata(i) == mission_id: mission_option_button.select(i)
+	mission_description_label.text = SGCNetworkManager.MISSIONS[mission_id]["description"]
+	start_game_button.text = "LAUNCH UAT BASE" if mission_id == SGCNetworkManager.MISSION_SGC_UAT else "LAUNCH SGC DEFENSE"
+
+func _on_mission_selected(index: int) -> void:
+	if _network_manager != null: _network_manager.set_mission(str(mission_option_button.get_item_metadata(index)))
+	_update_ui_state()
+
+func _on_mission_selection_changed(_mission_id: String) -> void:
+	_update_ui_state()

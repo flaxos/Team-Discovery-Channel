@@ -17,6 +17,7 @@ signal game_started()
 signal mission_peer_ready(peer_id: int)
 signal mission_settings_changed(difficulty: int)
 signal mission_restart_preparing()
+signal mission_selection_changed(mission_id: String)
 
 const DEFAULT_PORT: int = 7777
 const MAX_PLAYERS: int = 4
@@ -29,6 +30,13 @@ const DIFFICULTY_DESCRIPTIONS: Array[String] = [
 	"Survive at least 3 incoming waves and upgrade the dialing computer with the clean Lab ROM, then dial out.",
 	"Survive at least 3 incoming waves, upgrade the dialing computer and repair the Iris under fire, then dial out."
 ]
+
+const MISSION_SGC_DEFENSE: String = "sgc_defense"
+const MISSION_SGC_UAT: String = "sgc_uat"
+const MISSIONS: Dictionary = {
+	MISSION_SGC_DEFENSE: {"name": "SGC Defense — Levels 28/27/26", "description": "Refactored three-level SGC. Defend against incoming Jaffa, complete objectives and extract.", "scene": "res://scenes/main/GateRoom.tscn"},
+	MISSION_SGC_UAT: {"name": "SGC UAT Base — No Hostile Activation", "description": "Explore the same three-level SGC with lifts, stairs, props and friendly personnel. No automatic hostile gate activations or enemy waves.", "scene": "res://scenes/main/SGCUATBase.tscn"}
+}
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"
 const CLASS_CARTER_TECH: String = "carter_tech"
@@ -83,6 +91,7 @@ const MAX_RECONNECT_ATTEMPTS: int = 5
 var local_peer_id: int = 1
 var selected_class_id: String = CLASS_SG3_HEAVY
 var player_name: String = "O'Neill"
+var selected_mission_id: String = MISSION_SGC_DEFENSE
 var mission_difficulty: int = DIFFICULTY_EASY
 var mission_started: bool = false
 var restart_pending: bool = false
@@ -165,6 +174,12 @@ func parse_cli_arguments(custom_args: PackedStringArray = PackedStringArray()) -
 					if CLASS_PROFILES.has(c_candidate):
 						selected_class_id = c_candidate
 						result["class"] = selected_class_id
+			"--mission":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					if MISSIONS.has(args[i]):
+						selected_mission_id = args[i]
+						result["mission"] = selected_mission_id
 			"--difficulty":
 				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
 					i += 1
@@ -258,6 +273,8 @@ func disconnect_game(reset_settings: bool = true) -> void:
 	restart_pending = false
 	if reset_settings:
 		mission_difficulty = DIFFICULTY_EASY
+		selected_mission_id = MISSION_SGC_DEFENSE
+		mission_selection_changed.emit(selected_mission_id)
 	mission_settings_changed.emit(mission_difficulty)
 
 
@@ -285,18 +302,21 @@ func sync_mission_settings(tier: int) -> void:
 ## Include the selected mode in the transition RPC: every peer applies it before loading gameplay.
 func request_start_game() -> void:
 	if is_server and not mission_started:
-		start_game.rpc(mission_difficulty)
+		start_game.rpc(mission_difficulty, selected_mission_id)
 
 
 @rpc("authority", "call_local", "reliable")
-func start_game(tier: int = -1) -> void:
+func start_game(tier: int = -1, mission_id: String = "") -> void:
+	if mission_id != "" and not MISSIONS.has(mission_id): return
 	if mission_started:
 		return
 	if tier != -1:
 		if tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD:
 			return
 		mission_difficulty = tier
+	if mission_id != "": selected_mission_id = mission_id
 	mission_started = true
+	mission_selection_changed.emit(selected_mission_id)
 	mission_settings_changed.emit(mission_difficulty)
 	game_started.emit()
 
@@ -324,9 +344,9 @@ func _complete_mission_restart() -> void:
 	if not restart_pending or not mission_started or not is_server or session != _peer:
 		return
 	if is_in_active_session():
-		restart_game.rpc(tier)
+		restart_game.rpc(tier, selected_mission_id)
 	else:
-		restart_game(tier)
+		restart_game(tier, selected_mission_id)
 
 
 @rpc("authority", "call_local", "reliable")
@@ -336,10 +356,13 @@ func prepare_mission_restart() -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func restart_game(tier: int) -> void:
+func restart_game(tier: int, mission_id: String = "") -> void:
+	if mission_id != "" and not MISSIONS.has(mission_id): return
 	restart_pending = false
 	if not mission_started or tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD:
 		return
+	if mission_id != "": selected_mission_id = mission_id
+	mission_selection_changed.emit(selected_mission_id)
 	mission_difficulty = tier
 	mission_settings_changed.emit(tier)
 	game_started.emit()
@@ -363,11 +386,12 @@ func register_player(p_name: String, p_class_id: String) -> void:
 	if is_server:
 		if multiplayer.has_multiplayer_peer() and sender_id != multiplayer.get_unique_id():
 			sync_mission_settings.rpc_id(sender_id, mission_difficulty)
+			sync_mission_selection.rpc_id(sender_id, selected_mission_id)
 		for id: int in peers:
 			if id != sender_id:
 				sync_peer_info.rpc_id(sender_id, id, peers[id]["name"], peers[id]["class_id"])
 		if mission_started and sender_id != 1:
-			start_game.rpc_id(sender_id, mission_difficulty)
+			start_game.rpc_id(sender_id, mission_difficulty, selected_mission_id)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -460,3 +484,18 @@ func configure_mission_sync(sync: MultiplayerSynchronizer) -> void:
 
 func _mission_peer_visible(id: int) -> bool:
 	return id == 1 or mission_ready_peers.has(id)
+
+
+func set_mission(mission_id: String) -> bool:
+	if not MISSIONS.has(mission_id) or mission_started: return false
+	if is_in_active_session() and not is_server: return false
+	selected_mission_id = mission_id
+	mission_selection_changed.emit(mission_id)
+	if is_in_active_session() and is_server: sync_mission_selection.rpc(mission_id)
+	return true
+
+@rpc("authority", "call_remote", "reliable")
+func sync_mission_selection(mission_id: String) -> void:
+	if not MISSIONS.has(mission_id) or mission_started: return
+	selected_mission_id = mission_id
+	mission_selection_changed.emit(mission_id)
