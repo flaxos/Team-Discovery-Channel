@@ -1181,7 +1181,7 @@ script = ExtResource("2_wm01")
 [node name="Level27Complex" parent="." instance=ExtResource("8_l2701")]
 
 [node name="SGCElevator" parent="." instance=ExtResource("9_elev01")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 37, 0, 18)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37, 0, 18)
 
 [node name="ElevatorShaftWallEast" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 4.5, 18)
