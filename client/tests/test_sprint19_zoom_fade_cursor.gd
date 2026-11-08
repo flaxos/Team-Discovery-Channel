@@ -17,6 +17,10 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+
+func _setup() -> void:
 	print("\n=========================================================================")
 	print("  TEST: SPRINT 19 - CURSOR CONFINEMENT, ADS ZOOM & PROXIMITY FADE")
 	print("=========================================================================")

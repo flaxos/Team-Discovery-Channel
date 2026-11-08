@@ -607,6 +607,8 @@ func toggle_blast_doors() -> void:
 
 
 func _play_door_sfx() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists("res://audio/sfx_door_hydraulic.wav"):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load("res://audio/sfx_door_hydraulic.wav")

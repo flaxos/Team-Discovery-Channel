@@ -1,8 +1,10 @@
-[gd_scene load_steps=15 format=3 uid="uid://b8x7y4z2w9q02"]
+[gd_scene load_steps=16 format=3 uid="uid://b8x7y4z2w9q02"]
 
 [ext_resource type="Script" path="res://scripts/props/GeneralsDefenseTerminal.gd" id="1_gen_def"]
 [ext_resource type="Script" path="res://scripts/props/SecurityMonitorConsole.gd" id="2_sec_mon"]
 [ext_resource type="Script" path="res://scripts/props/BlastDoorConsole.gd" id="3_bdc"]
+
+[ext_resource type="Script" path="res://scripts/world/SpiralStaircase.gd" id="20_stairs"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor27"]
 albedo_color = Color(0.28, 0.30, 0.32, 1)
@@ -62,6 +64,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3, 15)
 use_collision = true
 size = Vector3(14, 0.4, 14)
 material = SubResource("Mat_Floor27")
+
+[node name="StairwellOpening" type="CSGBox3D" parent="BriefingRoom/BriefingFloor"]
+position = Vector3(-5, 0, -4)
+size = Vector3(4.7, 2, 4.7)
+operation = 2
 
 [node name="BriefingWallSouth" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.5, 22.4)
@@ -218,15 +225,15 @@ size = Vector3(0.6, 0.6, 0.6)
 material = SubResource("Mat_LeatherBlack")
 
 [node name="StairwaySafetyRailNorth" type="CSGBox3D" parent="BriefingRoom"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 6.1, 9.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 6.1, 8.6)
 use_collision = true
-size = Vector3(3, 1.2, 0.1)
+size = Vector3(4.7, 1.2, 0.1)
 material = SubResource("Mat_WhiteTrim")
 
 [node name="StairwaySafetyRailEast" type="CSGBox3D" parent="BriefingRoom"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 6.1, 11)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 6.1, 11)
 use_collision = true
-size = Vector3(0.1, 1.2, 3)
+size = Vector3(0.1, 1.2, 4.7)
 material = SubResource("Mat_WhiteTrim")
 
 [node name="BriefingLight" type="OmniLight3D" parent="BriefingRoom"]
@@ -489,157 +496,170 @@ outline_size = 4
 modulate = Color(0.9, 0.95, 1, 1)
 
 [node name="SpiralStairsInterconnect" type="Node3D" parent="."]
+script = ExtResource("20_stairs")
 
 [node name="StairsCentralPole" type="CSGCylinder3D" parent="SpiralStairsInterconnect"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 3.25, 11)
-use_collision = true
+use_collision = false
 radius = 0.25
 height = 6
 material = SubResource("Mat_WhiteTrim")
 
 [node name="Step01" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, -2.3, 0)
-use_collision = true
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 1.6, -2.4, 0.0)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step02" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.92388, 0, 0.382683, 0, 1, 0, -0.382683, 0, 0.92388, 0.55, -2.1, 0.23)
-use_collision = true
+transform = Transform3D(0.9422609221188205, 0, -0.3348796121709861, 0, 1, 0, 0.3348796121709861, 0, 0.9422609221188205, 1.5076174753901128, -2.2021739130434783, 0.5358073794735778)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step03" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0.42, -1.9, 0.42)
-use_collision = true
+transform = Transform3D(0.7757112907044199, 0, -0.6310879443260528, 0, 1, 0, 0.6310879443260528, 0, 0.7757112907044199, 1.241138065127072, -2.0043478260869567, 1.0097407109216845)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step04" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.382683, 0, 0.92388, 0, 1, 0, -0.92388, 0, 0.382683, 0.23, -1.7, 0.55)
-use_collision = true
+transform = Transform3D(0.5195839500354336, 0, -0.8544194045464886, 0, 1, 0, 0.8544194045464886, 0, 0.5195839500354336, 0.8313343200566937, -1.806521739130435, 1.367071047274382)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step05" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, -1.5, 0.6)
-use_collision = true
+transform = Transform3D(0.20345601305263397, 0, -0.9790840876823228, 0, 1, 0, 0.9790840876823228, 0, 0.20345601305263397, 0.3255296208842144, -1.608695652173913, 1.5665345402917166)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step06" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.382683, 0, 0.92388, 0, 1, 0, -0.92388, 0, -0.382683, -0.23, -1.3, 0.55)
-use_collision = true
+transform = Transform3D(-0.13616664909624646, 0, -0.9906859460363308, 0, 1, 0, 0.9906859460363308, 0, -0.13616664909624646, -0.21786663855399435, -1.4108695652173915, 1.5850975136581293)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step07" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -0.42, -1.1, 0.42)
-use_collision = true
+transform = Transform3D(-0.4600650377311521, 0, -0.8878852184023752, 0, 1, 0, 0.8878852184023752, 0, -0.4600650377311521, -0.7361040603698434, -1.2130434782608694, 1.4206163494438004)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step08" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.92388, 0, 0.382683, 0, 1, 0, -0.382683, 0, -0.92388, -0.55, -0.9, 0.23)
-use_collision = true
+transform = Transform3D(-0.7308359642781241, 0, -0.6825531432186541, 0, 1, 0, 0.6825531432186541, 0, -0.7308359642781241, -1.1693375428449986, -1.0152173913043478, 1.0920850291498467)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step09" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.6, -0.7, 0)
-use_collision = true
+transform = Transform3D(-0.9172113015054528, 0, -0.3984010898462418, 0, 1, 0, 0.3984010898462418, 0, -0.9172113015054528, -1.4675380824087245, -0.8173913043478261, 0.6374417437539869)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step10" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.92388, 0, -0.382683, 0, 1, 0, 0.382683, 0, -0.92388, -0.55, -0.5, -0.23)
-use_collision = true
+transform = Transform3D(-0.9976687691905393, 0, -0.06824241336467085, 0, 1, 0, 0.06824241336467085, 0, -0.9976687691905393, -1.596270030704863, -0.6195652173913041, 0.10918786138347336)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step11" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, -0.42, -0.3, -0.42)
-use_collision = true
+transform = Transform3D(-0.9629172873477994, 0, 0.26979677115702405, 0, 1, 0, -0.26979677115702405, 0, -0.9629172873477994, -1.540667659756479, -0.42173913043478295, -0.4316748338512385)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step12" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.382683, 0, -0.92388, 0, 1, 0, 0.92388, 0, -0.382683, -0.23, -0.1, -0.55)
-use_collision = true
+transform = Transform3D(-0.8169698930104421, 0, 0.576680322114867, 0, 1, 0, -0.576680322114867, 0, -0.8169698930104421, -1.3071518288167074, -0.22391304347826094, -0.9226885153837872)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step13" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0.1, -0.6)
-use_collision = true
+transform = Transform3D(-0.5766803221148672, 0, 0.816969893010442, 0, 1, 0, -0.816969893010442, 0, -0.5766803221148672, -0.9226885153837876, -0.026086956521738897, -1.3071518288167072)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step14" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.382683, 0, -0.92388, 0, 1, 0, 0.92388, 0, 0.382683, 0.23, 0.3, -0.55)
-use_collision = true
+transform = Transform3D(-0.26979677115702433, 0, 0.9629172873477992, 0, 1, 0, -0.9629172873477992, 0, -0.26979677115702433, -0.43167483385123895, 0.17173913043478226, -1.5406676597564788)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step15" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0.42, 0.5, -0.42)
-use_collision = true
+transform = Transform3D(0.06824241336467098, 0, 0.9976687691905392, 0, 1, 0, -0.9976687691905392, 0, 0.06824241336467098, 0.10918786138347357, 0.3695652173913043, -1.5962700307048627)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step16" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.92388, 0, -0.382683, 0, 1, 0, 0.382683, 0, 0.92388, 0.55, 0.7, -0.23)
-use_collision = true
+transform = Transform3D(0.3984010898462415, 0, 0.9172113015054529, 0, 1, 0, -0.9172113015054529, 0, 0.3984010898462415, 0.6374417437539864, 0.5673913043478264, -1.4675380824087247)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step17" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.9, 0)
-use_collision = true
+transform = Transform3D(0.6825531432186536, 0, 0.7308359642781246, 0, 1, 0, -0.7308359642781246, 0, 0.6825531432186536, 1.0920850291498458, 0.7652173913043475, -1.1693375428449995)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step18" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.92388, 0, 0.382683, 0, 1, 0, -0.382683, 0, 0.92388, 0.55, 1.1, 0.23)
-use_collision = true
+transform = Transform3D(0.8878852184023749, 0, 0.46006503773115276, 0, 1, 0, -0.46006503773115276, 0, 0.8878852184023749, 1.4206163494438, 0.9630434782608696, -0.7361040603698444)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step19" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0.42, 1.3, 0.42)
-use_collision = true
+transform = Transform3D(0.9906859460363308, 0, 0.13616664909624632, 0, 1, 0, -0.13616664909624632, 0, 0.9906859460363308, 1.5850975136581293, 1.1608695652173915, -0.21786663855399413)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step20" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0.382683, 0, 0.92388, 0, 1, 0, -0.92388, 0, 0.382683, 0.23, 1.5, 0.55)
-use_collision = true
+transform = Transform3D(0.9790840876823228, 0, -0.2034560130526341, 0, 1, 0, 0.2034560130526341, 0, 0.9790840876823228, 1.5665345402917166, 1.3586956521739126, 0.3255296208842146)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step21" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1.7, 0.6)
-use_collision = true
+transform = Transform3D(0.8544194045464888, 0, -0.5195839500354331, 0, 1, 0, 0.5195839500354331, 0, 0.8544194045464888, 1.3670710472743821, 1.5565217391304347, 0.831334320056693)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step22" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.382683, 0, 0.92388, 0, 1, 0, -0.92388, 0, -0.382683, -0.23, 1.9, 0.55)
-use_collision = true
+transform = Transform3D(0.6310879443260539, 0, -0.775711290704419, 0, 1, 0, 0.775711290704419, 0, 0.6310879443260539, 1.0097407109216863, 1.7543478260869558, 1.2411380651270705)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step23" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -0.42, 2.1, 0.42)
-use_collision = true
+transform = Transform3D(0.3348796121709865, 0, -0.9422609221188204, 0, 1, 0, 0.9422609221188204, 0, 0.3348796121709865, 0.5358073794735784, 1.9521739130434779, 1.5076174753901128)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
 
 [node name="Step24" type="CSGBox3D" parent="SpiralStairsInterconnect/StairsCentralPole"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -0.6, 2.25, 0)
-use_collision = true
+transform = Transform3D(3.061616997868383e-16, 0, -1.0, 0, 1, 0, 1.0, 0, 3.061616997868383e-16, 4.898587196589413e-16, 2.15, 1.6)
+use_collision = false
 size = Vector3(1.2, 0.2, 0.45)
 material = SubResource("Mat_Floor27")
+[node name="BaseLanding" type="CSGBox3D" parent="SpiralStairsInterconnect"]
+position = Vector3(-3.4, 0.85, 10.65)
+size = Vector3(1.2, 0.2, 1.3)
+use_collision = true
+material = SubResource("Mat_Floor27")
+
+[node name="UpperLanding" type="CSGBox3D" parent="SpiralStairsInterconnect"]
+position = Vector3(-5, 5.4, 13.8)
+size = Vector3(1.2, 0.2, 1.5)
+use_collision = true
+material = SubResource("Mat_Floor27")
+
 [node name="EastServiceStaircase" type="Node3D" parent="."]
 
 [node name="EastServiceStairRamp" type="CSGBox3D" parent="EastServiceStaircase"]

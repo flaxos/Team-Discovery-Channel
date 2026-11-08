@@ -15,6 +15,10 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  TEST: ADS GHOST RECON WILDLANDS PITCH & ANGLE ALIGNMENT")
 	print("========================================================")
@@ -32,6 +36,7 @@ func _init() -> void:
 	player.is_local_authority = true
 	players_container.add_child(player)
 	player.global_position = Vector3(0.0, 0.0, 0.0)
+	player.set_physics_process(false)
 
 
 func _process(delta: float) -> bool:

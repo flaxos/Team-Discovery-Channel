@@ -141,6 +141,8 @@ func _enter_tree() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		is_window_focused = false
+		if is_inside_tree():
+			close_squad_command_wheel()
 		if is_local_authority:
 			current_mouse_mode = Input.MOUSE_MODE_VISIBLE
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -223,18 +225,13 @@ func _is_ui_modal_open() -> bool:
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_local_authority or is_in_cctv_mode or _is_ui_modal_open():
 		return
-	if is_command_wheel_open and event is InputEventMouseMotion:
-		var motion := event as InputEventMouseMotion
-		var hud := _get_tactical_hud()
-		if hud != null:
-			hud.update_radial_command_wheel(motion.position)
-		return
 	if event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		if is_command_wheel_open:
 			var hud := _get_tactical_hud()
 			if hud != null:
-				hud.update_radial_command_wheel(motion.position)
+				hud.update_radial_command_wheel_rel(motion.relative)
+			get_viewport().set_input_as_handled()
 			return
 
 		# Unified Third-Person Shooter Look: mouse pitch and yaw control always active
@@ -502,6 +499,7 @@ func _physics_process(delta: float) -> void:
 
 	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
 	if _is_ui_modal_open():
+		close_squad_command_wheel()
 		is_aiming_down_sights = false
 		_update_mouse_mode()
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
@@ -970,8 +968,8 @@ func _process_aim() -> void:
 
 	# 3D Weapon visual pitch alignment towards aim target
 	if weapon_holder != null and hit != Vector3.ZERO:
-		var local_target := weapon_holder.to_local(hit)
-		var pitch_rad := -atan2(local_target.y, -local_target.z)
+		var local_target := to_local(hit) - weapon_holder.position
+		var pitch_rad := atan2(local_target.y, -local_target.z)
 		weapon_holder.rotation.x = clampf(pitch_rad, deg_to_rad(-45.0), deg_to_rad(45.0))
 
 
@@ -1397,7 +1395,7 @@ func _find_nearby_drag_target() -> CharacterBody3D:
 func _try_issue_squad_ping() -> void:
 	if not is_inside_tree() or get_viewport() == null:
 		return
-	var mouse_pos := get_viewport().get_mouse_position()
+	var mouse_pos := get_viewport().get_visible_rect().size * 0.5
 	var cam := camera if (camera != null and camera.current) else get_viewport().get_camera_3d()
 	if cam == null:
 		var forward_pos := global_position - global_transform.basis.z * 6.0
@@ -1430,7 +1428,7 @@ func _on_command_input_pressed() -> void:
 	command_press_time_ms = Time.get_ticks_msec()
 	q_press_time_ms = command_press_time_ms
 	var vp: Viewport = get_viewport()
-	command_press_start_pos = vp.get_mouse_position() if vp != null else Vector2(640.0, 360.0)
+	command_press_start_pos = vp.get_visible_rect().size * 0.5 if vp != null else Vector2(640.0, 360.0)
 	locked_target_world_pos = _calculate_auto_y_aim_target(command_press_start_pos)
 	if locked_target_world_pos == Vector3.ZERO:
 		locked_target_world_pos = global_position - global_transform.basis.z * 5.0
@@ -1609,6 +1607,8 @@ func _spawn_command_waypoint_fx(pos: Vector3, command_type: int) -> void:
 
 
 func _play_command_radio_sound() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if not is_inside_tree():
 		return
 	var asp := AudioStreamPlayer.new()

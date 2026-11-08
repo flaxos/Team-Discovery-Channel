@@ -73,8 +73,8 @@ func interact(player: Node = null) -> void:
 func _find_local_player() -> CharacterBody3D:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	var local_id: int = 1
-	if net != null and net.multiplayer_peer != null:
-		local_id = net.get_unique_id()
+	if net != null and net.multiplayer.has_multiplayer_peer():
+		local_id = net.multiplayer.get_unique_id()
 
 	var players_container: Node = get_tree().root.find_child("Players", true, false)
 	if players_container != null:
@@ -185,40 +185,46 @@ func get_floor_y(fl: int) -> float:
 
 
 func call_elevator(target_floor: int) -> void:
-	if is_moving:
-		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		server_request_call.rpc_id(1, target_floor)
+	else:
+		server_request_call(target_floor)
 
-	# If the elevator is already on that floor:
-	if target_floor == current_floor:
-		if is_doors_open:
-			# If doors are open, pressing call dispatches to the other floor (e.g. 28 -> 27 or 27 -> 28)
-			var other_floor: int = 27 if current_floor == 28 else 28
-			_dispatch_elevator(other_floor)
+
+@rpc("any_peer", "call_local", "reliable")
+func server_request_call(target_floor: int) -> void:
+	if not multiplayer.is_server() or is_moving or target_floor not in [28, 27]:
+		return
+	if target_floor == current_floor and not is_doors_open:
+		if multiplayer.has_multiplayer_peer():
+			sync_open_doors.rpc()
 		else:
-			# If doors are closed, open the doors
-			_open_doors()
-		return
+			sync_open_doors()
+	else:
+		var destination: int = (27 if current_floor == 28 else 28) if target_floor == current_floor else target_floor
+		server_request_elevator(destination)
 
-	# If on the other floor, call the elevator to target_floor
-	_dispatch_elevator(target_floor)
+
+@rpc("authority", "call_local", "reliable")
+func sync_open_doors() -> void:
+	_open_doors()
 
 
 func _dispatch_elevator(destination_floor: int) -> void:
-	if is_moving:
-		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
-		rpc_id(1, "server_request_elevator", destination_floor)
+		server_request_elevator.rpc_id(1, destination_floor)
 	else:
-		sync_move_elevator(destination_floor)
+		server_request_elevator(destination_floor)
 
 
 @rpc("any_peer", "call_local", "reliable")
 func server_request_elevator(target_floor: int) -> void:
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() or is_moving or target_floor not in [28, 27] or target_floor == current_floor:
 		return
-	if is_moving:
-		return
-	rpc("sync_move_elevator", target_floor)
+	if multiplayer.has_multiplayer_peer():
+		sync_move_elevator.rpc(target_floor)
+	else:
+		sync_move_elevator(target_floor)
 
 
 @rpc("call_local", "reliable")
@@ -312,6 +318,8 @@ func _on_ride_area_exited(body: Node3D) -> void:
 
 
 func _play_sfx(res_path: String, max_dist: float) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists(res_path):
 		var audio: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 		audio.stream = load(res_path) as AudioStream
