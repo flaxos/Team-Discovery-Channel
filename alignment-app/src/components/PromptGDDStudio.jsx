@@ -23,7 +23,7 @@ export default function PromptGDDStudio({
   const [activeDocTab, setActiveDocTab] = useState('prompt'); // 'prompt', 'gdd', 'roadmap', 'contract'
   const [copied, setCopied] = useState(false);
   const [gitCommitMsg, setGitCommitMsg] = useState('feat: align on game dev specs, GDD, and bootstrap prompt');
-  const [shouldGitCommit, setShouldGitCommit] = useState(true);
+  const [shouldGitCommit, setShouldGitCommit] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   const getDocContent = () => {
@@ -98,7 +98,7 @@ export default function PromptGDDStudio({
               </h2>
             </div>
             <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Synthesized from your team's voting and custom ideas. Copy the prompt directly into your AI coding assistant (Antigravity, Claude Code, or Codex), or export the full specification right into your GitHub repository!
+              Synthesized from your team's voting and custom ideas. Copy the prompt directly into your AI coding assistant (Antigravity, Claude Code, or Codex), or export a planning snapshot to docs/generated/. Maintained project history is preserved.
             </p>
           </div>
 
@@ -150,7 +150,7 @@ export default function PromptGDDStudio({
                 Direct Repository Sync (flaxos/Team-Discovery-Channel)
               </span>
               <span className="text-[11px] text-slate-400">
-                Writes BOOTSTRAP_PROMPT.md, GDD.md, ROADMAP.md, and TEAM_CONTRACT.md to root
+                Writes BOOTSTRAP_PROMPT.md, GDD.md, ROADMAP.md, and TEAM_CONTRACT.md to docs/generated/
               </span>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function PromptGDDStudio({
                 onChange={(e) => setShouldGitCommit(e.target.checked)}
                 className="rounded bg-slate-800 border-slate-700 text-teal-500 focus:ring-teal-500"
               />
-              <span>Commit & push to GitHub</span>
+              <span>Create a local Git commit (operator access)</span>
             </label>
 
             <button
@@ -188,7 +188,7 @@ export default function PromptGDDStudio({
               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
               <span>{exportStatus.message}</span>
               {exportStatus.gitPushed && (
-                <span className="font-bold underline ml-2">Pushed to GitHub main branch!</span>
+                <span className="font-bold underline ml-2">Pushed the current feature branch.</span>
               )}
             </div>
             <a 
