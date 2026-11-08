@@ -1164,6 +1164,10 @@ airman_callsign = "SGT SILER"
 _spawnable_scenes = PackedStringArray("res://scenes/entities/Player.tscn")
 spawn_path = NodePath("../Players")
 
+[node name="GadgetSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/props/C4Satchel.tscn", "res://scenes/props/ClaymoreMine.tscn", "res://scenes/props/DeployableTurret.tscn", "res://scenes/props/DeployableShield.tscn", "res://scenes/weapons/SmokeGrenade.tscn")
+spawn_path = NodePath("../Players")
+
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="EnemySpawner" type="MultiplayerSpawner" parent="."]

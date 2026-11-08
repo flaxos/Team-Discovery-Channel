@@ -45,6 +45,19 @@ properties/2/path = NodePath(".:current_state")
 properties/2/spawn = true
 properties/2/replication_mode = 2
 
+properties/3/path = NodePath(".:is_crouching")
+properties/3/spawn = true
+properties/3/replication_mode = 2
+properties/4/path = NodePath("Visuals/ArmorMesh:transform")
+properties/4/spawn = true
+properties/4/replication_mode = 2
+properties/5/path = NodePath("StaffMount:transform")
+properties/5/spawn = true
+properties/5/replication_mode = 2
+properties/6/path = NodePath(".:collision_layer")
+properties/6/spawn = true
+properties/6/replication_mode = 2
+
 [node name="JaffaGuard" type="CharacterBody3D"]
 collision_layer = 4
 collision_mask = 3

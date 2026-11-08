@@ -128,6 +128,12 @@ var current_sector: String = "GATE_ROOM"
 @onready var nameplate: Label3D = $Nameplate if has_node("Nameplate") else null
 
 
+func _enter_tree() -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null and has_node("MultiplayerSynchronizer"):
+		net.configure_mission_sync($MultiplayerSynchronizer)
+
+
 func _ready() -> void:
 	add_to_group("allies")
 	add_to_group("airmen")
@@ -157,12 +163,10 @@ func scramble_to_gate_room() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_inside_tree():
 		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-
-	if not multiplayer.is_server():
-		move_and_slide()
-		return
 
 	if fire_cooldown > 0.0:
 		fire_cooldown -= delta

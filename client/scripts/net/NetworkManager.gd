@@ -14,6 +14,7 @@ signal reconnecting_tick(attempt: int, max_attempts: int)
 signal auto_reconnect_failed()
 signal player_list_updated()
 signal game_started()
+signal mission_peer_ready(peer_id: int)
 signal mission_settings_changed(difficulty: int)
 signal mission_restart_preparing()
 
@@ -88,6 +89,8 @@ var restart_pending: bool = false
 
 ## peer_id -> Dictionary { name: String, class_id: String, node: Node3D }
 var peers: Dictionary = {}
+
+var mission_ready_peers: Dictionary = {}
 
 var _peer: ENetMultiplayerPeer
 
@@ -248,6 +251,7 @@ func disconnect_game(reset_settings: bool = true) -> void:
 	if is_inside_tree() and multiplayer != null:
 		multiplayer.multiplayer_peer = null
 	peers.clear()
+	mission_ready_peers.clear()
 	is_server = false
 	local_peer_id = 1
 	mission_started = false
@@ -327,6 +331,7 @@ func _complete_mission_restart() -> void:
 
 @rpc("authority", "call_local", "reliable")
 func prepare_mission_restart() -> void:
+	mission_ready_peers.clear()
 	mission_restart_preparing.emit()
 
 
@@ -342,6 +347,8 @@ func restart_game(tier: int) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func register_player(p_name: String, p_class_id: String) -> void:
+	if not CLASS_PROFILES.has(p_class_id):
+		return
 	var sender_id := multiplayer.get_remote_sender_id()
 	if sender_id == 0:
 		sender_id = local_peer_id
@@ -359,6 +366,8 @@ func register_player(p_name: String, p_class_id: String) -> void:
 		for id: int in peers:
 			if id != sender_id:
 				sync_peer_info.rpc_id(sender_id, id, peers[id]["name"], peers[id]["class_id"])
+		if mission_started and sender_id != 1:
+			start_game.rpc_id(sender_id, mission_difficulty)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -379,6 +388,7 @@ func _on_peer_connected(id: int) -> void:
 func _on_peer_disconnected(id: int) -> void:
 	print("NetworkManager: Peer disconnected with ID: %d" % id)
 	peers.erase(id)
+	mission_ready_peers.erase(id)
 	player_list_updated.emit()
 	peer_disconnected_event.emit(id)
 
@@ -420,3 +430,33 @@ func _on_server_disconnected() -> void:
 		else:
 			print("NetworkManager: Auto-reconnect aborted after reaching maximum attempts.")
 			auto_reconnect_failed.emit()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func report_mission_ready() -> void:
+	if not is_server or not mission_started:
+		return
+	var sender: int = multiplayer.get_remote_sender_id()
+	if sender in multiplayer.get_peers() and peers.has(sender) and not mission_ready_peers.has(sender):
+		mission_ready_peers[sender] = true
+		sync_mission_readiness.rpc(mission_ready_peers.keys())
+		mission_peer_ready.emit(sender)
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_mission_readiness(ready: Array) -> void:
+	mission_ready_peers.clear()
+	for id: int in ready:
+		mission_ready_peers[id] = true
+
+
+func configure_mission_sync(sync: MultiplayerSynchronizer) -> void:
+	if not is_in_active_session() or sync.get_parent().multiplayer != multiplayer:
+		return
+	sync.public_visibility = false
+	sync.add_visibility_filter(_mission_peer_visible)
+	sync.update_visibility()
+
+
+func _mission_peer_visible(id: int) -> bool:
+	return id == 1 or mission_ready_peers.has(id)

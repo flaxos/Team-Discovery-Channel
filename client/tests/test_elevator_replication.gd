@@ -34,16 +34,23 @@ func run_test() -> void:
 	client_peer = ENetMultiplayerPeer.new()
 	check(client_peer.create_client("127.0.0.1", 19779) == OK, "Client must connect")
 	client_api.multiplayer_peer = client_peer
-	var scene := load("res://scenes/props/SGCElevator.tscn") as PackedScene
-	var host := scene.instantiate() as SGCElevator
-	var client := scene.instantiate() as SGCElevator
-	host_root.add_child(host)
-	client_root.add_child(client)
 	for i: int in range(600):
 		await process_frame
 		if client_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 			break
 	check(client_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED, "Connection timed out")
+	var scene := load("res://scenes/props/SGCElevator.tscn") as PackedScene
+	var host := scene.instantiate() as SGCElevator
+	var client := scene.instantiate() as SGCElevator
+	host_root.add_child(host)
+	client_root.add_child(client)
+	var players := Node3D.new()
+	players.name = "Players"
+	host_root.add_child(players)
+	var caller := CharacterBody3D.new()
+	caller.name = str(client_api.get_unique_id())
+	players.add_child(caller)
+	caller.position = host.position
 	await wait_frames(10)
 	host.call_elevator(28)
 	await wait_frames(30)
@@ -64,10 +71,12 @@ func run_test() -> void:
 	client.call_elevator(28)
 	await wait_frames(30)
 	check(host.is_doors_open and client.is_doors_open, "Client same-floor door opening must replicate")
-	server_peer.close()
-	client_peer.close()
 	host_root.queue_free()
 	client_root.queue_free()
 	await process_frame
+	host_api.multiplayer_peer = null
+	client_api.multiplayer_peer = null
+	server_peer.close()
+	client_peer.close()
 	print("PASS host/client elevator door, dispatch and arrival replication")
 	quit(0)
