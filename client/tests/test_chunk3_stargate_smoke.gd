@@ -82,6 +82,8 @@ func _on_client_connected() -> void:
 		var ring_scene := load("res://scenes/props/TransportRings.tscn") as PackedScene
 		rings = ring_scene.instantiate() as TransportRings
 		host_gateroom.add_child(rings)
+		var client_ring: Node = ring_scene.instantiate()
+		client_gateroom.add_child(client_ring)
 
 	# Spawn Player for DHD interaction
 	var player_scene := load(PLAYER_SCENE) as PackedScene
@@ -137,6 +139,9 @@ func _process(delta: float) -> bool:
 	# Test 3: Helldivers-style DHD 7-Chevron & GDO Iris Input (Tick 55)
 	if step == 55:
 		print("[TEST] Testing DHD 7-Chevron chord sequence & GDO Iris Code...")
+		stargate.close_wormhole()
+		var manager: WaveManager = host_gateroom.get_node("WaveManager") as WaveManager
+		manager.completed_incursions = 3
 		dhd.start_dialing(player)
 
 		# Input the 7 chevron glyphs
@@ -197,6 +202,11 @@ func _process(delta: float) -> bool:
 
 
 func _cleanup() -> void:
+	if is_instance_valid(host_gateroom):
+		(host_gateroom.get_node("WaveManager") as WaveManager).end_mission()
+		host_gateroom.free()
+	if is_instance_valid(client_gateroom):
+		client_gateroom.free()
 	if host_peer != null:
 		host_peer.close()
 	if client_peer != null:

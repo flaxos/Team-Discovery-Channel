@@ -23,11 +23,38 @@ func _ready() -> void:
 
 
 func pickup_patch(player: PlayerController3D) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_pickup.rpc_id(1, _room().get_path_to(player))
+		return
+	_apply_pickup(player)
+
+
+func _room() -> Node:
+	var node: Node = get_parent()
+	while node != null:
+		if node.get_node_or_null("WaveManager") != null:
+			return node
+		node = node.get_parent()
+	return get_parent()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func request_pickup(player_path: NodePath) -> void:
+	if not multiplayer.is_server():
+		return
+	var player: PlayerController3D = _room().get_node_or_null(player_path) as PlayerController3D
+	var sender: int = multiplayer.get_remote_sender_id()
+	if player != null and (sender == 0 or player.get_multiplayer_authority() == sender):
+		_apply_pickup(player)
+
+
+func _apply_pickup(player: PlayerController3D) -> void:
 	if is_retrieved:
 		return
 
 	is_retrieved = true
 	carrier_player = player
+	player.is_carrying_patch_rom = true
 	if rom_mesh != null:
 		rom_mesh.visible = false
 	if glow_light != null:
@@ -38,6 +65,15 @@ func pickup_patch(player: PlayerController3D) -> void:
 	print("LabDataPatchDrive: Clean dialing ROM retrieved by %s! ESCORT TO CONTROL ROOM MAINFRAME!" % player.name)
 	patch_retrieved.emit(player)
 	_play_sfx("res://audio/sfx_gdo_beep.wav", 25.0)
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		sync_pickup.rpc(_room().get_path_to(player))
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_pickup(player_path: NodePath) -> void:
+	var player: PlayerController3D = _room().get_node_or_null(player_path) as PlayerController3D
+	if player != null:
+		_apply_pickup(player)
 
 
 func reset_patch() -> void:
@@ -66,6 +102,8 @@ func _on_body_exited(body: Node) -> void:
 
 
 func _play_sfx(path: String, max_dist: float) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists(path):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load(path)

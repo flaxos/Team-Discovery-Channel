@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULTS = ['test_sprint20_ads_submenu_and_remapping', 'test_keybinding_restart', 'test_elevator_replication', 'test_staircase_traversal', 'test_sgc_dual_staircase_and_elevator', 'test_jaffa_column_march',
+DEFAULTS = ['test_gate_lifecycle_and_modes', 'test_gate_client_authority', 'test_gate_three_wave_extraction', 'test_sprint12_incursion_38s_engine', 'test_sprint13_hard_mode_lab_patch', 'test_sprint15_squad_tactics_iris', 'test_chunk3_stargate_smoke', 'test_sprint3_climax_smoke', 'test_difficulty_menu_and_sync', 'test_mission_restart_cleanup', 'test_sprint20_ads_submenu_and_remapping', 'test_keybinding_restart', 'test_elevator_replication', 'test_staircase_traversal', 'test_sgc_dual_staircase_and_elevator', 'test_jaffa_column_march',
             'test_sprint19_zoom_fade_cursor', 'test_ads_pitch_alignment',
             'test_squad_radial_wheel', 'test_keybindings_modal',
             'test_sgc_4level_elevator_and_stairs']

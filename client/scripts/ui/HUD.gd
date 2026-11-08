@@ -254,22 +254,36 @@ func _on_ambience_slider_changed(value: float) -> void:
 
 
 func _on_restart_pressed() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null and net.is_in_active_session():
+		if not net.request_restart_game():
+			show_squad_order_toast("WAITING FOR HOST TO RESTART THE MISSION")
+		return
 	if pause_menu != null:
 		pause_menu.visible = false
 	if keybindings_modal != null:
-		keybindings_modal.visible = false
+		keybindings_modal.close_modal(false)
 	if victory_modal != null:
 		victory_modal.visible = false
 	if get_tree().paused:
 		get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	is_mission_ended = false
+	if net != null:
+		net.mission_started = false
 	var err := get_tree().reload_current_scene()
 	if err != OK or get_tree().current_scene == null or get_tree().current_scene.scene_file_path == "":
 		get_tree().change_scene_to_file("res://scenes/main/GateRoom.tscn")
 
 
 func _on_return_pressed() -> void:
+	var world: Node = get_parent()
+	if world != null:
+		var manager: Node = world.get_node_or_null("WaveManager")
+		if manager != null:
+			manager.end_mission()
 	if pause_menu != null:
 		pause_menu.visible = false
 	if keybindings_modal != null:
@@ -831,7 +845,7 @@ func _on_player_recovered() -> void:
 
 # --- Wave Manager Signals ---
 func on_wave_started(wave_num: int, enemy_count: int) -> void:
-	wave_label.text = "WAVE %d / 4" % wave_num if wave_num == 4 else "WAVE %d / 3" % wave_num
+	wave_label.text = "INCURSION %d | MINIMUM 3" % wave_num
 	var hostile_type := "JAFFA SHOCK GUARDS" if (wave_num == 3 or wave_num == 4) else "JAFFA GUARDS"
 	enemies_label.text = "HOSTILES: %d %s" % [enemy_count, hostile_type]
 	match wave_num:
@@ -849,7 +863,7 @@ func on_wave_started(wave_num: int, enemy_count: int) -> void:
 
 func on_jaffa_count_changed(enemies_remaining: int, wave_num: int) -> void:
 	total_kills += 1
-	wave_label.text = "WAVE %d / 4" % wave_num if wave_num == 4 else "WAVE %d / 3" % wave_num
+	wave_label.text = "INCURSION %d | MINIMUM 3" % wave_num
 	var hostile_type := "JAFFA SHOCK GUARDS" if (wave_num == 3 or wave_num == 4) else "JAFFA GUARDS"
 	enemies_label.text = "HOSTILES: %d %s" % [enemies_remaining, hostile_type]
 
@@ -863,7 +877,7 @@ func on_wave_cleared(wave_num: int, intermission_s: float) -> void:
 func on_all_waves_defeated() -> void:
 	wave_label.text = "ALL WAVES CLEARED!"
 	enemies_label.text = "SGC LEVEL 28 SECURED"
-	objective_label.text = "ALL WAVES CLEARED! SGC LEVEL 28 SECURED! DIAL DHD & OPEN IRIS FOR EXTRACTION!"
+	objective_label.text = "OUTBOUND READY! DIAL BEFORE THE NEXT INCOMING ACTIVATION!"
 
 
 func on_wormhole_timer_tick(seconds_left: float, _total_duration: float) -> void:
@@ -912,7 +926,7 @@ func on_lab_patch_objective_started() -> void:
 		wave_label.text = "DIALING BUFFER LOCKED!"
 		wave_label.add_theme_color_override("font_color", Color(1.0, 0.6, 0.1))
 	if objective_label != null:
-		objective_label.text = "GOA'ULD VIRUS DETECTED! RETRIEVE CLEAN DIALING ROM FROM LEVEL 28 LAB!"
+		objective_label.text = "COMPUTER UPGRADE REQUIRED: RETRIEVE LAB ROM, THEN UPLOAD AT THE CONTROL ROOM!"
 		objective_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 
 
@@ -931,6 +945,9 @@ func bind_dhd(dhd: DHDDialer) -> void:
 		current_dhd.gdo_verified.connect(_on_gdo_verified)
 		current_dhd.sequence_completed.connect(_on_dhd_completed)
 		current_dhd.dialing_cancelled.connect(_on_dhd_cancelled)
+		current_dhd.dialing_denied.connect(func(reason: String) -> void:
+			update_objective(reason, Color(1.0, 0.7, 0.2))
+		)
 
 	var sgc := current_dhd as SGCDialingConsoleScript
 	if sgc != null:
@@ -974,6 +991,8 @@ func _on_glyph_error() -> void:
 
 
 func _on_dhd_engaged(_player: Node) -> void:
+	if _player is PlayerController3D and not _player.is_local_authority:
+		return
 	if dhd_panel != null:
 		dhd_panel.visible = true
 	_render_glyphs()
@@ -1015,6 +1034,10 @@ func _on_dhd_cancelled() -> void:
 
 
 func _render_glyphs() -> void:
+	if current_dhd != null and current_dhd.active_dialer != null and not current_dhd.active_dialer.is_local_authority:
+		if dhd_panel != null:
+			dhd_panel.hide()
+		return
 	if current_dhd == null or glyph_container == null or dhd_title == null:
 		return
 

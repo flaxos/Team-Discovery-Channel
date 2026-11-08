@@ -158,6 +158,26 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
+[node name="DifficultySection" type="VBoxContainer" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DifficultyLabel" type="Label" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/DifficultySection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "MISSION MODE (HOST SELECTS):"
+
+[node name="DifficultyOptionButton" type="OptionButton" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/DifficultySection"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DifficultyDescriptionLabel" type="Label" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/DifficultySection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+
 [node name="RosterHeaderLabel" type="Label" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)

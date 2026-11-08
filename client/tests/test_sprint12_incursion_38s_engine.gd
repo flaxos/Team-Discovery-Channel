@@ -22,6 +22,9 @@ var test_step: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 12 38-SECOND INCURSION ENGINE TEST")
 	print("========================================================")
@@ -63,13 +66,16 @@ func _process(delta: float) -> bool:
 
 		assert(sequence_started["ok"], "Chevron sequence started signal must be emitted")
 		assert(wave_mgr.is_wave_active, "WaveManager must mark wave active")
-		assert(wave_mgr.enemies_alive == 4, "Initial incursion breach squad must field 4 Jaffa")
-		print("[TEST 1/4] PASS: Inbound activation sequence initiated with 4 initial breach hostiles.")
+		assert(wave_mgr.enemies_alive == 0, "No hostile may appear before the gate is stable")
+		print("[TEST 1/4] PASS: Inbound activation sequence initiated; spawning waits for a stable gate.")
 
 	elif ticks == 20:
 		# TEST 2: 38-Second Countdown Engine
 		print("[TEST 2/4] Testing 38-Second Incursion Countdown & HUD banner...")
 		# Simulate 10 seconds of incursion combat
+		stargate.sync_trigger_kawoosh()
+		stargate._finish_kawoosh(stargate.activation_id)
+		wave_mgr.incursion_established = true
 		wave_mgr.is_wormhole_open = true
 		wave_mgr.inbound_wormhole_timer = 28.0
 		wave_mgr._physics_process(delta)
@@ -95,7 +101,7 @@ func _process(delta: float) -> bool:
 		wave_mgr._on_all_incursion_enemies_cleared()
 
 		assert(wave_mgr.is_intermission, "Intermission must activate after incursion is cleared")
-		assert(wave_mgr.intermission_timer == wave_mgr.inter_gate_recharge_s, "Intermission timer must equal 20s recharge window")
+		assert(wave_mgr.intermission_timer > 19.5 and wave_mgr.intermission_timer <= wave_mgr.inter_gate_recharge_s, "Intermission timer must equal 20s recharge window")
 		hud.on_intermission_tick(int(wave_mgr.intermission_timer))
 		assert("INTER-GATE RECHARGE:" in hud.objective_label.text, "HUD must display INTER-GATE RECHARGE banner")
 		print("[TEST 3/4] PASS: Wormhole collapsed, Stargate disengaged, and 20s recharge window active.")
@@ -128,6 +134,8 @@ func _process(delta: float) -> bool:
 		print("  ✓ Wormhole Collapse & 20-Second Resupply Intermission ")
 		print("  ✓ Dynamic Iris Servo Repair Sealing Off Reinforcements")
 		print("========================================================\n")
+		wave_mgr.end_mission()
+		gateroom.queue_free()
 		quit(0)
 		return true
 

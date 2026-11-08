@@ -25,7 +25,7 @@ enum DifficultyTier { EASY, MEDIUM, HARD }
 const JAFFA_SCENE_PATH: String = "res://scenes/entities/JaffaGuard.tscn"
 const SHOCK_GUARD_SCENE_PATH: String = "res://scenes/entities/JaffaShockGuard.tscn"
 
-@export var difficulty: DifficultyTier = DifficultyTier.MEDIUM
+@export var difficulty: DifficultyTier = DifficultyTier.EASY
 @export var wormhole_duration_s: float = 38.0
 @export var inter_gate_recharge_s: float = 20.0
 @export var max_waves: int = 3
@@ -43,6 +43,22 @@ var stream_spawn_timer: float = 0.0
 var stream_spawn_interval: float = 7.0
 var is_iris_repaired: bool = false
 var target_activations: int = 3
+var completed_incursions: int = 0
+var incursion_established: bool = false
+var computer_upgraded: bool = false
+var iris_repaired_under_fire: bool = false
+var defense_started: bool = false
+var outbound_reserved: bool = false
+var mission_ended: bool = false
+var sequence_token: int = 0
+var sequence_active: bool = false
+var sequence_run_token: int = 0
+var sequence_chevron: int = 0
+var sequence_wait: float = 0.0
+var completion_announced: bool = false
+var snapshot_timer: float = 0.0
+signal objective_status_changed(text: String)
+
 
 @export var rank_spawn_interval: float = 2.0
 var pending_column_spawns: int = 0
@@ -55,7 +71,13 @@ var current_rank_index: int = 0
 
 
 func _ready() -> void:
+	var net: Node = get_node_or_null("/root/NetworkManager")
+	if net != null and net.get("mission_difficulty") != null:
+		difficulty = clampi(int(net.get("mission_difficulty")), 0, 2) as DifficultyTier
 	_configure_difficulty()
+	var gate: StargateRing = _gate()
+	if gate != null:
+		gate.wormhole_closed.connect(_on_gate_closed)
 
 	# Connect Iris Servo Housing if present in Gate Room
 	var iris_servo := get_node_or_null("../IrisServoHousing") as IrisServoHousingScript
@@ -63,9 +85,11 @@ func _ready() -> void:
 		iris_servo.iris_repaired.connect(_on_iris_servo_repaired)
 
 	# Connect Dialing Console patch upload signal
-	var dialer := get_tree().root.find_child("SGCDialingConsole", true, false) as SGCDialingConsoleScript
+	var dialer := _dialer()
 	if dialer != null:
 		dialer.patch_upload_completed.connect(_on_patch_upload_completed)
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_mission_snapshot.rpc_id(1)
 
 
 func set_difficulty(tier: DifficultyTier) -> void:
@@ -74,22 +98,84 @@ func set_difficulty(tier: DifficultyTier) -> void:
 
 
 func _configure_difficulty() -> void:
-	match difficulty:
-		DifficultyTier.EASY:
-			target_activations = 1
-			max_waves = 1
-		DifficultyTier.MEDIUM:
-			target_activations = 3
-			max_waves = 3
-		DifficultyTier.HARD:
-			target_activations = 4
-			max_waves = 4
+	# All tiers require three complete incursions; objectives add pressure, not a wave-one shortcut.
+	target_activations = 3
+	max_waves = 3
+	var dialer := _dialer()
+	if dialer != null:
+		dialer.set_buffer_corrupted(difficulty != DifficultyTier.EASY and not computer_upgraded)
+
+
+func _gate() -> StargateRing:
+	return get_node_or_null("../Stargate") as StargateRing
+
+
+func _dialer() -> SGCDialingConsoleScript:
+	return get_parent().find_child("SGCDialingConsole", true, false) as SGCDialingConsoleScript
+
+
+func requirements_met() -> bool:
+	return completed_incursions >= target_activations and (difficulty == DifficultyTier.EASY or computer_upgraded) and (difficulty != DifficultyTier.HARD or iris_repaired_under_fire)
+
+
+func dialing_block_reason() -> String:
+	if mission_ended:
+		return "MISSION ENDED"
+	if completed_incursions < target_activations:
+		return "SURVIVE INCURSIONS: %d / %d CLEARED" % [completed_incursions, target_activations]
+	if difficulty != DifficultyTier.EASY and not computer_upgraded:
+		return "UPGRADE DIALING COMPUTER: RETRIEVE LAB ROM AND UPLOAD AT CONTROL ROOM"
+	if difficulty == DifficultyTier.HARD and not iris_repaired_under_fire:
+		return "HARD MODE: REPAIR IRIS DURING AN ACTIVE INCOMING BREACH"
+	var gate: StargateRing = _gate()
+	if is_wave_active or is_wormhole_open or (gate != null and gate.current_state != StargateRing.GateState.INACTIVE):
+		return "GATE BUSY: CLEAR THE CURRENT INCOMING INCURSION"
+	return ""
+
+
+func request_outbound() -> bool:
+	if not multiplayer.is_server() or not dialing_block_reason().is_empty():
+		objective_status_changed.emit(dialing_block_reason())
+		return false
+	var gate: StargateRing = _gate()
+	if gate == null or not gate.reserve_connection(false):
+		return false
+	sequence_token += 1
+	outbound_reserved = true
+	is_intermission = false
+	pending_column_spawns = 0
+	return true
+
+
+func release_outbound() -> void:
+	if not multiplayer.is_server() or not outbound_reserved:
+		return
+	outbound_reserved = false
+	if not mission_ended:
+		is_intermission = true
+		intermission_timer = inter_gate_recharge_s
+
+
+func end_mission() -> void:
+	mission_ended = true
+	sequence_active = false
+	sequence_token += 1
+	pending_column_spawns = 0
+	is_wave_active = false
+	is_wormhole_open = false
+	is_intermission = false
+	var gate: StargateRing = _gate()
+	if gate != null and multiplayer.is_server():
+		gate.close_wormhole()
 
 
 func start_wave_defense() -> void:
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	current_wave = 0
+	completed_incursions = 0
+	defense_started = true
+	mission_ended = false
 	_configure_difficulty()
 	start_next_wave()
 
@@ -98,10 +184,26 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 
+	snapshot_timer -= delta
+	if snapshot_timer <= 0.0:
+		snapshot_timer = 0.25
+		_broadcast_mission_snapshot()
+	if mission_ended or outbound_reserved:
+		return
+
+	_advance_inbound_sequence(delta)
+
 	# Inbound Wormhole 38-second Countdown Engine
 	if is_wormhole_open:
+		if not _inbound_gate_active():
+			_collapse_inbound_wormhole()
+			return
 		inbound_wormhole_timer -= delta
 		wormhole_timer_tick.emit(maxf(0.0, inbound_wormhole_timer), wormhole_duration_s)
+
+		if inbound_wormhole_timer <= 0.0:
+			_collapse_inbound_wormhole()
+			return
 
 		# Hostile reinforcement streaming down the ramp while wormhole is open
 		if not is_iris_repaired:
@@ -138,76 +240,109 @@ func _physics_process(delta: float) -> void:
 
 
 func start_next_wave() -> void:
-	current_wave += 1
-	if current_wave > target_activations:
-		print("WaveManager: All %d incursion activations repelled!" % target_activations)
-		_evaluate_mission_completion()
+	if not multiplayer.is_server() or mission_ended or outbound_reserved or is_wave_active:
 		return
-
-	is_wave_active = true
+	var gate: StargateRing = _gate()
+	if gate == null or not gate.reserve_connection(true):
+		return
+	current_wave += 1
+	incursion_established = false
 	is_iris_repaired = false
+	var servo: Node = get_node_or_null("../IrisServoHousing")
+	if servo != null and servo.has_method("reset_for_breach"):
+		servo.reset_for_breach()
+	is_wave_active = true
+	is_intermission = false
 	stream_spawn_timer = stream_spawn_interval
 	column_stream_timer = 0.0
 	current_rank_index = 0
 	pending_column_spawns = 0
-
-	var initial_count: int = 4 + (current_wave - 1) * 2
-	enemies_alive = initial_count
-	wave_started.emit(current_wave, enemies_alive)
-
-	print("WaveManager: === UNSCHEDULED OFFWORLD ACTIVATION (Incursion %d/%d) ===" % [current_wave, target_activations])
+	enemies_alive = 0
+	wave_started.emit(current_wave, 4 + mini(current_wave - 1, 4) * 2)
 	_play_klaxon()
-	_execute_inbound_gate_sequence()
+	sequence_token += 1
+	_execute_inbound_gate_sequence(sequence_token)
 
 
-func _execute_inbound_gate_sequence() -> void:
+func _execute_inbound_gate_sequence(token: int = -1) -> void:
+	sequence_run_token = sequence_token if token < 0 else token
+	sequence_active = true
+	sequence_chevron = 0
+	sequence_wait = 0.2
 	chevron_sequence_started.emit()
-	var stargate := get_node_or_null("../Stargate") as StargateRing
 
-	# Step 1: Sequential Chevrons 1 through 7 locking
-	if stargate != null:
-		for c in range(1, 8):
-			await get_tree().create_timer(0.2).timeout
-			stargate.lock_chevron(c)
-		await get_tree().create_timer(0.8).timeout
 
-	# Step 2: Chevron 7 locked -> Kawoosh Eruption occurs automatically via StargateRing!
-	# Step 3: Iris Malfunction Tannoy Announcement
-	await get_tree().create_timer(0.6).timeout
-	iris_malfunction_declared.emit()
-	print("WaveManager: [TANNOY] Iris malfunction! Trinium iris jammed open! Red alert! All response teams to the Gate Room!")
-	_play_sfx("res://audio/sfx_iris_open.wav", 60.0)
-
-	# Step 4: 38-Second Incursion Window Begins
+func _advance_inbound_sequence(delta: float) -> void:
+	if not sequence_active:
+		return
+	if not _sequence_valid(sequence_run_token):
+		sequence_active = false
+		return
+	var gate: StargateRing = _gate()
+	if sequence_chevron < 7:
+		sequence_wait -= delta
+		if sequence_wait <= 0.0:
+			sequence_chevron += 1
+			sequence_wait = 0.2
+			gate.lock_chevron(sequence_chevron)
+		return
+	if gate.current_state != StargateRing.GateState.ACTIVE:
+		return
+	sequence_active = false
+	if not is_iris_repaired:
+		iris_malfunction_declared.emit()
 	is_wormhole_open = true
+	incursion_established = true
 	inbound_wormhole_timer = wormhole_duration_s
 	wormhole_state_changed.emit(true, "INBOUND_ACTIVE")
+	var count: int = 4 + mini(current_wave - 1, 4) * 2
+	enemies_alive += count
+	_spawn_wave_jaffa(count)
+	jaffa_count_changed.emit(enemies_alive, current_wave)
 
-	# Initial breach squad (4 Jaffa)
-	var initial_count := 4 + (current_wave - 1) * 2
-	_spawn_wave_jaffa(initial_count)
+
+func _sequence_valid(token: int) -> bool:
+	var gate: StargateRing = _gate()
+	return token == sequence_token and not mission_ended and not outbound_reserved and is_wave_active and gate != null and gate.direction == StargateRing.GateDirection.INBOUND
 
 
-func _collapse_inbound_wormhole() -> void:
-	is_wormhole_open = false
-	wormhole_state_changed.emit(false, "DISENGAGED")
-	print("WaveManager: [TANNOY] Inbound wormhole collapsed! Inter-gate recharge window: %.0fs." % inter_gate_recharge_s)
+func _inbound_gate_active() -> bool:
+	var gate: StargateRing = _gate()
+	return not mission_ended and not outbound_reserved and gate != null and gate.direction == StargateRing.GateDirection.INBOUND and gate.current_state == StargateRing.GateState.ACTIVE
 
+
+func _on_gate_closed() -> void:
+	if is_wave_active:
+		sequence_token += 1
+		is_wormhole_open = false
+		_clear_pending_spawns()
+		if enemies_alive == 0:
+			_on_all_incursion_enemies_cleared()
+
+
+func _clear_pending_spawns() -> void:
 	if pending_column_spawns > 0:
 		enemies_alive = maxi(0, enemies_alive - pending_column_spawns)
 		pending_column_spawns = 0
 		jaffa_count_changed.emit(enemies_alive, current_wave)
 
-	var stargate := get_node_or_null("../Stargate") as StargateRing
-	if stargate != null:
-		stargate.close_wormhole()
 
-	if enemies_alive == 0:
+func _collapse_inbound_wormhole() -> void:
+	if not multiplayer.is_server():
+		return
+	sequence_token += 1
+	is_wormhole_open = false
+	wormhole_state_changed.emit(false, "DISENGAGED")
+	_clear_pending_spawns()
+	var gate: StargateRing = _gate()
+	if gate != null and gate.direction == StargateRing.GateDirection.INBOUND:
+		gate.close_wormhole()
+	if enemies_alive == 0 and is_wave_active:
 		_on_all_incursion_enemies_cleared()
 
 
 func _spawn_ramp_reinforcements(count: int) -> void:
-	if not is_wave_active or not is_wormhole_open:
+	if not is_wave_active or not is_wormhole_open or not _inbound_gate_active() or is_iris_repaired:
 		return
 	enemies_alive += count
 	jaffa_count_changed.emit(enemies_alive, current_wave)
@@ -216,6 +351,8 @@ func _spawn_ramp_reinforcements(count: int) -> void:
 
 
 func _spawn_wave_jaffa(ramp_count: int) -> void:
+	if not is_wormhole_open or not _inbound_gate_active() or is_iris_repaired:
+		return
 	pending_column_spawns += ramp_count
 	# Immediately spawn the first rank upon event horizon activation
 	if column_stream_timer <= 0.0:
@@ -224,7 +361,7 @@ func _spawn_wave_jaffa(ramp_count: int) -> void:
 
 
 func _spawn_next_column_rank() -> void:
-	if pending_column_spawns <= 0:
+	if pending_column_spawns <= 0 or not is_wormhole_open or not _inbound_gate_active() or is_iris_repaired:
 		return
 
 	var is_shock_wave: bool = (current_wave >= 3)
@@ -281,46 +418,46 @@ func _on_jaffa_killed(_killer: Node, _jaffa: JaffaAI) -> void:
 
 
 func _on_all_incursion_enemies_cleared() -> void:
+	if not is_wave_active:
+		return
 	is_wave_active = false
+	if incursion_established:
+		completed_incursions += 1
 	wave_cleared.emit(current_wave)
-	print("WaveManager: Incursion %d/%d REPULSED!" % [current_wave, target_activations])
-
-	if current_wave < target_activations:
-		is_intermission = true
-		intermission_timer = inter_gate_recharge_s
-		print("WaveManager: Inter-gate recharge active (%.0f s). Resupply at Armory!" % inter_gate_recharge_s)
-	else:
-		_evaluate_mission_completion()
+	_evaluate_mission_completion()
+	# Incoming gates keep competing during resupply, even after the minimum wave objective.
+	is_intermission = true
+	intermission_timer = inter_gate_recharge_s
 
 
 func _evaluate_mission_completion() -> void:
-	if difficulty == DifficultyTier.HARD:
-		_trigger_hard_mode_buffer_lockout()
+	if requirements_met():
+		if not completion_announced:
+			completion_announced = true
+			all_waves_defeated.emit()
+		objective_status_changed.emit("OUTBOUND READY: DIAL BEFORE THE NEXT INCOMING ACTIVATION")
 	else:
-		print("WaveManager: SGC Sublevel 28 SECURED! Outbound dialing permitted.")
-		all_waves_defeated.emit()
+		objective_status_changed.emit(dialing_block_reason())
 
 
 func _trigger_hard_mode_buffer_lockout() -> void:
-	print("WaveManager: [HARD MODE] Goa'uld dialing buffer encryption virus active! Corrupted buffer!")
-	var dialer := get_tree().root.find_child("SGCDialingConsole", true, false) as SGCDialingConsoleScript
+	var dialer := _dialer()
 	if dialer != null:
 		dialer.set_buffer_corrupted(true)
-
 	lab_patch_objective_started.emit()
-	print("WaveManager: [OBJECTIVE] RETRIEVE CLEAN DIALING ROM FROM LEVEL 28 RESEARCH LAB!")
-
-	# Spawn ambush squad in Round Hallway and corridor
-	_spawn_sector_jaffa(Vector3(26.0, 0.0, 36.0), 3, true)
-	_spawn_sector_jaffa(Vector3(20.0, 0.0, 20.0), 2, false)
 
 
 func _on_patch_upload_completed() -> void:
-	print("WaveManager: Dialing buffer patch verified! Outbound wormhole clearance granted!")
-	all_waves_defeated.emit()
+	if not multiplayer.is_server():
+		return
+	computer_upgraded = true
+	_evaluate_mission_completion()
 
 
 func _on_iris_servo_repaired() -> void:
+	if not multiplayer.is_server():
+		return
+	iris_repaired_under_fire = iris_repaired_under_fire or (is_wormhole_open and _inbound_gate_active())
 	is_iris_repaired = true
 	iris_repaired_event.emit()
 	print("WaveManager: Iris manually engaged! Inbound matter transmission blocked!")
@@ -329,6 +466,7 @@ func _on_iris_servo_repaired() -> void:
 		pending_column_spawns = 0
 		jaffa_count_changed.emit(enemies_alive, current_wave)
 	_play_sfx("res://audio/sfx_iris_open.wav", 60.0)
+	_evaluate_mission_completion()
 
 
 func _play_klaxon() -> void:
@@ -391,3 +529,48 @@ func _spawn_sector_jaffa(spawn_pos: Vector3, count: int, is_shock: bool = false)
 		jaffa.position = spawn_pos + offset
 		enemies_container.add_child(jaffa, true)
 		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))
+
+
+func _broadcast_mission_snapshot(peer: int = 0) -> void:
+	if not multiplayer.has_multiplayer_peer() or not multiplayer.is_server():
+		return
+	var values: Array = [current_wave, completed_incursions, enemies_alive, is_wave_active, is_wormhole_open, is_intermission, intermission_timer, inbound_wormhole_timer, computer_upgraded, iris_repaired_under_fire, outbound_reserved, mission_ended, is_iris_repaired]
+	if peer > 0:
+		sync_mission_snapshot.rpc_id(peer, values)
+	else:
+		sync_mission_snapshot.rpc(values)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_mission_snapshot() -> void:
+	if multiplayer.is_server():
+		_broadcast_mission_snapshot(multiplayer.get_remote_sender_id())
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_mission_snapshot(values: Array) -> void:
+	if values.size() != 13:
+		return
+	var previous_wave: int = current_wave
+	current_wave = values[0]
+	completed_incursions = values[1]
+	enemies_alive = values[2]
+	is_wave_active = values[3]
+	is_wormhole_open = values[4]
+	is_intermission = values[5]
+	intermission_timer = values[6]
+	inbound_wormhole_timer = values[7]
+	computer_upgraded = values[8]
+	iris_repaired_under_fire = values[9]
+	outbound_reserved = values[10]
+	mission_ended = values[11]
+	is_iris_repaired = values[12]
+	if current_wave != previous_wave:
+		wave_started.emit(current_wave, enemies_alive)
+	jaffa_count_changed.emit(enemies_alive, current_wave)
+	if is_wormhole_open:
+		wormhole_timer_tick.emit(inbound_wormhole_timer, wormhole_duration_s)
+	elif is_intermission:
+		intermission_tick.emit(int(ceil(intermission_timer)))
+	else:
+		objective_status_changed.emit(dialing_block_reason())

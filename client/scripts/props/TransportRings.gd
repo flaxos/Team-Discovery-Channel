@@ -192,6 +192,8 @@ func _on_crush_body_entered(body: Node) -> void:
 
 
 func _play_sfx(path: String, max_dist: float) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists(path):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load(path)

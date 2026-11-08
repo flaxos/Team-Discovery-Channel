@@ -72,6 +72,7 @@ var emergency_strobe_timer: float = 0.0
 var player_sectors: Dictionary = {}
 var visited_sectors: Dictionary = {}
 
+var neutralized_players: Dictionary = {}
 var sector_shrouds: Dictionary = {}
 var shroud_mat_opaque: StandardMaterial3D = null
 var shroud_mat_adjacent: StandardMaterial3D = null
@@ -151,6 +152,10 @@ func _ready() -> void:
 		wave_manager.iris_malfunction_declared.connect(func() -> void:
 			if hud != null:
 				hud.on_iris_malfunction()
+		)
+		wave_manager.objective_status_changed.connect(func(text: String) -> void:
+			if hud != null:
+				hud.update_objective(text)
 		)
 		wave_manager.lab_patch_objective_started.connect(func() -> void:
 			if hud != null:
@@ -309,6 +314,13 @@ func _update_sector_shrouding(local_sec: String) -> void:
 		visited_sectors[local_sec] = true
 
 	var adj: Array = sector_adjacency.get(local_sec, [])
+	var upstairs: bool = false
+	if players_container != null:
+		for body: Node in players_container.get_children():
+			var operative := body as PlayerController3D
+			if operative != null and operative.is_local_authority and operative.global_position.y >= 4.5:
+				upstairs = true
+				break
 
 	# Shroud management:
 	# - Current room: shroud hidden (fully clear and visible to operative).
@@ -319,7 +331,8 @@ func _update_sector_shrouding(local_sec: String) -> void:
 		if shroud == null:
 			continue
 
-		if sec_id == local_sec:
+		# Lower-level fog caps sit at Y=5.8; hide them from upstairs without revealing enemy entities.
+		if upstairs or sec_id == local_sec:
 			shroud.visible = false
 		elif sec_id in adj:
 			shroud.visible = true
@@ -533,26 +546,64 @@ func _on_player_child_entered(node: Node) -> void:
 				hud.bind_local_player(player)
 
 
-func _check_squad_status(_id: int = 0) -> void:
+func _check_squad_status(id: int = 0) -> void:
+	if not multiplayer.is_server():
+		var local_id: int = multiplayer.get_unique_id()
+		var local: PlayerController3D = players_container.get_node_or_null(str(local_id)) as PlayerController3D
+		if local != null and local.health_component != null:
+			report_squad_status.rpc_id(1, local_id, local.health_component.is_dead or local.health_component.is_downed)
+		return
+	if id != 0:
+		var operative: PlayerController3D = players_container.get_node_or_null(str(id)) as PlayerController3D
+		if operative != null and operative.health_component != null:
+			neutralized_players[id] = operative.health_component.is_dead or operative.health_component.is_downed
+	_evaluate_squad_status()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func report_squad_status(id: int, neutralized: bool) -> void:
+	if not multiplayer.is_server() or multiplayer.get_remote_sender_id() != id:
+		return
+	if players_container.get_node_or_null(str(id)) == null:
+		return
+	neutralized_players[id] = neutralized
+	_evaluate_squad_status()
+
+
+func _evaluate_squad_status() -> void:
 	if players_container == null or players_container.get_child_count() == 0:
 		return
-	var any_standing: bool = false
-	for p in players_container.get_children():
-		var player := p as PlayerController3D
-		if player != null and player.health_component != null:
-			if not player.health_component.is_dead and not player.health_component.is_downed:
-				any_standing = true
-				break
-
-	if not any_standing:
-		print("GateRoom: SQUAD WIPED! All operatives neutralized.")
-		if hud != null:
-			hud.show_defeat()
+	for body: Node in players_container.get_children():
+		var operative := body as PlayerController3D
+		if operative != null and operative.health_component != null:
+			if not neutralized_players.get(operative.peer_id, false) and not operative.health_component.is_dead and not operative.health_component.is_downed:
+				return
+	_finish_mission(false)
 
 
 func _on_player_extracted(_player: Node) -> void:
+	if multiplayer.is_server():
+		_finish_mission(true)
+
+
+func _finish_mission(victory: bool) -> void:
+	if wave_manager != null:
+		wave_manager.end_mission()
+	if multiplayer.has_multiplayer_peer():
+		sync_mission_result.rpc(victory)
+	else:
+		sync_mission_result(victory)
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_mission_result(victory: bool) -> void:
+	if wave_manager != null:
+		wave_manager.mission_ended = true
 	if hud != null:
-		hud.show_victory()
+		if victory:
+			hud.show_victory()
+		else:
+			hud.show_defeat()
 
 
 func toggle_blast_doors() -> void:
@@ -751,4 +802,4 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	if player_node != null:
 		print("GateRoom: Removing disconnected player %d" % peer_id)
 		player_node.queue_free()
-	_check_squad_status()
+	call_deferred("_check_squad_status")

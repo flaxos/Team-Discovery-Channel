@@ -14,9 +14,20 @@ signal reconnecting_tick(attempt: int, max_attempts: int)
 signal auto_reconnect_failed()
 signal player_list_updated()
 signal game_started()
+signal mission_settings_changed(difficulty: int)
+signal mission_restart_preparing()
 
 const DEFAULT_PORT: int = 7777
 const MAX_PLAYERS: int = 4
+const DIFFICULTY_EASY: int = 0
+const DIFFICULTY_MEDIUM: int = 1
+const DIFFICULTY_HARD: int = 2
+const DIFFICULTY_NAMES: Array[String] = ["Easy", "Medium", "Hard"]
+const DIFFICULTY_DESCRIPTIONS: Array[String] = [
+	"Survive at least 3 incoming waves, then dial out and extract. No computer upgrade or Iris repair required.",
+	"Survive at least 3 incoming waves and upgrade the dialing computer with the clean Lab ROM, then dial out.",
+	"Survive at least 3 incoming waves, upgrade the dialing computer and repair the Iris under fire, then dial out."
+]
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"
 const CLASS_CARTER_TECH: String = "carter_tech"
@@ -71,6 +82,9 @@ const MAX_RECONNECT_ATTEMPTS: int = 5
 var local_peer_id: int = 1
 var selected_class_id: String = CLASS_SG3_HEAVY
 var player_name: String = "O'Neill"
+var mission_difficulty: int = DIFFICULTY_EASY
+var mission_started: bool = false
+var restart_pending: bool = false
 
 ## peer_id -> Dictionary { name: String, class_id: String, node: Node3D }
 var peers: Dictionary = {}
@@ -148,6 +162,14 @@ func parse_cli_arguments(custom_args: PackedStringArray = PackedStringArray()) -
 					if CLASS_PROFILES.has(c_candidate):
 						selected_class_id = c_candidate
 						result["class"] = selected_class_id
+			"--difficulty":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					var tier_name: String = args[i].to_lower()
+					var tiers: Dictionary = {"easy": DIFFICULTY_EASY, "medium": DIFFICULTY_MEDIUM, "mid": DIFFICULTY_MEDIUM, "hard": DIFFICULTY_HARD}
+					if tiers.has(tier_name):
+						mission_difficulty = tiers[tier_name]
+						result["difficulty"] = mission_difficulty
 			"--auto-start":
 				result["auto_start"] = true
 				auto_start_mission = true
@@ -170,7 +192,7 @@ func start_dedicated_server(port: int = DEFAULT_PORT) -> Error:
 
 ## Hosts a 4-player SGC mission server on the specified port.
 func host_game(port: int = DEFAULT_PORT) -> Error:
-	disconnect_game()
+	disconnect_game(false)
 	_peer = ENetMultiplayerPeer.new()
 	var err := _peer.create_server(port, MAX_PLAYERS)
 	if err != OK:
@@ -219,7 +241,7 @@ func join_game(address: String = "127.0.0.1", port: int = DEFAULT_PORT) -> Error
 
 
 ## Closes existing connection or server.
-func disconnect_game() -> void:
+func disconnect_game(reset_settings: bool = true) -> void:
 	if _peer != null:
 		_peer.close()
 		_peer = null
@@ -228,16 +250,93 @@ func disconnect_game() -> void:
 	peers.clear()
 	is_server = false
 	local_peer_id = 1
+	mission_started = false
+	restart_pending = false
+	if reset_settings:
+		mission_difficulty = DIFFICULTY_EASY
+	mission_settings_changed.emit(mission_difficulty)
 
 
-## Starts the mission across all connected peers.
+## Offline operatives and the host can select a mode; connected clients follow the host.
+func set_mission_difficulty(tier: int) -> bool:
+	if tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD or mission_started:
+		return false
+	if is_in_active_session() and not is_server:
+		return false
+	mission_difficulty = tier
+	mission_settings_changed.emit(mission_difficulty)
+	if is_in_active_session() and is_server:
+		sync_mission_settings.rpc(mission_difficulty)
+	return true
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_mission_settings(tier: int) -> void:
+	if tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD or mission_started:
+		return
+	mission_difficulty = tier
+	mission_settings_changed.emit(mission_difficulty)
+
+
+## Include the selected mode in the transition RPC: every peer applies it before loading gameplay.
 func request_start_game() -> void:
-	if is_server:
-		start_game.rpc()
+	if is_server and not mission_started:
+		start_game.rpc(mission_difficulty)
 
 
 @rpc("authority", "call_local", "reliable")
-func start_game() -> void:
+func start_game(tier: int = -1) -> void:
+	if mission_started:
+		return
+	if tier != -1:
+		if tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD:
+			return
+		mission_difficulty = tier
+	mission_started = true
+	mission_settings_changed.emit(mission_difficulty)
+	game_started.emit()
+
+
+## Retry the selected mission on every peer; clients wait for the host's decision.
+func request_restart_game() -> bool:
+	if not is_server or not mission_started or restart_pending:
+		return false
+	restart_pending = true
+	_complete_mission_restart.call_deferred()
+	return true
+
+
+func _complete_mission_restart() -> void:
+	var session: ENetMultiplayerPeer = _peer
+	var tier: int = mission_difficulty
+	# The host despawns replicated operatives before any peer replaces the spawner.
+	# Reliable despawns must be queued ahead of the reliable world-transition RPC.
+	if is_in_active_session():
+		prepare_mission_restart.rpc()
+	else:
+		prepare_mission_restart()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not restart_pending or not mission_started or not is_server or session != _peer:
+		return
+	if is_in_active_session():
+		restart_game.rpc(tier)
+	else:
+		restart_game(tier)
+
+
+@rpc("authority", "call_local", "reliable")
+func prepare_mission_restart() -> void:
+	mission_restart_preparing.emit()
+
+
+@rpc("authority", "call_local", "reliable")
+func restart_game(tier: int) -> void:
+	restart_pending = false
+	if not mission_started or tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD:
+		return
+	mission_difficulty = tier
+	mission_settings_changed.emit(tier)
 	game_started.emit()
 
 
@@ -255,6 +354,8 @@ func register_player(p_name: String, p_class_id: String) -> void:
 	player_list_updated.emit()
 	# If server, sync full roster to new peer
 	if is_server:
+		if multiplayer.has_multiplayer_peer() and sender_id != multiplayer.get_unique_id():
+			sync_mission_settings.rpc_id(sender_id, mission_difficulty)
 		for id: int in peers:
 			if id != sender_id:
 				sync_peer_info.rpc_id(sender_id, id, peers[id]["name"], peers[id]["class_id"])

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Sprint 13 Verification Suite: Hard Mode Dialing Buffer Virus, Lab ROM Retrieval & Mainframe Upload.
 ## Validates:
-##  1. Difficulty Scaling Presets: Easy (1 wave), Medium (3 waves), Hard (4 waves + virus).
+##  1. Difficulty Scaling Presets: All modes (3 minimum incursions), Medium (+computer upgrade), Hard (+upgrade and under-fire Iris repair).
 ##  2. Hard Mode Buffer Lockout: Corrupted dialing buffer denies outbound activation.
 ##  3. Artifact Research Lab ROM Retrieval: Operative retrieves clean optical ROM in Level 28 Lab.
 ##  4. Control Room Mainframe 10-Second Defense: Uploads patch, purges virus, restores outbound dialing.
@@ -24,6 +24,9 @@ var ticks: int = 0
 
 
 func _init() -> void:
+	call_deferred("_setup")
+
+func _setup() -> void:
 	print("\n========================================================")
 	print("  PROJECT SGC: SPRINT 13 HARD MODE LAB ROM & DEFENSE TEST")
 	print("========================================================")
@@ -53,14 +56,14 @@ func _process(_delta: float) -> bool:
 		# TEST 1: Tiered Difficulty Configuration
 		print("[TEST 1/5] Testing Tiered Difficulty Presets (Easy, Medium, Hard)...")
 		wave_mgr.set_difficulty(WaveManager.DifficultyTier.EASY)
-		assert(wave_mgr.target_activations == 1, "Easy mode must require 1 incursion")
+		assert(wave_mgr.target_activations == 3, "Easy mode must require 3 incursions")
 
 		wave_mgr.set_difficulty(WaveManager.DifficultyTier.MEDIUM)
 		assert(wave_mgr.target_activations == 3, "Medium mode must require 3 incursions")
 
 		wave_mgr.set_difficulty(WaveManager.DifficultyTier.HARD)
-		assert(wave_mgr.target_activations == 4, "Hard mode must require 4 incursions")
-		print("[TEST 1/5] PASS: Difficulty scaling matrix validated (Easy: 1, Medium: 3, Hard: 4).")
+		assert(wave_mgr.target_activations == 3, "Hard mode must require 3 incursions plus cumulative objectives")
+		print("[TEST 1/5] PASS: Cumulative three-incursion difficulty matrix validated.")
 
 	elif ticks == 10:
 		# TEST 2: Hard Mode Goa'uld Buffer Encryption Lockout
@@ -118,6 +121,8 @@ func _process(_delta: float) -> bool:
 	elif ticks == 40:
 		# TEST 5: Outbound Dialing Extraction Victory
 		print("[TEST 5/5] Testing Outbound Dialing & Extraction Victory...")
+		wave_mgr.completed_incursions = 3
+		wave_mgr.iris_repaired_under_fire = true
 		sgc_dialer.start_dialing(player)
 		assert(sgc_dialer.current_phase == DHDDialer.DialPhase.CHEVRONS, "Console must enter CHEVRONS phase")
 
@@ -147,6 +152,8 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Control Room Mainframe 10-Second Upload Defense     ")
 		print("  ✓ Outbound Dialing & Squad Extraction Victory         ")
 		print("========================================================\n")
+		wave_mgr.end_mission()
+		gateroom.queue_free()
 		quit(0)
 		return true
 

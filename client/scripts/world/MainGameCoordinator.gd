@@ -20,9 +20,12 @@ func _ready() -> void:
 	if net != null:
 		if not net.game_started.is_connected(_on_game_started):
 			net.game_started.connect(_on_game_started)
+		if not net.mission_restart_preparing.is_connected(_on_mission_restart_preparing):
+			net.mission_restart_preparing.connect(_on_mission_restart_preparing)
 
 		# Dedicated server mode bypasses lobby UI and initializes GateRoom arena immediately
 		if net.is_dedicated_server:
+			net.mission_started = true
 			print("MainGameCoordinator: Dedicated server active. Initializing GateRoom directly...")
 			_load_gate_room()
 			return
@@ -38,6 +41,7 @@ func _ready() -> void:
 
 
 func _load_lobby() -> void:
+	_clear_gate_room()
 	if current_lobby != null:
 		current_lobby.queue_free()
 		current_lobby = null
@@ -48,6 +52,7 @@ func _load_lobby() -> void:
 
 
 func _load_gate_room() -> void:
+	_clear_gate_room()
 	if current_lobby != null:
 		current_lobby.queue_free()
 		current_lobby = null
@@ -61,3 +66,36 @@ func _load_gate_room() -> void:
 func _on_game_started() -> void:
 	print("MainGameCoordinator: Gate dialed! Launching GateRoom mission...")
 	_load_gate_room()
+
+
+func _clear_gate_room() -> void:
+	if not is_instance_valid(current_gate_room):
+		current_gate_room = null
+		return
+	var manager: Node = current_gate_room.get_node_or_null("WaveManager")
+	if manager != null and manager.has_method("end_mission"):
+		manager.end_mission()
+	# Detach immediately so the replacement owns the canonical multiplayer paths.
+	world_container.remove_child(current_gate_room)
+	current_gate_room.queue_free()
+	current_gate_room = null
+
+
+func _on_mission_restart_preparing() -> void:
+	if not is_instance_valid(current_gate_room):
+		return
+	var manager: Node = current_gate_room.get_node_or_null("WaveManager")
+	if manager != null and manager.has_method("end_mission"):
+		manager.end_mission()
+	var hud: Node = current_gate_room.get_node_or_null("TacticalHUD")
+	if hud != null:
+		hud.set("is_mission_ended", true)
+		hud.set_process(false)
+	# Clients retain their old spawner and replicas until the authoritative despawns arrive.
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net == null or not net.is_server:
+		return
+	var players: Node = current_gate_room.get_node_or_null("Players")
+	if players != null:
+		for player: Node in players.get_children():
+			player.queue_free()

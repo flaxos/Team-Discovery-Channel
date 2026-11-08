@@ -27,7 +27,7 @@ func _ready() -> void:
 
 
 func start_dialing(player: PlayerController3D) -> void:
-	if is_buffer_corrupted:
+	if multiplayer.is_server() and is_buffer_corrupted:
 		_trigger_error_feedback()
 		print("SGCDialingConsole: [ALERT] DIALING BUFFER CORRUPTED! Clean ROM patch required from Level 28 Lab!")
 		buffer_lockout_triggered.emit()
@@ -49,29 +49,66 @@ func set_buffer_corrupted(corrupted: bool) -> void:
 
 
 func start_patch_upload(player: PlayerController3D) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_patch_upload.rpc_id(1, _player_path(player))
+		return
+	_begin_patch_upload(player)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func request_patch_upload(player_path: NodePath) -> void:
+	if not multiplayer.is_server():
+		return
+	var player: PlayerController3D = _request_player(player_path)
+	if player != null:
+		_begin_patch_upload(player)
+
+
+func _begin_patch_upload(player: PlayerController3D) -> void:
+	if not is_buffer_corrupted or not player.is_carrying_patch_rom or is_uploading_patch:
+		return
 	uploader_player = player
 	is_uploading_patch = true
 	current_upload_time = 0.0
 	print("SGCDialingConsole: Dialing patch upload initiated by %s (10.0s defense required)..." % player.name)
 	_update_screen_visuals()
+	_broadcast_upload()
 
 
 func cancel_patch_upload() -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_cancel_upload.rpc_id(1)
+		return
+	_cancel_upload()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func request_cancel_upload() -> void:
+	if not multiplayer.is_server():
+		return
+	var sender: int = multiplayer.get_remote_sender_id()
+	if sender == 0 or (uploader_player != null and uploader_player.get_multiplayer_authority() == sender):
+		_cancel_upload()
+
+
+func _cancel_upload() -> void:
 	if is_uploading_patch:
 		print("SGCDialingConsole: Patch upload aborted!")
 		is_uploading_patch = false
 		current_upload_time = 0.0
 		uploader_player = null
 		_update_screen_visuals()
+		_broadcast_upload()
 
 
 func update_upload(delta: float) -> bool:
-	if not is_uploading_patch:
+	if not multiplayer.is_server() or not is_uploading_patch:
 		return false
 
 	current_upload_time += delta
 	var progress: float = clampf(current_upload_time / upload_time_required, 0.0, 1.0)
 	patch_upload_progress.emit(progress)
+	_broadcast_upload()
 
 	if current_upload_time >= upload_time_required:
 		complete_patch_upload()
@@ -80,6 +117,10 @@ func update_upload(delta: float) -> bool:
 
 
 func complete_patch_upload() -> void:
+	if not multiplayer.is_server():
+		return
+	if is_instance_valid(uploader_player):
+		uploader_player.is_carrying_patch_rom = false
 	is_uploading_patch = false
 	is_buffer_corrupted = false
 	current_upload_time = 0.0
@@ -88,6 +129,46 @@ func complete_patch_upload() -> void:
 	patch_upload_completed.emit()
 	print("SGCDialingConsole: Dialing ROM patch applied! Goa'uld buffer lockout purged. System READY!")
 	_play_sfx("res://audio/sfx_gdo_beep.wav", 30.0)
+	_update_screen_visuals()
+	_broadcast_upload()
+
+
+func _physics_process(delta: float) -> void:
+	super._physics_process(delta)
+	if not multiplayer.is_server() or not is_uploading_patch:
+		return
+	if not is_instance_valid(uploader_player):
+		_cancel_upload()
+		return
+	var health: HealthComponent = uploader_player.health_component
+	if health != null and (health.is_dead or health.is_downed or health.is_stunned):
+		_cancel_upload()
+		return
+	if uploader_player.global_position.distance_to(global_position) > 4.5:
+		_cancel_upload()
+		return
+	# Host controller drives its own channel; remote channels advance on the server.
+	if not uploader_player.is_local_authority:
+		update_upload(delta)
+
+
+func _broadcast_upload() -> void:
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		var path: NodePath = _player_path(uploader_player) if is_instance_valid(uploader_player) else NodePath()
+		sync_upload.rpc(path, is_uploading_patch, current_upload_time, is_buffer_corrupted)
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_upload(player_path: NodePath, uploading: bool, elapsed: float, corrupted: bool) -> void:
+	var was_corrupted: bool = is_buffer_corrupted
+	uploader_player = _player_node(player_path) if not player_path.is_empty() else null
+	is_uploading_patch = uploading
+	current_upload_time = elapsed
+	is_buffer_corrupted = corrupted
+	patch_upload_progress.emit(clampf(elapsed / upload_time_required, 0.0, 1.0))
+	if was_corrupted and not corrupted:
+		buffer_restored.emit()
+		patch_upload_completed.emit()
 	_update_screen_visuals()
 
 
