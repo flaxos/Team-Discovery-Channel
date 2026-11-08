@@ -60,6 +60,8 @@ func _ready() -> void:
 
 
 func _setup_audio() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	if ResourceLoader.exists(fire_sound_path):
 		audio_player = AudioStreamPlayer3D.new()
 		audio_player.name = "FireAudio"
@@ -280,7 +282,14 @@ func _process(delta: float) -> void:
 
 
 ## Attempts to discharge the weapon, factoring in spread modifier (moving, crouch).
-func try_fire(spread_mult: float = 1.0) -> bool:
+func _operative() -> Node:
+	var actor: Node = get_parent()
+	while actor != null and not actor is PlayerController3D:
+		actor = actor.get_parent()
+	return actor
+
+
+func consume_shot() -> bool:
 	if is_reloading or fire_cooldown > 0.0:
 		return false
 
@@ -309,6 +318,16 @@ func try_fire(spread_mult: float = 1.0) -> bool:
 	# Accumulate spread bloom
 	current_spread_deg = minf(max_spread_deg, current_spread_deg + bloom_per_shot_deg)
 
+	return true
+
+
+func try_fire(spread_mult: float = 1.0, direction_override: Vector3 = Vector3.ZERO) -> bool:
+	var operative: Node = _operative()
+	if is_inside_tree() and multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return operative.request_weapon_fire() if operative != null and operative.is_local_authority else false
+	if not consume_shot():
+		return false
+
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position
 	var base_forward: Vector3 = -global_transform.basis.z
 
@@ -322,6 +341,9 @@ func try_fire(spread_mult: float = 1.0) -> bool:
 		if target != Vector3.ZERO:
 			base_forward = (target - origin).normalized()
 
+	if direction_override != Vector3.ZERO:
+		base_forward = direction_override
+
 	# Apply cone spread
 	var effective_spread_deg := current_spread_deg * spread_mult
 	var spread_rad := deg_to_rad(effective_spread_deg)
@@ -334,6 +356,8 @@ func try_fire(spread_mult: float = 1.0) -> bool:
 
 
 func _perform_shot(origin: Vector3, dir: Vector3) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	if audio_player != null:
 		audio_player.play()
 
@@ -341,9 +365,14 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 		var bolt_scene := load("res://scenes/entities/PlasmaBolt.tscn") as PackedScene
 		if bolt_scene != null:
 			var bolt := bolt_scene.instantiate() as PlasmaBolt
-			var is_enemy := (get_parent() is CharacterBody3D and not (get_parent() is PlayerController3D))
+			var actor: Node = _operative()
+			if actor == null:
+				actor = get_parent()
+			var is_enemy: bool = not actor is PlayerController3D
+			bolt.damage = damage
+			bolt.speed = plasma_speed_mps
 			get_tree().root.add_child(bolt)
-			bolt.initialize(origin, dir, get_parent(), is_enemy)
+			bolt.initialize(origin, dir, actor, is_enemy)
 			fired.emit(origin, dir, origin + dir * max_range_m, null)
 			return
 
@@ -365,7 +394,7 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 	# Trace ray with ballistic penetration through reinforced observation glass
 	for iter in range(4):
 		var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * max_range_m)
-		query.collision_mask = 1 | 2 | 4  # World (1), Players (2), and Jaffa (4)
+		query.collision_mask = 1 | 2 | 4 | (64 if is_zat else 0)  # Zat can target nonblocking corpses.
 		query.exclude = exclude_list
 		var result := space.intersect_ray(query)
 		if result.is_empty():
@@ -388,21 +417,27 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 
 
 func _apply_hit(target: Node) -> void:
-	if target == null:
+	if (multiplayer.has_multiplayer_peer() and not multiplayer.is_server()) or target == null:
 		return
 	var health := target.get_node_or_null("HealthComponent") as HealthComponent
 	if health != null:
 		if is_zat:
-			health.apply_zat_shot(get_parent())
+			health.apply_zat_shot(_operative() if _operative() != null else get_parent())
 		else:
 			var damage_type := "plasma" if is_plasma else "bullet"
-			health.take_damage(damage, get_parent(), damage_type)
+			health.take_damage(damage, _operative() if _operative() != null else get_parent(), damage_type)
 
 
 func reload() -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		var actor: Node = _operative()
+		if actor != null and actor.is_local_authority:
+			actor.request_weapon_reload()
+		return
 	if uses_heat or is_reloading or current_ammo >= mag_capacity or reserve_ammo <= 0:
 		return
 	is_reloading = true
+	_notify_operative_state()
 	var timer := get_tree().create_timer(reload_time_s)
 	timer.timeout.connect(func() -> void:
 		var needed := mag_capacity - current_ammo
@@ -412,9 +447,19 @@ func reload() -> void:
 		is_reloading = false
 		ammo_changed.emit(current_ammo, reserve_ammo)
 		reloaded.emit()
+		_notify_operative_state()
 	)
 
 
 func resupply() -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	reserve_ammo = reserve_capacity
 	ammo_changed.emit(current_ammo, reserve_ammo)
+	_notify_operative_state()
+
+
+func _notify_operative_state() -> void:
+	var actor: Node = _operative()
+	if actor != null and actor.has_method("_broadcast_weapon_state"):
+		actor._broadcast_weapon_state()

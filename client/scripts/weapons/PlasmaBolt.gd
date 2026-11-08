@@ -13,6 +13,7 @@ signal exploded(impact_point: Vector3)
 var shooter: Node = null
 var direction: Vector3 = Vector3.FORWARD
 var lifetime: float = 0.0
+var _detonated: bool = false
 
 
 func _ready() -> void:
@@ -21,6 +22,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	lifetime += delta
 	if lifetime >= max_lifetime_s:
 		queue_free()
@@ -62,6 +65,8 @@ func _play_fire_sound() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
+	if _detonated or (multiplayer.has_multiplayer_peer() and not multiplayer.is_server()) or body == null:
+		return
 	if is_instance_valid(shooter) and body == shooter:
 		return
 
@@ -84,6 +89,9 @@ func _on_area_entered(_area: Area3D) -> void:
 
 
 func _detonate(impact_point: Vector3) -> void:
+	if _detonated:
+		return
+	_detonated = true
 	exploded.emit(impact_point)
 	# Quick impact spark mesh
 	var spark := MeshInstance3D.new()
