@@ -51,7 +51,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.75, 0.85, 1)
 theme_override_font_sizes/font_size = 14
-text = "Cheyenne Mountain Complex • Level 28 Gate Room Defense & Extraction Operations"
+text = "Cheyenne Mountain Complex • SGC Sublevels 28 / 27 / 26"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/MainVBox"]
@@ -158,6 +158,24 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
+[node name="MissionSection" type="VBoxContainer" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MissionLabel" type="Label" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/MissionSection"]
+layout_mode = 2
+text = "LEVEL / MISSION (HOST SELECTS):"
+
+[node name="MissionOptionButton" type="OptionButton" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/MissionSection"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MissionDescriptionLabel" type="Label" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/MissionSection"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+
 [node name="DifficultySection" type="VBoxContainer" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol"]
 layout_mode = 2
 theme_override_constants/separation = 6
@@ -165,7 +183,7 @@ theme_override_constants/separation = 6
 [node name="DifficultyLabel" type="Label" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/DifficultySection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
-text = "MISSION MODE (HOST SELECTS):"
+text = "DIFFICULTY (HOST SELECTS):"
 
 [node name="DifficultyOptionButton" type="OptionButton" parent="MarginContainer/MainVBox/ColumnsHBox/RightCol/DifficultySection"]
 unique_name_in_owner = true
@@ -193,7 +211,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "OPEN IRIS • ENGAGE STARGATE • COMMENCE MISSION"
+text = "LAUNCH SELECTED MISSION"
 
 [node name="KeybindingsModal" parent="." instance=ExtResource("2_kb01")]
 visible = false

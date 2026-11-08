@@ -95,6 +95,7 @@ func run_test() -> void:
 	client.game_started.connect(func() -> void: client_observed_start = client.mission_difficulty)
 	if not check(host.set_mission_difficulty(2), "Host must select mode before opening lobby"):
 		return
+	check(host.set_mission(SGCNetworkManager.MISSION_SGC_UAT), "Host can choose UAT before hosting")
 	if not check(host.host_game(TEST_PORT) == OK, "Host must bind mode test port"):
 		return
 	if not check(client.join_game("127.0.0.1", TEST_PORT) == OK, "Client must join"):
@@ -115,6 +116,10 @@ func run_test() -> void:
 			break
 	if not check(client.mission_difficulty == 1, "Host mode changes must replicate to clients"):
 		return
+	await wait_frames(10)
+	check(client.selected_mission_id == SGCNetworkManager.MISSION_SGC_UAT, "Join receives host mission")
+	check(not client.set_mission(SGCNetworkManager.MISSION_SGC_DEFENSE), "Clients cannot change mission")
+	client.selected_mission_id = SGCNetworkManager.MISSION_SGC_DEFENSE
 	# The start RPC carries the mode even if a client's local cached selection is stale.
 	client.mission_difficulty = 0
 	host.request_start_game()
@@ -124,6 +129,7 @@ func run_test() -> void:
 			break
 	if not check(host_observed_start == 1 and client_observed_start == 1, "Both gameplay scenes must observe the host mode before game_started"):
 		return
+	check(client.selected_mission_id == SGCNetworkManager.MISSION_SGC_UAT, "Start RPC repairs stale mission selection")
 	if not check(not host.set_mission_difficulty(2), "In-progress mode cannot be changed"):
 		return
 	var restarts: Array[int] = [0, 0]
@@ -132,6 +138,7 @@ func run_test() -> void:
 	if not check(not client.request_restart_game(), "Clients must wait for a host retry"):
 		return
 	client.mission_difficulty = 0
+	client.selected_mission_id = SGCNetworkManager.MISSION_SGC_DEFENSE
 	if not check(host.request_restart_game(), "Host must be able to retry the active mission"):
 		return
 	for i: int in range(120):
@@ -140,6 +147,7 @@ func run_test() -> void:
 			break
 	if not check(restarts == [1, 1] and client.mission_difficulty == 1, "Host retry reaches both peers once and preserves selected mode"):
 		return
+	check(client.selected_mission_id == SGCNetworkManager.MISSION_SGC_UAT, "Retry preserves UAT mission")
 	client.disconnect_game()
 	host.disconnect_game()
 	host_root.queue_free()

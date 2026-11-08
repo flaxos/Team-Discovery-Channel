@@ -70,6 +70,7 @@ var is_animating_observation_shutters: bool = false
 var is_emergency_active: bool = false
 var emergency_strobe_timer: float = 0.0
 var player_sectors: Dictionary = {}
+@export var mission_id: String = SGCNetworkManager.MISSION_SGC_DEFENSE
 var mission_result: int = -1
 var visited_sectors: Dictionary = {}
 
@@ -184,6 +185,8 @@ func _ready() -> void:
 			sector_adjacency[str(c.from_region)].append(str(c.to_region))
 			sector_adjacency[str(c.to_region)].append(str(c.from_region))
 	_setup_sector_shrouds()
+	if mission_id == SGCNetworkManager.MISSION_SGC_UAT and hud != null:
+		hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_room_snapshot.rpc_id(1)
 
@@ -743,6 +746,9 @@ func sync_observation_shutters(force_closed: bool) -> void:
 
 
 func _start_foothold_defense() -> void:
+	if mission_id == SGCNetworkManager.MISSION_SGC_UAT:
+		if hud != null: hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
+		return
 	if wave_manager == null:
 		return
 	print("GateRoom: STAGING PHASE: Operatives resupply at Armory before incursion...")
@@ -759,6 +765,7 @@ func _start_foothold_defense() -> void:
 
 
 func _trigger_base_scramble() -> void:
+	if mission_id == SGCNetworkManager.MISSION_SGC_UAT: return
 	print("GateRoom: KLAXON SOUNDS! RED ALERT! UNSCHEDULED OFFWORLD ACTIVATION!")
 	set_emergency_lights(true)
 
