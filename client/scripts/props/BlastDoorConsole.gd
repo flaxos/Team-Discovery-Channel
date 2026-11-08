@@ -21,7 +21,7 @@ func _ready() -> void:
 	if prompt_label == null:
 		prompt_label = Label3D.new()
 		prompt_label.name = "PromptLabel"
-		prompt_label.text = "[E] TOGGLE OBSERVATION BLAST SHUTTERS" if door_id == "observation" else "[E] TOGGLE BLAST DOORS"
+		prompt_label.text = _bindings().format_prompt("[E] TOGGLE OBSERVATION BLAST SHUTTERS" if door_id == "observation" else "[E] TOGGLE BLAST DOORS")
 		prompt_label.font_size = 18
 		prompt_label.outline_size = 4
 		prompt_label.position = Vector3(0, 0.9, 0)
@@ -31,7 +31,7 @@ func _ready() -> void:
 	else:
 		prompt_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		if door_id == "observation":
-			prompt_label.text = "[E] TOGGLE OBSERVATION BLAST SHUTTERS"
+			prompt_label.text = _bindings().format_prompt("[E] TOGGLE OBSERVATION BLAST SHUTTERS")
 
 	var gr: Node = get_tree().root.find_child("GateRoom", true, false)
 	if gr != null:
@@ -64,7 +64,11 @@ func _on_doors_toggled(closed: bool) -> void:
 	if prompt_label != null:
 		prompt_label.modulate = Color(1.0, 0.3, 0.3) if closed else Color(0.2, 0.9, 0.3)
 		if door_id == "observation":
-			prompt_label.text = "[E] OPEN OBSERVATION SHUTTERS" if closed else "[E] LOWER OBSERVATION SHUTTERS"
+			prompt_label.text = _bindings().format_prompt("[E] OPEN OBSERVATION SHUTTERS" if closed else "[E] LOWER OBSERVATION SHUTTERS")
 		else:
-			prompt_label.text = "[E] OPEN BLAST DOORS" if closed else "[E] SEAL BLAST DOORS"
+			prompt_label.text = _bindings().format_prompt("[E] OPEN BLAST DOORS" if closed else "[E] SEAL BLAST DOORS")
 	blast_door_toggled.emit(closed)
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

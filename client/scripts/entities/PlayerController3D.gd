@@ -144,6 +144,8 @@ func _notification(what: int) -> void:
 		if is_inside_tree():
 			close_squad_command_wheel()
 		if is_local_authority:
+			if is_inside_tree():
+				_bindings().release_all()
 			current_mouse_mode = Input.MOUSE_MODE_VISIBLE
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
@@ -153,6 +155,7 @@ func _notification(what: int) -> void:
 
 
 func _exit_tree() -> void:
+	close_squad_command_wheel()
 	_restore_all_occluded_nodes()
 	_restore_visual_materials()
 
@@ -223,7 +226,7 @@ func _is_ui_modal_open() -> bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_local_authority or is_in_cctv_mode or _is_ui_modal_open():
+	if not is_local_authority or not is_window_focused or is_in_cctv_mode or _is_ui_modal_open():
 		return
 	if event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
@@ -240,58 +243,53 @@ func _unhandled_input(event: InputEvent) -> void:
 		rotation.y -= motion.relative.x * 0.0028 * sens_mult
 		ads_pitch_rad = clampf(ads_pitch_rad - motion.relative.y * 0.0022 * sens_mult, deg_to_rad(-35.0), deg_to_rad(35.0))
 		current_iso_pan_yaw = rotation.y
-	elif event is InputEventKey:
-		var key_event := event as InputEventKey
-		if key_event.pressed and not key_event.echo:
-			if key_event.keycode == KEY_G:
-				_toggle_drag_body()
-			elif key_event.keycode == KEY_C:
-				is_crouch_toggled = not is_crouch_toggled
-				print("Player %d crouch toggled: %s" % [peer_id, is_crouch_toggled])
-			elif key_event.keycode == KEY_T:
-				active_c4_timer_mode = (active_c4_timer_mode + 1) % 4
-				var c4_names: Array[String] = ["REMOTE DETONATOR", "5s TIMER", "10s TIMER", "30s TIMER"]
-				print("Player %d C4 mode: %s" % [peer_id, c4_names[active_c4_timer_mode]])
-			elif key_event.keycode == KEY_Q:
-				_on_command_input_pressed()
-			elif key_event.keycode == KEY_4:
-				deploy_shield()
-			elif key_event.keycode == KEY_5:
-				throw_smoke_grenade()
-		elif not key_event.pressed:
-			if key_event.keycode == KEY_Q:
-				_on_command_input_released()
-	elif event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		# Re-confine cursor if player clicked back into the window after losing focus
-		if mb.pressed and is_local_authority and not _is_ui_modal_open():
-			if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-				_update_mouse_mode()
-
-		# Seamless Mouse Scroll Zoom: adjusts TPS distance in default view, and ADS distance in ADS view
-		if mb.pressed:
-			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
-				if is_aiming_down_sights:
-					ads_zoom_distance = clampf(ads_zoom_distance - ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
-				else:
-					tps_zoom_distance = clampf(tps_zoom_distance - TPS_ZOOM_STEP, TPS_MIN_ZOOM, TPS_MAX_ZOOM)
-				get_viewport().set_input_as_handled()
-				return
-			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				if is_aiming_down_sights:
-					ads_zoom_distance = clampf(ads_zoom_distance + ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
-				else:
-					tps_zoom_distance = clampf(tps_zoom_distance + TPS_ZOOM_STEP, TPS_MIN_ZOOM, TPS_MAX_ZOOM)
-				get_viewport().set_input_as_handled()
-				return
-
-		if mb.button_index == MOUSE_BUTTON_XBUTTON1:
-			if mb.pressed:
-				_on_command_input_pressed()
-			else:
-				_on_command_input_released()
-		elif mb.button_index == MOUSE_BUTTON_MIDDLE and mb.pressed:
-			_try_issue_squad_ping()
+		return
+	if event is InputEventKey and event.echo:
+		return
+	if event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+		_update_mouse_mode()
+	if health_component != null and (health_component.is_dead or health_component.is_stunned or health_component.is_downed):
+		if health_component.is_downed and event.is_action_pressed("reload") and current_weapon != null:
+			current_weapon.reload()
+		return
+	if event.is_action_pressed("squad_command"):
+		_on_command_input_pressed()
+	elif event.is_action_released("squad_command"):
+		# Releasing an alternate binding must not close a still-held command.
+		if not Input.is_action_pressed("squad_command"):
+			_on_command_input_released()
+	elif event.is_action_pressed("squad_ping"):
+		_try_issue_squad_ping()
+	elif event.is_action_pressed("crouch"):
+		is_crouch_toggled = not is_crouch_toggled
+	elif event.is_action_pressed("c4_mode"):
+		active_c4_timer_mode = (active_c4_timer_mode + 1) % 4
+	elif event.is_action_pressed("deploy_shield"):
+		deploy_shield()
+	elif event.is_action_pressed("throw_smoke"):
+		throw_smoke_grenade()
+	elif event.is_action_pressed("drag_body"):
+		_toggle_drag_body()
+	elif event.is_action_pressed("gadget"):
+		if is_dragging_body or _find_nearby_drag_target() != null:
+			_toggle_drag_body()
+		else:
+			_deploy_tactical_gadget()
+	elif event.is_action_pressed("weapon_primary"):
+		switch_slot(1)
+	elif event.is_action_pressed("weapon_secondary"):
+		switch_slot(2)
+	elif event.is_action_pressed("plant_claymore"):
+		_plant_claymore()
+	elif event.is_action_pressed("reload") and current_weapon != null:
+		current_weapon.reload()
+	elif event.is_action_pressed("zoom_in") or event.is_action_pressed("zoom_out"):
+		var direction: float = -1.0 if event.is_action_pressed("zoom_in") else 1.0
+		if is_aiming_down_sights:
+			ads_zoom_distance = clampf(ads_zoom_distance + direction * ADS_ZOOM_STEP, ADS_MIN_ZOOM, ADS_MAX_ZOOM)
+		else:
+			tps_zoom_distance = clampf(tps_zoom_distance + direction * TPS_ZOOM_STEP, TPS_MIN_ZOOM, TPS_MAX_ZOOM)
+		get_viewport().set_input_as_handled()
 
 
 func _setup_replication() -> void:
@@ -498,7 +496,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
-	if _is_ui_modal_open():
+	if not is_window_focused or _is_ui_modal_open():
 		close_squad_command_wheel()
 		is_aiming_down_sights = false
 		_update_mouse_mode()
@@ -977,19 +975,6 @@ func _process_combat() -> void:
 	if current_weapon == null:
 		return
 
-	if Input.is_key_pressed(KEY_1):
-		switch_slot(1)
-	elif Input.is_key_pressed(KEY_2):
-		switch_slot(2)
-
-	if Input.is_action_just_pressed("gadget"):
-		_deploy_tactical_gadget()
-
-	if Input.is_action_just_pressed("plant_claymore"):
-		_plant_claymore()
-
-	if Input.is_action_just_pressed("reload"):
-		current_weapon.reload()
 
 	is_firing = Input.is_action_pressed("fire") and not is_command_wheel_open
 	if is_firing:
@@ -1178,8 +1163,6 @@ func _process_downed_crawl(delta: float) -> void:
 	if is_firing and current_weapon != null:
 		current_weapon.try_fire(1.8)
 
-	if Input.is_action_just_pressed("reload") and current_weapon != null:
-		current_weapon.reload()
 
 
 func _process_revive(delta: float) -> void:
@@ -1252,7 +1235,7 @@ func _process_cover_and_peeking(delta: float, _move_dir: Vector3) -> void:
 		is_sprinting = false
 	else:
 		is_peeking = false
-		is_crouching = is_crouch_toggled or Input.is_action_pressed("crouch")
+		is_crouching = is_crouch_toggled
 		is_sprinting = Input.is_action_pressed("sprint") and not is_crouching and not is_dragging_body
 
 	if body_mesh != null:
@@ -1470,7 +1453,7 @@ func open_squad_command_wheel() -> void:
 func close_squad_command_wheel() -> void:
 	is_command_wheel_open = false
 	is_holding_command_input = false
-	var hud := _get_tactical_hud()
+	var hud := _get_tactical_hud() if is_local_authority else null
 	if hud != null:
 		hud.close_radial_command_wheel()
 
@@ -1830,6 +1813,7 @@ func throw_smoke_grenade() -> void:
 
 
 func _on_downed() -> void:
+	close_squad_command_wheel()
 	stop_dragging_body()
 	if mounted_turret != null:
 		mounted_turret.dismount()
@@ -1857,6 +1841,7 @@ func _on_damage_taken(amount: float, _source: Node, _type: String) -> void:
 
 
 func _on_died() -> void:
+	close_squad_command_wheel()
 	stop_dragging_body()
 	_restore_all_occluded_nodes()
 	_restore_visual_materials()
@@ -1867,6 +1852,7 @@ func _on_died() -> void:
 
 
 func _on_stunned(duration: float) -> void:
+	close_squad_command_wheel()
 	stop_dragging_body()
 	print("Player %d stunned by Zat'nik'tel for %.1f seconds." % [peer_id, duration])
 
@@ -1876,6 +1862,7 @@ func _on_recovered_from_stun() -> void:
 
 
 func _on_vaporized() -> void:
+	close_squad_command_wheel()
 	print("Player %d disintegrated by Zat'nik'tel!" % peer_id)
 	stop_dragging_body()
 	_restore_all_occluded_nodes()
@@ -2022,3 +2009,7 @@ func clear_cctv_camera() -> void:
 		camera.position = Vector3(0, 12.0, 7.0)
 		camera.rotation = Vector3(-deg_to_rad(60.0), 0, 0)
 		camera.fov = 55.0
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

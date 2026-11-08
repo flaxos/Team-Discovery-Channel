@@ -168,34 +168,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if is_mission_ended:
 		return
 
-	if event is InputEventKey:
-		var key_event := event as InputEventKey
-		if key_event.pressed and not key_event.echo:
-			if key_event.keycode == KEY_F1:
-				toggle_keybindings_modal()
-				get_viewport().set_input_as_handled()
-				return
-			elif key_event.keycode == KEY_ESCAPE:
-				if keybindings_modal != null and keybindings_modal.visible:
-					toggle_keybindings_modal()
-					get_viewport().set_input_as_handled()
-					return
-				elif pause_menu != null and pause_menu.visible:
-					toggle_pause_menu()
-					get_viewport().set_input_as_handled()
-					return
-				else:
-					toggle_keybindings_modal()
-					get_viewport().set_input_as_handled()
-					return
-
-	if event.is_action_pressed("toggle_pause"):
+	if event is InputEventKey and event.echo:
+		return
+	var escape: bool = event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE
+	if escape or event.is_action_pressed("toggle_pause"):
 		if keybindings_modal != null and keybindings_modal.visible:
-			toggle_keybindings_modal()
+			keybindings_modal.close_modal()
 		elif pause_menu != null and pause_menu.visible:
 			toggle_pause_menu()
 		else:
 			toggle_keybindings_modal()
+		get_viewport().set_input_as_handled()
 
 
 func toggle_keybindings_modal() -> void:
@@ -584,27 +567,27 @@ func _update_weapon_display() -> void:
 	# Gadget display
 	if local_player.class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
 		if local_player.turret_cooldown > 0.0:
-			gadget_label.text = "[G] .50 CAL COOLDOWN (%ds)" % int(ceil(local_player.turret_cooldown))
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + ".50 CAL COOLDOWN (%ds)" % int(ceil(local_player.turret_cooldown))
 			gadget_label.modulate = Color(0.7, 0.7, 0.7)
 		else:
-			gadget_label.text = "[G] DEPLOY .50 CAL TRIPOD"
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "DEPLOY .50 CAL TRIPOD"
 			gadget_label.modulate = Color(0.4, 0.9, 0.5)
 	elif local_player.class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
 		var has_c4: bool = local_player.active_c4 != null and is_instance_valid(local_player.active_c4)
 		if has_c4:
-			gadget_label.text = "[G] DETONATE C4 SATCHEL"
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "DETONATE C4 SATCHEL"
 			gadget_label.modulate = Color(1.0, 0.4, 0.2)
 		elif local_player.c4_charges_remaining > 0:
-			gadget_label.text = "[G] THROW C4 (%d LEFT)" % local_player.c4_charges_remaining
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "THROW C4 (%d LEFT)" % local_player.c4_charges_remaining
 			gadget_label.modulate = Color(0.4, 0.9, 0.5)
 		else:
-			gadget_label.text = "[G] C4 DEPLETED (0/3)"
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "C4 DEPLETED (0/3)"
 			gadget_label.modulate = Color(0.7, 0.7, 0.7)
 	else:
-		gadget_label.text = "[G] TACTICAL SATCHEL"
+		gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "TACTICAL SATCHEL"
 
 	# Append Claymore indicator
-	var claymore_str := "  |  [3] CLAYMORE (%d/2)" % local_player.claymore_charges
+	var claymore_str: String = "  |  [%s] CLAYMORE (%d/2)" % [_bindings().binding_text("plant_claymore"), local_player.claymore_charges]
 	gadget_label.text += claymore_str
 
 
@@ -1149,3 +1132,7 @@ func _populate_debrief_stats(is_victory: bool) -> void:
 	if stat_status != null:
 		stat_status.text = "STATUS: %s" % ("ALL OPERATIVES EXTRACTED" if is_victory else "SQUAD COMPROMISED")
 		stat_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5) if is_victory else Color(1.0, 0.3, 0.3))
+
+
+func _bindings() -> Node:
+	return get_node("/root/KeybindingManager")

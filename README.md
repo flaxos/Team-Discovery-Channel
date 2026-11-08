@@ -43,3 +43,5 @@ Run `python3 tools/run_godot_tests.py` for the takeover regression suites; this 
 
 Sprint plans and review notes are in `docs/plans/` and `docs/reviews/`.
 The alignment API binds to localhost by default. Remote repository exports require `ALIGNMENT_EXPORT_TOKEN` and an `Authorization: Bearer …` header; set `ALIGNMENT_HOST` explicitly when remote API access is intended.
+
+Sprint 20 controls: open Tactical Controls from the lobby or press F1/ESC in a mission, then click a binding button. Conflicts offer Swap, Replace or Cancel. ESC cancels capture; RESET DEFAULTS restores the standard layout. Bindings persist in Godot's `user://keybindings.cfg`. Mouse-wheel pulses are available for discrete actions; held actions require a key or mouse button. Hold Q/M4 while aiming to select a squad order without releasing ADS.

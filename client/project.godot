@@ -17,6 +17,8 @@ buses/default_bus_layout="res://default_bus_layout.tres"
 
 [autoload]
 
+KeybindingManager="*res://scripts/input/KeybindingManager.gd"
+
 NetworkManager="*res://scripts/net/NetworkManager.gd"
 
 [debug]
