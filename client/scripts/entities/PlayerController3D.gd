@@ -7,9 +7,9 @@ extends CharacterBody3D
 const SGCDialingConsoleScript = preload("res://scripts/props/SGCDialingConsole.gd")
 const LabDataPatchDriveScript = preload("res://scripts/props/LabDataPatchDrive.gd")
 const IrisServoHousingScript = preload("res://scripts/props/IrisServoHousing.gd")
-const DeployableShieldScene = preload("res://scenes/props/DeployableShield.tscn")
+const DEPLOYABLE_SHIELD_PATH: String = "res://scenes/props/DeployableShield.tscn"
 const DeployableShieldScript = preload("res://scripts/props/DeployableShield.gd")
-const SmokeGrenadeScene = preload("res://scenes/weapons/SmokeGrenade.tscn")
+const SMOKE_GRENADE_PATH: String = "res://scenes/weapons/SmokeGrenade.tscn"
 const SmokeGrenadeScript = preload("res://scripts/weapons/SmokeGrenade.gd")
 const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
 const RadialCommandWheelScript = preload("res://scripts/ui/RadialCommandWheel.gd")
@@ -24,6 +24,8 @@ signal class_configured(class_id: String)
 @export var class_id: String = "sg3_heavy":
 	set(val):
 		if class_id == val and current_weapon != null:
+			return
+		if is_inside_tree() and multiplayer.has_multiplayer_peer() and multiplayer.is_server() and not _server_class_id.is_empty() and val != _server_class_id:
 			return
 		class_id = val
 		if is_inside_tree() and weapon_holder != null:
@@ -43,6 +45,15 @@ var is_firing: bool = false
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
 var current_weapon: WeaponBase = null
+var _weapon_inventory: Dictionary = {}
+var _server_class_id: String = ""
+var _applying_weapon_state: bool = false
+var _shot_request_id: int = 0
+var _last_shot_request: int = 0
+var _revive_lease: float = 0.0
+var _server_revive_target: NodePath = NodePath()
+var _server_revive_time: float = 0.0
+var _revive_send_timer: float = 0.0
 var current_aim_target: Vector3 = Vector3.ZERO
 var primary_weapon_id: String = "m249"
 var secondary_weapon_id: String = "m9"
@@ -161,6 +172,8 @@ func _exit_tree() -> void:
 
 
 func _ready() -> void:
+	if multiplayer.is_server():
+		_server_class_id = class_id
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null and net.peers.has(peer_id):
 		player_callsign = net.peers[peer_id].get("name", "OPERATIVE")
@@ -307,7 +320,8 @@ func _apply_class_profile(target_class_id: String) -> void:
 
 	if health_component != null:
 		health_component.max_health = profile.get("health", 120.0)
-		health_component.current_health = health_component.max_health
+		if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+			health_component.current_health = health_component.max_health
 
 	primary_weapon_id = profile.get("primary", "m249")
 	secondary_weapon_id = profile.get("secondary", "m9")
@@ -444,22 +458,37 @@ func _apply_class_visuals(target_class_id: String) -> void:
 
 
 func switch_slot(slot: int) -> void:
-	if active_slot == slot:
+	if slot not in [1, 2]:
+		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server() and not _applying_weapon_state:
+		if is_local_authority:
+			_equip_slot_local(slot)
+			server_request_slot.rpc_id(1, slot)
+		return
+	_equip_slot_local(slot)
+	if multiplayer.is_server():
+		_broadcast_weapon_state()
+
+
+func _equip_slot_local(slot: int) -> void:
+	if active_slot == slot and current_weapon != null:
 		return
 	active_slot = slot
-	var target_id := primary_weapon_id if active_slot == 1 else secondary_weapon_id
-	_equip_weapon_by_id(target_id)
-	print("Player %d switched to slot %d: %s" % [peer_id, active_slot, current_weapon.display_name])
+	_equip_weapon_by_id(primary_weapon_id if slot == 1 else secondary_weapon_id)
 
 
 func _equip_weapon_by_id(weapon_id: String) -> void:
 	if weapon_holder == null:
 		return
 
-	# Clear existing weapons in holder
-	for child in weapon_holder.get_children():
+	for child: Node in weapon_holder.get_children():
 		if child is WeaponBase:
-			child.queue_free()
+			child.hide()
+	if _weapon_inventory.has(weapon_id) and is_instance_valid(_weapon_inventory[weapon_id]):
+		current_weapon = _weapon_inventory[weapon_id]
+		current_weapon.show()
+		weapon_ammo_changed.emit(current_weapon.current_ammo, current_weapon.reserve_ammo)
+		return
 
 	var new_weapon: WeaponBase = null
 	match weapon_id:
@@ -480,6 +509,7 @@ func _equip_weapon_by_id(weapon_id: String) -> void:
 
 	weapon_holder.add_child(new_weapon)
 	current_weapon = new_weapon
+	_weapon_inventory[weapon_id] = new_weapon
 	current_weapon.position = Vector3(0.3, 0.9, -0.4)
 
 	# Connect weapon signals
@@ -490,6 +520,8 @@ func _equip_weapon_by_id(weapon_id: String) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if multiplayer.is_server():
+		_server_revive_tick(delta)
 	# Non-authorities rely on MultiplayerSynchronizer replication for position/rotation
 	if not is_local_authority:
 		move_and_slide()
@@ -1053,14 +1085,31 @@ func _plant_claymore() -> void:
 		print("Player %d planted M18A1 Claymore! (%d charges left)" % [peer_id, claymore_charges])
 
 
-func _on_weapon_fired(origin: Vector3, dir: Vector3, hit_point: Vector3, hit_node: Node) -> void:
-	var is_zat := (current_weapon != null and current_weapon.is_zat)
-	var is_pl := (current_weapon != null and current_weapon.is_plasma)
-	rpc("play_shot_fx", origin, hit_point, is_pl, is_zat)
+func _on_weapon_fired(origin: Vector3, _dir: Vector3, hit_point: Vector3, _hit_node: Node) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
+	var zat: bool = current_weapon != null and current_weapon.is_zat
+	var plasma: bool = current_weapon != null and current_weapon.is_plasma
+	if multiplayer.has_multiplayer_peer():
+		play_shot_fx.rpc(origin, hit_point, plasma, zat)
+	else:
+		play_shot_fx(origin, hit_point, plasma, zat)
+	_broadcast_weapon_state()
 
 
-@rpc("call_local", "unreliable")
+@rpc("any_peer", "call_local", "unreliable")
 func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = false) -> void:
+	var sender: int = multiplayer.get_remote_sender_id()
+	if multiplayer.has_multiplayer_peer() and sender != 0 and sender != 1:
+		return
+	if sender == 1 and is_local_authority:
+		return # The firing client already rendered its responsive prediction.
+	_render_shot_fx(from, to, is_plasma, is_zat)
+
+
+func _render_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = false) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	# Render lightweight tracer beam
 	var tracer := MeshInstance3D.new()
 	var imm := ImmediateMesh.new()
@@ -1166,11 +1215,13 @@ func _process_downed_crawl(delta: float) -> void:
 
 
 func _process_revive(delta: float) -> void:
+	_revive_send_timer -= delta
 	if not Input.is_action_pressed("interact"):
 		if current_revive_time > 0.0:
 			current_revive_time = 0.0
 			active_revive_target = null
 			revive_progress_changed.emit(0.0)
+		_send_revive_hold(null)
 		return
 
 	# Find closest downed squadmate or allied SGC Airman within 2.4m
@@ -1202,18 +1253,20 @@ func _process_revive(delta: float) -> void:
 
 	if closest_downed != null:
 		active_revive_target = closest_downed
+		_send_revive_hold(closest_downed)
 		current_revive_time += delta
 		var prog := clampf(current_revive_time / REVIVE_DURATION_S, 0.0, 1.0)
 		revive_progress_changed.emit(prog)
 		if current_revive_time >= REVIVE_DURATION_S:
 			var target_health := active_revive_target.get_node_or_null("HealthComponent") as HealthComponent
-			if target_health != null:
+			if target_health != null and not multiplayer.has_multiplayer_peer():
 				target_health.revive(self)
 			active_revive_target = null
 			current_revive_time = 0.0
 			revive_progress_changed.emit(0.0)
 			print("Player %d REVIVED squadmate/ally %s!" % [peer_id, closest_downed.name])
 	else:
+		_send_revive_hold(null)
 		if current_revive_time > 0.0:
 			current_revive_time = 0.0
 			active_revive_target = null
@@ -1776,7 +1829,7 @@ func deploy_shield() -> void:
 		return
 	deployable_shields_count -= 1
 
-	var shield := DeployableShieldScene.instantiate() as DeployableShieldScript
+	var shield := (load(DEPLOYABLE_SHIELD_PATH) as PackedScene).instantiate() as DeployableShieldScript
 	var spawn_pos := global_position - global_transform.basis.z * 1.3
 	spawn_pos.y = global_position.y
 	shield.position = spawn_pos
@@ -1797,7 +1850,7 @@ func throw_smoke_grenade() -> void:
 		return
 	smoke_grenades_count -= 1
 
-	var grenade := SmokeGrenadeScene.instantiate() as SmokeGrenadeScript
+	var grenade := (load(SMOKE_GRENADE_PATH) as PackedScene).instantiate() as SmokeGrenadeScript
 	var spawn_pos := global_position + Vector3(0, 1.4, 0) - global_transform.basis.z * 0.8
 	grenade.position = spawn_pos
 	var throw_vel := (-global_transform.basis.z * 12.0) + Vector3(0, 3.5, 0)
@@ -1880,7 +1933,8 @@ func _on_vaporized() -> void:
 	var tween := create_tween()
 	if body_mesh != null:
 		tween.tween_property(body_mesh, "scale", Vector3(0.01, 0.01, 0.01), 0.25)
-	tween.tween_callback(queue_free)
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		tween.tween_callback(queue_free)
 	var flash_tween := flash.create_tween()
 	flash_tween.tween_property(flash, "light_energy", 0.0, 0.25)
 	flash_tween.tween_callback(flash.queue_free)
@@ -2013,3 +2067,139 @@ func clear_cctv_camera() -> void:
 
 func _bindings() -> Node:
 	return get_node("/root/KeybindingManager")
+
+
+# Combat requests carry intent only. The server chooses weapon statistics, spread, ray hits and damage.
+func _valid_combat_sender() -> bool:
+	return multiplayer.is_server() and _combat_peer_allowed(multiplayer.get_remote_sender_id())
+
+
+func _combat_peer_allowed(sender: int) -> bool:
+	return sender == 0 or (sender == peer_id and sender in multiplayer.get_peers())
+
+
+func _can_use_weapon(slot: int) -> bool:
+	return health_component != null and not health_component.is_dead and not health_component.is_stunned and (not health_component.is_downed or slot == 2)
+
+
+func request_weapon_fire() -> bool:
+	if current_weapon == null or not is_local_authority or not _can_use_weapon(active_slot):
+		return false
+	if not current_weapon.consume_shot():
+		return false
+	var origin: Vector3 = current_weapon.muzzle_point.global_position
+	var direction: Vector3 = (current_aim_target - origin).normalized() if current_aim_target != Vector3.ZERO else -global_transform.basis.z
+	_shot_request_id += 1
+	server_request_fire.rpc_id(1, _shot_request_id, active_slot, current_weapon.weapon_id, origin, direction, is_aiming_down_sights)
+	if current_weapon.audio_player != null:
+		current_weapon.audio_player.play()
+	_render_shot_fx(origin, origin + direction * current_weapon.max_range_m, current_weapon.is_plasma, current_weapon.is_zat)
+	return true
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_fire(sequence: int, slot: int, weapon_id: String, origin: Vector3, direction: Vector3, aiming: bool) -> void:
+	if not _valid_combat_sender() or sequence <= _last_shot_request or slot not in [1, 2] or not _can_use_weapon(slot):
+		return
+	_last_shot_request = sequence
+	var profile: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(_server_class_id, {})
+	var allowed: String = profile.get("primary" if slot == 1 else "secondary", "")
+	if weapon_id != allowed or not origin.is_finite() or not direction.is_finite() or absf(direction.length() - 1.0) > 0.02:
+		return
+	_equip_slot_local(slot)
+	var muzzle: Vector3 = current_weapon.muzzle_point.global_position
+	if origin.distance_to(muzzle) > 1.5 or absf(direction.y) > 0.9:
+		return
+	var flat := Vector3(direction.x, 0, direction.z).normalized()
+	if flat.dot(-global_transform.basis.z) < -0.1:
+		return
+	is_aiming_down_sights = aiming
+	var spread: float = 0.01 if aiming and is_crouching else (0.35 if aiming else (0.40 if is_crouching else (1.8 if velocity.length() > 2.0 else 1.0)))
+	current_weapon.try_fire(spread, direction)
+	_broadcast_weapon_state()
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_slot(slot: int) -> void:
+	if not _valid_combat_sender() or slot not in [1, 2] or not _can_use_weapon(slot):
+		return
+	_equip_slot_local(slot)
+	_broadcast_weapon_state()
+
+
+func request_weapon_reload() -> void:
+	server_request_reload.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_reload() -> void:
+	if _valid_combat_sender() and current_weapon != null and _can_use_weapon(active_slot):
+		current_weapon.reload()
+		_broadcast_weapon_state()
+
+
+func _broadcast_weapon_state() -> void:
+	if not multiplayer.has_multiplayer_peer() or not multiplayer.is_server() or current_weapon == null:
+		return
+	var weapon: WeaponBase = current_weapon
+	sync_weapon_state.rpc(active_slot, weapon.weapon_id, weapon.current_ammo, weapon.reserve_ammo, weapon.current_heat, weapon.is_overheated, weapon.is_reloading)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func sync_weapon_state(slot: int, weapon_id: String, ammo: int, reserve: int, heat: float, overheated: bool, reloading: bool) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	_applying_weapon_state = true
+	_equip_slot_local(slot)
+	_applying_weapon_state = false
+	if current_weapon == null or current_weapon.weapon_id != weapon_id:
+		return
+	current_weapon.current_ammo = ammo
+	current_weapon.reserve_ammo = reserve
+	current_weapon.current_heat = heat
+	current_weapon.is_overheated = overheated
+	current_weapon.is_reloading = reloading
+	weapon_ammo_changed.emit(ammo, reserve)
+	current_weapon.heat_changed.emit(heat, overheated)
+
+
+func _send_revive_hold(target: Node) -> void:
+	if not multiplayer.has_multiplayer_peer() or _revive_send_timer > 0.0:
+		return
+	_revive_send_timer = 0.1
+	var path: NodePath = get_parent().get_path_to(target) if is_instance_valid(target) else NodePath()
+	if multiplayer.is_server():
+		server_revive_hold(path)
+	else:
+		server_revive_hold.rpc_id(1, path)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func server_revive_hold(target_path: NodePath) -> void:
+	if not _valid_combat_sender() or not _can_use_weapon(1):
+		return
+	if target_path.is_empty():
+		_server_revive_target = NodePath()
+		_server_revive_time = 0.0
+		return
+	if target_path != _server_revive_target:
+		_server_revive_time = 0.0
+	_server_revive_target = target_path
+	_revive_lease = 0.35
+
+
+func _server_revive_tick(delta: float) -> void:
+	if _server_revive_target.is_empty():
+		return
+	_revive_lease -= delta
+	var target: Node3D = get_parent().get_node_or_null(_server_revive_target) as Node3D
+	var health: HealthComponent = target.get_node_or_null("HealthComponent") as HealthComponent if target != null else null
+	if _revive_lease <= 0.0 or not _can_use_weapon(1) or target == self or target == null or global_position.distance_to(target.global_position) > 2.4 or health == null or not health.is_downed or health.is_dead:
+		_server_revive_target = NodePath()
+		_server_revive_time = 0.0
+		return
+	_server_revive_time += delta
+	if _server_revive_time >= REVIVE_DURATION_S:
+		health.revive(self)
+		_server_revive_target = NodePath()
+		_server_revive_time = 0.0
