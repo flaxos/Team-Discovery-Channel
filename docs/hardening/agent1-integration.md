@@ -1,5 +1,7 @@
 # Agent 1 — Git integration and baseline recovery
 
+> Historical record: findings, branch states, counts and environment limits below apply to the stated baseline. See the [current documentation index](../README.md) and [testing guide](../TESTING.md) for present behavior and commands.
+
 Audit date: 8 November 2026. No shared history was rewritten, no force-push was used and no merge into main was performed.
 
 ## Confirmed finding

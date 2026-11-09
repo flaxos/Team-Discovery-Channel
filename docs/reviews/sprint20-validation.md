@@ -1,5 +1,7 @@
 # Sprint 20 validation
 
+> Historical record: findings, branch states, counts and environment limits below apply to the stated baseline. See the [current documentation index](../README.md) and [testing guide](../TESTING.md) for present behavior and commands.
+
 Validated with Godot 4.4.1 on 8 November 2026, based on Sprint 19 takeover commit `0031510`.
 
 `python3 tools/run_godot_tests.py --output /tmp/tdc-release-validation --timeout 30` passed all 11 suites. The persistence suite launches a writer and a separate reader process using isolated user data. The runner rejects engine/script errors, assertions, leaks and timeouts even when a test exits zero.

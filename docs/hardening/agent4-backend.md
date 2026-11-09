@@ -1,5 +1,7 @@
 # Agent 4 — Alignment API security and document safety
 
+> Historical record: findings, branch states, counts and environment limits below apply to the stated baseline. See the [current documentation index](../README.md) and [testing guide](../TESTING.md) for present behavior and commands.
+
 Worktree: `/tmp/tdc-hardening/backend`, branch `stabilisation/backend`. Implementation starts from recovered baseline `0bb2d1b` on current main. No gameplay files changed.
 
 ## Confirmed defects and evidence

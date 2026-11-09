@@ -1,5 +1,7 @@
 # Agent 5 — test infrastructure and CI
 
+> Historical record: findings, branch states, counts and environment limits below apply to the stated baseline. See the [current documentation index](../README.md) and [testing guide](../TESTING.md) for present behavior and commands.
+
 Baseline: `62d15bf`, Godot `4.4.1.stable.official.49a5bc7b6`, Python 3.11. Work is limited to runner/CI infrastructure; no gameplay or existing game-test assertions were changed.
 
 ## Confirmed defects

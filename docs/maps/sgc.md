@@ -1,5 +1,7 @@
 # Three-level SGC map
 
+See [playing/local UAT](../PLAYING.md) for lobby and multiplayer instructions, [architecture](../ARCHITECTURE.md) for ownership, and [testing](../TESTING.md) for acceptance commands.
+
 The playable mode contains Sublevels 28 (gate/operations/combat loop), 27 (briefing/command/security), and 26 (support, staging, storage and service rooms). Existing mission objectives and wave counts remain unchanged. Level 25 is excluded.
 
 ## Reference basis and deliberate extensions
@@ -15,6 +17,12 @@ The playable mode contains Sublevels 28 (gate/operations/combat loop), 27 (brief
 Use the lobby's **LEVEL / MISSION** selector before dispatch: **SGC Defense — Levels 28/27/26** enables incursions; **SGC UAT Base — No Hostile Activation** loads `SGCUATBase.tscn`, which inherits the same GateRoom map. UAT retains traversal, props and friendly personnel, but guards the staging scramble and wave start/update paths, so an incoming hostile connection cannot begin automatically. Difficulty is disabled for UAT. Mission IDs are carried in start/retry RPCs and sent to joining clients; clients cannot change the host selection. CLI: `--mission sgc_defense` or `--mission sgc_uat`.
 
 `test_mission_selection_uat` launches through the actual lobby/coordinator, checks the inherited scene and Level 26, runs 30 simulated seconds without enemies or gate activation, verifies retry and checks Defense still activates. The settings synchronization suite covers client selection authority and stale start/retry caches.
+
+## Interaction and objective UI
+
+Buffer lockout and ROM-upload status use the objective HUD without opening the dialing panel. The panel is reserved for an approved dialing session and closes when that session is cancelled; global lockout/progress updates cannot leave an orphan overlay on screen. `test_buffer_lockout_hud` covers denied dialing, upload/cancel/snapshot notifications and normal dialing dismissal.
+
+The control and briefing windows have independent shutter consoles. Inside the lift, use aimed buttons or the floor picker; keep UI state separate from authoritative movement. The [player guide](../PLAYING.md#floors-stairs-and-shutters) covers the interaction route.
 
 ## Authoring contract
 
@@ -75,6 +83,8 @@ DISPLAY=:0 godot --path client --script res://tests/support/sgc_visual_review.gd
 
 The runner allows 180 seconds per suite by default because the full three-capsule route matrix takes about 100 seconds on the development machine. Explicit timeout overrides remain supported.
 
+- `test_sgc_enclosure`: room/shaft closure, deliberate portal/placement gaps and missing surfaces, plus lift-independent closure.
+- `test_buffer_lockout_hud`: denied dialing and upload/cancel/snapshot messages leave no orphan panel; approved dialing still opens and dismisses its session UI.
 - `test_sgc_map_routes`: every walking and stair connection, both directions, with continuously moving production player, airman and Jaffa capsules. Initial placements are test setup, not movement shortcuts.
 - `test_sgc_uat_architecture`: roof collision coverage, sealed raised operations, shutter alignment, aimed floor-button selection and continuous live-controller lift grounding in both directions.
 - `test_sgc_lift_routes`: startup entry, physical rider carrying, three-floor arrivals, diagonal exits, queued calls and rejected Level 25 requests.
@@ -83,6 +93,3 @@ The runner allows 180 seconds per suite by default because the full three-capsul
 - Boundary, multiplayer lift/state, late join/retry, observation glass, objectives, gunplay and input regressions remain covered. The four old stair/lift tests based on CSG names or exact tread counts have been consolidated into the behavioral route/lift suites.
 
 The visual helper writes actual Forward+ GPU captures to `build/sgc-review/`. It covers embarkation looking up at the stacked observation rooms, control looking at the gate, both shutters closed, briefing, spiral, east corridor, west/connector joins, service stairs, support, briefing alert lighting and an active incoming gate. Screenshots and headless tests do not establish subjective combat balance or replace a human multiplayer playtest.
-
-
-Buffer lockout and ROM-upload status use the objective HUD without opening the dialing panel. The panel is reserved for an approved dialing session and closes when that session is cancelled; global lockout/progress updates cannot leave an orphan overlay on screen. `test_buffer_lockout_hud` covers denied dialing, upload/cancel/snapshot notifications and normal dialing dismissal.

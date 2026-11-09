@@ -1,5 +1,7 @@
 # Sprint 20 Plan: Tactical ADS Squad Submenu Selection & Interactive Keybinding Remapping
 
+> Historical record: findings, branch states, counts and environment limits below apply to the stated baseline. See the [current documentation index](../README.md) and [testing guide](../TESTING.md) for present behavior and commands.
+
 **Target Architecture:** Project SGC (Godot 4.4.1, Strict Static GDScript `untyped_declaration=2`, SGC Foothold Slice)  
 **Branch:** `feat/sprint20-ads-submenu-and-keybinding-remapping`  
 **Parent Sprint:** `feat/sprint19-cursor-confinement-ads-zoom-fade` (Completed & PR #19 Updated)

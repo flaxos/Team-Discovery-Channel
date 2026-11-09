@@ -1,58 +1,55 @@
 # Team Discovery Channel
-> **Collab multiplayer game project with the agentic lads.**
 
-Welcome to the **Team Discovery Channel** game dev repository!
-We built a dedicated **Alignment & Voting Engine** to defeat scope creep and stay grounded.
+Stargate: SG Extraction is a Godot 4.4.1 co-op tactical shooter. The current playable setting is the three-level SGC: Sublevels 28, 27 and 26. The repository also contains a separate Alignment & Voting web app for planning.
 
----
+## Play locally
 
-## 🎮 Game Status & Alignment
-* **Game Concept**: Deep Space Expedition Co-op
-* **Alignment Status**: Compiled & Grounded
-* **Documents Generated**:
-  - [**BOOTSTRAP_PROMPT.md**](./BOOTSTRAP_PROMPT.md) - The complete agentic kickoff prompt for Claude Code, Antigravity, or Codex to scaffold the game.
-  - [**GDD.md**](./GDD.md) - Game Design Document (Core Loop, Netcode Blueprint, Feature Matrix).
-  - [**ROADMAP.md**](./ROADMAP.md) - Sprint 0 through 2 milestones with role division.
-  - [**TEAM_CONTRACT.md**](./TEAM_CONTRACT.md) - The Grounding Pact & Anti-Abandonment rules.
+From the checkout you want to test:
 
----
+```sh
+godot --path client
+```
 
-## 🛠️ Alignment & Voting Web App
-To run the live voting and prompt compiler app:
+In the lobby, select a callsign and class, click **ESTABLISH SGC BASE**, choose **LEVEL / MISSION**, then click **LAUNCH SELECTED MISSION**.
 
-```bash
-cd alignment-app
-npm install
+| Mission | Behavior |
+| --- | --- |
+| **SGC Defense — Levels 28/27/26** | Incoming Jaffa, objectives and outbound extraction. The host selects difficulty. |
+| **SGC UAT Base — No Hostile Activation** | The same map, equipment and friendly personnel for exploration, with automatic hostile activation and waves disabled. Difficulty is disabled. |
+
+To preselect quiet UAT, run `godot --path client -- --mission sgc_uat`, then host and launch in the lobby. This flag selects the mission; it does not bypass the lobby. The normal game directory on the development machine is `/home/flax/games/Team-Discovery-Channel`; it is separate from Orca worktrees. Restart a running game after updating its checkout.
+
+See the [player guide](docs/PLAYING.md) for controls, mission objectives, floor selection, shutters and multiplayer launch commands.
+
+## Current map and validation
+
+Operations is raised above embarkation behind sealed observation glass, with side/rear stair access; briefing overlooks it from Level 27. The gate is 6.7 m across, inside a 24 m wide, 12 m high chamber. These are playable SG-1-informed proportions, with authored peripheral corridors and Level 26 support rooms.
+
+The lift has aimed floor buttons and a floor picker. Both factions navigate the region graph, stairs and lift. Corridor openings are clipped to adjoining rooms; enclosure validation checks the built walls, floors, ceilings and connecting shafts. A failed enclosure check blocks the navigation bake. Buffer-lockout and ROM-upload messages use the objective HUD rather than opening a stuck dialing panel.
+
+The [map authoring contract](docs/maps/sgc.md) covers layout references, schema, art-replacement slots, navigation and enclosure checks. The [roadmap](ROADMAP.md) distinguishes implemented work from future offworld missions.
+
+## Developer checks
+
+```sh
+python3 tools/run_godot_tests.py --profile full --timeout 240
+```
+
+The full profile discovers every `client/tests/test_*.gd`. At gameplay commit `a720594`, all **51 checks** passed locally: 49 test scripts, a separate persistence reader process and project import. This is a recorded local result, not a claim about subsequent hosted CI or human multiplayer acceptance. See [testing and UAT](docs/TESTING.md) for profiles, reports, visual captures and the manual acceptance route.
+
+## Alignment & Voting app
+
+```sh
+npm ci --prefix alignment-app
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) to cast votes, propose custom mechanics, or regenerate the bootstrap prompts!
+Open [localhost:5173](http://localhost:5173). Retrieve the local access token with `npm --prefix alignment-app run auth-token` and enter it in the app. The API listens on loopback port 4100 by default. Its authentication, deployment settings and generated-document export contract are in the [Alignment app guide](docs/ALIGNMENT.md).
 
----
+Voting exports write planning snapshots under `docs/generated/`; they do not replace these maintained project documents.
 
-## 👥 The Squad
-* **flaxos** (🚀) - AI Agent Orchestrator, Core Gameplay & Systems, Combat Feel & Juice
-* **Scotty** (⚡) - Multiplayer & Netcode, Game Feel & Combat, Weapons & Perks Scripter
+## Project documentation
 
-*Built with passion, caffeine, and agentic AI.*
+Start with the [documentation index](docs/README.md). [GDD.md](GDD.md) describes the implemented design and future vision; [BOOTSTRAP_PROMPT.md](BOOTSTRAP_PROMPT.md) is the current contributor handoff; [TEAM_CONTRACT.md](TEAM_CONTRACT.md) records the team's grounding pact. Historical plans and audits are linked separately from current operating instructions.
 
-## Current Godot game
-
-The SGC co-op game is in `client/` (Godot 4.4.1). Run `godot --path client` to open the lobby.
-Run `python3 tools/run_godot_tests.py` for the takeover regression suites; this runner rejects script/engine errors and timeouts even if a suite prints a success banner.
-
-Sprint plans and review notes are in `docs/plans/` and `docs/reviews/`.
-The alignment API binds to localhost by default. Remote repository exports require `ALIGNMENT_EXPORT_TOKEN` and an `Authorization: Bearer …` header; set `ALIGNMENT_HOST` explicitly when remote API access is intended.
-
-Sprint 20 controls: open Tactical Controls from the lobby or press F1/ESC in a mission, then click a binding button. Conflicts offer Swap, Replace or Cancel. ESC cancels capture; RESET DEFAULTS restores the standard layout. Bindings persist in Godot's `user://keybindings.cfg`. Mouse-wheel pulses are available for discrete actions; held actions require a key or mouse button. Hold Q/M4 while aiming to select a squad order without releasing ADS.
-
-Mission modes are selectable in the lobby by the host: **Easy** requires at least three cleared incursions; **Medium** also requires the lab ROM computer upgrade; **Hard** additionally requires iris repair during an incoming breach. Incoming pressure continues until the objectives are met. Starting an eligible outbound dial reserves the gate against new incoming connections.
-
-The active cleanup and larger map/mission refactor plans are tracked in [plan/](plan/README.md).
-
-
-The host can select **SGC Defense — Levels 28/27/26** or **SGC UAT Base — No Hostile Activation** in the lobby's **LEVEL / MISSION** menu. UAT uses the same three-level map, friendly personnel, equipment, lifts and stairs, with automatic hostile gate activations and waves disabled. Difficulty applies to Defense. The host's mission selection is shared with clients and preserved on retry.
-
-For a quiet dedicated UAT server: `godot --headless --path client -- --server --mission sgc_uat`. The inherited scene is `client/scenes/main/SGCUATBase.tscn`.
-
-Changes in a separate worktree do not update an already running game or another checkout. Launch Godot with `--path` pointing at the `client/` directory of the checkout containing the changes.
+Contributors: **flaxos** — AI orchestration, core systems and combat; **Scotty** — multiplayer, game feel, weapons and perks.

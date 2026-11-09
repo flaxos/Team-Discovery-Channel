@@ -1,6 +1,10 @@
-# Active work
+# Work tracker
 
-- [Sprint 21 cleanup and acceptance checks](sprint21_accessibility_gate_lifecycle_and_difficulty.md): PR conflicts, map access, gate lifecycle and selectable mission modes.
-- [Larger architecture refactor](map_and_mission_architecture_refactor.md): follow-up design after the cleanup baseline passes.
+Current operating documentation is indexed in [docs/README.md](../docs/README.md). This directory records implementation and acceptance work rather than replacing the current code contract.
 
-Historical sprint plans remain under `docs/plans/`.
+| Record | Status / next use |
+| --- | --- |
+| [Sprint 21 cleanup](sprint21_accessibility_gate_lifecycle_and_difficulty.md) | Engineering cleanup integrated; preserve the lifecycle/authority/settings contracts and complete human multiplayer acceptance. |
+| [Map and mission architecture](map_and_mission_architecture_refactor.md) | Three-level map, mission/UAT selection, AI/art schema and UAT fixes implemented; broader coordinator/data refactors remain proposals. |
+
+The [roadmap](../ROADMAP.md) distinguishes delivered behavior from future offworld modes. Historical sprint plans remain under [docs/plans](../docs/plans/); reviews and audit evidence retain the findings at their stated commits. Refer to [testing/UAT](../docs/TESTING.md) for current commands and [the map contract](../docs/maps/sgc.md) for authoring rules.
