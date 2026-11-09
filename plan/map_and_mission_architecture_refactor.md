@@ -1,19 +1,27 @@
-# Follow-up: map and mission architecture refactor
+# Map and mission architecture: implementation record and follow-up
 
-Do this after Sprint 21 cleanup is playable and verified. Preserve the working Q/ADS and remapping behavior.
+Updated 9 November 2026 against gameplay commit `a720594`. The original follow-up proposal has been partly delivered; this record distinguishes implemented contracts from future restructuring. Preserve working Q/ADS, remapping, combat authority and mission behavior.
 
-## Map topology
+## Implemented map topology
 
-Replace overlapping room-sized CSG walls/floors with reusable floor, wall, portal, landing and staircase modules. Define a floor-height table, minimum capsule clearance, wall thickness and door aperture dimensions once. Every portal must connect two named navigable regions, with explicit clearance volumes that neighboring floors/walls cannot occupy.
+- `SGCMapDefinition` supplies named regions/connections, main floor heights, local offsets, ceilings, clearance, lighting, references/confidence and art-replacement data. The playable map contains Levels 28/27/26.
+- `SGCMap` builds reusable walls/floors, clipped portals, guarded stairs, shaft enclosures, cover, fixtures and dressing. Retained props own the gate, consoles, glazing and shutters.
+- Both factions use `SGCNavigator` for graph/local paths, physical stair movement and lift actions. Production capsule traversal covers all walk/stair edges in both directions without intermediate position resets.
+- The SG-1-informed core has raised sealed operations, briefing above, side/rear access and revised gate/chamber proportions. Quiet UAT is selected through the normal host lobby.
+- `SGCEnclosureValidator` checks physical exterior closure; detached walking joins fail schema validation and the bake refuses shell errors. Negative tests introduce gaps and removed surfaces. Art slots retain briefs and dimension bounds.
 
-Keep a named region/connection graph alongside the authored map. Use that graph for spawn placement, test route generation, AI destinations and accessibility reporting. Validate connected regions with the production player capsule and both directions of every vertical connection. Test access from real spawn/corridor positions, not only positions within the target room.
+These changes are delivered through [PR #22](https://github.com/flaxos/Team-Discovery-Channel/pull/22), [#23](https://github.com/flaxos/Team-Discovery-Channel/pull/23), [#24](https://github.com/flaxos/Team-Discovery-Channel/pull/24) and [#25](https://github.com/flaxos/Team-Discovery-Channel/pull/25). Current contracts and exact commands live in [the map guide](../docs/maps/sgc.md).
 
-## Mission ownership
+## Implemented mission ownership
 
-Keep one server-authoritative mission coordinator with explicit phases: preparation, incoming sequence, incoming active, cleanup/recharge, outbound eligible, outbound dialing, outbound active, mission ended. The gate owns its direction and rendering lifecycle; the wave system requests transitions and reacts to accepted state changes. UI observes state and objectives rather than setting gate visuals directly.
+Native server authority, gate direction/reservation, objective eligibility, late-join snapshots and coordinated retry/world retirement are in place. The host selects Defense/UAT and difficulty. Gate rendering/lifecycle stays with `StargateRing`; the wave system requests transitions and observes accepted changes. UI observes mission state. Buffer lockout/upload progress does not create an orphan dialing panel.
 
-Represent the mode objectives as data: minimum cleared incursions, computer upgrade required, iris repair required. Share the same predicate between UI prompts and server-side interaction acceptance. Publish a replicated mission snapshot for late joiners containing selected mode, phase, wave counts, gate direction, objective progress and timers.
+## Remaining design proposals
 
-## Verification and rollout
+A single explicit mission-phase enum/coordinator and fully data-driven objective definitions remain possible follow-up refactors; they are not claims about the current implementation. Current public interfaces split responsibility across `NetworkManager`, `MainGameCoordinator`, `WaveManager`, `StargateRing` and the dialing console. See [architecture](../docs/ARCHITECTURE.md) before replacing them.
 
-Migrate one subsystem at a time behind the existing public interfaces. Keep the strict test runner, true corridor-to-corridor routes, stale-callback/race tests and two-peer settings/state checks. Add a short graphical UAT route covering spawn → control room → both Level 27 access routes → every main room → return, then one full extraction run per mode. Do not claim headless visibility or collision checks establish graphical quality or game feel.
+If this restructuring is pursued, keep one authoritative predicate for progression/UI acceptance, preserve reservation and stale-callback behavior, and migrate behind existing interfaces. Avoid a second gate state machine or parallel networking stack. Scope offworld scene transitions separately.
+
+## Verification and acceptance
+
+At `a720594`, all 51 local checks passed, including route/lift/enclosure/lockout contracts and native multiplayer regressions. Forward+ captures were inspected. Continue [graphical and two-human UAT](../docs/TESTING.md#graphical-and-human-uat), especially combat balance, latency and live mission completion. Automated collision/visibility checks do not establish game feel.

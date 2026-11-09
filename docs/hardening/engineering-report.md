@@ -1,5 +1,7 @@
 # Multiplayer stabilisation engineering report
 
+> Historical record: findings, branch states, counts and environment limits below apply to the stated baseline. See the [current documentation index](../README.md) and [testing guide](../TESTING.md) for present behavior and commands.
+
 Status (9 November 2026): engineering integration and local automated validation complete on `stabilisation/release-candidate`. Graphical multiplayer UAT is pending; this is not a release-readiness claim. Godot target: 4.4.1.
 
 ## Scope and preservation

@@ -1,6 +1,6 @@
 # Sprint 21: map access, gate lifecycle and selectable mission modes
 
-Status: implementation in progress. Requested 8 November 2026 after Sprint 20 playtest.
+Status: engineering implementation integrated; human multiplayer acceptance remains open. Requested 8 November 2026 after Sprint 20 playtest. Updated 9 November 2026. The execution plan below records the original work; use [current architecture](../docs/ARCHITECTURE.md), [map contract](../docs/maps/sgc.md) and [testing/UAT](../docs/TESTING.md) for implemented behavior and commands.
 
 ## Accepted playtest findings
 
@@ -18,7 +18,7 @@ Status: implementation in progress. Requested 8 November 2026 after Sprint 20 pl
 4. Add host-selectable Easy / Medium / Hard in the lobby, synchronized to clients before mission load. Defaults: Easy. All modes require at least three cleared incursions before outbound eligibility. Medium additionally requires a dialing-computer upgrade using the lab ROM/upload interaction. Hard adds iris repair during an active incursion, under combat pressure. Repair/upgrade progress persists across waves. If requirements remain incomplete, subsequent incoming waves keep applying pressure during scheduled recharge cycles. An eligible outbound dial attempt reserves the gate atomically and blocks a new incoming sequence.
 5. Integrate and run strict headless regression checks, real two-peer network checks and physical route checks. Review the changes, update plans/PR descriptions, commit and push. Report any graphical UAT limitation honestly.
 
-## Work ownership
+## Historical work ownership
 
 - Root: integration, conflict reconciliation, plan, test runner and PR delivery.
 - Navigation subagent: scene geometry, spiral walk surface, route-access tests.
@@ -35,13 +35,14 @@ Status: implementation in progress. Requested 8 November 2026 after Sprint 20 pl
 - Host-selected difficulty reaches existing/new clients and is applied before game_started/mission scene initialization. Clients cannot override host settings.
 - Q/ADS and remapping regression checks remain green. Test runner rejects errors/assertions even with exit code zero.
 
-## Larger refactor follow-up
+## Original larger-refactor proposal
 
 This cleanup establishes explicit gate ownership and route tests first. A later map refactor should replace overlapping room CSG volumes with a shared floor/doorway module system and a documented navigation topology, then simplify state/UI ownership around the authoritative mission lifecycle. Avoid an unrelated full rewrite during these fixes.
 
-## Progress
+## Final engineering progress
 
-- PR ancestry reconciliation is pushed. GitHub confirmed PR #19 and #20 mergeable against their intended bases.
-- Host-selectable modes, synchronized mission settings and lobby layout checks pass.
-- Navigation repair passes a continuous 427-waypoint route from the normal Gate Room floor through both stairs in both directions and the main rooms, with no intermediate teleports.
-- Gate/mode lifecycle and real progression tests are being integrated. Retry handling includes mode preservation, old-world retirement and coordinated replication teardown.
+- Ancestry reconciliation and the recovered controls baseline were integrated; the stabilisation work landed through [PR #21](https://github.com/flaxos/Team-Discovery-Channel/pull/21).
+- Host-selectable difficulty, gate lifecycle/reservation, objective progression, combat authority and native joining/retry/state replication are implemented and covered by the full suite.
+- The subsequent map refactor replaced the old fixed-route baseline with continuous production player/friendly/Jaffa coverage across every walk/stair connection and three-floor lift coverage.
+- [PR #22](https://github.com/flaxos/Team-Discovery-Channel/pull/22), [#23](https://github.com/flaxos/Team-Discovery-Channel/pull/23), [#24](https://github.com/flaxos/Team-Discovery-Channel/pull/24) and [#25](https://github.com/flaxos/Team-Discovery-Channel/pull/25) deliver the three-level map, mission/UAT selector, raised architecture/lift fixes and enclosure/lockout corrections.
+- Gameplay baseline `a720594` passed 51 local checks. Fixed-camera Forward+ captures were inspected; live two-human mission completion, combat feel and network conditions still require acceptance. See the [current work record](map_and_mission_architecture_refactor.md).
