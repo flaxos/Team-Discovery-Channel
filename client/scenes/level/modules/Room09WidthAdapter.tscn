@@ -1,0 +1,240 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelModule.gd" id="1"]
+[sub_resource type="StandardMaterial3D" id="mat"]
+albedo_color = Color(0.32,0.38,0.41,1)
+[sub_resource type="BoxShape3D" id="s0"]
+size = Vector3(6.0, 0.2, 7.0)
+[sub_resource type="BoxMesh" id="m0"]
+size = Vector3(6.0, 0.2, 7.0)
+[sub_resource type="BoxShape3D" id="s1"]
+size = Vector3(6.0, 0.2, 7.0)
+[sub_resource type="BoxMesh" id="m1"]
+size = Vector3(6.0, 0.2, 7.0)
+[sub_resource type="BoxShape3D" id="s2"]
+size = Vector3(3.0, 0.2, 1.0)
+[sub_resource type="BoxMesh" id="m2"]
+size = Vector3(3.0, 0.2, 1.0)
+[sub_resource type="BoxShape3D" id="s3"]
+size = Vector3(3.0, 0.2, 1.0)
+[sub_resource type="BoxMesh" id="m3"]
+size = Vector3(3.0, 0.2, 1.0)
+[sub_resource type="BoxShape3D" id="s4"]
+size = Vector3(0.2, 3.4, 7.0)
+[sub_resource type="BoxMesh" id="m4"]
+size = Vector3(0.2, 3.4, 7.0)
+[sub_resource type="BoxShape3D" id="s5"]
+size = Vector3(0.2, 3.4, 1.0)
+[sub_resource type="BoxMesh" id="m5"]
+size = Vector3(0.2, 3.4, 1.0)
+[sub_resource type="BoxShape3D" id="s6"]
+size = Vector3(0.2, 3.4, 1.0)
+[sub_resource type="BoxMesh" id="m6"]
+size = Vector3(0.2, 3.4, 1.0)
+[sub_resource type="BoxShape3D" id="s7"]
+size = Vector3(0.2, 3.4, 7.0)
+[sub_resource type="BoxMesh" id="m7"]
+size = Vector3(0.2, 3.4, 7.0)
+[sub_resource type="BoxShape3D" id="s8"]
+size = Vector3(3.0, 2.8, 0.2)
+[sub_resource type="BoxMesh" id="m8"]
+size = Vector3(3.0, 2.8, 0.2)
+[sub_resource type="BoxShape3D" id="s9"]
+size = Vector3(3.0, 0.6, 0.2)
+[sub_resource type="BoxMesh" id="m9"]
+size = Vector3(3.0, 0.6, 0.2)
+[sub_resource type="BoxShape3D" id="s10"]
+size = Vector3(1.5, 3.4, 0.2)
+[sub_resource type="BoxMesh" id="m10"]
+size = Vector3(1.5, 3.4, 0.2)
+[sub_resource type="BoxShape3D" id="s11"]
+size = Vector3(1.5, 3.4, 0.2)
+[sub_resource type="BoxMesh" id="m11"]
+size = Vector3(1.5, 3.4, 0.2)
+[sub_resource type="BoxShape3D" id="s12"]
+size = Vector3(6.0, 2.8, 0.2)
+[sub_resource type="BoxMesh" id="m12"]
+size = Vector3(6.0, 2.8, 0.2)
+[sub_resource type="BoxShape3D" id="s13"]
+size = Vector3(6.0, 0.6, 0.2)
+[sub_resource type="BoxMesh" id="m13"]
+size = Vector3(6.0, 0.6, 0.2)
+[node name="Room09WidthAdapter" type="Node3D"]
+script = ExtResource("1")
+definition_path = "res://resources/level_modules/Room09WidthAdapter.tres"
+[node name="Structure" type="Node3D" parent="."]
+[node name="Collision" type="Node3D" parent="Structure"]
+[node name="NavigationSource" type="Node3D" parent="Structure"]
+[node name="PortalClosures" type="Node3D" parent="Structure"]
+[node name="Visuals" type="Node3D" parent="."]
+[node name="Closures" type="Node3D" parent="Visuals"]
+[node name="Sockets" type="Node3D" parent="."]
+[node name="Markers" type="Node3D" parent="."]
+[node name="Attachments" type="Node3D" parent="."]
+[node name="Props" type="Node3D" parent="Attachments"]
+[node name="Cover" type="Node3D" parent="Attachments"]
+[node name="Interactions" type="Node3D" parent="Attachments"]
+[node name="Spawns" type="Node3D" parent="Attachments"]
+[node name="Floor0" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, -0.1, 0.5)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Floor0"]
+shape = SubResource("s0")
+[node name="Floor0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, -0.1, 0.5)
+mesh = SubResource("m0")
+material_override = SubResource("mat")
+metadata/visual_slot = "Floor0"
+metadata/dimensions = Vector3(6.0, 0.2, 7.0)
+[node name="Roof1" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 3.5, 0.5)
+collision_layer = 128
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Roof1"]
+shape = SubResource("s1")
+[node name="Roof1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 3.5, 0.5)
+mesh = SubResource("m1")
+material_override = SubResource("mat")
+metadata/visual_slot = "Roof1"
+metadata/dimensions = Vector3(6.0, 0.2, 7.0)
+[node name="Floor2" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, -0.1, -3.5)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Floor2"]
+shape = SubResource("s2")
+[node name="Floor2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, -0.1, -3.5)
+mesh = SubResource("m2")
+material_override = SubResource("mat")
+metadata/visual_slot = "Floor2"
+metadata/dimensions = Vector3(3.0, 0.2, 1.0)
+[node name="Roof3" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 3.5, -3.5)
+collision_layer = 128
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Roof3"]
+shape = SubResource("s3")
+[node name="Roof3" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 3.5, -3.5)
+mesh = SubResource("m3")
+material_override = SubResource("mat")
+metadata/visual_slot = "Roof3"
+metadata/dimensions = Vector3(3.0, 0.2, 1.0)
+[node name="Wall4" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(-3.1, 1.7, 0.5)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall4"]
+shape = SubResource("s4")
+[node name="Wall4" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-3.1, 1.7, 0.5)
+mesh = SubResource("m4")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall4"
+metadata/dimensions = Vector3(0.2, 3.4, 7.0)
+[node name="Wall5" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(-1.6, 1.7, -3.5)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall5"]
+shape = SubResource("s5")
+[node name="Wall5" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-1.6, 1.7, -3.5)
+mesh = SubResource("m5")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall5"
+metadata/dimensions = Vector3(0.2, 3.4, 1.0)
+[node name="Wall6" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(1.6, 1.7, -3.5)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall6"]
+shape = SubResource("s6")
+[node name="Wall6" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(1.6, 1.7, -3.5)
+mesh = SubResource("m6")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall6"
+metadata/dimensions = Vector3(0.2, 3.4, 1.0)
+[node name="Wall7" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(3.1, 1.7, 0.5)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall7"]
+shape = SubResource("s7")
+[node name="Wall7" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(3.1, 1.7, 0.5)
+mesh = SubResource("m7")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall7"
+metadata/dimensions = Vector3(0.2, 3.4, 7.0)
+[node name="north" type="StaticBody3D" parent="Structure/PortalClosures"]
+position = Vector3(0.0, 1.4, -4.1)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/PortalClosures/north"]
+shape = SubResource("s8")
+[node name="north" type="MeshInstance3D" parent="Visuals/Closures"]
+position = Vector3(0.0, 1.4, -4.1)
+mesh = SubResource("m8")
+material_override = SubResource("mat")
+metadata/visual_slot = "north"
+metadata/dimensions = Vector3(3.0, 2.8, 0.2)
+[node name="Header9" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 3.1, -4.1)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Header9"]
+shape = SubResource("s9")
+[node name="Header9" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 3.1, -4.1)
+mesh = SubResource("m9")
+material_override = SubResource("mat")
+metadata/visual_slot = "Header9"
+metadata/dimensions = Vector3(3.0, 0.6, 0.2)
+[node name="Wall10" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(-2.25, 1.7, -3.1)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall10"]
+shape = SubResource("s10")
+[node name="Wall10" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-2.25, 1.7, -3.1)
+mesh = SubResource("m10")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall10"
+metadata/dimensions = Vector3(1.5, 3.4, 0.2)
+[node name="Wall11" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(2.25, 1.7, -3.1)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall11"]
+shape = SubResource("s11")
+[node name="Wall11" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(2.25, 1.7, -3.1)
+mesh = SubResource("m11")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall11"
+metadata/dimensions = Vector3(1.5, 3.4, 0.2)
+[node name="south" type="StaticBody3D" parent="Structure/PortalClosures"]
+position = Vector3(0.0, 1.4, 4.1)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/PortalClosures/south"]
+shape = SubResource("s12")
+[node name="south" type="MeshInstance3D" parent="Visuals/Closures"]
+position = Vector3(0.0, 1.4, 4.1)
+mesh = SubResource("m12")
+material_override = SubResource("mat")
+metadata/visual_slot = "south"
+metadata/dimensions = Vector3(6.0, 2.8, 0.2)
+[node name="Header13" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 3.1, 4.1)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Header13"]
+shape = SubResource("s13")
+[node name="Header13" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 3.1, 4.1)
+mesh = SubResource("m13")
+material_override = SubResource("mat")
+metadata/visual_slot = "Header13"
+metadata/dimensions = Vector3(6.0, 0.6, 0.2)
+[node name="north" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+[node name="south" type="Marker3D" parent="Sockets"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 4)
+[node name="entry" type="Marker3D" parent="Markers"]
+[node name="destination" type="Marker3D" parent="Markers"]
+[node name="patrol" type="Marker3D" parent="Markers"]
+[node name="prop" type="Marker3D" parent="Markers"]
+[node name="interaction" type="Marker3D" parent="Markers"]
+[node name="cover" type="Marker3D" parent="Markers"]

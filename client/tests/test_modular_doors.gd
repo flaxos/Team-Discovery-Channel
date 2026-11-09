@@ -63,7 +63,7 @@ func run() -> void:
 	var model := Model.new()
 	model.restore(model.placed(module, Vector2.ZERO, 0))
 	model.restore(model.placed(module, Vector2(0, 8), 0))
-	assert(model.layout.connections.size() == 1 and model.layout.connections[0].state == "door")
+	assert(model.layout.connections.size() == 1 and model.layout.connections[0].state == "open")
 	assert(
 		(
 			LevelAssembler.connect_touching(model.layout).is_empty()
@@ -71,6 +71,8 @@ func run() -> void:
 		),
 		"Do not duplicate a shared door"
 	)
+	# Corridor joins default open; explicitly author a door for interaction coverage.
+	model.layout.connections[0].state = "door"
 	var before := Model.copy(model.layout)
 	assert(
 		not model.accepted(model.moved(model.layout.instances[1].id, Vector2(0, 16), 0)),
@@ -89,7 +91,15 @@ func run() -> void:
 		all_rooms.restore(all_rooms.placed(item.module, item.position, item.quarter_turn))
 	assert(all_rooms.layout.connections.size() == 8)
 	for edge in all_rooms.layout.connections:
-		assert(edge.state == "door")
+		assert(
+			(
+				edge.state
+				== LevelAssembler.connection_default(
+					all_rooms.layout.instance(edge.from_instance).module,
+					all_rooms.layout.instance(edge.to_instance).module
+				)
+			)
+		)
 	assert(LevelLayoutValidator.validate(all_rooms.layout).is_empty())
 	# Selecting/releasing a deliberately disconnected room must not reconnect it.
 	var disconnected := Model.new()

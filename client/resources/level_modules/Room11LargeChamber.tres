@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="LevelModuleDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleDefinition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelSocketDefinition.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room11LargeChamber.tscn" id="3"]
+[sub_resource type="Resource" id="north_00"]
+script = ExtResource("2")
+id = &"north_00"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+approach = Vector3(0, 0, -3)
+width = 3.0
+family = &"passage"
+[sub_resource type="Resource" id="north_01"]
+script = ExtResource("2")
+id = &"north_01"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -4)
+approach = Vector3(8, 0, -3)
+width = 3.0
+family = &"passage"
+[sub_resource type="Resource" id="south_00"]
+script = ExtResource("2")
+id = &"south_00"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 12)
+approach = Vector3(0, 0, 11)
+width = 3.0
+family = &"passage"
+[sub_resource type="Resource" id="south_01"]
+script = ExtResource("2")
+id = &"south_01"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 8, 0, 12)
+approach = Vector3(8, 0, 11)
+width = 3.0
+family = &"passage"
+[sub_resource type="Resource" id="east_00"]
+script = ExtResource("2")
+id = &"east_00"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0, 0)
+approach = Vector3(11, 0, 0)
+width = 3.0
+family = &"passage"
+[sub_resource type="Resource" id="east_01"]
+script = ExtResource("2")
+id = &"east_01"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0, 8)
+approach = Vector3(11, 0, 8)
+width = 3.0
+family = &"passage"
+[sub_resource type="Resource" id="west_00"]
+script = ExtResource("2")
+id = &"west_00"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4, 0, 0)
+approach = Vector3(-3, 0, 0)
+width = 3.0
+family = &"passage"
+[sub_resource type="Resource" id="west_01"]
+script = ExtResource("2")
+id = &"west_01"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4, 0, 8)
+approach = Vector3(-3, 0, 8)
+width = 3.0
+family = &"passage"
+[resource]
+script = ExtResource("1")
+id = &"room11"
+scene = ExtResource("3")
+occupied = AABB(-4,-0.2,-4,16,3.8,16)
+interiors = Array[AABB]([AABB(-4,0,-1.5,16,3.4,3.0), AABB(-4,0,6.5,16,3.4,3.0), AABB(-3.8,0,-3.8,15.600000000000001,3.4,2.3), AABB(-3.8,0,1.5,15.600000000000001,3.4,5.0), AABB(-3.8,0,9.5,15.600000000000001,3.4,2.3000000000000007), AABB(-1.5,0,-4,3.0,3.4,0.20000000000000018), AABB(-1.5,0,11.8,3.0,3.4,0.1999999999999993), AABB(6.5,0,-4,3.0,3.4,0.20000000000000018), AABB(6.5,0,11.8,3.0,3.4,0.1999999999999993)])
+sockets = Array[ExtResource("2")]([SubResource("north_00"), SubResource("north_01"), SubResource("south_00"), SubResource("south_01"), SubResource("east_00"), SubResource("east_01"), SubResource("west_00"), SubResource("west_01")])
+tags = PackedStringArray("chamber")

@@ -87,8 +87,6 @@ static func connect_touching(layout: LevelLayout) -> PackedStringArray:
 		return errors
 	var used: Dictionary = {}
 	for edge in layout.connections:
-		if edge.state == "open":
-			edge.state = "door"
 		used[str(edge.from_instance) + "/" + str(edge.from_socket)] = true
 		used[str(edge.to_instance) + "/" + str(edge.to_socket)] = true
 	for i in range(layout.instances.size()):
@@ -121,7 +119,7 @@ static func connect_touching(layout: LevelLayout) -> PackedStringArray:
 					edge.from_socket = sa.id
 					edge.to_instance = b.id
 					edge.to_socket = sb.id
-					edge.state = "door"
+					edge.state = connection_default(a.module, b.module)
 					layout.connections.append(edge)
 					used[ka] = true
 					used[kb] = true
@@ -147,3 +145,11 @@ static func add_doors(layout: LevelLayout, parent: Node3D) -> void:
 		door.set("height", socket.height)
 		parent.add_child(door)
 		door.owner = parent.owner if parent.owner != null else parent
+
+
+static func connection_default(a: LevelModuleDefinition, b: LevelModuleDefinition) -> String:
+	if a.connection_default == "door" or b.connection_default == "door":
+		return "door"
+	if a.connection_default == "open" or b.connection_default == "open":
+		return "open"
+	return "open" if "corridor" in a.tags and "corridor" in b.tags else "door"

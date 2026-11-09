@@ -5,6 +5,7 @@ signal selection_changed
 const Model = preload("model.gd")
 var model: Model
 var selected: StringName
+var selected_connection := -1
 var palette: LevelModuleDefinition
 var placing := false
 var connecting := false
@@ -43,6 +44,19 @@ func socket_position(item: LevelModuleInstance, socket: LevelSocketDefinition) -
 	return Vector2(p.x, p.z)
 
 
+func footprint(item: LevelModuleInstance, at: Vector2) -> Rect2:
+	var pose := item.placement(0)
+	pose.origin = Vector3(at.x, 0, at.y)
+	var bounds := pose * item.module.occupied
+	return Rect2(
+		Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)
+	)
+
+
+func draw_footprint(rect: Rect2, color: Color, filled: bool = true, width: float = 1) -> void:
+	draw_rect(Rect2(screen(rect.position), rect.size * zoom), color, filled, -1 if filled else width)
+
+
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.055, 0.065, 0.08))
 	var a := world(Vector2.ZERO).snapped(Vector2(8, 8))
@@ -69,9 +83,9 @@ func _draw() -> void:
 				color = Color(0.8, 0.2, 0.2)
 		if item.id == selected:
 			color = color.lightened(0.25)
-		draw_rect(Rect2(screen(at - Vector2(4, 4)), Vector2(8, 8) * zoom), color)
-		draw_rect(
-			Rect2(screen(at - Vector2(4, 4)), Vector2(8, 8) * zoom),
+		draw_footprint(footprint(item, at), color)
+		draw_footprint(
+			footprint(item, at),
 			Color.WHITE if item.id == selected else Color(0.4, 0.5, 0.6),
 			false,
 			2
@@ -96,12 +110,19 @@ func _draw() -> void:
 					-1,
 					11
 				)
-			var direction := pos - screen(item.position)
+			var normal := -(item.placement(0).basis * socket.local_transform.basis.z)
+			var direction := Vector2(normal.x, normal.z)
 			draw_line(pos, pos + direction.normalized() * 10, Color(1, 0.75, 0.25), 2)
-	for edge in model.layout.connections:
+	for index in range(model.layout.connections.size()):
+		var edge := model.layout.connections[index]
 		var ia := model.layout.instance(edge.from_instance)
 		var ib := model.layout.instance(edge.to_instance)
-		draw_line(screen(ia.position), screen(ib.position), Color(0.3, 0.9, 0.7), 3)
+		draw_line(
+			screen(ia.position),
+			screen(ib.position),
+			Color.WHITE if index == selected_connection else Color(0.3, 0.9, 0.7),
+			3
+		)
 	for edge in model.layout.connections:
 		if edge.state == "door":
 			var item := model.layout.instance(edge.from_instance)
@@ -110,8 +131,8 @@ func _draw() -> void:
 	if placing and palette != null:
 		var candidate := model.placed(palette, grid(mouse), turn) as LevelLayout
 		var valid := LevelLayoutValidator.validate(candidate, false).is_empty()
-		draw_rect(
-			Rect2(screen(grid(mouse) - Vector2(4, 4)), Vector2(8, 8) * zoom),
+		draw_footprint(
+			footprint(candidate.instances[-1], grid(mouse)),
 			Color(0.2, 1, 0.5, 0.4) if valid else Color(1, 0.15, 0.15, 0.5)
 		)
 
@@ -166,14 +187,26 @@ func _gui_input(event: InputEvent) -> void:
 				elif connecting:
 					pick_socket()
 				else:
+					selected_connection = -1
+					for i in range(model.layout.connections.size()):
+						var edge := model.layout.connections[i]
+						var item := model.layout.instance(edge.from_instance)
+						if (
+							(
+								screen(socket_position(item, item.module.socket(edge.from_socket)))
+								. distance_to(mouse)
+							)
+							< 10
+						):
+							selected_connection = i
 					selected = &""
 					for item in model.layout.instances:
-						if Rect2(item.position - Vector2(4, 4), Vector2(8, 8)).has_point(
-							world(mouse)
-						):
+						if footprint(item, item.position).has_point(world(mouse)):
 							selected = item.id
 							drag = true
 							break
+					if selected_connection >= 0:
+						drag = false
 					selection_changed.emit()
 		queue_redraw()
 		accept_event()

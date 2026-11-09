@@ -6,6 +6,7 @@ extends Resource
 @export var occupied := AABB(Vector3(-4, -0.2, -4), Vector3(8, 3.8, 8))
 @export var interiors: Array[AABB] = []
 @export var sockets: Array[LevelSocketDefinition] = []
+@export_enum("auto", "open", "door") var connection_default: String = "auto"
 @export var tags: PackedStringArray = []
 @export
 var visual_brief: String = "Neutral concrete and steel placeholders; preserve collision and slot bounds."
