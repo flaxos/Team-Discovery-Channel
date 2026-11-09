@@ -74,6 +74,8 @@ func run() -> void:
 		if ResourceSaver.save(level.navigation.navigation_mesh, nav_output) != OK:
 			fail(PackedStringArray(["Cannot save navigation"]))
 			return
+		# Export a self-contained layout even when the input was a temporary editor snapshot.
+		level.layout = resource.duplicate(true) as LevelLayout
 		level.navigation.owner = level
 		var scene := PackedScene.new()
 		if scene.pack(level) != OK:
