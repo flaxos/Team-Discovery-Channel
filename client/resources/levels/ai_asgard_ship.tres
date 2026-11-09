@@ -1,0 +1,158 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=23 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_egdfe"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_53bjy"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_p6if1"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room11LargeChamber.tres" id="4_fkblv"]
+[ext_resource type="Resource" path="res://resources/room_presets/command.tres" id="5_mesgg"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="6_rfs4w"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="7_d43aq"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room10LongChamber.tres" id="8_ky37a"]
+[ext_resource type="Resource" path="res://resources/room_presets/laboratory_medical.tres" id="9_f0hnh"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room15TransportChamber.tres" id="10_0ukm7"]
+[ext_resource type="Resource" path="res://resources/room_presets/ring_transport.tres" id="11_j4d8x"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="12_24gbu"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="13_l7k02"]
+
+[sub_resource type="Resource" id="Resource_700l8"]
+script = ExtResource("1_egdfe")
+from_instance = &"bridge"
+from_socket = &"east_00"
+to_instance = &"medical_corridor"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_i1fov"]
+script = ExtResource("1_egdfe")
+from_instance = &"medical_corridor"
+from_socket = &"south"
+to_instance = &"medical"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_l6kf8"]
+script = ExtResource("1_egdfe")
+from_instance = &"medical"
+from_socket = &"east_01"
+to_instance = &"transport_corridor"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_55elm"]
+script = ExtResource("1_egdfe")
+from_instance = &"transport_corridor"
+from_socket = &"south"
+to_instance = &"transport"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_3rpdu"]
+script = ExtResource("2_53bjy")
+id = &"bridge"
+module = ExtResource("4_fkblv")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("6_rfs4w")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("5_mesgg")
+attachment_overrides = Array[ExtResource("3_p6if1")]([])
+theme_id = &""
+theme_zone = &""
+role = &"command"
+
+[sub_resource type="Resource" id="Resource_w0hlr"]
+script = ExtResource("2_53bjy")
+id = &"medical_corridor"
+module = ExtResource("7_d43aq")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("6_rfs4w")]([])
+socket_decks = {}
+position = Vector2(16, -3.49691e-07)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_p6if1")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_vqx82"]
+script = ExtResource("2_53bjy")
+id = &"medical"
+module = ExtResource("8_ky37a")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("6_rfs4w")]([])
+socket_decks = {}
+position = Vector2(24, -1.04907e-06)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("9_f0hnh")
+attachment_overrides = Array[ExtResource("3_p6if1")]([])
+theme_id = &""
+theme_zone = &""
+role = &"laboratory_medical"
+
+[sub_resource type="Resource" id="Resource_7sk08"]
+script = ExtResource("2_53bjy")
+id = &"transport_corridor"
+module = ExtResource("7_d43aq")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("6_rfs4w")]([])
+socket_decks = {}
+position = Vector2(32, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_p6if1")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_fdy71"]
+script = ExtResource("2_53bjy")
+id = &"transport"
+module = ExtResource("10_0ukm7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("6_rfs4w")]([])
+socket_decks = {}
+position = Vector2(32, -16)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("11_j4d8x")
+attachment_overrides = Array[ExtResource("3_p6if1")]([])
+theme_id = &""
+theme_zone = &""
+role = &"ring_transport"
+
+[resource]
+script = ExtResource("12_24gbu")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"asgard"
+theme_zones = Array[ExtResource("13_l7k02")]([])
+instances = Array[ExtResource("2_53bjy")]([SubResource("Resource_3rpdu"), SubResource("Resource_w0hlr"), SubResource("Resource_vqx82"), SubResource("Resource_7sk08"), SubResource("Resource_fdy71")])
+connections = Array[ExtResource("1_egdfe")]([SubResource("Resource_700l8"), SubResource("Resource_i1fov"), SubResource("Resource_l6kf8"), SubResource("Resource_55elm")])
+entry_instance = &"bridge"
+entry_marker = &"entry"
+destination_instance = &"transport"
+destination_marker = &"destination"

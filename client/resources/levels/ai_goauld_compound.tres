@@ -1,0 +1,183 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_wi3jp"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_gi1yh"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_gucsa"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room03TJunction.tres" id="4_wi44u"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="5_a1rll"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="6_jv1n6"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room10LongChamber.tres" id="7_8h8gh"]
+[ext_resource type="Resource" path="res://resources/room_presets/generator.tres" id="8_8jegi"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room15TransportChamber.tres" id="9_lonbp"]
+[ext_resource type="Resource" path="res://resources/room_presets/ring_transport.tres" id="10_4ji3l"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="11_sffr1"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="12_j6rf3"]
+
+[sub_resource type="Resource" id="Resource_8pgyt"]
+script = ExtResource("1_wi3jp")
+from_instance = &"junction"
+from_socket = &"north"
+to_instance = &"entry"
+to_socket = &"south"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_anyuf"]
+script = ExtResource("1_wi3jp")
+from_instance = &"junction"
+from_socket = &"east"
+to_instance = &"power_corridor"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_52rge"]
+script = ExtResource("1_wi3jp")
+from_instance = &"power_corridor"
+from_socket = &"south"
+to_instance = &"generator"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_hs4gd"]
+script = ExtResource("1_wi3jp")
+from_instance = &"junction"
+from_socket = &"west"
+to_instance = &"transport_corridor"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_1stom"]
+script = ExtResource("1_wi3jp")
+from_instance = &"transport_corridor"
+from_socket = &"south"
+to_instance = &"transport"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_7d07d"]
+script = ExtResource("2_gi1yh")
+id = &"junction"
+module = ExtResource("4_wi44u")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_a1rll")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_gucsa")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_1kv50"]
+script = ExtResource("2_gi1yh")
+id = &"entry"
+module = ExtResource("6_jv1n6")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_a1rll")]([])
+socket_decks = {}
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_gucsa")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_a065k"]
+script = ExtResource("2_gi1yh")
+id = &"power_corridor"
+module = ExtResource("6_jv1n6")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_a1rll")]([])
+socket_decks = {}
+position = Vector2(8, -3.49691e-07)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_gucsa")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_by4wh"]
+script = ExtResource("2_gi1yh")
+id = &"generator"
+module = ExtResource("7_8h8gh")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_a1rll")]([])
+socket_decks = {}
+position = Vector2(16, -1.04907e-06)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("8_8jegi")
+attachment_overrides = Array[ExtResource("3_gucsa")]([])
+theme_id = &""
+theme_zone = &""
+role = &"generator"
+
+[sub_resource type="Resource" id="Resource_ji0bn"]
+script = ExtResource("2_gi1yh")
+id = &"transport_corridor"
+module = ExtResource("6_jv1n6")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_a1rll")]([])
+socket_decks = {}
+position = Vector2(-8, 3.49691e-07)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_gucsa")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_876vc"]
+script = ExtResource("2_gi1yh")
+id = &"transport"
+module = ExtResource("9_lonbp")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_a1rll")]([])
+socket_decks = {}
+position = Vector2(-16, 7.94781e-07)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("10_4ji3l")
+attachment_overrides = Array[ExtResource("3_gucsa")]([])
+theme_id = &""
+theme_zone = &""
+role = &"ring_transport"
+
+[resource]
+script = ExtResource("11_sffr1")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"goauld"
+theme_zones = Array[ExtResource("12_j6rf3")]([])
+instances = Array[ExtResource("2_gi1yh")]([SubResource("Resource_7d07d"), SubResource("Resource_1kv50"), SubResource("Resource_a065k"), SubResource("Resource_by4wh"), SubResource("Resource_ji0bn"), SubResource("Resource_876vc")])
+connections = Array[ExtResource("1_wi3jp")]([SubResource("Resource_8pgyt"), SubResource("Resource_anyuf"), SubResource("Resource_52rge"), SubResource("Resource_hs4gd"), SubResource("Resource_1stom")])
+entry_instance = &"entry"
+entry_marker = &"entry"
+destination_instance = &"generator"
+destination_marker = &"destination"
