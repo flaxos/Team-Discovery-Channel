@@ -63,7 +63,7 @@ func _process(_delta: float) -> bool:
 
 		var sgc_dialer := control_room.get_node_or_null("SGCDialingConsole") as SGCDialingConsoleScript
 		assert(sgc_dialer != null, "SGCDialingConsole must exist in ControlRoomMezzanine")
-		assert(sgc_dialer.position.z >= 9.0 and sgc_dialer.position.z <= 12.0, "SGCDialingConsole must overlook Gate Room (found Z=%.2f)" % sgc_dialer.position.z)
+		assert(sgc_dialer.global_position.y >= 1.5 and sgc_dialer.position.z > 8.0 and sgc_dialer.position.z < 22.0, "SGCDialingConsole must sit on raised operations overlooking the gate")
 		print("[TEST 2/4] PASS: SGC Dialing Console installed on Control Room Mezzanine overlooking Gate Room.")
 
 	elif ticks == 10:

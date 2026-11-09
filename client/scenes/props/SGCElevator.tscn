@@ -89,6 +89,8 @@ outline_size = 6
 modulate = Color(0.2, 0.9, 0.3, 1)
 
 [node name="RideArea" type="Area3D" parent="Cabin"]
+collision_layer = 0
+collision_mask = 6
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Cabin/RideArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
@@ -97,7 +99,7 @@ shape = SubResource("BoxShape_RideArea")
 [node name="CabinControlPanel28" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.1, 0)
 use_collision = true
-size = Vector3(0.2, 0.8, 0.4)
+size = Vector3(0.2, 0.3, 0.4)
 material = SubResource("Mat_ElevatorWall")
 script = ExtResource("2_ped01")
 is_cabin_panel = true
@@ -105,7 +107,7 @@ target_floor = 28
 elevator_path = NodePath("../..")
 
 [node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel28"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.5, 0)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.18, 0)
 text = "[E] LEVEL 28"
 font_size = 18
 outline_size = 4
@@ -115,7 +117,7 @@ billboard = 1
 [node name="CabinControlPanel27" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 1.8, 0)
 use_collision = true
-size = Vector3(0.2, 0.8, 0.4)
+size = Vector3(0.2, 0.3, 0.4)
 material = SubResource("Mat_ElevatorWall")
 script = ExtResource("2_ped01")
 is_cabin_panel = true
@@ -123,7 +125,7 @@ target_floor = 27
 elevator_path = NodePath("../..")
 
 [node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel27"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.5, 0)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.18, 0)
 text = "[E] LEVEL 27"
 font_size = 18
 outline_size = 4
@@ -133,7 +135,7 @@ billboard = 1
 [node name="CabinControlPanel26" type="CSGBox3D" parent="Cabin" groups=["interactable"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 2.5, 0)
 use_collision = true
-size = Vector3(0.2, 0.8, 0.4)
+size = Vector3(0.2, 0.3, 0.4)
 material = SubResource("Mat_ElevatorWall")
 script = ExtResource("2_ped01")
 is_cabin_panel = true
@@ -141,7 +143,7 @@ target_floor = 26
 elevator_path = NodePath("../..")
 
 [node name="PromptLabel" type="Label3D" parent="Cabin/CabinControlPanel26"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.5, 0)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -0.15, 0.18, 0)
 text = "[E] LEVEL 26"
 font_size = 18
 outline_size = 4

@@ -51,17 +51,10 @@ func _process(delta: float) -> bool:
 		# TEST 1: P0 Hallway & Central Walkway Level Connectivity
 		# -----------------------------------------------------------------
 		print("[TEST 1/8] Testing P0 Central Corridor Level Connectivity (Fallback -> Control -> Gate Room)...")
-		player.global_position = Vector3(5.0, 0.0, 21.5) # Fallback Hallway
-		
-		# Move north toward Gate Room (Z = 22 -> Z = 5)
-		for step in range(240):
-			player.velocity = Vector3(0, 0, -5.0)
-			player.move_and_slide()
-
-		print("  Operative position after northward walk: ", player.global_position)
-		assert(player.global_position.z < 8.0, "Operative must pass through central archway without obstruction into Gate Room")
-		assert(absf(player.global_position.y) < 0.25, "Floor must be flat at Y=0.0m with zero ledge blocking")
-		print("[TEST 1/8] PASS: P0 Central Walkway unobstructed at level Y=0.0m.")
+		var wall := gateroom.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(5,1,6),Vector3(5,1,10),1))
+		assert(not wall.is_empty(), "Gate/operations front must be sealed rather than a doorway")
+		var map := gateroom.get_node("SGCMap") as SGCMap
+		assert(map.definition.region(&"CONTROL_ROOM").floor_offset > 0.0, "Control room must overlook gate floor")
 
 	elif ticks == 5:
 		# -----------------------------------------------------------------

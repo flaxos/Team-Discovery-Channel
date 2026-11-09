@@ -22,7 +22,13 @@ func _ready() -> void:
 	if prompt_label == null:
 		prompt_label = Label3D.new()
 		prompt_label.name = "PromptLabel"
-		prompt_label.text = _bindings().format_prompt("[E] TOGGLE OBSERVATION BLAST SHUTTERS" if door_id == "observation" else "[E] TOGGLE BLAST DOORS")
+		prompt_label.text = _bindings().format_prompt(
+			(
+				"[E] TOGGLE OBSERVATION BLAST SHUTTERS"
+				if door_id == "observation"
+				else "[E] TOGGLE BLAST DOORS"
+			)
+		)
 		prompt_label.font_size = 18
 		prompt_label.outline_size = 4
 		prompt_label.position = Vector3(0, 0.9, 0)
@@ -34,9 +40,13 @@ func _ready() -> void:
 		if door_id == "observation":
 			prompt_label.text = _bindings().format_prompt("[E] TOGGLE OBSERVATION BLAST SHUTTERS")
 
+	if door_id == "control_observation":
+		prompt_label.text = _bindings().format_prompt("[E] CONTROL WINDOW BLAST SHUTTER")
 	var gr: Node = _room()
 	if gr != null:
-		if door_id == "observation":
+		if door_id == "control_observation":
+			gr.connect("control_window_toggled", _on_doors_toggled)
+		elif door_id == "observation":
 			if gr.has_signal("observation_shutters_toggled"):
 				gr.connect("observation_shutters_toggled", _on_doors_toggled)
 			elif gr.has_signal("blast_doors_toggled"):
@@ -74,7 +84,9 @@ func request_interact(player_path: NodePath) -> void:
 func _apply_interaction() -> void:
 	var room: Node = _room()
 	if room != null:
-		if door_id == "observation":
+		if door_id == "control_observation":
+			room.toggle_control_window()
+		elif door_id == "observation":
 			room.toggle_observation_shutters()
 		else:
 			room.toggle_blast_doors()
@@ -85,10 +97,18 @@ func _on_doors_toggled(closed: bool) -> void:
 		console_light.light_color = Color(1.0, 0.2, 0.2) if closed else Color(0.2, 0.9, 0.3)
 	if prompt_label != null:
 		prompt_label.modulate = Color(1.0, 0.3, 0.3) if closed else Color(0.2, 0.9, 0.3)
-		if door_id == "observation":
-			prompt_label.text = _bindings().format_prompt("[E] OPEN OBSERVATION SHUTTERS" if closed else "[E] LOWER OBSERVATION SHUTTERS")
+		if door_id == "control_observation":
+			prompt_label.text = _bindings().format_prompt(
+				"[E] OPEN CONTROL WINDOW SHUTTER" if closed else "[E] CLOSE CONTROL WINDOW SHUTTER"
+			)
+		elif door_id == "observation":
+			prompt_label.text = _bindings().format_prompt(
+				"[E] OPEN OBSERVATION SHUTTERS" if closed else "[E] LOWER OBSERVATION SHUTTERS"
+			)
 		else:
-			prompt_label.text = _bindings().format_prompt("[E] OPEN BLAST DOORS" if closed else "[E] SEAL BLAST DOORS")
+			prompt_label.text = _bindings().format_prompt(
+				"[E] OPEN BLAST DOORS" if closed else "[E] SEAL BLAST DOORS"
+			)
 	blast_door_toggled.emit(closed)
 
 

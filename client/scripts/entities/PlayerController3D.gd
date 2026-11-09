@@ -169,12 +169,17 @@ func _notification(what: int) -> void:
 
 
 func _exit_tree() -> void:
+	if is_instance_valid(lift_floor_dialog):
+		lift_floor_dialog.queue_free()
 	close_squad_command_wheel()
 	_restore_all_occluded_nodes()
 	_restore_visual_materials()
 
 
 func _ready() -> void:
+	collision_mask |= 128
+	floor_snap_length = 0.4
+	platform_on_leave = CharacterBody3D.PLATFORM_ON_LEAVE_DO_NOTHING
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null and net.peers.has(peer_id):
 		class_id = net.peers[peer_id].get("class_id", class_id)
@@ -222,7 +227,12 @@ func _ready() -> void:
 			camera.current = false
 
 
+var lift_floor_dialog: AcceptDialog
+
+
 func _is_ui_modal_open() -> bool:
+	if is_instance_valid(lift_floor_dialog) and lift_floor_dialog.visible:
+		return true
 	if not is_inside_tree() or get_tree() == null:
 		return false
 	var hud := get_tree().root.find_child("TacticalHUD", true, false)
@@ -694,6 +704,8 @@ func _physics_process(delta: float) -> void:
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
+	else:
+		velocity.y = 0.0
 
 	move_and_slide()
 
@@ -809,7 +821,7 @@ func _update_wall_occlusion() -> void:
 		var cur_exclude := exclude.duplicate()
 		for iter in range(3):
 			var query := PhysicsRayQueryParameters3D.create(cam_pos, target_pt)
-			query.collision_mask = 1
+			query.collision_mask = 129
 			query.exclude = cur_exclude
 			var res := space_state.intersect_ray(query)
 			if res.is_empty():
@@ -1989,6 +2001,12 @@ func _try_interact() -> void:
 		nearest_turret.mount(self)
 		return
 
+	# Aim at a specific control before using the proximity fallback.
+	var aimed := aimed_interactable()
+	if aimed != null:
+		aimed.interact(self)
+		return
+
 	# 3. Check for nearby interactable stations (Armory, Defense Terminal, Security Console, etc.)
 	var nearest_interactable: Node = null
 	var min_interact_dist: float = 3.2
@@ -2233,3 +2251,55 @@ func _server_revive_tick(delta: float) -> void:
 		health.revive(self)
 		_server_revive_target = NodePath()
 		_server_revive_time = 0.0
+
+
+func aimed_interactable() -> Node:
+	if camera == null:
+		return null
+	var from := camera.global_position
+	var end := from - camera.global_basis.z * 8.0
+	var query := PhysicsRayQueryParameters3D.create(from, end, 1, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return null
+	var node := hit["collider"] as Node
+	while node != null:
+		if (
+			node.is_in_group("interactable")
+			and node.has_method("interact")
+			and node is Node3D
+			and global_position.distance_to(node.global_position) < 3.2
+		):
+			return node
+		node = node.get_parent()
+	return null
+
+
+func open_lift_selector(lift: SGCElevator) -> void:
+	if is_instance_valid(lift_floor_dialog):
+		lift_floor_dialog.queue_free()
+	lift_floor_dialog = AcceptDialog.new()
+	lift_floor_dialog.title = "Select SGC sublevel"
+	lift_floor_dialog.ok_button_text = "Cancel"
+	var list := VBoxContainer.new()
+	for floor_number: int in lift.SUPPORTED_FLOORS:
+		var button := Button.new()
+		button.text = (
+			"Level %d%s"
+			% [floor_number, " — current floor" if floor_number == lift.current_floor else ""]
+		)
+		button.custom_minimum_size = Vector2(300, 48)
+		button.disabled = floor_number == lift.current_floor or lift.is_moving
+		button.pressed.connect(
+			func() -> void:
+				lift.select_floor(floor_number)
+				lift_floor_dialog.hide()
+				_update_mouse_mode()
+		)
+		list.add_child(button)
+	lift_floor_dialog.add_child(list)
+	get_tree().root.add_child(lift_floor_dialog)
+	lift_floor_dialog.canceled.connect(_update_mouse_mode)
+	lift_floor_dialog.confirmed.connect(_update_mouse_mode)
+	lift_floor_dialog.popup_centered(Vector2i(340, 220))
+	_update_mouse_mode()

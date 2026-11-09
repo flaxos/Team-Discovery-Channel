@@ -22,6 +22,8 @@ func run() -> void:
 	var output := ProjectSettings.globalize_path("res://../build/sgc-review")
 	DirAccess.make_dir_recursive_absolute(output)
 	var views: Array[Dictionary] = [
+		{"id": "embarkation", "camera": Vector3(6, 2.0, -12), "target": Vector3(0, 5.0, 8)},
+		{"id": "control", "camera": Vector3(0, 3.1, 13), "target": Vector3(0, 4.3, -15)},
 		{"id": "briefing", "camera": Vector3(1, 8.5, 20), "target": Vector3(-1, 6.7, 11)},
 		{"id": "spiral", "camera": Vector3(-1, 8.8, 16), "target": Vector3(-4.5, 3.5, 11)},
 		{"id": "corridor", "camera": Vector3(23, 2.3, 5), "target": Vector3(23, 1.4, 18)},
@@ -34,6 +36,18 @@ func run() -> void:
 			await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(output.path_join(view.id + ".png"))
+	room.toggle_control_window()
+	room.toggle_observation_shutters(true)
+	for i in range(90):
+		await physics_frame
+	camera.position = Vector3(6, 2.0, -12)
+	camera.look_at(Vector3(0, 5.0, 8))
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png(output.path_join("shutters-closed.png"))
+	room.toggle_control_window()
+	room.toggle_observation_shutters(false)
+	for i in range(90):
+		await physics_frame
 	room.sector_shrouds.clear()
 	room.set_emergency_lights(true)
 	room._process(0.2)

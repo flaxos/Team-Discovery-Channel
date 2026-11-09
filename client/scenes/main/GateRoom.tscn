@@ -237,13 +237,13 @@ is_automated_sentry = false
 [node name="StargatePlatform" type="CSGBox3D" parent="BunkerGeometry"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -14)
 use_collision = true
-size = Vector3(14, 2, 12)
+size = Vector3(8, 2, 12)
 material = SubResource("Mat_Platform")
 
 [node name="GateRamp" type="CSGBox3D" parent="BunkerGeometry"]
 transform = Transform3D(1, 0, 0, 0, 0.970143, -0.242536, 0, 0.242536, 0.970143, 0, 0.8, -4)
 use_collision = true
-size = Vector3(7, 0.4, 8.25)
+size = Vector3(3.2, 0.4, 8.25)
 material = SubResource("Mat_Platform")
 
 [node name="Barricades" type="Node3D" parent="BunkerGeometry"]
@@ -306,7 +306,7 @@ collision_mask = 2
 shape = SubResource("CylinderShape3D_Console")
 
 [node name="BlastDoorsWest" type="Node3D" parent="."]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -18, 0, 4)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -12, 0, 4)
 
 [node name="BlastDoorNorth" type="CSGBox3D" parent="BlastDoorsWest"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 2.2, 0)
@@ -342,7 +342,7 @@ collision_mask = 2
 shape = SubResource("CylinderShape3D_Console")
 
 [node name="BlastDoorsEast" type="Node3D" parent="."]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 18, 0, 4)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 12, 0, 4)
 
 [node name="BlastDoorNorth" type="CSGBox3D" parent="BlastDoorsEast"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8, 2.2, 0)
@@ -512,31 +512,26 @@ outline_size = 4
 modulate = Color(0.9, 0.95, 1, 1)
 
 [node name="ControlRoomMezzanine" type="Node3D" parent="Level28Complex"]
+position = Vector3(0, 1.5, 0)
 
 [node name="ControlObservationGlassNorth" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 7.7)
+position = Vector3(0, 1.9, 7.7)
 use_collision = true
-size = Vector3(8.4, 1.6, 0.2)
+size = Vector3(11.8, 2.4, 0.1)
 material = SubResource("Mat_Glass")
 
-[node name="ControlCenterArchHeader" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 7.8)
-use_collision = true
-size = Vector3(4.0, 0.4, 0.8)
-material = SubResource("Mat_Wall")
-
 [node name="DialingConsole1" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 13.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 18)
 use_collision = true
 size = Vector3(2, 1, 1)
 material = SubResource("Mat_Door")
 
 [node name="SGCDialingConsole" parent="Level28Complex/ControlRoomMezzanine" instance=ExtResource("11_sgcdial01")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 10.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14)
 stargate_path = NodePath("../../../Stargate")
 
 [node name="DialingConsole3" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0.5, 10.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0.5, 14)
 use_collision = true
 size = Vector3(2.2, 1, 1.2)
 material = SubResource("Mat_Door")
@@ -551,7 +546,7 @@ modulate = Color(0.9, 0.95, 1, 1)
 [node name="ControlElevatorConnector" type="Node3D" parent="Level28Complex"]
 
 [node name="Stargate" parent="." instance=ExtResource("3_sg01")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, -15)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, -15)
 
 [node name="IrisServoHousing" parent="." instance=ExtResource("13_irisservo01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -11.5)
@@ -608,3 +603,16 @@ script = ExtResource("2_wm01")
 
 [node name="SGCElevator" parent="." instance=ExtResource("9_elev01")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 37, 0, 18)
+
+[node name="ControlWindowConsole" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine" groups=["interactable", "blast_door_console"]]
+position = Vector3(5.2, 0.6, 8.5)
+size = Vector3(0.5, 1.2, 0.4)
+use_collision = true
+script = ExtResource("15_bdconsole")
+door_id = "control_observation"
+
+[node name="ControlBlastShutters" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
+position = Vector3(0, -0.8, 7.85)
+size = Vector3(12, 2.7, 0.1)
+use_collision = true
+material = SubResource("Mat_Door")

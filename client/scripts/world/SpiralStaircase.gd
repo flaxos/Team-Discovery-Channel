@@ -1,9 +1,9 @@
 extends Node3D
 ## Continuous walk surface with segmented guard infill. Decorative treads have no collision.
-const CENTER := Vector3(-4.5, 0, 11)
+const CENTER := Vector3(-4.5, 0, 12)
 const RADIUS: float = 1.6
 const WIDTH: float = 1.6
-const BASE_Y: float = 0.0
+const BASE_Y: float = SGCMapDefinition.CONTROL_FLOOR_Y
 const TOP_Y: float = 5.5
 const SWEEP: float = TAU * 1.25
 
@@ -12,9 +12,9 @@ func path_point(t: float) -> Vector3:
 	return (
 		CENTER
 		+ Vector3(
-			cos(t * SWEEP - PI / 2) * RADIUS,
+			cos(t * SWEEP + PI / 2) * RADIUS,
 			lerpf(BASE_Y, TOP_Y, t),
-			sin(t * SWEEP - PI / 2) * RADIUS
+			sin(t * SWEEP + PI / 2) * RADIUS
 		)
 	)
 
@@ -28,8 +28,8 @@ func _ready() -> void:
 	for i in range(120):
 		var a := float(i) / 120
 		var b := float(i + 1) / 120
-		var ad := Vector3(cos(a * SWEEP - PI / 2), 0, sin(a * SWEEP - PI / 2))
-		var bd := Vector3(cos(b * SWEEP - PI / 2), 0, sin(b * SWEEP - PI / 2))
+		var ad := Vector3(cos(a * SWEEP + PI / 2), 0, sin(a * SWEEP + PI / 2))
+		var bd := Vector3(cos(b * SWEEP + PI / 2), 0, sin(b * SWEEP + PI / 2))
 		var p0 := path_point(a) - ad * WIDTH / 2
 		var p1 := path_point(a) + ad * WIDTH / 2
 		var p2 := path_point(b) - bd * WIDTH / 2
@@ -42,7 +42,7 @@ func _ready() -> void:
 			tread.mesh = box
 			tread.material_override = mat
 			tread.position = path_point(a) - Vector3(0, 0.05, 0)
-			tread.rotation.y = -(a * SWEEP - PI / 2)
+			tread.rotation.y = -(a * SWEEP + PI / 2)
 			add_child(tread)
 		for edge: float in [-1.0, 1.0]:
 			# Full infill collider prevents slipping between balusters; caps are the handrail.

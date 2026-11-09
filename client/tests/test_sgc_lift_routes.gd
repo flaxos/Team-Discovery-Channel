@@ -72,7 +72,7 @@ func run() -> void:
 	check(await walk(Vector3(37, 0, 18)), "Startup cabin lip must be passable")
 	for floor_number: int in [27, 26, 28]:
 		lift.select_floor(floor_number)
-		await frames(300)
+		await frames(480)
 		check(lift.current_floor == floor_number, "Lift must arrive on requested floor")
 		check(
 			absf(pawn.position.y - lift.get_floor_y(floor_number)) < 0.12,

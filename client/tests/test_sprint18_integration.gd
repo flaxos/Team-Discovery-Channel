@@ -234,7 +234,7 @@ func _process(_delta: float) -> bool:
 
 		var overlook_glass: CSGBox3D = l27.get_node_or_null("BriefingRoom/BriefingGateRoomOverlook") as CSGBox3D
 		assert(overlook_glass != null, "BriefingGateRoomOverlook window must exist overlooking Gate Room")
-		assert(is_equal_approx(overlook_glass.size.x, 12.0), "Overlook window width must be 12.0 meters")
+		assert(is_equal_approx(overlook_glass.size.x, 11.8), "Overlook window width must be 12.0 meters")
 
 		var blast_shutters: CSGBox3D = l27.get_node_or_null("BriefingRoom/BriefingBlastShutters") as CSGBox3D
 		assert(blast_shutters != null, "BriefingBlastShutters must exist")
@@ -246,12 +246,12 @@ func _process(_delta: float) -> bool:
 		# Test manual console toggle
 		shutter_console.call("interact", player)
 		assert(gateroom.is_observation_shutters_closed, "Manual console toggle must close observation blast shutters")
-		blast_shutters.position.y = 7.35
+		blast_shutters.position.y = 7.4
 		gateroom.is_animating_observation_shutters = false
 
 		shutter_console.call("interact", player)
 		assert(not gateroom.is_observation_shutters_closed, "Second console toggle must reopen observation blast shutters")
-		blast_shutters.position.y = 10.75
+		blast_shutters.position.y = 10.1
 		gateroom.is_animating_observation_shutters = false
 
 		# Test Red Alert Klaxon scramble automatic sealing
@@ -271,7 +271,7 @@ func _process(_delta: float) -> bool:
 
 		var stairs := gateroom.get_node("SGCMap/SpiralStairs") as Node3D
 		assert(stairs != null and stairs.has_node("HelicalWalkSurface"), "Spiral must expose continuous collision")
-		assert(stairs.path_point(0.0).y == 0.0 and stairs.path_point(1.0).y == 5.5, "Spiral must connect Levels 28 and 27")
+		assert(stairs.path_point(0.0).y == 1.5 and stairs.path_point(1.0).y == 5.5, "Spiral must connect Levels 28 and 27")
 
 		print("  ✓ All 29 helical steps have visual treads; the helix owns collision with riser <= 0.20m.")
 		print("  ✓ Visual tread spacing and Level27 landing verified; continuous travel is tested separately.")

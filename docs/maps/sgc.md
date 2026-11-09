@@ -6,6 +6,7 @@ The playable mode contains Sublevels 28 (gate/operations/combat loop), 27 (brief
 
 - [RDA's SGC floor-plan and level references](https://rdanderson.com/stargate/cheyenne/index.htm), including the [floor-plan image](https://rdanderson.com/stargate/cheyenne/images/cheyenne.jpg), establish the reference core.
 - [The July 2002 set tour](https://rdanderson.com/stargate/features/articles/2002-07-setday1.htm) describes the control room below the briefing room and stair access, including a corner spiral extending beyond the briefing level on the set.
+- The revised core uses a 24 m wide, 12 m high embarkation chamber and a 6.7 m gate. Operations is raised 1.5 m above embarkation; briefing is at 5.5 m. These are playable proportions, not measured production dimensions. A solid sill and sealed glazing separate embarkation from operations; corridor stairs provide access from the side/rear.
 - Preserve the gate → operations → briefing sightline, adjoining commander's office, and control/briefing corner stair. The playable spiral has been aligned with its actual landings and opening. Coordinates and circulation widths are gameplay adaptations, not claims of measured production-blueprint accuracy.
 - The west return loop, peripheral combat corridors, security room, service stairs and Level 26 support layout are authored extensions. Level 26's exact room placement is not established by these references. Resource `confidence` and `reference` fields distinguish the core relationships from these extensions.
 
@@ -17,9 +18,9 @@ Use the lobby's **LEVEL / MISSION** selector before dispatch: **SGC Defense — 
 
 ## Authoring contract
 
-`client/resources/maps/sgc.tres` is the editable map resource. `SGCMapDefinition.create_default()` supplies the factory layout; runtime loads a private copy of the authored resource. Regions define footprint, floor, anchor, style and lighting. Connections define stable endpoints, walk/stair/spiral/lift action, clearance, optional door and availability. Floors are 0, 5.5 and 11 m; player clearance derives from the existing 0.4 m radius / 1.8 m capsule.
+`client/resources/maps/sgc.tres` is the editable map resource. `SGCMapDefinition.create_default()` supplies the factory layout; runtime loads a private copy of the authored resource. Regions define footprint, floor, local floor offset, ceiling height, anchor, style and lighting. Connections define stable endpoints, walk/stair/spiral/lift action, clearance, optional door and availability. Main floors are 0, 5.5 and 11 m; operations has a 1.5 m offset; player clearance derives from the existing 0.4 m radius / 1.8 m capsule.
 
-`SGCMap` builds reusable wall segments around portals, split floors around stair holes, continuous stair collision, exposed-edge guards, recessed cover, fixtures and service dressing. Retained scene props still own objectives, consoles, weapons, observation glass and blast shutters. Lift floors are flush with landings; the cabin floor uses its moving physics body. Landing gates close over absent cabins. Three explicit cabin buttons select destinations and calls during transit queue.
+`SGCMap` builds reusable wall segments around portals, split floors around stair holes, continuous stair collision, exposed-edge guards, recessed cover, fixtures and service dressing. Retained scene props still own objectives, consoles, weapons, observation glass and blast shutters. Lift floors are flush with landings; the cabin floor uses its moving physics body. Landing gates close over absent cabins. Aim at an individual cabin button and press **E** to select it. Press **E** elsewhere inside the cabin to open the three-floor picker. Calls during transit queue. Travel takes three seconds per floor at constant speed; rider detection includes character layers and platform exit adds no launch velocity. The live player controller is tested throughout the Level 26→28 descent.
 
 After changing layout, collision or navigation dimensions, rebuild the checked-in navigation resource:
 
@@ -35,6 +36,7 @@ Every generated module has a stable `SGCAssetSlot` in the map resource and `asse
 
 | Family | Appearance brief |
 | --- | --- |
+| Ceilings | Grey reinforced concrete panels, dark seams, steel beams and silo service fittings; continuous overhead coverage with deliberate stair openings. |
 | Bunker walls | Muted cast concrete, visible panel seams, dark painted steel surrounds, restrained grime at joints, exposed service conduits. |
 | Corridor floors | Worn non-slip grey surface, readable seams, restrained hazard markings near equipment and thresholds. |
 | Briefing | Dark charcoal carpet, subdued fluorescent fixtures, concrete walls, wood table, brushed metal fittings. |
@@ -43,6 +45,8 @@ Every generated module has a stable `SGCAssetSlot` in the map resource and `asse
 | Support props | Supply racks, utility cabinets and staging benches; utilitarian painted metal, clear silhouettes, no obstruction of portals or anchors. |
 
 Textures can be assigned per slot. `replace_asset_visual(slot_id, packed_scene)` validates visual bounds against the slot envelope, disables replacement collision, and keeps the original gameplay shape. Oversized replacements fail without replacing the placeholder. Generated art should use the supplied dimensions and material channels. AI artwork generation is deferred; these are functional placeholders and briefs.
+
+Ceilings have independent collision on physics layer 8 (128), included in character and weapon masks and excluded from navigation baking to prevent walkable roof islands. Both observation windows have separate blast shutters and consoles; the control shutter retracts into its sill and the briefing shutter retracts above its frame. Their closed positions are inset from the glass to avoid coplanar surfaces.
 
 Lighting uses region fixture profiles and restrained ambient fill. The global directional light has been removed. Level 26 includes alarm fixtures in the existing alert system. Normal/emergency captures are generated by the visual review helper below.
 
@@ -64,9 +68,10 @@ DISPLAY=:0 godot --path client --script res://tests/support/sgc_visual_review.gd
 The runner allows 180 seconds per suite by default because the full three-capsule route matrix takes about 100 seconds on the development machine. Explicit timeout overrides remain supported.
 
 - `test_sgc_map_routes`: every walking and stair connection, both directions, with continuously moving production player, airman and Jaffa capsules. Initial placements are test setup, not movement shortcuts.
+- `test_sgc_uat_architecture`: roof collision coverage, sealed raised operations, shutter alignment, aimed floor-button selection and continuous live-controller lift grounding in both directions.
 - `test_sgc_lift_routes`: startup entry, physical rider carrying, three-floor arrivals, diagonal exits, queued calls and rejected Level 25 requests.
 - `test_sgc_ai_wayfinding`: production friendly orders through both lift journeys and a seeded hostile overrun through both exits to Level 26.
 - `test_sgc_map_contract`: source provenance, alternate routes, art metadata and replacement bounds, stable collision and unreachable destinations.
 - Boundary, multiplayer lift/state, late join/retry, observation glass, objectives, gunplay and input regressions remain covered. The four old stair/lift tests based on CSG names or exact tread counts have been consolidated into the behavioral route/lift suites.
 
-The visual helper writes actual Forward+ GPU captures to `build/sgc-review/`. It covers briefing, spiral, east corridor, support, briefing alert lighting and an active incoming gate. Screenshots and headless tests do not establish subjective combat balance or replace a human multiplayer playtest.
+The visual helper writes actual Forward+ GPU captures to `build/sgc-review/`. It covers embarkation looking up at the stacked observation rooms, control looking at the gate, both shutters closed, briefing, spiral, east corridor, support, briefing alert lighting and an active incoming gate. Screenshots and headless tests do not establish subjective combat balance or replace a human multiplayer playtest.

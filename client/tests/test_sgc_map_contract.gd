@@ -15,10 +15,10 @@ func run() -> void:
 	assert(definition.FLOOR_HEIGHTS.keys() == [28, 27, 26])
 	assert(definition.region(&"BRIEFING_ROOM").confidence == "reference_relationship")
 	assert(definition.region(&"STAGING").confidence == "gameplay_extension")
-	var blocked: Array[StringName] = [&"GATE_ROOM__EAST_CORRIDOR", &"GATE_ROOM__CONTROL_ROOM"]
+	var blocked: Array[StringName] = [&"GATE_ROOM__GATE_EAST_ACCESS"]
 	var route := definition.route(&"GATE_ROOM", &"ARMORY", blocked)
 	assert(
-		not route.is_empty() and route[0].to_region == &"WEST_CORRIDOR",
+		not route.is_empty() and route[0].to_region == &"GATE_WEST_ACCESS",
 		"Fallback loop must route around blocked eastern exits"
 	)
 	var style_ids: Array[StringName] = []

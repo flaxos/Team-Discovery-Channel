@@ -30,6 +30,16 @@ func _ready() -> void:
 		mat.albedo_color = style.palette[0]
 		mat.roughness = style.roughness
 		mat.metallic = style.metallic
+		if style.id == &"ceiling":
+			var img := Image.create(128, 128, false, Image.FORMAT_RGB8)
+			img.fill(Color(0.42, 0.44, 0.45))
+			for pixel in range(128):
+				for seam in range(2):
+					img.set_pixel(pixel, seam, Color(0.18, 0.20, 0.21))
+					img.set_pixel(seam, pixel, Color(0.18, 0.20, 0.21))
+			mat.albedo_texture = ImageTexture.create_from_image(img)
+			mat.uv1_triplanar = true
+			mat.uv1_scale = Vector3(0.5, 0.5, 0.5)
 		materials[style.id] = mat
 	for r in definition.regions:
 		_build_region(r)
@@ -39,6 +49,7 @@ func _ready() -> void:
 	_build_spiral()
 	_build_cover()
 	_build_guards()
+	_build_control_front()
 	_build_dressing()
 	call_deferred("_bake_navigation")
 
@@ -100,7 +111,7 @@ func _floor_rect(id: String, rect: Rect2, y: float, style: StringName) -> void:
 
 func _floor_with_hole(r: SGCRegion, hole: Rect2) -> void:
 	var rect := r.footprint
-	var y: float = definition.FLOOR_HEIGHTS[r.floor_number]
+	var y: float = definition.floor_y(r)
 	_floor_rect(
 		str(r.id) + "FloorN",
 		Rect2(rect.position, Vector2(rect.size.x, hole.position.y - rect.position.y)),
@@ -131,10 +142,14 @@ func _floor_with_hole(r: SGCRegion, hole: Rect2) -> void:
 
 
 func _build_region(r: SGCRegion) -> void:
-	var y: float = definition.FLOOR_HEIGHTS[r.floor_number]
+	var y: float = definition.floor_y(r)
 	if r.id == &"BRIEFING_ROOM":
-		_floor_with_hole(r, Rect2(-6.9, 8.6, 4.8, 4.8))
-		_floor_rect("SpiralTopLanding", Rect2(-3.6, 11.05, 1.4, 2.75), y, &"steel")
+		_floor_with_hole(r, Rect2(-6.9, 9.6, 4.8, 4.8))
+		_floor_rect("SpiralTopLanding", Rect2(-6.8, 9.2, 1.4, 2.75), y, &"steel")
+	elif r.id == &"FALLBACK_HALLWAY":
+		_floor_with_hole(r, Rect2(-1.3, 22, 2.6, 4.1))
+	elif r.id == &"CONTROL_CONNECTOR":
+		_floor_with_hole(r, Rect2(7, 13.7, 5.1, 2.6))
 	elif r.id == &"SERVICE_ROOM":
 		_floor_with_hole(r, Rect2(30.6, 26, 2.8, 12.1))
 	else:
@@ -146,13 +161,17 @@ func _build_region(r: SGCRegion) -> void:
 		)
 	for side in range(4):
 		_wall(r, side)
-	# Open ceilings preserve tactical camera visibility; fixtures mark the light sources.
+	_build_ceiling(r)
+	# Fixtures sit below the authored ceiling, independent of camera occlusion.
 	var light := OmniLight3D.new()
 	light.name = str(r.id) + "Light"
 	light.position = r.anchor + Vector3(0, 3.3, 0)
+	if r.id == &"GATE_ROOM":
+		light.position.y = 10.5
+		light.omni_range = 24.0
 	light.light_energy = r.light_energy
 	light.light_color = r.light_color
-	light.omni_range = 10.0
+	light.omni_range = 24.0 if r.id == &"GATE_ROOM" else 10.0
 	light.shadow_enabled = true
 	add_child(light)
 	if r.floor_number == 26:
@@ -182,6 +201,11 @@ func _build_region(r: SGCRegion) -> void:
 
 func _wall(r: SGCRegion, side: int) -> void:
 	var rect := r.footprint
+	if r.id == &"GATE_ROOM" and side == 1:
+		for x: float in [-9.5, 9.5]:
+			_box("AtriumRearPier" + str(x), Vector3(x, 6, 8), Vector3(5, 12, 0.4), &"bunker")
+		_box("AtriumRearHeader", Vector3(0, 10.65, 8), Vector3(14, 2.7, 0.4), &"bunker")
+		return
 	var along_x: bool = side < 2
 	var fixed: float = (
 		(rect.position.y if side == 0 else rect.end.y)
@@ -191,7 +215,7 @@ func _wall(r: SGCRegion, side: int) -> void:
 	var lo: float = rect.position.x if along_x else rect.position.y
 	var hi: float = rect.end.x if along_x else rect.end.y
 	var openings: Array[Vector2] = []
-	var y: float = definition.FLOOR_HEIGHTS[r.floor_number]
+	var y: float = definition.floor_y(r)
 	for c in definition.connections:
 		if c.from_region != r.id and c.to_region != r.id:
 			continue
@@ -202,7 +226,11 @@ func _wall(r: SGCRegion, side: int) -> void:
 				continue
 			var cross: float = p.z if along_x else p.x
 			var along: float = p.x if along_x else p.z
-			if absf(cross - fixed) < 0.05 and along >= lo and along <= hi:
+			if (
+				absf(cross - fixed) < (0.3 if c.kind == "stairs" else 0.05)
+				and along >= lo
+				and along <= hi
+			):
 				openings.append(
 					Vector2(maxf(lo, along - c.width / 2), minf(hi, along + c.width / 2))
 				)
@@ -210,16 +238,21 @@ func _wall(r: SGCRegion, side: int) -> void:
 	# Reserve the whole opening there, including headroom above the lower wall.
 	var stair_openings: Array[Vector2] = []
 	for c in definition.connections:
-		if c.kind != "stairs" or not along_x:
+		if c.kind != "stairs":
 			continue
 		var a := c.points[0]
 		var b := c.points[-1]
-		if fixed < minf(a.z, b.z) - 0.05 or fixed > maxf(a.z, b.z) + 0.05:
+		var a_axis: float = a.z if along_x else a.x
+		var b_axis: float = b.z if along_x else b.x
+		if absf(b_axis - a_axis) < 0.01:
 			continue
-		var t := (fixed - a.z) / (b.z - a.z)
+		if fixed < minf(a_axis, b_axis) - 0.3 or fixed > maxf(a_axis, b_axis) + 0.3:
+			continue
+		var t := (fixed - a_axis) / (b_axis - a_axis)
 		var p := a.lerp(b, t)
-		if p.x > lo and p.x < hi and p.y >= y - 0.1 and p.y <= y + 3.8:
-			var gap := Vector2(p.x - 1.5, p.x + 1.5)
+		var along: float = p.x if along_x else p.z
+		if along > lo and along < hi and p.y >= y - 0.1 and p.y <= y + 3.8:
+			var gap := Vector2(along - 1.5, along + 1.5)
 			openings.append(gap)
 			stair_openings.append(gap)
 	# Lift entrance is west of the cabin, never across its shaft.
@@ -254,6 +287,8 @@ func _wall_piece(
 		return
 	if r.id == &"BRIEFING_ROOM" and side == 0:
 		return
+	if r.id == &"GATE_ROOM":
+		height = r.ceiling_height - bottom
 	var along_x := side < 2
 	var at := (
 		Vector3((lo + hi) / 2, y + bottom + height / 2, fixed)
@@ -271,24 +306,27 @@ func _build_stairs(c: SGCConnection) -> void:
 	var length := delta.length()
 	var center := (a + b) / 2.0 - Vector3(0, 0.1, 0)
 	var ramp := _box(str(c.id) + "WalkSurface", center, Vector3(2.4, 0.2, length + 0.2), &"steel")
-	(ramp.get_parent() as Node3D).rotation.x = -atan2(delta.y, delta.z)
+	(ramp.get_parent() as Node3D).look_at(center + delta, Vector3.UP)
 	for offset: float in [-1.3, 1.3]:
 		var rail := _box(
 			str(c.id) + "Rail" + str(offset),
-			center + Vector3(offset, 0.65, 0),
+			center + Vector3(-delta.z, 0, delta.x).normalized() * offset + Vector3(0, 0.65, 0),
 			Vector3(0.10, 1.1, length + 0.2),
 			&"steel"
 		)
-		(rail.get_parent() as Node3D).rotation.x = -atan2(delta.y, delta.z)
+		(rail.get_parent() as Node3D).look_at(
+			(rail.get_parent() as Node3D).position + delta, Vector3.UP
+		)
 	for i in range(35):
 		var p := a.lerp(b, float(i) / 34.0)
-		_box(
+		var tread := _box(
 			str(c.id) + "Tread" + str(i),
 			p - Vector3(0, 0.08, 0),
-			Vector3(2.4, 0.12, absf(delta.z) / 34 + 0.02),
+			Vector3(2.4, 0.12, Vector2(delta.x, delta.z).length() / 34 + 0.02),
 			&"steel",
 			false
 		)
+		(tread.get_parent() as Node3D).rotation.y = atan2(delta.x, delta.z)
 
 
 func _build_spiral() -> void:
@@ -305,10 +343,10 @@ func _build_cover() -> void:
 		):
 			continue
 		var pos := Vector3(
-			r.footprint.position.x + 1.2,
-			definition.FLOOR_HEIGHTS[r.floor_number] + 0.5,
-			r.footprint.position.y + 2
+			r.footprint.position.x + 1.2, definition.floor_y(r) + 0.5, r.footprint.position.y + 2
 		)
+		if r.id == &"WEST_FALLBACK":
+			pos = Vector3(-12, definition.floor_y(r) + 0.5, 32.0)
 		var cover := _box(str(r.id) + "Cover", pos, Vector3(1.6, 1, 1), &"steel")
 		cover.get_parent().add_to_group("cover")
 
@@ -431,9 +469,10 @@ func _build_guards() -> void:
 	for x: float in [30.5, 33.5]:
 		_box("ServiceHoleGuard" + str(x), Vector3(x, 11.55, 32), Vector3(0.10, 1.1, 12.1), &"steel")
 	_box("ServiceHoleNorthGuard", Vector3(32, 11.55, 26), Vector3(2.8, 1.1, 0.1), &"steel")
-	_box("SpiralHoleWestGuard", Vector3(-6.9, 6.05, 11), Vector3(0.1, 1.1, 4.8), &"steel")
-	_box("SpiralHoleSouthGuard", Vector3(-5.3, 6.05, 13.4), Vector3(3.2, 1.1, 0.1), &"steel")
-	_box("SpiralHoleEastGuard", Vector3(-2.1, 6.05, 11), Vector3(0.1, 1.1, 4.8), &"steel")
+	_box("SpiralHoleWestGuard", Vector3(-6.9, 6.05, 12), Vector3(0.1, 1.1, 4.8), &"steel")
+	_box("SpiralHoleSouthGuard", Vector3(-4.5, 6.05, 14.4), Vector3(4.8, 1.1, 0.1), &"steel")
+	_box("SpiralTopLandingGuard", Vector3(-5.3, 6.05, 11.0), Vector3(0.1, 1.1, 2.0), &"steel")
+	_box("SpiralHoleEastGuard", Vector3(-2.1, 6.05, 12), Vector3(0.1, 1.1, 4.8), &"steel")
 
 
 func replace_asset_visual(slot_id: StringName, scene: PackedScene) -> bool:
@@ -480,7 +519,7 @@ func replace_asset_visual(slot_id: StringName, scene: PackedScene) -> bool:
 func _build_dressing() -> void:
 	# Keep dressing against the outer walls, away from authored portals and tactical anchors.
 	for r in definition.regions:
-		var y: float = definition.FLOOR_HEIGHTS[r.floor_number]
+		var y: float = definition.floor_y(r)
 		var edge := r.footprint.position
 		_box(
 			str(r.id) + "ServiceConduit",
@@ -507,3 +546,97 @@ func _build_dressing() -> void:
 				)
 		elif r.id == &"SERVICE_ROOM":
 			_box("ServiceCabinet", Vector3(28, y + 1.0, 28.5), Vector3(1.2, 2.0, 1.2), &"steel")
+
+
+func _build_ceiling(r: SGCRegion) -> void:
+	var y := definition.floor_y(r) + r.ceiling_height
+	var rect := r.footprint
+	var hole := Rect2()
+	if r.id == &"CONTROL_ROOM":
+		hole = Rect2(-6.9, 9.6, 4.8, 5.4)
+	elif r.id in [&"ELEVATOR_LOBBY", &"ROUND_HALLWAY"]:
+		hole = rect.intersection(Rect2(21.4, 19.6, 3.2, 9.0))
+	elif r.id == &"SERVICE_STAIRWELL":
+		hole = Rect2(30.4, 26, 3.2, 12.4)
+	if hole.has_area():
+		_ceiling_panel(
+			str(r.id) + "CeilingN",
+			Rect2(rect.position, Vector2(rect.size.x, hole.position.y - rect.position.y)),
+			y
+		)
+		_ceiling_panel(
+			str(r.id) + "CeilingS",
+			Rect2(
+				Vector2(rect.position.x, hole.end.y), Vector2(rect.size.x, rect.end.y - hole.end.y)
+			),
+			y
+		)
+		_ceiling_panel(
+			str(r.id) + "CeilingW",
+			Rect2(
+				Vector2(rect.position.x, hole.position.y),
+				Vector2(hole.position.x - rect.position.x, hole.size.y)
+			),
+			y
+		)
+		_ceiling_panel(
+			str(r.id) + "CeilingE",
+			Rect2(
+				Vector2(hole.end.x, hole.position.y), Vector2(rect.end.x - hole.end.x, hole.size.y)
+			),
+			y
+		)
+	else:
+		_ceiling_panel(str(r.id) + "Ceiling", rect, y)
+
+
+func _ceiling_panel(label: String, rect: Rect2, y: float) -> void:
+	if rect.size.x < 0.01 or rect.size.y < 0.01:
+		return
+	var mesh := _box(
+		label,
+		Vector3(rect.get_center().x, y + 0.12, rect.get_center().y),
+		Vector3(rect.size.x, 0.24, rect.size.y),
+		&"ceiling",
+		false
+	)
+	var body := mesh.get_parent() as StaticBody3D
+	body.add_to_group("sgc_ceiling")
+	body.collision_layer = 128
+	# Downward-facing collision prevents roofs becoming walkable navigation islands.
+	var a := Vector3(-rect.size.x / 2, -0.12, -rect.size.y / 2)
+	var b := Vector3(rect.size.x / 2, -0.12, -rect.size.y / 2)
+	var c := Vector3(-rect.size.x / 2, -0.12, rect.size.y / 2)
+	var d := Vector3(rect.size.x / 2, -0.12, rect.size.y / 2)
+	var shape := ConcavePolygonShape3D.new()
+	shape.set_faces(PackedVector3Array([a, b, c, b, d, c]))
+	shape.backface_collision = true
+	var collision := CollisionShape3D.new()
+	collision.shape = shape
+	body.add_child(collision)
+	# Visible underside ribs communicate the bunker/silo structure at human scale.
+	for index in range(int(rect.size.y / 4)):
+		_box(
+			label + "Beam" + str(index),
+			Vector3(rect.get_center().x, y - 0.09, rect.position.y + 2 + index * 4),
+			Vector3(rect.size.x, 0.18, 0.18),
+			&"steel",
+			false
+		)
+
+
+func _build_control_front() -> void:
+	_box("ControlFrontBase", Vector3(0, 1.1, 7.8), Vector3(14, 2.2, 0.4), &"bunker")
+	_box("ControlFrontHeader", Vector3(0, 4.95, 7.8), Vector3(14, 0.7, 0.4), &"bunker")
+	for x: float in [-6.5, 6.5]:
+		_box("ControlWindowPost" + str(x), Vector3(x, 3.4, 7.8), Vector3(1, 2.4, 0.4), &"steel")
+	# Deep roof and overhead reinforced shaft cover, consistent with the former silo shell.
+	_box("SiloRoofHatch", Vector3(0, 11.9, -15), Vector3(9, 0.2, 9), &"steel", false)
+	for z: float in [-18, -10, -2, 6]:
+		_box(
+			"SiloOverheadBeam" + str(z),
+			Vector3(0, 11.6, z),
+			Vector3(24, 0.6, 0.45),
+			&"steel",
+			false
+		)

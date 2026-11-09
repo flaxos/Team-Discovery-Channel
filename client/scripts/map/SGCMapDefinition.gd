@@ -2,6 +2,8 @@ class_name SGCMapDefinition
 extends Resource
 
 const FLOOR_HEIGHTS: Dictionary = {28: 0.0, 27: 5.5, 26: 11.0}
+const CONTROL_FLOOR_Y: float = 1.5
+const GATE_DIAMETER: float = 6.7
 const CAPSULE_RADIUS: float = 0.4
 const CAPSULE_HEIGHT: float = 1.8
 const WALL_THICKNESS: float = 0.3
@@ -79,8 +81,20 @@ func route(
 	return result
 
 
+static func floor_y(r: SGCRegion) -> float:
+	return FLOOR_HEIGHTS[r.floor_number] + r.floor_offset
+
+
 static func create_default() -> SGCMapDefinition:
 	var m := SGCMapDefinition.new()
+	(
+		m
+		. _style(
+			&"ceiling",
+			"Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings.",
+			Color(0.42, 0.44, 0.45)
+		)
+	)
 	m._style(
 		&"bunker",
 		"Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits.",
@@ -109,7 +123,7 @@ static func create_default() -> SGCMapDefinition:
 	m._region(
 		"GATE_ROOM",
 		28,
-		Rect2(-18, -22, 36, 30),
+		Rect2(-12, -22, 24, 30),
 		Vector3(5, 0, 4),
 		"Two-storey gate atrium; preserve gate/control/briefing sightline.",
 		true
@@ -118,21 +132,21 @@ static func create_default() -> SGCMapDefinition:
 		"CONTROL_ROOM",
 		28,
 		Rect2(-7, 8, 14, 14),
-		Vector3(5, 0, 15),
+		Vector3(5, 1.5, 15),
 		"Operations below briefing room.",
 		true
 	)
-	m._region("FALLBACK_HALLWAY", 28, Rect2(-5, 22, 10, 20), Vector3(2.5, 0, 29))
-	m._region("CONNECTOR_TUNNEL", 28, Rect2(5, 33, 12, 6), Vector3(11, 0, 36))
+	m._region("FALLBACK_HALLWAY", 28, Rect2(-3, 22, 6, 20), Vector3(2.5, 0, 29))
+	m._region("CONNECTOR_TUNNEL", 28, Rect2(3, 34, 14, 4), Vector3(11, 0, 36))
 	m._region("ROUND_HALLWAY", 28, Rect2(17, 24, 18, 21), Vector3(29, 0, 36))
 	m._region("ARMORY", 28, Rect2(35, 28, 18, 16), Vector3(43, 0, 36))
 	m._region("LABORATORY", 28, Rect2(17, 45, 18, 20), Vector3(26, 0, 52))
 	m._region("ELEVATOR_LOBBY", 28, Rect2(17, 10, 18.4, 14), Vector3(30, 0, 18))
 	m._region("EAST_CORRIDOR", 28, Rect2(18, 0, 9, 10), Vector3(23, 0, 4))
-	m._region("CONTROL_CONNECTOR", 28, Rect2(7, 12, 10, 6), Vector3(12, 0, 15))
+	m._region("CONTROL_CONNECTOR", 28, Rect2(7, 13, 10, 4), Vector3(12, 0, 15))
 	m._region("WEST_CORRIDOR", 28, Rect2(-28, 0, 10, 10), Vector3(-23, 0, 4))
 	m._region("WEST_SERVICE", 28, Rect2(-28, 10, 6, 26), Vector3(-25, 0, 30))
-	m._region("WEST_FALLBACK", 28, Rect2(-22, 30, 17, 6), Vector3(-12, 0, 33))
+	m._region("WEST_FALLBACK", 28, Rect2(-22, 31, 19, 4), Vector3(-12, 0, 33))
 	m._region(
 		"BRIEFING_ROOM",
 		27,
@@ -160,21 +174,39 @@ static func create_default() -> SGCMapDefinition:
 	m._region("STAGING", 26, Rect2(7, 10, 12, 16), Vector3(14, 11, 18))
 	m._region("STORAGE", 26, Rect2(7, 26, 20, 12), Vector3(15, 11, 32))
 	m._region("SERVICE_ROOM", 26, Rect2(27, 26, 8.4, 14), Vector3(29, 11, 38))
-	m._walk("GATE_ROOM", "CONTROL_ROOM", Vector3(5, 0, 8), 3)
-	m._walk("CONTROL_ROOM", "FALLBACK_HALLWAY", Vector3(0, 0, 22), 6, true)
-	m._walk("FALLBACK_HALLWAY", "CONNECTOR_TUNNEL", Vector3(5, 0, 36), 5)
+	m.region(&"CONTROL_ROOM").floor_offset = CONTROL_FLOOR_Y
+	m.region(&"CONTROL_ROOM").ceiling_height = 3.5
+	m.region(&"GATE_ROOM").ceiling_height = 12.0
+	m._region("GATE_EAST_ACCESS", 28, Rect2(12, 2.2, 6, 3.6), Vector3(15, 0, 4))
+	m._region("GATE_WEST_ACCESS", 28, Rect2(-18, 2.2, 6, 3.6), Vector3(-15, 0, 4))
+	m._link(
+		"CONTROL_ROOM",
+		"FALLBACK_HALLWAY",
+		"stairs",
+		PackedVector3Array([Vector3(0, 1.5, 22.2), Vector3(0, 0, 26)]),
+		2.0
+	)
+	m._walk("FALLBACK_HALLWAY", "CONNECTOR_TUNNEL", Vector3(3, 0, 36), 5)
 	m._walk("CONNECTOR_TUNNEL", "ROUND_HALLWAY", Vector3(17, 0, 36), 5)
 	m._walk("ROUND_HALLWAY", "ARMORY", Vector3(35, 0, 36), 5)
 	m._walk("ROUND_HALLWAY", "LABORATORY", Vector3(26, 0, 45), 4)
 	m._walk("ELEVATOR_LOBBY", "ROUND_HALLWAY", Vector3(30, 0, 24), 5)
-	m._walk("GATE_ROOM", "EAST_CORRIDOR", Vector3(18, 0, 4), 3.6, true)
+	m._walk("GATE_ROOM", "GATE_EAST_ACCESS", Vector3(12, 0, 4), 3.6, true)
+	m._walk("GATE_EAST_ACCESS", "EAST_CORRIDOR", Vector3(18, 0, 4), 3.6)
 	m._walk("EAST_CORRIDOR", "ELEVATOR_LOBBY", Vector3(23, 0, 10), 5)
-	m._walk("CONTROL_ROOM", "CONTROL_CONNECTOR", Vector3(7, 0, 15), 5)
+	m._link(
+		"CONTROL_ROOM",
+		"CONTROL_CONNECTOR",
+		"stairs",
+		PackedVector3Array([Vector3(7.2, 1.5, 15), Vector3(12, 0, 15)]),
+		2.0
+	)
 	m._walk("CONTROL_CONNECTOR", "ELEVATOR_LOBBY", Vector3(17, 0, 15), 5)
-	m._walk("GATE_ROOM", "WEST_CORRIDOR", Vector3(-18, 0, 4), 3.6, true)
+	m._walk("GATE_ROOM", "GATE_WEST_ACCESS", Vector3(-12, 0, 4), 3.6, true)
+	m._walk("GATE_WEST_ACCESS", "WEST_CORRIDOR", Vector3(-18, 0, 4), 3.6)
 	m._walk("WEST_CORRIDOR", "WEST_SERVICE", Vector3(-25, 0, 10), 5)
 	m._walk("WEST_SERVICE", "WEST_FALLBACK", Vector3(-22, 0, 33), 5)
-	m._walk("WEST_FALLBACK", "FALLBACK_HALLWAY", Vector3(-5, 0, 33), 5)
+	m._walk("WEST_FALLBACK", "FALLBACK_HALLWAY", Vector3(-3, 0, 33), 5)
 	m._walk("BRIEFING_ROOM", "GENERALS_OFFICE", Vector3(7, 5.5, 15), 3)
 	m._walk("BRIEFING_ROOM", "SECURITY_STATION", Vector3(-7, 5.5, 15), 3)
 	m._walk("GENERALS_OFFICE", "UPPER_CORRIDOR", Vector3(19, 5.5, 15), 3)
@@ -191,9 +223,9 @@ static func create_default() -> SGCMapDefinition:
 		var t := float(i) / 120.0
 		spiral.append(
 			Vector3(
-				-4.5 + cos(t * TAU * 1.25 - PI / 2.0) * 1.6,
-				t * 5.5,
-				11 + sin(t * TAU * 1.25 - PI / 2.0) * 1.6
+				-4.5 + cos(t * TAU * 1.25 + PI / 2.0) * 1.6,
+				lerpf(CONTROL_FLOOR_Y, 5.5, t),
+				12 + sin(t * TAU * 1.25 + PI / 2.0) * 1.6
 			)
 		)
 	m._link("CONTROL_ROOM", "BRIEFING_ROOM", "spiral", spiral, 2.0)

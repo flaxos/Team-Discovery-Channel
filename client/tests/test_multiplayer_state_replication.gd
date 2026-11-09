@@ -105,6 +105,19 @@ func run_test() -> void:
 	await frames(90)
 	assert(client.is_blast_doors_closed, "Late/reloaded room receives current door snapshot")
 
+	host.toggle_control_window()
+	await frames(90)
+	assert(host.is_control_window_closed and client.is_control_window_closed, "Control window shutter replicates independently")
+	assert(not client.is_observation_shutters_closed, "Control shutter must leave briefing shutter open")
+	client.toggle_control_window()
+	assert(client.is_control_window_closed, "Client cannot directly mutate control shutter")
+	client.is_control_window_closed = false
+	client.request_room_snapshot.rpc_id(1)
+	await frames(90)
+	assert(client.is_control_window_closed, "Room snapshot restores control shutter state")
+	var replica_shutter := client.find_child("ControlBlastShutters", true, false) as CSGBox3D
+	assert(absf(replica_shutter.position.y - 1.9) < 0.01, "Replica control shutter aligns to its frame")
+
 	var host_lift: SGCElevator = host.get_node("SGCElevator") as SGCElevator
 	var client_lift: SGCElevator = client.get_node("SGCElevator") as SGCElevator
 	host_lift.current_floor = 27

@@ -21,7 +21,7 @@ func run() -> void:
 	map = room.get_node("SGCMap") as SGCMap
 	await map.navigation_ready
 	check(map.definition.validate().is_empty(), "Invalid map schema")
-	check(map.definition.regions.size() == 24, "All three floors must be defined")
+	check(map.definition.regions.size() == 26, "All three floors must be defined")
 	for scene_path: String in [
 		"res://scenes/entities/Player.tscn",
 		"res://scenes/entities/SGCAirman.tscn",
@@ -59,7 +59,23 @@ func run() -> void:
 								c.id,
 								reverse,
 								pawn.position,
-								nav.status,
+								(
+									nav.status
+									+ " collision="
+									+ str(
+										(
+											[
+												pawn.get_last_slide_collision().get_collider(),
+												pawn.get_last_slide_collision().get_normal(),
+												pawn.get_last_slide_collision().get_position(),
+												pawn.is_on_floor(),
+												pawn.velocity
+											]
+											if pawn.get_slide_collision_count() > 0
+											else []
+										)
+									)
+								),
 								nav.steps.front() if not nav.steps.is_empty() else {}
 							]
 						)
