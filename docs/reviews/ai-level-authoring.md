@@ -44,3 +44,15 @@ Automated tests cover native layout/resource persistence, deterministic transact
 All five faction definitions currently use neutral fallback. Themes may supply cosmetic scenes/materials only; dimensions, collision, decks, sockets and navigation remain structural. Unsafe scripted/physics visuals fail validation, and unavailable or mismatched visual assets retain generic geometry. Theme overrides are available through typed resources/CLI and the native Inspector; no additional theme-picker dock was built. Transport areas reuse idle rings, including the explicitly accepted Asgard substitute; no Asgard beaming or mission logic is implied.
 
 Batch C is present; its PR #34 is merged. Batch D's broader integrated construction fixture was not present and is not silently substituted by these three small D.5 authoring demonstrations. Existing authored maps, editor settings, modified structural resources and the Main scene were preserved byte-for-byte and excluded from these commits.
+
+## Recorded validation
+
+Godot **4.4.1.stable.official.49a5bc7b6**:
+
+| Run | Result | Local evidence |
+|---|---|---|
+| Focused themes/catalogue/API/demonstrations plus existing modular level/editor tests and import | 7/7 passed | `build/test-results/d5-final-targeted/summary.json` |
+| Entire regression inventory, including SGC and multiplayer | 62/62 passed | `build/test-results/d5-full/summary.json` |
+| Same focused checks from a clean archive of committed sources, without local user edits | 7/7 passed | `build/test-results/d5-clean-release/summary.json` |
+
+The full inventory ran once after final code changes. The clean export also passed a fresh project import. Python authoring tools passed `py_compile`; Git whitespace checks passed. Existing user-edited files match their starting SHA-256 hashes. The final three graphical overview captures succeeded without engine diagnostics and were inspected. Manual mouse-driven editor and player walkthrough checks above remain pending.
