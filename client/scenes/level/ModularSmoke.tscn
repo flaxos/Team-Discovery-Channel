@@ -1,0 +1,87 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelAssembly.gd" id="1_veidu"]
+[ext_resource type="Resource" path="res://resources/levels/modular_smoke.tres" id="2_mcyf6"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room01Straight.tscn" id="3_nkybp"]
+[ext_resource type="Script" path="res://scripts/level/LevelModule.gd" id="4_2mkgk"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="5_p0ip2"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room02Corner.tscn" id="6_ouheg"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room02Corner.tres" id="7_cy86m"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room03TJunction.tscn" id="8_lm2qg"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room03TJunction.tres" id="9_71hp0"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room04Chamber.tscn" id="10_jjq3f"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="11_cu40x"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_i4v7g"]
+vertices = PackedVector3Array(-8.85, 0.2, -12.65, -7.2, 0.2, -12.65, -7.2, 0.2, -19.1, -8.85, 0.2, -19.1, -8.85, 0.2, -4.4, -8.85, 0.2, -3.95, -7.2, 0.2, -3.95, -7.2, 0.2, -4.4, -4.8, 0.2, -9.2, -4.8, 0.2, -11.15, -6.75, 0.2, -11.15, -3.3, 0.2, -7.1, -3.45, 0.2, -8.9, -4.35, 0.2, -8.75, -4.35, 0.2, -7.1, -6.75, 0.2, -4.85, -4.8, 0.2, -4.85, -4.8, 0.2, -6.65, -7.2, 0.2, -11.6, -8.85, 0.2, -11.6, -9.3, 0.2, -11.15, -9.3, 0.2, -4.85, -11.1, 0.2, -11.15, -11.1, 0.2, -4.85, -0.75, 0.2, -6.65, -0.75, 0.2, -5.75, 0.900001, 0.2, -5.9, -1.2, 0.2, -7.1, 0.900001, 0.2, -8.9, -0.75, 0.2, 5.65, 0.900001, 0.2, 5.65, -8.85, 0.2, -3.5, -7.2, 0.2, -3.5, -9.3, 0.2, -3.05, -11.1, 0.2, -3.05, -11.1, 0.2, 3.1, -6.75, 0.2, -3.05, -4.8, 0.2, 3.1, -4.8, 0.2, -3.05, -6, 0.2, 8.8, -5.85, 0.2, 7.15, -6.75, 0.2, 7.15, -7.2, 0.2, 6.7, -9.3, 0.2, 7.15, -11.1, 0.2, 8.8, -7.2, 0.2, 4.9, -8.85, 0.2, 4.9, -8.85, 0.2, 6.7, -11.1, 0.2, 7.15, 2.1, 0.2, 8.8, 2.25, 0.2, 7.15, 1.35, 0.2, 7.15, 0.900001, 0.2, 6.7, -0.75, 0.2, 6.7, -1.2, 0.2, 7.15, 7.2, 0.2, 9.25, 7.2, 0.2, 11.05, 8.85, 0.2, 11.05, 8.85, 0.2, 7.15, 6.75, 0.2, 8.8)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1), PackedInt32Array(7, 6, 4), PackedInt32Array(4, 6, 5), PackedInt32Array(10, 9, 8), PackedInt32Array(13, 12, 14), PackedInt32Array(14, 12, 11), PackedInt32Array(15, 17, 16), PackedInt32Array(19, 0, 18), PackedInt32Array(18, 0, 1), PackedInt32Array(19, 10, 20), PackedInt32Array(20, 10, 8), PackedInt32Array(7, 4, 15), PackedInt32Array(15, 4, 21), PackedInt32Array(14, 17, 13), PackedInt32Array(13, 17, 8), PackedInt32Array(8, 17, 15), PackedInt32Array(8, 15, 21), PackedInt32Array(19, 18, 10), PackedInt32Array(20, 8, 22), PackedInt32Array(22, 8, 21), PackedInt32Array(22, 21, 23), PackedInt32Array(26, 25, 24), PackedInt32Array(24, 27, 26), PackedInt32Array(26, 27, 28), PackedInt32Array(11, 12, 27), PackedInt32Array(27, 12, 28), PackedInt32Array(29, 25, 30), PackedInt32Array(30, 25, 26), PackedInt32Array(32, 31, 6), PackedInt32Array(6, 31, 5), PackedInt32Array(33, 35, 34), PackedInt32Array(32, 36, 31), PackedInt32Array(31, 36, 33), PackedInt32Array(33, 36, 35), PackedInt32Array(35, 36, 37), PackedInt32Array(36, 38, 37), PackedInt32Array(41, 40, 39), PackedInt32Array(41, 39, 42), PackedInt32Array(42, 39, 43), PackedInt32Array(43, 39, 44), PackedInt32Array(47, 46, 42), PackedInt32Array(42, 46, 45), PackedInt32Array(43, 44, 48), PackedInt32Array(43, 47, 42), PackedInt32Array(51, 50, 49), PackedInt32Array(53, 29, 52), PackedInt32Array(52, 29, 30), PackedInt32Array(40, 54, 39), PackedInt32Array(39, 54, 49), PackedInt32Array(52, 51, 53), PackedInt32Array(53, 51, 54), PackedInt32Array(54, 51, 49), PackedInt32Array(56, 55, 57), PackedInt32Array(57, 55, 58), PackedInt32Array(49, 50, 59), PackedInt32Array(59, 50, 58), PackedInt32Array(59, 58, 55)]
+geometry_parsed_geometry_type = 1
+geometry_collision_mask = 1
+cell_size = 0.15
+cell_height = 0.1
+agent_height = 1.9
+agent_radius = 0.6
+agent_max_climb = 0.2
+agent_max_slope = 42.0
+
+[node name="@Node3D@2" type="Node3D"]
+script = ExtResource("1_veidu")
+layout = ExtResource("2_mcyf6")
+
+[node name="room_0" type="Node3D" parent="." instance=ExtResource("3_nkybp")]
+script = ExtResource("4_2mkgk")
+instance_id = &"room_0"
+definition = ExtResource("5_p0ip2")
+available_sockets = PackedStringArray()
+
+[node name="room_1" type="Node3D" parent="." instance=ExtResource("6_ouheg")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -3.49691e-07, 0, -8)
+script = ExtResource("4_2mkgk")
+instance_id = &"room_1"
+definition = ExtResource("7_cy86m")
+available_sockets = PackedStringArray()
+
+[node name="room_2" type="Node3D" parent="." instance=ExtResource("8_lm2qg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.49691e-07, 0, 8)
+script = ExtResource("4_2mkgk")
+instance_id = &"room_2"
+definition = ExtResource("9_71hp0")
+available_sockets = PackedStringArray()
+
+[node name="room_3" type="Node3D" parent="." instance=ExtResource("10_jjq3f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -8)
+script = ExtResource("4_2mkgk")
+instance_id = &"room_3"
+definition = ExtResource("11_cu40x")
+available_sockets = PackedStringArray()
+
+[node name="room_4" type="Node3D" parent="." instance=ExtResource("3_nkybp")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -8, 0, -16)
+script = ExtResource("4_2mkgk")
+instance_id = &"room_4"
+definition = ExtResource("5_p0ip2")
+available_sockets = PackedStringArray()
+
+[node name="room_5" type="Node3D" parent="." instance=ExtResource("6_ouheg")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 8, 0, 8)
+script = ExtResource("4_2mkgk")
+instance_id = &"room_5"
+definition = ExtResource("7_cy86m")
+available_sockets = PackedStringArray()
+
+[node name="room_6" type="Node3D" parent="." instance=ExtResource("8_lm2qg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 8)
+script = ExtResource("4_2mkgk")
+instance_id = &"room_6"
+definition = ExtResource("9_71hp0")
+available_sockets = PackedStringArray()
+
+[node name="room_7" type="Node3D" parent="." instance=ExtResource("10_jjq3f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 9.53674e-07)
+script = ExtResource("4_2mkgk")
+instance_id = &"room_7"
+definition = ExtResource("11_cu40x")
+available_sockets = PackedStringArray()
+
+[node name="Navigation" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_i4v7g")
