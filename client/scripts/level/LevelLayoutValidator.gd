@@ -35,6 +35,19 @@ static func validate(layout: LevelLayout, require_route: bool = true) -> PackedS
 			if s.id == &"" or sockets.has(s.id):
 				errors.append("Duplicate/empty socket: %s/%s" % [item.id, s.id])
 			sockets[s.id] = true
+			# -Z is the socket's outward normal. Test both sides of the occupied
+			# boundary independently of the scene marker, which can share a bad basis.
+			var outward := -s.local_transform.basis.z
+			var boundary := item.module.occupied.grow(0.001)
+			if (
+				not s.local_transform.is_finite()
+				or not outward.is_normalized()
+				or boundary.has_point(s.local_transform.origin + outward * 0.05)
+				or not boundary.has_point(s.local_transform.origin - outward * 0.05)
+			):
+				errors.append(
+					"Socket must face outward from occupied boundary: %s/%s" % [item.id, s.id]
+				)
 			if s.width < 1.2 or s.height < 2.0:
 				errors.append("Insufficient clearance: %s/%s" % [item.id, s.id])
 		for id in item.available_sockets:

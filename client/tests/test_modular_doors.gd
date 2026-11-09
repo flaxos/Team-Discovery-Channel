@@ -6,7 +6,59 @@ func _init() -> void:
 	call_deferred("run")
 
 
+func verify_mixed_doorways() -> void:
+	# A loop with mixed north/east/west joins reproduced the user's default-map
+	# failure. Keep this fixture independent of their mutable editor_demo resource.
+	var arrangement := [
+		["Room01Straight", Vector2(56, -16), 3],
+		["Room01Straight", Vector2(64, -16), 3],
+		["Room01Straight", Vector2(48, -16), 3],
+		["Room02Corner", Vector2(40, -16), 3],
+		["Room02Corner", Vector2(72, -16), 2],
+		["Room02Corner", Vector2(72, -8), 1],
+		["Room02Corner", Vector2(40, -8), 0],
+		["Room03TJunction", Vector2(56, 0), 0],
+		["Room02Corner", Vector2(48, -8), 1],
+		["Room02Corner", Vector2(48, 0), 0],
+		["Room02Corner", Vector2(56, -8), 3],
+		["Room02Corner", Vector2(64, 0), 1],
+		["Room03TJunction", Vector2(64, -8), 2],
+	]
+	var model := Model.new()
+	for pose: Array in arrangement:
+		var module := (
+			load("res://resources/level_modules/" + pose[0] + ".tres") as LevelModuleDefinition
+		)
+		var candidate := model.placed(module, pose[1], pose[2])
+		assert(model.accepted(candidate))
+		model.restore(candidate)
+	assert(model.layout.connections.size() == 13)
+	assert(LevelLayoutValidator.validate(model.layout).is_empty())
+	# The explicit recovery action on an older connection-free layout has the
+	# same result as automatic placement, without moving or saving any room.
+	var recovered := Model.copy(model.layout)
+	recovered.connections.clear()
+	assert(LevelAssembler.connect_touching(recovered).is_empty())
+	assert(recovered.connections.size() == 13)
+	assert(LevelLayoutValidator.validate(recovered).is_empty())
+	var assembly := LevelAssembly.new()
+	assembly.layout = recovered
+	root.add_child(assembly)
+	await assembly.navigation_ready
+	assert(assembly.last_errors.is_empty())
+	for edge in recovered.connections:
+		var start := assembly.marker(edge.from_instance, &"entry")
+		var goal := assembly.marker(edge.to_instance, &"entry")
+		for reverse: bool in [false, true]:
+			var path := assembly.local_path(goal if reverse else start, start if reverse else goal)
+			assert(not path.is_empty())
+			assert(path[-1].distance_to(start if reverse else goal) < 0.5)
+	assembly.queue_free()
+	await process_frame
+
+
 func run() -> void:
+	await verify_mixed_doorways()
 	var module := load("res://resources/level_modules/Room01Straight.tres") as LevelModuleDefinition
 	var model := Model.new()
 	model.restore(model.placed(module, Vector2.ZERO, 0))

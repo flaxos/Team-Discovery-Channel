@@ -11,37 +11,55 @@ func frames(n: int) -> void:
 		await physics_frame
 
 
+func verify_socket_combinations() -> void:
+	var modules: Array[LevelModuleDefinition] = []
+	for name: String in ["Room01Straight", "Room02Corner", "Room03TJunction", "Room04Chamber"]:
+		modules.append(load("res://resources/level_modules/" + name + ".tres"))
+	# Cross-direction pairs matter: identical sockets can share the same incorrect
+	# basis and still pass alignment. Exercise every kit pair and quarter turn.
+	for turn in range(4):
+		for target in modules:
+			for moving in modules:
+				for sa in target.sockets:
+					for sb in moving.sockets:
+						var layout := LevelLayout.new()
+						var a := LevelModuleInstance.new()
+						a.id = &"a"
+						a.module = target
+						a.quarter_turn = turn
+						var b := LevelModuleInstance.new()
+						b.id = &"b"
+						b.module = moving
+						b.position = Vector2(100, 100)
+						layout.instances.assign([a, b])
+						layout.entry_instance = a.id
+						layout.destination_instance = b.id
+						assert(LevelAssembler.snap(layout, b.id, sb.id, a.id, sa.id).is_empty())
+						assert(LevelLayoutValidator.validate(layout).is_empty())
+						assert(is_equal_approx(a.position.distance_to(b.position), 8.0))
+						var old := b.position
+						assert(not LevelAssembler.snap(layout, b.id, sb.id, a.id, sa.id).is_empty())
+						assert(b.position == old and layout.connections.size() == 1)
+	# Reject an inward marker even if the corresponding scene has the same bug.
+	var bad := LevelLayout.new()
+	var item := LevelModuleInstance.new()
+	item.id = &"inverted_room"
+	item.module = modules[1].duplicate() as LevelModuleDefinition
+	item.module.sockets = []
+	for socket in modules[1].sockets:
+		item.module.sockets.append(socket.duplicate() as LevelSocketDefinition)
+	var east := item.module.socket(&"east")
+	east.local_transform.basis = east.local_transform.basis.rotated(Vector3.UP, PI)
+	bad.instances.append(item)
+	var errors := LevelLayoutValidator.validate(bad, false)
+	assert(errors.size() == 1 and "inverted_room/east" in errors[0] and "outward" in errors[0])
+
+
 func run() -> void:
 	var source := load("res://resources/levels/modular_smoke.tres") as LevelLayout
 	assert(LevelLayoutValidator.validate(source).is_empty())
 	assert(source.instances.size() == 8)
-	# All pairs and rotations share one socket calculation, and failures are transactional.
-	for turn in range(4):
-		for module_name: String in [
-			"Room01Straight", "Room02Corner", "Room03TJunction", "Room04Chamber"
-		]:
-			var module := (
-				load("res://resources/level_modules/" + module_name + ".tres")
-				as LevelModuleDefinition
-			)
-			for socket in module.sockets:
-				var layout := LevelLayout.new()
-				var a := LevelModuleInstance.new()
-				a.id = &"a"
-				a.module = module
-				a.quarter_turn = turn
-				var b := LevelModuleInstance.new()
-				b.id = &"b"
-				b.module = module
-				b.position = Vector2(100, 100)
-				layout.instances.assign([a, b])
-				layout.entry_instance = &"a"
-				layout.destination_instance = &"b"
-				assert(LevelAssembler.snap(layout, b.id, socket.id, a.id, socket.id).is_empty())
-				assert(LevelLayoutValidator.validate(layout).is_empty())
-				var old := b.position
-				assert(not LevelAssembler.snap(layout, b.id, socket.id, a.id, socket.id).is_empty())
-				assert(b.position == old and layout.connections.size() == 1)
+	verify_socket_combinations()
 	var bad := (
 		ResourceLoader.load(
 			"res://resources/levels/modular_smoke.tres", "", ResourceLoader.CACHE_MODE_IGNORE_DEEP

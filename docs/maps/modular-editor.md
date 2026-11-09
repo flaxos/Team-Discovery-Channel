@@ -4,7 +4,7 @@ Requires Godot 4.4.1 and the Phase 1 room kit. This plugin edits the existing `L
 
 ## Enable and open
 
-Open the `client/` project in Godot. In **Project → Project Settings → Plugins**, enable **Modular Map Editor**. Click the **Modular Map** bottom-panel tab and drag its upper edge upward if needed. The initial path is `res://resources/levels/editor_demo.tres`; click **Open** to inspect the eight-instance example built through the canvas mouse-event workflow using all four archetypes.
+Open the `client/` project in Godot. In **Project → Project Settings → Plugins**, enable **Modular Map Editor**. Click the **Modular Map** bottom-panel tab and drag its upper edge upward if needed. The initial path is `res://resources/levels/automatic_doors_demo.tres`; click **Open** to inspect the connected eight-instance door example using all four archetypes. `editor_demo.tres` remains a separate editable layout; it is not overwritten when the plugin opens.
 
 ## Author a map
 
@@ -48,7 +48,7 @@ Manual checklist:
 
 ## Limits
 
-Initial palette is the existing four archetypes on `deck0`; no deck-management UI, custom ID/property inspector, procedural generation, new architecture/art, doors/alarms, mission creation or generic enemy behavior is added. Multiple simultaneous build jobs are blocked. The bottom panel may need resizing or horizontal palette scrolling on narrow screens. Saved-state indication is conservative after Undo/Redo: save again when prompted. Structural enclosure remains a sampled physical check, not a rendering proof.
+Initial palette is the existing four archetypes on `deck0`; no deck-management UI, custom ID/property inspector, procedural generation, new architecture/art, alarms, mission creation or generic enemy behavior is added. Multiple simultaneous build jobs are blocked. The bottom panel may need resizing or horizontal palette scrolling on narrow screens. Saved-state indication is conservative after Undo/Redo: save again when prompted. Structural enclosure remains a sampled physical check, not a rendering proof.
 
 
 ## Delivery evidence
@@ -66,3 +66,14 @@ Open `res://resources/levels/automatic_doors_demo.tres` for eight kit instances 
 `test_modular_doors` covers automatic two-room and eight-room linking, duplicate prevention, preserved existing links, static navigation through operable connections, closed/open collision, the production player E interaction, physical traversal, closing again, occupied-doorway protection and missing/distant interactor rejection. Generic NPC door-opening behavior is not added by this editor refactor.
 
 Automatic-door refactor validation: all 54 full regression checks passed (`build/test-results/auto-door-full/`); final targeted door/editor tests pass (`auto-door-final-target/`). Native editor rebuild and Preview 3D were exercised using the automatic-door example. User-authored map and editor-setting changes were preserved separately.
+
+
+### Doorway-facing correction
+
+The original corner, T-junction and chamber east/west socket bases pointed inward. This made mixed north/east or north/west joins fail even when their doorways visibly touched. Both module definitions and scene markers now face outward consistently. Validation rejects an inward-facing socket at the occupied boundary and reports its room/socket ID.
+
+After updating, reopen the Godot project to reload the kit resources. For an existing disconnected layout, open its `.tres`, click **Connect touching rooms**, then **Validate** and **Save**. This records compatible touching links without moving your rooms. **Preview 3D** then builds the whole map; press **E** near each door to operate it. Connections only form between matching doorway markers, not arbitrary touching walls.
+
+Regression coverage includes all 484 canonical socket-pair/quarter-turn combinations, inward-facing rejection, and a 13-room mixed-orientation loop with automatic placement, recovery of missing links, enclosure and bidirectional navigation across all 13 connections.
+
+Doorway-facing fix verification: all **54/54 Godot 4.4.1 regression checks passed** (`build/test-results/socket-facing-full/`), following focused modular suites (`socket-facing-target/`). The native Godot editor opened the new default, exercised Undo, rebuilt and launched Preview 3D, then exited cleanly. A recovered copy of the existing 13-room layout passed the headless build/navigation command; the authored layout and local editor settings were left unchanged.
