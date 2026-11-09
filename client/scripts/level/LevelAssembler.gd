@@ -77,3 +77,73 @@ static func assemble(layout: LevelLayout, parent: Node3D) -> void:
 	for c in layout.connections:
 		(parent.get_node(str(c.from_instance)) as LevelModule).set_portal(c.from_socket, true)
 		(parent.get_node(str(c.to_instance)) as LevelModule).set_portal(c.to_socket, true)
+
+	add_doors(layout, parent)
+
+
+static func connect_touching(layout: LevelLayout) -> PackedStringArray:
+	var errors := LevelLayoutValidator.validate(layout, false)
+	if not errors.is_empty():
+		return errors
+	var used: Dictionary = {}
+	for edge in layout.connections:
+		if edge.state == "open":
+			edge.state = "door"
+		used[str(edge.from_instance) + "/" + str(edge.from_socket)] = true
+		used[str(edge.to_instance) + "/" + str(edge.to_socket)] = true
+	for i in range(layout.instances.size()):
+		var a := layout.instances[i]
+		for j in range(i + 1, layout.instances.size()):
+			var b := layout.instances[j]
+			if a.deck != b.deck:
+				continue
+			for sa in a.module.sockets:
+				for sb in b.module.sockets:
+					var ka := str(a.id) + "/" + str(sa.id)
+					var kb := str(b.id) + "/" + str(sb.id)
+					if used.has(ka) or used.has(kb) or not a.allows(sa.id) or not b.allows(sb.id):
+						continue
+					if (
+						sa.family != sb.family
+						or absf(sa.width - sb.width) > 0.001
+						or absf(sa.height - sb.height) > 0.001
+					):
+						continue
+					var ta := a.placement(float(layout.decks[str(a.deck)])) * sa.local_transform
+					var tb := b.placement(float(layout.decks[str(b.deck)])) * sb.local_transform
+					if (
+						ta.origin.distance_to(tb.origin) > 0.001
+						or ta.basis.z.dot(tb.basis.z) > -0.999
+					):
+						continue
+					var edge := LevelModuleConnection.new()
+					edge.from_instance = a.id
+					edge.from_socket = sa.id
+					edge.to_instance = b.id
+					edge.to_socket = sb.id
+					edge.state = "door"
+					layout.connections.append(edge)
+					used[ka] = true
+					used[kb] = true
+	return PackedStringArray()
+
+
+static func add_doors(layout: LevelLayout, parent: Node3D) -> void:
+	for index in range(layout.connections.size()):
+		var edge := layout.connections[index]
+		if edge.state != "door":
+			continue
+		var name := "Door_%03d" % index
+		if parent.has_node(name):
+			continue
+		var item := layout.instance(edge.from_instance)
+		var socket := item.module.socket(edge.from_socket)
+		var door := load("res://scenes/level/ModularDoor.tscn").instantiate() as Node3D
+		door.name = name
+		door.transform = (
+			item.placement(float(layout.decks[str(item.deck)])) * socket.local_transform
+		)
+		door.set("width", socket.width)
+		door.set("height", socket.height)
+		parent.add_child(door)
+		door.owner = parent.owner if parent.owner != null else parent

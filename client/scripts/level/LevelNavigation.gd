@@ -13,7 +13,14 @@ static func bake(root: Node3D) -> NavigationMesh:
 	mesh.cell_height = 0.1
 	mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
 	mesh.geometry_collision_mask = 1
+	var doors: Dictionary = {}
+	for door in root.get_tree().get_nodes_in_group("modular_door"):
+		if root.is_ancestor_of(door):
+			doors[door] = door.collision_layer
+			door.collision_layer = 0
 	var source := NavigationMeshSourceGeometryData3D.new()
 	NavigationServer3D.parse_source_geometry_data(mesh, source, root)
 	NavigationServer3D.bake_from_source_geometry_data(mesh, source)
+	for door: StaticBody3D in doors:
+		door.collision_layer = doors[door]
 	return mesh

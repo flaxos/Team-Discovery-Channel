@@ -1,6 +1,7 @@
 @tool
 extends RefCounted
 signal changed
+var auto_doors := true
 var layout := LevelLayout.new()
 var errors := PackedStringArray()
 
@@ -40,15 +41,22 @@ func placed(module: LevelModuleDefinition, position: Vector2, turn: int) -> Leve
 	if result.entry_instance == &"":
 		result.entry_instance = item.id
 	result.destination_instance = item.id
+	if auto_doors:
+		LevelAssembler.connect_touching(result)
 	return result
 
 
 func moved(id: StringName, position: Vector2, turn: int) -> LevelLayout:
 	var result := copy(layout)
 	var item := result.instance(id)
+	var changed := (
+		item != null and (item.position.distance_to(position) > 0.001 or item.quarter_turn != turn)
+	)
 	if item != null:
 		item.position = position
 		item.quarter_turn = turn
+	if auto_doors and changed:
+		LevelAssembler.connect_touching(result)
 	return result
 
 

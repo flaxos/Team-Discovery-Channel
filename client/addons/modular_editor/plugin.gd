@@ -52,6 +52,7 @@ func _enter_tree() -> void:
 		button.pressed.connect(choose.bind(name))
 	for title: String in [
 		"Select / Move",
+		"Connect touching rooms",
 		"Connect sockets",
 		"Rotate (R)",
 		"Remove room + links",
@@ -97,6 +98,26 @@ func tool_action(title: String) -> void:
 	if title == "Select / Move":
 		canvas.placing = false
 		canvas.connecting = false
+	elif title == "Connect touching rooms":
+		var candidate := Model.copy(model.layout)
+		var errors := LevelAssembler.connect_touching(candidate)
+		if not errors.is_empty():
+			model.errors = errors
+			refresh()
+			return
+		var changed := candidate.connections.size() != model.layout.connections.size()
+		for i in range(mini(candidate.connections.size(), model.layout.connections.size())):
+			if candidate.connections[i].state != model.layout.connections[i].state:
+				changed = true
+		if not changed:
+			model.errors = PackedStringArray(
+				[
+					"No unlinked matching doorways touch. Rotate/move rooms until their amber doorway markers meet and face each other."
+				]
+			)
+			refresh()
+			return
+		commit(candidate, title)
 	elif title == "Connect sockets":
 		canvas.placing = false
 		canvas.connecting = true
@@ -153,7 +174,7 @@ func refresh() -> void:
 	results.text += (
 		"\n".join(model.errors)
 		if not model.errors.is_empty()
-		else "8 m grid · MMB pan · wheel zoom · choose palette to place · select/drag to move · R rotate · connect: click source then destination socket (may snap destination)."
+		else "Touching compatible doorways automatically create operable doors. [E] opens/closes in 3D. · 8 m grid · MMB pan · wheel zoom · choose palette to place · select/drag to move · R rotate · connect: click source then destination socket (may snap destination)."
 	)
 	canvas.queue_redraw()
 

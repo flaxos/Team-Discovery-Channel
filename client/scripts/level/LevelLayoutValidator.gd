@@ -70,7 +70,7 @@ static func validate(layout: LevelLayout, require_route: bool = true) -> PackedS
 			if used.has(key):
 				errors.append("Reused socket: " + key)
 			used[key] = true
-		if not a.allows(sa.id) or not b.allows(sb.id) or c.state != "open":
+		if not a.allows(sa.id) or not b.allows(sb.id) or c.state not in ["open", "door"]:
 			errors.append("Unavailable connection: " + label)
 		var ta := a.placement(float(layout.decks[str(a.deck)])) * sa.local_transform
 		var tb := b.placement(float(layout.decks[str(b.deck)])) * sb.local_transform

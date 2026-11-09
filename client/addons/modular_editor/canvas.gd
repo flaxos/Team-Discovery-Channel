@@ -102,6 +102,11 @@ func _draw() -> void:
 		var ia := model.layout.instance(edge.from_instance)
 		var ib := model.layout.instance(edge.to_instance)
 		draw_line(screen(ia.position), screen(ib.position), Color(0.3, 0.9, 0.7), 3)
+	for edge in model.layout.connections:
+		if edge.state == "door":
+			var item := model.layout.instance(edge.from_instance)
+			var point := screen(socket_position(item, item.module.socket(edge.from_socket)))
+			draw_rect(Rect2(point - Vector2(4, 6), Vector2(8, 12)), Color(0.3, 1, 0.65))
 	if placing and palette != null:
 		var candidate := model.placed(palette, grid(mouse), turn) as LevelLayout
 		var valid := LevelLayoutValidator.validate(candidate, false).is_empty()
@@ -221,5 +226,6 @@ func pick_socket() -> void:
 				model.errors = errors
 				selection_changed.emit()
 				return
+			candidate.connections[-1].state = "door"
 			edit_requested.emit(candidate, "Connect and snap sockets")
 			return

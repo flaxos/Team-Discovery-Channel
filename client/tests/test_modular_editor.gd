@@ -31,6 +31,7 @@ func click(position: Vector2, pressed: bool = true) -> void:
 
 
 func run() -> void:
+	model.auto_doors = false  # Explicit socket-tool regression; automatic doors have their own suite.
 	canvas = Canvas.new()
 	canvas.model = model
 	root.add_child(canvas)
