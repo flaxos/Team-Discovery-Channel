@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="LevelModuleDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleDefinition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelSocketDefinition.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room01Straight.tscn" id="3"]
+[sub_resource type="Resource" id="north"]
+script = ExtResource("2")
+id = &"north"
+local_transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 0, 0, -4)
+approach = Vector3(0.0,0,-3.0)
+[sub_resource type="Resource" id="south"]
+script = ExtResource("2")
+id = &"south"
+local_transform = Transform3D(-1.0, 0, -0.0, 0, 1, 0, 0.0, 0, -1.0, 0, 0, 4)
+approach = Vector3(0.0,0,3.0)
+[resource]
+script = ExtResource("1")
+id = &"room01"
+scene = ExtResource("3")
+interiors = Array[AABB]([AABB(-1.5,0,-4.0,3.0,3.4,8.0)])
+sockets = Array[ExtResource("2")]([SubResource("north"), SubResource("south")])
+tags = PackedStringArray("corridor")

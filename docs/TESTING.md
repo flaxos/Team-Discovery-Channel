@@ -78,3 +78,8 @@ npm run build
 ```
 
 The existing CI workflow runs runner contracts, Godot fast/multiplayer/full profiles, Alignment API tests and a frontend build. It pins Godot 4.4.1, Python 3.11 and Node 22.14.0, and retains diagnostic artifacts for 14 days. See [Alignment operations](ALIGNMENT.md) for that app's runtime requirements.
+
+
+## Modular room scaffolding
+
+The separate [modular kit guide](maps/modular-levels.md) documents the Phase 1 builder, neutral preview and `test_modular_level` contract. Full test discovery includes this suite without changing the existing SGC tests. The 51-check result above remains the historical pre-kit baseline; consult the new report for current totals.
