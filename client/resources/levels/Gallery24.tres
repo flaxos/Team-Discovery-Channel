@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="LevelLayout" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="3"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="4"]
+[sub_resource type="Resource" id="i0"]
+script = ExtResource("2")
+id = &"gallery_0"
+module = ExtResource("4")
+position = Vector2(0,0)
+[sub_resource type="Resource" id="i1"]
+script = ExtResource("2")
+id = &"gallery_1"
+module = ExtResource("4")
+position = Vector2(0,8)
+[sub_resource type="Resource" id="i2"]
+script = ExtResource("2")
+id = &"gallery_2"
+module = ExtResource("4")
+position = Vector2(0,16)
+[sub_resource type="Resource" id="c0"]
+script = ExtResource("3")
+from_instance = &"gallery_0"
+from_socket = &"south"
+to_instance = &"gallery_1"
+to_socket = &"north"
+state = "open"
+[sub_resource type="Resource" id="c1"]
+script = ExtResource("3")
+from_instance = &"gallery_1"
+from_socket = &"south"
+to_instance = &"gallery_2"
+to_socket = &"north"
+state = "open"
+[resource]
+script = ExtResource("1")
+instances = Array[ExtResource("2")]([SubResource("i0"),SubResource("i1"),SubResource("i2")])
+connections = Array[ExtResource("3")]([SubResource("c0"),SubResource("c1")])
+entry_instance = &"gallery_0"
+destination_instance = &"gallery_2"

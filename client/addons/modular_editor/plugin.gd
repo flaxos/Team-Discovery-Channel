@@ -40,18 +40,23 @@ func _enter_tree() -> void:
 	panel.add_child(scroll)
 	var tools := HBoxContainer.new()
 	scroll.add_child(tools)
-	for name: String in ["Room01Straight", "Room02Corner", "Room03TJunction", "Room04Chamber"]:
+	for name: String in LevelCatalogue.MODULES:
 		var button := Button.new()
-		button.text = {
-			"Room01Straight": "Straight corridor",
-			"Room02Corner": "Corner corridor",
-			"Room03TJunction": "T-junction",
-			"Room04Chamber": "Chamber"
-		}[name]
+		button.text = (
+			{
+				"Room01Straight": "Straight corridor",
+				"Room02Corner": "Corner corridor",
+				"Room03TJunction": "T-junction",
+				"Room04Chamber": "Chamber"
+			}
+			. get(name, name.substr(6))
+		)
 		tools.add_child(button)
 		button.pressed.connect(choose.bind(name))
 	for title: String in [
 		"Select / Move",
+		"Open passage",
+		"Standard door",
 		"Connect touching rooms",
 		"Connect sockets",
 		"Rotate (R)",
@@ -98,6 +103,21 @@ func tool_action(title: String) -> void:
 	if title == "Select / Move":
 		canvas.placing = false
 		canvas.connecting = false
+	elif title in ["Open passage", "Standard door"]:
+		if (
+			canvas.selected_connection < 0
+			or canvas.selected_connection >= model.layout.connections.size()
+		):
+			model.errors = PackedStringArray(
+				["Click a linked doorway marker to select its connection first."]
+			)
+			refresh()
+			return
+		var candidate := Model.copy(model.layout)
+		candidate.connections[canvas.selected_connection].state = (
+			"open" if title == "Open passage" else "door"
+		)
+		commit(candidate, title)
 	elif title == "Connect touching rooms":
 		var candidate := Model.copy(model.layout)
 		var errors := LevelAssembler.connect_touching(candidate)
@@ -174,7 +194,7 @@ func refresh() -> void:
 	results.text += (
 		"\n".join(model.errors)
 		if not model.errors.is_empty()
-		else "Touching compatible doorways automatically create operable doors. [E] opens/closes in 3D. · 8 m grid · MMB pan · wheel zoom · choose palette to place · select/drag to move · R rotate · connect: click source then destination socket (may snap destination)."
+		else "Compatible corridor joins create open passages; room entrances create doors. Click a linked doorway to change its type. [E] opens/closes in 3D. · 8 m grid · MMB pan · wheel zoom · choose palette to place · select/drag to move · R rotate · connect: click source then destination socket (may snap destination)."
 	)
 	canvas.queue_redraw()
 
