@@ -394,7 +394,7 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 	# Trace ray with ballistic penetration through reinforced observation glass
 	for iter in range(4):
 		var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * max_range_m)
-		query.collision_mask = 1 | 2 | 4 | (64 if is_zat else 0)  # Zat can target nonblocking corpses.
+		query.collision_mask = 1 | 2 | 4 | 128 | (64 if is_zat else 0)  # Zat can target nonblocking corpses.
 		query.exclude = exclude_list
 		var result := space.intersect_ray(query)
 		if result.is_empty():

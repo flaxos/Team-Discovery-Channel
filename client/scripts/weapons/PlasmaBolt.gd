@@ -45,9 +45,9 @@ func initialize(p_origin: Vector3, p_direction: Vector3, p_shooter: Node, p_is_e
 	# Set collision masks based on whether bolt was fired by Jaffa or Player
 	collision_layer = 8  # Layer 4 (projectiles)
 	if is_enemy_bolt:
-		collision_mask = 1 | 2  # World (1) and Players (2)
+		collision_mask = 1 | 2 | 128  # World (1) and Players (2)
 	else:
-		collision_mask = 1 | 4  # World (1) and Jaffa (3)
+		collision_mask = 1 | 4 | 128  # World (1) and Jaffa (3)
 
 	_play_fire_sound()
 

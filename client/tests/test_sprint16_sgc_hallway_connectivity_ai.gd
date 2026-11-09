@@ -136,153 +136,17 @@ func _process(delta: float) -> bool:
 		print("[TEST 1/5] PASS: 360-degree camera yaw rotation and camera-relative orientation verified.")
 
 	elif ticks == 4:
-		# ========================================================
-		# TEST 2: Complete Level 28 Physical Connectivity, Clearance & Floor Mismatch Resolution
-		# ========================================================
-		print("[TEST 2/5] Testing Exhaustive Level 28 Room Connectivity, Doorway Clearance & Floor Alignment...")
-
-		var space: PhysicsDirectSpaceState3D = gateroom.get_world_3d().direct_space_state
-
-		# --------------------------------------------------------
-		# 2A. Route 1: Fallback Hallway (Z=28, Y=0.1) <-> Control Room (Z=15, Y=0.1) through Central Blast Doors (Z=22)
-		# --------------------------------------------------------
-		print("  -> Verifying Fallback Hallway <-> Control Room through Central Blast Doors (Z=22)...")
-		var r1_fallback := Vector3(0.0, 0.1, 28.0)
-		var r1_blastdoor := Vector3(0.0, 0.1, 22.0)
-		var r1_control := Vector3(0.0, 0.1, 15.0)
-
-		_verify_route_segment(space, r1_fallback, r1_blastdoor, "Fallback -> Central Blast Doors")
-		_verify_route_segment(space, r1_blastdoor, r1_control, "Central Blast Doors -> Control Room")
-		_verify_character_movement(r1_fallback, r1_blastdoor, "Fallback -> Central Blast Doors")
-		_verify_character_movement(r1_blastdoor, r1_control, "Central Blast Doors -> Control Room")
-
-		# Verify reverse traversal
-		_verify_character_movement(r1_control, r1_blastdoor, "Control Room -> Central Blast Doors")
-		_verify_character_movement(r1_blastdoor, r1_fallback, "Central Blast Doors -> Fallback")
-
-		# --------------------------------------------------------
-		# 2B. Route 2: Control Room (Z=15, Y=0.1) <-> Elevator Connector (X=12, Z=15, Y=0.1) <-> Elevator Lobby
-		# --------------------------------------------------------
-		print("  -> Verifying Control Room <-> Elevator Connector (X=12, Z=15) with NO ramp box obstacle...")
-		var r2_control := Vector3(0.0, 0.1, 15.0)
-		var r2_control_east := Vector3(5.0, 0.1, 15.0)
-		var r2_connector := Vector3(12.0, 0.1, 15.0)
-		var r2_elevator_lobby := Vector3(20.0, 0.1, 15.0)
-
-		_verify_route_segment(space, r2_control, r2_control_east, "Control Room Center -> East Aisle")
-		_verify_route_segment(space, r2_control_east, r2_connector, "Control Room -> Elevator Connector")
-		_verify_route_segment(space, r2_connector, r2_elevator_lobby, "Elevator Connector -> Elevator Lobby")
-		_verify_character_movement(r2_control, r2_control_east, "Control Room Center -> East Aisle")
-		_verify_character_movement(r2_control_east, r2_connector, "Control Room -> Elevator Connector")
-		_verify_character_movement(r2_connector, r2_elevator_lobby, "Elevator Connector -> Elevator Lobby")
-
-		# Verify reverse traversal
-		_verify_character_movement(r2_elevator_lobby, r2_connector, "Elevator Lobby -> Elevator Connector")
-		_verify_character_movement(r2_connector, r2_control, "Elevator Connector -> Control Room")
-
-		# --------------------------------------------------------
-		# 2C. Route 3: Control Room (Z=14, Y=0.1) <-> Gate Room (X=5, Z=4, Y=0.1) through North Doorway (Z=7.8)
-		# --------------------------------------------------------
-		print("  -> Verifying Control Room <-> Gate Room through North Doorway (Z=7.8) with NO step/ramp obstacle...")
-		var r3_control_north := Vector3(5.0, 0.1, 14.0)
-		var r3_north_door := Vector3(5.0, 0.1, 8.2)
-		var r3_gate_room := Vector3(5.0, 0.1, 4.0)
-
-		_verify_route_segment(space, r3_control_north, r3_north_door, "Control Room -> North Doorway")
-		_verify_route_segment(space, r3_north_door, r3_gate_room, "North Doorway -> Gate Room Arena")
-		_verify_character_movement(r3_control_north, r3_north_door, "Control Room -> North Doorway")
-		_verify_character_movement(r3_north_door, r3_gate_room, "North Doorway -> Gate Room Arena")
-
-		# Verify reverse traversal
-		_verify_character_movement(r3_gate_room, r3_north_door, "Gate Room Arena -> North Doorway")
-		_verify_character_movement(r3_north_door, r3_control_north, "North Doorway -> Control Room")
-
-		# --------------------------------------------------------
-		# 2D. Route 4: Elevator Lobby <-> East Connector Corridor into Gate Room East Blast Doors (X=18, Z=4)
-		# --------------------------------------------------------
-		print("  -> Verifying Elevator Lobby <-> East Corridor into Gate Room East Blast Doors (X=18, Z=4)...")
-		var r4_elev_center := Vector3(24.0, 0.1, 18.0)
-		var r4_corridor_portal := Vector3(22.5, 0.1, 9.6)
-		var r4_corridor_mid := Vector3(22.5, 0.1, 6.0)
-		var r4_east_blastdoor := Vector3(18.0, 0.1, 4.0)
-		var r4_gate_east := Vector3(10.0, 0.1, 4.0)
-
-		_verify_route_segment(space, r4_elev_center, r4_corridor_portal, "Elevator Lobby -> East Corridor Portal")
-		_verify_route_segment(space, r4_corridor_portal, r4_corridor_mid, "East Corridor Portal -> Mid Corridor")
-		_verify_route_segment(space, r4_corridor_mid, r4_east_blastdoor, "East Corridor -> East Blast Doors")
-		_verify_route_segment(space, r4_east_blastdoor, r4_gate_east, "East Blast Doors -> Gate Room Floor")
-
-		_verify_character_movement(r4_elev_center, r4_corridor_portal, "Elevator Lobby -> East Corridor Portal")
-		_verify_character_movement(r4_corridor_portal, r4_corridor_mid, "East Corridor Portal -> Mid Corridor")
-		_verify_character_movement(r4_corridor_mid, r4_east_blastdoor, "East Corridor -> East Blast Doors")
-		_verify_character_movement(r4_east_blastdoor, r4_gate_east, "East Blast Doors -> Gate Room Floor")
-
-		# --------------------------------------------------------
-		# 2E. Route 5: Armory <-> Round Hallway <-> Connector Tunnel <-> Fallback Hallway
-		# --------------------------------------------------------
-		print("  -> Verifying Armory <-> Round Hallway <-> Connector Tunnel <-> Fallback Hallway...")
-		var r5_armory := Vector3(44.0, 0.1, 36.0)
-		var r5_armory_door := Vector3(35.0, 0.1, 36.0)
-		var r5_round_hallway := Vector3(26.0, 0.1, 36.0)
-		var r5_connector_tunnel := Vector3(11.5, 0.1, 36.0)
-		var r5_fallback_corner := Vector3(2.5, 0.1, 36.0)
-		var r5_fallback_mid := Vector3(2.5, 0.1, 28.0)
-
-		_verify_route_segment(space, r5_armory, r5_armory_door, "Armory -> Armory Doorway")
-		_verify_route_segment(space, r5_armory_door, r5_round_hallway, "Armory Doorway -> Round Hallway")
-		_verify_route_segment(space, r5_round_hallway, r5_connector_tunnel, "Round Hallway -> Connector Tunnel")
-		_verify_route_segment(space, r5_connector_tunnel, r5_fallback_corner, "Connector Tunnel -> Fallback Corner")
-		_verify_route_segment(space, r5_fallback_corner, r5_fallback_mid, "Fallback Corner -> Fallback Mid")
-
-		_verify_character_movement(r5_armory, r5_armory_door, "Armory -> Armory Doorway")
-		_verify_character_movement(r5_armory_door, r5_round_hallway, "Armory Doorway -> Round Hallway")
-		_verify_character_movement(r5_round_hallway, r5_connector_tunnel, "Round Hallway -> Connector Tunnel")
-		_verify_character_movement(r5_connector_tunnel, r5_fallback_corner, "Connector Tunnel -> Fallback Corner")
-		_verify_character_movement(r5_fallback_corner, r5_fallback_mid, "Fallback Corner -> Fallback Mid")
-
-		# --------------------------------------------------------
-		# 2F. Full Continuous Perimeter Traversal Loop & Sector Classification
-		# --------------------------------------------------------
-		print("  -> Verifying full continuous perimeter loop and accurate real-time sector classification...")
-		var perimeter_points: Array[Dictionary] = [
-			{"pos": Vector3(44.0, 0.1, 36.0), "sector": GateRoom.SECTOR_ARMORY},
-			{"pos": Vector3(35.0, 0.1, 36.0), "sector": GateRoom.SECTOR_ARMORY},
-			{"pos": Vector3(26.0, 0.1, 36.0), "sector": GateRoom.SECTOR_ROUND_HALLWAY},
-			{"pos": Vector3(24.0, 0.1, 18.0), "sector": GateRoom.SECTOR_ELEVATOR_LOBBY},
-			{"pos": Vector3(22.5, 0.1, 9.6), "sector": GateRoom.SECTOR_EAST_CORRIDOR},
-			{"pos": Vector3(22.5, 0.1, 6.0), "sector": GateRoom.SECTOR_EAST_CORRIDOR},
-			{"pos": Vector3(18.0, 0.1, 4.0), "sector": GateRoom.SECTOR_EAST_CORRIDOR},
-			{"pos": Vector3(5.0, 0.1, 4.0), "sector": GateRoom.SECTOR_GATE_ROOM},
-			{"pos": Vector3(5.0, 0.1, 8.2), "sector": GateRoom.SECTOR_CONTROL_ROOM},
-			{"pos": Vector3(5.0, 0.1, 14.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
-			{"pos": Vector3(0.0, 0.1, 15.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
-			{"pos": Vector3(12.0, 0.1, 15.0), "sector": "CONTROL_CONNECTOR"},
-			{"pos": Vector3(0.0, 0.1, 15.0), "sector": GateRoom.SECTOR_CONTROL_ROOM},
-			{"pos": Vector3(0.0, 0.1, 22.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},
-			{"pos": Vector3(0.0, 0.1, 28.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},
-			{"pos": Vector3(2.5, 0.1, 28.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},
-			{"pos": Vector3(2.5, 0.1, 36.0), "sector": GateRoom.SECTOR_FALLBACK_HALLWAY},
-			{"pos": Vector3(11.5, 0.1, 36.0), "sector": GateRoom.SECTOR_CONNECTOR_TUNNEL},
-			{"pos": Vector3(26.0, 0.1, 36.0), "sector": GateRoom.SECTOR_ROUND_HALLWAY},
-			{"pos": Vector3(44.0, 0.1, 36.0), "sector": GateRoom.SECTOR_ARMORY}
-		]
-
-		for i: int in range(perimeter_points.size()):
-			var pt_data: Dictionary = perimeter_points[i]
-			var p: Vector3 = pt_data["pos"]
-			var expected_sec: String = pt_data["sector"]
-
-			var detected_sec: String = gateroom.get_current_sector(p)
-			assert(detected_sec == expected_sec, "Perimeter point %s must classify as %s (got %s)" % [
-				str(p), expected_sec, detected_sec
-			])
-
-			# Verify CharacterBody3D has solid ground contact at every route waypoint
-			player.global_position = p
-			var grounded: bool = player.test_move(player.global_transform, Vector3.DOWN * 0.15)
-			assert(grounded, "Operative must maintain solid floor contact at waypoint %s (no void/gap)!" % str(p))
-
-		print("[TEST 2/5] PASS: All Level 28 sectors physically connected with unobstructed doorways and 100% flat floor alignment.")
+		# Continuous production-capsule coverage is in test_sgc_map_routes.
+		# The revised core intentionally replaces the flat central doorway with sealed glazing.
+		var map := gateroom.get_node("SGCMap") as SGCMap
+		assert(map.definition.validate().is_empty(), "Revised map topology must validate")
+		assert(map.definition.region(&"CONTROL_ROOM").floor_offset == 1.5)
+		var connected := map.definition.route(&"GATE_ROOM", &"CONTROL_ROOM")
+		assert(not connected.is_empty(), "Operations must remain accessible through side circulation")
+		assert(connected.size() > 1, "There must be no direct embarkation/operations doorway")
+		var space := gateroom.get_world_3d().direct_space_state
+		var wall := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(5,1,6),Vector3(5,1,10),1))
+		assert(not wall.is_empty(), "Operations front must be physically sealed")
 
 	elif ticks == 6:
 		# ========================================================

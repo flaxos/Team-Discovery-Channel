@@ -3,6 +3,8 @@ extends Resource
 
 @export var id: StringName
 @export var floor_number: int = 28
+@export var floor_offset: float = 0.0
+@export var ceiling_height: float = 3.8
 @export var footprint: Rect2
 @export var surface_style: StringName = &"bunker"
 @export var light_energy: float = 1.8
@@ -14,4 +16,7 @@ extends Resource
 
 
 func contains(point: Vector3, floor_y: float) -> bool:
-	return absf(point.y - floor_y) < 2.5 and footprint.has_point(Vector2(point.x, point.z))
+	return (
+		absf(point.y - floor_y - floor_offset) < 2.5
+		and footprint.has_point(Vector2(point.x, point.z))
+	)

@@ -153,7 +153,8 @@ func _handle_interaction(player: Node = null) -> void:
 	# If riding inside the cabin or inside ride area, toggle destination floor
 	if target_player != null:
 		if riders.has(target_player) or (ride_area != null and ride_area.overlaps_body(target_player)):
-			toggle_elevator()
+			if target_player.has_method("open_lift_selector"):
+				target_player.open_lift_selector(self)
 			return
 
 		var p_pos: Vector3 = target_player.global_position
@@ -269,26 +270,33 @@ func sync_move_elevator(target_floor: int) -> void:
 	)
 
 
-func _animate_cabin_transit(target_floor: int, duration: float = TRANSIT_DURATION) -> void:
+func _animate_cabin_transit(target_floor: int, duration: float = -1.0) -> void:
 	var target_y: float = get_floor_y(target_floor)
 	travel_started = true
+	if duration < 0.0:
+		duration = (
+			TRANSIT_DURATION * absf(target_y - cabin.position.y) / 5.5
+			if cabin != null
+			else TRANSIT_DURATION
+		)
 	var tween: Tween = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	transit_tween = tween
 	if cabin != null:
-		tween.tween_property(cabin, "position:y", target_y, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(cabin, "position:y", target_y, duration).set_trans(Tween.TRANS_LINEAR)
 
-	tween.tween_callback(func() -> void:
-		current_floor = target_floor
-		arrival_dwell = 2.0
-		state = _arrival_state()
-		is_moving = false
-		travel_started = false
-		_update_floor_indicator(current_floor)
-		_set_pedestal_lights_status(Color(0.2, 0.9, 0.3)) # Green when arrived
-		_play_sfx("res://audio/sfx_gate_lock.wav", 40.0)
-		_open_doors()
-		elevator_arrived.emit(current_floor)
-		print("SGCElevator: Arrived at Level %d." % current_floor)
+	tween.tween_callback(
+		func() -> void:
+			current_floor = target_floor
+			arrival_dwell = 2.0
+			state = _arrival_state()
+			is_moving = false
+			travel_started = false
+			_update_floor_indicator(current_floor)
+			_set_pedestal_lights_status(Color(0.2, 0.9, 0.3))  # Green when arrived
+			_play_sfx("res://audio/sfx_gate_lock.wav", 40.0)
+			_open_doors()
+			elevator_arrived.emit(current_floor)
+			print("SGCElevator: Arrived at Level %d." % current_floor)
 	)
 
 
@@ -387,7 +395,7 @@ func request_elevator_snapshot() -> void:
 
 func _send_elevator_snapshot(peer: int = 0) -> void:
 	var y: float = cabin.position.y if cabin != null else get_floor_y(current_floor)
-	var remaining: float = maxf(0.01, TRANSIT_DURATION - travel_elapsed)
+	var remaining: float = maxf(0.01, TRANSIT_DURATION * absf(get_floor_y(destination_floor) - get_floor_y(current_floor)) / 5.5 - travel_elapsed)
 	if peer > 0:
 		sync_elevator_snapshot.rpc_id(peer, current_floor, destination_floor, is_moving, is_doors_open, y, remaining)
 	else:

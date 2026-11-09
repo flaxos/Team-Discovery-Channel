@@ -72,7 +72,7 @@ func run_test() -> void:
 	await wait_frames(30)
 	check(host.is_doors_open and client.is_doors_open, "Client same-floor door opening must replicate")
 	host.select_floor(26)
-	await wait_frames(300)
+	await wait_frames(480)
 	check(host.current_floor == 26 and client.current_floor == 26, "Level 26 arrival must replicate")
 	check(host.state == SGCElevator.ElevatorState.AT_26 and client.state == host.state, "Level 26 state must replicate")
 

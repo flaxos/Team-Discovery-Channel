@@ -65,6 +65,8 @@ func toggle_keybindings_modal() -> void:
 
 var is_blast_doors_closed: bool = false
 var is_animating_doors: bool = false
+var is_control_window_closed: bool = false
+var is_control_window_animating: bool = false
 var is_observation_shutters_closed: bool = false
 var is_animating_observation_shutters: bool = false
 var is_emergency_active: bool = false
@@ -100,6 +102,7 @@ var sector_adjacency: Dictionary = {
 
 signal blast_doors_toggled(closed: bool)
 signal observation_shutters_toggled(closed: bool)
+signal control_window_toggled(closed: bool)
 signal sector_changed(player_id: int, old_sector: String, new_sector: String)
 
 
@@ -730,7 +733,7 @@ func sync_observation_shutters(force_closed: bool) -> void:
 	observation_shutters_toggled.emit(is_observation_shutters_closed)
 
 	# Target Y: 7.35m when lowered (closed over glass), 10.75m when retracted (open above ceiling)
-	var target_y: float = 7.35 if is_observation_shutters_closed else 10.75
+	var target_y: float = 7.4 if is_observation_shutters_closed else 10.1
 
 	var shutters: CSGBox3D = find_child("BriefingBlastShutters", true, false) as CSGBox3D
 	var tween: Tween = create_tween()
@@ -852,11 +855,21 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func request_room_snapshot() -> void:
 	if not multiplayer.is_server():
 		return
-	sync_room_snapshot.rpc_id(multiplayer.get_remote_sender_id(), is_blast_doors_closed, is_observation_shutters_closed, is_emergency_active, mission_result)
+	sync_room_snapshot.rpc_id(
+		multiplayer.get_remote_sender_id(),
+		is_blast_doors_closed,
+		is_observation_shutters_closed,
+		is_emergency_active,
+		mission_result,
+		is_control_window_closed
+	)
 
 
 @rpc("authority", "call_remote", "reliable")
-func sync_room_snapshot(doors: bool, shutters: bool, alarm: bool, result: int) -> void:
+func sync_room_snapshot(
+	doors: bool, shutters: bool, alarm: bool, result: int, control_closed: bool = false
+) -> void:
+	sync_control_window(control_closed)
 	is_animating_doors = false
 	is_animating_observation_shutters = false
 	sync_blast_doors(doors)
@@ -864,3 +877,26 @@ func sync_room_snapshot(doors: bool, shutters: bool, alarm: bool, result: int) -
 	set_emergency_lights(alarm)
 	if result >= 0:
 		sync_mission_result(result == 1)
+
+
+func toggle_control_window() -> void:
+	if not multiplayer.is_server() or is_control_window_animating:
+		return
+	if multiplayer.has_multiplayer_peer():
+		sync_control_window.rpc(not is_control_window_closed)
+	else:
+		sync_control_window(not is_control_window_closed)
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_control_window(closed: bool) -> void:
+	if is_control_window_animating or closed == is_control_window_closed:
+		return
+	is_control_window_closed = closed
+	is_control_window_animating = true
+	control_window_toggled.emit(closed)
+	var shutter := find_child("ControlBlastShutters", true, false) as Node3D
+	var tween := create_tween()
+	if shutter != null:
+		tween.tween_property(shutter, "position:y", 1.9 if closed else -0.8, 1.2)
+	tween.tween_callback(func() -> void: is_control_window_animating = false)

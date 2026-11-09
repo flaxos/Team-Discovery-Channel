@@ -72,6 +72,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	collision_mask |= 128
 	# Server is authoritative over AI logic
 	set_multiplayer_authority(1)
 	navigator = SGCNavigator.new(self)

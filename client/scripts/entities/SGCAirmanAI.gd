@@ -128,6 +128,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	collision_mask |= 128
 	navigator = SGCNavigator.new(self)
 	add_to_group("sgc_airmen")
 	add_to_group("allies")

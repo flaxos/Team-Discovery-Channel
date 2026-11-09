@@ -76,8 +76,8 @@ func _plan(goal: Vector3) -> void:
 			)
 		elif c.kind in ["stairs", "spiral"]:
 			var approach := points[0]
-			if c.kind == "spiral" and here == c.to_region:
-				approach += Vector3(0, 0, 1.4)
+			if c.kind == "spiral":
+				approach += Vector3(0, 0, -3.2) if here == c.to_region else Vector3(1.0, 0, 0)
 			elif c.kind == "stairs":
 				var away := points[0] - points[-1]
 				away.y = 0
@@ -87,7 +87,7 @@ func _plan(goal: Vector3) -> void:
 				steps.append({"point": p, "connection": c, "kind": "surface"})
 			var exit := points[-1]
 			if c.kind == "spiral":
-				exit += Vector3(0, 0, 1.4) if here == c.from_region else Vector3(0, 0, -1.0)
+				exit += Vector3(0, 0, -3.2) if here == c.from_region else Vector3(1.0, 0, 0)
 			else:
 				var dir := points[-1] - points[0]
 				dir.y = 0
@@ -146,7 +146,9 @@ func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
 			return actor.global_position
 		if step["kind"] == "lift":
 			return _lift(step)
-		var tolerance: float = 0.25 if step["kind"] == "surface" else 0.5
+		var tolerance: float = (
+			0.25 if step["kind"] == "surface" else (0.1 if step["kind"] == "surface_exit" else 0.5)
+		)
 		if actor.global_position.distance_to(p) < tolerance:
 			steps.pop_front()
 			local_points.clear()
@@ -181,6 +183,7 @@ func _local_next(p: Vector3) -> Vector3:
 		local_points = map.local_path(actor.global_position, p)
 		if local_points.is_empty() or local_points[-1].distance_to(p) > 1.2:
 			status = "unreachable_local"
+			local_points.clear()
 			return actor.global_position
 	while (
 		local_points.size() > 1
