@@ -27,3 +27,7 @@ yarn-error.log*
 
 # Python test runner caches
 __pycache__/
+
+# Visual modular editor generated preview
+/client/scenes/level/EditorPreview.tscn
+/client/resources/levels/editor_preview_navigation.res
