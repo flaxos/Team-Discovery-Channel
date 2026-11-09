@@ -117,6 +117,30 @@ func _draw() -> void:
 			-1,
 			12
 		)
+		if item.room_preset != null:
+			draw_string(
+				ThemeDB.fallback_font,
+				screen(at) + Vector2(-35, 18),
+				str(item.room_preset.id),
+				HORIZONTAL_ALIGNMENT_LEFT,
+				-1,
+				10
+			)
+			if item.id == selected:
+				for attachment in LevelRoomComposer.resolved(item):
+					var local := LevelRoomComposer.pose(item, attachment)
+					var point := item.placement(0) * local.origin
+					draw_circle(screen(Vector2(point.x, point.z)), 3, Color(.4, .8, 1))
+					if attachment.bounds.size != Vector3.ZERO:
+						var bounds := item.placement(0) * local * attachment.bounds
+						draw_footprint(
+							Rect2(
+								Vector2(bounds.position.x, bounds.position.z),
+								Vector2(bounds.size.x, bounds.size.z)
+							),
+							Color(.4, .8, 1),
+							false
+						)
 		for socket in item.module.sockets:
 			if not socket_visible(item, socket):
 				continue
@@ -148,7 +172,7 @@ func _draw() -> void:
 		)
 	for edge in model.layout.connections:
 		if (
-			edge.state == "door"
+			edge.state in ["door", "security_door"]
 			and (
 				model.layout.instance(edge.from_instance).socket_deck(edge.from_socket)
 				== model.active_deck
@@ -156,7 +180,10 @@ func _draw() -> void:
 		):
 			var item := model.layout.instance(edge.from_instance)
 			var point := screen(socket_position(item, item.module.socket(edge.from_socket)))
-			draw_rect(Rect2(point - Vector2(4, 6), Vector2(8, 12)), Color(0.3, 1, 0.65))
+			draw_rect(
+				Rect2(point - Vector2(4, 6), Vector2(8, 12)),
+				Color(1, .65, .2) if edge.state == "security_door" else Color(0.3, 1, 0.65)
+			)
 	if placing and palette != null:
 		var candidate := model.placed(palette, grid(mouse), turn) as LevelLayout
 		var valid := LevelLayoutValidator.validate(candidate, false).is_empty()

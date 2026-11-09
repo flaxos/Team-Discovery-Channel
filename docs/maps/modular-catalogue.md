@@ -67,3 +67,10 @@ Full Batch A integration verification: **55/55 Godot 4.4.1 checks passed**, incl
 | room16 | Room16HangarShell | 24 × 32 m | north 12 × 10 m equipment; south_00 3 m, south_01 6 m | Batch B |
 
 See the [vertical kit guide](modular-vertical-kit.md) for exact scene/resource paths, socket transforms, equipment anchors/clearances, deck authoring, transport contracts, demo commands and UAT. Batch B is structural and interface work; functional presets/security doors and the integrated Phase 2.5 demonstration remain Batches C/D.
+
+
+## Batch C: functional catalogue
+
+All sixteen functional presets are implemented as typed resources under `client/resources/room_presets/`. Their complete identifiers, compatible dimensions/modules, shared assets, attachment requirements, implementation status and authoring instructions are listed in the [functional room preset catalogue](modular-room-presets.md). Roles populate existing structures rather than creating new architectural prefabs. Material-theme resources are separate from both structure and content.
+
+Current delivery status: Batches A, B and C implemented; Batch D's integrated environment remains pending. Historical batch-specific evidence above describes the state at each earlier delivery.

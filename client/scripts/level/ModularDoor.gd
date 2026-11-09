@@ -1,5 +1,9 @@
 class_name ModularDoor
 extends StaticBody3D
+signal access_changed(access_id: StringName, is_locked: bool)
+@export var security_id: StringName
+@export var is_security := false
+@export var locked := false
 @export var width: float = 3.0
 @export var height: float = 2.8
 var is_open := false
@@ -21,7 +25,7 @@ func _ready() -> void:
 	visual.mesh = box
 	visual.position = collision.position
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.23, 0.32, 0.35)
+	material.albedo_color = Color(0.45, 0.32, 0.2) if is_security else Color(0.23, 0.32, 0.35)
 	material.metallic = 0.4
 	visual.material_override = material
 	visual.name = "Panel"
@@ -52,19 +56,42 @@ func interact(player: Node = null) -> void:
 func _toggle() -> void:
 	if not multiplayer.is_server():
 		return
-	if is_open:
-		var shape := BoxShape3D.new()
-		shape.size = Vector3(width - 0.08, height - 0.05, 0.3)
-		var query := PhysicsShapeQueryParameters3D.new()
-		query.shape = shape
-		query.transform = global_transform * Transform3D(Basis.IDENTITY, Vector3(0, height / 2, 0))
-		query.collision_mask = 6
-		if not get_world_3d().direct_space_state.intersect_shape(query).is_empty():
-			return
+	if locked or (is_open and not _can_close()):
+		return
 	if multiplayer.has_multiplayer_peer():
 		sync_open.rpc(not is_open)
 	else:
 		sync_open(not is_open)
+
+
+func _can_close() -> bool:
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(width - 0.08, height - 0.05, 0.3)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = global_transform * Transform3D(Basis.IDENTITY, Vector3(0, height / 2, 0))
+	query.collision_mask = 6
+	return get_world_3d().direct_space_state.intersect_shape(query).is_empty()
+
+
+func set_locked(value: bool) -> bool:
+	if not multiplayer.is_server() or not is_security or (value and is_open and not _can_close()):
+		return false
+	var open := is_open and not value
+	if multiplayer.has_multiplayer_peer():
+		sync_security_state.rpc(open, value)
+	else:
+		sync_security_state(open, value)
+	return true
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_security_state(open: bool, value: bool) -> void:
+	var changed := locked != value
+	locked = value
+	sync_open(open)
+	if changed:
+		access_changed.emit(security_id, locked)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -84,16 +111,20 @@ func request_toggle(player_path: NodePath) -> void:
 @rpc("any_peer", "call_remote", "reliable")
 func request_snapshot() -> void:
 	if multiplayer.is_server():
-		sync_open.rpc_id(multiplayer.get_remote_sender_id(), is_open)
+		sync_security_state.rpc_id(multiplayer.get_remote_sender_id(), is_open, locked)
 
 
 @rpc("authority", "call_local", "reliable")
 func sync_open(open: bool) -> void:
+	if locked and open:
+		return
 	is_open = open
 	collision_layer = 0 if open else 1
 	if has_node("Panel"):
 		get_node("Panel").visible = not open
 	if prompt != null:
-		var label := "[E] Close door" if open else "[E] Open door"
+		var label := (
+			"Locked security door" if locked else ("[E] Close door" if open else "[E] Open door")
+		)
 		var bindings := get_node_or_null("/root/KeybindingManager")
 		prompt.text = bindings.format_prompt(label) if bindings != null else label

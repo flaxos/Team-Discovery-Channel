@@ -2,6 +2,8 @@
 extends EditorPlugin
 const Model = preload("model.gd")
 const Canvas = preload("canvas.gd")
+const RoomControls = preload("room_controls.gd")
+var room_controls: HFlowContainer
 var model := Model.new()
 var panel: VBoxContainer
 var canvas: Control
@@ -91,6 +93,7 @@ func _enter_tree() -> void:
 		"Select / Move",
 		"Open passage",
 		"Standard door",
+		"Security door",
 		"Connect touching rooms",
 		"Connect sockets",
 		"Rotate (R)",
@@ -109,6 +112,11 @@ func _enter_tree() -> void:
 	canvas.edit_requested.connect(commit)
 	canvas.selection_changed.connect(refresh)
 	model.changed.connect(refresh)
+	room_controls = RoomControls.new()
+	room_controls.model = model
+	room_controls.canvas = canvas
+	panel.add_child(room_controls)
+	room_controls.edit_requested.connect(commit)
 	results = RichTextLabel.new()
 	results.custom_minimum_size.y = 85
 	panel.add_child(results)
@@ -170,7 +178,7 @@ func tool_action(title: String) -> void:
 	if title == "Select / Move":
 		canvas.placing = false
 		canvas.connecting = false
-	elif title in ["Open passage", "Standard door"]:
+	elif title in ["Open passage", "Standard door", "Security door"]:
 		if (
 			canvas.selected_connection < 0
 			or canvas.selected_connection >= model.layout.connections.size()
@@ -182,8 +190,11 @@ func tool_action(title: String) -> void:
 			return
 		var candidate := Model.copy(model.layout)
 		candidate.connections[canvas.selected_connection].state = (
-			"open" if title == "Open passage" else "door"
+			"open"
+			if title == "Open passage"
+			else "security_door" if title == "Security door" else "door"
 		)
+		candidate.connections[canvas.selected_connection].initially_locked = false
 		commit(candidate, title)
 	elif title == "Connect touching rooms":
 		var candidate := Model.copy(model.layout)
@@ -248,14 +259,31 @@ func commit(candidate: LevelLayout, title: String) -> void:
 
 func restore(value: LevelLayout) -> void:
 	dirty = true
+	var key := ""
+	if (
+		canvas.selected_connection >= 0
+		and canvas.selected_connection < model.layout.connections.size()
+	):
+		key = connection_key(model.layout.connections[canvas.selected_connection])
+	canvas.selected_connection = -1
 	model.restore(value)
 	canvas.first_socket.clear()
-	canvas.selected_connection = -1
+	for i in range(model.layout.connections.size()):
+		if connection_key(model.layout.connections[i]) == key:
+			canvas.selected_connection = i
+	refresh()
+
+
+func connection_key(edge: LevelModuleConnection) -> String:
+	return (
+		"%s/%s -> %s/%s" % [edge.from_instance, edge.from_socket, edge.to_instance, edge.to_socket]
+	)
 
 
 func refresh() -> void:
 	if results == null:
 		return
+	room_controls.refresh()
 	deck_picker.clear()
 	for id: String in model.layout.decks:
 		deck_picker.add_item(id)
@@ -289,6 +317,9 @@ func refresh() -> void:
 		if not model.errors.is_empty()
 		else "Compatible corridor joins create open passages; room entrances create doors. Click a linked doorway to change its type. [E] opens/closes in 3D. · 8 m grid · MMB pan · wheel zoom · choose palette to place · select/drag to move · R rotate · connect: click source then destination socket (may snap destination)."
 	)
+	var notices := LevelRoomComposer.warnings(model.layout)
+	if not notices.is_empty():
+		results.text += "\n" + "\n".join(notices)
 	canvas.queue_redraw()
 
 

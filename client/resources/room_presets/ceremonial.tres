@@ -1,0 +1,56 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"dais"
+component = &"equipment"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,4,0,12)
+approach = Vector3(0,0,-3)
+placeholder_size = Vector3(3,0.15,3)
+bounds = AABB(-1.5,0,-1.5,3,0.15,3)
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"throne"
+component = &"equipment"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,4,0.15,12)
+approach = Vector3(0,-0.15,-3)
+placeholder_size = Vector3(1,1.8,1)
+bounds = AABB(-0.5,0,-0.5,1,1.8,1)
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+id = &"guard_left"
+component = &"spawn"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,12)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+id = &"guard_right"
+component = &"spawn"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,8,0,12)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("2")
+id = &"side_approach_left"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,8)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a5"]
+script = ExtResource("2")
+id = &"side_approach_right"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,8,0,8)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a6"]
+script = ExtResource("2")
+id = &"character_objective"
+component = &"objective"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,4,0,9)
+approach = Vector3(0,0,0)
+[resource]
+script = ExtResource("1")
+id = &"ceremonial"
+label = "Throne / ceremonial"
+compatible_modules = PackedStringArray("room13","room16")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6")])
+system_references = PackedStringArray("objective.character")

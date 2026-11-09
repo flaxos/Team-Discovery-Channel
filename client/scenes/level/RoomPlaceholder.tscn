@@ -1,0 +1,13 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelPlaceholderProp.gd" id="1"]
+[sub_resource type="StandardMaterial3D" id="mat"]
+albedo_color = Color(0.38, 0.42, 0.44, 1)
+[node name="RoomPlaceholder" type="Node3D"]
+script = ExtResource("1")
+[node name="Structure" type="Node3D" parent="."]
+[node name="Body" type="StaticBody3D" parent="Structure"]
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Body"]
+[node name="Visuals" type="Node3D" parent="."]
+[node name="Mesh" type="MeshInstance3D" parent="Visuals"]
+material_override = SubResource("mat")

@@ -146,6 +146,10 @@ func validate_and_bake() -> void:
 		LevelAssembler.assemble(layout, self)
 	else:
 		LevelAssembler.add_doors(layout, self)
+	errors = LevelRoomComposer.populate(layout, self)
+	if not errors.is_empty():
+		report(errors)
+		return
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	errors = LevelEnclosureValidator.validate(self)
@@ -169,6 +173,11 @@ func validate_and_bake() -> void:
 	await get_tree().physics_frame
 	while NavigationServer3D.map_get_iteration_id(navigation_map) == 0:
 		await get_tree().physics_frame
+	errors = LevelNavigation.validate_regions(self)
+	errors.append_array(LevelRoomComposer.validate_world(self))
+	if not errors.is_empty():
+		report(errors)
+		return
 	ready_for_navigation = true
 	report(PackedStringArray())
 	navigation_ready.emit()

@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"console"
+component = &"console"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,2.6,0,-2.6)
+approach = Vector3(-1.2,0,1.2)
+placeholder_size = Vector3(1,1,0.8)
+bounds = AABB(-0.5,0,-0.4,1,1,0.8)
+references = PackedStringArray("systems.control")
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"patrol_entry"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-1)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+id = &"patrol_exit"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,1)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+id = &"security_console"
+component = &"console"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.6,0,-2.6)
+approach = Vector3(1.2,0,1.2)
+placeholder_size = Vector3(1,1,0.8)
+bounds = AABB(-0.5,0,-0.4,1,1,0.8)
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("2")
+id = &"door_network"
+component = &"system"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)
+approach = Vector3(0,0,0)
+references = PackedStringArray("doors.network","alarm.zone")
+[resource]
+script = ExtResource("1")
+id = &"security_control"
+label = "Security / alarm control"
+compatible_modules = PackedStringArray("room04","room10","room11","room13","room15")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4")])
+system_references = PackedStringArray("doors.network","alarm.zone")

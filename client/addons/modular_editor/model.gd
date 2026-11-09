@@ -18,6 +18,9 @@ static func copy(source: LevelLayout) -> LevelLayout:
 	for item in source.instances:
 		var cloned := item.duplicate() as LevelModuleInstance
 		cloned.socket_decks = item.socket_decks.duplicate()
+		cloned.attachment_overrides = []
+		for override in item.attachment_overrides:
+			cloned.attachment_overrides.append(override.duplicate() as LevelRoomOverride)
 		cloned.transport_endpoints = []
 		for endpoint in item.transport_endpoints:
 			cloned.transport_endpoints.append(endpoint.duplicate() as LevelTransportEndpoint)
@@ -132,4 +135,42 @@ func redecked(id: StringName, deck_id: StringName) -> LevelLayout:
 		item.deck = deck_id
 		item.socket_decks.clear()
 		item.bind_matching_decks(result.decks)
+	return result
+
+
+func configured(id: StringName, preset: LevelRoomPreset) -> LevelLayout:
+	var result := copy(layout)
+	var item := result.instance(id)
+	if item != null:
+		item.room_preset = preset
+		item.role = preset.id if preset != null else &""
+	return result
+
+
+func attachment_changed(
+	id: StringName, attachment_id: StringName, pose: Transform3D, disabled: bool
+) -> LevelLayout:
+	var result := copy(layout)
+	var item := result.instance(id)
+	if item != null:
+		var found: LevelRoomOverride
+		for override in item.attachment_overrides:
+			if override.id == attachment_id:
+				found = override
+		if found == null:
+			found = LevelRoomOverride.new()
+			found.id = attachment_id
+			item.attachment_overrides.append(found)
+		found.local_transform = pose
+		found.disabled = disabled
+	return result
+
+
+func attachment_reset(id: StringName, attachment_id: StringName) -> LevelLayout:
+	var result := copy(layout)
+	var item := result.instance(id)
+	if item != null:
+		for i in range(item.attachment_overrides.size() - 1, -1, -1):
+			if item.attachment_overrides[i].id == attachment_id:
+				item.attachment_overrides.remove_at(i)
 	return result

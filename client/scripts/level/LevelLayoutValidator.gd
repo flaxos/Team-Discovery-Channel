@@ -91,6 +91,9 @@ static func validate(layout: LevelLayout, require_route: bool = true) -> PackedS
 		for id: Variant in item.available_sockets:
 			if not sockets.has(StringName(id)):
 				errors.append("Unknown available socket: %s/%s" % [item.id, id])
+	for item in layout.instances:
+		if item != null and item.module != null:
+			errors.append_array(LevelRoomComposer.validate(item))
 	errors.append_array(validate_transports(layout, require_route))
 	if not errors.is_empty():
 		return errors
@@ -105,6 +108,7 @@ static func validate(layout: LevelLayout, require_route: bool = true) -> PackedS
 			if overlap.size.x > 0.001 and overlap.size.y > 0.001 and overlap.size.z > 0.001:
 				errors.append("Occupied overlap: %s / %s" % [a.id, b.id])
 	var used := {}
+	var security_ids := {}
 	var graph := {}
 	for c in layout.connections:
 		var a := layout.instance(c.from_instance)
@@ -122,8 +126,19 @@ static func validate(layout: LevelLayout, require_route: bool = true) -> PackedS
 			if used.has(key):
 				errors.append("Reused socket: " + key)
 			used[key] = true
-		if not a.allows(sa.id) or not b.allows(sb.id) or c.state not in ["open", "door"]:
+		if (
+			not a.allows(sa.id)
+			or not b.allows(sb.id)
+			or c.state not in ["open", "door", "security_door"]
+		):
 			errors.append("Unavailable connection: " + label)
+		if c.state == "security_door":
+			var id := c.security_id if c.security_id != &"" else StringName(label)
+			if security_ids.has(id):
+				errors.append("Duplicate security access ID: " + str(id))
+			security_ids[id] = true
+		elif c.initially_locked:
+			errors.append("Lock state requires security door: " + label)
 		var ta := a.placement(float(layout.decks[str(a.deck)])) * sa.local_transform
 		var tb := b.placement(float(layout.decks[str(b.deck)])) * sb.local_transform
 		if (

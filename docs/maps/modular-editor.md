@@ -81,3 +81,5 @@ Doorway-facing fix verification: all **54/54 Godot 4.4.1 regression checks passe
 Phase 2.5 Batch A expands the palette and rotated footprints; see the [structural catalogue](modular-catalogue.md).
 
 Batch B adds active deck/elevation controls, socket deck bindings, Frame layout and the vertical/equipment palette. See the [vertical kit guide](modular-vertical-kit.md).
+
+Batch C adds room-preset selection, attachment position/yaw overrides and reset, role/clearance overlays, inactive-override notices and security-door access controls. See the [functional preset guide](modular-room-presets.md) for validation and UAT.

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelVisualTheme" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelVisualTheme.gd" id="1"]
+[sub_resource type="StandardMaterial3D" id="surface"]
+albedo_color = Color(0.32,0.38,0.41,1)
+[sub_resource type="StandardMaterial3D" id="prop"]
+albedo_color = Color(0.38,0.42,0.44,1)
+[resource]
+script = ExtResource("1")
+id = &"neutral"
+surface_material = SubResource("surface")
+prop_material = SubResource("prop")
