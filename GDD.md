@@ -1,69 +1,52 @@
-# GAME DESIGN DOCUMENT (GDD)
-## Project SGC: Stargate SG-1 / SG-3 Tactical Extraction Shooter
-> Team Discovery Channel Collaborative Initiative
-> Stack-Ranked Consensus Outcome
+# Game design: Stargate SG Extraction
 
----
+Team Discovery Channel's co-op tactical shooter uses **Godot 4.4.1**, native ENet multiplayer and a shared three-level SGC map. This document separates the playable slice from the broader extraction-game vision. Implementation baseline: `a720594`, 9 November 2026; see the [roadmap](ROADMAP.md) and pull requests for delivery status.
 
-### 1. Executive Summary & Core Hook
-* **Tagline**: Step through the puddle. Sneak in. Plant the C4. Dial home under fire.
-* **Genre**: Co-op Tactical Extraction Shooter & Wave Survival
-* **Inspirations**: *Stargate SG-1*, *Helldivers 1*, *Door Kickers 2*, *Alien Swarm*, *GTFO*
-* **Platform**: Desktop via Godot 4.x (GDScript) + Low-Poly Asset Packs (Synty FBX/glTF)
-* **Camera Perspective**: Isometric / Top-Down 3D Tactical (Helldivers 1, Alien Swarm, Synthetik)
-* **Target Delivery Window**: The 2-Week SGC Vertical Slice (Recommended)
+## Playable slice
 
----
+**SGC Defense — Levels 28/27/26** is the active combat mission. Players defend against incoming Jaffa, use the base's equipment and corridors, satisfy difficulty-specific objectives, dial an authorized outbound gate and extract. **SGC UAT Base — No Hostile Activation** uses the same geometry and props for quiet traversal and interaction testing; automatic hostile activation and waves are disabled.
 
-### 2. The Grounding Pact & Anti-Scope Creep Rules
-> **To ensure this game is completed within our sprint window**:
-1. **Rule of Low-Poly Assets**: Zero custom high-poly modeling or 4K PBR texture baking. We use clean stylized low-poly meshes (Synty style) and invest our visual budget into shaders (Stargate kawoosh, staff plasma glow, transport ring beams).
-2. **Rule of Shared Prefabs**: Every mission mode reuses the exact same Stargate, DHD, Jaffa AI, and weapon mechanics.
-3. **The 2-Week Vertical Slice Gate**: No expanded lore or galaxy map before 2 players can connect, shoot Jaffa, dial the DHD, and extract through the puddle.
+| Difficulty | Outbound requirements |
+| --- | --- |
+| Easy | At least three cleared incursions. |
+| Medium | Three cleared incursions plus the lab-ROM dialing-computer upgrade. |
+| Hard | Medium requirements plus iris repair during an active incoming breach. |
 
----
+Incoming windows default to 38 seconds, followed by 20-second recharge periods. Pressure continues until requirements are satisfied. A valid outbound dial reserves the gate against new incoming activation. Dialing uses seven chevrons and four GDO beats; extraction requires an authorized outbound gate. These are game timings rather than the television show's maximum wormhole duration.
 
-### 3. The Stealth-to-Loud Extraction Loop
-```mermaid
-flowchart TD
-    A["Cheyenne Mountain SGC Briefing Room"] --> B["Step Through Event Horizon (Wormhole Insertion)"]
-    B --> C["Phase 1: Silent Recon & MALP Drone Scouting"]
-    C --> D["Phase 2: Infiltration & Planting C4 on Goa'uld Objective"]
-    D --> E["Phase 3: Alarm Tripped / C4 Detonation (Go Loud!)"]
-    E --> F["Jaffa Transport Rings Drop from Orbiting Ha'tak"]
-    F --> G["Running Gunfight Retreat to the Stargate"]
-    G --> H["7-Chevron DHD Dialing Sequence Under Fire"]
-    H --> I["Transmit SGC IDC Code to Open Iris"]
-    I --> J["Dive Through Event Horizon Back to Earth!"]
-```
+## Space and visual direction
 
----
+The SGC includes Level 28 embarkation, operations and combat corridors; Level 27 briefing, command and security; and Level 26 support, staging, storage and service rooms. Operations is 1.5 m above embarkation behind sealed glazing, with side/rear stairs. Briefing overlooks the chamber from 5.5 m. Main floor elevations are 0, 5.5 and 11 m; Level 25 is excluded.
 
-### 4. SGC Squad Classes (Stack-Ranked)
-* **#1 Heavy Support Marine (SG-3 Marine)** (3 pts • Ranked by: flaxos (#1)): M249 SAW light machine gun, claymore anti-personnel mines, deployable Browning .50 cal tripod, shoulder-fired rocket launcher for turret busting.
-* **#2 Tech Specialist & Archaeologist (The Carter / Daniel)** (2 pts • Ranked by: flaxos (#2)): Armed with MP5. Fast DHD chevron dialer (cuts dial time in half), carries GDO transmitter for Iris override, deploys MALP/UAV scout drones, hacks Ancient terminals.
-* **#3 Pointman / Recon Leader (The O'Neill / Mitchell)** (1 pts • Ranked by: flaxos (#3)): Suppressed P90, tactical C4 satchel, flashbangs, sprint dodge. Can tag enemies through walls and set remote detonators.
-* **#4 Allied Jaffa / Tok'ra Infiltrator (The Teal'c / Bra'tac)** (1 pts • Ranked by: flaxos (#4)): Ma'Tok Staff weapon (heavy plasma blasts and melee parry), Zat'nik'tel (silent 1-shot stun / 2-shot kill), healing ribbon device, symbiote regeneration.
+The 6.7 m gate sits in a 24 m wide, 12 m high chamber. The layout follows referenced SG-1 relationships, with gameplay proportions and authored peripheral/support spaces rather than a claim of measured blueprint accuracy. Muted concrete, charcoal steel, subdued lighting, ceiling panels/beams and clear thresholds support the former-silo setting. Independent control/briefing shutters remain inside their frames.
 
----
+Generated modules carry dimensions, material briefs and replacement-art slots. Visual replacement preserves gameplay collision and rejects oversized assets. Bespoke art must preserve readability and traversal. See the [SGC map contract](docs/maps/sgc.md) for provenance, palette and schema.
 
-### 5. Signature Stargate Mechanics (Stack-Ranked)
-* **#1 Remote C4 & Beacon Distractions** (3 pts • Ranked by: flaxos (#1)): Plant C4 on a fuel depot on a far ridge. Trigger detonation to pull Jaffa patrols away from the central temple entrance, opening a silent infiltration window.
-* **#2 Transport Rings (Enemy Spawns & Tactical Flanking)** (2 pts • Ranked by: flaxos (#2)): Five glowing metallic rings slam down with iconic audio. Enemies arrive in drop waves, but clever players can throw grenades into descending rings or step inside to teleport across the compound.
-* **#3 The 7-Chevron DHD Dialing Mini-Game Under Fire** (1 pts • Ranked by: flaxos (#4)): Dialing isn't a simple button press! One player must punch the 7 glyph chevrons on the DHD (or hold a sequence like a Helldivers Stratagem) while teammates form a defensive firing arc. Transmit the IDC code before diving into the event horizon!
-* **#4 Authentic Zat'nik'tel Rules (1-Shot Stun, 2-Shot Kill/Disintegrate)** (1 pts • Ranked by: flaxos (#3)): 1st shot silently incapacitates Jaffa guards for 20 seconds. 2nd shot kills and vaporizes the body completely, preventing patrols from discovering corpses and triggering alarms!
-* **#5 MALP / UAV Scout Drone Recon** (1 pts • Ranked by: flaxos (#5)): Pilot a wheeled MALP probe or miniature UAV drone through the Stargate first to map out Jaffa sentries, alarm horns, and Naquadah deposits on the squad's HUD.
+## Classes and combat
 
----
+The selectable profiles currently equip these primary/secondary weapons:
 
-### 6. Priority Mission Archetypes (Stack-Ranked)
-* **#1 SGC Gate Room Foothold / Iris Defense (Horde Mode)** (3 pts • Ranked by: flaxos (#1)): A foothold situation in Cheyenne Mountain! The Iris is breached. Defend the Gate Room from waves of incoming Jaffa, seal blast doors, set up Browning .50 cals, and hold until techs force-dial out.
-* **#2 Goa'uld Outpost Sabotage & Extraction** (2 pts • Ranked by: flaxos (#2)): Infiltrate a planetary fortress, plant C4 on a Naquadah power core or Tel'tak cargo ship, trigger a distraction, and fight back to the Stargate.
-* **#3 Alpha Site / Village Evacuation Defense** (1 pts • Ranked by: flaxos (#3)): Protect a human settlement or off-world Alpha Site from swarms of Jaffa landing via transport rings while civilians escape through the dialed Stargate.
-* **#4 Ha'tak Mothership Infiltration (via Transport Rings)** (1 pts • Ranked by: flaxos (#4)): Locate hidden transport rings on a planet surface, beam up into an orbiting Goa'uld Ha'tak, plant C4 on the hyperdrive crystal room, and ring back down before detonation.
+| Class | Primary | Secondary |
+| --- | --- | --- |
+| SG-3 Heavy Support Marine | M249 | M9 |
+| Tech Specialist & Archaeologist | MP5 | Zat |
+| Pointman / Recon Leader | P90 | M9 |
+| Allied Jaffa / Tok'ra Infiltrator | Staff weapon | Zat |
 
----
+The slice also includes resupply and weapon racks, C4/claymores, deployable turrets, shields, smoke, downing/revive and friendly squad orders. Zat progression is stun, kill, then corpse vaporization; stun defaults to 20 seconds. Broader class descriptions may contain aspirational equipment and do not establish that every listed perk is implemented.
 
-### 7. Engine & Visual Polish
-* **Engine**: Godot 4.x (GDScript) + Low-Poly Asset Packs (Synty FBX/glTF)
-* **Visual Direction**: Stylized Low-Poly 3D + Next-Gen Dynamic Lighting (Synty × Deep Rock Galactic)
+Players use a tactical third-person/isometric camera with shoulder ADS and camera-relative movement. The squad radial works while holding ADS. Persistent remapping supports keyboard/mouse alternatives, conflict resolution and live prompts. [Playing](docs/PLAYING.md) is the current control reference.
+
+## World and AI contracts
+
+Both factions share the region graph, local navigation paths, physical stair traversal and explicit lift actions. Gate-lane hostiles enter the perimeter corridors; overrun pressure can order friendly fallback to briefing and then Level 26. Passage reservations serialize narrow routes. Movement must not teleport actors or supply artificial vertical velocity to pass tests.
+
+The lift serves three floors, with aimed buttons or an in-cabin picker. Riders remain grounded during travel. Walking portals share a room boundary and sufficient clearance; exterior walls, floors, ceilings and shafts must close the indoor shell. Enclosure failure blocks the map bake and CI acceptance, at the documented sampling resolution. Manual inspection remains necessary for visual seams and replacement materials.
+
+Mission, combat and shared interactions are server controlled. Joining/retrying clients receive selected mission/difficulty and current gate, objective, NPC, door, shutter and lift state. UI observes those states; buffer-lockout and ROM-upload messages remain objective HUD notices rather than opening an orphan dialing panel. See [architecture](docs/ARCHITECTURE.md).
+
+## Future vision and scope boundary
+
+The wider concept remains recon → sabotage → alarm → retreat → dial home under fire, inspired by Stargate SG-1, Helldivers, Door Kickers, Alien Swarm and GTFO. Candidate missions include a Goa'uld outpost, Alpha Site evacuation and Ha'tak infiltration, with offworld DHDs, transport rings, MALP/UAV reconnaissance and stealth objectives. These are future concepts; there is no claim that selectable offworld theaters or scene-to-scene insertion are shipped.
+
+Share gate, weapon, AI and interaction components across future modes. Prioritize a playable two-person mission over bespoke art, new networking systems or expanding the galaxy. The [team contract](TEAM_CONTRACT.md) and [acceptance guide](docs/TESTING.md) define the grounding and verification requirements.

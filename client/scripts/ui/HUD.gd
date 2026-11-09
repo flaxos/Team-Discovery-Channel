@@ -958,19 +958,17 @@ func bind_dhd(dhd: DHDDialer) -> void:
 
 
 func _on_buffer_lockout() -> void:
+	# A mission objective is not an engaged dialing session. Never strand its panel onscreen.
 	if dhd_panel != null:
-		dhd_panel.visible = true
-	if dhd_title != null:
-		dhd_title.text = "⚠️ BUFFER LOCKOUT: RETRIEVE CLEAN ROM FROM LAB ⚠️"
-		dhd_title.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
+		dhd_panel.hide()
+	update_objective("DIALING BUFFER LOCKED — retrieve the clean ROM from the lab, then upload it in the control room.", Color(1.0, 0.7, 0.2))
 
 
 func _on_patch_progress(progress: float) -> void:
-	if dhd_panel != null:
-		dhd_panel.visible = true
-	if dhd_title != null:
-		dhd_title.text = "UPLOADING CLEAN DIALING ROM: %d%%" % int(progress * 100)
-		dhd_title.add_theme_color_override("font_color", Color(0.2, 0.8, 1.0))
+	var sgc := current_dhd as SGCDialingConsoleScript
+	if sgc == null or not sgc.is_uploading_patch:
+		return
+	update_objective("UPLOADING CLEAN DIALING ROM: %d%%" % int(progress * 100), Color(0.2, 0.8, 1.0))
 
 
 func _on_buffer_restored() -> void:

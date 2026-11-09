@@ -1,5 +1,7 @@
 # Takeover review — 8 November 2026
 
+> Historical record: findings, branch states, counts and environment limits below apply to the stated baseline. See the [current documentation index](../README.md) and [testing guide](../TESTING.md) for present behavior and commands.
+
 Reviewed checkout: `087b4e3f2a4f46006f3ec00fb4a8bf945ab0287b` on `feat/sprint19-cursor-confinement-ads-zoom-fade`. Working tree clean. GitHub PR #19 is open, unmerged, and its head SHA matches this checkout. No gameplay code changed, no Sprint 20 implementation started, and no remote changes made.
 
 ## Codebase map
