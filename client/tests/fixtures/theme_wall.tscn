@@ -1,0 +1,5 @@
+[gd_scene format=3]
+[sub_resource type="BoxMesh" id="wall"]
+size = Vector3(0.2,3.4,8)
+[node name="WallVisual" type="MeshInstance3D"]
+mesh = SubResource("wall")

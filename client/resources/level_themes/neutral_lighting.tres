@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LevelLightingPalette" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelLightingPalette.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = &"neutral"
+ambient_color = Color(1,1,1,1)
+ambient_energy = 0.8
+fixture_color = Color(1,1,1,1)
+fixture_energy = 1.0

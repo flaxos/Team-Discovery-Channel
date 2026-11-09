@@ -13,6 +13,8 @@ extends Resource
 @export var style: StringName = &"neutral"
 @export var room_preset: LevelRoomPreset
 @export var attachment_overrides: Array[LevelRoomOverride] = []
+@export var theme_id: StringName
+@export var theme_zone: StringName
 @export var theme: LevelVisualTheme
 @export var role: StringName = &""
 

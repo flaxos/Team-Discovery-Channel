@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="LevelVisualTheme" format=3]
 [ext_resource type="Script" path="res://scripts/level/LevelVisualTheme.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/level_themes/neutral_lighting.tres" id="2"]
 [sub_resource type="StandardMaterial3D" id="surface"]
 albedo_color = Color(0.32,0.38,0.41,1)
 [sub_resource type="StandardMaterial3D" id="prop"]
@@ -9,3 +10,10 @@ script = ExtResource("1")
 id = &"neutral"
 surface_material = SubResource("surface")
 prop_material = SubResource("prop")
+display_name = "Neutral"
+description = "Legible neutral concrete and steel placeholder architecture; baseline visual fallback."
+fallback_id = &""
+lighting = ExtResource("2")
+compatible_families = PackedStringArray("corridor","chamber","adapter","vertical")
+decoration_slots = PackedStringArray("wall_panels","ceiling_detail","portal_surround","room_detail")
+art_status = "neutral"

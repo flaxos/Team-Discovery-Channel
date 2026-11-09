@@ -16,6 +16,10 @@ func _ready() -> void:
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	settings.ambient_light_color = Color.WHITE
 	settings.ambient_light_energy = 0.8
+	var palette := LevelThemeResolver.lighting(level.layout)
+	if palette != null:
+		settings.ambient_light_color = palette.ambient_color
+		settings.ambient_light_energy = palette.ambient_energy
 	environment.environment = settings
 	level.add_child(environment)
 	var sun := DirectionalLight3D.new()
@@ -29,13 +33,34 @@ func _ready() -> void:
 	if "--capture" in OS.get_cmdline_user_args():
 		var camera := Camera3D.new()
 		level.add_child(camera)
-		camera.position = Vector3(20, 42, 25)
-		camera.look_at(Vector3(-4, 0, -4))
+		var bounds := (
+			level.layout.instances[0].placement(
+				float(level.layout.decks[str(level.layout.instances[0].deck)])
+			)
+			* level.layout.instances[0].module.occupied
+		)
+		for item in level.layout.instances:
+			bounds = bounds.merge(
+				item.placement(float(level.layout.decks[str(item.deck)])) * item.module.occupied
+			)
+		var span := maxf(bounds.size.x, bounds.size.z)
+		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+		camera.size = span * 1.7
+		camera.far = maxf(500, span * 10)
+		camera.position = bounds.get_center() + Vector3(span * .6, span * 1.4, span * .8)
+		camera.look_at(bounds.get_center())
 		camera.current = true
 		for i in range(12):
 			await get_tree().process_frame
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("/tmp/modular-overview.png")
+		var destination := "/tmp/modular-overview.png"
+		var args := OS.get_cmdline_user_args()
+		if "--capture-output" in args:
+			destination = args[args.find("--capture-output") + 1]
+		if get_viewport().get_texture().get_image().save_png(destination) != OK:
+			push_error("Cannot save preview capture: " + destination)
+			get_tree().quit(1)
+			return
 		await preload("res://tests/support/finish.gd").success(get_tree())
 	else:
 		var players := Node3D.new()

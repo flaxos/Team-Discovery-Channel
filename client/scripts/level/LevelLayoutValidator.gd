@@ -20,6 +20,7 @@ static func validate(layout: LevelLayout, require_route: bool = true) -> PackedS
 			errors.append("Invalid deck elevation: " + str(id))
 	if not errors.is_empty():
 		return errors
+	errors.append_array(LevelThemeResolver.validate_layout(layout))
 	var seen := {}
 	for item in layout.instances:
 		if item == null:
