@@ -202,7 +202,7 @@ material_override = SubResource("mat")
 metadata/visual_slot = "Headereast"
 metadata/dimensions = Vector3(0.2, 0.6, 3)
 [node name="east" type="Marker3D" parent="Sockets"]
-transform = Transform3D(0.0, 0, 1.0, 0, 1, 0, -1.0, 0, 0.0, 4, 0, 0)
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 4.0, 0.0, 0.0)
 [node name="entry" type="Marker3D" parent="Markers"]
 position = Vector3(0, 0, 0)
 [node name="destination" type="Marker3D" parent="Markers"]

@@ -10,7 +10,7 @@ approach = Vector3(0.0,0,-3.0)
 [sub_resource type="Resource" id="east"]
 script = ExtResource("2")
 id = &"east"
-local_transform = Transform3D(0.0, 0, 1.0, 0, 1, 0, -1.0, 0, 0.0, 4, 0, 0)
+local_transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 4.0, 0.0, 0.0)
 approach = Vector3(3.0,0,0.0)
 [sub_resource type="Resource" id="south"]
 script = ExtResource("2")
@@ -20,7 +20,7 @@ approach = Vector3(0.0,0,3.0)
 [sub_resource type="Resource" id="west"]
 script = ExtResource("2")
 id = &"west"
-local_transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -4, 0, 0)
+local_transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, -4.0, 0.0, 0.0)
 approach = Vector3(-3.0,0,0.0)
 [resource]
 script = ExtResource("1")

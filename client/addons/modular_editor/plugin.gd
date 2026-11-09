@@ -17,7 +17,7 @@ func _enter_tree() -> void:
 	var toolbar := HFlowContainer.new()
 	panel.add_child(toolbar)
 	path = LineEdit.new()
-	path.text = "res://resources/levels/editor_demo.tres"
+	path.text = "res://resources/levels/automatic_doors_demo.tres"
 	path.custom_minimum_size.x = 330
 	toolbar.add_child(path)
 	for title: String in [
@@ -240,7 +240,7 @@ func action(title: String) -> void:
 				model
 				. errors
 				. append(
-					"Full-map build requires explicit socket connections. Use Connect sockets: click a socket on the fixed room, then a compatible socket on the moving room. Grid adjacency alone does not connect rooms. To inspect one room, select it and use Validate room or Preview room 3D."
+					"Full-map build requires connected doorways. Click Connect touching rooms to link compatible doorway markers already touching. Markers must coincide and face opposite directions; use R to rotate unconnected rooms. New placements link automatically. Touching solid walls do not create doors. To inspect one room, select it and use Validate room or Preview room 3D."
 				)
 			)
 		refresh()
