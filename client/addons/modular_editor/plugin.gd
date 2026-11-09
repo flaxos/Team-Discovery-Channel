@@ -14,13 +14,22 @@ var busy := false
 func _enter_tree() -> void:
 	panel = VBoxContainer.new()
 	panel.name = "ModularMap"
-	var toolbar := HBoxContainer.new()
+	var toolbar := HFlowContainer.new()
 	panel.add_child(toolbar)
 	path = LineEdit.new()
 	path.text = "res://resources/levels/editor_demo.tres"
 	path.custom_minimum_size.x = 330
 	toolbar.add_child(path)
-	for title: String in ["New", "Open", "Save", "Validate", "Rebuild", "Preview 3D"]:
+	for title: String in [
+		"New",
+		"Open",
+		"Save",
+		"Validate",
+		"Rebuild",
+		"Preview 3D",
+		"Validate room",
+		"Preview room 3D"
+	]:
 		var button := Button.new()
 		button.text = title
 		toolbar.add_child(button)
@@ -192,16 +201,34 @@ func action(title: String) -> void:
 			model.errors.clear()
 		refresh()
 		return
-	var errors := LevelLayoutValidator.validate(model.layout)
+	var selected_only := title in ["Validate room", "Preview room 3D"]
+	var build_layout := (
+		model.room_layout(canvas.selected) if selected_only else Model.copy(model.layout)
+	)
+	if build_layout == null:
+		model.errors = PackedStringArray(
+			["Select a room using Select / Move, then click Validate room or Preview room 3D."]
+		)
+		refresh()
+		return
+	var errors := LevelLayoutValidator.validate(build_layout)
 	if not errors.is_empty():
 		model.errors = errors
+		if "Disconnected instance" in str(errors):
+			(
+				model
+				. errors
+				. append(
+					"Full-map build requires explicit socket connections. Use Connect sockets: click a socket on the fixed room, then a compatible socket on the moving room. Grid adjacency alone does not connect rooms. To inspect one room, select it and use Validate room or Preview room 3D."
+				)
+			)
 		refresh()
 		return
 	busy = true
 	var token := str(Time.get_ticks_usec())
 	var snapshot := "user://modular_editor_" + token + ".tres"
 	var logfile := "user://modular_editor_" + token + ".log"
-	if ResourceSaver.save(Model.copy(model.layout), snapshot) != OK:
+	if ResourceSaver.save(build_layout, snapshot) != OK:
 		model.errors = PackedStringArray(["Could not save build snapshot"])
 		busy = false
 		refresh()
@@ -223,7 +250,7 @@ func action(title: String) -> void:
 			"--validate"
 		]
 	)
-	if title != "Validate":
+	if title not in ["Validate", "Validate room"]:
 		args.append_array(
 			PackedStringArray(
 				[
@@ -262,8 +289,8 @@ func action(title: String) -> void:
 	if model.errors.is_empty():
 		results.text = (
 			"PASS full layout, enclosure and navigation validation. "
-			+ ("Rebuilt EditorPreview.tscn" if title != "Validate" else "")
+			+ ("Rebuilt EditorPreview.tscn" if title not in ["Validate", "Validate room"] else "")
 		)
-		if title == "Preview 3D":
+		if title in ["Preview 3D", "Preview room 3D"]:
 			get_editor_interface().get_resource_filesystem().scan()
 			get_editor_interface().play_custom_scene("res://addons/modular_editor/preview.tscn")
