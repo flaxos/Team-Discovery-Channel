@@ -30,6 +30,14 @@ godot --headless --path client --script res://scripts/map/bake_sgc_map.gd -- --b
 
 This preserves authored layout/art data and refreshes generated slots and navigation. Add `--reset-layout` only to regenerate the factory layout. The fallback runtime bake supports missing artifacts, but normal play uses the prebuilt mesh. Each scene owns a separate navigation map, including host/client test fixtures.
 
+## Indoor enclosure rule
+
+An indoor map must not expose unmodelled space through corridor joins, floors, ceilings or connecting shafts. Walking portals must sit on a shared room boundary at the same elevation, with sufficient shared clearance; their built openings are clipped to the receiving room. Moving a corridor away from its neighbour fails schema validation even when the route graph remains connected.
+
+`SGCEnclosureValidator` probes the built shell around the union of rooms, enclosed stair transitions and the lift shaft. It samples exterior wall faces at 0.25 m spacing and horizontal faces at 0.5 m spacing, including the space between floors. Every sampled exterior boundary must have physical closure; internal portals and stair holes remain open into other enclosed volumes. Errors name the region/connection, face, world position and direction. This is a deterministic structural check at the documented sampling resolution; it is not a test of transparent materials or replacement artwork.
+
+The navigation bake refuses to save a map with enclosure errors, and `test_sgc_enclosure` runs in the full CI suite. Negative cases create a corridor-placement gap, a portal-edge crack, a missing floor, a missing ceiling and missing stair casing, and require validation to fail. Closure is also checked with the lift at a different floor. Generated shaft panels have the same art-replacement metadata as other map modules.
+
 ## Art briefs and replacement
 
 Every generated module has a stable `SGCAssetSlot` in the map resource and `asset_slot` metadata on its body: dimensions, description, style, visual scene, texture and replacement status. Styles supply palette, roughness, metallic response, material channels, texture scale, wear and references.
@@ -74,4 +82,7 @@ The runner allows 180 seconds per suite by default because the full three-capsul
 - `test_sgc_map_contract`: source provenance, alternate routes, art metadata and replacement bounds, stable collision and unreachable destinations.
 - Boundary, multiplayer lift/state, late join/retry, observation glass, objectives, gunplay and input regressions remain covered. The four old stair/lift tests based on CSG names or exact tread counts have been consolidated into the behavioral route/lift suites.
 
-The visual helper writes actual Forward+ GPU captures to `build/sgc-review/`. It covers embarkation looking up at the stacked observation rooms, control looking at the gate, both shutters closed, briefing, spiral, east corridor, support, briefing alert lighting and an active incoming gate. Screenshots and headless tests do not establish subjective combat balance or replace a human multiplayer playtest.
+The visual helper writes actual Forward+ GPU captures to `build/sgc-review/`. It covers embarkation looking up at the stacked observation rooms, control looking at the gate, both shutters closed, briefing, spiral, east corridor, west/connector joins, service stairs, support, briefing alert lighting and an active incoming gate. Screenshots and headless tests do not establish subjective combat balance or replace a human multiplayer playtest.
+
+
+Buffer lockout and ROM-upload status use the objective HUD without opening the dialing panel. The panel is reserved for an approved dialing session and closes when that session is cancelled; global lockout/progress updates cannot leave an orphan overlay on screen. `test_buffer_lockout_hud` covers denied dialing, upload/cancel/snapshot notifications and normal dialing dismissal.

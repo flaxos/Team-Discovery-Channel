@@ -18,6 +18,12 @@ func bake() -> void:
 	map.definition = definition
 	root.add_child(room)
 	await map.navigation_ready
+	var errors := preload("res://scripts/map/SGCEnclosureValidator.gd").new().validate(map)
+	if not errors.is_empty():
+		for error in errors:
+			push_error(error)
+		quit(1)
+		return
 	assert(ResourceSaver.save(map.definition, "res://resources/maps/sgc.tres") == OK)
 	assert(
 		(

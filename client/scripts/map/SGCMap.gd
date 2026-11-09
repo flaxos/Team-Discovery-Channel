@@ -146,10 +146,6 @@ func _build_region(r: SGCRegion) -> void:
 	if r.id == &"BRIEFING_ROOM":
 		_floor_with_hole(r, Rect2(-6.9, 9.6, 4.8, 4.8))
 		_floor_rect("SpiralTopLanding", Rect2(-6.8, 9.2, 1.4, 2.75), y, &"steel")
-	elif r.id == &"FALLBACK_HALLWAY":
-		_floor_with_hole(r, Rect2(-1.3, 22, 2.6, 4.1))
-	elif r.id == &"CONTROL_CONNECTOR":
-		_floor_with_hole(r, Rect2(7, 13.7, 5.1, 2.6))
 	elif r.id == &"SERVICE_ROOM":
 		_floor_with_hole(r, Rect2(30.6, 26, 2.8, 12.1))
 	else:
@@ -231,9 +227,14 @@ func _wall(r: SGCRegion, side: int) -> void:
 				and along >= lo
 				and along <= hi
 			):
-				openings.append(
-					Vector2(maxf(lo, along - c.width / 2), minf(hi, along + c.width / 2))
-				)
+				var gap := Vector2(maxf(lo, along - c.width / 2), minf(hi, along + c.width / 2))
+				if c.kind == "walk":
+					# Portals cannot extend beyond the actual receiving room footprint.
+					var other := definition.region(c.other(r.id)).footprint
+					gap.x = maxf(gap.x, other.position.x if along_x else other.position.y)
+					gap.y = minf(gap.y, other.end.x if along_x else other.end.y)
+				if gap.y > gap.x:
+					openings.append(gap)
 	# A sloping stair can cross a neighboring room boundary halfway up a flight.
 	# Reserve the whole opening there, including headroom above the lower wall.
 	var stair_openings: Array[Vector2] = []
@@ -361,6 +362,8 @@ func _bake_navigation() -> void:
 	await get_tree().physics_frame
 	if not is_inside_tree():
 		return
+	_build_stair_enclosures()
+	await get_tree().physics_frame
 	nav_region = NavigationRegion3D.new()
 	nav_region.name = "Navigation"
 	var mesh := NavigationMesh.new()
@@ -640,3 +643,92 @@ func _build_control_front() -> void:
 			&"steel",
 			false
 		)
+
+
+func _build_stair_enclosures() -> void:
+	# Close only the exposed faces of each connecting stair shaft. The portions
+	# inside rooms stay open, preserving their existing approach and exit routes.
+	var volumes := definition.enclosure_volumes()
+	for c in definition.connections:
+		if c.kind not in ["stairs", "spiral"]:
+			continue
+		var bounds := definition.stair_enclosure(c)
+		_build_enclosure_shell(bounds, str(c.id), volumes)
+	_build_enclosure_shell(definition.LIFT_ENCLOSURE, "LiftShaft", volumes)
+
+
+func _build_enclosure_shell(bounds: AABB, label: String, volumes: Array[AABB]) -> void:
+	for axis in range(3):
+		var u := (axis + 1) % 3
+		var v := (axis + 2) % 3
+		var cuts_u: Array[float] = [bounds.position[u], bounds.end[u]]
+		var cuts_v: Array[float] = [bounds.position[v], bounds.end[v]]
+		for volume in volumes:
+			for edge: Vector3 in [volume.position, volume.end]:
+				if edge[u] > bounds.position[u] and edge[u] < bounds.end[u]:
+					cuts_u.append(edge[u])
+				if edge[v] > bounds.position[v] and edge[v] < bounds.end[v]:
+					cuts_v.append(edge[v])
+		cuts_u.sort()
+		cuts_v.sort()
+		for sign_value: float in [-1.0, 1.0]:
+			var normal := Vector3.ZERO
+			normal[axis] = sign_value
+			for i in range(cuts_u.size() - 1):
+				for j in range(cuts_v.size() - 1):
+					if cuts_u[i + 1] - cuts_u[i] < 0.01 or cuts_v[j + 1] - cuts_v[j] < 0.01:
+						continue
+					var at := bounds.get_center()
+					at[axis] = bounds.position[axis] if sign_value < 0 else bounds.end[axis]
+					at[u] = (cuts_u[i] + cuts_u[i + 1]) / 2
+					at[v] = (cuts_v[j] + cuts_v[j + 1]) / 2
+					var covered := false
+					for volume in volumes:
+						if volume.has_point(at + normal * 0.01):
+							covered = true
+							break
+					if covered:
+						continue
+					if _face_is_closed(
+						at, normal, u, v, cuts_u[i + 1] - cuts_u[i], cuts_v[j + 1] - cuts_v[j]
+					):
+						continue
+					var size := Vector3.ZERO
+					size[axis] = 0.2
+					size[u] = cuts_u[i + 1] - cuts_u[i]
+					size[v] = cuts_v[j + 1] - cuts_v[j]
+					var mesh := _box(
+						label + "Enclosure%d_%s_%d_%d" % [axis, sign_value, i, j],
+						at + normal * 0.07,
+						size,
+						&"bunker",
+						axis != 1
+					)
+					if axis == 1:
+						# Shaft caps must not become navigable roof islands.
+						var body := mesh.get_parent() as StaticBody3D
+						body.collision_layer = 128
+						var collider := CollisionShape3D.new()
+						var shape := BoxShape3D.new()
+						shape.size = size
+						collider.shape = shape
+						body.add_child(collider)
+
+
+func _face_is_closed(
+	at: Vector3, normal: Vector3, u: int, v: int, width: float, height: float
+) -> bool:
+	# A rail or the middle of a partly covered panel cannot seal an entire face.
+	for x: float in [-0.49, 0.0, 0.49]:
+		for y: float in [-0.49, 0.0, 0.49]:
+			var sample := at
+			sample[u] += x * width
+			sample[v] += y * height
+			var hit := get_world_3d().direct_space_state.intersect_ray(
+				PhysicsRayQueryParameters3D.create(
+					sample - normal * 0.4, sample + normal * 0.4, 129
+				)
+			)
+			if hit.is_empty() or absf((hit.position - sample).dot(normal)) > 0.15:
+				return false
+	return true

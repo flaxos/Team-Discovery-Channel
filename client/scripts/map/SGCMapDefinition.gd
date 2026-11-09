@@ -6,6 +6,7 @@ const CONTROL_FLOOR_Y: float = 1.5
 const GATE_DIAMETER: float = 6.7
 const CAPSULE_RADIUS: float = 0.4
 const CAPSULE_HEIGHT: float = 1.8
+const LIFT_ENCLOSURE := AABB(Vector3(35.4, -0.5, 16.1), Vector3(3.45, 15.7, 3.8))
 const WALL_THICKNESS: float = 0.3
 const REFERENCE: String = "https://rdanderson.com/stargate/cheyenne/index.htm"
 @export var regions: Array[SGCRegion] = []
@@ -35,19 +36,57 @@ func validate() -> PackedStringArray:
 		if ids.has(r.id) or r.id == &"":
 			errors.append("Duplicate/empty region: " + str(r.id))
 		ids[r.id] = true
+		if (
+			r.footprint.size.x <= 0
+			or r.footprint.size.y <= 0
+			or r.ceiling_height < CAPSULE_HEIGHT + 0.2
+		):
+			errors.append("Invalid interior dimensions: " + str(r.id))
 		if not FLOOR_HEIGHTS.has(r.floor_number):
 			errors.append("Unsupported floor")
 	for c in connections:
 		if region(c.from_region) == null or region(c.to_region) == null:
 			errors.append("Invalid endpoints: " + str(c.id))
+			continue
 		if c.width < CAPSULE_RADIUS * 2.0 + 0.2 or c.clearance_height < CAPSULE_HEIGHT + 0.2:
 			errors.append("Insufficient clearance: " + str(c.id))
 		if c.points.is_empty():
 			errors.append("Missing portal: " + str(c.id))
+			continue
+		if c.kind == "walk" and not _shared_portal(c):
+			errors.append("Portal exposes void or has insufficient shared clearance: " + str(c.id))
 	for r in regions:
 		if r != regions[0] and route(regions[0].id, r.id).is_empty():
 			errors.append("Disconnected: " + str(r.id))
 	return errors
+
+
+func _shared_portal(c: SGCConnection) -> bool:
+	var from := region(c.from_region)
+	var to := region(c.to_region)
+	if not FLOOR_HEIGHTS.has(from.floor_number) or not FLOOR_HEIGHTS.has(to.floor_number):
+		return false
+	if not is_equal_approx(floor_y(from), floor_y(to)):
+		return false
+	var a := from.footprint
+	var b := to.footprint
+	var point := Vector2(c.points[0].x, c.points[0].z)
+	for axis in range(2):
+		var along := 1 - axis
+		var shared := (
+			(absf(a.end[axis] - b.position[axis]) < 0.01 and absf(point[axis] - a.end[axis]) < 0.01)
+			or (
+				absf(b.end[axis] - a.position[axis]) < 0.01
+				and absf(point[axis] - b.end[axis]) < 0.01
+			)
+		)
+		if not shared:
+			continue
+		var lo := maxf(maxf(a.position[along], b.position[along]), point[along] - c.width / 2)
+		var hi := minf(minf(a.end[along], b.end[along]), point[along] + c.width / 2)
+		if hi - lo >= CAPSULE_RADIUS * 2.0 + 0.2:
+			return true
+	return false
 
 
 func route(
@@ -79,6 +118,47 @@ func route(
 	if cursor != start:
 		result.clear()
 	return result
+
+
+func enclosure_volumes() -> Array[AABB]:
+	var result: Array[AABB] = []
+	for r in regions:
+		result.append(
+			AABB(
+				Vector3(r.footprint.position.x, floor_y(r), r.footprint.position.y),
+				Vector3(r.footprint.size.x, r.ceiling_height, r.footprint.size.y)
+			)
+		)
+	for c in connections:
+		if c.kind in ["stairs", "spiral"]:
+			result.append(stair_enclosure(c))
+	# Retained lift shaft, adjoining all three lobby portals.
+	result.append(LIFT_ENCLOSURE)
+	return result
+
+
+func stair_enclosure(c: SGCConnection) -> AABB:
+	var a := c.points[0]
+	var b := c.points[-1]
+	var low := a.min(b)
+	var high := a.max(b)
+	if c.kind == "spiral":
+		for p in c.points:
+			low = low.min(p)
+			high = high.max(p)
+		low -= Vector3(0.8, 0, 0.8)
+		high += Vector3(0.8, 0, 0.8)
+	else:
+		var across := (
+			Vector3(1.6, 0, 0.4) if absf(b.z - a.z) > absf(b.x - a.x) else Vector3(0.4, 0, 1.6)
+		)
+		low -= across
+		high += across
+	high.y = maxf(
+		floor_y(region(c.from_region)) + region(c.from_region).ceiling_height,
+		floor_y(region(c.to_region)) + region(c.to_region).ceiling_height
+	)
+	return AABB(low, high - low)
 
 
 static func floor_y(r: SGCRegion) -> float:

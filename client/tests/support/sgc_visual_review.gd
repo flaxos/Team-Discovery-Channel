@@ -22,6 +22,9 @@ func run() -> void:
 	var output := ProjectSettings.globalize_path("res://../build/sgc-review")
 	DirAccess.make_dir_recursive_absolute(output)
 	var views: Array[Dictionary] = [
+		{"id": "west-join", "camera": Vector3(-25, 1.7, 33), "target": Vector3(-10, 1.7, 33)},
+		{"id": "connector-join", "camera": Vector3(10, 1.7, 36), "target": Vector3(22, 1.7, 36)},
+		{"id": "service-stair", "camera": Vector3(32, 7.2, 26.2), "target": Vector3(32, 11.7, 36)},
 		{"id": "embarkation", "camera": Vector3(6, 2.0, -12), "target": Vector3(0, 5.0, 8)},
 		{"id": "control", "camera": Vector3(0, 3.1, 13), "target": Vector3(0, 4.3, -15)},
 		{"id": "briefing", "camera": Vector3(1, 8.5, 20), "target": Vector3(-1, 6.7, 11)},
