@@ -16,7 +16,9 @@ Open the `client/` project in Godot. In **Project → Project Settings → Plugi
 - Middle-mouse drag pans; mouse wheel zooms around the cursor. Green lines show connections, amber dots show sockets, selection has a white outline, and errors containing room IDs highlight those rooms red. Errors also appear in the scrollable results panel. ESC cancels placement/connection gestures.
 - Use the editor's standard **Undo/Redo** commands (Edit menu / Ctrl+Z and the configured redo shortcut). Each accepted layout edit uses `EditorUndoRedoManager`; rejected edits do not enter history. View pan/zoom is not a layout edit.
 
-Incomplete/disconnected maps are permitted during editing. **Validate**, **Rebuild** and **Preview 3D** require the full Phase 1 graph, enclosure and entry/destination navigation checks.
+**Validate room** and **Preview room 3D** inspect only the selected room, with its sockets capped. Choose **Select / Move** and click the room first. These actions do not alter the authored layout or its connections.
+
+Incomplete/disconnected maps are permitted during editing. The full-map **Validate**, **Rebuild** and **Preview 3D** require the full Phase 1 graph, enclosure and entry/destination navigation checks.
 
 ## Save, build and walk
 
@@ -50,3 +52,5 @@ Initial palette is the existing four archetypes on `deck0`; no deck-management U
 Phase 2 was implemented on `feat/visual-modular-editor`, based on merged Phase 1 at `62a781a`. The full Godot 4.4.1 inventory passed **53/53 checks** (`build/test-results/phase2-full/`). Targeted canvas/layout checks passed (`phase2-target-final/`), followed by the extended snapshot-deletion/export-reload test (`phase2-export-final/`). Native editor activation, editor Undo/Redo history, headless rebuild and the Preview 3D play/stop action were exercised, and a Forward+ editor-panel capture was inspected. The player preview boots without script/engine errors. These automated checks do not replace the manual checklist above.
 
 The only Phase 1 implementation change embeds the input layout when packing an exported scene, avoiding a dependency on temporary editor build snapshots. SGC maps, missions, networking and NPC controllers are unchanged. Preview artifacts are ignored; `editor_demo.tres` is the persisted GUI-built eight-room example.
+
+If every room reports disconnected, check that the layout has explicit socket connections and a valid entry room. Grid placement alone does not connect sockets. Use **Connect sockets**, or inspect a standalone room with the room-specific actions above.

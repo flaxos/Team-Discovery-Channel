@@ -73,3 +73,17 @@ func removed(id: StringName) -> LevelLayout:
 func accepted(candidate: LevelLayout) -> bool:
 	errors = LevelLayoutValidator.validate(candidate, false)
 	return errors.is_empty()
+
+
+func room_layout(id: StringName) -> LevelLayout:
+	var item := layout.instance(id)
+	if item == null:
+		return null
+	var result := copy(layout)
+	result.instances.assign([item.duplicate() as LevelModuleInstance])
+	result.connections.clear()
+	result.entry_instance = id
+	result.destination_instance = id
+	result.entry_marker = &"entry"
+	result.destination_marker = &"destination"
+	return result

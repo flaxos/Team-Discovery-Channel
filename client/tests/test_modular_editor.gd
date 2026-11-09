@@ -74,6 +74,19 @@ func run() -> void:
 			and model.layout.instances[-1].quarter_turn == old_turn
 		)
 	)
+	# Individual inspection must work before any map connections exist.
+	var room := model.room_layout(model.layout.instances[0].id)
+	assert(LevelLayoutValidator.validate(room).is_empty())
+	assert(room.instances.size() == 1 and room.connections.is_empty())
+	assert(model.layout.instances.size() == 8 and model.layout.connections.is_empty())
+	assert(model.room_layout(&"unknown") == null)
+	var isolated := LevelAssembly.new()
+	isolated.layout = room
+	root.add_child(isolated)
+	await isolated.navigation_ready
+	assert(isolated.last_errors.is_empty())
+	isolated.queue_free()
+	await process_frame
 	# Fixture order and generated stable IDs permit explicit socket connections.
 	var names: Dictionary = {}
 	for i in range(8):
