@@ -45,3 +45,5 @@ label = "Cargo bay / glider hangar"
 compatible_modules = PackedStringArray("room16")
 attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4")])
 system_references = PackedStringArray("vehicle.future","doors.access")
+description = "Cargo bay / glider hangar configuration with reusable equipment and reachable markers; no mission progression."
+synonyms = PackedStringArray("glider bay","vehicle bay","hangar")

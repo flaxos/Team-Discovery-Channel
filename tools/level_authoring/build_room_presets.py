@@ -90,6 +90,9 @@ PRESETS = [
 ]
 
 
+ALIASES = {'jaffa_barracks': ['barracks', 'sleeping quarters', 'troop quarters', 'dormitory'], 'security_checkpoint': ['checkpoint', 'guard post', 'bottleneck'], 'armoury': ['armory', 'equipment storage', 'weapons'], 'detention': ['holding cells', 'prison', 'extraction'], 'generator': ['reactor', 'power plant', 'power control'], 'cargo': ['storage', 'warehouse', 'crates'], 'engineering': ['maintenance', 'service room', 'repair'], 'security_control': ['control room', 'security office', 'alarm control'], 'ring_transport': ['transport area', 'ring room', 'teleport'], 'stargate_dhd': ['gate room', 'stargate chamber', 'dialling'], 'sarcophagus': ['revival interface', 'healing interface'], 'laboratory_medical': ['medical room', 'laboratory', 'sickbay', 'lab', 'infirmary'], 'command': ['bridge', 'command center', 'command centre', 'control room'], 'cargo_hangar': ['glider bay', 'vehicle bay', 'hangar'], 'ceremonial': ['throne room', 'ceremonial hall'], 'observation_communications': ['observation', 'communications room', 'intelligence']}
+
+
 def vector(value):
     return 'Vector3('+','.join(map(str,value))+')'
 
@@ -124,7 +127,7 @@ def bake():
                 lines.append('bounds = AABB('+','.join(map(str,a['bounds']))+')')
             if a.get('refs'):lines.append('references = '+packed(a['refs']))
         lines += ['[resource]','script = ExtResource("1")',f'id = &"{id}"',f'label = {json.dumps(label)}','compatible_modules = '+packed(modules),
-                  'attachments = Array[ExtResource("2")](['+', '.join(f'SubResource("a{i}")' for i in range(len(attachments)))+'])','system_references = '+packed(systems)]
+                  'attachments = Array[ExtResource("2")](['+', '.join(f'SubResource("a{i}")' for i in range(len(attachments)))+'])','system_references = '+packed(systems), 'description = '+json.dumps(label+' configuration with reusable equipment and reachable markers; no mission progression.'), 'synonyms = '+packed(ALIASES[id])]
         (output/(id+'.tres')).write_text('\n'.join(lines)+'\n')
 
 

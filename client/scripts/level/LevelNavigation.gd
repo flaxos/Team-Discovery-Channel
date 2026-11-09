@@ -3,7 +3,7 @@ class_name LevelNavigation
 extends RefCounted
 
 
-static func bake(root: Node3D) -> NavigationMesh:
+static func profile() -> NavigationMesh:
 	var mesh := NavigationMesh.new()
 	mesh.agent_radius = 0.6
 	mesh.agent_height = 1.9
@@ -13,6 +13,11 @@ static func bake(root: Node3D) -> NavigationMesh:
 	mesh.cell_height = 0.1
 	mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
 	mesh.geometry_collision_mask = 1
+	return mesh
+
+
+static func bake(root: Node3D) -> NavigationMesh:
+	var mesh := profile()
 	var doors: Dictionary = {}
 	for door in root.get_tree().get_nodes_in_group("modular_door"):
 		if root.is_ancestor_of(door) and not (door.is_security and door.locked):

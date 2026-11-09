@@ -51,3 +51,5 @@ label = "Laboratory / medical"
 compatible_modules = PackedStringArray("room10","room11","room13")
 attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5")])
 system_references = PackedStringArray("objective.intelligence")
+description = "Laboratory / medical configuration with reusable equipment and reachable markers; no mission progression."
+synonyms = PackedStringArray("medical room","laboratory","sickbay","lab","infirmary")
