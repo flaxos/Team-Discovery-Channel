@@ -143,6 +143,8 @@ func validate_and_bake() -> void:
 		return
 	if get_child_count() == 0:
 		LevelAssembler.assemble(layout, self)
+	else:
+		LevelAssembler.add_doors(layout, self)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	errors = LevelEnclosureValidator.validate(self)

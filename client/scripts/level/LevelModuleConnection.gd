@@ -5,4 +5,4 @@ extends Resource
 @export var from_socket: StringName
 @export var to_instance: StringName
 @export var to_socket: StringName
-@export_enum("open") var state: String = "open"
+@export_enum("open", "door") var state: String = "open"

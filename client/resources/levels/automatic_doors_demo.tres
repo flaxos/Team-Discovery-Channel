@@ -1,0 +1,182 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_abebb"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_jatm3"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="3_ye7bd"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room02Corner.tres" id="4_dnkhb"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room03TJunction.tres" id="5_n2hxc"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="6_7w6ng"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="7_ikwdh"]
+
+[sub_resource type="Resource" id="Resource_y2h8b"]
+script = ExtResource("1_abebb")
+from_instance = &"room_001"
+from_socket = &"north"
+to_instance = &"room_002"
+to_socket = &"north"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_ngq8l"]
+script = ExtResource("1_abebb")
+from_instance = &"room_001"
+from_socket = &"south"
+to_instance = &"room_003"
+to_socket = &"north"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_qcp11"]
+script = ExtResource("1_abebb")
+from_instance = &"room_002"
+from_socket = &"east"
+to_instance = &"room_004"
+to_socket = &"east"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_s4xlq"]
+script = ExtResource("1_abebb")
+from_instance = &"room_004"
+from_socket = &"north"
+to_instance = &"room_005"
+to_socket = &"north"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_nav0g"]
+script = ExtResource("1_abebb")
+from_instance = &"room_003"
+from_socket = &"east"
+to_instance = &"room_006"
+to_socket = &"east"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_21bar"]
+script = ExtResource("1_abebb")
+from_instance = &"room_003"
+from_socket = &"west"
+to_instance = &"room_007"
+to_socket = &"east"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_hjgue"]
+script = ExtResource("1_abebb")
+from_instance = &"room_004"
+from_socket = &"south"
+to_instance = &"room_008"
+to_socket = &"north"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_ivpqr"]
+script = ExtResource("1_abebb")
+from_instance = &"room_007"
+from_socket = &"north"
+to_instance = &"room_008"
+to_socket = &"south"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_1vtcs"]
+script = ExtResource("2_jatm3")
+id = &"room_001"
+module = ExtResource("3_ye7bd")
+deck = &"deck0"
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_fj2gf"]
+script = ExtResource("2_jatm3")
+id = &"room_002"
+module = ExtResource("4_dnkhb")
+deck = &"deck0"
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_p6v2t"]
+script = ExtResource("2_jatm3")
+id = &"room_003"
+module = ExtResource("5_n2hxc")
+deck = &"deck0"
+position = Vector2(3.49691e-07, 8)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_gckr4"]
+script = ExtResource("2_jatm3")
+id = &"room_004"
+module = ExtResource("6_7w6ng")
+deck = &"deck0"
+position = Vector2(-8, -8)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_m0e63"]
+script = ExtResource("2_jatm3")
+id = &"room_005"
+module = ExtResource("3_ye7bd")
+deck = &"deck0"
+position = Vector2(-8, -16)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_jyptw"]
+script = ExtResource("2_jatm3")
+id = &"room_006"
+module = ExtResource("4_dnkhb")
+deck = &"deck0"
+position = Vector2(8, 8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_qiupg"]
+script = ExtResource("2_jatm3")
+id = &"room_007"
+module = ExtResource("5_n2hxc")
+deck = &"deck0"
+position = Vector2(-8, 8)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_5c6pu"]
+script = ExtResource("2_jatm3")
+id = &"room_008"
+module = ExtResource("6_7w6ng")
+deck = &"deck0"
+position = Vector2(-8, 9.53674e-07)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[resource]
+script = ExtResource("7_ikwdh")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+instances = Array[ExtResource("2_jatm3")]([SubResource("Resource_1vtcs"), SubResource("Resource_fj2gf"), SubResource("Resource_p6v2t"), SubResource("Resource_gckr4"), SubResource("Resource_m0e63"), SubResource("Resource_jyptw"), SubResource("Resource_qiupg"), SubResource("Resource_5c6pu")])
+connections = Array[ExtResource("1_abebb")]([SubResource("Resource_y2h8b"), SubResource("Resource_ngq8l"), SubResource("Resource_qcp11"), SubResource("Resource_s4xlq"), SubResource("Resource_nav0g"), SubResource("Resource_21bar"), SubResource("Resource_hjgue"), SubResource("Resource_ivpqr")])
+entry_instance = &"room_001"
+entry_marker = &"entry"
+destination_instance = &"room_008"
+destination_marker = &"destination"

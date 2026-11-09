@@ -10,7 +10,9 @@ Open the `client/` project in Godot. In **Project → Project Settings → Plugi
 
 - Select a prefab in the palette, hover over the canvas for an overlap-colored footprint/socket preview, and left-click to place. The grid is 8 m; **R** rotates the placement preview before placement.
 - Choose **Select / Move**, click a room to select, and drag/release to move it on the grid. **Rotate (R)** rotates the selected room. Selected sockets show their stable IDs; hover a socket for `instance/socket` text.
-- Choose **Connect sockets**, click the fixed room's socket, then the moving room's socket. This calls Phase 1 `LevelAssembler.snap`, which may reposition/rotate the second room. When sockets coincide, the second click selects the other endpoint. Compatibility and existing connection constraints take precedence over the grid.
+- **Place compatible doorway markers against each other:** placement and movement automatically record a connection and create one operable door. The markers must coincide and face opposite directions; touching arbitrary walls does not connect them. Rotate the preview with R if necessary.
+- For an existing layout, click **Connect touching rooms** once. It links all currently matching unused doorways and upgrades existing open-passage links to doors, as one undoable edit. No rooms are moved and the resource is not saved until you click Save. In Preview 3D, approach a door and press **E** (or your remapped interact key) to open/close it.
+- **Connect sockets** remains an advanced tool for snapping two explicit doorway markers together; its link also creates an operable door.
 - Invalid edits display errors and leave the prior layout intact. Connected-room moves/rotations are rejected if they invalidate any connection. Use **Disconnect selected** explicitly before moving an attached room; this is undoable. **Remove room + links** explicitly removes the room and incident links together.
 - Select a room and use **Entry** or **Destination** to assign required endpoint markers. New rooms receive stable generated IDs; all four archetypes use Phase 1 named markers.
 - Middle-mouse drag pans; mouse wheel zooms around the cursor. Green lines show connections, amber dots show sockets, selection has a white outline, and errors containing room IDs highlight those rooms red. Errors also appear in the scrollable results panel. ESC cancels placement/connection gestures.
@@ -22,7 +24,9 @@ Incomplete/disconnected maps are permitted during editing. The full-map **Valida
 
 ## Save, build and walk
 
-Enter a `.tres` filename under `res://resources/levels/` and click **Save**. Save before New/Open; unsaved changes block those operations rather than being discarded. Save before closing/disabling the plugin. Reopen the saved resource to retain placements, turns, decks and socket connections. The same resource works with the [Phase 1 CLI and AI interface](modular-levels.md).
+Enter a `.tres` filename under `res://resources/levels/` and click **Save**. Save before New/Open; unsaved changes block those operations rather than being discarded. Save before closing/disabling the plugin. Reopen the saved resource to retain placements, turns, decks and socket connections. New connections use the `door` connection state. Older `open` passage states remain supported by the runtime until explicitly upgraded. Door state is server controlled with range/actor checks and joining-client snapshots. Door collision is excluded only during static navigation baking and restored afterwards; closed doors still physically block players. Generic NPC door-use behavior remains outside this editor milestone.
+
+The same resource works with the [Phase 1 CLI and AI interface](modular-levels.md).
 
 **Validate** runs Phase 1's headless builder asynchronously using an immutable snapshot. **Rebuild** additionally exports `res://scenes/level/EditorPreview.tscn` and its navigation resource. Those are generated, ignored preview artifacts; the authored `.tres` remains the source of truth. The export embeds its layout so temporary build snapshot cleanup cannot break the scene. Builds time out after 60 seconds; details are returned in the results panel.
 
@@ -53,4 +57,12 @@ Phase 2 was implemented on `feat/visual-modular-editor`, based on merged Phase 1
 
 The only Phase 1 implementation change embeds the input layout when packing an exported scene, avoiding a dependency on temporary editor build snapshots. SGC maps, missions, networking and NPC controllers are unchanged. Preview artifacts are ignored; `editor_demo.tres` is the persisted GUI-built eight-room example.
 
-If every room reports disconnected, check that the layout has explicit socket connections and a valid entry room. Grid placement alone does not connect sockets. Use **Connect sockets**, or inspect a standalone room with the room-specific actions above.
+If every room reports disconnected, check that the layout has explicit socket connections and a valid entry room. Matching touching sockets now connect automatically on placement/movement. Use **Connect touching rooms** on an older layout, or inspect a standalone room with the room-specific actions above.
+
+### Automatic-door example and verification
+
+Open `res://resources/levels/automatic_doors_demo.tres` for eight kit instances with eight automatic door links, including a return loop. This separate example does not overwrite your saved map. Connected doorways have green door markers on the canvas. Doors begin closed, open/close using the existing interact binding, and refuse to close through an occupied doorway. Older `open` passage connections still load unchanged unless you explicitly upgrade them using **Connect touching rooms**.
+
+`test_modular_doors` covers automatic two-room and eight-room linking, duplicate prevention, preserved existing links, static navigation through operable connections, closed/open collision, the production player E interaction, physical traversal, closing again, occupied-doorway protection and missing/distant interactor rejection. Generic NPC door-opening behavior is not added by this editor refactor.
+
+Automatic-door refactor validation: all 54 full regression checks passed (`build/test-results/auto-door-full/`); final targeted door/editor tests pass (`auto-door-final-target/`). Native editor rebuild and Preview 3D were exercised using the automatic-door example. User-authored map and editor-setting changes were preserved separately.
