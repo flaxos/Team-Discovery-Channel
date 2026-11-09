@@ -97,6 +97,7 @@ func capture() -> void:
 			report(PackedStringArray(["Unsupported manual transform: " + str(item.id)]))
 			return
 		item.available_sockets = node.available_sockets.duplicate()
+		item.socket_decks = node.socket_decks.duplicate()
 		candidate.instances.append(item)
 	var errors := LevelLayoutValidator.validate(candidate, false)
 	if not errors.is_empty():

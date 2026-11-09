@@ -13,20 +13,21 @@ CATALOGUE = [
  ('Room13SpecialHall',16,24,3,[(0,-4,'north_00'),(8,-4,'north_01'),(0,20,'south_00'),(8,20,'south_01'),(-4,0,'west_00'),(-4,8,'west_01'),(-4,16,'west_02'),(12,0,'east_00'),(12,8,'east_01'),(12,16,'east_02')],'chamber'),
 ]
 def vec(v): return 'Vector3('+', '.join(str(round(x,5)) for x in v)+')'
-def bake(spec):
- name,W,D,width,sockets,kind=spec; h=3.4; xmax=W-4; zmax=D-4
+def bake(spec, height=3.4, socket_sizes=None):
+ name,W,D,width,sockets,kind=spec; h=height; xmax=W-4; zmax=D-4
  rects=[]; defs=[]
  if kind=='chamber':rects=[(-3.8,-3.8,xmax-.2,zmax-.2)]
  else:
   r=width/2;rects=[(-r,-r,r,r)]
  for x,z,id in sockets:
   w=3 if kind=='adapter' and id=='north' else (6 if name=='Room13SpecialHall' and id=='east_01' else width)
+  w, portal_height = (socket_sizes or {}).get(id, (w, 2.8))
   side=id.split('_')[0];r=w/2
   if side=='north': rects.append((x-r,-4,x+r,-3.8 if kind=='chamber' else 0));basis=(1,0,0,0,1,0,0,0,1);normal=(0,-1)
   elif side=='south':rects.append((x-r,zmax-.2 if kind=='chamber' else 0,x+r,zmax));basis=(-1,0,0,0,1,0,0,0,-1);normal=(0,1)
   elif side=='east':rects.append((xmax-.2 if kind=='chamber' else 0,z-r,xmax,z+r));basis=(0,0,-1,0,1,0,1,0,0);normal=(1,0)
   else:rects.append((-4,z-r,-3.8 if kind=='chamber' else 0,z+r));basis=(0,0,1,0,1,0,-1,0,0);normal=(-1,0)
-  defs.append((id,x,z,w,basis,normal))
+  defs.append((id,x,z,w,basis,normal,portal_height))
  # Union partition; floors never overlap. Merge equal horizontal runs vertically.
  xs=sorted({r[k] for r in rects for k in (0,2)});zs=sorted({r[k] for r in rects for k in (1,3)})
  cells={(i,j) for i in range(len(xs)-1) for j in range(len(zs)-1) if any(a< (xs[i]+xs[i+1])/2<c and b<(zs[j]+zs[j+1])/2<d for a,b,c,d in rects)}
@@ -57,8 +58,8 @@ def bake(spec):
    p=[coord+sign*.1, h/2,(lo+hi)/2] if axis==0 else [(lo+hi)/2,h/2,coord+sign*.1]
    size=[.2,h,hi-lo] if axis==0 else [hi-lo,h,.2]
    if portal:
-    p[axis]=coord-sign*.1;p[1]=1.4;size[1]=2.8;boxes.append(('Cap',tuple(p),tuple(size),1,portal[0]))
-    p[1]=3.1;size[1]=.6;boxes.append(('Header',tuple(p),tuple(size),1,None))
+    ph=portal[6];p[axis]=coord-sign*.1;p[1]=ph/2;size[1]=ph;boxes.append(('Cap',tuple(p),tuple(size),1,portal[0]))
+    p[1]=(h+ph)/2;size[1]=h-ph;boxes.append(('Header',tuple(p),tuple(size),1,None))
    else:boxes.append(('Wall',tuple(p),tuple(size),1,None))
  lines=['[gd_scene format=3]','[ext_resource type="Script" path="res://scripts/level/LevelModule.gd" id="1"]','[sub_resource type="StandardMaterial3D" id="mat"]','albedo_color = Color(0.32,0.38,0.41,1)']
  for i,(_,p,size,layer,cap) in enumerate(boxes):lines += [f'[sub_resource type="BoxShape3D" id="s{i}"]',f'size = {vec(size)}',f'[sub_resource type="BoxMesh" id="m{i}"]',f'size = {vec(size)}']
@@ -69,12 +70,12 @@ def bake(spec):
   id=cap or f'{part_kind}{i}';parent='Structure/PortalClosures' if cap else 'Structure/Collision';visual='Visuals/Closures' if cap else 'Visuals'
   lines += [f'[node name="{id}" type="StaticBody3D" parent="{parent}"]',f'position = {vec(p)}',f'collision_layer = {layer}',f'[node name="Shape" type="CollisionShape3D" parent="{parent}/{id}"]',f'shape = SubResource("s{i}")',f'[node name="{id}" type="MeshInstance3D" parent="{visual}"]',f'position = {vec(p)}',f'mesh = SubResource("m{i}")','material_override = SubResource("mat")',f'metadata/visual_slot = "{id}"',f'metadata/dimensions = {vec(size)}']
  resource=['[gd_resource type="Resource" script_class="LevelModuleDefinition" format=3]','[ext_resource type="Script" path="res://scripts/level/LevelModuleDefinition.gd" id="1"]','[ext_resource type="Script" path="res://scripts/level/LevelSocketDefinition.gd" id="2"]',f'[ext_resource type="PackedScene" path="res://scenes/level/modules/{name}.tscn" id="3"]']
- for id,x,z,w,basis,normal in defs:
+ for id,x,z,w,basis,normal,portal_height in defs:
   transform='Transform3D('+', '.join(map(str,(*basis,x,0,z)))+')'
   lines += [f'[node name="{id}" type="Marker3D" parent="Sockets"]',f'transform = {transform}']
-  resource += [f'[sub_resource type="Resource" id="{id}"]','script = ExtResource("2")',f'id = &"{id}"',f'local_transform = {transform}',f'approach = {vec((x-normal[0],0,z-normal[1]))}',f'width = {w}.0',f'family = &"{"passage" if w==3 else "wide_passage"}"']
+  resource += [f'[sub_resource type="Resource" id="{id}"]','script = ExtResource("2")',f'id = &"{id}"',f'local_transform = {transform}',f'approach = {vec((x-normal[0],0,z-normal[1]))}',f'width = {float(w)}',f'height = {portal_height}',f'family = &"{"passage" if w==3 else "wide_passage" if w==6 else "equipment_passage"}"']
  for id in ['entry','destination','patrol','prop','interaction','cover']:lines += [f'[node name="{id}" type="Marker3D" parent="Markers"]']
- resource += ['[resource]','script = ExtResource("1")',f'id = &"room{name[4:6]}"',f'scene = ExtResource("3")',f'occupied = AABB(-4,-0.2,-4,{W},3.8,{D})','interiors = Array[AABB](['+', '.join(f'AABB({a},0,{b},{c-a},3.4,{d-b})' for a,b,c,d in rectangles)+'])','sockets = Array[ExtResource("2")](['+', '.join(f'SubResource("{s[0]}")' for s in defs)+'])',f'tags = PackedStringArray("{kind}")']
+ resource += ['[resource]','script = ExtResource("1")',f'id = &"room{name[4:6]}"',f'scene = ExtResource("3")',f'occupied = AABB(-4,-0.2,-4,{W},{h+0.4},{D})','interiors = Array[AABB](['+', '.join(f'AABB({a},0,{b},{c-a},{h},{d-b})' for a,b,c,d in rectangles)+'])','sockets = Array[ExtResource("2")](['+', '.join(f'SubResource("{s[0]}")' for s in defs)+'])',f'tags = PackedStringArray("{kind}")']
  (ROOT/'scenes/level/modules'/f'{name}.tscn').write_text('\n'.join(lines)+'\n');(ROOT/'resources/level_modules'/f'{name}.tres').write_text('\n'.join(resource)+'\n')
 if __name__=='__main__':
  for spec in CATALOGUE:bake(spec)

@@ -1,0 +1,151 @@
+[gd_resource type="Resource" script_class="LevelModuleDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleDefinition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelSocketDefinition.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/level/LevelBoundaryPatch.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room14Ramp4m.tscn" id="4"]
+[sub_resource type="Resource" id="lower"]
+script = ExtResource("2")
+id = &"lower"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-4)
+approach = Vector3(0,0,-3)
+[sub_resource type="Resource" id="upper"]
+script = ExtResource("2")
+id = &"upper"
+local_transform = Transform3D(-1,0,0,0,1,0,0,0,-1,0,4,12)
+approach = Vector3(0,4,11)
+[sub_resource type="Resource" id="p0"]
+script = ExtResource("3")
+id = &"Floor0"
+origin = Vector3(-1.5, 0, -4)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 0, 2)
+normal = Vector3(0, -1.0, -0.0)
+socket = &""
+[sub_resource type="Resource" id="p1"]
+script = ExtResource("3")
+id = &"Roof0"
+origin = Vector3(-1.5, 3.4, -4)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 0, 2)
+normal = Vector3(0, 1.0, 0.0)
+socket = &""
+[sub_resource type="Resource" id="p2"]
+script = ExtResource("3")
+id = &"Wall-1_0"
+origin = Vector3(-1.5, 0, -4)
+span_u = Vector3(0, 0, 2)
+span_v = Vector3(0, 3.4, 0)
+normal = Vector3(-1, 0, 0)
+socket = &""
+[sub_resource type="Resource" id="p3"]
+script = ExtResource("3")
+id = &"Wall1_0"
+origin = Vector3(1.5, 0, -4)
+span_u = Vector3(0, 0, 2)
+span_v = Vector3(0, 3.4, 0)
+normal = Vector3(1, 0, 0)
+socket = &""
+[sub_resource type="Resource" id="p4"]
+script = ExtResource("3")
+id = &"Floor1"
+origin = Vector3(-1.5, 0, -2)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 4, 12)
+normal = Vector3(0, -0.94868, 0.31623)
+socket = &""
+[sub_resource type="Resource" id="p5"]
+script = ExtResource("3")
+id = &"Roof1"
+origin = Vector3(-1.5, 3.4, -2)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 4, 12)
+normal = Vector3(0, 0.94868, -0.31623)
+socket = &""
+[sub_resource type="Resource" id="p6"]
+script = ExtResource("3")
+id = &"Wall-1_1"
+origin = Vector3(-1.5, 0, -2)
+span_u = Vector3(0, 4, 12)
+span_v = Vector3(0, 3.4, 0)
+normal = Vector3(-1, 0, 0)
+socket = &""
+[sub_resource type="Resource" id="p7"]
+script = ExtResource("3")
+id = &"Wall1_1"
+origin = Vector3(1.5, 0, -2)
+span_u = Vector3(0, 4, 12)
+span_v = Vector3(0, 3.4, 0)
+normal = Vector3(1, 0, 0)
+socket = &""
+[sub_resource type="Resource" id="p8"]
+script = ExtResource("3")
+id = &"Floor2"
+origin = Vector3(-1.5, 4, 10)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 0, 2)
+normal = Vector3(0, -1.0, -0.0)
+socket = &""
+[sub_resource type="Resource" id="p9"]
+script = ExtResource("3")
+id = &"Roof2"
+origin = Vector3(-1.5, 7.4, 10)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 0, 2)
+normal = Vector3(0, 1.0, 0.0)
+socket = &""
+[sub_resource type="Resource" id="p10"]
+script = ExtResource("3")
+id = &"Wall-1_2"
+origin = Vector3(-1.5, 4, 10)
+span_u = Vector3(0, 0, 2)
+span_v = Vector3(0, 3.4, 0)
+normal = Vector3(-1, 0, 0)
+socket = &""
+[sub_resource type="Resource" id="p11"]
+script = ExtResource("3")
+id = &"Wall1_2"
+origin = Vector3(1.5, 4, 10)
+span_u = Vector3(0, 0, 2)
+span_v = Vector3(0, 3.4, 0)
+normal = Vector3(1, 0, 0)
+socket = &""
+[sub_resource type="Resource" id="p12"]
+script = ExtResource("3")
+id = &"Portallower"
+origin = Vector3(-1.5, 0, -4)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 2.8, 0)
+normal = Vector3(0, 0, -1)
+socket = &"lower"
+[sub_resource type="Resource" id="p13"]
+script = ExtResource("3")
+id = &"Headerlower"
+origin = Vector3(-1.5, 2.8, -4)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 0.6, 0)
+normal = Vector3(0, 0, -1)
+socket = &""
+[sub_resource type="Resource" id="p14"]
+script = ExtResource("3")
+id = &"Portalupper"
+origin = Vector3(-1.5, 4, 12)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 2.8, 0)
+normal = Vector3(0, 0, 1)
+socket = &"upper"
+[sub_resource type="Resource" id="p15"]
+script = ExtResource("3")
+id = &"Headerupper"
+origin = Vector3(-1.5, 6.8, 12)
+span_u = Vector3(3, 0, 0)
+span_v = Vector3(0, 0.6, 0)
+normal = Vector3(0, 0, 1)
+socket = &""
+[resource]
+script = ExtResource("1")
+id = &"room14"
+scene = ExtResource("4")
+occupied = AABB(-4,-0.2,-4,8,7.8,16)
+sockets = Array[ExtResource("2")]([SubResource("lower"),SubResource("upper")])
+boundary_patches = Array[ExtResource("3")]([SubResource("p0"), SubResource("p1"), SubResource("p2"), SubResource("p3"), SubResource("p4"), SubResource("p5"), SubResource("p6"), SubResource("p7"), SubResource("p8"), SubResource("p9"), SubResource("p10"), SubResource("p11"), SubResource("p12"), SubResource("p13"), SubResource("p14"), SubResource("p15")])
+tags = PackedStringArray("corridor","vertical")

@@ -1,0 +1,294 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelModule.gd" id="1"]
+[sub_resource type="StandardMaterial3D" id="mat"]
+albedo_color = Color(0.32,0.38,0.41,1)
+[sub_resource type="BoxShape3D" id="s0"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxMesh" id="m0"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxShape3D" id="s1"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxMesh" id="m1"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxMesh" id="m2"]
+size = Vector3(0.04, 0.06, 2.0)
+[sub_resource type="BoxMesh" id="m3"]
+size = Vector3(0.04, 0.06, 2.0)
+[sub_resource type="BoxShape3D" id="s4"]
+size = Vector3(3, 0.2, 12.64911)
+[sub_resource type="BoxMesh" id="m4"]
+size = Vector3(3, 0.2, 12.64911)
+[sub_resource type="BoxShape3D" id="s5"]
+size = Vector3(3, 0.2, 12.64911)
+[sub_resource type="BoxMesh" id="m5"]
+size = Vector3(3, 0.2, 12.64911)
+[sub_resource type="BoxMesh" id="m6"]
+size = Vector3(0.04, 0.06, 12.64911)
+[sub_resource type="BoxMesh" id="m7"]
+size = Vector3(0.04, 0.06, 12.64911)
+[sub_resource type="BoxShape3D" id="s8"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxMesh" id="m8"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxShape3D" id="s9"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxMesh" id="m9"]
+size = Vector3(3, 0.2, 2.0)
+[sub_resource type="BoxMesh" id="m10"]
+size = Vector3(0.04, 0.06, 2.0)
+[sub_resource type="BoxMesh" id="m11"]
+size = Vector3(0.04, 0.06, 2.0)
+[sub_resource type="BoxShape3D" id="s12"]
+size = Vector3(0.2, 7.4, 16)
+[sub_resource type="BoxMesh" id="m12"]
+size = Vector3(0.2, 7.4, 16)
+[sub_resource type="BoxShape3D" id="s13"]
+size = Vector3(0.2, 7.4, 16)
+[sub_resource type="BoxMesh" id="m13"]
+size = Vector3(0.2, 7.4, 16)
+[sub_resource type="BoxShape3D" id="s14"]
+size = Vector3(3, 2.8, 0.2)
+[sub_resource type="BoxMesh" id="m14"]
+size = Vector3(3, 2.8, 0.2)
+[sub_resource type="BoxShape3D" id="s15"]
+size = Vector3(3, 0.6, 0.2)
+[sub_resource type="BoxMesh" id="m15"]
+size = Vector3(3, 0.6, 0.2)
+[sub_resource type="BoxShape3D" id="s16"]
+size = Vector3(3, 2.8, 0.2)
+[sub_resource type="BoxMesh" id="m16"]
+size = Vector3(3, 2.8, 0.2)
+[sub_resource type="BoxShape3D" id="s17"]
+size = Vector3(3, 0.6, 0.2)
+[sub_resource type="BoxMesh" id="m17"]
+size = Vector3(3, 0.6, 0.2)
+[node name="Room14Ramp4m" type="Node3D"]
+script = ExtResource("1")
+definition_path = "res://resources/level_modules/Room14Ramp4m.tres"
+[node name="Structure" type="Node3D" parent="."]
+[node name="Collision" type="Node3D" parent="Structure"]
+[node name="NavigationSource" type="Node3D" parent="Structure"]
+[node name="PortalClosures" type="Node3D" parent="Structure"]
+[node name="Visuals" type="Node3D" parent="."]
+[node name="Closures" type="Node3D" parent="Visuals"]
+[node name="Sockets" type="Node3D" parent="."]
+[node name="Markers" type="Node3D" parent="."]
+[node name="Attachments" type="Node3D" parent="."]
+[node name="Props" type="Node3D" parent="Attachments"]
+[node name="Cover" type="Node3D" parent="Attachments"]
+[node name="Interactions" type="Node3D" parent="Attachments"]
+[node name="Spawns" type="Node3D" parent="Attachments"]
+[node name="Floor0" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, -0.1, -3.0)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Floor0"]
+shape = SubResource("s0")
+[node name="Floor0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, -0.1, -3.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m0")
+material_override = SubResource("mat")
+metadata/visual_slot = "Floor0"
+metadata/dimensions = Vector3(3, 0.2, 2.0)
+[node name="Roof0" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 3.5, -3.0)
+rotation = Vector3(0,0,0)
+collision_layer = 128
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Roof0"]
+shape = SubResource("s1")
+[node name="Roof0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 3.5, -3.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m1")
+material_override = SubResource("mat")
+metadata/visual_slot = "Roof0"
+metadata/dimensions = Vector3(3, 0.2, 2.0)
+[node name="Handrail-1_0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-1.52, 0.95, -3.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m2")
+material_override = SubResource("mat")
+metadata/visual_slot = "Handrail-1_0"
+metadata/dimensions = Vector3(0.04, 0.06, 2.0)
+[node name="Handrail1_0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(1.52, 0.95, -3.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m3")
+material_override = SubResource("mat")
+metadata/visual_slot = "Handrail1_0"
+metadata/dimensions = Vector3(0.04, 0.06, 2.0)
+[node name="Floor1" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 1.90513, 4.03162)
+rotation = Vector3(-0.3217505543966422,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Floor1"]
+shape = SubResource("s4")
+[node name="Floor1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 1.90513, 4.03162)
+rotation = Vector3(-0.3217505543966422,0,0)
+mesh = SubResource("m4")
+material_override = SubResource("mat")
+metadata/visual_slot = "Floor1"
+metadata/dimensions = Vector3(3, 0.2, 12.64911)
+[node name="Roof1" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 5.49487, 3.96838)
+rotation = Vector3(-0.3217505543966422,0,0)
+collision_layer = 128
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Roof1"]
+shape = SubResource("s5")
+[node name="Roof1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 5.49487, 3.96838)
+rotation = Vector3(-0.3217505543966422,0,0)
+mesh = SubResource("m5")
+material_override = SubResource("mat")
+metadata/visual_slot = "Roof1"
+metadata/dimensions = Vector3(3, 0.2, 12.64911)
+[node name="Handrail-1_1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-1.52, 2.95, 4.0)
+rotation = Vector3(-0.3217505543966422,0,0)
+mesh = SubResource("m6")
+material_override = SubResource("mat")
+metadata/visual_slot = "Handrail-1_1"
+metadata/dimensions = Vector3(0.04, 0.06, 12.64911)
+[node name="Handrail1_1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(1.52, 2.95, 4.0)
+rotation = Vector3(-0.3217505543966422,0,0)
+mesh = SubResource("m7")
+material_override = SubResource("mat")
+metadata/visual_slot = "Handrail1_1"
+metadata/dimensions = Vector3(0.04, 0.06, 12.64911)
+[node name="Floor2" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 3.9, 11.0)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Floor2"]
+shape = SubResource("s8")
+[node name="Floor2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 3.9, 11.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m8")
+material_override = SubResource("mat")
+metadata/visual_slot = "Floor2"
+metadata/dimensions = Vector3(3, 0.2, 2.0)
+[node name="Roof2" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0.0, 7.5, 11.0)
+rotation = Vector3(0,0,0)
+collision_layer = 128
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Roof2"]
+shape = SubResource("s9")
+[node name="Roof2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.0, 7.5, 11.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m9")
+material_override = SubResource("mat")
+metadata/visual_slot = "Roof2"
+metadata/dimensions = Vector3(3, 0.2, 2.0)
+[node name="Handrail-1_2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-1.52, 4.95, 11.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m10")
+material_override = SubResource("mat")
+metadata/visual_slot = "Handrail-1_2"
+metadata/dimensions = Vector3(0.04, 0.06, 2.0)
+[node name="Handrail1_2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(1.52, 4.95, 11.0)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m11")
+material_override = SubResource("mat")
+metadata/visual_slot = "Handrail1_2"
+metadata/dimensions = Vector3(0.04, 0.06, 2.0)
+[node name="Wall-1" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(-1.6, 3.7, 4)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall-1"]
+shape = SubResource("s12")
+[node name="Wall-1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-1.6, 3.7, 4)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m12")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall-1"
+metadata/dimensions = Vector3(0.2, 7.4, 16)
+[node name="Wall1" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(1.6, 3.7, 4)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Wall1"]
+shape = SubResource("s13")
+[node name="Wall1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(1.6, 3.7, 4)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m13")
+material_override = SubResource("mat")
+metadata/visual_slot = "Wall1"
+metadata/dimensions = Vector3(0.2, 7.4, 16)
+[node name="lower" type="StaticBody3D" parent="Structure/PortalClosures"]
+position = Vector3(0, 1.4, -3.9)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/PortalClosures/lower"]
+shape = SubResource("s14")
+[node name="lower" type="MeshInstance3D" parent="Visuals/Closures"]
+position = Vector3(0, 1.4, -3.9)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m14")
+material_override = SubResource("mat")
+metadata/visual_slot = "lower"
+metadata/dimensions = Vector3(3, 2.8, 0.2)
+[node name="Headerlower" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0, 3.1, -3.9)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Headerlower"]
+shape = SubResource("s15")
+[node name="Headerlower" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 3.1, -3.9)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m15")
+material_override = SubResource("mat")
+metadata/visual_slot = "Headerlower"
+metadata/dimensions = Vector3(3, 0.6, 0.2)
+[node name="upper" type="StaticBody3D" parent="Structure/PortalClosures"]
+position = Vector3(0, 5.4, 11.9)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/PortalClosures/upper"]
+shape = SubResource("s16")
+[node name="upper" type="MeshInstance3D" parent="Visuals/Closures"]
+position = Vector3(0, 5.4, 11.9)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m16")
+material_override = SubResource("mat")
+metadata/visual_slot = "upper"
+metadata/dimensions = Vector3(3, 2.8, 0.2)
+[node name="Headerupper" type="StaticBody3D" parent="Structure/Collision"]
+position = Vector3(0, 7.1, 11.9)
+rotation = Vector3(0,0,0)
+collision_layer = 1
+[node name="Shape" type="CollisionShape3D" parent="Structure/Collision/Headerupper"]
+shape = SubResource("s17")
+[node name="Headerupper" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 7.1, 11.9)
+rotation = Vector3(0,0,0)
+mesh = SubResource("m17")
+material_override = SubResource("mat")
+metadata/visual_slot = "Headerupper"
+metadata/dimensions = Vector3(3, 0.6, 0.2)
+[node name="lower" type="Marker3D" parent="Sockets"]
+transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-4)
+[node name="upper" type="Marker3D" parent="Sockets"]
+transform = Transform3D(-1,0,0,0,1,0,0,0,-1,0,4,12)
+[node name="entry" type="Marker3D" parent="Markers"]
+position = Vector3(0, 0, -3)
+[node name="destination" type="Marker3D" parent="Markers"]
+position = Vector3(0, 4, 11)
+[node name="patrol" type="Marker3D" parent="Markers"]
+position = Vector3(0, 4, 11)
+[node name="interaction" type="Marker3D" parent="Markers"]
+position = Vector3(0, 0, -3)
+[node name="prop" type="Marker3D" parent="Markers"]
+position = Vector3(0, 0, -3)
+[node name="cover" type="Marker3D" parent="Markers"]
+position = Vector3(0, 0, -3)

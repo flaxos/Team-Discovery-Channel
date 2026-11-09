@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="LevelModuleDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleDefinition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelSocketDefinition.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room16HangarShell.tscn" id="3"]
+[sub_resource type="Resource" id="north"]
+script = ExtResource("2")
+id = &"north"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -4)
+approach = Vector3(8, 0, -3)
+width = 12.0
+height = 10.0
+family = &"equipment_passage"
+[sub_resource type="Resource" id="south_00"]
+script = ExtResource("2")
+id = &"south_00"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 28)
+approach = Vector3(0, 0, 27)
+width = 3.0
+height = 2.8
+family = &"passage"
+[sub_resource type="Resource" id="south_01"]
+script = ExtResource("2")
+id = &"south_01"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 8, 0, 28)
+approach = Vector3(8, 0, 27)
+width = 6.0
+height = 2.8
+family = &"wide_passage"
+[resource]
+script = ExtResource("1")
+id = &"room16"
+scene = ExtResource("3")
+occupied = AABB(-4,-0.2,-4,24,12.4,32)
+interiors = Array[AABB]([AABB(-3.8,0,-3.8,23.6,12.0,31.6), AABB(-1.5,0,27.8,3.0,12.0,0.1999999999999993), AABB(2.0,0,-4,12.0,12.0,0.20000000000000018), AABB(5.0,0,27.8,6.0,12.0,0.1999999999999993)])
+sockets = Array[ExtResource("2")]([SubResource("north"), SubResource("south_00"), SubResource("south_01")])
+tags = PackedStringArray("chamber")
+equipment_anchors = {"gate": Transform3D(1,0,0,0,1,0,0,0,1,8,3.5,8),"cargo": Transform3D(1,0,0,0,1,0,0,0,1,8,0,20)}
+equipment_clearances = {"gate": AABB(4.5,0.02,6,7,7.2,8),"cargo": AABB(-1,0.02,16,18,11.5,10)}
+connection_default = "open"

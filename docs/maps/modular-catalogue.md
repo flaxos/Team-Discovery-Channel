@@ -56,3 +56,14 @@ Batch A delivery: commit `7011bdf` adds eight structural PackedScenes, their def
 Automated canvas events and native editor action checks do not certify every mouse-driven workflow; this checklist remains for human UAT.
 
 Full Batch A integration verification: **55/55 Godot 4.4.1 checks passed**, including existing SGC and multiplayer suites (`build/test-results/catalogue-a-full/`). Native editor verification also covers changing a connection to an open passage and Undo restoring the original door, followed by successful Rebuild/Preview 3D with no engine warnings.
+
+
+## Batch B: vertical and equipment interfaces
+
+| ID | Asset | Reserved X × Z | Portals | Status |
+|---|---|---|---|---|
+| room14 | Room14Ramp4m | 8 × 16 m | lower/upper passage sockets; 4 m rise | Batch B |
+| room15 | Room15TransportChamber | 8 × 8 m | north/south passage; 10.4 m clear height | Batch B |
+| room16 | Room16HangarShell | 24 × 32 m | north 12 × 10 m equipment; south_00 3 m, south_01 6 m | Batch B |
+
+See the [vertical kit guide](modular-vertical-kit.md) for exact scene/resource paths, socket transforms, equipment anchors/clearances, deck authoring, transport contracts, demo commands and UAT. Batch B is structural and interface work; functional presets/security doors and the integrated Phase 2.5 demonstration remain Batches C/D.

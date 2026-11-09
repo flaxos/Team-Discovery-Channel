@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="LevelModuleDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleDefinition.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelSocketDefinition.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/level/modules/Room15TransportChamber.tscn" id="3"]
+[sub_resource type="Resource" id="north"]
+script = ExtResource("2")
+id = &"north"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+approach = Vector3(0, 0, -3)
+width = 3.0
+height = 2.8
+family = &"passage"
+[sub_resource type="Resource" id="south"]
+script = ExtResource("2")
+id = &"south"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 4)
+approach = Vector3(0, 0, 3)
+width = 3.0
+height = 2.8
+family = &"passage"
+[resource]
+script = ExtResource("1")
+id = &"room15"
+scene = ExtResource("3")
+occupied = AABB(-4,-0.2,-4,8,10.8,8)
+interiors = Array[AABB]([AABB(-3.8,0,-3.8,7.6,10.4,7.6), AABB(-1.5,0,-4,3.0,10.4,0.20000000000000018), AABB(-1.5,0,3.8,3.0,10.4,0.20000000000000018)])
+sockets = Array[ExtResource("2")]([SubResource("north"), SubResource("south")])
+tags = PackedStringArray("chamber")
+equipment_anchors = {"transport": Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)}
+equipment_clearances = {"transport": AABB(-2.5,0.02,-2.5,5,10.2,5)}

@@ -54,7 +54,23 @@ func footprint(item: LevelModuleInstance, at: Vector2) -> Rect2:
 
 
 func draw_footprint(rect: Rect2, color: Color, filled: bool = true, width: float = 1) -> void:
-	draw_rect(Rect2(screen(rect.position), rect.size * zoom), color, filled, -1 if filled else width)
+	draw_rect(
+		Rect2(screen(rect.position), rect.size * zoom), color, filled, -1 if filled else width
+	)
+
+
+func socket_visible(item: LevelModuleInstance, socket: LevelSocketDefinition) -> bool:
+	var deck := item.socket_deck(socket.id)
+	return deck == model.active_deck or (deck == &"" and item.deck == model.active_deck)
+
+
+func interactive(item: LevelModuleInstance) -> bool:
+	if item.deck == model.active_deck:
+		return true
+	for socket in item.module.sockets:
+		if item.socket_deck(socket.id) == model.active_deck:
+			return true
+	return false
 
 
 func _draw() -> void:
@@ -76,6 +92,9 @@ func _draw() -> void:
 	if model == null:
 		return
 	for item in model.layout.instances:
+		if not interactive(item):
+			draw_footprint(footprint(item, item.position), Color(.2, .24, .28), false)
+			continue
 		var at := grid(mouse) if drag and item.id == selected else item.position
 		var color := Color(0.3, 0.4, 0.5)
 		for error: String in model.errors:
@@ -93,12 +112,14 @@ func _draw() -> void:
 		draw_string(
 			ThemeDB.fallback_font,
 			screen(at) + Vector2(-35, 4),
-			str(item.id),
+			str(item.id) + (" ↑4m" if "vertical" in item.module.tags else ""),
 			HORIZONTAL_ALIGNMENT_LEFT,
 			-1,
 			12
 		)
 		for socket in item.module.sockets:
+			if not socket_visible(item, socket):
+				continue
 			var pos := screen(socket_position(item, socket))
 			draw_circle(pos, 5, Color(1, 0.75, 0.25))
 			if item.id == selected:
@@ -117,6 +138,8 @@ func _draw() -> void:
 		var edge := model.layout.connections[index]
 		var ia := model.layout.instance(edge.from_instance)
 		var ib := model.layout.instance(edge.to_instance)
+		if ia.socket_deck(edge.from_socket) != model.active_deck:
+			continue
 		draw_line(
 			screen(ia.position),
 			screen(ib.position),
@@ -124,7 +147,13 @@ func _draw() -> void:
 			3
 		)
 	for edge in model.layout.connections:
-		if edge.state == "door":
+		if (
+			edge.state == "door"
+			and (
+				model.layout.instance(edge.from_instance).socket_deck(edge.from_socket)
+				== model.active_deck
+			)
+		):
 			var item := model.layout.instance(edge.from_instance)
 			var point := screen(socket_position(item, item.module.socket(edge.from_socket)))
 			draw_rect(Rect2(point - Vector2(4, 6), Vector2(8, 12)), Color(0.3, 1, 0.65))
@@ -191,6 +220,8 @@ func _gui_input(event: InputEvent) -> void:
 					for i in range(model.layout.connections.size()):
 						var edge := model.layout.connections[i]
 						var item := model.layout.instance(edge.from_instance)
+						if item.socket_deck(edge.from_socket) != model.active_deck:
+							continue
 						if (
 							(
 								screen(socket_position(item, item.module.socket(edge.from_socket)))
@@ -201,7 +232,10 @@ func _gui_input(event: InputEvent) -> void:
 							selected_connection = i
 					selected = &""
 					for item in model.layout.instances:
-						if footprint(item, item.position).has_point(world(mouse)):
+						if (
+							interactive(item)
+							and footprint(item, item.position).has_point(world(mouse))
+						):
 							selected = item.id
 							drag = true
 							break
@@ -217,6 +251,8 @@ func _gui_input(event: InputEvent) -> void:
 		tooltip_text = ""
 		for item in model.layout.instances:
 			for socket in item.module.sockets:
+				if not socket_visible(item, socket):
+					continue
 				if screen(socket_position(item, socket)).distance_to(mouse) < 12:
 					tooltip_text = str(item.id) + "/" + str(socket.id)
 		queue_redraw()
@@ -235,6 +271,8 @@ func _gui_input(event: InputEvent) -> void:
 func pick_socket() -> void:
 	for item in model.layout.instances:
 		for socket in item.module.sockets:
+			if not socket_visible(item, socket):
+				continue
 			if screen(socket_position(item, socket)).distance_to(mouse) > 12:
 				continue
 			if (
@@ -262,3 +300,14 @@ func pick_socket() -> void:
 			candidate.connections[-1].state = "door"
 			edit_requested.emit(candidate, "Connect and snap sockets")
 			return
+
+
+func frame_layout() -> void:
+	if model.layout.instances.is_empty() or size.x < 80 or size.y < 80:
+		return
+	var bounds := footprint(model.layout.instances[0], model.layout.instances[0].position)
+	for item in model.layout.instances:
+		bounds = bounds.merge(footprint(item, item.position))
+	zoom = clampf(minf((size.x - 80) / bounds.size.x, (size.y - 80) / bounds.size.y), 3, 60)
+	pan = size / 2 - bounds.get_center() * zoom
+	queue_redraw()

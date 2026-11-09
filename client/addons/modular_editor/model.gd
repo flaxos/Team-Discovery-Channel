@@ -2,6 +2,7 @@
 extends RefCounted
 signal changed
 var auto_doors := true
+var active_deck: StringName = &"deck0"
 var layout := LevelLayout.new()
 var errors := PackedStringArray()
 
@@ -15,7 +16,12 @@ static func copy(source: LevelLayout) -> LevelLayout:
 	result.destination_instance = source.destination_instance
 	result.destination_marker = source.destination_marker
 	for item in source.instances:
-		result.instances.append(item.duplicate() as LevelModuleInstance)
+		var cloned := item.duplicate() as LevelModuleInstance
+		cloned.socket_decks = item.socket_decks.duplicate()
+		cloned.transport_endpoints = []
+		for endpoint in item.transport_endpoints:
+			cloned.transport_endpoints.append(endpoint.duplicate() as LevelTransportEndpoint)
+		result.instances.append(cloned)
 	for edge in source.connections:
 		result.connections.append(edge.duplicate() as LevelModuleConnection)
 	return result
@@ -23,6 +29,8 @@ static func copy(source: LevelLayout) -> LevelLayout:
 
 func restore(value: LevelLayout) -> void:
 	layout = copy(value)
+	if not layout.decks.has(str(active_deck)) and not layout.decks.is_empty():
+		active_deck = StringName(layout.decks.keys()[0])
 	errors.clear()
 	changed.emit()
 
@@ -35,6 +43,8 @@ func placed(module: LevelModuleDefinition, position: Vector2, turn: int) -> Leve
 		index += 1
 	item.id = StringName("room_%03d" % index)
 	item.module = module
+	item.deck = active_deck
+	item.bind_matching_decks(result.decks)
 	item.position = position
 	item.quarter_turn = turn
 	result.instances.append(item)
@@ -88,10 +98,38 @@ func room_layout(id: StringName) -> LevelLayout:
 	if item == null:
 		return null
 	var result := copy(layout)
-	result.instances.assign([item.duplicate() as LevelModuleInstance])
+	var isolated := result.instance(id)
+	isolated.transport_endpoints = []
+	result.instances.assign([isolated])
 	result.connections.clear()
 	result.entry_instance = id
 	result.destination_instance = id
 	result.entry_marker = &"entry"
 	result.destination_marker = &"destination"
+	return result
+
+
+func deck_changed(id: String, elevation: float) -> LevelLayout:
+	var result := copy(layout)
+	result.decks[id] = elevation
+	for item in result.instances:
+		item.bind_matching_decks(result.decks)
+	return result
+
+
+func socket_bound(id: StringName, socket_id: StringName, deck_id: StringName) -> LevelLayout:
+	var result := copy(layout)
+	var item := result.instance(id)
+	if item != null:
+		item.socket_decks[str(socket_id)] = str(deck_id)
+	return result
+
+
+func redecked(id: StringName, deck_id: StringName) -> LevelLayout:
+	var result := copy(layout)
+	var item := result.instance(id)
+	if item != null:
+		item.deck = deck_id
+		item.socket_decks.clear()
+		item.bind_matching_decks(result.decks)
 	return result
