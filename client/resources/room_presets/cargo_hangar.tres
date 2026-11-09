@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"vehicle_clearance"
+component = &"clearance"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)
+approach = Vector3(0,0,-6.5)
+anchor = &"cargo"
+bounds = AABB(-3,0.02,-4,6,5,8)
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"cargo_left"
+component = &"prop"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,20)
+approach = Vector3(1.8,0,0)
+placeholder_size = Vector3(2,2,2)
+bounds = AABB(-1.0,0,-1.0,2,2,2)
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+id = &"cargo_right"
+component = &"prop"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,16,0,20)
+approach = Vector3(-1.8,0,0)
+placeholder_size = Vector3(2,2,2)
+bounds = AABB(-1.0,0,-1.0,2,2,2)
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+id = &"access_control"
+component = &"system"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,25)
+approach = Vector3(0,0,0)
+references = PackedStringArray("doors.access")
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("2")
+id = &"cargo_objective"
+component = &"objective"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,8,0,13.5)
+approach = Vector3(0,0,0)
+[resource]
+script = ExtResource("1")
+id = &"cargo_hangar"
+label = "Cargo bay / glider hangar"
+compatible_modules = PackedStringArray("room16")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4")])
+system_references = PackedStringArray("vehicle.future","doors.access")

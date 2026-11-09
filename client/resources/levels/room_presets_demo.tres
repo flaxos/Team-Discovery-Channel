@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_qhpeo"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_bb1ra"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_x2qfm"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="4_fm3ea"]
+[ext_resource type="Resource" path="res://resources/room_presets/cargo.tres" id="5_u36sp"]
+[ext_resource type="Resource" path="res://resources/level_themes/neutral.tres" id="6_tvshu"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="7_2x0yh"]
+[ext_resource type="Resource" path="res://resources/room_presets/jaffa_barracks.tres" id="8_7y2ye"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="9_l31pc"]
+
+[sub_resource type="Resource" id="Resource_hhngu"]
+script = ExtResource("1_qhpeo")
+from_instance = &"room_001"
+from_socket = &"south"
+to_instance = &"room_002"
+to_socket = &"north"
+security_id = &"uat.access"
+initially_locked = false
+state = "security_door"
+
+[sub_resource type="Resource" id="Resource_goqc8"]
+script = ExtResource("2_bb1ra")
+id = &"room_001"
+module = ExtResource("4_fm3ea")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("7_2x0yh")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("5_u36sp")
+attachment_overrides = Array[ExtResource("3_x2qfm")]([])
+theme = ExtResource("6_tvshu")
+role = &"cargo"
+
+[sub_resource type="Resource" id="Resource_68irg"]
+script = ExtResource("2_bb1ra")
+id = &"room_002"
+module = ExtResource("4_fm3ea")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("7_2x0yh")]([])
+socket_decks = {}
+position = Vector2(0, 8)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("8_7y2ye")
+attachment_overrides = Array[ExtResource("3_x2qfm")]([])
+theme = ExtResource("6_tvshu")
+role = &"jaffa_barracks"
+
+[resource]
+script = ExtResource("9_l31pc")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+instances = Array[ExtResource("2_bb1ra")]([SubResource("Resource_goqc8"), SubResource("Resource_68irg")])
+connections = Array[ExtResource("1_qhpeo")]([SubResource("Resource_hhngu")])
+entry_instance = &"room_001"
+entry_marker = &"entry"
+destination_instance = &"room_002"
+destination_marker = &"destination"

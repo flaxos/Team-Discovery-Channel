@@ -1,0 +1,56 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/props/ArmoryArmorStation.tscn" id="ArmoryArmorStation"]
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"console"
+component = &"console"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,2.6,0,-2.6)
+approach = Vector3(-1.2,0,1.2)
+placeholder_size = Vector3(1,1,0.8)
+bounds = AABB(-0.5,0,-0.4,1,1,0.8)
+references = PackedStringArray("systems.control")
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"patrol_entry"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-1)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+id = &"patrol_exit"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,1)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+id = &"armour_station"
+component = &"equipment"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,2.6,0,2.6)
+approach = Vector3(-1.2,0,-1.2)
+scene = ExtResource("ArmoryArmorStation")
+blocks_movement = true
+bounds = AABB(-0.7,0,-0.35,1.4,2.1,0.7)
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("2")
+id = &"weapon_rack"
+component = &"prop"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.6,0,-2.6)
+approach = Vector3(1.2,0,1.2)
+placeholder_size = Vector3(1,1.8,0.5)
+bounds = AABB(-0.5,0,-0.25,1,1.8,0.5)
+[sub_resource type="Resource" id="a5"]
+script = ExtResource("2")
+id = &"inventory"
+component = &"interaction"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.6,0,2.6)
+approach = Vector3(0,0,0)
+references = PackedStringArray("inventory.storage")
+[resource]
+script = ExtResource("1")
+id = &"armoury"
+label = "Armoury"
+compatible_modules = PackedStringArray("room04","room10","room11","room13","room15")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5")])
+system_references = PackedStringArray("inventory.storage")

@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/props/TransportRings.tscn" id="TransportRings"]
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"Rings"
+component = &"rings"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)
+approach = Vector3(0,0,0)
+anchor = &"transport"
+scene = ExtResource("TransportRings")
+bounds = AABB(-2.5,0.02,-2.5,5,10.2,5)
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"console"
+component = &"console"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-3.2,0,-3.2)
+approach = Vector3(0.9,0,0.9)
+placeholder_size = Vector3(0.5,1,0.5)
+bounds = AABB(-0.25,0,-0.25,0.5,1,0.5)
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+id = &"arrival"
+component = &"spawn"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+id = &"patrol_entry"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-3)
+approach = Vector3(0,0,0)
+[resource]
+script = ExtResource("1")
+id = &"ring_transport"
+label = "Transport rings"
+compatible_modules = PackedStringArray("room15")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3")])
+system_references = PackedStringArray("transport.destination")

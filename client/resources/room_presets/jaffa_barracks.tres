@@ -1,0 +1,73 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"console"
+component = &"console"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,2.6,0,-2.6)
+approach = Vector3(-1.2,0,1.2)
+placeholder_size = Vector3(1,1,0.8)
+bounds = AABB(-0.5,0,-0.4,1,1,0.8)
+references = PackedStringArray("systems.control")
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"patrol_entry"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-1)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+id = &"patrol_exit"
+component = &"patrol"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,1)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+id = &"bed_01"
+component = &"prop"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.7,0,-2.5)
+approach = Vector3(1.3,0,1.1)
+placeholder_size = Vector3(1.3,0.5,1.8)
+bounds = AABB(-0.65,0,-0.9,1.3,0.5,1.8)
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("2")
+id = &"bed_02"
+component = &"prop"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.7,0,2.5)
+approach = Vector3(1.3,0,-1.1)
+placeholder_size = Vector3(1.3,0.5,1.8)
+bounds = AABB(-0.65,0,-0.9,1.3,0.5,1.8)
+[sub_resource type="Resource" id="a5"]
+script = ExtResource("2")
+id = &"weapon_rack"
+component = &"prop"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,2.7,0,2.7)
+approach = Vector3(-1.3,0,-1.3)
+placeholder_size = Vector3(1,1.8,0.5)
+bounds = AABB(-0.5,0,-0.25,1,1.8,0.5)
+[sub_resource type="Resource" id="a6"]
+script = ExtResource("2")
+id = &"squad_01"
+component = &"spawn"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-1.2)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a7"]
+script = ExtResource("2")
+id = &"squad_02"
+component = &"spawn"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)
+approach = Vector3(0,0,0)
+[sub_resource type="Resource" id="a8"]
+script = ExtResource("2")
+id = &"squad_03"
+component = &"spawn"
+local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,1.2)
+approach = Vector3(0,0,0)
+[resource]
+script = ExtResource("1")
+id = &"jaffa_barracks"
+label = "Jaffa barracks"
+compatible_modules = PackedStringArray("room04","room10","room11","room13","room15")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6"), SubResource("a7"), SubResource("a8")])
+system_references = PackedStringArray("squad.spawn")

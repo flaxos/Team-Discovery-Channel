@@ -11,6 +11,9 @@ extends Resource
 @export var available_sockets: PackedStringArray = []
 @export var tags: PackedStringArray = []
 @export var style: StringName = &"neutral"
+@export var room_preset: LevelRoomPreset
+@export var attachment_overrides: Array[LevelRoomOverride] = []
+@export var theme: LevelVisualTheme
 @export var role: StringName = &""
 
 

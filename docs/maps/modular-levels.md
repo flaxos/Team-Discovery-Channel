@@ -93,3 +93,5 @@ Delivery evidence, the final scope boundary and the complete file manifest are r
 `LevelAssembler.connect_touching(layout)` validates the layout, connects coincident compatible unused sockets without moving rooms or changing existing connection types. New corridor joins default open; room entrances default to doors. The visual editor calls it on placement/movement and exposes it as an undoable action for existing layouts. Bake excludes door panels from static navigation while their runtime collision remains closed until interacted with.
 
 Batch B extends the same schema with per-socket deck bindings, optional sloped boundary patches and equipment/transport interfaces. Existing planar definitions remain valid. See [vertical kit authoring](modular-vertical-kit.md).
+
+Batch C composes optional functional presets beneath the existing attachment branches and adds a security-door classification. Structural module authoring remains independent of role and material themes; see [room-preset authoring](modular-room-presets.md).

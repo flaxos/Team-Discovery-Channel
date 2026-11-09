@@ -149,7 +149,7 @@ static func connect_touching(layout: LevelLayout) -> PackedStringArray:
 static func add_doors(layout: LevelLayout, parent: Node3D) -> void:
 	for index in range(layout.connections.size()):
 		var edge := layout.connections[index]
-		if edge.state != "door":
+		if edge.state not in ["door", "security_door"]:
 			continue
 		var name := "Door_%03d" % index
 		if parent.has_node(name):
@@ -163,6 +163,21 @@ static func add_doors(layout: LevelLayout, parent: Node3D) -> void:
 		)
 		door.set("width", socket.width)
 		door.set("height", socket.height)
+		door.set("is_security", edge.state == "security_door")
+		door.set(
+			"security_id",
+			(
+				edge.security_id
+				if edge.security_id != &""
+				else StringName(
+					(
+						"%s/%s -> %s/%s"
+						% [edge.from_instance, edge.from_socket, edge.to_instance, edge.to_socket]
+					)
+				)
+			)
+		)
+		door.set("locked", edge.initially_locked)
 		parent.add_child(door)
 		door.owner = parent.owner if parent.owner != null else parent
 
