@@ -41,3 +41,18 @@ The catalogue suite validates every archetype at four rotations, each socket's n
 ### Remaining batches
 
 Batch B adds the 4 m ramp, per-socket deck bindings, vertical enclosure checks, transport chamber and equipment shell. Batch C adds functional presets and security-door interfaces. Batch D supplies the integrated demonstration and final full regression run. These are not delivered by Batch A; SGC and multiplayer implementations remain unchanged.
+
+Batch A delivery: commit `7011bdf` adds eight structural PackedScenes, their definitions, the gallery layout and editor changes. Targeted import/catalogue/door/editor/legacy-module suites pass (`build/test-results/catalogue-a/`); expanded production traversal tests pass (`catalogue-a-traversal/`). Native editor Undo/Rebuild/Preview 3D exits cleanly; Gallery24 passes the headless builder. Batches B–D remain pending and Phase 2.5 is partially complete.
+
+
+### Manual Batch A UAT
+
+1. Enable Modular Map Editor under Project Settings → Plugins; open the Modular Map bottom panel.
+2. Create a new layout and place Room10LongChamber at (0,0), turn 0. Place Room01Straight at (8,0) and (8,8), both turn 1. Confirm two independent door connections on the long wall.
+3. Select a linked doorway marker; confirm its connection is highlighted and the results panel names both endpoints. Choose Open passage, then Undo/Redo and Standard door.
+4. Try placing another room across the long chamber's far cell. Confirm rejection and unchanged layout. Rotate an unconnected large chamber and inspect its footprint before placement.
+5. Save to a new resource filename, reopen, Validate and Preview 3D. Walk both entrances and operate the doors with E. Open Gallery24.tres separately and confirm continuous passage through all three instances.
+
+Automated canvas events and native editor action checks do not certify every mouse-driven workflow; this checklist remains for human UAT.
+
+Full Batch A integration verification: **55/55 Godot 4.4.1 checks passed**, including existing SGC and multiplayer suites (`build/test-results/catalogue-a-full/`). Native editor verification also covers changing a connection to an open passage and Undo restoring the original door, followed by successful Rebuild/Preview 3D with no engine warnings.

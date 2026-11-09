@@ -54,7 +54,7 @@ func footprint(item: LevelModuleInstance, at: Vector2) -> Rect2:
 
 
 func draw_footprint(rect: Rect2, color: Color, filled: bool = true, width: float = 1) -> void:
-	draw_rect(Rect2(screen(rect.position), rect.size * zoom), color, filled, width)
+	draw_rect(Rect2(screen(rect.position), rect.size * zoom), color, filled, -1 if filled else width)
 
 
 func _draw() -> void:
@@ -113,10 +113,16 @@ func _draw() -> void:
 			var normal := -(item.placement(0).basis * socket.local_transform.basis.z)
 			var direction := Vector2(normal.x, normal.z)
 			draw_line(pos, pos + direction.normalized() * 10, Color(1, 0.75, 0.25), 2)
-	for edge in model.layout.connections:
+	for index in range(model.layout.connections.size()):
+		var edge := model.layout.connections[index]
 		var ia := model.layout.instance(edge.from_instance)
 		var ib := model.layout.instance(edge.to_instance)
-		draw_line(screen(ia.position), screen(ib.position), Color(0.3, 0.9, 0.7), 3)
+		draw_line(
+			screen(ia.position),
+			screen(ib.position),
+			Color.WHITE if index == selected_connection else Color(0.3, 0.9, 0.7),
+			3
+		)
 	for edge in model.layout.connections:
 		if edge.state == "door":
 			var item := model.layout.instance(edge.from_instance)

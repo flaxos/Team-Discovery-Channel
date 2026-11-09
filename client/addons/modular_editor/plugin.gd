@@ -183,6 +183,7 @@ func restore(value: LevelLayout) -> void:
 	dirty = true
 	model.restore(value)
 	canvas.first_socket.clear()
+	canvas.selected_connection = -1
 
 
 func refresh() -> void:
@@ -191,6 +192,15 @@ func refresh() -> void:
 	results.text = (
 		("Unsaved changes. " if dirty else "Saved. ") + "Selected: " + str(canvas.selected) + "\n"
 	)
+	if (
+		canvas.selected_connection >= 0
+		and canvas.selected_connection < model.layout.connections.size()
+	):
+		var edge := model.layout.connections[canvas.selected_connection]
+		results.text += (
+			"Connection: %s/%s → %s/%s (%s)\n"
+			% [edge.from_instance, edge.from_socket, edge.to_instance, edge.to_socket, edge.state]
+		)
 	results.text += (
 		"\n".join(model.errors)
 		if not model.errors.is_empty()
