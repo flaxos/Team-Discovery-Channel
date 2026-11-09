@@ -91,3 +91,5 @@ After Phase 1 review, Phase 2 can improve editor selection and Undo/Redo. Later 
 Delivery evidence, the final scope boundary and the complete file manifest are recorded in the [Phase 1 delivery report](../reviews/modular-phase1.md).
 
 `LevelAssembler.connect_touching(layout)` validates the layout, connects coincident compatible unused sockets without moving rooms or changing existing connection types. New corridor joins default open; room entrances default to doors. The visual editor calls it on placement/movement and exposes it as an undoable action for existing layouts. Bake excludes door panels from static navigation while their runtime collision remains closed until interacted with.
+
+Batch B extends the same schema with per-socket deck bindings, optional sloped boundary patches and equipment/transport interfaces. Existing planar definitions remain valid. See [vertical kit authoring](modular-vertical-kit.md).

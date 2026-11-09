@@ -9,6 +9,10 @@ var results: RichTextLabel
 var path: LineEdit
 var dirty := false
 var busy := false
+var deck_picker: OptionButton
+var deck_height: SpinBox
+var new_deck: LineEdit
+var socket_picker: OptionButton
 
 
 func _enter_tree() -> void:
@@ -23,6 +27,7 @@ func _enter_tree() -> void:
 	for title: String in [
 		"New",
 		"Open",
+		"Frame layout",
 		"Save",
 		"Validate",
 		"Rebuild",
@@ -34,13 +39,42 @@ func _enter_tree() -> void:
 		button.text = title
 		toolbar.add_child(button)
 		button.pressed.connect(action.bind(title))
+	var decks := HFlowContainer.new()
+	panel.add_child(decks)
+	var deck_label := Label.new()
+	deck_label.text = "Active deck"
+	decks.add_child(deck_label)
+	deck_picker = OptionButton.new()
+	decks.add_child(deck_picker)
+	deck_picker.item_selected.connect(select_deck)
+	deck_height = SpinBox.new()
+	deck_height.min_value = -10000
+	deck_height.max_value = 10000
+	deck_height.step = .1
+	deck_height.suffix = " m"
+	decks.add_child(deck_height)
+	new_deck = LineEdit.new()
+	new_deck.placeholder_text = "New deck ID"
+	new_deck.custom_minimum_size.x = 130
+	decks.add_child(new_deck)
+	for title: String in ["Add deck", "Set elevation", "Move room to deck"]:
+		var button := Button.new()
+		button.text = title
+		button.pressed.connect(deck_action.bind(title))
+		decks.add_child(button)
+	socket_picker = OptionButton.new()
+	decks.add_child(socket_picker)
+	var bind_button := Button.new()
+	bind_button.text = "Bind socket to active deck"
+	bind_button.pressed.connect(deck_action.bind("Bind socket"))
+	decks.add_child(bind_button)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size.y = 38
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(scroll)
 	var tools := HBoxContainer.new()
 	scroll.add_child(tools)
-	for name: String in LevelCatalogue.MODULES:
+	for name: String in LevelCatalogue.all_modules():
 		var button := Button.new()
 		button.text = (
 			{
@@ -86,6 +120,39 @@ func _exit_tree() -> void:
 	get_undo_redo().clear_history(get_undo_redo().get_object_history_id(panel))
 	remove_control_from_bottom_panel(panel)
 	panel.queue_free()
+
+
+func select_deck(index: int) -> void:
+	model.active_deck = StringName(deck_picker.get_item_text(index))
+	canvas.drag = false
+	canvas.first_socket.clear()
+	canvas.selected_connection = -1
+	refresh()
+
+
+func deck_action(title: String) -> void:
+	if busy:
+		return
+	if title == "Add deck":
+		var id := new_deck.text.strip_edges()
+		if id.is_empty() or model.layout.decks.has(id):
+			model.errors = PackedStringArray(["Enter a unique, non-empty deck ID."])
+			refresh()
+			return
+		commit(model.deck_changed(id, deck_height.value), title)
+	elif title == "Set elevation":
+		commit(model.deck_changed(str(model.active_deck), deck_height.value), title)
+	elif title == "Move room to deck":
+		commit(model.redecked(canvas.selected, model.active_deck), title)
+	elif title == "Bind socket" and socket_picker.selected >= 0:
+		commit(
+			model.socket_bound(
+				canvas.selected,
+				StringName(socket_picker.get_item_text(socket_picker.selected)),
+				model.active_deck
+			),
+			title
+		)
 
 
 func choose(name: String) -> void:
@@ -189,6 +256,22 @@ func restore(value: LevelLayout) -> void:
 func refresh() -> void:
 	if results == null:
 		return
+	deck_picker.clear()
+	for id: String in model.layout.decks:
+		deck_picker.add_item(id)
+		if id == str(model.active_deck):
+			deck_picker.select(deck_picker.item_count - 1)
+	deck_height.set_value_no_signal(float(model.layout.decks.get(str(model.active_deck), 0.0)))
+	var old_socket := (
+		socket_picker.get_item_text(socket_picker.selected) if socket_picker.selected >= 0 else ""
+	)
+	socket_picker.clear()
+	var selected := model.layout.instance(canvas.selected)
+	if selected != null:
+		for socket in selected.module.sockets:
+			socket_picker.add_item(str(socket.id))
+			if str(socket.id) == old_socket:
+				socket_picker.select(socket_picker.item_count - 1)
 	results.text = (
 		("Unsaved changes. " if dirty else "Saved. ") + "Selected: " + str(canvas.selected) + "\n"
 	)
@@ -210,6 +293,9 @@ func refresh() -> void:
 
 
 func action(title: String) -> void:
+	if title == "Frame layout":
+		canvas.frame_layout()
+		return
 	if busy:
 		return
 	if title in ["New", "Open"]:
@@ -239,6 +325,7 @@ func action(title: String) -> void:
 		commit(loaded, "Open layout")
 		dirty = false
 		refresh()
+		canvas.frame_layout.call_deferred()
 		return
 	if title == "Save":
 		if not path.text.begins_with("res://resources/levels/") or not path.text.ends_with(".tres"):

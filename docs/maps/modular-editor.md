@@ -79,3 +79,5 @@ Regression coverage includes all 484 canonical socket-pair/quarter-turn combinat
 Doorway-facing fix verification: all **54/54 Godot 4.4.1 regression checks passed** (`build/test-results/socket-facing-full/`), following focused modular suites (`socket-facing-target/`). The native Godot editor opened the new default, exercised Undo, rebuilt and launched Preview 3D, then exited cleanly. A recovered copy of the existing 13-room layout passed the headless build/navigation command; the authored layout and local editor settings were left unchanged.
 
 Phase 2.5 Batch A expands the palette and rotated footprints; see the [structural catalogue](modular-catalogue.md).
+
+Batch B adds active deck/elevation controls, socket deck bindings, Frame layout and the vertical/equipment palette. See the [vertical kit guide](modular-vertical-kit.md).

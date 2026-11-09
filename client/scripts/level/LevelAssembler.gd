@@ -36,7 +36,12 @@ static func snap(
 				)
 			]
 		)
-	if not layout.decks.has(str(target.deck)) or moving.deck != target.deck:
+	if (
+		not layout.decks.has(str(target.deck))
+		or not layout.decks.has(str(moving.deck))
+		or moving.socket_deck(a.id) == &""
+		or moving.socket_deck(a.id) != target.socket_deck(b.id)
+	):
 		return PackedStringArray(["Socket decks must match"])
 	var target_world := target.placement(float(layout.decks[str(target.deck)])) * b.local_transform
 	var wanted := (
@@ -44,6 +49,15 @@ static func snap(
 		* Transform3D(Basis(Vector3.UP, PI), Vector3.ZERO)
 		* a.local_transform.affine_inverse()
 	)
+	if absf(wanted.origin.y - float(layout.decks[str(moving.deck)])) > 0.001:
+		return PackedStringArray(
+			[
+				(
+					"Socket height does not match deck: %s/%s -> %s/%s"
+					% [moving_id, moving_socket, target_id, target_socket]
+				)
+			]
+		)
 	var angle := roundi(wanted.basis.get_euler().y / (PI / 2))
 	var old_position := moving.position
 	var old_turn := moving.quarter_turn
@@ -71,6 +85,7 @@ static func assemble(layout: LevelLayout, parent: Node3D) -> void:
 		node.definition = item.module
 		node.deck = item.deck
 		node.available_sockets = item.available_sockets.duplicate()
+		node.socket_decks = item.socket_decks.duplicate()
 		node.transform = item.placement(float(layout.decks[str(item.deck)]))
 		parent.add_child(node)
 		node.owner = parent.owner if parent.owner != null else parent
@@ -93,13 +108,18 @@ static func connect_touching(layout: LevelLayout) -> PackedStringArray:
 		var a := layout.instances[i]
 		for j in range(i + 1, layout.instances.size()):
 			var b := layout.instances[j]
-			if a.deck != b.deck:
-				continue
 			for sa in a.module.sockets:
 				for sb in b.module.sockets:
 					var ka := str(a.id) + "/" + str(sa.id)
 					var kb := str(b.id) + "/" + str(sb.id)
-					if used.has(ka) or used.has(kb) or not a.allows(sa.id) or not b.allows(sb.id):
+					if (
+						used.has(ka)
+						or used.has(kb)
+						or not a.allows(sa.id)
+						or not b.allows(sb.id)
+						or a.socket_deck(sa.id) == &""
+						or a.socket_deck(sa.id) != b.socket_deck(sb.id)
+					):
 						continue
 					if (
 						sa.family != sb.family

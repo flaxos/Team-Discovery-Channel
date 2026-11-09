@@ -1,0 +1,129 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_44fjq"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_a03sy"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room14Ramp4m.tres" id="3_8i6w2"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="4_4pcxh"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room03TJunction.tres" id="5_i1yq1"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room15TransportChamber.tres" id="6_pd11p"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room16HangarShell.tres" id="7_k57tg"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="8_270ed"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="9_0ue4v"]
+
+[sub_resource type="Resource" id="Resource_iphlk"]
+script = ExtResource("1_44fjq")
+from_instance = &"room_001"
+from_socket = &"lower"
+to_instance = &"room_002"
+to_socket = &"west"
+state = "open"
+
+[sub_resource type="Resource" id="Resource_4xwrp"]
+script = ExtResource("1_44fjq")
+from_instance = &"room_002"
+from_socket = &"north"
+to_instance = &"room_003"
+to_socket = &"south"
+state = "door"
+
+[sub_resource type="Resource" id="Resource_dy4ef"]
+script = ExtResource("1_44fjq")
+from_instance = &"room_003"
+from_socket = &"north"
+to_instance = &"room_004"
+to_socket = &"south_00"
+state = "open"
+
+[sub_resource type="Resource" id="Resource_5p0er"]
+script = ExtResource("1_44fjq")
+from_instance = &"room_001"
+from_socket = &"upper"
+to_instance = &"room_005"
+to_socket = &"north"
+state = "open"
+
+[sub_resource type="Resource" id="Resource_8gpub"]
+script = ExtResource("2_a03sy")
+id = &"room_001"
+module = ExtResource("3_8i6w2")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("4_4pcxh")]([])
+socket_decks = {
+"upper": "upper"
+}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_7s74m"]
+script = ExtResource("2_a03sy")
+id = &"room_002"
+module = ExtResource("5_i1yq1")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("4_4pcxh")]([])
+socket_decks = {}
+position = Vector2(0, -8)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_4dwbp"]
+script = ExtResource("2_a03sy")
+id = &"room_003"
+module = ExtResource("6_pd11p")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("4_4pcxh")]([])
+socket_decks = {}
+position = Vector2(-8, -8)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_pox7m"]
+script = ExtResource("2_a03sy")
+id = &"room_004"
+module = ExtResource("7_k57tg")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("4_4pcxh")]([])
+socket_decks = {}
+position = Vector2(-40, -8)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[sub_resource type="Resource" id="Resource_teav1"]
+script = ExtResource("2_a03sy")
+id = &"room_005"
+module = ExtResource("8_270ed")
+deck = &"upper"
+transport_endpoints = Array[ExtResource("4_4pcxh")]([])
+socket_decks = {}
+position = Vector2(0, 16)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+role = &""
+
+[resource]
+script = ExtResource("9_0ue4v")
+schema_version = 1
+decks = {
+"deck0": 0.0,
+"upper": 4.0
+}
+instances = Array[ExtResource("2_a03sy")]([SubResource("Resource_8gpub"), SubResource("Resource_7s74m"), SubResource("Resource_4dwbp"), SubResource("Resource_pox7m"), SubResource("Resource_teav1")])
+connections = Array[ExtResource("1_44fjq")]([SubResource("Resource_iphlk"), SubResource("Resource_4xwrp"), SubResource("Resource_dy4ef"), SubResource("Resource_5p0er")])
+entry_instance = &"room_002"
+entry_marker = &"entry"
+destination_instance = &"room_005"
+destination_marker = &"destination"

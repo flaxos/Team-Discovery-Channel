@@ -5,6 +5,7 @@ extends Node3D
 @export var definition: LevelModuleDefinition
 @export_file("*.tres") var definition_path: String
 @export var deck: StringName = &"deck0"
+@export var socket_decks: Dictionary = {}
 @export var available_sockets: PackedStringArray = []
 
 
