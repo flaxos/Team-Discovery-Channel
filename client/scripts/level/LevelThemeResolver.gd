@@ -2,6 +2,8 @@
 class_name LevelThemeResolver
 extends RefCounted
 const DIRECTORY = "res://resources/level_themes/"
+static var _themes: Dictionary = {}
+static var _theme_files: PackedStringArray = []
 
 
 static func definitions() -> Array[LevelVisualTheme]:
@@ -17,10 +19,14 @@ static func definitions() -> Array[LevelVisualTheme]:
 
 
 static func registry() -> Dictionary:
-	var result: Dictionary = {}
-	for theme in definitions():
-		result[theme.id] = theme
-	return result
+	var files := DirAccess.get_files_at(DIRECTORY)
+	files.sort()
+	if _themes.is_empty() or files != _theme_files:
+		_themes.clear()
+		_theme_files = files
+		for theme in definitions():
+			_themes[theme.id] = theme
+	return _themes
 
 
 static func selected(layout: LevelLayout, item: LevelModuleInstance) -> LevelVisualTheme:

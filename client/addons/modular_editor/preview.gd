@@ -45,10 +45,16 @@ func _ready() -> void:
 			)
 		var span := maxf(bounds.size.x, bounds.size.z)
 		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-		camera.size = span * 1.7
+		camera.keep_aspect = Camera3D.KEEP_HEIGHT
 		camera.far = maxf(500, span * 10)
-		camera.position = bounds.get_center() + Vector3(span * .6, span * 1.4, span * .8)
+		camera.position = bounds.get_center() + Vector3(span * .25, span * 2, span * .35)
 		camera.look_at(bounds.get_center())
+		var projected := camera.global_transform.affine_inverse() * bounds
+		var aspect := get_viewport().get_visible_rect().size.aspect()
+		camera.position += (
+			camera.basis * Vector3(projected.get_center().x, projected.get_center().y, 0)
+		)
+		camera.size = maxf(projected.size.y, projected.size.x / aspect) * 1.2
 		camera.current = true
 		for i in range(12):
 			await get_tree().process_frame
@@ -61,7 +67,8 @@ func _ready() -> void:
 			push_error("Cannot save preview capture: " + destination)
 			get_tree().quit(1)
 			return
-		await preload("res://tests/support/finish.gd").success(get_tree())
+		call_deferred("_finish_capture")
+		return
 	else:
 		var players := Node3D.new()
 		players.name = "Players"
@@ -70,3 +77,8 @@ func _ready() -> void:
 		pawn.name = "1"
 		players.add_child(pawn)
 		pawn.position = level.marker(level.layout.entry_instance, &"entry") + Vector3(0, 0.03, 0)
+
+
+func _finish_capture() -> void:
+	# Return from _ready before teardown so its renderer resource references retire.
+	preload("res://tests/support/finish.gd").success(get_tree())

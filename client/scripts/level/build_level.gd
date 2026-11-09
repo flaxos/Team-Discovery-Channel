@@ -58,32 +58,11 @@ func run() -> void:
 			return
 		var output: String = options["--output"]
 		var nav_output: String = options["--nav-output"]
-		if (
-			not (output.begins_with("res://scenes/level/") or output.begins_with("user://"))
-			or not (
-				nav_output.begins_with("res://resources/levels/")
-				or nav_output.begins_with("user://")
-			)
-		):
-			fail(
-				PackedStringArray(
-					["Outputs must stay in modular scene/resource directories or user://"]
-				)
-			)
+		errors = LevelBuildPipeline.export(level, output, nav_output)
+		if not errors.is_empty():
+			fail(errors)
 			return
-		if ResourceSaver.save(level.navigation.navigation_mesh, nav_output) != OK:
-			fail(PackedStringArray(["Cannot save navigation"]))
-			return
-		# Export a self-contained layout even when the input was a temporary editor snapshot.
-		level.layout = resource.duplicate(true) as LevelLayout
-		level.navigation.owner = level
-		var scene := PackedScene.new()
-		if scene.pack(level) != OK:
-			fail(PackedStringArray(["Cannot pack assembly"]))
-			return
-		if ResourceSaver.save(scene, output) != OK:
-			fail(PackedStringArray(["Cannot save build outputs"]))
-			return
+
 	print("PASS modular build and navigation")
 	await preload("res://tests/support/finish.gd").success(self)
 
