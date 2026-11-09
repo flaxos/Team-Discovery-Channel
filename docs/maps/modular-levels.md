@@ -8,11 +8,17 @@ This independent kit does not replace SGC or add a lobby mission. It contains fo
 
 Every module reserves an 8 × 8 m cell, with floor at Y=0, 3.4 m ceiling clearance, 3 m clear corridors and 3 × 2.8 m portals. Straight/corner/T interiors occupy enclosed paths inside that cell; chamber clearance is 7.6 m. Reserved cells may touch but must not overlap. Conservative reservations intentionally leave unusable exterior corners between narrow modules.
 
-Socket IDs are `north`, `east`, `south`, `west`; available sets depend on the archetype. Socket origins are doorway-floor centers, local -Z faces outward, and +Y is up. Scene markers and resource transforms must agree. Connected socket origins coincide and their directions oppose. Only quarter-turn yaw, horizontal translation and declared deck elevations are supported; no scaling or tilted instances. Placement/dimension tolerance is 1 mm. An empty availability list means all archetype sockets are enabled; remove connections and use an explicit subset to disable selected chamber openings.
+Socket IDs are `north`, `east`, `south`, `west`; available sets depend on the archetype. Socket origins are doorway-floor centers, local -Z faces outward, and +Y is up. Scene markers and resource transforms must agree. Connected socket origins coincide and their directions oppose. Portal cap state is derived from saved connections when a scene reopens; it does not depend on editable-child overrides. Only quarter-turn yaw, horizontal translation and declared deck elevations are supported; no scaling or tilted instances. Placement/dimension tolerance is 1 mm. An empty availability list means all archetype sockets are enabled; remove connections and use an explicit subset to disable selected chamber openings.
 
 Typed resources under `client/scripts/level/` separate module geometry, socket data, instance identity/deck/role/style/tags, connection endpoints and layout schema/decks/required markers. Instance IDs are unique within a layout; socket IDs are unique within an archetype. Different placements reuse the same module definition. Static `open` connections are the only implemented connection state.
 
 Stable scene branches: `Structure/Collision`, `Structure/NavigationSource`, `Structure/PortalClosures`, `Visuals`, `Sockets`, `Markers`, and `Attachments/{Props,Cover,Interactions,Spawns}`. Collision supplies navigation; `NavigationSource` is reserved for later explicit source extensions. Placeholder meshes carry `visual_slot` and dimension metadata. Change materials or replace visual meshes within those bounds without changing structural collision. Do not add collision beneath Visuals. Gameplay props that change clearance require validation and rebaking.
+
+## Creating another module archetype
+
+Create a new `LevelModuleDefinition` resource with a unique module ID and scene reference. Start a new scene with `LevelModule.gd` on its Node3D root, preserving the stable branch names above. Author its structural floor/wall collision, ceiling collision on layer 8 (128), and separate placeholder visual meshes. Set its occupied reservation and interior AABBs in local coordinates; the latter describe walkable enclosed space, not solid walls.
+
+Add a `LevelSocketDefinition` for each doorway, its matching `Sockets/<id>` Marker3D, and matching collision/visual caps under `Structure/PortalClosures/<id>` and `Visuals/Closures/<id>`. Leave caps closed in the archetype. Set exact opening dimensions, outward socket transform and internal approach point. Add the named entry/destination/patrol markers and attachment branches. Set `definition_path` on the scene root to its definition resource. Test the new scene in an isolated layout before adding it to an authored level; inspect every supported orientation and both traversal directions. Room purpose belongs in instance role/tags and attachments rather than geometric socket names.
 
 ## Human authoring in Godot
 
@@ -20,7 +26,7 @@ Stable scene branches: `Structure/Collision`, `Structure/NavigationSource`, `Str
 2. Drag archetype scenes into the root. Each loads its matching definition through `definition_path`. Assign a unique `instance_id` and deck; place new instances apart initially so reservations do not overlap. Use Godot's transform tools for translation and 90-degree rotation.
 3. Set `capture_destination` to an explicit `.tres` path. Click **Capture placed modules**. Incomplete disconnected layouts may be captured while authoring; final validation requires connectivity. Capture rejects arbitrary rotations, scaling, floor mismatches and overlaps. It renames placed nodes to their instance IDs.
 4. On the assembly root, fill `moving_instance`, `moving_socket`, `target_instance` and `target_socket`. Click **Snap sockets (capture to save)**. It calculates placement and records the connection; failures roll back. Capture again to persist the result.
-5. Click **Validate and bake** to validate the completed shell and bake navigation. Rebuild from the resource with **Rebuild from layout**; an existing scene requires explicitly enabling `discard_uncaptured_edits` first. Save the scene normally.
+5. Click **Validate and bake** to validate the completed shell and bake navigation. Uncaptured scene poses or portal states inconsistent with the resource fail validation; capture moves first. Rebuild from the resource with **Rebuild from layout**; an existing scene requires explicitly enabling `discard_uncaptured_edits` first. Save the scene normally.
 
 Inspector actions are minimal scaffolding, not an Undo/Redo-backed editor plugin. Save/capture before destructive rebuilding. A dock, socket selectors and editor undo integration are Phase 2 work.
 
@@ -81,3 +87,5 @@ Coverage includes socket orientations, transactional rejection, invalid referenc
 ## Next increment and boundaries
 
 After Phase 1 review, Phase 2 can improve editor selection and Undo/Redo. Phase 3 can adapt NPC navigation providers, dynamic doors/locks and mission/alarm synchronization. Phase 4 can assemble a small Goa'uld interior with entry, objective and optional patrol branch. Ring/gate rooms should instance existing shared assets; no base/ship-specific generator conditions belong in the module layer. No additional game modes, artwork or SGC rewrite are part of this delivery.
+
+Delivery evidence, the final scope boundary and the complete file manifest are recorded in the [Phase 1 delivery report](../reviews/modular-phase1.md).

@@ -41,7 +41,15 @@ func run() -> void:
 		level.marker(resource.entry_instance, resource.entry_marker),
 		level.marker(resource.destination_instance, resource.destination_marker)
 	)
-	if route.is_empty() or route[-1].distance_to(level.marker(resource.destination_instance,resource.destination_marker)) > 0.5:
+	if (
+		route.is_empty()
+		or (
+			route[-1].distance_to(
+				level.marker(resource.destination_instance, resource.destination_marker)
+			)
+			> 0.5
+		)
+	):
 		fail(PackedStringArray(["Entry to destination navigation disconnected"]))
 		return
 	if "--build" in args:

@@ -20,6 +20,20 @@ var last_errors := PackedStringArray()
 
 
 func _ready() -> void:
+	# Portal caps are derived from saved connections, not editable scene internals.
+	if layout != null and LevelLayoutValidator.validate(layout, false).is_empty():
+		for item in layout.instances:
+			var module := get_node_or_null(str(item.id)) as LevelModule
+			if module != null:
+				for socket in item.module.sockets:
+					module.set_portal(socket.id, false)
+		for connection in layout.connections:
+			var a := get_node_or_null(str(connection.from_instance)) as LevelModule
+			var b := get_node_or_null(str(connection.to_instance)) as LevelModule
+			if a != null:
+				a.set_portal(connection.from_socket, true)
+			if b != null:
+				b.set_portal(connection.to_socket, true)
 	if not Engine.is_editor_hint() and layout != null:
 		await validate_and_bake()
 
@@ -122,6 +136,7 @@ func snap_selected() -> void:
 
 
 func validate_and_bake() -> void:
+	ready_for_navigation = false
 	var errors := LevelLayoutValidator.validate(layout)
 	if not errors.is_empty():
 		report(errors)

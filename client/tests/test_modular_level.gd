@@ -134,6 +134,47 @@ func run() -> void:
 	var captured := load("user://captured_layout.tres") as LevelLayout
 	assert(LevelLayoutValidator.validate(captured).is_empty())
 	assert(captured.instances.size() == source.instances.size())
+	# Editor actions must not validate stale layout poses or bake unrecorded scene moves.
+	var moved := level.get_node("room_0") as LevelModule
+	moved.position.x += 0.125
+	assert(
+		"Uncaptured" in str(LevelEnclosureValidator.validate(level)),
+		"Uncaptured placement must fail"
+	)
+	moved.position.x -= 0.125
+	assert(LevelEnclosureValidator.validate(level).is_empty())
+	# Invoke all Inspector authoring actions on a separate partial authoring scene.
+	var editor := LevelAssembly.new()
+	root.add_child(editor)
+	editor.layout = LevelLayout.new()
+	var corridor := LevelModuleInstance.new()
+	corridor.id = &"corridor"
+	corridor.module = load("res://resources/level_modules/Room01Straight.tres")
+	var chamber := LevelModuleInstance.new()
+	chamber.id = &"chamber"
+	chamber.module = load("res://resources/level_modules/Room04Chamber.tres")
+	chamber.position = Vector2(100, 0)
+	editor.layout.instances.assign([corridor, chamber])
+	editor.layout.entry_instance = corridor.id
+	editor.layout.destination_instance = chamber.id
+	editor.rebuild_action.call()
+	assert(editor.get_node("corridor") is LevelModule)
+	editor.moving_instance = chamber.id
+	editor.moving_socket = &"south"
+	editor.target_instance = corridor.id
+	editor.target_socket = &"north"
+	editor.snap_action.call()
+	assert(editor.last_errors.is_empty() and editor.layout.connections.size() == 1)
+	editor.capture_destination = "user://editor_actions.tres"
+	editor.capture_action.call()
+	assert(editor.last_errors.is_empty())
+	await editor.validate_action.call()
+	assert(editor.ready_for_navigation and editor.last_errors.is_empty())
+	editor.discard_uncaptured_edits = true
+	editor.rebuild_action.call()
+	assert(not editor.discard_uncaptured_edits)
+	editor.queue_free()
+	await process_frame
 	# Geometry independent of visual materials.
 	var visual := level.get_node("room_0/Visuals/Floor0") as MeshInstance3D
 	visual.material_override = StandardMaterial3D.new()
@@ -149,7 +190,23 @@ func run() -> void:
 			== "res://scenes/level/modules/Room01Straight.tscn"
 		)
 	)
-	reopened.free()
+	root.add_child(reopened)
+	await reopened.navigation_ready
+	assert(reopened.last_errors.is_empty(), "Reopened scene must restore derived portal states")
+	for connection in source.connections:
+		var cap := (
+			reopened.get_node(
+				(
+					str(connection.from_instance)
+					+ "/Structure/PortalClosures/"
+					+ str(connection.from_socket)
+				)
+			)
+			as StaticBody3D
+		)
+		assert(cap.collision_layer == 0, "Saved connection must reopen portal after scene load")
+	reopened.queue_free()
+	await frames(3)
 	for path: String in [
 		"res://scenes/entities/Player.tscn",
 		"res://scenes/entities/SGCAirman.tscn",

@@ -7,12 +7,33 @@ static func validate(root: LevelAssembly) -> PackedStringArray:
 	var errors := PackedStringArray()
 	var volumes: Array[AABB] = []
 	var labels: Array[String] = []
+	var connected := {}
+	for connection in root.layout.connections:
+		connected[str(connection.from_instance) + "/" + str(connection.from_socket)] = true
+		connected[str(connection.to_instance) + "/" + str(connection.to_socket)] = true
 	for item in root.layout.instances:
-		var node := root.get_node(str(item.id)) as LevelModule
+		var node := root.get_node_or_null(str(item.id)) as LevelModule
 		if node == null:
 			errors.append("Missing built instance: " + str(item.id))
 			continue
+		if not node.transform.is_equal_approx(
+			item.placement(float(root.layout.decks[str(item.deck)]))
+		):
+			errors.append("Uncaptured placement: " + str(item.id))
 		for s in item.module.sockets:
+			var key := str(item.id) + "/" + str(s.id)
+			var cap := (
+				node.get_node_or_null("Structure/PortalClosures/" + str(s.id)) as StaticBody3D
+			)
+			var visual := node.get_node_or_null("Visuals/Closures/" + str(s.id)) as Node3D
+			var open: bool = connected.has(key)
+			if (
+				cap == null
+				or visual == null
+				or (cap.collision_layer == 0) != open
+				or visual.visible == open
+			):
+				errors.append("Portal closure disagrees with layout: " + key)
 			var marker := node.get_node_or_null("Sockets/" + str(s.id)) as Node3D
 			if marker == null or not marker.transform.is_equal_approx(s.local_transform):
 				errors.append("Socket scene mismatch: %s/%s" % [item.id, s.id])
