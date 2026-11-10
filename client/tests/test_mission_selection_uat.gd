@@ -24,7 +24,7 @@ func run() -> void:
 	root.add_child(main)
 	await frames(3)
 	var lobby := main.current_lobby as LobbyUI
-	assert(lobby.mission_option_button.item_count == 2)
+	assert(lobby.mission_option_button.item_count == 3)
 	lobby._on_mission_selected(1)
 	assert(net.selected_mission_id == SGCNetworkManager.MISSION_SGC_UAT)
 	assert(lobby.difficulty_option_button.disabled)

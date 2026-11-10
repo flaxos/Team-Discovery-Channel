@@ -1,0 +1,52 @@
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
+[ext_resource type="Script" path="res://scripts/mission/MissionPatrol.gd" id="3_patrol"]
+[ext_resource type="Resource" path="res://resources/levels/modular_integration_demo.tres" id="4_layout"]
+
+[sub_resource type="Resource" id="reach"]
+script = ExtResource("2_objective")
+id = &"reach_command"
+kind = "reach"
+room = &"command"
+text = "REACH THE COMMAND ROOM ON THE UPPER DECK"
+
+[sub_resource type="Resource" id="console"]
+script = ExtResource("2_objective")
+id = &"download_data"
+kind = "interact"
+room = &"command"
+attachment = &"main_console"
+text = "DOWNLOAD DATA FROM THE MAIN CONSOLE"
+prompt = "DOWNLOAD COMMAND DATA"
+
+[sub_resource type="Resource" id="extract"]
+script = ExtResource("2_objective")
+id = &"extract"
+kind = "extract"
+room = &"entry"
+marker = &"entry"
+radius = 3.5
+text = "RETURN TO THE INSERTION POINT — ALL STANDING OPERATIVES"
+
+[sub_resource type="Resource" id="patrol_service"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("wide_junction", "wide_elbow", "wide_straight", "width_adapter", "hub")
+size = 2
+
+[sub_resource type="Resource" id="patrol_upper"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("upper_approach", "upper_junction")
+size = 2
+
+[sub_resource type="Resource" id="patrol_stores"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("cargo", "stores_approach")
+size = 1
+
+[resource]
+script = ExtResource("1_definition")
+layout = ExtResource("4_layout")
+objectives = Array[ExtResource("2_objective")]([SubResource("reach"), SubResource("console"), SubResource("extract")])
+patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_service"), SubResource("patrol_upper"), SubResource("patrol_stores")])

@@ -22,6 +22,8 @@ func _ready() -> void:
 			net.game_started.connect(_on_game_started)
 		if not net.mission_restart_preparing.is_connected(_on_mission_restart_preparing):
 			net.mission_restart_preparing.connect(_on_mission_restart_preparing)
+		if not net.mission_restart_released.is_connected(_on_mission_restart_released):
+			net.mission_restart_released.connect(_on_mission_restart_released)
 
 		# Dedicated server mode bypasses lobby UI and initializes GateRoom arena immediately
 		if net.is_dedicated_server:
@@ -97,9 +99,19 @@ func _on_mission_restart_preparing() -> void:
 	if hud != null:
 		hud.set("is_mission_ended", true)
 		hud.set_process(false)
-	# Clients retain their old spawner and replicas until the authoritative despawns arrive.
+	# Clients retain their old spawner and replicas until the authoritative despawns arrive,
+	# but stop publishing their own operative so nothing is in flight when the host frees it.
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-	if net == null or not net.is_server:
+	if net == null or net.is_server:
+		return
+	var mine: Node = current_gate_room.get_node_or_null("Players/" + str(net.local_peer_id))
+	if mine != null and mine.has_node("MultiplayerSynchronizer"):
+		(mine.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer).public_visibility = false
+
+
+func _on_mission_restart_released() -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net == null or not net.is_server or not is_instance_valid(current_gate_room):
 		return
 	var players: Node = current_gate_room.get_node_or_null("Players")
 	if players != null:

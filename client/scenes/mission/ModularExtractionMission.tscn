@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/ModularMission.gd" id="1_mission"]
+[ext_resource type="Script" path="res://scripts/level/LevelAssembly.gd" id="2_level"]
+[ext_resource type="Script" path="res://scripts/mission/MissionObjectives.gd" id="3_objectives"]
+[ext_resource type="Resource" path="res://resources/missions/modular_extraction_uat.tres" id="4_definition"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
+
+[node name="GateRoom" type="Node3D"]
+script = ExtResource("1_mission")
+definition = ExtResource("4_definition")
+mission_id = "modular_extraction_uat"
+
+[node name="Level" type="Node3D" parent="."]
+script = ExtResource("2_level")
+
+[node name="Objectives" type="Node" parent="."]
+script = ExtResource("3_objectives")
+
+[node name="Spawns" type="Node3D" parent="."]
+
+[node name="Players" type="Node3D" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/entities/Player.tscn")
+spawn_path = NodePath("../Players")
+
+[node name="GadgetSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/props/C4Satchel.tscn", "res://scenes/props/ClaymoreMine.tscn", "res://scenes/props/DeployableTurret.tscn", "res://scenes/props/DeployableShield.tscn", "res://scenes/weapons/SmokeGrenade.tscn")
+spawn_path = NodePath("../Players")
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn", "res://scenes/entities/JaffaShockGuard.tscn")
+spawn_path = NodePath("../Enemies")
+
+[node name="TacticalHUD" parent="." instance=ExtResource("5_hud")]
