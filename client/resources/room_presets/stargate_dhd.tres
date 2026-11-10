@@ -40,3 +40,5 @@ label = "Stargate / DHD"
 compatible_modules = PackedStringArray("room16")
 attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3")])
 system_references = PackedStringArray("gate.destination","objective.entry","objective.extraction")
+description = "Stargate / DHD configuration with reusable equipment and reachable markers; no mission progression."
+synonyms = PackedStringArray("gate room","stargate chamber","dialling")

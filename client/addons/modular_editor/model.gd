@@ -11,6 +11,9 @@ static func copy(source: LevelLayout) -> LevelLayout:
 	var result := LevelLayout.new()
 	result.decks = source.decks.duplicate(true)
 	result.schema_version = source.schema_version
+	result.default_theme = source.default_theme
+	for zone in source.theme_zones:
+		result.theme_zones.append(zone.duplicate() as LevelThemeZone)
 	result.entry_instance = source.entry_instance
 	result.entry_marker = source.entry_marker
 	result.destination_instance = source.destination_instance

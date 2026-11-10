@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LevelVisualTheme" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelVisualTheme.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/level_themes/neutral_lighting.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"asgard"
+display_name = "Asgard"
+description = "Advanced ship interiors: clean pale surfaces, flowing visual details and restrained cool lighting."
+synonyms = PackedStringArray("asgard","ship","advanced")
+fallback_id = &"neutral"
+lighting = ExtResource("2")
+compatible_families = PackedStringArray("corridor","chamber","adapter","vertical")
+decoration_slots = PackedStringArray("wall_panels","floor_detail","ceiling_detail","door_frame","room_detail")
+art_status = "fallback"

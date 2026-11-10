@@ -296,7 +296,7 @@ static func populate(layout: LevelLayout, root: Node3D) -> PackedStringArray:
 		if gate != null and dhd != null:
 			dhd.stargate_path = dhd.get_path_to(gate)
 			dhd.target_stargate = gate
-		apply_theme(item, module)
+		apply_theme(item, module, layout)
 	if not errors.is_empty():
 		return errors
 	var has_pairs := false
@@ -309,21 +309,17 @@ static func populate(layout: LevelLayout, root: Node3D) -> PackedStringArray:
 	return errors
 
 
-static func apply_theme(item: LevelModuleInstance, module: LevelModule) -> void:
-	if item.theme == null:
-		return
-	if item.theme.surface_material != null:
-		for node: Node in module.get_node("Visuals").find_children(
-			"*", "MeshInstance3D", true, false
-		):
-			(node as MeshInstance3D).material_override = item.theme.surface_material
-	if item.theme.prop_material != null:
+static func apply_theme(
+	item: LevelModuleInstance, module: LevelModule, layout: LevelLayout = null
+) -> void:
+	LevelThemeResolver.apply(layout, item, module)
+	var theme := LevelThemeResolver.selected(layout, item)
+	var material := LevelThemeResolver.material_for(theme, item, &"prop")
+	if material != null:
 		for attachment in resolved(item):
 			var prop := module.get_node_or_null(node_path(attachment)) as LevelPlaceholderProp
 			if prop != null:
-				(prop.get_node("Visuals/Mesh") as MeshInstance3D).material_override = (
-					item.theme.prop_material
-				)
+				(prop.get_node("Visuals/Mesh") as MeshInstance3D).material_override = material
 
 
 static func validate_world(root: LevelAssembly) -> PackedStringArray:

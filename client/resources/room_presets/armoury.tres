@@ -54,3 +54,5 @@ label = "Armoury"
 compatible_modules = PackedStringArray("room04","room10","room11","room13","room15")
 attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5")])
 system_references = PackedStringArray("inventory.storage")
+description = "Armoury configuration with reusable equipment and reachable markers; no mission progression."
+synonyms = PackedStringArray("armory","equipment storage","weapons")

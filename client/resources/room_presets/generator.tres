@@ -44,3 +44,5 @@ label = "Generator / reactor"
 compatible_modules = PackedStringArray("room10","room11","room13")
 attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4")])
 system_references = PackedStringArray("systems.power")
+description = "Generator / reactor configuration with reusable equipment and reachable markers; no mission progression."
+synonyms = PackedStringArray("reactor","power plant","power control")

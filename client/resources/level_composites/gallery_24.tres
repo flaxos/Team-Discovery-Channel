@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelCompositeDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCompositeDefinition.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/levels/Gallery24.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"gallery_24"
+label = "Long gallery"
+description = "Reusable straight gallery composition with open internal passages; retains ordinary room instances."
+synonyms = PackedStringArray("long hall","gallery","long corridor")
+layout = ExtResource("2")

@@ -1,0 +1,96 @@
+[gd_resource type="Resource" script_class="LevelCatalogueMetadata" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCatalogueMetadata.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelCapabilityDescription.gd" id="2"]
+[sub_resource type="Resource" id="e0"]
+script = ExtResource("2")
+id = &"room01"
+label = "Straight corridor"
+description = "Opposing narrow corridor sockets for regular patrol routes."
+synonyms = PackedStringArray("hallway","straight","patrol")
+[sub_resource type="Resource" id="e1"]
+script = ExtResource("2")
+id = &"room02"
+label = "Corner corridor"
+description = "Narrow right-angle corridor and a sightline break."
+synonyms = PackedStringArray("l shaped","corner","stealth","hallway")
+[sub_resource type="Resource" id="e2"]
+script = ExtResource("2")
+id = &"room03"
+label = "T-junction"
+description = "Branching narrow corridor intersection with a capped unused branch when unconnected."
+synonyms = PackedStringArray("t junction","branch","intersection")
+[sub_resource type="Resource" id="e3"]
+script = ExtResource("2")
+id = &"room04"
+label = "Standard chamber"
+description = "Reusable compact chamber; role-independent shell with configurable entrances."
+synonyms = PackedStringArray("small room","rectangular room","chamber")
+[sub_resource type="Resource" id="e4"]
+script = ExtResource("2")
+id = &"room05"
+label = "X-junction"
+description = "Four-way narrow corridor intersection with uninterrupted central sightlines."
+synonyms = PackedStringArray("crossroads","four way","x junction","intersection")
+[sub_resource type="Resource" id="e5"]
+script = ExtResource("2")
+id = &"room06"
+label = "Wide straight corridor"
+description = "Expanded straight corridor for two-way squads and patrol formations."
+synonyms = PackedStringArray("wide hallway","squad movement","firefight")
+[sub_resource type="Resource" id="e6"]
+script = ExtResource("2")
+id = &"room07"
+label = "Wide corner"
+description = "Expanded right-angle corridor preserving squad clearance."
+synonyms = PackedStringArray("wide l shaped","squad","corner")
+[sub_resource type="Resource" id="e7"]
+script = ExtResource("2")
+id = &"room08"
+label = "Wide junction"
+description = "Expanded four-way junction; an unused capped opening provides a T configuration."
+synonyms = PackedStringArray("wide t","wide x","intersection","branch")
+[sub_resource type="Resource" id="e8"]
+script = ExtResource("2")
+id = &"room09"
+label = "Corridor width adapter"
+description = "Explicit transition between narrow and wide connector families with a level threshold."
+synonyms = PackedStringArray("transition","adapter","narrow wide")
+[sub_resource type="Resource" id="e9"]
+script = ExtResource("2")
+id = &"room10"
+label = "Long rectangular chamber"
+description = "Elongated room with multiple entrances along its long walls."
+synonyms = PackedStringArray("barracks","storage","long room","laboratory")
+[sub_resource type="Resource" id="e10"]
+script = ExtResource("2")
+id = &"room11"
+label = "Large square chamber"
+description = "Large reusable square room with multiple entrances on each edge."
+synonyms = PackedStringArray("command centre","control center","cargo","large room")
+[sub_resource type="Resource" id="e11"]
+script = ExtResource("2")
+id = &"room13"
+label = "Large special hall"
+description = "Large elongated hall for substantial machinery or ceremonial and command configurations."
+synonyms = PackedStringArray("ceremonial","command hall","large room")
+[sub_resource type="Resource" id="e12"]
+script = ExtResource("2")
+id = &"room14"
+label = "Adjacent-deck ramp"
+description = "Enclosed ramp and protected landings; requires matching lower and upper deck bindings."
+synonyms = PackedStringArray("vertical","stairs alternative","deck connection","ramp")
+[sub_resource type="Resource" id="e13"]
+script = ExtResource("2")
+id = &"room15"
+label = "Tall transport chamber"
+description = "Tall clear volume for shared transport rings and other compatible room configurations."
+synonyms = PackedStringArray("ring room","transport area","teleport interface")
+[sub_resource type="Resource" id="e14"]
+script = ExtResource("2")
+id = &"room16"
+label = "Gate and hangar shell"
+description = "Equipment-scale clear shell with personnel, cargo and large equipment entrances."
+synonyms = PackedStringArray("stargate chamber","glider bay","hangar","large gate")
+[resource]
+script = ExtResource("1")
+entries = Array[ExtResource("2")]([SubResource("e0"),SubResource("e1"),SubResource("e2"),SubResource("e3"),SubResource("e4"),SubResource("e5"),SubResource("e6"),SubResource("e7"),SubResource("e8"),SubResource("e9"),SubResource("e10"),SubResource("e11"),SubResource("e12"),SubResource("e13"),SubResource("e14")])

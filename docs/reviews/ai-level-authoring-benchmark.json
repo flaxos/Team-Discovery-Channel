@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-11-09T21:58:43.775682+00:00",
+  "measurement_scope": "One tool call means one invocation of the shared authoring CLI during data authoring, including catalogue discovery and rendered preview; implementation/exploration tool calls are excluded.",
+  "engine": "Godot 4.4.1",
+  "agent_tokens": null,
+  "agent_tokens_note": "No reliable per-layout agent usage meter is exposed in this session; no estimate is substituted.",
+  "natural_language_requests": "docs/maps/briefs/*.md; disposable operation requests were outside the repository and are not runtime inputs.",
+  "layouts": [
+    {
+      "brief": "docs/maps/briefs/neutral_installation.md",
+      "layout": "client/resources/levels/ai_neutral_installation.tres",
+      "theme": "neutral",
+      "cli_tool_calls": 7,
+      "diagnostic_godot_calls": 1,
+      "operation_count": 7,
+      "authoring_iterations": 1,
+      "repair_iterations": 0,
+      "toolchain_repair_iterations": 2,
+      "validation_calls": 2,
+      "agent_tokens": null,
+      "implementation_modification_required": true,
+      "implementation_files_modified": [
+        "client/addons/modular_editor/preview.gd",
+        "client/scripts/level/LevelThemeResolver.gd"
+      ],
+      "repair_note": "First capture wrote an image but failed strict shutdown checks. Two shared preview cleanup repairs were needed; theme registry caching was also added during diagnosis. Layout geometry and data required no repair. Initial call timings were not retained.",
+      "calls": [
+        {
+          "command": "catalogue",
+          "seconds": null,
+          "ok": true
+        },
+        {
+          "command": "apply",
+          "seconds": null,
+          "ok": true
+        },
+        {
+          "command": "validate",
+          "seconds": null,
+          "ok": true
+        },
+        {
+          "command": "build",
+          "seconds": null,
+          "ok": true
+        },
+        {
+          "command": "preview",
+          "seconds": null,
+          "ok": false
+        },
+        {
+          "command": "preview",
+          "seconds": 16.017,
+          "ok": false
+        },
+        {
+          "command": "preview",
+          "seconds": 16.047,
+          "ok": true
+        }
+      ],
+      "generated_files": [
+        "client/resources/levels/ai_neutral_installation.tres",
+        "user://ai_neutral_installation.tscn",
+        "user://ai_neutral_installation_navigation.tres",
+        "build/authoring-benchmark/neutral_installation.png"
+      ],
+      "effective_visual_sources": [
+        "neutral"
+      ],
+      "status": "validated_built_rendered"
+    },
+    {
+      "brief": "docs/maps/briefs/goauld_compound.md",
+      "layout": "client/resources/levels/ai_goauld_compound.tres",
+      "theme": "goauld",
+      "cli_tool_calls": 5,
+      "operation_count": 8,
+      "authoring_iterations": 1,
+      "repair_iterations": 0,
+      "validation_calls": 2,
+      "calls": [
+        {
+          "command": "catalogue",
+          "seconds": 1.176,
+          "ok": true
+        },
+        {
+          "command": "apply",
+          "seconds": 2.186,
+          "ok": true
+        },
+        {
+          "command": "validate",
+          "seconds": 1.195,
+          "ok": true
+        },
+        {
+          "command": "build",
+          "seconds": 1.167,
+          "ok": true
+        },
+        {
+          "command": "preview",
+          "seconds": 15.373,
+          "ok": true
+        }
+      ],
+      "agent_tokens": null,
+      "implementation_files_modified": [],
+      "implementation_modification_required": false,
+      "generated_files": [
+        "client/resources/levels/ai_goauld_compound.tres",
+        "user://ai_goauld_compound.tscn",
+        "user://ai_goauld_compound_navigation.tres",
+        "build/authoring-benchmark/goauld_compound.png"
+      ],
+      "effective_visual_sources": [
+        "neutral"
+      ],
+      "status": "validated_built_rendered"
+    },
+    {
+      "brief": "docs/maps/briefs/asgard_ship.md",
+      "layout": "client/resources/levels/ai_asgard_ship.tres",
+      "theme": "asgard",
+      "cli_tool_calls": 5,
+      "operation_count": 7,
+      "authoring_iterations": 1,
+      "repair_iterations": 0,
+      "validation_calls": 2,
+      "calls": [
+        {
+          "command": "catalogue",
+          "seconds": 2.308,
+          "ok": true
+        },
+        {
+          "command": "apply",
+          "seconds": 1.218,
+          "ok": true
+        },
+        {
+          "command": "validate",
+          "seconds": 2.206,
+          "ok": true
+        },
+        {
+          "command": "build",
+          "seconds": 1.16,
+          "ok": true
+        },
+        {
+          "command": "preview",
+          "seconds": 15.996,
+          "ok": true
+        }
+      ],
+      "agent_tokens": null,
+      "implementation_files_modified": [],
+      "implementation_modification_required": false,
+      "generated_files": [
+        "client/resources/levels/ai_asgard_ship.tres",
+        "user://ai_asgard_ship.tscn",
+        "user://ai_asgard_ship_navigation.tres",
+        "build/authoring-benchmark/asgard_ship.png"
+      ],
+      "effective_visual_sources": [
+        "neutral"
+      ],
+      "status": "validated_built_rendered"
+    }
+  ],
+  "post_benchmark_integration": {
+    "cli_tool_calls": 3,
+    "commands": [
+      "preview neutral_installation",
+      "preview goauld_compound",
+      "preview asgard_ship"
+    ],
+    "implementation_files_modified": [
+      "client/addons/modular_editor/preview.gd"
+    ],
+    "reason": "Visual inspection found overview clipping on the larger layouts. Shared orthographic camera now fits projected bounds and aspect ratio. All three were recaptured; no layout data changed. These verification calls are additional to the measured per-brief runs.",
+    "repair_iterations": 1,
+    "status": "recaptured_and_inspected"
+  }
+}

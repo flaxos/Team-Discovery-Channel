@@ -54,3 +54,5 @@ label = "Throne / ceremonial"
 compatible_modules = PackedStringArray("room13","room16")
 attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6")])
 system_references = PackedStringArray("objective.character")
+description = "Throne / ceremonial configuration with reusable equipment and reachable markers; no mission progression."
+synonyms = PackedStringArray("throne room","ceremonial hall")
