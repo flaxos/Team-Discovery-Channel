@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/ModularNpcDemo.gd" id="1_demo"]
+[ext_resource type="Script" path="res://scripts/level/LevelAssembly.gd" id="2_level"]
+[ext_resource type="Resource" path="res://resources/levels/modular_integration_demo.tres" id="3_layout"]
+
+[node name="ModularNpcDemo" type="Node3D"]
+script = ExtResource("1_demo")
+
+[node name="Level" type="Node3D" parent="."]
+script = ExtResource("2_level")
+layout = ExtResource("3_layout")
+
+[node name="Hostiles" type="Node3D" parent="."]
+
+[node name="Friendlies" type="Node3D" parent="."]
+
+[node name="HostileSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn")
+spawn_path = NodePath("../Hostiles")
+
+[node name="FriendlySpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/entities/SGCAirman.tscn")
+spawn_path = NodePath("../Friendlies")
