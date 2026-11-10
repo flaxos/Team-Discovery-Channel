@@ -11,7 +11,8 @@ Maintained documentation describes the code available at gameplay baseline `a720
 | [Visual modular editor](maps/modular-editor.md) | Native top-down GUI, Undo/Redo, save/build/preview and manual UAT. |
 | [Modular room kit](maps/modular-levels.md) | Phase 1 scenes, typed layouts, editor/headless authoring and acceptance. |
 | [Modular NPC navigation](maps/modular-npc-navigation.md) | Production Jaffa/airman navigation, patrols, AI door use, demo scene and limitations. |
-| [Offworld extraction plan](plans/offworld-extraction-mission.md) | Design-only dependency map and next playable milestone. |
+| [Modular extraction mission](maps/modular-extraction-mission.md) | First playable modular mission: objectives, extraction rule, Jaffa combat, tests, UAT and travel blockers. |
+| [Offworld extraction plan](plans/offworld-extraction-mission.md) | Dependency map for the offworld mission; its first milestone is now implemented. |
 | [SGC map contract](maps/sgc.md) | Proportions, provenance, schema, art slots, navigation and enclosure rules. |
 | [Testing and UAT](TESTING.md) | Automated checks, report interpretation, screenshots and manual route. |
 | [Alignment app](ALIGNMENT.md) | Web app setup, tokens, deployment settings and generated exports. |

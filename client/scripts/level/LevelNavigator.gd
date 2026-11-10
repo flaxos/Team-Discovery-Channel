@@ -45,6 +45,29 @@ static func find_level(body: Node) -> LevelAssembly:
 	return null
 
 
+## Nearest reachable room `cover` marker on the actor's deck that keeps distance from the
+## threat. Vector3.INF when the level offers none; callers then hold their position.
+static func cover_position(assembly: LevelAssembly, body: Node3D, threat: Vector3) -> Vector3:
+	var best := Vector3.INF
+	var here := body.global_position
+	for item in assembly.layout.instances:
+		var marker := assembly.get_node_or_null(str(item.id) + "/Markers/cover") as Node3D
+		if marker == null:
+			continue
+		var spot := marker.global_position
+		if (
+			absf(spot.y - here.y) > 1.5
+			or spot.distance_to(threat) < 4.0
+			or spot.distance_to(here) > 24.0
+			or spot.distance_to(here) >= best.distance_to(here)
+		):
+			continue
+		var path := assembly.local_path(here, spot)
+		if not path.is_empty() and path[-1].distance_to(spot) < 1.0:
+			best = spot
+	return best
+
+
 func reset() -> void:
 	points.clear()
 	doors.clear()

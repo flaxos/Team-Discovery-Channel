@@ -17,6 +17,7 @@ signal game_started()
 signal mission_peer_ready(peer_id: int)
 signal mission_settings_changed(difficulty: int)
 signal mission_restart_preparing()
+signal mission_restart_released()
 signal mission_selection_changed(mission_id: String)
 
 const DEFAULT_PORT: int = 7777
@@ -33,9 +34,11 @@ const DIFFICULTY_DESCRIPTIONS: Array[String] = [
 
 const MISSION_SGC_DEFENSE: String = "sgc_defense"
 const MISSION_SGC_UAT: String = "sgc_uat"
+const MISSION_MODULAR_EXTRACTION: String = "modular_extraction_uat"
 const MISSIONS: Dictionary = {
 	MISSION_SGC_DEFENSE: {"name": "SGC Defense — Levels 28/27/26", "description": "Refactored three-level SGC. Defend against incoming Jaffa, complete objectives and extract.", "scene": "res://scenes/main/GateRoom.tscn"},
-	MISSION_SGC_UAT: {"name": "SGC UAT Base — No Hostile Activation", "description": "Explore the same three-level SGC with lifts, stairs, props and friendly personnel. No automatic hostile gate activations or enemy waves.", "scene": "res://scenes/main/SGCUATBase.tscn"}
+	MISSION_SGC_UAT: {"name": "SGC UAT Base — No Hostile Activation", "description": "Explore the same three-level SGC with lifts, stairs, props and friendly personnel. No automatic hostile gate activations or enemy waves.", "scene": "res://scenes/main/SGCUATBase.tscn"},
+	MISSION_MODULAR_EXTRACTION: {"name": "Modular Extraction UAT — Development", "description": "Development slice on the modular test facility: reach the command room, download data from the main console and return to the insertion point. Jaffa patrols are active.", "scene": "res://scenes/mission/ModularExtractionMission.tscn"}
 }
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"
@@ -100,6 +103,7 @@ var restart_pending: bool = false
 var peers: Dictionary = {}
 
 var mission_ready_peers: Dictionary = {}
+var _restart_acks: Dictionary = {}
 
 var _peer: ENetMultiplayerPeer
 
@@ -335,10 +339,24 @@ func _complete_mission_restart() -> void:
 	var tier: int = mission_difficulty
 	# The host despawns replicated operatives before any peer replaces the spawner.
 	# Reliable despawns must be queued ahead of the reliable world-transition RPC.
+	var waiting: Array = mission_ready_peers.keys()
+	_restart_acks.clear()
 	if is_in_active_session():
 		prepare_mission_restart.rpc()
 	else:
 		prepare_mission_restart()
+	# Clients stop sending operative state and acknowledge before the host despawns them;
+	# freeing first would leave their in-flight packets addressed to a missing node.
+	var deadline: int = Time.get_ticks_msec() + 1500
+	while session == _peer and Time.get_ticks_msec() < deadline:
+		var pending: bool = false
+		for id: int in waiting:
+			if peers.has(id) and not _restart_acks.has(id):
+				pending = true
+		if not pending:
+			break
+		await get_tree().process_frame
+	mission_restart_released.emit()
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if not restart_pending or not mission_started or not is_server or session != _peer:
@@ -353,6 +371,14 @@ func _complete_mission_restart() -> void:
 func prepare_mission_restart() -> void:
 	mission_ready_peers.clear()
 	mission_restart_preparing.emit()
+	if is_in_active_session() and not is_server:
+		acknowledge_mission_restart.rpc_id(1)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func acknowledge_mission_restart() -> void:
+	if is_server and restart_pending:
+		_restart_acks[multiplayer.get_remote_sender_id()] = true
 
 
 @rpc("authority", "call_local", "reliable")
@@ -477,7 +503,8 @@ func sync_mission_readiness(ready: Array) -> void:
 func configure_mission_sync(sync: MultiplayerSynchronizer) -> void:
 	if not is_in_active_session() or sync.get_parent().multiplayer != multiplayer:
 		return
-	sync.public_visibility = false
+	# The filter alone gates unready peers. Turning public visibility off as well would hide
+	# server-owned actors from every client, because no per-peer visibility is ever granted.
 	sync.add_visibility_filter(_mission_peer_visible)
 	sync.update_visibility()
 

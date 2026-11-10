@@ -244,7 +244,7 @@ func _update_ui_state() -> void:
 	start_game_button.visible = is_server
 	start_game_button.disabled = not is_server
 	mission_option_button.disabled = (is_connected and not is_server) or (net != null and net.mission_started)
-	difficulty_option_button.disabled = (is_connected and not is_server) or (net != null and (net.mission_started or net.selected_mission_id == SGCNetworkManager.MISSION_SGC_UAT))
+	difficulty_option_button.disabled = (is_connected and not is_server) or (net != null and (net.mission_started or net.selected_mission_id != SGCNetworkManager.MISSION_SGC_DEFENSE))
 	_sync_mission_selection()
 	_sync_difficulty_selection()
 
@@ -262,7 +262,7 @@ func _sync_mission_selection() -> void:
 	for i in range(mission_option_button.item_count):
 		if mission_option_button.get_item_metadata(i) == mission_id: mission_option_button.select(i)
 	mission_description_label.text = SGCNetworkManager.MISSIONS[mission_id]["description"]
-	start_game_button.text = "LAUNCH UAT BASE" if mission_id == SGCNetworkManager.MISSION_SGC_UAT else "LAUNCH SGC DEFENSE"
+	start_game_button.text = {SGCNetworkManager.MISSION_SGC_UAT: "LAUNCH UAT BASE", SGCNetworkManager.MISSION_MODULAR_EXTRACTION: "LAUNCH EXTRACTION UAT"}.get(mission_id, "LAUNCH SGC DEFENSE")
 
 func _on_mission_selected(index: int) -> void:
 	if _network_manager != null: _network_manager.set_mission(str(mission_option_button.get_item_metadata(index)))
