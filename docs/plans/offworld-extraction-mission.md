@@ -1,6 +1,6 @@
 # First offworld extraction mission — engineering plan
 
-Design only. Nothing here is implemented. Each "exists" item was read in the current code; nothing in this plan has been prototyped.
+**Status:** the smallest next playable milestone below is implemented as the [Modular Extraction UAT mission](../maps/modular-extraction-mission.md), together with step 1 of "Order after that" for Jaffa. The rest of this plan is still design only; the table describes the code before that milestone.
 
 ## Target experience
 
