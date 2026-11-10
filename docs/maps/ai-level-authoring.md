@@ -142,3 +142,5 @@ Run `python3 tools/run_godot_tests.py test_level_themes test_level_catalogue tes
 Natural-language demonstration briefs live in `docs/maps/briefs/`; their saved `.tres` maps are authoritative. Benchmark records count authoring CLI invocations (including discovery and preview), explicit validation/repair iterations, generated/modified files and whether implementation code changed during the measured data-authoring run. This is distinct from the tool calls used to implement this milestone. Agent-token consumption is null when no reliable per-layout usage meter exists; do not estimate it from file sizes.
 
 See [the demonstration and benchmark report](../reviews/ai-level-authoring.md) for the three saved maps, measured calls, shared preview repairs, launch commands and manual UAT checklist.
+
+For the full structural/preset integration example, use [Batch D's two-deck construction laboratory](modular-integration-demo.md), saved as `modular_integration_demo.tres` and discoverable as the `integration_lab` composite.

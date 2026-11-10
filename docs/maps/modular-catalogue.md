@@ -2,7 +2,7 @@
 
 ## Batch A: structural expansion
 
-Definitions live in `client/resources/level_modules/<asset>.tres`; reusable scenes live in `client/scenes/level/modules/<asset>.tscn`. The editor palette is populated from `LevelCatalogue.MODULES`. No structural generation runs during placement or play. `tools/level_authoring/build_catalogue.py` is an explicit author-time baker for the new static assets; rerunning it replaces those generated assets, so preserve manual scene edits first.
+Definitions live in `client/resources/level_modules/<asset>.tres`; reusable scenes live in `client/scenes/level/modules/<asset>.tscn`. The editor palette uses live resource discovery through `LevelCatalogue.all_modules()`; `MODULES` remains a compatibility list. Use `python3 tools/level_authoring.py catalogue --detail` for the authoritative machine-readable view. No structural generation runs during placement or play. `tools/level_authoring/build_catalogue.py` is an explicit author-time baker for the new static assets; rerunning it replaces those generated assets, so preserve manual scene edits first.
 
 | ID | Asset | Reserved X × Z | Portals | Status |
 |---|---|---|---|---|
@@ -73,4 +73,8 @@ See the [vertical kit guide](modular-vertical-kit.md) for exact scene/resource p
 
 All sixteen functional presets are implemented as typed resources under `client/resources/room_presets/`. Their complete identifiers, compatible dimensions/modules, shared assets, attachment requirements, implementation status and authoring instructions are listed in the [functional room preset catalogue](modular-room-presets.md). Roles populate existing structures rather than creating new architectural prefabs. Material-theme resources are separate from both structure and content.
 
-Current delivery status: Batches A, B and C implemented; Batch D's integrated environment remains pending. Historical batch-specific evidence above describes the state at each earlier delivery.
+Current delivery status: Batches A–D implemented. The [integrated Batch D fixture](modular-integration-demo.md) combines all fifteen structural PackedScenes, functional room presets, mixed door types and both decks through the shared pipeline. Historical batch-specific evidence above describes the state at each earlier delivery.
+
+## Batch D: integrated construction fixture
+
+Open `res://resources/levels/modular_integration_demo.tres` or discover the `integration_lab` composite in the live catalogue. See the [fixture guide](modular-integration-demo.md) for routes, launch/build commands, test coverage, limitations and manual UAT. Geometry and functional presets are reused without additional runtime generation or mission logic.

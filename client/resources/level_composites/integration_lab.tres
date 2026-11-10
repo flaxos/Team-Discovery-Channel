@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelCompositeDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCompositeDefinition.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/levels/modular_integration_demo.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"integration_lab"
+label = "Integrated construction laboratory"
+description = "Neutral two-deck development layout demonstrating the full structural catalogue, functional presets, narrow/wide transitions, operable and security doors, a walkable ramp and idle paired rings. A toolchain fixture, not a mission."
+synonyms = PackedStringArray("batch d", "integration", "development fixture", "multi deck", "construction laboratory")
+layout = ExtResource("2")
