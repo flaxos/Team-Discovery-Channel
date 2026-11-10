@@ -64,6 +64,21 @@ func _toggle() -> void:
 		sync_open(not is_open)
 
 
+## Authorised opening for server-owned AI: same reach and lock rules as a player request.
+## Never unlocks and never closes; returns whether the doorway is open.
+func open_for(actor: Node3D) -> bool:
+	if (
+		not multiplayer.is_server()
+		or actor == null
+		or actor.get_multiplayer_authority() != 1
+		or global_position.distance_to(actor.global_position) > 3.2
+	):
+		return false
+	if not is_open:
+		_toggle()
+	return is_open
+
+
 func _can_close() -> bool:
 	var shape := BoxShape3D.new()
 	shape.size = Vector3(width - 0.08, height - 0.05, 0.3)

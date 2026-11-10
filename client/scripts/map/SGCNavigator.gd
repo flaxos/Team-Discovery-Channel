@@ -14,6 +14,8 @@ var local_points := PackedVector3Array()
 var local_goal := Vector3.INF
 var retry_time: float = 0.0
 var lift_phase: int = 0
+## Modular levels have no SGC regions or passages; they follow the assembly's navmesh.
+var level_route: LevelNavigator
 
 
 func _init(body: CharacterBody3D) -> void:
@@ -32,6 +34,13 @@ func _find_map() -> bool:
 	return map != null and map.ready_for_navigation
 
 
+func _find_level() -> bool:
+	if level_route == null or not is_instance_valid(level_route.level):
+		var level := LevelNavigator.find_level(actor)
+		level_route = LevelNavigator.new(actor, level) if level != null else null
+	return level_route != null
+
+
 func _release() -> void:
 	if map != null and held_passage != &"":
 		map.release_passage(held_passage, actor)
@@ -40,6 +49,8 @@ func _release() -> void:
 
 func reset() -> void:
 	_release()
+	if level_route != null:
+		level_route.reset()
 	steps.clear()
 	local_points.clear()
 	destination = Vector3.INF
@@ -107,6 +118,10 @@ func _plan(goal: Vector3) -> void:
 
 func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
 	if not _find_map():
+		if map == null and _find_level():
+			var point := level_route.next_position(goal, delta)
+			status = level_route.status
+			return point
 		status = "waiting_for_navigation"
 		return actor.global_position
 	if destination == Vector3.INF or destination.distance_to(goal) > 0.5:

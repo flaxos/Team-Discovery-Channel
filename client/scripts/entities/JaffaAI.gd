@@ -7,6 +7,8 @@ extends CharacterBody3D
 signal jaffa_died(killer: Node)
 signal jaffa_vaporized()
 signal staff_fired(origin: Vector3, direction: Vector3)
+signal patrol_waypoint_reached(index: int)
+signal patrol_lap_completed(laps: int)
 
 enum State {
 	IDLE,
@@ -54,6 +56,10 @@ var suppressive_hold_timer: float = 0.0
 var _death_notified: bool = false
 var navigator: SGCNavigator
 var overrun_destination_index: int = 0
+var patrol_points: Array[Vector3] = []
+var patrol_index: int = 0
+var patrol_loop: bool = true
+var patrol_laps: int = 0
 
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D if has_node("NavigationAgent3D") else null
@@ -109,6 +115,31 @@ func start_column_march(march_target_pos: Vector3) -> void:
 	print("JaffaAI [%s]: Commencing column march toward %s (Lane X=%.1f, Rank %d, Front=%s)." % [
 		name, str(march_target), column_x_lane, formation_rank, str(is_front_rank)
 	])
+
+
+## Walks the waypoints in order through the shared navigator; resumes after combat.
+func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
+	patrol_points = points.duplicate()
+	patrol_index = 0
+	patrol_laps = 0
+	patrol_loop = loop
+	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
+		current_state = State.PATROL
+
+
+func _patrol_destination() -> Vector3:
+	if not patrol_loop and patrol_laps > 0:
+		return patrol_points[-1]
+	if global_position.distance_to(patrol_points[patrol_index]) < 1.0:
+		patrol_waypoint_reached.emit(patrol_index)
+		if patrol_index == patrol_points.size() - 1:
+			patrol_laps += 1
+			patrol_lap_completed.emit(patrol_laps)
+			if patrol_loop:
+				patrol_index = 0
+		else:
+			patrol_index += 1
+	return patrol_points[patrol_index]
 
 
 func _physics_process(delta: float) -> void:
@@ -770,6 +801,7 @@ func _on_vaporized() -> void:
 
 
 func _overrun_destination() -> Vector3:
+	if not patrol_points.is_empty(): return _patrol_destination()
 	var map := get_tree().get_first_node_in_group("sgc_map") as SGCMap
 	if map == null: return Vector3(column_x_lane, 0.0, 24.0)
 	var destinations: Array[StringName] = [&"EAST_CORRIDOR", &"ROUND_HALLWAY", &"BRIEFING_ROOM", &"STAGING"]
