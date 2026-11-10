@@ -125,3 +125,7 @@ Record commit, peer roles, expected and actual result for each line.
 5. **Offworld gate room.** The modular kit has a `stargate_dhd` preset, but no mission uses it and inbound/outbound rules are owned by `WaveManager`.
 6. **`GateRoom` still carries SGC specifics** (sectors, shutters, blast doors). This mission overrides or bypasses them; a second modular mission would justify extracting a slim shared host.
 7. **Readiness during transit.** The mission-ready gate assumes one load per mission. A second load needs the same handshake without dropping in-flight actors, as the retry fix above shows.
+
+## Recorded delivery evidence
+
+Godot **4.4.1.stable.official.49a5bc7b6**, clean worktree of this branch: the full profile ran once after integration and passed **68/68** checks (project import, 66 suites and the persistence reader), including every existing SGC and multiplayer suite. The two-process suite was repeated six times after the retry fix without a failure. The stills above come from the real lobby start on a graphical display. Human UAT is pending.
