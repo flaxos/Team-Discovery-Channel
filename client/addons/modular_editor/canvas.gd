@@ -16,6 +16,9 @@ var pan := Vector2(400, 250)
 var mouse := Vector2.ZERO
 var drag := false
 var panning := false
+var pan_buttons := 0
+var pan_keys: Dictionary = {}
+const PAN_SPEED = 500.0
 
 
 func _ready() -> void:
@@ -23,6 +26,26 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	focus_mode = Control.FOCUS_ALL
 	custom_minimum_size = Vector2(700, 420)
+	focus_exited.connect(clear_navigation)
+
+
+func clear_navigation() -> void:
+	pan_keys.clear()
+	pan_buttons = 0
+	panning = false
+
+
+func _process(delta: float) -> void:
+	if not has_focus() or not is_visible_in_tree():
+		clear_navigation()
+		return
+	var direction := Vector2(
+		int(pan_keys.has(KEY_D) or pan_keys.has(KEY_RIGHT)) - int(pan_keys.has(KEY_A) or pan_keys.has(KEY_LEFT)),
+		int(pan_keys.has(KEY_S) or pan_keys.has(KEY_DOWN)) - int(pan_keys.has(KEY_W) or pan_keys.has(KEY_UP))
+	)
+	if direction != Vector2.ZERO:
+		pan -= direction.normalized() * PAN_SPEED * delta
+		queue_redraw()
 
 
 func world(point: Vector2) -> Vector2:
@@ -206,13 +229,18 @@ func _draw() -> void:
 func rotate_selected() -> void:
 	if placing:
 		turn = (turn + 1) % 4
+		selection_changed.emit()
 		queue_redraw()
 		return
 	var item := model.layout.instance(selected) as LevelModuleInstance
 	if item != null:
-		edit_requested.emit(
-			model.moved(selected, item.position, (item.quarter_turn + 1) % 4), "Rotate room"
-		)
+		var candidate := model.moved(selected, item.position, (item.quarter_turn + 1) % 4)
+		if not model.accepted(candidate):
+			model.errors.append("Rotation blocked by overlap or connected sockets. Disconnect this room's links before changing its orientation; no links were removed.")
+			selection_changed.emit()
+			queue_redraw()
+			return
+		edit_requested.emit(candidate, "Rotate room")
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -228,8 +256,12 @@ func _gui_input(event: InputEvent) -> void:
 				zoom * (1.15 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1 / 1.15), 3, 60
 			)
 			pan = mouse - before * zoom
-		elif event.button_index == MOUSE_BUTTON_MIDDLE:
-			panning = event.pressed
+		elif event.button_index in [MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
+			var bit: int = 1 << event.button_index
+			pan_buttons = (pan_buttons | bit) if event.pressed else (pan_buttons & ~bit)
+			panning = pan_buttons != 0
+			if event.pressed:
+				drag = false
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			if not event.pressed and drag:
 				drag = false
@@ -283,16 +315,38 @@ func _gui_input(event: InputEvent) -> void:
 				if screen(socket_position(item, socket)).distance_to(mouse) < 12:
 					tooltip_text = str(item.id) + "/" + str(socket.id)
 		queue_redraw()
-	elif event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_R:
+	elif event is InputEventKey:
+		key_input(event)
+
+
+func _input(event: InputEvent) -> void:
+	# Editor viewport shortcuts run before Control._gui_input; claim map keys first.
+	if has_focus() and is_visible_in_tree() and event is InputEventKey:
+		key_input(event)
+
+
+func key_input(event: InputEventKey) -> void:
+	var code: int = event.keycode if event.keycode != 0 else event.physical_keycode
+	if code in [KEY_W, KEY_A, KEY_S, KEY_D, KEY_UP, KEY_LEFT, KEY_DOWN, KEY_RIGHT]:
+		if not event.pressed:
+			pan_keys.erase(code)
+		elif not (event.ctrl_pressed or event.alt_pressed or event.meta_pressed):
+			pan_keys[code] = true
+		else:
+			return
+		accept_event()
+	elif event.pressed and not event.echo and not (event.ctrl_pressed or event.alt_pressed or event.meta_pressed):
+		if code == KEY_R:
 			rotate_selected()
 			accept_event()
-		if event.keycode == KEY_ESCAPE:
+		elif code == KEY_ESCAPE:
 			drag = false
 			first_socket.clear()
 			placing = false
 			connecting = false
+			clear_navigation()
 			queue_redraw()
+			accept_event()
 
 
 func pick_socket() -> void:

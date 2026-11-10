@@ -3,6 +3,7 @@ extends EditorPlugin
 const Model = preload("model.gd")
 const Canvas = preload("canvas.gd")
 const RoomControls = preload("room_controls.gd")
+const Toolbar = preload("toolbar.gd")
 var room_controls: HFlowContainer
 var model := Model.new()
 var panel: VBoxContainer
@@ -20,92 +21,20 @@ var socket_picker: OptionButton
 func _enter_tree() -> void:
 	panel = VBoxContainer.new()
 	panel.name = "ModularMap"
-	var toolbar := HFlowContainer.new()
+	var toolbar := Toolbar.new()
+	toolbar.shortcut_scope = panel
 	panel.add_child(toolbar)
-	path = LineEdit.new()
-	path.text = "res://resources/levels/automatic_doors_demo.tres"
-	path.custom_minimum_size.x = 330
-	toolbar.add_child(path)
-	for title: String in [
-		"New",
-		"Open",
-		"Frame layout",
-		"Save",
-		"Validate",
-		"Rebuild",
-		"Preview 3D",
-		"Validate room",
-		"Preview room 3D"
-	]:
-		var button := Button.new()
-		button.text = title
-		toolbar.add_child(button)
-		button.pressed.connect(action.bind(title))
-	var decks := HFlowContainer.new()
-	panel.add_child(decks)
-	var deck_label := Label.new()
-	deck_label.text = "Active deck"
-	decks.add_child(deck_label)
-	deck_picker = OptionButton.new()
-	decks.add_child(deck_picker)
-	deck_picker.item_selected.connect(select_deck)
-	deck_height = SpinBox.new()
-	deck_height.min_value = -10000
-	deck_height.max_value = 10000
-	deck_height.step = .1
-	deck_height.suffix = " m"
-	decks.add_child(deck_height)
-	new_deck = LineEdit.new()
-	new_deck.placeholder_text = "New deck ID"
-	new_deck.custom_minimum_size.x = 130
-	decks.add_child(new_deck)
-	for title: String in ["Add deck", "Set elevation", "Move room to deck"]:
-		var button := Button.new()
-		button.text = title
-		button.pressed.connect(deck_action.bind(title))
-		decks.add_child(button)
-	socket_picker = OptionButton.new()
-	decks.add_child(socket_picker)
-	var bind_button := Button.new()
-	bind_button.text = "Bind socket to active deck"
-	bind_button.pressed.connect(deck_action.bind("Bind socket"))
-	decks.add_child(bind_button)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size.y = 38
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
-	var tools := HBoxContainer.new()
-	scroll.add_child(tools)
-	for name: String in LevelCatalogue.all_modules():
-		var button := Button.new()
-		button.text = (
-			{
-				"Room01Straight": "Straight corridor",
-				"Room02Corner": "Corner corridor",
-				"Room03TJunction": "T-junction",
-				"Room04Chamber": "Chamber"
-			}
-			. get(name, name.substr(6))
-		)
-		tools.add_child(button)
-		button.pressed.connect(choose.bind(name))
-	for title: String in [
-		"Select / Move",
-		"Open passage",
-		"Standard door",
-		"Security door",
-		"Connect touching rooms",
-		"Connect sockets",
-		"Rotate (R)",
-		"Remove room + links",
-		"Disconnect selected",
-		"Entry",
-		"Destination"
-	]:
-		var button := Button.new()
-		button.text = title
-		tools.add_child(button)
-		button.pressed.connect(tool_action.bind(title))
+	toolbar.build()
+	path = toolbar.path
+	deck_picker = toolbar.deck_picker
+	deck_height = toolbar.deck_height
+	new_deck = toolbar.new_deck
+	socket_picker = toolbar.socket_picker
+	toolbar.map_action.connect(action)
+	toolbar.tool_action.connect(tool_action)
+	toolbar.deck_action.connect(deck_action)
+	toolbar.deck_selected.connect(select_deck)
+	toolbar.prefab_selected.connect(choose)
 	canvas = Canvas.new()
 	canvas.model = model
 	panel.add_child(canvas)
@@ -136,6 +65,7 @@ func select_deck(index: int) -> void:
 	canvas.first_socket.clear()
 	canvas.selected_connection = -1
 	refresh()
+	canvas.grab_focus.call_deferred()
 
 
 func deck_action(title: String) -> void:
@@ -169,12 +99,14 @@ func choose(name: String) -> void:
 	)
 	canvas.placing = true
 	canvas.connecting = false
+	canvas.grab_focus()
 	canvas.queue_redraw()
 
 
 func tool_action(title: String) -> void:
 	if busy:
 		return
+	canvas.grab_focus()
 	if title == "Select / Move":
 		canvas.placing = false
 		canvas.connecting = false
@@ -315,7 +247,7 @@ func refresh() -> void:
 	results.text += (
 		"\n".join(model.errors)
 		if not model.errors.is_empty()
-		else "Compatible corridor joins create open passages; room entrances create doors. Click a linked doorway to change its type. [E] opens/closes in 3D. · 8 m grid · MMB pan · wheel zoom · choose palette to place · select/drag to move · R rotate · connect: click source then destination socket (may snap destination)."
+		else "Compatible corridor joins create open passages; room entrances create doors. Click a linked doorway to change its type. [E] opens/closes in 3D. · 8 m grid · WASD/arrows pan · RMB/MMB drag pan · wheel zoom · choose palette to place · select/drag to move · R rotate · connect: click source then destination socket (may snap destination)."
 	)
 	var notices := LevelRoomComposer.warnings(model.layout)
 	if not notices.is_empty():
@@ -326,6 +258,7 @@ func refresh() -> void:
 func action(title: String) -> void:
 	if title == "Frame layout":
 		canvas.frame_layout()
+		canvas.grab_focus()
 		return
 	if busy:
 		return
