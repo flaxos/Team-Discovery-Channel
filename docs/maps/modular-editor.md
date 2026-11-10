@@ -6,6 +6,14 @@ Requires Godot 4.4.1 and the Phase 1 room kit. This plugin edits the existing `L
 
 Open the `client/` project in Godot. In **Project → Project Settings → Plugins**, enable **Modular Map Editor**. Click the **Modular Map** bottom-panel tab and drag its upper edge upward if needed. The initial path is `res://resources/levels/automatic_doors_demo.tres`; click **Open** to inspect the connected eight-instance door example using all four archetypes. `editor_demo.tres` remains a separate editable layout; it is not overwritten when the plugin opens.
 
+## Toolbar layout
+
+The top row groups **New / Open / Save**, the native layout path, full-map validation/rebuild/3D preview, and selected-room validation/preview. The next row contains **Select / Move**, **Rotate (R)**, **Frame layout**, **Connections**, **Room actions**, and deck/socket binding controls. Connection joining, classification and disconnect actions are in the **Connections** menu; endpoint/removal actions are in **Room actions**; deck add/elevation/move actions are in **Deck actions**. The **Bind socket** button binds the chosen socket to the active deck.
+
+The next two rows contain every structural prefab, ordered by occupied footprint area from small to large, then reserved height and stable ID for ties. Each button shows its footprint dimensions. Rows scroll horizontally on narrow panels, keeping editing controls separate from the prefab palette.
+
+**R** rotates the active placement preview or the selected room by 90°. It works immediately after choosing a prefab, clicking the canvas or using a toolbar button. It applies to the entire structural library, including large and vertical modules. Symmetric footprints may look unchanged; use the socket markers to see their orientation. Text fields and dropdowns retain normal keyboard input; Ctrl/Alt/Command combinations are not claimed by map navigation. A linked-room rotation that breaks sockets or causes overlap is rejected with an explicit correction message, preserving all connections. Disconnect deliberately before changing that room's orientation.
+
 ## Author a map
 
 - Select a prefab in the palette, hover over the canvas for an overlap-colored footprint/socket preview, and left-click to place. The grid is 8 m; **R** rotates the placement preview before placement.
@@ -15,7 +23,7 @@ Open the `client/` project in Godot. In **Project → Project Settings → Plugi
 - **Connect sockets** remains an advanced tool for snapping two explicit doorway markers together; its link also creates an operable door.
 - Invalid edits display errors and leave the prior layout intact. Connected-room moves/rotations are rejected if they invalidate any connection. Use **Disconnect selected** explicitly before moving an attached room; this is undoable. **Remove room + links** explicitly removes the room and incident links together.
 - Select a room and use **Entry** or **Destination** to assign required endpoint markers. New rooms receive stable generated IDs; all four archetypes use Phase 1 named markers.
-- Middle-mouse drag pans; mouse wheel zooms around the cursor. Green lines show connections, amber dots show sockets, selection has a white outline, and errors containing room IDs highlight those rooms red. Errors also appear in the scrollable results panel. ESC cancels placement/connection gestures.
+- With the canvas focused, **WASD or arrow keys** pan continuously. **Hold right or middle mouse and drag** to pan without placing or removing rooms; mouse wheel zooms around the cursor. Keyboard panning stops on key release or when focus leaves the canvas. Green lines show connections, amber dots show sockets, selection has a white outline, and errors containing room IDs highlight those rooms red. Errors also appear in the scrollable results panel. ESC cancels placement/connection gestures.
 - Use the editor's standard **Undo/Redo** commands (Edit menu / Ctrl+Z and the configured redo shortcut). Each accepted layout edit uses `EditorUndoRedoManager`; rejected edits do not enter history. View pan/zoom is not a layout edit.
 
 **Validate room** and **Preview room 3D** inspect only the selected room, with its sockets capped. Choose **Select / Move** and click the room first. These actions do not alter the authored layout or its connections.
@@ -83,3 +91,9 @@ Phase 2.5 Batch A expands the palette and rotated footprints; see the [structura
 Batch B adds active deck/elevation controls, socket deck bindings, Frame layout and the vertical/equipment palette. See the [vertical kit guide](modular-vertical-kit.md).
 
 Batch C adds room-preset selection, attachment position/yaw overrides and reset, role/clearance overlays, inactive-override notices and security-door access controls. See the [functional preset guide](modular-room-presets.md) for validation and UAT.
+
+### Editor input and toolbar UAT correction
+
+`test_modular_editor_controls` delivers real viewport key events to every prefab and selected-room type, checks Undo/Redo, text-field focus, toolbar row ordering and complete size-sorted palette coverage, keyboard direction/release/focus loss, right/middle drag behavior and connection-preserving rotation rejection. Native Godot editor verification additionally checks all fifteen palette buttons, canvas focus restoration, R from a toolbar button, selected-room rotation and keyboard panning. The inspected [native editor capture](../reviews/modular-editor-controls.png) shows the new row grouping.
+
+Manual follow-up: choose each prefab and press R while hovering over the canvas; select an unconnected room and repeat; use WASD and arrows, release keys, type in a path/deck field, then hold right mouse and drag. Confirm the map pans without placing anything, and zoom/selection still work. Inspect the Connections/Room actions/Deck actions menus and save/reopen a copy of your map. Existing SGC/game controls are outside the modular panel's focus scope.
