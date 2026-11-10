@@ -123,3 +123,5 @@ Batch C adds reusable contracts and neutral content. It does not complete the fu
 ## Delivery evidence
 
 Godot 4.4.1 full inventory: **58/58 checks passed** (`build/test-results/presets-full/`), including unchanged SGC/multiplayer coverage. Final preset/security acceptance passes (`presets-final-acceptance/`) after catalogue compatibility adjustments and optional-marker validation. Native Godot editor preset changes, attachment edits/invalid-edit rollback, security access editing, Undo/Redo, Rebuild and Preview 3D exit cleanly; the editor capture was inspected. The two-room fixture also builds through the actual headless CLI. Existing user maps, edited structural resources, project settings and Main scene remain byte-for-byte unchanged.
+
+The [Batch D integrated fixture](modular-integration-demo.md) now demonstrates these presets together with the complete structural kit, mixed door types, paired idle rings and a walkable deck connection. Earlier Batch C evidence above remains historical.

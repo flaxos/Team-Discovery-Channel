@@ -1,0 +1,44 @@
+{
+  "engine": "4.4.1.stable.official.49a5bc7b6",
+  "layout": "client/resources/levels/modular_integration_demo.tres",
+  "layout_sha256": "4fe47618aaf919c2e0aa680eb1562640382868b98ac82263a4c66daca91e68bc",
+  "full_regression": {
+    "passed": true,
+    "checks": 63,
+    "duration_seconds": 314.525
+  },
+  "focused": {
+    "passed": true,
+    "checks": 4
+  },
+  "runtime_code_modified": false,
+  "structural_packed_scenes": 15,
+  "room_instances": 20,
+  "connections": 19,
+  "decks": [
+    "deck0",
+    "upper"
+  ],
+  "physical_profiles": [
+    "Player",
+    "SGCAirman",
+    "JaffaGuard"
+  ],
+  "physical_routes_both_directions": [
+    [
+      "hub",
+      "command"
+    ],
+    [
+      "hub",
+      "lower_rings"
+    ],
+    [
+      "cargo",
+      "barracks"
+    ]
+  ],
+  "overview": "docs/reviews/modular-integration-overview.png",
+  "overview_inspected": true,
+  "manual_editor_uat": "pending human sign-off"
+}
