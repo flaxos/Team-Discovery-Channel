@@ -127,6 +127,10 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 		current_state = State.PATROL
 
 
+func _resume_state() -> State:
+	return State.ADVANCE if patrol_points.is_empty() else State.PATROL
+
+
 func _patrol_destination() -> Vector3:
 	if not patrol_loop and patrol_laps > 0:
 		return patrol_points[-1]
@@ -247,13 +251,25 @@ func _alert_nearby_formation_jaffa() -> void:
 	for child: Node in enemies.get_children():
 		var other: JaffaAI = child as JaffaAI
 		if other != null and other != self and is_instance_valid(other):
-			if other.current_state == State.MARCHING_FORMATION or other.current_state == State.ADVANCE:
+			if other.current_state == State.PATROL and other.global_position.distance_to(global_position) > combat_range:
+				continue
+			if other.current_state in [State.MARCHING_FORMATION, State.ADVANCE, State.PATROL]:
 				if other.current_target == null and current_target != null:
 					other.current_target = current_target
 				other.break_formation_and_engage()
 
 
 func _assign_tactical_role() -> void:
+	var level := LevelNavigator.find_level(self)
+	if level != null:
+		# Modular levels: cover comes from room markers; without one, hold the current position.
+		var threat := current_target.global_position if current_target != null else global_position
+		var cover := LevelNavigator.cover_position(level, self, threat)
+		is_tactical_flanking = false
+		tactical_cover_position = cover if cover != Vector3.INF else global_position
+		tactical_destination = tactical_cover_position
+		return
+
 	var is_west: bool = (global_position.x < 0.0 or column_x_lane < 0.0)
 
 	if formation_rank == 1:
@@ -292,6 +308,12 @@ func _find_nearest_cover(is_west: bool) -> Vector3:
 
 func _process_cover(delta: float) -> void:
 	_find_nearest_target()
+
+	if current_target == null and not patrol_points.is_empty():
+		# Patrols do not hold cover forever: wait out the suppression timer, then resume.
+		current_state = State.COMBAT
+		suppressive_hold_timer = 4.0
+		return
 
 	if current_target != null:
 		var dist_to_target: float = global_position.distance_to(current_target.global_position)
@@ -353,7 +375,7 @@ func _process_combat_state(delta: float) -> void:
 			return
 		_set_crouching(false)
 		_reset_staff_position()
-		current_state = State.ADVANCE
+		current_state = _resume_state()
 		var advance_target := _overrun_destination()
 		_advance_towards(advance_target, delta, march_speed)
 		return
@@ -400,6 +422,8 @@ func _process_advance_state(delta: float) -> void:
 
 	if current_target == null:
 		# Proceed to march steadily into the base preserving tactical lane cohesion
+		if current_state == State.ADVANCE:
+			current_state = _resume_state()
 		var advance_target := _overrun_destination()
 		_advance_towards(advance_target, delta, march_speed)
 		return
@@ -409,6 +433,11 @@ func _process_advance_state(delta: float) -> void:
 		current_state = State.MELEE
 		_process_melee(delta)
 	elif dist <= combat_range and _has_line_of_sight(current_target):
+		if current_state == State.PATROL:
+			# A patrol reacts like an interrupted column: lead suppresses, the rest take cover.
+			break_formation_and_engage()
+			_alert_nearby_formation_jaffa()
+			return
 		current_state = State.COMBAT
 		_process_combat(delta, dist)
 	else:
@@ -691,7 +720,7 @@ func _on_damage_taken(_amount: float, source: Node, _damage_type: String) -> voi
 	if source is Node3D and is_instance_valid(source):
 		current_target = source as Node3D
 
-	if current_state == State.MARCHING_FORMATION or current_state == State.ADVANCE:
+	if current_state in [State.MARCHING_FORMATION, State.ADVANCE, State.PATROL]:
 		break_formation_and_engage()
 		_alert_nearby_formation_jaffa()
 
@@ -750,7 +779,7 @@ func _on_stunned(duration: float) -> void:
 
 func _on_recovered_from_stun() -> void:
 	if current_state == State.STUNNED:
-		current_state = State.ADVANCE
+		current_state = _resume_state()
 		if stun_fx != null:
 			stun_fx.visible = false
 		print("Jaffa Guard recovered from Zat stun.")
