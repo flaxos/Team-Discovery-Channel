@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelCompositeDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCompositeDefinition.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/levels/composites/cargo_wing.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"cargo_wing"
+label = "Cargo and storage wing"
+description = "Through-corridor junction with a long cargo store and a small store room."
+synonyms = PackedStringArray("storage", "stores", "warehouse", "supply")
+layout = ExtResource("2")
+gameplay_roles = PackedStringArray("storage", "resupply", "side_objective")

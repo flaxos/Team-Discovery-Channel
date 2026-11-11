@@ -1,0 +1,100 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_7f71f"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_dj13g"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_65kjt"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room05XJunction.tres" id="4_0kqsc"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="5_jpp1g"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room15TransportChamber.tres" id="6_hxvad"]
+[ext_resource type="Resource" path="res://resources/room_presets/cargo.tres" id="7_kge81"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="8_fjdm3"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="9_h3qrm"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="10_e4fi8"]
+
+[sub_resource type="Resource" id="Resource_ow4q2"]
+script = ExtResource("1_7f71f")
+from_instance = &"spine"
+from_socket = &"north"
+to_instance = &"store_long"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_sl4ve"]
+script = ExtResource("1_7f71f")
+from_instance = &"spine"
+from_socket = &"east"
+to_instance = &"store_small"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_5njng"]
+script = ExtResource("2_dj13g")
+id = &"spine"
+module = ExtResource("4_0kqsc")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_jpp1g")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_65kjt")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_j76gp"]
+script = ExtResource("2_dj13g")
+id = &"store_long"
+module = ExtResource("6_hxvad")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_jpp1g")]([])
+socket_decks = {}
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_kge81")
+attachment_overrides = Array[ExtResource("3_65kjt")]([])
+theme_id = &""
+theme_zone = &""
+role = &"cargo"
+
+[sub_resource type="Resource" id="Resource_4m7mf"]
+script = ExtResource("2_dj13g")
+id = &"store_small"
+module = ExtResource("8_fjdm3")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_jpp1g")]([])
+socket_decks = {}
+position = Vector2(8, -3.49691e-07)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_kge81")
+attachment_overrides = Array[ExtResource("3_65kjt")]([])
+theme_id = &""
+theme_zone = &""
+role = &"cargo"
+
+[resource]
+script = ExtResource("9_h3qrm")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"neutral"
+theme_zones = Array[ExtResource("10_e4fi8")]([])
+instances = Array[ExtResource("2_dj13g")]([SubResource("Resource_5njng"), SubResource("Resource_j76gp"), SubResource("Resource_4m7mf")])
+connections = Array[ExtResource("1_7f71f")]([SubResource("Resource_ow4q2"), SubResource("Resource_sl4ve")])
+entry_instance = &"spine"
+entry_marker = &"entry"
+destination_instance = &"store_long"
+destination_marker = &"destination"

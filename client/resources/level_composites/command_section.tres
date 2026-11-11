@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelCompositeDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCompositeDefinition.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/levels/composites/command_section.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"command_section"
+label = "Command section"
+description = "Checkpoint antechamber guarding a large command room through a security door, with an observation room behind it."
+synonyms = PackedStringArray("command", "bridge", "headquarters", "operations")
+layout = ExtResource("2")
+gameplay_roles = PackedStringArray("objective_area", "defensible", "single_guarded_entrance")

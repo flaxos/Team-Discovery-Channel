@@ -1,0 +1,128 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_ia2es"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_vpknp"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_jrrv3"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room05XJunction.tres" id="4_ay6us"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="5_jlit6"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="6_xguii"]
+[ext_resource type="Resource" path="res://resources/room_presets/jaffa_barracks.tres" id="7_uwd7y"]
+[ext_resource type="Resource" path="res://resources/room_presets/armoury.tres" id="8_lxh1x"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="9_6jeil"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="10_fhoa8"]
+
+[sub_resource type="Resource" id="Resource_jegb7"]
+script = ExtResource("1_ia2es")
+from_instance = &"spine"
+from_socket = &"north"
+to_instance = &"barracks_a"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_nfbrh"]
+script = ExtResource("1_ia2es")
+from_instance = &"spine"
+from_socket = &"east"
+to_instance = &"barracks_b"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_jefi6"]
+script = ExtResource("1_ia2es")
+from_instance = &"barracks_a"
+from_socket = &"east"
+to_instance = &"armoury"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_1uu6k"]
+script = ExtResource("2_vpknp")
+id = &"spine"
+module = ExtResource("4_ay6us")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_jlit6")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_jrrv3")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_n14qv"]
+script = ExtResource("2_vpknp")
+id = &"barracks_a"
+module = ExtResource("6_xguii")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_jlit6")]([])
+socket_decks = {}
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_uwd7y")
+attachment_overrides = Array[ExtResource("3_jrrv3")]([])
+theme_id = &""
+theme_zone = &""
+role = &"jaffa_barracks"
+
+[sub_resource type="Resource" id="Resource_nv0lc"]
+script = ExtResource("2_vpknp")
+id = &"barracks_b"
+module = ExtResource("6_xguii")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_jlit6")]([])
+socket_decks = {}
+position = Vector2(8, -3.49691e-07)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_uwd7y")
+attachment_overrides = Array[ExtResource("3_jrrv3")]([])
+theme_id = &""
+theme_zone = &""
+role = &"jaffa_barracks"
+
+[sub_resource type="Resource" id="Resource_s3r71"]
+script = ExtResource("2_vpknp")
+id = &"armoury"
+module = ExtResource("6_xguii")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_jlit6")]([])
+socket_decks = {}
+position = Vector2(-8, -8)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("8_lxh1x")
+attachment_overrides = Array[ExtResource("3_jrrv3")]([])
+theme_id = &""
+theme_zone = &""
+role = &"armoury"
+
+[resource]
+script = ExtResource("9_6jeil")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"neutral"
+theme_zones = Array[ExtResource("10_fhoa8")]([])
+instances = Array[ExtResource("2_vpknp")]([SubResource("Resource_1uu6k"), SubResource("Resource_n14qv"), SubResource("Resource_nv0lc"), SubResource("Resource_s3r71")])
+connections = Array[ExtResource("1_ia2es")]([SubResource("Resource_jegb7"), SubResource("Resource_nfbrh"), SubResource("Resource_jefi6")])
+entry_instance = &"spine"
+entry_marker = &"entry"
+destination_instance = &"armoury"
+destination_marker = &"destination"

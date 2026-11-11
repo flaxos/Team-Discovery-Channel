@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelCompositeDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCompositeDefinition.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/levels/composites/generator_section.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"generator_section"
+label = "Engineering and generator section"
+description = "Access corridor into an engineering bay that leads on to a generator room."
+synonyms = PackedStringArray("generator", "power", "engineering", "reactor")
+layout = ExtResource("2")
+gameplay_roles = PackedStringArray("objective_area", "dead_end")

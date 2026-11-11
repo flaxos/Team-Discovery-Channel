@@ -1,0 +1,127 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_0pds8"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_ogns6"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_42g1e"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="4_a13wb"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="5_6nd17"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="6_nu712"]
+[ext_resource type="Resource" path="res://resources/room_presets/security_checkpoint.tres" id="7_a7jof"]
+[ext_resource type="Resource" path="res://resources/room_presets/security_control.tres" id="8_2lt6j"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="9_3sp1q"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="10_4ba3l"]
+
+[sub_resource type="Resource" id="Resource_npr6o"]
+script = ExtResource("1_0pds8")
+from_instance = &"approach"
+from_socket = &"north"
+to_instance = &"checkpoint"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_m0o3f"]
+script = ExtResource("1_0pds8")
+from_instance = &"checkpoint"
+from_socket = &"east"
+to_instance = &"control"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_hyr6w"]
+script = ExtResource("1_0pds8")
+from_instance = &"checkpoint"
+from_socket = &"south"
+to_instance = &"beyond"
+to_socket = &"north"
+security_id = &"gate"
+initially_locked = false
+state = "security_door"
+
+[sub_resource type="Resource" id="Resource_rb8bj"]
+script = ExtResource("2_ogns6")
+id = &"approach"
+module = ExtResource("4_a13wb")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_6nd17")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_42g1e")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_027hx"]
+script = ExtResource("2_ogns6")
+id = &"checkpoint"
+module = ExtResource("6_nu712")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_6nd17")]([])
+socket_decks = {}
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_a7jof")
+attachment_overrides = Array[ExtResource("3_42g1e")]([])
+theme_id = &""
+theme_zone = &""
+role = &"security_checkpoint"
+
+[sub_resource type="Resource" id="Resource_i1bc1"]
+script = ExtResource("2_ogns6")
+id = &"control"
+module = ExtResource("6_nu712")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_6nd17")]([])
+socket_decks = {}
+position = Vector2(-8, -8)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("8_2lt6j")
+attachment_overrides = Array[ExtResource("3_42g1e")]([])
+theme_id = &""
+theme_zone = &""
+role = &"security_control"
+
+[sub_resource type="Resource" id="Resource_3v3tg"]
+script = ExtResource("2_ogns6")
+id = &"beyond"
+module = ExtResource("4_a13wb")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_6nd17")]([])
+socket_decks = {}
+position = Vector2(-1.39876e-06, -16)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_42g1e")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[resource]
+script = ExtResource("9_3sp1q")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"neutral"
+theme_zones = Array[ExtResource("10_4ba3l")]([])
+instances = Array[ExtResource("2_ogns6")]([SubResource("Resource_rb8bj"), SubResource("Resource_027hx"), SubResource("Resource_i1bc1"), SubResource("Resource_3v3tg")])
+connections = Array[ExtResource("1_0pds8")]([SubResource("Resource_npr6o"), SubResource("Resource_m0o3f"), SubResource("Resource_hyr6w")])
+entry_instance = &"approach"
+entry_marker = &"entry"
+destination_instance = &"beyond"
+destination_marker = &"destination"

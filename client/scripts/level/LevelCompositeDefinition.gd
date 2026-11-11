@@ -6,3 +6,4 @@ extends Resource
 @export_multiline var description: String
 @export var synonyms: PackedStringArray = []
 @export var layout: LevelLayout
+@export var gameplay_roles: PackedStringArray = []

@@ -1,0 +1,44 @@
+{
+ "brief": "A two-deck Asgard research facility with a command area, medical section and transport room.",
+ "layout": "res://resources/levels/ai2_asgard_research_facility.tres",
+ "requirements": [
+  {
+   "check": "roles",
+   "required": {
+    "command": 1,
+    "laboratory_medical": 1,
+    "ring_transport": 2,
+    "engineering": 1
+   }
+  },
+  {
+   "check": "route",
+   "through": [
+    "entry",
+    "medical",
+    "command",
+    "rings_upper"
+   ],
+   "label": "entry to medical, command and upper transport on foot"
+  },
+  {
+   "check": "only_via",
+   "room": "command",
+   "via": "ramp",
+   "label": "upper deck is reached on foot only by the ramp"
+  },
+  {
+   "check": "dead_ends",
+   "allowed": [
+    "entry",
+    "rings_lower",
+    "engineering",
+    "rings_upper",
+    "observation"
+   ]
+  },
+  {
+   "check": "connected"
+  }
+ ]
+}

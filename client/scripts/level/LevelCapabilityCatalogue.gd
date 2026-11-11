@@ -216,6 +216,7 @@ static func generate(detail: bool = false, query: String = "", kind: String = "a
 		for preset in roles:
 			if str(module.id) in preset.compatible_modules:
 				record.presets.append(str(preset.id))
+		record["tactical"] = module_tactics(module, entry)
 		var item := LevelModuleInstance.new()
 		item.module = module
 		for theme in themes:
@@ -290,7 +291,8 @@ static func generate(detail: bool = false, query: String = "", kind: String = "a
 				"modules": encode(preset.compatible_modules),
 				"attachments": components,
 				"systems": encode(preset.system_references),
-				"resource": preset.resource_path
+				"resource": preset.resource_path,
+				"tactical": preset_tactics(preset)
 			}
 		)
 	for theme in themes:
@@ -368,7 +370,12 @@ static func generate(detail: bool = false, query: String = "", kind: String = "a
 			"synonyms": encode(composite.synonyms),
 			"resource": composite.resource_path,
 			"layout": composite.layout.resource_path,
-			"openings": openings
+			"openings": openings,
+			"rooms": composite.layout.instances.size(),
+			"entry": str(composite.layout.entry_instance),
+			"decks": composite.layout.decks.keys(),
+			"gameplay_roles": encode(composite.gameplay_roles),
+			"presets": composite_presets(composite.layout)
 		}
 		if detail:
 			record["members"] = members
@@ -397,6 +404,8 @@ static func generate(detail: bool = false, query: String = "", kind: String = "a
 		"source_digest": source_digest(paths),
 		"sources": encode(paths) if detail else [],
 		"grid_metres": LevelCatalogue.GRID_SIZE,
+		"tactical_basis":
+		"authored = designer intent in semantics.tres; derived = read from module/preset resources; inferred = heuristic from openings only. None of it is play-tested.",
 		"agent_clearance":
 		{
 			"radius": profile.agent_radius,
@@ -405,6 +414,137 @@ static func generate(detail: bool = false, query: String = "", kind: String = "a
 			"max_slope": profile.agent_max_slope
 		},
 		"capabilities": filtered
+	}
+
+
+static func module_tactics(
+	module: LevelModuleDefinition, entry: LevelCapabilityDescription
+) -> Dictionary:
+	var narrowest := INF
+	var families := {}
+	var rise := 0.0
+	for socket in module.sockets:
+		narrowest = minf(narrowest, socket.width)
+		families[str(socket.family)] = true
+		rise = maxf(rise, absf(socket.local_transform.origin.y))
+	var height := module.occupied.size.y
+	if not module.interiors.is_empty():
+		height = module.interiors[0].size.y
+	var markers: Array = []
+	for marker: Dictionary in scene_metadata(module.scene).markers:
+		markers.append(marker.id)
+	var openings := module.sockets.size()
+	var choke := "medium"
+	if openings <= 2 and narrowest <= 3.0:
+		choke = "high"
+	elif openings >= 4 or narrowest > 3.0:
+		choke = "low"
+	return {
+		"authored":
+		{
+			"gameplay_roles": encode(entry.gameplay_roles if entry != null else PackedStringArray()),
+			"sightlines": entry.sightlines if entry != null else ""
+		},
+		"derived":
+		{
+			"openings": openings,
+			"families": families.keys(),
+			"narrowest_opening_m": narrowest,
+			"reserved_area_m2": module.occupied.size.x * module.occupied.size.z,
+			"clear_height_m": height,
+			"deck_rise_m": rise,
+			"markers": markers,
+			"cover_props": 0,
+			"equipment_anchors": module.equipment_anchors.keys()
+		},
+		"inferred": {"chokepoint_potential": choke}
+	}
+
+
+static func preset_tactics(preset: LevelRoomPreset) -> Dictionary:
+	var groups := {"objective": [], "cover": [], "patrol": [], "spawn": []}
+	var blocking := 0
+	for attachment in preset.attachments:
+		var component := str(attachment.component)
+		if component in ["objective", "interaction", "console", "dhd", "gate", "rings"]:
+			groups.objective.append(str(attachment.id))
+		elif groups.has(component):
+			groups[component].append(str(attachment.id))
+		if attachment.blocks_movement or attachment.placeholder_size != Vector3.ZERO:
+			blocking += 1
+	return {
+		"derived":
+		{
+			"objective_locations": groups.objective,
+			"cover_attachments": groups.cover,
+			"patrol_markers": groups.patrol,
+			"spawn_markers": groups.spawn,
+			"solid_props": blocking
+		}
+	}
+
+
+static func composite_presets(layout: LevelLayout) -> Array:
+	var result: Array = []
+	for item in layout.instances:
+		if item.room_preset != null and not str(item.room_preset.id) in result:
+			result.append(str(item.room_preset.id))
+	return result
+
+
+## One short line of facts per capability, for choosing before asking for detail.
+static func summarise(data: Dictionary) -> Dictionary:
+	var lines: Array = []
+	for record: Dictionary in data.capabilities:
+		var line: Dictionary = {"kind": record.kind, "id": record.id, "name": record.name}
+		if record.kind == "module":
+			var sockets := {}
+			for socket: Dictionary in record.sockets:
+				sockets[socket.family] = sockets.get(socket.family, []) + [socket.id]
+			line.merge(
+				{
+					"size_m": "%dx%d" % [record.footprint[0], record.footprint[1]],
+					"sockets": sockets,
+					"roles": record.tactical.authored.gameplay_roles,
+					"sightlines": record.tactical.authored.sightlines,
+					"chokepoint_inferred": record.tactical.inferred.chokepoint_potential,
+					"presets": record.presets.size()
+				}
+			)
+			if record.tactical.derived.deck_rise_m > 0.0:
+				line["deck_rise_m"] = record.tactical.derived.deck_rise_m
+		elif record.kind == "preset":
+			line.merge(
+				{
+					"modules": record.modules,
+					"objectives": record.tactical.derived.objective_locations,
+					"cover": record.tactical.derived.cover_attachments.size(),
+					"patrol_markers": record.tactical.derived.patrol_markers.size(),
+					"about": record.description
+				}
+			)
+		elif record.kind == "theme":
+			line.merge({"art_status": record.art_status, "fallback": record.fallback})
+		else:
+			line.merge(
+				{
+					"rooms": record.rooms,
+					"entry": record.entry,
+					"decks": record.decks,
+					"presets": record.presets,
+					"roles": record.gameplay_roles,
+					"openings": record.openings,
+					"about": record.description
+				}
+			)
+		lines.append(line)
+	return {
+		"schema_version": data.schema_version,
+		"summary": true,
+		"source_digest": data.source_digest,
+		"tactical_basis": data.tactical_basis,
+		"plan_kinds": LevelPlanner.KINDS,
+		"capabilities": lines
 	}
 
 

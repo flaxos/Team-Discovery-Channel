@@ -7,90 +7,120 @@ id = &"room01"
 label = "Straight corridor"
 description = "Opposing narrow corridor sockets for regular patrol routes."
 synonyms = PackedStringArray("hallway","straight","patrol")
+gameplay_roles = PackedStringArray("patrol_route","connector")
+sightlines = "long straight view end to end"
 [sub_resource type="Resource" id="e1"]
 script = ExtResource("2")
 id = &"room02"
 label = "Corner corridor"
 description = "Narrow right-angle corridor and a sightline break."
 synonyms = PackedStringArray("l shaped","corner","stealth","hallway")
+gameplay_roles = PackedStringArray("connector","sightline_break")
+sightlines = "broken by the corner"
 [sub_resource type="Resource" id="e2"]
 script = ExtResource("2")
 id = &"room03"
 label = "T-junction"
 description = "Branching narrow corridor intersection with a capped unused branch when unconnected."
 synonyms = PackedStringArray("t junction","branch","intersection")
+gameplay_roles = PackedStringArray("junction","branch")
+sightlines = "three directions meet"
 [sub_resource type="Resource" id="e3"]
 script = ExtResource("2")
 id = &"room04"
 label = "Standard chamber"
 description = "Reusable compact chamber; role-independent shell with configurable entrances."
 synonyms = PackedStringArray("small room","rectangular room","chamber")
+gameplay_roles = PackedStringArray("small_room","guard_post","checkpoint")
+sightlines = "enclosed, short range"
 [sub_resource type="Resource" id="e4"]
 script = ExtResource("2")
 id = &"room05"
 label = "X-junction"
 description = "Four-way narrow corridor intersection with uninterrupted central sightlines."
 synonyms = PackedStringArray("crossroads","four way","x junction","intersection")
+gameplay_roles = PackedStringArray("junction","hub")
+sightlines = "long views along both axes"
 [sub_resource type="Resource" id="e5"]
 script = ExtResource("2")
 id = &"room06"
 label = "Wide straight corridor"
 description = "Expanded straight corridor for two-way squads and patrol formations."
 synonyms = PackedStringArray("wide hallway","squad movement","firefight")
+gameplay_roles = PackedStringArray("patrol_route","squad_movement")
+sightlines = "long straight view, wide"
 [sub_resource type="Resource" id="e6"]
 script = ExtResource("2")
 id = &"room07"
 label = "Wide corner"
 description = "Expanded right-angle corridor preserving squad clearance."
 synonyms = PackedStringArray("wide l shaped","squad","corner")
+gameplay_roles = PackedStringArray("connector","sightline_break")
+sightlines = "broken by the corner, wide"
 [sub_resource type="Resource" id="e7"]
 script = ExtResource("2")
 id = &"room08"
 label = "Wide junction"
 description = "Expanded four-way junction; an unused capped opening provides a T configuration."
 synonyms = PackedStringArray("wide t","wide x","intersection","branch")
+gameplay_roles = PackedStringArray("junction","hub","squad_movement")
+sightlines = "long views along both axes, wide"
 [sub_resource type="Resource" id="e8"]
 script = ExtResource("2")
 id = &"room09"
 label = "Corridor width adapter"
 description = "Explicit transition between narrow and wide connector families with a level threshold."
 synonyms = PackedStringArray("transition","adapter","narrow wide")
+gameplay_roles = PackedStringArray("transition","chokepoint")
+sightlines = "narrows from wide to narrow"
 [sub_resource type="Resource" id="e9"]
 script = ExtResource("2")
 id = &"room10"
 label = "Long rectangular chamber"
 description = "Elongated room with multiple entrances along its long walls."
 synonyms = PackedStringArray("barracks","storage","long room","laboratory")
+gameplay_roles = PackedStringArray("medium_room","objective_room","quarters")
+sightlines = "open interior, 16 m long axis"
 [sub_resource type="Resource" id="e10"]
 script = ExtResource("2")
 id = &"room11"
 label = "Large square chamber"
 description = "Large reusable square room with multiple entrances on each edge."
 synonyms = PackedStringArray("command centre","control center","cargo","large room")
+gameplay_roles = PackedStringArray("large_room","objective_room","command","defensible_room")
+sightlines = "open interior, 16 m across"
 [sub_resource type="Resource" id="e11"]
 script = ExtResource("2")
 id = &"room13"
 label = "Large special hall"
 description = "Large elongated hall for substantial machinery or ceremonial and command configurations."
 synonyms = PackedStringArray("ceremonial","command hall","large room")
+gameplay_roles = PackedStringArray("hall","objective_room","ceremonial")
+sightlines = "open interior, up to 24 m"
 [sub_resource type="Resource" id="e12"]
 script = ExtResource("2")
 id = &"room14"
 label = "Adjacent-deck ramp"
 description = "Enclosed ramp and protected landings; requires matching lower and upper deck bindings."
 synonyms = PackedStringArray("vertical","stairs alternative","deck connection","ramp")
+gameplay_roles = PackedStringArray("deck_transition","chokepoint")
+sightlines = "inclined, long view along the ramp"
 [sub_resource type="Resource" id="e13"]
 script = ExtResource("2")
 id = &"room15"
 label = "Tall transport chamber"
 description = "Tall clear volume for shared transport rings and other compatible room configurations."
 synonyms = PackedStringArray("ring room","transport area","teleport interface")
+gameplay_roles = PackedStringArray("transport","small_room")
+sightlines = "enclosed, tall"
 [sub_resource type="Resource" id="e14"]
 script = ExtResource("2")
 id = &"room16"
 label = "Gate and hangar shell"
 description = "Equipment-scale clear shell with personnel, cargo and large equipment entrances."
 synonyms = PackedStringArray("stargate chamber","glider bay","hangar","large gate")
+gameplay_roles = PackedStringArray("hangar","gate_room","staging")
+sightlines = "very open, up to 32 m"
 [resource]
 script = ExtResource("1")
 entries = Array[ExtResource("2")]([SubResource("e0"),SubResource("e1"),SubResource("e2"),SubResource("e3"),SubResource("e4"),SubResource("e5"),SubResource("e6"),SubResource("e7"),SubResource("e8"),SubResource("e9"),SubResource("e10"),SubResource("e11"),SubResource("e12"),SubResource("e13"),SubResource("e14")])
