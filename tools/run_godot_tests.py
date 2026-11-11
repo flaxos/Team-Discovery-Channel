@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -125,7 +126,9 @@ def main(argv: list[str] | None = None) -> int:
     records = []
     excluded = [name for name in inventory(args.project) if name not in selected]
     with tempfile.TemporaryDirectory(prefix='tdc-tests-') as data:
-        env = dict(os.environ, XDG_DATA_HOME=data, XDG_CONFIG_HOME=data, XDG_CACHE_HOME=data)
+        # Suites that shell out to repository tools must find the same engine this runner was given.
+        env = dict(os.environ, XDG_DATA_HOME=data, XDG_CONFIG_HOME=data, XDG_CACHE_HOME=data,
+                   GODOT=shutil.which(args.godot) or args.godot)
         version_result = execute([args.godot, '--version'], 15, env, args.output / 'version.log')
         version = version_result['output'].strip()
         if not version_result['passed'] or not re.match(r'^4\.4\.1(?:[.\s-]|$)', version):
