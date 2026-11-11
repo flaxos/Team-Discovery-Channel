@@ -28,7 +28,7 @@ const FIELDS: Dictionary = {
 	"deck": ["op", "id", "elevation", "elevations"],
 	"bind_socket": ["op", "id", "socket", "deck"],
 	"endpoint": ["op", "kind", "id", "marker"],
-	"composite": ["op", "composite_id", "prefix", "at", "turn", "deck_map"],
+	"composite": ["op", "composite_id", "prefix", "at", "turn", "deck_map", "attach"],
 	"disconnect": ["op", "from", "from_socket", "to", "to_socket"],
 	"remove": ["op", "id", "remove_links"],
 	"transport":
@@ -336,13 +336,24 @@ static func operation(layout: LevelLayout, data: Dictionary) -> Array:
 					return [
 						issue("unsupported_field", "Unknown attach field: " + str(key), [str(id)])
 					]
-			var errors := LevelAssembler.snap(
-				layout,
-				id,
-				StringName(str(attach.get("socket", ""))),
-				StringName(str(attach.get("target", ""))),
-				StringName(str(attach.get("target_socket", "")))
+			# Either socket may be omitted: the first free pair that fits is used, in
+			# declared socket order, so the result is repeatable.
+			var target_id := StringName(str(attach.get("target", "")))
+			var mine: Array = [str(attach.socket)] if attach.has("socket") else free_sockets(layout, id)
+			var theirs: Array = (
+				[str(attach.target_socket)]
+				if attach.has("target_socket")
+				else free_sockets(layout, target_id)
 			)
+			var errors := PackedStringArray(
+				["No free socket pair fits: %s -> %s" % [id, target_id]]
+			)
+			for a: String in mine:
+				for b: String in theirs:
+					if not errors.is_empty():
+						var tried := LevelAssembler.snap(layout, id, StringName(a), target_id, StringName(b))
+						if tried.is_empty() or (mine.size() == 1 and theirs.size() == 1):
+							errors = tried
 			if not errors.is_empty():
 				return messages(errors, layout)
 			var connection := layout.connections[-1]
@@ -572,6 +583,23 @@ static func operation(layout: LevelLayout, data: Dictionary) -> Array:
 	return []
 
 
+static func free_sockets(layout: LevelLayout, id: StringName) -> Array:
+	var result: Array = []
+	var item := layout.instance(id)
+	if item == null or item.module == null:
+		return result
+	var taken := {}
+	for value in layout.connections:
+		if value.from_instance == id:
+			taken[value.from_socket] = true
+		if value.to_instance == id:
+			taken[value.to_socket] = true
+	for socket in item.module.sockets:
+		if not taken.has(socket.id) and item.allows(socket.id):
+			result.append(str(socket.id))
+	return result
+
+
 static func configure(item: LevelModuleInstance, preset_id: String) -> Array:
 	var preset := (
 		LevelCapabilityCatalogue.preset_by_id(StringName(preset_id)) if preset_id != "" else null
@@ -638,6 +666,49 @@ static func place_composite(layout: LevelLayout, data: Dictionary) -> Array:
 	if composite == null:
 		return [issue("unknown_composite", "Unknown composite template")]
 	var prefix := str(data.get("prefix", ""))
+	var join: Dictionary = {}
+	if data.has("attach") and data.attach is Dictionary:
+		var named: Dictionary = data.attach
+		var opening := str(named.get("opening", str(composite.layout.entry_instance)))
+		if not "/" in opening or not named.has("target_socket"):
+			# Unnamed sockets: try free pairs on a copy and keep the first that validates.
+			var member := composite.layout.instance(StringName(opening.get_slice("/", 0)))
+			if member == null:
+				return [issue("invalid_attach", "opening must name a room of the composite")]
+			var mine: Array = [opening.get_slice("/", 1)] if "/" in opening else free_sockets(composite.layout, member.id)
+			var theirs: Array = (
+				[str(named.target_socket)]
+				if named.has("target_socket")
+				else free_sockets(layout, StringName(str(named.get("target", ""))))
+			)
+			for a: String in mine:
+				for b: String in theirs:
+					var exact := data.merged(
+						{"attach": named.merged({"opening": str(member.id) + "/" + a, "target_socket": b}, true)},
+						true
+					)
+					var trial := Model.copy(layout)
+					if (
+						place_composite(trial, exact).is_empty()
+						and LevelLayoutValidator.validate(trial, false).is_empty()
+					):
+						return place_composite(layout, exact)
+			return [
+				issue(
+					"composite_does_not_fit",
+					"No free socket pair places %s against %s without overlap" % [composite.id, named.get("target", "")],
+					[str(named.get("target", ""))],
+					[],
+					"Attach to a room with a free doorway facing open space, or name another opening."
+				)
+			]
+	if data.has("attach"):
+		# Solve the group's position from one named opening, like a single room's attach.
+		var solved := composite_pose(layout, composite, data.attach)
+		if solved.has("errors"):
+			return solved.errors
+		join = data.attach
+		data = data.merged({"at": solved.at, "turn": solved.turn}, true)
 	if not identifier(prefix) or not vector_ok(data.get("at"), 2):
 		return [
 			issue(
@@ -705,7 +776,67 @@ static func place_composite(layout: LevelLayout, data: Dictionary) -> Array:
 		layout.entry_instance = ids[template.entry_instance]
 	if layout.destination_instance == &"":
 		layout.destination_instance = ids[template.destination_instance]
+	if not join.is_empty():
+		var opening := str(join.opening).split("/")
+		var link: Dictionary = {
+			"op": "connect",
+			"from": str(join.get("target", "")),
+			"from_socket": str(join.get("target_socket", "")),
+			"to": prefix + "_" + opening[0],
+			"to_socket": opening[1]
+		}
+		if join.has("type"):
+			link["type"] = str(join.type)
+		return operation(layout, link)
 	return []
+
+
+## Position and turn that bring a composite's named opening onto a target socket.
+static func composite_pose(
+	layout: LevelLayout, composite: LevelCompositeDefinition, attach: Variant
+) -> Dictionary:
+	if not attach is Dictionary or not attach.get("opening") is String:
+		return {"errors": [issue("invalid_attach", "attach needs opening, target and target_socket")]}
+	for key: Variant in attach:
+		if not str(key) in ["opening", "target", "target_socket", "type"]:
+			return {"errors": [issue("unsupported_field", "Unknown attach field: " + str(key))]}
+	var opening := str(attach.opening).split("/")
+	var member := composite.layout.instance(StringName(opening[0])) if opening.size() == 2 else null
+	var target := layout.instance(StringName(str(attach.get("target", ""))))
+	if member == null or target == null:
+		return {
+			"errors":
+			[
+				issue(
+					"invalid_attach",
+					"opening must be member/socket of the composite and target an existing room",
+					[str(attach.get("target", ""))],
+					[],
+					"List openings with catalogue --kind composite."
+				)
+			]
+		}
+	# Solve on a scratch pair with the shared snap, then apply the same rigid motion to all.
+	var scratch := LevelLayout.new()
+	scratch.decks = layout.decks.duplicate()
+	var fixed := target.duplicate() as LevelModuleInstance
+	fixed.room_preset = null
+	var moving := member.duplicate() as LevelModuleInstance
+	moving.room_preset = null
+	moving.id = &"__opening"
+	moving.deck = fixed.socket_deck(StringName(str(attach.get("target_socket", ""))))
+	moving.socket_decks = {}
+	moving.bind_matching_decks(scratch.decks)
+	scratch.instances = [fixed, moving]
+	var errors := LevelAssembler.snap(
+		scratch, moving.id, StringName(opening[1]), fixed.id,
+		StringName(str(attach.get("target_socket", "")))
+	)
+	if not errors.is_empty():
+		return {"errors": messages(errors, layout)}
+	var turn := posmod(moving.quarter_turn - member.quarter_turn, 4)
+	var rotated := Basis(Vector3.UP, turn * PI / 2) * Vector3(member.position.x, 0, member.position.y)
+	return {"at": [moving.position.x - rotated.x, moving.position.y - rotated.z], "turn": turn}
 
 
 static func save(layout: LevelLayout, output: String, overwrite: bool = false) -> Array:

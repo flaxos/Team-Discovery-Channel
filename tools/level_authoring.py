@@ -85,6 +85,7 @@ def parser() -> argparse.ArgumentParser:
     catalogue.add_argument('--detail', action='store_true')
     catalogue.add_argument('--search', default='')
     catalogue.add_argument('--kind', choices=['all', 'module', 'preset', 'theme', 'composite'], default='all')
+    catalogue.add_argument('--summary', action='store_true', help='One compact line of facts per capability.')
     catalogue.add_argument('--output', help='Write a generated JSON snapshot; never a geometry source.')
     catalogue.add_argument('--verify', help='Reject a stale generated snapshot.')
     apply = sub.add_parser('apply', help='Transactionally create/edit a native layout from a disposable JSON request.')
@@ -92,13 +93,23 @@ def parser() -> argparse.ArgumentParser:
     apply.add_argument('--layout', help='Existing input .tres; omit when request includes create.')
     apply.add_argument('--output', required=True)
     apply.add_argument('--overwrite', action='store_true')
+    plan = sub.add_parser('plan', help='Place a requested room graph (rooms, links, loops, decks) as a native layout.')
+    plan.add_argument('--request', required=True, help='Disposable plan JSON: rooms, links, entry, destination, optional requirements.')
+    plan.add_argument('--output', help='Layout .tres to save; omit for a dry run.')
+    plan.add_argument('--overwrite', action='store_true')
+    topology = sub.add_parser('topology', help="Describe a layout's room graph and check optional route requirements.")
+    topology.add_argument('--layout', required=True)
+    topology.add_argument('--requirements', help='JSON array of checks, or an object with a requirements array.')
     for name in ['inspect', 'validate']:
         command = sub.add_parser(name)
         command.add_argument('--layout', required=True)
+        if name == 'validate':
+            command.add_argument('--summary', action='store_true', help='Collapse per-room theme reports.')
     build = sub.add_parser('build', help='Validate, bake and export through the shared Godot pipeline.')
     build.add_argument('--layout', required=True)
     build.add_argument('--output', required=True)
     build.add_argument('--nav-output', required=True)
+    build.add_argument('--summary', action='store_true', help='Collapse per-room theme reports.')
     preview = sub.add_parser('preview', help='Launch the existing player preview or capture a rendered overview.')
     source = preview.add_mutually_exclusive_group(required=True)
     source.add_argument('--layout')
@@ -125,11 +136,17 @@ def main(argv: list[str] | None = None) -> int:
                 if value:
                     request[key] = resource_path(value) if key != 'verify' else str(Path(value).resolve())
             if args.command == 'catalogue':
-                request.update(detail=args.detail, search=args.search, kind=args.kind)
+                request.update(detail=args.detail, search=args.search, kind=args.kind, summary=args.summary)
                 if args.output:
                     output = Path(args.output).resolve()
                     output.parent.mkdir(parents=True, exist_ok=True)
                     request['output'] = str(output)
+            if args.command == 'plan':
+                request['plan'] = json.loads(Path(args.request).read_text(encoding='utf-8'))
+                request['overwrite'] = args.overwrite
+            if args.command == 'topology' and args.requirements:
+                wanted = json.loads(Path(args.requirements).read_text(encoding='utf-8'))
+                request['requirements'] = wanted.get('requirements', []) if isinstance(wanted, dict) else wanted
             if args.command == 'apply':
                 request['transaction'] = json.loads(Path(args.request).read_text(encoding='utf-8'))
                 request['overwrite'] = args.overwrite
@@ -161,6 +178,12 @@ def main(argv: list[str] | None = None) -> int:
                     response = {'ok': True, 'version': 1, 'pid': process.pid, 'scene': scene, 'log': str(log_path)}
             else:
                 response = run_engine(args.godot, request)
+                if getattr(args, 'summary', False) and isinstance(response.get('themes'), list):
+                    sources: dict = {}
+                    for room in response['themes']:
+                        key = f"{room['theme']['requested']} -> {room['theme']['visual_source']}"
+                        sources[key] = sources.get(key, 0) + 1
+                    response['themes'] = sources
         print(json.dumps(response, ensure_ascii=False))
         return 0 if response.get('ok') else 1
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:

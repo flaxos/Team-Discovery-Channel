@@ -73,7 +73,38 @@ func run() -> void:
 				)
 				return
 			file.store_string(JSON.stringify(data, "  ") + "\n")
+		if bool(request.get("summary", false)):
+			data = LevelCapabilityCatalogue.summarise(data)
 		await respond({"ok": true, "version": 1, "catalogue": data})
+		return
+	if command == "plan":
+		var wanted: Variant = request.get("plan")
+		if not wanted is Dictionary:
+			await failed([LevelAuthoring.issue("invalid_plan", "plan requires a request object")])
+			return
+		var planned := LevelPlanner.plan(wanted)
+		if not planned.ok:
+			await failed(planned.errors)
+			return
+		var planned_layout: LevelLayout = planned.layout
+		var report: Dictionary = {
+			"ok": true,
+			"version": 1,
+			"placed": planned.placed,
+			"attempts": planned.attempts,
+			"topology": LevelTopology.summary(planned_layout)
+		}
+		if wanted.has("requirements"):
+			report["requirements"] = LevelTopology.evaluate(planned_layout, wanted.requirements)
+		if request.has("output"):
+			var save_errors := LevelAuthoring.save(
+				planned_layout, str(request.output), bool(request.get("overwrite", false))
+			)
+			if not save_errors.is_empty():
+				await failed(save_errors)
+				return
+			report["layout"] = str(request.output)
+		await respond(report)
 		return
 	var path := str(request.get("layout", ""))
 	var source: LevelLayout
@@ -185,6 +216,15 @@ func run() -> void:
 				}
 			)
 		await respond({"ok": true, "version": 1, "layout": data})
+		return
+	if command == "topology":
+		var report: Dictionary = {
+			"ok": true, "version": 1, "layout": path, "topology": LevelTopology.summary(source)
+		}
+		if request.has("requirements"):
+			report["requirements"] = LevelTopology.evaluate(source, request.requirements)
+			report["ok"] = report.requirements.ok
+		await respond(report, 0 if report.ok else 1)
 		return
 	if command not in ["validate", "build"]:
 		await failed([LevelAuthoring.issue("unknown_command", "Unsupported command: " + command)])
