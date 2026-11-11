@@ -1,0 +1,48 @@
+{
+ "brief": "A 20-room Goa'uld compound, with a central security checkpoint, two alternate infiltration routes, a generator objective, an upper command deck and a ring transport room.",
+ "layout": "res://resources/levels/ai2_goauld_compound_two_deck.tres",
+ "requirements": [
+  {
+   "check": "room_count",
+   "min": 20,
+   "max": 20
+  },
+  {
+   "check": "distinct_routes",
+   "from": "forecourt",
+   "to": "inner",
+   "min": 2,
+   "unlocked_only": true,
+   "label": "two infiltration routes that avoid the locked gate"
+  },
+  {
+   "check": "alternate_route",
+   "from": "entry",
+   "to": "destination",
+   "around": "checkpoint"
+  },
+  {
+   "check": "reachable",
+   "from": "entry",
+   "to": "power_generator",
+   "unlocked_only": true
+  },
+  {
+   "check": "roles",
+   "required": {
+    "security_checkpoint": 1,
+    "generator": 1,
+    "command": 1,
+    "ring_transport": 1
+   }
+  },
+  {
+   "check": "only_via",
+   "room": "cmd_command",
+   "via": "ramp"
+  },
+  {
+   "check": "connected"
+  }
+ ]
+}

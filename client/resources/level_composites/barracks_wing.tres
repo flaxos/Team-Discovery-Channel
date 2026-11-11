@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelCompositeDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCompositeDefinition.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/levels/composites/barracks_wing.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"barracks_wing"
+label = "Barracks wing"
+description = "Through-corridor junction serving two barracks rooms and an armoury behind one of them."
+synonyms = PackedStringArray("barracks", "quarters", "crew wing", "garrison")
+layout = ExtResource("2")
+gameplay_roles = PackedStringArray("garrison", "patrol_origin", "resupply")

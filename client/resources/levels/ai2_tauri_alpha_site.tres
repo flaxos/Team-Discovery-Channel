@@ -1,0 +1,465 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=49 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_i1jm5"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_v7dah"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_r0lbn"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="4_v7yqh"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="5_q2qe6"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="6_4ntc7"]
+[ext_resource type="Resource" path="res://resources/room_presets/security_checkpoint.tres" id="7_wfjhc"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room05XJunction.tres" id="8_q1a76"]
+[ext_resource type="Resource" path="res://resources/room_presets/jaffa_barracks.tres" id="9_klutu"]
+[ext_resource type="Resource" path="res://resources/room_presets/armoury.tres" id="10_qxblh"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room15TransportChamber.tres" id="11_ye1ca"]
+[ext_resource type="Resource" path="res://resources/room_presets/cargo.tres" id="12_4sbdj"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room11LargeChamber.tres" id="13_5j1u8"]
+[ext_resource type="Resource" path="res://resources/room_presets/command.tres" id="14_utu28"]
+[ext_resource type="Resource" path="res://resources/room_presets/observation_communications.tres" id="15_y05pd"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="16_ggpt6"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="17_y0mav"]
+
+[sub_resource type="Resource" id="Resource_wnyqs"]
+script = ExtResource("1_i1jm5")
+from_instance = &"entry"
+from_socket = &"north"
+to_instance = &"gate_check"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_sefte"]
+script = ExtResource("1_i1jm5")
+from_instance = &"gate_check"
+from_socket = &"east"
+to_instance = &"hub"
+to_socket = &"north"
+security_id = &"main_gate"
+initially_locked = false
+state = "security_door"
+
+[sub_resource type="Resource" id="Resource_j200h"]
+script = ExtResource("1_i1jm5")
+from_instance = &"hub"
+from_socket = &"east"
+to_instance = &"west_hall"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_sy0wg"]
+script = ExtResource("1_i1jm5")
+from_instance = &"hub"
+from_socket = &"south"
+to_instance = &"east_hall"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_lpmk7"]
+script = ExtResource("1_i1jm5")
+from_instance = &"hub"
+from_socket = &"west"
+to_instance = &"south_hall"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_nvibt"]
+script = ExtResource("1_i1jm5")
+from_instance = &"crew_spine"
+from_socket = &"north"
+to_instance = &"crew_barracks_a"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_yhbsd"]
+script = ExtResource("1_i1jm5")
+from_instance = &"crew_spine"
+from_socket = &"east"
+to_instance = &"crew_barracks_b"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_rui2i"]
+script = ExtResource("1_i1jm5")
+from_instance = &"crew_barracks_a"
+from_socket = &"east"
+to_instance = &"crew_armoury"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_vsmek"]
+script = ExtResource("1_i1jm5")
+from_instance = &"west_hall"
+from_socket = &"south"
+to_instance = &"crew_spine"
+to_socket = &"south"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_bkohc"]
+script = ExtResource("1_i1jm5")
+from_instance = &"stores_spine"
+from_socket = &"north"
+to_instance = &"stores_store_long"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_lsiie"]
+script = ExtResource("1_i1jm5")
+from_instance = &"stores_spine"
+from_socket = &"east"
+to_instance = &"stores_store_small"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_uh2d3"]
+script = ExtResource("1_i1jm5")
+from_instance = &"east_hall"
+from_socket = &"south"
+to_instance = &"stores_spine"
+to_socket = &"south"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_kwgy0"]
+script = ExtResource("1_i1jm5")
+from_instance = &"cmd_antechamber"
+from_socket = &"north"
+to_instance = &"cmd_command"
+to_socket = &"north_00"
+security_id = &"cmd_command"
+initially_locked = false
+state = "security_door"
+
+[sub_resource type="Resource" id="Resource_je5ax"]
+script = ExtResource("1_i1jm5")
+from_instance = &"cmd_command"
+from_socket = &"north_01"
+to_instance = &"cmd_observation"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_0amc2"]
+script = ExtResource("1_i1jm5")
+from_instance = &"south_hall"
+from_socket = &"south"
+to_instance = &"cmd_antechamber"
+to_socket = &"east"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_omdbf"]
+script = ExtResource("2_v7dah")
+id = &"entry"
+module = ExtResource("4_v7yqh")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_aw26a"]
+script = ExtResource("2_v7dah")
+id = &"gate_check"
+module = ExtResource("6_4ntc7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_wfjhc")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"security_checkpoint"
+
+[sub_resource type="Resource" id="Resource_ym6qm"]
+script = ExtResource("2_v7dah")
+id = &"hub"
+module = ExtResource("8_q1a76")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-8, -8)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_s8x1m"]
+script = ExtResource("2_v7dah")
+id = &"west_hall"
+module = ExtResource("4_v7yqh")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-8, 9.53674e-07)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_fv4jb"]
+script = ExtResource("2_v7dah")
+id = &"east_hall"
+module = ExtResource("4_v7yqh")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-16, -8)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_p2ndq"]
+script = ExtResource("2_v7dah")
+id = &"south_hall"
+module = ExtResource("4_v7yqh")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-8, -16)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_5kxkf"]
+script = ExtResource("2_v7dah")
+id = &"crew_spine"
+module = ExtResource("8_q1a76")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-8, 8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_ggktj"]
+script = ExtResource("2_v7dah")
+id = &"crew_barracks_a"
+module = ExtResource("6_4ntc7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-8, 16)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("9_klutu")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"jaffa_barracks"
+
+[sub_resource type="Resource" id="Resource_vnhbl"]
+script = ExtResource("2_v7dah")
+id = &"crew_barracks_b"
+module = ExtResource("6_4ntc7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-16, 8)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("9_klutu")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"jaffa_barracks"
+
+[sub_resource type="Resource" id="Resource_64hk3"]
+script = ExtResource("2_v7dah")
+id = &"crew_armoury"
+module = ExtResource("6_4ntc7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(1.90735e-06, 16)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("10_qxblh")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"armoury"
+
+[sub_resource type="Resource" id="Resource_p8cj0"]
+script = ExtResource("2_v7dah")
+id = &"stores_spine"
+module = ExtResource("8_q1a76")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-24, -8)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_1g8xv"]
+script = ExtResource("2_v7dah")
+id = &"stores_store_long"
+module = ExtResource("11_ye1ca")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-32, -8)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("12_4sbdj")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"cargo"
+
+[sub_resource type="Resource" id="Resource_eeikq"]
+script = ExtResource("2_v7dah")
+id = &"stores_store_small"
+module = ExtResource("6_4ntc7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-24, -16)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("12_4sbdj")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"cargo"
+
+[sub_resource type="Resource" id="Resource_wl0r8"]
+script = ExtResource("2_v7dah")
+id = &"cmd_antechamber"
+module = ExtResource("6_4ntc7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-8, -24)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_wfjhc")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"security_checkpoint"
+
+[sub_resource type="Resource" id="Resource_ykyoo"]
+script = ExtResource("2_v7dah")
+id = &"cmd_command"
+module = ExtResource("13_5j1u8")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-9.53674e-07, -24)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("14_utu28")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"command"
+
+[sub_resource type="Resource" id="Resource_ojp8u"]
+script = ExtResource("2_v7dah")
+id = &"cmd_observation"
+module = ExtResource("6_4ntc7")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_q2qe6")]([])
+socket_decks = {}
+position = Vector2(-8, -32)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("15_y05pd")
+attachment_overrides = Array[ExtResource("3_r0lbn")]([])
+theme_id = &""
+theme_zone = &""
+role = &"observation_communications"
+
+[resource]
+script = ExtResource("16_ggpt6")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"tauri_sgc"
+theme_zones = Array[ExtResource("17_y0mav")]([])
+instances = Array[ExtResource("2_v7dah")]([SubResource("Resource_omdbf"), SubResource("Resource_aw26a"), SubResource("Resource_ym6qm"), SubResource("Resource_s8x1m"), SubResource("Resource_fv4jb"), SubResource("Resource_p2ndq"), SubResource("Resource_5kxkf"), SubResource("Resource_ggktj"), SubResource("Resource_vnhbl"), SubResource("Resource_64hk3"), SubResource("Resource_p8cj0"), SubResource("Resource_1g8xv"), SubResource("Resource_eeikq"), SubResource("Resource_wl0r8"), SubResource("Resource_ykyoo"), SubResource("Resource_ojp8u")])
+connections = Array[ExtResource("1_i1jm5")]([SubResource("Resource_wnyqs"), SubResource("Resource_sefte"), SubResource("Resource_j200h"), SubResource("Resource_sy0wg"), SubResource("Resource_lpmk7"), SubResource("Resource_nvibt"), SubResource("Resource_yhbsd"), SubResource("Resource_rui2i"), SubResource("Resource_vsmek"), SubResource("Resource_bkohc"), SubResource("Resource_lsiie"), SubResource("Resource_uh2d3"), SubResource("Resource_kwgy0"), SubResource("Resource_je5ax"), SubResource("Resource_0amc2")])
+entry_instance = &"entry"
+entry_marker = &"entry"
+destination_instance = &"cmd_command"
+destination_marker = &"destination"

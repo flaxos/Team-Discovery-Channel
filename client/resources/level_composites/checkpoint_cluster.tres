@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LevelCompositeDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/level/LevelCompositeDefinition.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/levels/composites/checkpoint_cluster.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = &"checkpoint_cluster"
+label = "Security checkpoint cluster"
+description = "Corridor, guarded checkpoint with a security door on its far side, and an adjoining security control room."
+synonyms = PackedStringArray("checkpoint", "guard post", "security gate", "control point")
+layout = ExtResource("2")
+gameplay_roles = PackedStringArray("chokepoint", "access_control")

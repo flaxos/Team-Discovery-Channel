@@ -1,0 +1,48 @@
+{
+ "brief": "A 15-room Goa'uld security compound with an objective chamber and two distinct routes to extraction.",
+ "layout": "res://resources/levels/ai2_goauld_security_compound.tres",
+ "requirements": [
+  {
+   "check": "room_count",
+   "min": 15,
+   "max": 15
+  },
+  {
+   "check": "distinct_routes",
+   "from": "objective",
+   "to": "extraction",
+   "min": 2,
+   "label": "two distinct routes from the objective chamber to extraction"
+  },
+  {
+   "check": "alternate_route",
+   "from": "objective",
+   "to": "extraction",
+   "around": "checkpoint",
+   "label": "route that avoids the checkpoint"
+  },
+  {
+   "check": "dead_ends",
+   "allowed": [
+    "north_gate",
+    "rings",
+    "control",
+    "armoury",
+    "store",
+    "detention"
+   ]
+  },
+  {
+   "check": "roles",
+   "required": {
+    "security_checkpoint": 1,
+    "security_control": 1,
+    "sarcophagus": 1,
+    "jaffa_barracks": 1
+   }
+  },
+  {
+   "check": "connected"
+  }
+ ]
+}

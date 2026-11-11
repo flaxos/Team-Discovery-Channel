@@ -1,0 +1,100 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_h0ypj"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_x3b41"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_0wp54"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="4_gg1d8"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="5_f6tly"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room10LongChamber.tres" id="6_tahf5"]
+[ext_resource type="Resource" path="res://resources/room_presets/engineering.tres" id="7_js534"]
+[ext_resource type="Resource" path="res://resources/room_presets/generator.tres" id="8_e77qa"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="9_e1wef"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="10_e00iu"]
+
+[sub_resource type="Resource" id="Resource_q6n2v"]
+script = ExtResource("1_h0ypj")
+from_instance = &"access"
+from_socket = &"north"
+to_instance = &"engineering"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_vjt2e"]
+script = ExtResource("1_h0ypj")
+from_instance = &"engineering"
+from_socket = &"south"
+to_instance = &"generator"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_d1nux"]
+script = ExtResource("2_x3b41")
+id = &"access"
+module = ExtResource("4_gg1d8")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_f6tly")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_0wp54")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_twd4h"]
+script = ExtResource("2_x3b41")
+id = &"engineering"
+module = ExtResource("6_tahf5")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_f6tly")]([])
+socket_decks = {}
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("7_js534")
+attachment_overrides = Array[ExtResource("3_0wp54")]([])
+theme_id = &""
+theme_zone = &""
+role = &"engineering"
+
+[sub_resource type="Resource" id="Resource_nyhgf"]
+script = ExtResource("2_x3b41")
+id = &"generator"
+module = ExtResource("6_tahf5")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_f6tly")]([])
+socket_decks = {}
+position = Vector2(-2.09815e-06, -24)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("8_e77qa")
+attachment_overrides = Array[ExtResource("3_0wp54")]([])
+theme_id = &""
+theme_zone = &""
+role = &"generator"
+
+[resource]
+script = ExtResource("9_e1wef")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"neutral"
+theme_zones = Array[ExtResource("10_e00iu")]([])
+instances = Array[ExtResource("2_x3b41")]([SubResource("Resource_d1nux"), SubResource("Resource_twd4h"), SubResource("Resource_nyhgf")])
+connections = Array[ExtResource("1_h0ypj")]([SubResource("Resource_q6n2v"), SubResource("Resource_vjt2e")])
+entry_instance = &"access"
+entry_marker = &"entry"
+destination_instance = &"generator"
+destination_marker = &"destination"

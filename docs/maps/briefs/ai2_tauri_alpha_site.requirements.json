@@ -1,0 +1,41 @@
+{
+ "brief": "A Tau'ri Alpha Site interior with barracks, security checkpoints, storage and a defensible command room.",
+ "layout": "res://resources/levels/ai2_tauri_alpha_site.tres",
+ "requirements": [
+  {
+   "check": "roles",
+   "required": {
+    "jaffa_barracks": 2,
+    "security_checkpoint": 2,
+    "cargo": 2,
+    "command": 1,
+    "armoury": 1
+   }
+  },
+  {
+   "check": "only_via",
+   "room": "cmd_command",
+   "via": "cmd_antechamber",
+   "label": "command room has one guarded approach"
+  },
+  {
+   "check": "only_via",
+   "room": "hub",
+   "via": "gate_check",
+   "label": "interior is behind the gate checkpoint"
+  },
+  {
+   "check": "reachable",
+   "from": "entry",
+   "to": "cmd_command",
+   "unlocked_only": true
+  },
+  {
+   "check": "min_branches",
+   "min": 3
+  },
+  {
+   "check": "connected"
+  }
+ ]
+}
