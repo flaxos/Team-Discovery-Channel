@@ -24,6 +24,8 @@ func _ready() -> void:
 			net.mission_restart_preparing.connect(_on_mission_restart_preparing)
 		if not net.mission_restart_released.is_connected(_on_mission_restart_released):
 			net.mission_restart_released.connect(_on_mission_restart_released)
+		if not net.server_disconnected.is_connected(_on_server_disconnected):
+			net.server_disconnected.connect(_on_server_disconnected)
 
 		# Dedicated server mode bypasses lobby UI and initializes GateRoom arena immediately
 		if net.is_dedicated_server:
@@ -87,6 +89,13 @@ func _clear_gate_room() -> void:
 	world_container.remove_child(current_gate_room)
 	current_gate_room.queue_free()
 	current_gate_room = null
+
+
+## The server has gone: leave the dead world for the lobby instead of running it without a peer.
+func _on_server_disconnected() -> void:
+	if is_instance_valid(current_gate_room):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		_load_lobby()
 
 
 func _on_mission_restart_preparing() -> void:

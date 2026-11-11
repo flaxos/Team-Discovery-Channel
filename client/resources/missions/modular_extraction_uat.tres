@@ -47,6 +47,7 @@ size = 1
 
 [resource]
 script = ExtResource("1_definition")
+title = "MODULAR EXTRACTION — DEVELOPMENT UAT"
 layout = ExtResource("4_layout")
 objectives = Array[ExtResource("2_objective")]([SubResource("reach"), SubResource("console"), SubResource("extract")])
 patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_service"), SubResource("patrol_upper"), SubResource("patrol_stores")])

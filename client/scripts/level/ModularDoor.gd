@@ -58,10 +58,9 @@ func _toggle() -> void:
 		return
 	if locked or (is_open and not _can_close()):
 		return
-	if multiplayer.has_multiplayer_peer():
-		sync_open.rpc(not is_open)
-	else:
-		sync_open(not is_open)
+	var open := not is_open
+	sync_open(open)
+	SGCNetworkManager.mission_rpc(self, &"sync_open", [open])
 
 
 ## Authorised opening for server-owned AI: same reach and lock rules as a player request.
@@ -93,10 +92,8 @@ func set_locked(value: bool) -> bool:
 	if not multiplayer.is_server() or not is_security or (value and is_open and not _can_close()):
 		return false
 	var open := is_open and not value
-	if multiplayer.has_multiplayer_peer():
-		sync_security_state.rpc(open, value)
-	else:
-		sync_security_state(open, value)
+	sync_security_state(open, value)
+	SGCNetworkManager.mission_rpc(self, &"sync_security_state", [open, value])
 	return true
 
 

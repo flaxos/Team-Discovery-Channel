@@ -22,7 +22,11 @@ var is_vaporized: bool = false
 var _revision: int = 0
 var _last_revision: int = -1
 var _snapshot_timer: float = 0.0
+## Server only: peers whose copy of this actor exists and has asked for its state.
+var replica_peers: Dictionary = {}
 var is_downed: bool = false
+## Set once the mission result is final: no further damage, bleed-out or stun changes.
+var frozen: bool = false
 var is_stunned: bool = false
 var stun_timer: float = 0.0
 var bleedout_timer: float = 0.0
@@ -46,7 +50,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if not _can_mutate():
+	if not _can_mutate() or frozen:
 		return
 	_snapshot_timer -= delta
 	if _snapshot_timer <= 0.0 and (is_downed or is_stunned):
@@ -80,7 +84,7 @@ func _process(delta: float) -> void:
 
 ## Applies damage with source and damage type tagging.
 func take_damage(amount: float, source: Node = null, damage_type: String = "bullet") -> void:
-	if not _can_mutate() or not is_finite(amount) or amount <= 0.0 or is_dead:
+	if not _can_mutate() or frozen or not is_finite(amount) or amount <= 0.0 or is_dead:
 		return
 
 	var final_dmg := amount
@@ -136,7 +140,7 @@ func revive(_reviver: Node = null) -> void:
 ## 2nd shot: Fatal electrical shock (drops target dead).
 ## 3rd shot: Disintegrates / vaporizes target completely (mesh dissolves).
 func apply_zat_shot(source: Node = null) -> void:
-	if not _can_mutate() or is_vaporized:
+	if not _can_mutate() or frozen or is_vaporized:
 		return
 	zat_window_timer = ZAT_WINDOW_DURATION
 
@@ -193,7 +197,9 @@ func _publish_state(event: String = "", amount: float = 0.0, source: Node = null
 	_revision += 1
 	if is_inside_tree() and multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		var source_path: NodePath = get_path_to(source) if is_instance_valid(source) and source.is_inside_tree() else NodePath()
-		sync_health_state.rpc(_state(), event, amount, source_path)
+		SGCNetworkManager.mission_rpc(
+			self, &"sync_health_state", [_state(), event, amount, source_path], self
+		)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -201,6 +207,7 @@ func request_health_snapshot() -> void:
 	if multiplayer.is_server():
 		var sender: int = multiplayer.get_remote_sender_id()
 		if sender in multiplayer.get_peers():
+			replica_peers[sender] = true
 			sync_health_state.rpc_id(sender, _state(), "", 0.0, NodePath())
 
 

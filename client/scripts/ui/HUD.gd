@@ -1097,6 +1097,25 @@ func _render_glyphs() -> void:
 		dhd_title.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4))
 
 
+## Mission hosts other than the SGC defence supply their own banner and debrief wording.
+func set_mission_banner(title: String, detail: String) -> void:
+	if wave_label != null:
+		wave_label.text = title
+	if enemies_label != null:
+		enemies_label.text = detail
+
+
+## Keys: title, subtitle, objectives, squad, status, leave. Call after show_victory/show_defeat.
+func set_debrief(text: Dictionary) -> void:
+	var targets := {
+		"title": debrief_title, "subtitle": debrief_subtitle, "objectives": stat_waves,
+		"squad": stat_chevrons, "status": stat_status, "leave": return_btn
+	}
+	for key: String in text:
+		if targets.get(key) != null:
+			targets[key].set("text", str(text[key]))
+
+
 func show_victory() -> void:
 	is_mission_ended = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

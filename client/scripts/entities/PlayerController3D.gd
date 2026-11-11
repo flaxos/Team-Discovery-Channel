@@ -1123,10 +1123,8 @@ func _on_weapon_fired(origin: Vector3, _dir: Vector3, hit_point: Vector3, _hit_n
 		return
 	var zat: bool = current_weapon != null and current_weapon.is_zat
 	var plasma: bool = current_weapon != null and current_weapon.is_plasma
-	if multiplayer.has_multiplayer_peer():
-		play_shot_fx.rpc(origin, hit_point, plasma, zat)
-	else:
-		play_shot_fx(origin, hit_point, plasma, zat)
+	play_shot_fx(origin, hit_point, plasma, zat)
+	SGCNetworkManager.mission_rpc(self, &"play_shot_fx", [origin, hit_point, plasma, zat], health_component)
 	_broadcast_weapon_state()
 
 
@@ -2190,7 +2188,7 @@ func _broadcast_weapon_state(peer: int = 0) -> void:
 	if peer > 0:
 		sync_weapon_state.rpc_id(peer, active_slot, weapon.weapon_id, weapon.current_ammo, weapon.reserve_ammo, weapon.current_heat, weapon.is_overheated, weapon.is_reloading)
 	else:
-		sync_weapon_state.rpc(active_slot, weapon.weapon_id, weapon.current_ammo, weapon.reserve_ammo, weapon.current_heat, weapon.is_overheated, weapon.is_reloading)
+		SGCNetworkManager.mission_rpc(self, &"sync_weapon_state", [active_slot, weapon.weapon_id, weapon.current_ammo, weapon.reserve_ammo, weapon.current_heat, weapon.is_overheated, weapon.is_reloading], health_component)
 
 
 @rpc("any_peer", "call_remote", "reliable")

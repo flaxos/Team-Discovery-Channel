@@ -392,7 +392,8 @@ func _fire_mp5(dir: Vector3) -> void:
 			if health != null:
 				health.take_damage(weapon_damage, self, "bullet")
 
-	rpc("play_mp5_fx", origin, hit_pos)
+	play_mp5_fx(origin, hit_pos)
+	SGCNetworkManager.mission_rpc(self, &"play_mp5_fx", [origin, hit_pos], health_component)
 
 
 @rpc("call_local", "unreliable")
