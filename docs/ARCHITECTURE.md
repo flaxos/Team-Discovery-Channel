@@ -17,6 +17,21 @@ The game is the Godot project in `client/`. Multiplayer uses native Godot high-l
 | [`SGCEnclosureValidator`](../client/scripts/map/SGCEnclosureValidator.gd) | Physical exterior-shell checks used by map baking and automated acceptance. |
 | [`PlayerController3D`](../client/scripts/entities/PlayerController3D.gd), [`HUD`](../client/scripts/ui/HUD.gd) | Local input/camera, aimed interaction, lift picker, squad wheel, controls UI and observable mission status. |
 
+## Modular missions and levels
+
+A second mission path runs on modular levels. It shares the player, weapon, health, enemy and networking code above.
+
+| Component | Responsibility |
+| --- | --- |
+| [`ModularMission`](../client/scripts/mission/ModularMission.gd) | Mission host for a modular level. Extends `GateRoom` for spawning, late join, squad-down failure, result and retry; SGC-only behaviour is stubbed ([decision D-008](DECISIONS.md)). |
+| [`MissionDefinition`](../client/scripts/mission/MissionDefinition.gd), [`MissionObjectives`](../client/scripts/mission/MissionObjectives.gd) | Mission data (layout, ordered `reach` / `interact` / `extract` objectives, patrols) and server-decided sequential progression with a join snapshot. |
+| [`LevelAssembly`](../client/scripts/level/LevelAssembly.gd) | Builds a `LevelLayout` into rooms, doors and attachments, validates it and bakes one navigation map. |
+| [`LevelNavigator`](../client/scripts/level/LevelNavigator.gd) | Navigation-mesh route following for both factions on modular levels; `SGCNavigator` delegates to it when no `SGCMap` is present. |
+| [`ModularDoor`](../client/scripts/level/ModularDoor.gd) | Server-validated doors and security locks with snapshots; AI opens them through `open_for`. |
+| [`LevelPlanner`](../client/scripts/level/LevelPlanner.gd), [`LevelTopology`](../client/scripts/level/LevelTopology.gd), [`LevelAuthoring`](../client/scripts/level/LevelAuthoring.gd) | Authoring-time only: graph planning, connectivity checks and transactional layout edits behind `tools/level_authoring.py`. Not used at run time. |
+
+One world is loaded per mission and there is no travel between worlds. Enemy perception lives in `JaffaAI` and is not yet suitable for stealth. Both are planned changes: see the [roadmap](../ROADMAP.md) and decisions D-002 and D-004.
+
 ## Gate and mission lifecycle
 
 `StargateRing` owns `INACTIVE`, `DIALING`, `KAWOOSH` and `ACTIVE` states, plus `NONE`, `INBOUND` or `OUTBOUND` direction. The wave system requests incoming connections; the dialing computer requests outbound permission through the mission system. These states are not a second monolithic phase-enum coordinator.

@@ -21,7 +21,13 @@ python3 tools/run_godot_tests.py test_sgc_enclosure test_sgc_map_routes test_sgc
 
 Reports default to `build/test-results/godot/`: `summary.json`, `junit.xml`, process output and engine logs. Use `--output` to keep a separate run. Test user data is isolated from normal keybindings/settings; the persistence suite uses separate writer and reader processes. `--skip-import` is diagnostic only and is not clean-checkout acceptance.
 
-At gameplay commit **`a720594`**, the full profile passed **51/51 local checks**: 49 discovered scripts, an extra persistence reader process and project import. The evidence is a baseline result, not a promise that a later branch or hosted workflow passed. CI status belongs to the corresponding pull request.
+### Current baseline
+
+The last recorded full local run is **69/69 checks** on the PR #40 branch (project import, 67 suites and the persistence reader), recorded in the [authoring review](reviews/ai-level-authoring-2.md). It was not re-run for the documentation-only roadmap change.
+
+**Hosted CI:** the `Godot full` job has failed on every push to `main` since PR #35. `test_level_authoring` runs `tools/level_authoring.py`, which looks for `godot` on `PATH` (or the `GODOT` environment variable); the workflow installs the engine elsewhere and passes its path only to the test runner. The fast and multiplayer jobs pass. Until this is repaired (roadmap milestone EX-1), a local full run is the only complete regression signal.
+
+Historical baseline: at gameplay commit **`a720594`**, the full profile passed **51/51 local checks**: 49 discovered scripts, an extra persistence reader process and project import. The evidence is a baseline result, not a promise that a later branch or hosted workflow passed. CI status belongs to the corresponding pull request.
 
 ## Coverage contracts
 
@@ -83,4 +89,8 @@ The existing CI workflow runs runner contracts, Godot fast/multiplayer/full prof
 
 ## Modular room scaffolding
 
-The separate [modular kit guide](maps/modular-levels.md) documents the Phase 1 builder, neutral preview and `test_modular_level` contract. Full test discovery includes this suite without changing the existing SGC tests. The 51-check result above remains the historical pre-kit baseline; consult the new report for current totals.
+The separate [modular kit guide](maps/modular-levels.md) documents the Phase 1 builder, neutral preview and `test_modular_level` contract. Later modular suites cover the catalogue, vertical kit, presets, security doors, themes, authoring CLI, planner and topology (`test_modular_*`, `test_level_*`), NPC navigation and the extraction mission. Full test discovery includes them without changing the existing SGC tests.
+
+## Human acceptance still outstanding
+
+No mission has a signed human run. The written checklists are: the route above for the SGC, the eleven steps in the [extraction mission guide](maps/modular-extraction-mission.md#human-uat-checklist-pending-sign-off), the six steps in the [NPC navigation guide](maps/modular-npc-navigation.md), and the editor checklists in the modular guides. Record completed runs under `docs/reviews/` with commit, roles and results. The [roadmap](../ROADMAP.md#near-term-acceptance-gates) lists the gates that depend on them.

@@ -1,6 +1,8 @@
 # Team Discovery Channel
 
-Stargate: SG Extraction is a Godot 4.4.1 co-op tactical shooter. The current playable setting is the three-level SGC: Sublevels 28, 27 and 26. The repository also contains a separate Alignment & Voting web app for planning.
+Stargate: SG Extraction is a Godot 4.4.1 co-op tactical shooter. The main playable setting is the three-level SGC (Sublevels 28, 27 and 26); a first development mission also runs on a modular offworld-style facility. The repository also contains a separate Alignment & Voting web app for planning.
+
+**What to build next:** see the [roadmap](ROADMAP.md).
 
 ## Play locally
 
@@ -16,6 +18,7 @@ In the lobby, select a callsign and class, click **ESTABLISH SGC BASE**, choose 
 | --- | --- |
 | **SGC Defense — Levels 28/27/26** | Incoming Jaffa, objectives and outbound extraction. The host selects difficulty. |
 | **SGC UAT Base — No Hostile Activation** | The same map, equipment and friendly personnel for exploration, with automatic hostile activation and waves disabled. Difficulty is disabled. |
+| **Modular Extraction UAT — Development** | A development slice on a modular test facility: reach the command room, use a console and return, with Jaffa patrols. See [its guide](docs/maps/modular-extraction-mission.md). |
 
 To preselect quiet UAT, run `godot --path client -- --mission sgc_uat`, then host and launch in the lobby. This flag selects the mission; it does not bypass the lobby. The normal game directory on the development machine is `/home/flax/games/Team-Discovery-Channel`; it is separate from Orca worktrees. Restart a running game after updating its checkout.
 
@@ -27,7 +30,7 @@ Operations is raised above embarkation behind sealed observation glass, with sid
 
 The lift has aimed floor buttons and a floor picker. Both factions navigate the region graph, stairs and lift. Corridor openings are clipped to adjoining rooms; enclosure validation checks the built walls, floors, ceilings and connecting shafts. A failed enclosure check blocks the navigation bake. Buffer-lockout and ROM-upload messages use the objective HUD rather than opening a stuck dialing panel.
 
-The [map authoring contract](docs/maps/sgc.md) covers layout references, schema, art-replacement slots, navigation and enclosure checks. The [roadmap](ROADMAP.md) distinguishes implemented work from future offworld missions.
+The [map authoring contract](docs/maps/sgc.md) covers layout references, schema, art-replacement slots, navigation and enclosure checks. Modular facilities are built with a separate room kit and the shared [AI authoring CLI](docs/maps/ai-level-authoring.md). The [roadmap](ROADMAP.md) distinguishes implemented work from planned stealth, gate travel and faction content.
 
 ## Developer checks
 
@@ -35,7 +38,7 @@ The [map authoring contract](docs/maps/sgc.md) covers layout references, schema,
 python3 tools/run_godot_tests.py --profile full --timeout 240
 ```
 
-The full profile discovers every `client/tests/test_*.gd`. At gameplay commit `a720594`, all **51 checks** passed locally: 49 test scripts, a separate persistence reader process and project import. This is a recorded local result, not a claim about subsequent hosted CI or human multiplayer acceptance. See [testing and UAT](docs/TESTING.md) for profiles, reports, visual captures and the manual acceptance route.
+The full profile discovers every `client/tests/test_*.gd`. The last recorded local result is **69/69 checks** on the PR #40 branch (project import, 67 suites and a persistence reader process). The hosted CI full profile is currently failing on `main` for an environment reason described in [testing](docs/TESTING.md#current-baseline). Neither result is a claim of human multiplayer acceptance. See [testing and UAT](docs/TESTING.md) for profiles, reports, visual captures and the manual acceptance route.
 
 ## Alignment & Voting app
 
@@ -50,6 +53,6 @@ Voting exports write planning snapshots under `docs/generated/`; they do not rep
 
 ## Project documentation
 
-Start with the [documentation index](docs/README.md). [GDD.md](GDD.md) describes the implemented design and future vision; [BOOTSTRAP_PROMPT.md](BOOTSTRAP_PROMPT.md) is the current contributor handoff; [TEAM_CONTRACT.md](TEAM_CONTRACT.md) records the team's grounding pact. Historical plans and audits are linked separately from current operating instructions.
+Start with the [roadmap](ROADMAP.md) and the [documentation index](docs/README.md). [GDD.md](GDD.md) describes the implemented design and future vision; [BOOTSTRAP_PROMPT.md](BOOTSTRAP_PROMPT.md) is the current contributor handoff; [TEAM_CONTRACT.md](TEAM_CONTRACT.md) records the team's grounding pact. Historical plans and audits are linked separately from current operating instructions.
 
 Contributors: **flaxos** — AI orchestration, core systems and combat; **Scotty** — multiplayer, game feel, weapons and perks.

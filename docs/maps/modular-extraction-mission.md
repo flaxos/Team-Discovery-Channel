@@ -106,6 +106,8 @@ Record commit, peer roles, expected and actual result for each line.
 
 ## Known limitations
 
+Each item below was re-checked against the code on 12 November 2026 and is tracked, with its planned fix, in the [risk register](../plans/master-development-roadmap.md#7-risk-and-defect-register).
+
 - **Perception is the existing rule:** any operative within 22 m is acquired even through walls or a deck. Patrols converge quickly; this is not stealth.
 - **Cover markers sit at room centres** in the current kit, so "cover" is a fallback position in an adjacent room, not concealment. Better cover needs authored markers, not code.
 - **Jaffa keep firing on downed operatives.** Existing behaviour; with the squad-down rule it makes solo play unforgiving.

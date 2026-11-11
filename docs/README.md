@@ -1,26 +1,56 @@
 # Documentation index
 
-Maintained documentation describes the code available at gameplay baseline `a720594` (9 November 2026), including the enclosure and lockout fixes proposed in [PR #25](https://github.com/flaxos/Team-Discovery-Channel/pull/25). Consult GitHub for merge/CI status and your local checkout for the code actually running.
+Maintained documentation describes `main` at `bf56743` (PR #40, 11 November 2026) unless a document states its own baseline. Consult GitHub for merge and CI status and your local checkout for the code actually running.
+
+## Start here
 
 | Document | Purpose |
 | --- | --- |
-| [Project README](../README.md) | Quick launch, current scope and developer entry points. |
-| [Player guide](PLAYING.md) | Hosting/joining, Defense/UAT, controls, lift and objective troubleshooting. |
-| [Game design](../GDD.md) | Implemented mechanics and explicitly deferred mission concepts. |
+| [Roadmap](../ROADMAP.md) | **Authoritative.** What exists, what is next, milestone sequence, dependencies and acceptance gates. |
+| [Master development plan](plans/master-development-roadmap.md) | Capability matrix with evidence, dependency graph, every milestone, the art and content track, the risk register and three agent-ready work packages. |
+| [Decision log](DECISIONS.md) | Architectural and direction decisions, with status and open questions. |
+| [Game design](../GDD.md) | Part 1: the game as implemented. Part 2: the intended game. |
+| [Project README](../README.md) | Quick launch and developer entry points. |
+
+## Playing, architecture and testing
+
+| Document | Purpose |
+| --- | --- |
+| [Player guide](PLAYING.md) | Hosting/joining, missions, controls, lift and objective troubleshooting. |
 | [Architecture](ARCHITECTURE.md) | Runtime ownership, multiplayer authority and code entry points. |
-| [Visual modular editor](maps/modular-editor.md) | Native top-down GUI, Undo/Redo, save/build/preview and manual UAT. |
-| [Modular room kit](maps/modular-levels.md) | Phase 1 scenes, typed layouts, editor/headless authoring and acceptance. |
-| [Modular NPC navigation](maps/modular-npc-navigation.md) | Production Jaffa/airman navigation, patrols, AI door use, demo scene and limitations. |
-| [Modular extraction mission](maps/modular-extraction-mission.md) | First playable modular mission: objectives, extraction rule, Jaffa combat, tests, UAT and travel blockers. |
-| [AI level authoring 2.0 benchmark](reviews/ai-level-authoring-2.md) | Graph planner, topology checks, composites and tactical metadata; before/after on three briefs. |
-| [Offworld extraction plan](plans/offworld-extraction-mission.md) | Dependency map for the offworld mission; its first milestone is now implemented. |
-| [SGC map contract](maps/sgc.md) | Proportions, provenance, schema, art slots, navigation and enclosure rules. |
-| [Testing and UAT](TESTING.md) | Automated checks, report interpretation, screenshots and manual route. |
-| [Alignment app](ALIGNMENT.md) | Web app setup, tokens, deployment settings and generated exports. |
-| [Roadmap](../ROADMAP.md) | Delivered milestones, current acceptance work and future scope. |
-| [Contributor handoff](../BOOTSTRAP_PROMPT.md) | Instructions for continuing the existing game. |
+| [Testing and UAT](TESTING.md) | Automated checks, report interpretation, screenshots and manual routes. |
+| [Contributor handoff](../BOOTSTRAP_PROMPT.md) | Standing instructions for continuing the existing game. |
 | [Team contract](../TEAM_CONTRACT.md) | Team commitments and quality gates. |
-| [Work tracker](../plan/README.md) | Implementation and acceptance records. |
+| [Alignment app](ALIGNMENT.md) | Web app setup, tokens, deployment settings and generated exports. |
+
+## Missions and maps
+
+| Document | Purpose |
+| --- | --- |
+| [SGC map contract](maps/sgc.md) | Proportions, provenance, schema, art slots, navigation and enclosure rules. |
+| [Modular extraction mission](maps/modular-extraction-mission.md) | First playable modular mission: objectives, extraction rule, Jaffa combat, tests, human checklist and travel blockers. |
+| [Modular NPC navigation](maps/modular-npc-navigation.md) | Production Jaffa/airman navigation, patrols, AI door use, demo scene and limitations. |
+
+## Level authoring
+
+| Document | Purpose |
+| --- | --- |
+| [AI level authoring guide](maps/ai-level-authoring.md) | The shared CLI used by every coding agent: discover, plan, validate, build, preview, topology checks. |
+| [Modular room kit](maps/modular-levels.md) | Phase 1 scenes, typed layouts, editor/headless authoring and acceptance. |
+| [Structural catalogue](maps/modular-catalogue.md) | Structural modules, sockets and gallery. |
+| [Vertical kit](maps/modular-vertical-kit.md) | Ramps, decks, tall rooms, equipment anchors and transport contracts. |
+| [Functional room presets](maps/modular-room-presets.md) | Sixteen room roles, attachments, overrides and the security-door interface. |
+| [Integrated fixture](maps/modular-integration-demo.md) | The two-deck demonstration level used by the extraction mission. |
+| [Visual modular editor](maps/modular-editor.md) | Native top-down GUI, Undo/Redo, save/build/preview and manual UAT. |
+| [Authoring briefs](maps/briefs/) | Brief text and route requirements for the demonstration maps. |
+
+## Plans and records
+
+| Document | Purpose |
+| --- | --- |
+| [Offworld extraction plan](plans/offworld-extraction-mission.md) | Earlier dependency study. Superseded by the master plan; kept for its analysis. |
+| [AI level authoring 2.0 review](reviews/ai-level-authoring-2.md) | Friction study and before/after benchmark for the planner. |
+| [Work tracker](../plan/README.md) | Implementation records for the SGC refactor and Sprint 21. |
 
 ## Historical and generated material
 

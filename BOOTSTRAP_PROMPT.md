@@ -6,13 +6,14 @@ This is an existing playable Godot **4.4.1** project, not an instruction to scaf
 
 ## Start here
 
-1. Read [README](README.md), [architecture](docs/ARCHITECTURE.md), [map contract](docs/maps/sgc.md), [testing/UAT](docs/TESTING.md) and the active [work tracker](plan/README.md).
+1. Read the [roadmap](ROADMAP.md) first: it names the next milestone and links its work package. Then [README](README.md), [architecture](docs/ARCHITECTURE.md), [testing/UAT](docs/TESTING.md) and, for SGC work, the [map contract](docs/maps/sgc.md). For modular levels use the [AI authoring guide](docs/maps/ai-level-authoring.md).
 2. Inspect the actual checkout, branch, status and applicable repository/user instructions before editing. Preserve unrelated changes. Historical plans/audits describe their own baseline; they are not new approval or delegation instructions.
 3. Launch the `client/` directory of the checkout containing the changes. The development machine's base game is `/home/flax/games/Team-Discovery-Channel`; Orca worktrees are separate. A running game must restart to load updated code/resources.
 
 ## Current scope and interfaces
 
 - The normal entry is `client/scenes/main/Main.tscn`, with `MainGameCoordinator`, the lobby and the `NetworkManager` autoload.
+- A third mission, Modular Extraction UAT, runs on a modular level through `ModularMission` and a `MissionDefinition` resource; see [its guide](docs/maps/modular-extraction-mission.md).
 - Defense and UAT share the three-level SGC map. UAT uses `SGCUATBase.tscn` and disables automatic hostile activation/waves. Mission/difficulty are host owned and synchronize before world initialization and on join/retry.
 - Keep the native ENet server-authoritative combat and interaction paths. Do not add a Node/WebSocket game server; the Alignment app is a separate planning service.
 - Gate state/direction belongs to `StargateRing`; wave progression/objective eligibility belongs to `WaveManager`; approved dialing/ROM upload belongs to the dialing console. Preserve reservation and stale-callback protections.
@@ -33,8 +34,8 @@ Use existing dimensioned art slots and material briefs. Replacement visuals pres
 python3 tools/run_godot_tests.py --profile full --timeout 240
 ```
 
-The last gameplay baseline `a720594` passed 51 local checks; consult current output rather than copying that claim to untested work. Tests reject errors/assertions/leaks even with exit zero. Use targeted checks while developing, then required regression coverage. Follow the documented graphical and two-human UAT route; headless checks do not establish visual quality or game feel.
+The last recorded full local run passed 69 checks at PR #40 (the older `a720594` baseline was 51); consult current output rather than copying either claim to untested work. Tests reject errors/assertions/leaks even with exit zero. Use targeted checks while developing, then required regression coverage. Follow the documented graphical and two-human UAT route; headless checks do not establish visual quality or game feel.
 
-Update maintained docs and PR descriptions for the final behavior. Keep generated vote snapshots separate. Preserve historical findings as dated records. Describe what changed, what was verified and what human acceptance remains. Do not expand into offworld theaters, new netcode or bespoke art merely because old planning text mentions them.
+Update maintained docs and PR descriptions for the final behavior. Keep generated vote snapshots separate. Preserve historical findings as dated records. Describe what changed, what was verified and what human acceptance remains. Do not expand into offworld theaters, new netcode or bespoke art merely because old planning text mentions them; planned expansion is sequenced in the [roadmap](ROADMAP.md) and starts from its work packages.
 
 The [team contract](TEAM_CONTRACT.md) remains the grounding pact: prioritize a playable co-op game and shared components over speculative scope.
