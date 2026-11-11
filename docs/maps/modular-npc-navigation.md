@@ -95,6 +95,8 @@ Existing SGC AI suites are unchanged and run in the full regression.
 
 ## Known limitations
 
+> **Status update, 12 November 2026.** This list is as written for PR #38. Three items were superseded by PR #39: combat on modular levels now runs and is tested (the mission uses the standard `Players` and `Enemies` containers), Jaffa on modular levels take room `cover` markers instead of gate-room coordinates, and a client joining with patrols in progress is covered by `test_modular_extraction_multiplayer`. Rerouting, avoidance, door closing and ring links remain open and are tracked in the [risk register](../plans/master-development-roadmap.md#7-risk-and-defect-register).
+
 - **No rerouting around a locked door.** The level bakes one navigation region, so a locked door is detected on the planned path and the NPC holds. Choosing an alternative route needs per-connection navigation links or a room-graph planner. The canonical fixture is a tree, so no alternative exists there anyway.
 - **The navmesh is not rebaked at runtime.** Locking a door after the bake leaves walkable mesh behind it (handled by the door check above). Geometry added later is only discovered by stalling, which takes about 12 s to report.
 - **NPCs leave doors open.** `open_for` never closes.

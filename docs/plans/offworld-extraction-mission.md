@@ -1,5 +1,9 @@
 # First offworld extraction mission — engineering plan
 
+**Superseded for planning (12 November 2026):** the [master development plan](master-development-roadmap.md) now carries the milestone order, and the [decision log](../DECISIONS.md) records the open decisions listed at the end of this page. This study is kept for its dependency analysis.
+
+**Correction:** the detection row below says "range plus line of sight". In the code, a Jaffa also acquires any operative within 22 m without line of sight and only needs line of sight to fire (`JaffaAI._find_nearest_target`).
+
 **Status:** the smallest next playable milestone below is implemented as the [Modular Extraction UAT mission](../maps/modular-extraction-mission.md), together with step 1 of "Order after that" for Jaffa. The rest of this plan is still design only; the table describes the code before that milestone.
 
 ## Target experience
