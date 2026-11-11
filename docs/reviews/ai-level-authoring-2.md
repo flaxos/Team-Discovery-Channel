@@ -97,3 +97,7 @@ The captures were inspected for overlaps, gaps and stranded rooms; none were see
 - **Topology is connectivity only.** Walking links, not ring transport; no distances, sightlines, cover or patrol coverage.
 - **Tactical metadata is not play-tested.** Authored roles and sightlines are design intent; cover markers on bare modules are positions, not cover.
 - **Editor integration:** planned layouts open in the modular editor like any other; the editor has no plan or topology panel.
+
+## Recorded verification
+
+Godot **4.4.1.stable.official.49a5bc7b6**, clean worktree of this branch. The full profile ran once on the final code and passed **69/69** checks (project import, 67 suites and the persistence reader), including every SGC, multiplayer and existing level-authoring suite. `test_level_planning` is new. The tool unit tests (`python3 -m unittest discover -s tools/tests`) pass.
