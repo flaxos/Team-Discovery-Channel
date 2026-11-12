@@ -76,6 +76,9 @@ const LOW_COVER_MAX := 1.3
 ## Height of the line a crouched actor must have blocked, and of a standing threat's torso.
 const CROUCHED_TORSO := 0.8
 const THREAT_TORSO := 1.0
+## Closest a cover spot may be to the threat. Chambers are 7.6 m across, so more would leave
+## most props unusable against an intruder inside the room; melee range is 2.2 m.
+const PROP_COVER_MIN_RANGE := 3.0
 
 
 ## Solid low-cover attachments of the level: `cover` components, and `prop` or `equipment`
@@ -102,17 +105,20 @@ static func cover_props(assembly: LevelAssembly) -> Array[Node3D]:
 
 
 ## True when `prop` blocks the line from a crouched actor at `spot` to a standing threat at
-## `threat`: the first thing that line hits is part of the prop.
+## `threat`: the first thing that line hits is part of the prop. Heights are measured from the
+## floor the prop stands on, not from `spot`, which may be a navigation-mesh point above it.
 static func prop_blocks(prop: Node3D, spot: Vector3, threat: Vector3) -> bool:
+	var floor_y := prop.global_position.y
 	var query := PhysicsRayQueryParameters3D.create(
-		spot + Vector3(0, CROUCHED_TORSO, 0), threat + Vector3(0, THREAT_TORSO, 0), 1
+		Vector3(spot.x, floor_y + CROUCHED_TORSO, spot.z), threat + Vector3(0, THREAT_TORSO, 0), 1
 	)
 	var hit := prop.get_world_3d().direct_space_state.intersect_ray(query)
 	return not hit.is_empty() and prop.is_ancestor_of(hit["collider"] as Node)
 
 
 ## The nearest reachable spot behind a cover prop, on the side away from `threat`, where the
-## prop blocks the line to the threat at crouched height and the spot keeps 4 m from it. Only
+## prop blocks the line to the threat at crouched height and the spot keeps
+## PROP_COVER_MIN_RANGE from it. Only
 ## props on the actor's deck and within `max_walk` metres of walking count, and spots within
 ## 1 m of `taken` are skipped. Returns {"spot": Vector3, "prop": Node3D}, or {} if none.
 static func prop_cover(
@@ -138,7 +144,7 @@ static func prop_cover(
 		for turn: float in [0.0, 0.45, -0.45, 0.9, -0.9]:
 			var wanted := centre + away.rotated(Vector3.UP, turn) * reach
 			var spot := NavigationServer3D.map_get_closest_point(assembly.navigation_map, wanted)
-			if spot.distance_to(wanted) > 0.6 or spot.distance_to(threat) < 4.0:
+			if spot.distance_to(wanted) > 0.6 or spot.distance_to(threat) < PROP_COVER_MIN_RANGE:
 				continue
 			var free := true
 			for other in taken:

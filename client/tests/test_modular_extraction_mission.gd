@@ -160,8 +160,18 @@ func run() -> void:
 			break
 	assert(lead.current_state == JaffaAI.State.PATROL and wing.current_state == JaffaAI.State.PATROL)
 	var resumed_from := lead.global_position
-	await frames(240)
-	assert(lead.global_position.distance_to(resumed_from) > 3.0, "Patrol moves again after combat")
+	# A sentry may pause briefly (looking round at the end of a search); it must walk on within 8 s.
+	for i in range(60 * 8):
+		await physics_frame
+		if lead.global_position.distance_to(resumed_from) > 3.0:
+			break
+	assert(
+		lead.global_position.distance_to(resumed_from) > 3.0,
+		"Patrol moves again after combat: from %s to %s, nav %s, heading %s, cover %s, crouch %s, vel %s" % [
+			resumed_from, lead.global_position, lead.navigator.status, lead.patrol_points[lead.patrol_index],
+			lead.cover_prop, lead.is_crouching, lead.velocity
+		]
+	)
 
 	# --- A lone operative downed by real staff fire fails the mission once.
 	player.health_component.current_health = player.health_component.max_health

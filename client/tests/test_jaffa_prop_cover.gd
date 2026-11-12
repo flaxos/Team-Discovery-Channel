@@ -119,7 +119,7 @@ func run() -> void:
 	var spot: Vector3 = setup.spot
 	assert(LevelNavigator.prop_blocks(prop, spot, threat), "The prop blocks the line at torso height")
 	assert(spot.distance_to(threat) > prop.global_position.distance_to(threat), "Behind, not in front")
-	assert(spot.distance_to(threat) >= 4.0)
+	assert(spot.distance_to(threat) >= LevelNavigator.PROP_COVER_MIN_RANGE)
 	assert(not LevelNavigator.prop_blocks(prop, setup.start, threat), "The start is exposed")
 	probe.global_position = setup.start
 	var other_side := floor_near(prop.global_position - (setup.direction as Vector3) * 9.0)
