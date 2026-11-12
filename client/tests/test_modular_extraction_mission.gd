@@ -133,7 +133,7 @@ func run() -> void:
 				reached_cover = true
 		if took_cover and reached_cover and fired > 0 and player.health_component.current_health < 5000.0:
 			break
-	assert(lead.current_target == player, "Existing perception acquired the operative")
+	assert(lead.current_target == player, "The patrol saw and engaged the operative")
 	assert(took_cover and reached_cover, "Trailing Jaffa ran to its marker cover")
 	assert(fired > 0 and player.health_component.current_health < 5000.0, "Staff fire damaged the operative")
 	assert(wing.is_on_floor() and lead.is_on_floor())
@@ -237,8 +237,10 @@ func run() -> void:
 	await frames(5)
 	assert(room.mission_result == -1, "One standing teammate keeps the mission alive")
 
-	# --- A downed operative is not targeted while a standing one is known.
+	# --- A downed operative is not targeted while a standing one is known. This checks the
+	# shared target choice through the assault rule; sentry sight is in test_jaffa_perception.
 	var sentry := room.enemies.get_node("Jaffa_P2_0") as JaffaAI
+	sentry.profile = JaffaAI.Profile.ASSAULT
 	var here := sentry.global_position
 	var spots: Array[Vector3] = sentry.patrol_points.duplicate()
 	spots.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.distance_to(here) < b.distance_to(here))
@@ -259,6 +261,7 @@ func run() -> void:
 	sentry._find_nearest_target()
 	assert(sentry.current_target == player, "With nobody standing in reach, the downed operative is the target")
 	sentry.current_target = null
+	sentry.profile = JaffaAI.Profile.SENTRY
 	place(buddy, buddy_spot)
 	place(player, console.global_position + Vector3(0, 0, 1.5))
 	player.health_component.revive(buddy)

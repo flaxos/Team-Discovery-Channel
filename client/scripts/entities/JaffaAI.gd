@@ -36,6 +36,39 @@ enum State {
 @export var fire_interval_s: float = 2.8
 @export var staff_accuracy_spread_deg: float = 3.5
 
+## ASSAULT is the original behaviour, kept for gate waves and column marches. SENTRY is used by
+## patrols: it only knows what it sees (JaffaPerception). `start_patrol` selects SENTRY.
+enum Profile { ASSAULT, SENTRY }
+
+@export_group("Sentry perception")
+@export var sight_range: float = 24.0
+## Full horizontal angle of the view cone.
+@export var sight_cone_deg: float = 110.0
+## Within this distance an operative in line of sight is noticed from any direction.
+@export var proximity_radius: float = 1.5
+## Seconds of continuous sight to go from unaware to alerted, close up and at sight_range.
+@export var notice_time_near: float = 0.8
+@export var notice_time_far: float = 2.5
+## Seconds for full suspicion to drain away once nothing is seen.
+@export var forget_time: float = 3.0
+## Seconds an alerted Jaffa keeps fighting an unseen target before it goes to look.
+@export var lose_target_time: float = 1.5
+## Seconds spent at the last seen position before resuming the patrol.
+@export var investigate_wait: float = 5.0
+## Longest walk towards the last seen position before searching from where it is.
+@export var investigate_travel_limit: float = 20.0
+@export_group("")
+
+var profile: Profile = Profile.ASSAULT
+var perception: JaffaPerception
+## Replicated for the overhead tell: JaffaPerception.Level and its 0..1 fill.
+var awareness_level: int = 0
+var awareness: float = 0.0
+var investigating := false
+var _search_clock := 0.0
+var _search_wait := -1.0
+var _tell: Label3D
+
 var current_state: State = State.ADVANCE
 var current_target: Node3D = null
 var fire_timer: float = 0.0
@@ -82,6 +115,8 @@ func _ready() -> void:
 	# Server is authoritative over AI logic
 	set_multiplayer_authority(1)
 	navigator = SGCNavigator.new(self)
+	perception = JaffaPerception.new(self)
+	_build_tell()
 
 	if is_shock_guard:
 		if health_component != null:
@@ -123,6 +158,7 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 	patrol_index = 0
 	patrol_laps = 0
 	patrol_loop = loop
+	profile = Profile.SENTRY
 	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
 		current_state = State.PATROL
 
@@ -131,6 +167,11 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 func stand_down() -> void:
 	current_target = null
 	velocity = Vector3.ZERO
+	investigating = false
+	if perception != null:
+		perception.calm()
+	awareness_level = JaffaPerception.Level.UNAWARE
+	awareness = 0.0
 	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
 		_set_crouching(false)
 		_reset_staff_position()
@@ -139,7 +180,111 @@ func stand_down() -> void:
 
 
 func _resume_state() -> State:
-	return State.ADVANCE if patrol_points.is_empty() else State.PATROL
+	if patrol_points.is_empty():
+		return State.ADVANCE
+	return State.CHASE if profile == Profile.SENTRY and investigating else State.PATROL
+
+
+## Server side: run perception and react to what it reports.
+func _update_perception(delta: float) -> void:
+	match perception.update(delta):
+		"alerted":
+			_engage(perception.target, true)
+		"lost":
+			_start_investigation()
+	if perception.level == JaffaPerception.Level.ALERTED and perception.target != null:
+		current_target = perception.target
+	_publish_awareness()
+
+
+## Turn an alert into combat. `spread` passes it to nearby Jaffa (one hop).
+func _engage(target: Node3D, spread: bool) -> void:
+	current_target = target
+	investigating = false
+	if current_state in [State.PATROL, State.ADVANCE, State.IDLE, State.CHASE, State.MARCHING_FORMATION]:
+		break_formation_and_engage()
+	if spread:
+		_alert_nearby_formation_jaffa()
+
+
+func _start_investigation() -> void:
+	perception.investigate()
+	investigating = true
+	current_target = null
+	_search_clock = 0.0
+	_search_wait = -1.0
+	_set_crouching(false)
+	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
+		current_state = State.CHASE
+
+
+func _publish_awareness() -> void:
+	awareness_level = perception.level
+	awareness = snappedf(perception.awareness, 0.05)
+
+
+## A sentry with no target: patrol, stop and stare while suspicious, or search a position.
+func _process_sentry_calm(delta: float) -> void:
+	if investigating:
+		current_state = State.CHASE
+		_search_clock += delta
+		if _search_wait < 0.0:
+			var offset := perception.stimulus - global_position
+			offset.y = 0.0
+			var stalled: bool = navigator != null and navigator.status in ["unreachable", "blocked_door"]
+			if offset.length() > 1.5 and _search_clock < investigate_travel_limit and not stalled:
+				_advance_towards(perception.stimulus, delta, move_speed)
+				return
+			_search_wait = investigate_wait
+		_search_wait -= delta
+		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+		rotation.y += delta * 1.1  # look around
+		if _search_wait <= 0.0:
+			investigating = false
+			perception.calm()
+			_publish_awareness()
+			current_state = _resume_state()
+		return
+	if perception.level == JaffaPerception.Level.SUSPICIOUS:
+		# Stop and look where something was seen; keep looking until it is forgotten or confirmed.
+		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+		var look := perception.stimulus - global_position
+		look.y = 0.0
+		if look.length_squared() > 0.01:
+			rotation.y = lerp_angle(rotation.y, atan2(-look.x, -look.z), clampf(4.0 * delta, 0.0, 1.0))
+		return
+	if current_state in [State.ADVANCE, State.CHASE]:
+		current_state = _resume_state()
+	_advance_towards(_overrun_destination(), delta, march_speed)
+
+
+func _build_tell() -> void:
+	_tell = Label3D.new()
+	_tell.name = "AwarenessTell"
+	_tell.position = Vector3(0, 2.45, 0)
+	_tell.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_tell.font_size = 96
+	_tell.outline_size = 16
+	_tell.visible = false
+	add_child(_tell)
+
+
+## Overhead tell on every peer, from the replicated awareness: "?" fills as suspicion builds,
+## a red "!" once alerted.
+func _process(_delta: float) -> void:
+	if _tell == null:
+		return
+	_tell.visible = awareness_level != JaffaPerception.Level.UNAWARE and current_state != State.DEAD
+	if not _tell.visible:
+		return
+	if awareness_level == JaffaPerception.Level.ALERTED:
+		_tell.text = "!"
+		_tell.modulate = Color(1.0, 0.25, 0.15)
+	else:
+		_tell.text = "?"
+		_tell.modulate = Color(1.0, 0.85, 0.2, 0.35 + 0.65 * clampf(awareness, 0.0, 1.0))
 
 
 func _patrol_destination() -> Vector3:
@@ -170,6 +315,9 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 		move_and_slide()
 		return
+
+	if profile == Profile.SENTRY:
+		_update_perception(delta)
 
 	# State evaluations
 	match current_state:
@@ -262,6 +410,21 @@ func _alert_nearby_formation_jaffa() -> void:
 	for child: Node in enemies.get_children():
 		var other: JaffaAI = child as JaffaAI
 		if other != null and other != self and is_instance_valid(other):
+			if other.profile == Profile.SENTRY:
+				# One hop, as before: the alerted sentry engages but does not pass it on.
+				if (
+					other.global_position.distance_to(global_position) <= combat_range
+					and other.perception.level != JaffaPerception.Level.ALERTED
+					and other.current_state not in [State.DEAD, State.STUNNED, State.DOWNED]
+				):
+					var known := is_instance_valid(current_target)
+					other.perception.alert(
+						current_target if known else null,
+						current_target.global_position if known else global_position
+					)
+					other._publish_awareness()
+					other._engage(other.perception.target, false)
+				continue
 			if other.current_state == State.PATROL and other.global_position.distance_to(global_position) > combat_range:
 				continue
 			if other.current_state in [State.MARCHING_FORMATION, State.ADVANCE, State.PATROL]:
@@ -431,6 +594,10 @@ func _process_advance_state(delta: float) -> void:
 	_reset_staff_position()
 	_find_nearest_target()
 
+	if profile == Profile.SENTRY and current_target == null:
+		_process_sentry_calm(delta)
+		return
+
 	if current_target == null:
 		# Proceed to march steadily into the base preserving tactical lane cohesion
 		if current_state == State.ADVANCE:
@@ -527,6 +694,16 @@ func _setup_staff_visual() -> void:
 
 
 func _find_nearest_target() -> void:
+	if profile == Profile.SENTRY:
+		# A sentry knows only what perception gave it; drop a target that is gone or dead.
+		if current_target != null:
+			var gone := not is_instance_valid(current_target) or not current_target.is_inside_tree()
+			var health: HealthComponent = (
+				null if gone else current_target.get_node_or_null("HealthComponent") as HealthComponent
+			)
+			if gone or (health != null and health.is_dead):
+				current_target = null
+		return
 	# Find closest active SGC operative or allied Airman defender in perception range.
 	# A downed one is only a target when no standing one is known.
 	var candidates: Array[Node3D] = []
@@ -736,6 +913,26 @@ func _on_damage_taken(_amount: float, source: Node, _damage_type: String) -> voi
 		var spark_at := global_position + Vector3(0, 1.2, 0)
 		play_armor_spark_fx(spark_at)
 		SGCNetworkManager.mission_rpc(self, &"play_armor_spark_fx", [spark_at], health_component)
+
+	if profile == Profile.SENTRY and perception != null and multiplayer.is_server():
+		# Being hit is an immediate alert, wherever the shot came from.
+		var hit_by_operative := (
+			source is Node3D and is_instance_valid(source) and source.has_node("HealthComponent")
+		)
+		var attacker: Node3D = source as Node3D if hit_by_operative else null
+		var at := (
+			(source as Node3D).global_position
+			if source is Node3D and is_instance_valid(source)
+			else global_position
+		)
+		var was_alerted := perception.level == JaffaPerception.Level.ALERTED
+		perception.alert(attacker, at)
+		_publish_awareness()
+		if not was_alerted:
+			_engage(attacker, true)
+		elif attacker != null:
+			current_target = attacker
+		return
 
 	if source is Node3D and is_instance_valid(source):
 		current_target = source as Node3D
