@@ -37,7 +37,7 @@ The full classification, with source paths and tests, is the [capability matrix]
 
 ### Known problems that affect planning
 
-- **Hosted CI was red on `main` from PR #35 to #41** because one suite could not find the engine on the CI runner. EX-1 repairs the runner; confirm on the hosted run before relying on it.
+- **Hosted CI was red on `main` from PR #35 to #41** because one suite could not find the engine on the CI runner. EX-1 repairs the runner; the hosted `Godot full` job passed on PRs #42 and #43.
 - **Jaffa in gate waves still detect through walls** (the assault rule kept for SGC Defense). Patrols on modular missions use sight-based perception since ST-1; it has no hearing or level-wide alarm yet.
 - **"Cover" on modular levels is a room-centre marker**, not cover.
 - **The play machine's checkout is behind `main`** and does not contain the extraction mission or the planner.
