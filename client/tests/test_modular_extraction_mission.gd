@@ -126,7 +126,10 @@ func run() -> void:
 		await physics_frame
 		if wing.current_state == JaffaAI.State.COVER:
 			took_cover = true
-			assert(wing.tactical_destination in valid, "Cover comes from a room marker")
+			assert(
+				wing.tactical_destination in valid or wing.cover_prop != null,
+				"Cover comes from a cover prop or a room marker"
+			)
 			assert(wing.tactical_destination.distance_to(player.global_position) >= 4.0)
 			var offset := wing.global_position - wing.tactical_destination
 			if Vector2(offset.x, offset.z).length() < 1.3:

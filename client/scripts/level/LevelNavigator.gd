@@ -46,7 +46,8 @@ static func find_level(body: Node) -> LevelAssembly:
 
 
 ## Nearest reachable room `cover` marker on the actor's deck that keeps distance from the
-## threat. Vector3.INF when the level offers none; callers then hold their position.
+## threat. The fallback when no cover prop qualifies (prop_cover). Vector3.INF when the level
+## offers none; callers then hold their position.
 static func cover_position(assembly: LevelAssembly, body: Node3D, threat: Vector3) -> Vector3:
 	var best := Vector3.INF
 	var here := body.global_position
@@ -65,6 +66,95 @@ static func cover_position(assembly: LevelAssembly, body: Node3D, threat: Vector
 		var path := assembly.local_path(here, spot)
 		if not path.is_empty() and path[-1].distance_to(spot) < 1.0:
 			best = spot
+	return best
+
+
+## Height range of a solid room attachment that works as low cover: a crouched Jaffa is hidden
+## behind it and can stand to fire over it.
+const LOW_COVER_MIN := 0.9
+const LOW_COVER_MAX := 1.3
+## Height of the line a crouched actor must have blocked, and of a standing threat's torso.
+const CROUCHED_TORSO := 0.8
+const THREAT_TORSO := 1.0
+
+
+## Solid low-cover attachments of the level: `cover` components, and `prop` or `equipment`
+## pieces whose bounds are low cover (LOW_COVER_MIN..MAX high, at least 0.9 m deep each way).
+static func cover_props(assembly: LevelAssembly) -> Array[Node3D]:
+	var result: Array[Node3D] = []
+	for item in assembly.layout.instances:
+		var module := assembly.get_node_or_null(str(item.id))
+		if module == null:
+			continue
+		for attachment in LevelRoomComposer.resolved(item):
+			var size := attachment.bounds.size
+			if attachment.placeholder_size == Vector3.ZERO and attachment.scene == null:
+				continue  # A marker, not something solid.
+			var low := size.y >= LOW_COVER_MIN and size.y <= LOW_COVER_MAX
+			var broad := minf(size.x, size.z) >= 0.9
+			if attachment.component == &"cover" or (
+				attachment.component in [&"prop", &"equipment"] and low and broad
+			):
+				var node := module.get_node_or_null(LevelRoomComposer.node_path(attachment)) as Node3D
+				if node != null:
+					result.append(node)
+	return result
+
+
+## True when `prop` blocks the line from a crouched actor at `spot` to a standing threat at
+## `threat`: the first thing that line hits is part of the prop.
+static func prop_blocks(prop: Node3D, spot: Vector3, threat: Vector3) -> bool:
+	var query := PhysicsRayQueryParameters3D.create(
+		spot + Vector3(0, CROUCHED_TORSO, 0), threat + Vector3(0, THREAT_TORSO, 0), 1
+	)
+	var hit := prop.get_world_3d().direct_space_state.intersect_ray(query)
+	return not hit.is_empty() and prop.is_ancestor_of(hit["collider"] as Node)
+
+
+## The nearest reachable spot behind a cover prop, on the side away from `threat`, where the
+## prop blocks the line to the threat at crouched height and the spot keeps 4 m from it. Only
+## props on the actor's deck and within `max_walk` metres of walking count, and spots within
+## 1 m of `taken` are skipped. Returns {"spot": Vector3, "prop": Node3D}, or {} if none.
+static func prop_cover(
+	assembly: LevelAssembly,
+	body: Node3D,
+	threat: Vector3,
+	max_walk: float = 20.0,
+	taken: Array[Vector3] = []
+) -> Dictionary:
+	var best := {}
+	var best_walk := max_walk
+	var here := body.global_position
+	for prop in cover_props(assembly):
+		var centre := prop.global_position
+		if absf(centre.y - here.y) > 1.5 or Vector2(centre.x - here.x, centre.z - here.z).length() > max_walk:
+			continue
+		var away := Vector3(centre.x - threat.x, 0.0, centre.z - threat.z)
+		if away.length() < 2.0:
+			continue
+		away = away.normalized()
+		var bounds: AABB = prop.get_meta("attachment_bounds", AABB(Vector3(-0.5, 0, -0.5), Vector3.ONE))
+		var reach := maxf(bounds.size.x, bounds.size.z) * 0.5 + 0.55
+		for turn: float in [0.0, 0.45, -0.45, 0.9, -0.9]:
+			var wanted := centre + away.rotated(Vector3.UP, turn) * reach
+			var spot := NavigationServer3D.map_get_closest_point(assembly.navigation_map, wanted)
+			if spot.distance_to(wanted) > 0.6 or spot.distance_to(threat) < 4.0:
+				continue
+			var free := true
+			for other in taken:
+				free = free and other.distance_to(spot) > 1.0
+			if not free or not prop_blocks(prop, spot, threat):
+				continue
+			var path := assembly.local_path(here, spot)
+			if path.is_empty() or path[-1].distance_to(spot) > 1.0:
+				continue
+			var walk := 0.0
+			for i in range(1, path.size()):
+				walk += path[i - 1].distance_to(path[i])
+			if walk < best_walk:
+				best_walk = walk
+				best = {"spot": spot, "prop": prop}
+			break
 	return best
 
 

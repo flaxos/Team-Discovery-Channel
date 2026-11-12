@@ -99,6 +99,13 @@ var is_tactical_flanking: bool = false
 var tactical_destination: Vector3 = Vector3.ZERO
 var flank_route_target: Vector3 = Vector3.ZERO
 var tactical_cover_position: Vector3 = Vector3.ZERO
+## Modular levels: the cover prop this Jaffa is fighting from (LevelNavigator.prop_cover), if any.
+var cover_prop: Node3D = null
+## Staff height while standing to fire over a cover prop, above the tallest low cover.
+const OVER_COVER_STAFF_HEIGHT := 1.35
+## Seconds left standing up to fire over cover, and until the cover is re-checked.
+var _peek := 0.0
+var _cover_check := 0.0
 var suppressive_hold_timer: float = 0.0
 var _death_notified: bool = false
 var navigator: SGCNavigator
@@ -185,6 +192,7 @@ func stand_down() -> void:
 	investigating = false
 	errand = Vector3.INF
 	raising_alarm = false
+	cover_prop = null
 	if perception != null:
 		perception.calm()
 	awareness_level = JaffaPerception.Level.UNAWARE
@@ -293,6 +301,7 @@ func _start_investigation() -> void:
 	perception.investigate()
 	investigating = true
 	current_target = null
+	cover_prop = null
 	_search_clock = 0.0
 	_search_wait = -1.0
 	_search_route.clear()
@@ -514,6 +523,11 @@ func break_formation_and_engage() -> void:
 	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
 		return
 
+	if profile == Profile.SENTRY and _take_prop_cover(10.0):
+		# Modular levels: a sentry with low cover close by fights from behind it.
+		current_state = State.COVER
+		_set_crouching(false)
+		return
 	if is_front_rank or _is_lead_jaffa_on_ramp():
 		# Front ranks halt and crouch to lay down suppressive plasma bolt fire
 		current_state = State.COMBAT
@@ -579,10 +593,13 @@ func _alert_nearby_formation_jaffa() -> void:
 func _assign_tactical_role() -> void:
 	var level := LevelNavigator.find_level(self)
 	if level != null:
-		# Modular levels: cover comes from room markers; without one, hold the current position.
+		# Modular levels: behind a cover prop if one qualifies, else a room cover marker, else
+		# hold the current position.
+		is_tactical_flanking = false
+		if _take_prop_cover(20.0):
+			return
 		var threat := current_target.global_position if current_target != null else global_position
 		var cover := LevelNavigator.cover_position(level, self, threat)
-		is_tactical_flanking = false
 		tactical_cover_position = cover if cover != Vector3.INF else global_position
 		tactical_destination = tactical_cover_position
 		return
@@ -599,6 +616,64 @@ func _assign_tactical_role() -> void:
 		is_tactical_flanking = true
 		flank_route_target = Vector3(-18.0, 0.1, 4.0) if is_west else Vector3(18.0, 0.1, 4.0)
 		tactical_destination = flank_route_target
+
+
+## Modular levels: pick the nearest qualifying cover prop within `max_walk` metres, not one a
+## nearby Jaffa already holds. Sets the destination and `cover_prop`; false when none qualifies.
+func _take_prop_cover(max_walk: float) -> bool:
+	cover_prop = null
+	var level := LevelNavigator.find_level(self)
+	if level == null or current_target == null or not is_instance_valid(current_target):
+		return false
+	var taken: Array[Vector3] = []
+	var siblings: Node = get_parent()
+	if siblings != null:
+		for child in siblings.get_children():
+			var other := child as JaffaAI
+			if other != null and other != self and other.cover_prop != null:
+				taken.append(other.tactical_destination)
+	var found := LevelNavigator.prop_cover(level, self, current_target.global_position, max_walk, taken)
+	if found.is_empty():
+		return false
+	cover_prop = found["prop"]
+	tactical_cover_position = found["spot"]
+	tactical_destination = tactical_cover_position
+	_peek = 0.0
+	_cover_check = 0.5
+	return true
+
+
+## Behind a cover prop: crouch facing the threat, stand to fire when ready, crouch again. Look
+## for other cover once the threat has an angle round this prop.
+func _hold_prop_cover(delta: float) -> void:
+	var look := current_target.global_position - global_position
+	look.y = 0.0
+	if look.length_squared() > 0.01:
+		rotation.y = atan2(-look.x, -look.z)
+	_cover_check -= delta
+	if _cover_check <= 0.0:
+		_cover_check = 0.5
+		if not LevelNavigator.prop_blocks(cover_prop, global_position, current_target.global_position):
+			if not _take_prop_cover(20.0):
+				_set_crouching(false)
+				current_state = State.COMBAT
+			return
+	fire_timer -= delta
+	if _peek > 0.0:
+		_peek -= delta
+		if _peek <= 0.0:
+			_set_crouching(true)
+		return
+	if fire_timer <= 0.0:
+		_set_crouching(false)
+		# Fire over the top: the muzzle sits clear above the prop, not inside it.
+		if staff_mount != null:
+			staff_mount.position.y = OVER_COVER_STAFF_HEIGHT
+		_peek = 0.7
+		fire_timer = fire_interval_s + randf_range(-0.3, 0.3)
+		_fire_staff_blast()
+	else:
+		_set_crouching(true)
 
 
 func _find_nearest_cover(is_west: bool) -> Vector3:
@@ -662,6 +737,10 @@ func _process_cover(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+
+		if cover_prop != null and is_instance_valid(cover_prop) and current_target != null:
+			_hold_prop_cover(delta)
+			return
 
 		if not is_tactical_flanking:
 			_set_crouching(true)
@@ -919,7 +998,12 @@ func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
 	return false
 
 
-func _has_line_of_sight(target: Node3D) -> bool:
+## Height a Jaffa looks from, standing or crouched: a crouched Jaffa can still peek over low cover.
+const EYE_HEIGHT := 1.55
+
+
+## Clear line from the staff's muzzle (for firing) or from the eyes (`from_eye`, for perception).
+func _has_line_of_sight(target: Node3D, from_eye: bool = false) -> bool:
 	if target == null or not is_inside_tree() or not target.is_inside_tree():
 		return false
 	if _is_target_obscured_by_smoke(target.global_position):
@@ -930,6 +1014,8 @@ func _has_line_of_sight(target: Node3D) -> bool:
 		return false
 
 	var from: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.4, 0)
+	if from_eye:
+		from = global_position + Vector3(0, EYE_HEIGHT, 0)
 	var exclude_list: Array[RID] = [get_rid()]
 	if target is CollisionObject3D:
 		exclude_list.append((target as CollisionObject3D).get_rid())
