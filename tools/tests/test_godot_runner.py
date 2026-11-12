@@ -29,6 +29,7 @@ import os, pathlib, sys, time
 if '--version' in sys.argv:
     print(os.environ.get('FAKE_VERSION', '4.4.1.stable.fixture')); sys.exit(0)
 if '--editor' in sys.argv:
+    if '--import' not in sys.argv: print('SCRIPT ERROR: import must wait for resources (--import)'); sys.exit(0)
     print('SCRIPT ERROR: fixture import failure' if os.environ.get('FAKE_IMPORT_ERROR') else 'Imported'); sys.exit(0)
 script = sys.argv[sys.argv.index('--script') + 1]
 if script.endswith('test_failure.gd'): print('SCRIPT ERROR: Assertion failed: deliberate failure'); print('ALL PASSED'); sys.exit(0)

@@ -64,7 +64,8 @@ def prepare(godot: str) -> dict:
     if version.returncode or not re.match(r'^4\.4\.1(?:[.\s-]|$)', version.stdout):
         return error('engine_version', 'This project requires Godot 4.4.1.')
     try:
-        result = subprocess.run([godot, '--headless', '--editor', '--path', str(PROJECT), '--quit'],
+        # --import waits for every resource to be imported before quitting.
+        result = subprocess.run([godot, '--headless', '--editor', '--import', '--path', str(PROJECT)],
                                 capture_output=True, text=True, timeout=120)
     except subprocess.TimeoutExpired:
         return error('import_timeout', 'Godot project import exceeded 120 seconds.')
