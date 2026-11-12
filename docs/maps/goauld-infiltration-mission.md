@@ -1,6 +1,6 @@
 # Goa'uld Infiltration — greybox mission
 
-Roadmap milestones **GI-0** (layout) and **GI-1** (mission). A fourth selectable mission on a purpose-planned two-deck compound, built to be finished quietly or loudly. It is the shared testbed for the next stealth, event, cover and art work. Everything renders in the neutral placeholder style: the layout's theme is `goauld`, which falls back to neutral because no Goa'uld art exists yet.
+Roadmap milestones **GI-0** (layout), **GI-1** (mission) and **GI-2** (complete: every phase 3 system wired in). A fourth selectable mission on a purpose-planned two-deck compound, built to be finished quietly or loudly. Patrols see (ST-1) and hear (ST-2), an alerted Jaffa runs for an alarm that brings reinforcements (EV-1), and guards fight from the barricades and crates (TA-1). It is the shared testbed for the next stealth, event, cover and art work. Everything renders in the neutral placeholder style: the layout's theme is `goauld`, which falls back to neutral because no Goa'uld art exists yet.
 
 **Deploy through the Stargate → sabotage the generator → download the command records upstairs → return to the Stargate.**
 
@@ -72,11 +72,35 @@ Since EV-1 being seen has consequences; the rules are in [the alert guide](missi
 
 On the alarm, two Jaffa leave the barracks after 6 s and two shock guards after 20 s, and every sentry searches where the squad was last seen. Disabling the observation console on the way to the command records, or both consoles, takes the alarm away.
 
+## Noise and cover
+
+- **Noise (ST-2).** An unsuppressed rifle is heard about 25–40 m away through the compound's walls, so a shot in maintenance brings the generator watch. Carter's suppressed MP5 carries about 6 m. A sentry that hears something searches the spot and the points around it, then resumes its patrol; noise alone does not alert the compound.
+- **Cover (TA-1).** Low cover where the guarded fights happen:
+
+  | Room | Cover | Fight |
+  |---|---|---|
+  | `checkpoint` | Two barricades | The loud route's checkpoint pair |
+  | `cmd_antechamber` | Two barricades (also a checkpoint preset) | The upper hall sentry at the command section's door |
+  | `stores` | Three crates | The stores sentry on the quiet route |
+
+  Each barricade pair flanks one doorway, with no room behind it against the wall, so it protects guards against intruders coming through that door, not from inside the room. Building GI-2's suite found two cover defects, both fixed in TA-1: upper-deck barricades were never usable, and a 4 m minimum range left almost no spot inside a chamber.
+
+  Elsewhere (corridors, the inner junction, the generator room, the command room) there is no low cover. Jaffa there fight in the open or from the room's centre marker. More cover would mean other room presets, which is content work for after the human runs.
+
 ## Automated coverage
 
 ```sh
-python3 tools/run_godot_tests.py test_goauld_infiltration_mission test_mission_selection_uat --timeout 300
+python3 tools/run_godot_tests.py test_goauld_infiltration_mission test_goauld_infiltration_loud test_mission_alert test_mission_alert_multiplayer test_mission_selection_uat --timeout 400
 ```
+
+`test_goauld_infiltration_loud` plays the loud route with every phase 3 system live:
+- Cover exists in the checkpoint, the antechamber and the stores.
+- A rifle shot in maintenance sends the generator watch to look without alerting the compound.
+- A checkpoint guard set beside a barricade takes it when engaged.
+- The fight escalates: a runner raises the alarm and all four reinforcements arrive.
+- Both objectives are completed and the squad extracts while the compound hunts. The debrief reads *Alarm raised*, and every hostile, reinforcements included, stands down.
+
+The alarm itself is covered in depth by the [alert suites](mission-alert.md#automated-coverage).
 
 `test_goauld_infiltration_mission` runs the production lobby, mission host and sentries:
 
@@ -90,7 +114,7 @@ The quiet-route case teleports between room centres. It shows the route can be d
 
 ## Human UAT checklist (pending)
 
-Record commit, peer roles, route taken, time to finish, where you were seen, and anything that felt unfair or empty.
+Record each session in a copy of the [playtest template](../reviews/infiltration-playtest-template.md): commit, peer roles, route taken, time to finish, where you were seen, and anything that felt unfair or empty. Its answers decide the **Stealth**, **Infiltration greybox** and **Infiltration complete** gates, and the patrol, noise, alarm and cover tuning that follows.
 
 1. Launch from the lobby. Confirm the HUD shows objective 1, six hostiles and the mission title.
 2. Take the quiet route (wide exit, service corridor, stores, maintenance) and reach the generator unseen. Note how long you waited for the stores sentry.
@@ -112,4 +136,5 @@ Record commit, peer roles, route taken, time to finish, where you were seen, and
 - **Cover is still the room `cover` marker**, not the checkpoint's sandbag props (TA-1).
 - **The Stargate does nothing:** insertion is a spawn in the gate room and extraction is walking back to it. Gate travel is GT-2.
 - **Rings are idle** and are not a walking link for players or AI.
-- **Patrol timings are untuned.** The quiet route was checked automatically, not played.
+- **Everything is untuned.** Patrol timings, notice times, noise radii, raise time, reinforcement delays and cover choice were checked automatically, not played. GI-2's tuning step is waiting for the human runs.
+- **No resupply** on the compound (CO-1 does not exist yet).

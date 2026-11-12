@@ -23,7 +23,7 @@ Reports default to `build/test-results/godot/`: `summary.json`, `junit.xml`, pro
 
 ### Current baseline
 
-The last recorded full local run is **76/76 checks** on the TA-1 branch (PR #48): project import, 74 suites and the persistence reader. Each milestone's pull request records its own run.
+The last recorded full local run is **77/77 checks** on the GI-2 branch (PR #49): project import, 75 suites and the persistence reader. Each milestone's pull request records its own run.
 
 **Hosted CI:** the `Godot full` job failed on every push to `main` from PR #35 to #41. `test_level_authoring` runs `tools/level_authoring.py`, which looks for `godot` on `PATH` (or the `GODOT` environment variable); the workflow installs the engine elsewhere and passed its path only to the test runner. Since roadmap milestone EX-1 the runner exports the engine it was given as `GODOT` to every suite, and `tools/tests/test_godot_runner.py` checks that. The hosted `Godot full` job passed on PRs #42 and #43 with this change; check each pull request's hosted run for the current state.
 
@@ -41,6 +41,7 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 | `test_sgc_map_contract` | Provenance, alternate routing, art bounds/collision preservation and invalid destination handling. |
 | `test_mission_selection_uat` | Real lobby/coordinator dispatch, quiet UAT startup, retry and retained Defense activation. |
 | `test_modular_extraction_mission`, `test_modular_extraction_multiplayer`, `test_modular_extraction_dedicated` | Modular mission from the lobby and from a dedicated server: objectives, extraction rule, Jaffa patrol combat and cover, failure, stand-down after the result, retry, error-free late join during a firefight and shared result. See the [mission guide](maps/modular-extraction-mission.md). |
+| `test_goauld_infiltration_loud` | The infiltration mission's loud route with hearing, alarm, reinforcements and cover live, through extraction and stand-down. |
 | `test_goauld_infiltration_mission` | Infiltration mission from the lobby: unseen insertion, guarded checkpoint, quiet route to the generator without an alert, objectives in order, extraction, retry and failure. See the [mission guide](maps/goauld-infiltration-mission.md). |
 | `test_mission_alert`, `test_mission_alert_multiplayer` | Compound alert on the infiltration mission: escalation, alarm runner and console, reinforcement budget and timing, disabled consoles, stopped runner, calm-down, debrief, retry; two-process late join during an alarm, client console disable through the server and runner tell. See the [alert guide](maps/mission-alert.md). |
 | `test_jaffa_hearing` | Sentry hearing with real weapons and a C4 charge: per-weapon radii, suppressed shot silent, unsuppressed shot heard and investigated, no escalation from noise, range limit, walls do not muffle, fighting sentry unaffected, blast heard beyond rifle range, search points visited and route resumed. |

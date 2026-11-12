@@ -23,8 +23,9 @@ A new session should:
 - **EV-1 — Alert state, alarm and reinforcements** is implemented in [PR #46](https://github.com/flaxos/Team-Discovery-Channel/pull/46) ([guide](docs/maps/mission-alert.md)). It contains #45, so it lands correctly whichever merges first.
 - **ST-2 — Sound and search** is implemented in [PR #47](https://github.com/flaxos/Team-Discovery-Channel/pull/47), which contains #45 and #46.
 - **TA-1 — Real cover from authored props** is implemented in [PR #48](https://github.com/flaxos/Team-Discovery-Channel/pull/48), which contains #45 to #47.
+- **GI-2 — Infiltration mission complete** (agent part) is in [PR #49](https://github.com/flaxos/Team-Discovery-Channel/pull/49): an automated loud-route playthrough with every phase 3 system live, cover checked in the guarded rooms, and a [playtest record template](docs/reviews/infiltration-playtest-template.md). Its tuning and its gate are human work.
 
-**Next milestone: GI-2 — Infiltration mission complete.** Phase 3's tuning still needs the phase 2 human sessions: every value is provisional.
+That completes the implementation work of phase 3. **Next: the human sessions.** Two people play the infiltration mission by each route and fill in the template; that closes Stealth, Infiltration greybox and Infiltration complete, and drives tuning. The next agent milestones are phase 4 (GA-0 visual brief, then GA-1) or phase 5 (GT-1); they do not depend on each other. Phase 3's tuning still needs the phase 2 human sessions: every value is provisional.
 
 ## What exists today
 
@@ -68,7 +69,7 @@ The greybox layout and the art brief cost little and can proceed in parallel now
 | 4 | **EV-1** Alert state, alarm and reinforcements — *implemented, PR #46* | One alert level per mission, alarm runners and consoles, a reinforcement budget; wired into the infiltration mission | M | Fable-class |
 | 5 | **ST-2** Sound and search — *implemented, PR #47* | Gunfire and blasts draw sentries; searches visit points around the last known position | M | Fable-class |
 | 6 | **TA-1** Real cover from authored props — *implemented, PR #48* | Jaffa fight from behind the props rooms already place | M | Fable-class |
-| 7 | **GI-2** Infiltration mission complete | The compound with consequences and cover, ready for the replay gate | M | Codex-class plus authoring |
+| 7 | **GI-2** Infiltration mission complete — *agent part in PR #49; tuning and gate are human* | The compound with consequences and cover, ready for the replay gate | M | Codex-class plus authoring |
 
 Each has objective, files, boundaries, acceptance tests, human checks, risks and a handoff prompt in the master plan. The layout half of GI-1 (GI-0) can be authored at any time.
 
@@ -154,6 +155,7 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | Master roadmap (PR #41) | Documentation only: audit, capability matrix, milestone plan, decision log. |
 | GI-0 and GI-1 (PR #44) | Twenty-room two-deck compound planned with the authoring CLI (gate insertion, guarded checkpoint route and quiet service route to the generator, upper command deck, paired rings); fourth selectable mission with six sentries and an automated quiet-route check. |
 | ST-1 (PR #43) | Sentry perception for patrols: view cone and line of sight, suspicious then alerted with a replicated ? / ! tell, one-hop alert spread, search the last seen position and resume the route. Gate waves keep the assault rule. |
+| GI-2 (PR #49) | Loud-route playthrough of the infiltration mission with hearing, alarm, reinforcements and cover live; cover verified in the guarded rooms; playtest record template for the human gates. 77/77 local checks. |
 | TA-1 (PR #48) | Jaffa fight from behind solid low cover props: spot selection behind the prop, crouch and stand to fire over it, relocation when flanked, marker fallback; perception from eye height. One new suite; 76/76 local checks. |
 | ST-2 (PR #47) | Per-weapon noise radii (suppressed MP5 6 m) and explosive and turret noise; sentries hear and search the source; searches visit points around the last known position before resuming. One new suite; 75/75 local checks. |
 | EV-1 (PR #46) | Compound alert levels, alarm runners and consoles that operatives can disable, a one-time reinforcement budget, klaxon, banner, toasts and debrief line; wired into the infiltration mission. Two new suites; 74/74 local checks. |

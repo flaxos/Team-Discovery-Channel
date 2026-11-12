@@ -19,7 +19,7 @@ Sections 3 onward are the plan. [ROADMAP.md](../../ROADMAP.md) records which mil
 
 The repository records human playtest feedback on the SGC (Sprint 21 findings, the UAT fixes in PRs #24, #25 and #37) but no completed acceptance sign-off for any mission. Nothing below is marked human-verified.
 
-**Regression evidence.** The audit's last full local run was 69/69 on the PR #40 branch. Since then each milestone's pull request records its own full run (76/76 on the TA-1 branch), and hosted CI is green again since EX-1: see R1 in section 7 and [TESTING.md](../TESTING.md#current-baseline).
+**Regression evidence.** The audit's last full local run was 69/69 on the PR #40 branch. Since then each milestone's pull request records its own full run (77/77 on the GI-2 branch), and hosted CI is green again since EX-1: see R1 in section 7 and [TESTING.md](../TESTING.md#current-baseline).
 
 ## 2. Capability matrix
 
@@ -98,7 +98,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | SGC Defense | Wave defence across three floors, difficulty objectives, dial out, extract | Most complete. Two-human acceptance outstanding |
 | SGC UAT Base | The same base with no hostiles | Exploration and controls testing |
 | Modular Extraction UAT | Reach a room, use a console, return; five patrolling Jaffa | Development slice on a neutral test fixture. No alarm consoles or gate |
-| Goa'uld Infiltration — Greybox | Sabotage, download upstairs, return to the gate; six sentries; a guarded and a quiet route; alarm consoles and reinforcements (GI-1, EV-1) | Greybox stealth testbed. Human runs outstanding |
+| Goa'uld Infiltration — Greybox | Sabotage, download upstairs, return to the gate; six sentries that see and hear; a guarded and a quiet route; alarm consoles and reinforcements; cover at the checkpoint, antechamber and stores (GI-1, ST-2, EV-1, TA-1, GI-2) | Greybox stealth testbed, every phase 3 system live. Human runs outstanding |
 
 ## 3. Decision: gameplay, map or art first
 
@@ -273,7 +273,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 **GI-1 — Infiltration greybox mission** · M · Codex with scripted authoring · full work package in section 8.
 
-**GI-2 — Infiltration mission complete**
+**GI-2 — Infiltration mission complete** · *agent part in PR #49 (systems wired, loud-route suite, playtest template); tuning from human runs and the replay gate remain*
 - **Experience:** the same compound with consequences: alarm, reinforcements, a guarded checkpoint worth avoiding, firefights with real cover.
 - **Baseline:** GI-1.
 - **New:** EV-1 wired into the mission; cover props placed for TA-1; patrols tuned from human runs; resupply point if CO-1 exists.

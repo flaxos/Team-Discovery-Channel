@@ -14,7 +14,7 @@ This document keeps two things apart: **Part 1** is what the game does today, **
 |---|---|---|
 | **SGC Defense — Levels 28/27/26** | Defend the base against incoming Jaffa, meet the difficulty's objectives, dial an authorised outbound gate and extract | The most complete mission |
 | **SGC UAT Base — No Hostile Activation** | The same geometry and props with hostile activation and waves disabled | Exploration and interaction testing |
-| **Goa'uld Infiltration — Greybox** | Sabotage the generator, download command records on the upper deck and return to the Stargate, through a compound guarded by sight-based sentries; a guarded checkpoint route and a quiet service route | Greybox testbed for stealth. No alarm, reinforcements or Goa'uld art yet. See [its guide](docs/maps/goauld-infiltration-mission.md) |
+| **Goa'uld Infiltration — Greybox** | Sabotage the generator, download command records on the upper deck and return to the Stargate, through a compound guarded by sentries that see and hear, with alarm consoles, reinforcements and barricades; a guarded checkpoint route and a quiet service route | Greybox testbed for stealth. No alarm, reinforcements or Goa'uld art yet. See [its guide](docs/maps/goauld-infiltration-mission.md) |
 | **Modular Extraction UAT — Development** | Deploy into a modular test facility, reach the command room, download from a console, return to the insertion point; five Jaffa patrol | A development slice on neutral placeholder rooms. No gate, stealth, alarm or reinforcements. See [its guide](docs/maps/modular-extraction-mission.md) |
 
 No mission has a signed human acceptance run yet. The **Stargate in the infiltration compound is inert**: insertion is a spawn beside it and extraction is walking back to it.

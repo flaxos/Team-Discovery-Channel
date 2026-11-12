@@ -52,6 +52,7 @@ Maintained documentation describes `main` at `bf56743` (PR #40, 11 November 2026
 | --- | --- |
 | [Offworld extraction plan](plans/offworld-extraction-mission.md) | Earlier dependency study. Superseded by the master plan; kept for its analysis. |
 | [AI level authoring 2.0 review](reviews/ai-level-authoring-2.md) | Friction study and before/after benchmark for the planner. |
+| [Infiltration playtest template](reviews/infiltration-playtest-template.md) | Copy per human session; the evidence for the Stealth and Infiltration gates. |
 | [Work tracker](../plan/README.md) | Implementation records for the SGC refactor and Sprint 21. |
 
 ## Historical and generated material
