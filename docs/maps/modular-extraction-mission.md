@@ -60,12 +60,15 @@ To make another mission, save a new `MissionDefinition` and a scene that points 
 
 Changes to `JaffaAI.gd` are confined to the patrol state, which only `start_patrol` uses, and to levels where a `LevelAssembly` is found. SGC behaviour is unchanged.
 
-- A patrol that sights an operative now reacts like an interrupted column: rank 0 halts and suppresses, later ranks run to cover. Patrols within weapon range are alerted.
+- **Patrols use the sentry perception profile** (`JaffaPerception`, roadmap ST-1). A sentry notices only what it can see: inside a 110° view cone, within 24 m, with a clear line of sight. Walls, floors, closed doors and smoke block it; within 1.5 m line of sight alone is enough.
+- **Awareness builds before an alert.** While a sentry sees an operative its awareness fills, in about 0.8 s close up and 2.5 s at 24 m. Partway it is *suspicious*: it stops and turns to look, with a yellow **?** overhead that fills as suspicion grows. Out of sight, suspicion drains away over 3 s. Full awareness is an *alert*: a red **!**.
+- **An alerted patrol reacts like an interrupted column:** rank 0 halts and suppresses, later ranks run to cover, and other patrols within 22 m are alerted too (one hop). Taking damage alerts at once, from any direction.
+- **Losing the target:** after 1.5 s without sight an alerted sentry walks to where it last saw someone, looks around for 5 s, then resumes its route at the waypoint it was heading for.
+- Every value above is exported on `JaffaAI` under *Sentry perception* and is provisional until human play. Gate waves and column marches keep the original assault rules, so SGC Defense is unchanged.
 - On a modular level, cover is the nearest reachable room `cover` marker on the same deck that is at least 4 m from the threat and within 24 m (`LevelNavigator.cover_position`). The SGC cover and flank coordinates are not used.
 - **Fallback:** with no qualifying marker the Jaffa holds its current position and fights from there.
-- When contact is lost the Jaffa waits out the existing suppression timer, then resumes its patrol route.
 
-Perception, weapons and damage are the existing code paths.
+Weapons and damage are the existing code paths.
 
 ## Netcode fixes found on the way
 
@@ -111,7 +114,7 @@ Record commit, peer roles, expected and actual result for each line.
 
 Each item below was re-checked against the code on 12 November 2026 and is tracked, with its planned fix, in the [risk register](../plans/master-development-roadmap.md#7-risk-and-defect-register).
 
-- **Perception is the existing rule:** any operative within 22 m is acquired even through walls or a deck. Patrols converge quickly; this is not stealth.
+- **Perception is sight only.** There is no hearing yet: gunfire does not draw patrols that cannot see it (ST-2), and there is no level-wide alarm or reinforcements (EV-1). The third-person camera can see round corners that a sentry cannot, so the cone and timings need human tuning.
 - **Cover markers sit at room centres** in the current kit, so "cover" is a fallback position in an adjacent room, not concealment. Better cover needs authored markers, not code.
 - **A downed operative is only targeted when no standing operative is known** to that Jaffa (since EX-1). Solo play still fails on the first down, through the unchanged squad-down rule.
 - **No friendly airmen, resupply or armoury** in this mission.

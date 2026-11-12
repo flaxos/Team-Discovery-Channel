@@ -57,6 +57,12 @@ properties/5/replication_mode = 2
 properties/6/path = NodePath(".:collision_layer")
 properties/6/spawn = true
 properties/6/replication_mode = 2
+properties/7/path = NodePath(".:awareness_level")
+properties/7/spawn = true
+properties/7/replication_mode = 2
+properties/8/path = NodePath(".:awareness")
+properties/8/spawn = true
+properties/8/replication_mode = 2
 
 [node name="JaffaShockGuard" type="CharacterBody3D"]
 collision_layer = 4
