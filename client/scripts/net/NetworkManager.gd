@@ -35,10 +35,12 @@ const DIFFICULTY_DESCRIPTIONS: Array[String] = [
 const MISSION_SGC_DEFENSE: String = "sgc_defense"
 const MISSION_SGC_UAT: String = "sgc_uat"
 const MISSION_MODULAR_EXTRACTION: String = "modular_extraction_uat"
+const MISSION_GOAULD_INFILTRATION: String = "goauld_infiltration"
 const MISSIONS: Dictionary = {
 	MISSION_SGC_DEFENSE: {"name": "SGC Defense — Levels 28/27/26", "description": "Refactored three-level SGC. Defend against incoming Jaffa, complete objectives and extract.", "scene": "res://scenes/main/GateRoom.tscn"},
 	MISSION_SGC_UAT: {"name": "SGC UAT Base — No Hostile Activation", "description": "Explore the same three-level SGC with lifts, stairs, props and friendly personnel. No automatic hostile gate activations or enemy waves.", "scene": "res://scenes/main/SGCUATBase.tscn"},
-	MISSION_MODULAR_EXTRACTION: {"name": "Modular Extraction UAT — Development", "description": "Development slice on the modular test facility: reach the command room, download data from the main console and return to the insertion point. Jaffa patrols are active.", "scene": "res://scenes/mission/ModularExtractionMission.tscn"}
+	MISSION_MODULAR_EXTRACTION: {"name": "Modular Extraction UAT — Development", "description": "Development slice on the modular test facility: reach the command room, download data from the main console and return to the insertion point. Jaffa patrols are active.", "scene": "res://scenes/mission/ModularExtractionMission.tscn"},
+	MISSION_GOAULD_INFILTRATION: {"name": "Goa'uld Infiltration — Greybox", "description": "Greybox stealth mission in a two-deck Goa'uld compound: sabotage the generator, download the command records upstairs and return to the Stargate. Sentries see by sight and raise suspicion before an alert; take the guarded checkpoint or the quiet service route.", "scene": "res://scenes/mission/GoauldInfiltrationMission.tscn"}
 }
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"

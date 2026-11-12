@@ -61,7 +61,7 @@ func run() -> void:
 	root.add_child(main)
 	await frames(3)
 	var lobby := main.current_lobby as LobbyUI
-	assert(lobby.mission_option_button.item_count == 3)
+	assert(lobby.mission_option_button.item_count == 4)
 	lobby._on_mission_selected(2)
 	assert(net.selected_mission_id == MISSION and lobby.difficulty_option_button.disabled)
 	assert("EXTRACTION" in lobby.start_game_button.text)
