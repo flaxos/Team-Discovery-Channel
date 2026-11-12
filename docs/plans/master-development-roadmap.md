@@ -19,7 +19,7 @@ Sections 3 onward are the plan. [ROADMAP.md](../../ROADMAP.md) records which mil
 
 The repository records human playtest feedback on the SGC (Sprint 21 findings, the UAT fixes in PRs #24, #25 and #37) but no completed acceptance sign-off for any mission. Nothing below is marked human-verified.
 
-**Regression evidence.** The audit's last full local run was 69/69 on the PR #40 branch. Since then each milestone's pull request records its own full run (74/74 on the EV-1 branch), and hosted CI is green again since EX-1: see R1 in section 7 and [TESTING.md](../TESTING.md#current-baseline).
+**Regression evidence.** The audit's last full local run was 69/69 on the PR #40 branch. Since then each milestone's pull request records its own full run (75/75 on the ST-2 branch), and hosted CI is green again since EX-1: see R1 in section 7 and [TESTING.md](../TESTING.md#current-baseline).
 
 ## 2. Capability matrix
 
@@ -59,7 +59,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | NPC avoidance and rerouting | Missing | No avoidance code. A locked door on the path produces `blocked_door` and the NPC waits |
 | Mounted weapons | Verified (SGC) | Fixed .50 cal turrets and the Heavy tripod; airmen can crew them. Not available as a modular attachment |
 | Deployable equipment | Verified (SGC) | Claymore, C4, ballistic shield, smoke; smoke blocks AI sight |
-| Stealth interactions, takedowns | Missing | Body dragging exists. No takedown, knife, silenced-weapon or body-discovery logic |
+| Stealth interactions, takedowns | Partial | Body dragging exists. Weapon noise with a suppressed MP5 and sentry hearing and search (ST-2, `test_jaffa_hearing`). No takedown, knife or body discovery |
 
 ### Stargate systems
 
@@ -198,7 +198,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 **ST-1 — Perception and awareness core** · M · Fable · full work package in section 8.
 
-**ST-2 — Sound, investigation and search**
+**ST-2 — Sound, investigation and search** · *implemented in PR #47*
 - **Experience:** unsuppressed gunfire draws nearby patrols; a patrol that loses you searches the area before giving up.
 - **Baseline:** none. No noise events exist.
 - **New:** host-side noise events with a radius (weapon fire, explosions, sprinting optional); a search state that visits two or three points around the last known position; suppressed weapons emit a smaller radius.

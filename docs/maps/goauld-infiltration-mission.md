@@ -102,12 +102,13 @@ Record commit, peer roles, route taken, time to finish, where you were seen, and
 8. Get spotted on purpose. Can you see who runs for the alarm (**!!**) and stop him before he reaches the console? Note how long you had.
 9. Let the alarm sound once. Do the klaxon, the searching sentries and the reinforcements feel like a consequence you can still play through to extraction?
 10. Disable the observation console before the command room, or both consoles, and get spotted: confirm nobody runs and no reinforcements come.
+11. Fire an unsuppressed weapon near the stores, then try the MP5 (Carter) in the same place. Is the difference worth the class choice, and is the search afterwards fair?
 
 ## Known limitations
 
 - **Greybox:** neutral placeholder art; no Goa'uld visuals.
 - **No locked doors or lockdown** after the alarm (EV-2), and reinforcements come from the barracks only, not by rings.
-- **No hearing:** gunfire does not draw sentries that cannot see it (ST-2).
+- **Hearing is straight-line** (ST-2): unsuppressed fire draws sentries within its radius through walls. Carter's suppressed MP5 is the quiet weapon.
 - **Cover is still the room `cover` marker**, not the checkpoint's sandbag props (TA-1).
 - **The Stargate does nothing:** insertion is a spawn in the gate room and extraction is walking back to it. Gate travel is GT-2.
 - **Rings are idle** and are not a walking link for players or AI.
