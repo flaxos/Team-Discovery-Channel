@@ -13,7 +13,7 @@ godot --path client -- --mission sgc_uat
 3. In **LEVEL / MISSION**, choose **SGC UAT Base — No Hostile Activation** for quiet exploration, or **SGC Defense — Levels 28/27/26** for combat.
 4. For Defense, choose difficulty. Click **LAUNCH SELECTED MISSION**.
 
-A third entry, **Modular Extraction UAT — Development**, runs a short objective mission on a modular test facility instead of the SGC; preselect it with `--mission modular_extraction_uat`. Its objectives, extraction rule and limitations are in the [mission guide](maps/modular-extraction-mission.md). The floor, lift, shutter and Defense sections below apply to the SGC missions only.
+A fourth entry, **Goa'uld Infiltration — Greybox** (`--mission goauld_infiltration`), is a stealth mission in a two-deck compound; see [its guide](maps/goauld-infiltration-mission.md). A third entry, **Modular Extraction UAT — Development**, runs a short objective mission on a modular test facility instead of the SGC; preselect it with `--mission modular_extraction_uat`. Its objectives, extraction rule and limitations are in the [mission guide](maps/modular-extraction-mission.md). The floor, lift, shutter and Defense sections below apply to the SGC missions only.
 
 UAT inherits the Defense map, including props, friendly personnel, stairs and the lift. It disables automatic hostile gate activations and enemy waves; it is an exploration/test mode rather than an extraction run. Difficulty is disabled. The host owns mission/difficulty selection; clients receive it, including on joining and retry.
 

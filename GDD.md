@@ -14,9 +14,10 @@ This document keeps two things apart: **Part 1** is what the game does today, **
 |---|---|---|
 | **SGC Defense — Levels 28/27/26** | Defend the base against incoming Jaffa, meet the difficulty's objectives, dial an authorised outbound gate and extract | The most complete mission |
 | **SGC UAT Base — No Hostile Activation** | The same geometry and props with hostile activation and waves disabled | Exploration and interaction testing |
+| **Goa'uld Infiltration — Greybox** | Sabotage the generator, download command records on the upper deck and return to the Stargate, through a compound guarded by sight-based sentries; a guarded checkpoint route and a quiet service route | Greybox testbed for stealth. No alarm, reinforcements or Goa'uld art yet. See [its guide](docs/maps/goauld-infiltration-mission.md) |
 | **Modular Extraction UAT — Development** | Deploy into a modular test facility, reach the command room, download from a console, return to the insertion point; five Jaffa patrol | A development slice on neutral placeholder rooms. No gate, stealth, alarm or reinforcements. See [its guide](docs/maps/modular-extraction-mission.md) |
 
-No mission has a signed human acceptance run yet.
+No mission has a signed human acceptance run yet. The **Stargate in the infiltration compound is inert**: insertion is a spawn beside it and extraction is walking back to it.
 
 ### SGC Defense rules
 
@@ -65,7 +66,7 @@ Players use a tactical third-person camera with shoulder ADS and camera-relative
 
 **Jaffa** march in columns, advance through the SGC, patrol named room markers on modular levels, open unlocked doors, and fight with staff weapons and melee. In the SGC they take sandbag cover and flank by fixed corridor points. On modular levels the "cover" they move to is a room-centre marker.
 
-**Detection is simple and not stealth-capable.** A Jaffa targets the nearest operative it can see within about 33 m in any direction, and failing that, any operative within 22 m whether or not there is a wall or deck between them. It only fires with line of sight. There is no view cone, suspicion, hearing or level-wide alarm. Smoke blocks sight. Jaffa continue to attack downed operatives.
+**Detection depends on the Jaffa's role.** *Patrols* (modular missions) are sentries: they see inside a view cone with line of sight, become suspicious before they are alerted, show a **?** or **!** overhead, alert patrols nearby, and search the last seen position before resuming their route. Damage alerts them at once. *Gate waves and column marches* (SGC Defense) keep the original assault rule: the nearest operative in sight within about 33 m, or failing that any operative within 22 m regardless of walls. All Jaffa fire only with line of sight, and target a downed operative only when no standing one is in reach. Smoke blocks sight. There is no hearing or level-wide alarm yet.
 
 **Airmen** follow squad orders, hold corners, leapfrog, crew turrets and revive in the SGC. On modular levels they can be ordered to a position; their tactical behaviour still depends on SGC sector names.
 
