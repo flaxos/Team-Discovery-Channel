@@ -101,6 +101,18 @@ func run_host() -> void:
 	await frames(10)
 	assert(room.objectives.index == 1, "Host completes the first objective before anyone joins")
 	# Hostiles stay live while the client connects: the join happens during a firefight.
+	# Record when each Jaffa's awareness last changed, to compare with the client's view.
+	var level_now := {}
+	var level_since := {}
+	var clock: Array[int] = [0]
+	var recorder := func() -> void:
+		clock[0] += 1
+		for enemy in room.enemies.get_children():
+			var jaffa := enemy as JaffaAI
+			if jaffa != null and level_now.get(str(jaffa.name), -1) != jaffa.awareness_level:
+				level_now[str(jaffa.name)] = jaffa.awareness_level
+				level_since[str(jaffa.name)] = clock[0]
+	process_frame.connect(recorder)
 	var hits: Array[int] = [0]
 	me.health_component.damage_taken.connect(func(_a: float, _s: Node, _t: String) -> void: hits[0] += 1)
 	child_pid = OS.create_process(
@@ -135,10 +147,17 @@ func run_host() -> void:
 		FileAccess.get_file_as_string(output_dir.path_join("joined"))
 	)
 	assert(reported.size() == 5)
+	var compared := 0
 	for jaffa_name: String in reported:
 		var at: Array = reported[jaffa_name]
 		var truth := (room.enemies.get_node(jaffa_name) as Node3D).global_position
 		assert(truth.distance_to(Vector3(at[0], at[1], at[2])) < 2.5, "Replica follows " + jaffa_name)
+		# Awareness drives the overhead tell; compare it wherever it has been stable for 1.5 s.
+		if clock[0] - int(level_since[jaffa_name]) > 90:
+			compared += 1
+			assert(int(at[3]) == int(level_now[jaffa_name]), "Client sees the awareness of " + jaffa_name)
+	assert(compared >= 3, "Enough Jaffa held one awareness level to compare")
+	process_frame.disconnect(recorder)
 	assert(await marked("console"), "Client console use must reach the host")
 	assert(room.objectives.index == 2 and events == [1, 2], "One completion per objective")
 	assert(await marked("at_exit"))
@@ -216,7 +235,7 @@ func run_client() -> void:
 	var positions := {}
 	for mirror: JaffaAI in seen:
 		var at := mirror.global_position
-		positions[str(mirror.name)] = [at.x, at.y, at.z]
+		positions[str(mirror.name)] = [at.x, at.y, at.z, mirror.awareness_level]
 	mark("joined", JSON.stringify(positions))
 	place(me, console.global_position + Vector3(0, 0, 1.5))
 	for _i: int in range(600):
