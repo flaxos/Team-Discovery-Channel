@@ -41,6 +41,7 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 | `test_sgc_map_contract` | Provenance, alternate routing, art bounds/collision preservation and invalid destination handling. |
 | `test_mission_selection_uat` | Real lobby/coordinator dispatch, quiet UAT startup, retry and retained Defense activation. |
 | `test_modular_extraction_mission`, `test_modular_extraction_multiplayer`, `test_modular_extraction_dedicated` | Modular mission from the lobby and from a dedicated server: objectives, extraction rule, Jaffa patrol combat and cover, failure, stand-down after the result, retry, error-free late join during a firefight and shared result. See the [mission guide](maps/modular-extraction-mission.md). |
+| `test_jaffa_perception` | Sentry perception on the integrated fixture with fresh sentries: nothing seen through walls or floors (where the assault rule would acquire), nothing outside the cone, suspicious before alerted no sooner than the notice time, forgetting, smoke, closed and open doors, damage alert, one-hop spread, search of the last seen position and resumption of the route at the same waypoint. |
 | `test_buffer_lockout_hud` | Denied dialing and upload/cancel/snapshot updates leave no orphan panel; approved dialing can open and dismiss its panel. |
 
 The full inventory also covers gate lifecycle/difficulty, combat authority, native multiplayer joins/state/retry, inventory, controls/remapping, camera and objectives. Use `--list` for exact names rather than maintaining a second hand-written inventory.
