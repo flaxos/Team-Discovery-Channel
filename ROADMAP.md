@@ -18,17 +18,19 @@ A new session should:
 
 **ST-1 — Perception and awareness core** is implemented in [PR #43](https://github.com/flaxos/Team-Discovery-Channel/pull/43), stacked on PR #42. Its tuning values are provisional until people play it.
 
-**Next milestone: GI-1 — Goa'uld infiltration greybox mission** (its layout half, GI-0, can start at once).
+**GI-0 and GI-1 — Goa'uld infiltration greybox mission** are implemented in [PR #44](https://github.com/flaxos/Team-Discovery-Channel/pull/44), stacked on PR #43. That completes the implementation work of phase 2; its human gates (stealth, infiltration greybox) are open.
+
+**Next milestone: EV-1 — Alert state, alarm and reinforcements** (phase 3). Run the phase 2 human sessions first if possible: EV-1's design should come from how the greybox mission plays.
 
 ## What exists today
 
 | | State |
 |---|---|
-| **Playable** | **SGC Defense** (three-floor wave defence, difficulty objectives, dial out and extract). **SGC UAT Base** (the same base, no hostiles). **Modular Extraction UAT** (development slice: reach a room, use a console, return, with five patrolling Jaffa) |
+| **Playable** | **SGC Defense** (three-floor wave defence, difficulty objectives, dial out and extract). **SGC UAT Base** (the same base, no hostiles). **Modular Extraction UAT** (development slice: reach a room, use a console, return, with five patrolling Jaffa). **Goa'uld Infiltration — Greybox** (stealth testbed: sight-based sentries, a guarded and a quiet route, three objectives) |
 | **Working systems** | Host/join and dedicated launch, four classes, server-authoritative combat, downing and revive, late join and retry, squad orders, Jaffa and airman AI, gate dialling and iris in the SGC, modular doors |
 | **Content pipeline** | 15 structural modules, 16 room presets, 8 composites, a visual editor, and an AI authoring CLI with a graph planner and topology checks |
 | **Placeholder only** | Faction themes (`goauld`, `asgard`, `tokra`, `replicator`, `tauri_sgc` all render the neutral fallback). Transport rings and the gate preset on modular levels (placed, inert). Several class perks named in the lobby text |
-| **Not built** | Stealth (view cones, suspicion, noise, alarms). Gate travel between worlds. Reinforcements and mission events on modular levels. Real cover on modular levels. Takedowns, Goa'uld shields. Any faction art. Outdoor terrain. Campaign progression |
+| **Not built** | Hearing, alarms and reinforcements (sight-based perception exists for patrols since ST-1). Gate travel between worlds. Reinforcements and mission events on modular levels. Real cover on modular levels. Takedowns, Goa'uld shields. Any faction art. Outdoor terrain. Campaign progression |
 | **Not yet accepted by people** | Everything. Human playtests have produced fixes, but no mission has a signed acceptance run |
 
 The full classification, with source paths and tests, is the [capability matrix](docs/plans/master-development-roadmap.md#2-capability-matrix).
@@ -58,7 +60,7 @@ The greybox layout and the art brief cost little and can proceed in parallel now
 |---|---|---|---|---|
 | 1 | **EX-1** Trustworthy baseline and extraction hardening — *implemented, PR #42* | Green hosted CI; the extraction mission cleaned up for a two-person run, including a dedicated-server check | M | Codex-class |
 | 2 | **ST-1** Perception and awareness core — *implemented, PR #43* | Patrols that see by line of sight inside a cone, become suspicious before alerted, investigate and give up | M | Fable-class |
-| 3 | **GI-1** Goa'uld infiltration greybox mission | A fourth selectable mission on a planned two-deck compound with a quiet route and a loud one | M | Scripted authoring plus Codex-class |
+| 3 | **GI-1** Goa'uld infiltration greybox mission — *implemented, PR #44* | A fourth selectable mission on a planned two-deck compound with a quiet route and a loud one | M | Scripted authoring plus Codex-class |
 
 Each has objective, files, boundaries, acceptance tests, human checks, risks and a handoff prompt in the master plan. The layout half of GI-1 (GI-0) can be authored at any time.
 
@@ -96,7 +98,7 @@ The diagram and the table of which streams can run at the same time without touc
 | CI | Hosted `Godot full` is green on `main` (repair in EX-1) |
 | EX-2 | A dated two-person record exists for Modular Extraction UAT and one SGC Defense run |
 | Stealth | Two people cross the test facility unseen on purpose, and report the awareness tell as readable (ST-1 is implemented; this gate is open) |
-| Infiltration greybox | Two people finish GI-1 by each route |
+| Infiltration greybox | Two people finish GI-1 by each route (mission implemented; gate open) |
 | Infiltration complete | Both routes are reported as worth replaying with alarm and reinforcements active |
 
 Automated suites never satisfy a human gate.
@@ -142,6 +144,7 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | First modular mission (PR #39) | Modular Extraction UAT: data-driven objectives, extraction rule, patrol combat, two shared netcode fixes. 68/68 local checks. |
 | AI level authoring 2.0 (PR #40) | Graph planner, topology checks, six more composites, tactical catalogue metadata, four demonstration maps. 69/69 local checks. |
 | Master roadmap (PR #41) | Documentation only: audit, capability matrix, milestone plan, decision log. |
+| GI-0 and GI-1 (PR #44) | Twenty-room two-deck compound planned with the authoring CLI (gate insertion, guarded checkpoint route and quiet service route to the generator, upper command deck, paired rings); fourth selectable mission with six sentries and an automated quiet-route check. |
 | ST-1 (PR #43) | Sentry perception for patrols: view cone and line of sight, suspicious then alerted with a replicated ? / ! tell, one-hop alert spread, search the last seen position and resume the route. Gate waves keep the assault rule. |
 | EX-1 (PR #42) | CI runner repair; readiness-gated mission messages so mid-firefight joins log no errors; hostiles stand down and squad state is final at the result; standing operatives targeted before downed ones; dedicated-server suite, client-requested retry and return to lobby on server loss; mission-owned HUD and debrief text. |
 
