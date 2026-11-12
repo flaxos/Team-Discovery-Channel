@@ -171,7 +171,12 @@ func run_client() -> void:
 	# The snapshot: alarm raised, consoles dead, the arrived reinforcements, the banner.
 	var alert := room.alert
 	assert(alert.is_raised() and alert.spotted, "Late join receives the alarm")
-	assert(alert.reinforcements_spawned == 2 and room.enemies.has_node("Jaffa_R0_0"))
+	# The second group may also have arrived while a slow client was loading.
+	var arrived := 0
+	for enemy in room.enemies.get_children():
+		if str(enemy.name).begins_with("Jaffa_R"):
+			arrived += 1
+	assert(arrived >= 2 and alert.reinforcements_spawned == arrived and room.enemies.has_node("Jaffa_R0_0"))
 	for station in alert.consoles:
 		assert(station.prompt.text == "ALARM ACTIVE" and not station.is_in_group("interactable"))
 	assert(room.hud.enemies_label.text.begins_with("ALARM RAISED"), room.hud.enemies_label.text)
