@@ -29,6 +29,9 @@ signal ammo_changed(current: int, reserve: int)
 @export var overheat_cooldown_time: float = 3.0
 @export var plasma_speed_mps: float = 35.0
 @export var fire_sound_path: String = "res://audio/sfx_p90.wav"
+## Metres a shot is heard by patrolling sentries, in a straight line (walls do not muffle it).
+## Suppressed weapons use a small radius; 0 is silent.
+@export var noise_radius: float = 30.0
 
 var current_ammo: int = 50
 var reserve_ammo: int = 250
@@ -360,6 +363,11 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 		return
 	if audio_player != null:
 		audio_player.play()
+	if noise_radius > 0.0 and is_inside_tree():
+		var shooter: Node = _operative()
+		get_tree().call_group(
+			&"noise_listeners", &"hear", origin, noise_radius, shooter if shooter != null else get_parent()
+		)
 
 	if is_plasma:
 		var bolt_scene := load("res://scenes/entities/PlasmaBolt.tscn") as PackedScene

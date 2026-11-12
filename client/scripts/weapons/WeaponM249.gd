@@ -21,3 +21,4 @@ func _init() -> void:
 	spread_recovery_rate = 14.0
 	max_range_m = 60.0
 	fire_sound_path = "res://audio/sfx_m249.wav"
+	noise_radius = 40.0

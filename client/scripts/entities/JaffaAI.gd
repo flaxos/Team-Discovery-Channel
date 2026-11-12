@@ -53,10 +53,16 @@ enum Profile { ASSAULT, SENTRY }
 @export var forget_time: float = 3.0
 ## Seconds an alerted Jaffa keeps fighting an unseen target before it goes to look.
 @export var lose_target_time: float = 1.5
-## Seconds spent at the last seen position before resuming the patrol.
-@export var investigate_wait: float = 5.0
+## Seconds spent looking around at the last seen position before searching nearby.
+@export var investigate_wait: float = 3.0
 ## Longest walk towards the last seen position before searching from where it is.
 @export var investigate_travel_limit: float = 20.0
+## After looking at the last seen position, visit this many reachable points around it.
+@export var search_points: int = 3
+## How far from the last seen position the search points are.
+@export var search_radius: float = 5.0
+## Seconds spent looking around at each search point.
+@export var search_look_time: float = 1.5
 @export_group("")
 
 var profile: Profile = Profile.ASSAULT
@@ -72,6 +78,9 @@ var errand := Vector3.INF
 var _errand_look := Vector3.INF
 var _search_clock := 0.0
 var _search_wait := -1.0
+## Search points still to visit after looking at the last seen position.
+var _search_route: Array[Vector3] = []
+var _search_leg := 0.0
 var _tell: Label3D
 
 var current_state: State = State.ADVANCE
@@ -164,6 +173,7 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 	patrol_laps = 0
 	patrol_loop = loop
 	profile = Profile.SENTRY
+	add_to_group(&"noise_listeners")
 	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
 		current_state = State.PATROL
 
@@ -214,7 +224,21 @@ func _engage(target: Node3D, spread: bool) -> void:
 		_alert_nearby_formation_jaffa()
 
 
-## Server: go and look at `at` (an alarm). An alerted Jaffa is already fighting and ignores it.
+## Server: a noise at `at` that carries `radius` metres in a straight line; walls do not muffle
+## it. A sentry in range that is not already fighting turns suspicious and goes to look.
+## Called through the `noise_listeners` group by weapons and explosives.
+func hear(at: Vector3, radius: float, _source: Node = null) -> void:
+	if profile != Profile.SENTRY or perception == null or not is_physics_processing():
+		return
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
+	if errand != Vector3.INF or global_position.distance_to(at) > radius:
+		return
+	investigate_at(at)
+
+
+## Server: go and look at `at` (an alarm or a noise). An alerted Jaffa is already fighting and
+## ignores it.
 func investigate_at(at: Vector3) -> void:
 	if perception == null or perception.level == JaffaPerception.Level.ALERTED:
 		return
@@ -271,6 +295,8 @@ func _start_investigation() -> void:
 	current_target = null
 	_search_clock = 0.0
 	_search_wait = -1.0
+	_search_route.clear()
+	_search_leg = 0.0
 	_set_crouching(false)
 	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
 		current_state = State.CHASE
@@ -281,7 +307,8 @@ func _publish_awareness() -> void:
 	awareness = snappedf(perception.awareness, 0.05)
 
 
-## A sentry with no target: patrol, stop and stare while suspicious, or search a position.
+## A sentry with no target: patrol, stop and stare while suspicious, or search a position:
+## walk to it, look around, then visit a few reachable points around it, looking at each.
 func _process_sentry_calm(delta: float) -> void:
 	if investigating:
 		current_state = State.CHASE
@@ -294,15 +321,30 @@ func _process_sentry_calm(delta: float) -> void:
 				_advance_towards(perception.stimulus, delta, move_speed)
 				return
 			_search_wait = investigate_wait
-		_search_wait -= delta
-		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
-		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
-		rotation.y += delta * 1.1  # look around
-		if _search_wait <= 0.0:
-			investigating = false
-			perception.calm()
-			_publish_awareness()
-			current_state = _resume_state()
+			_search_route = _search_route_around(global_position)
+		if _search_wait > 0.0:
+			# Stops at zero: a negative value means "still walking to the position".
+			_search_wait = maxf(0.0, _search_wait - delta)
+			velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+			velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+			rotation.y += delta * 1.1  # look around
+			return
+		if not _search_route.is_empty():
+			var leg := _search_route[0] - global_position
+			leg.y = 0.0
+			var blocked: bool = navigator != null and navigator.status in ["unreachable", "blocked_door", "stuck"]
+			_search_leg += delta
+			if leg.length() > 1.0 and _search_leg < 8.0 and not blocked:
+				_advance_towards(_search_route[0], delta, march_speed)
+				return
+			_search_route.pop_front()
+			_search_leg = 0.0
+			_search_wait = search_look_time
+			return
+		investigating = false
+		perception.calm()
+		_publish_awareness()
+		current_state = _resume_state()
 		return
 	if perception.level == JaffaPerception.Level.SUSPICIOUS:
 		# Stop and look where something was seen; keep looking until it is forgotten or confirmed.
@@ -316,6 +358,39 @@ func _process_sentry_calm(delta: float) -> void:
 	if current_state in [State.ADVANCE, State.CHASE]:
 		current_state = _resume_state()
 	_advance_towards(_overrun_destination(), delta, march_speed)
+
+
+## Up to `search_points` reachable floor points about `search_radius` from `center` on the same
+## deck, in spread-out directions and a short walk away. Empty off a modular level.
+func _search_route_around(center: Vector3) -> Array[Vector3]:
+	var route: Array[Vector3] = []
+	var level := LevelNavigator.find_level(self)
+	if level == null or not level.ready_for_navigation or search_points <= 0:
+		return route
+	var start := randf() * TAU
+	# Opposite directions first, then the quarters between them.
+	for step: float in [0.0, 0.5, 0.25, 0.75, 0.125, 0.625, 0.375, 0.875]:
+		if route.size() >= search_points:
+			break
+		var angle := start + TAU * step
+		var wanted := center + Vector3(sin(angle), 0.0, cos(angle)) * search_radius
+		var spot := NavigationServer3D.map_get_closest_point(level.navigation_map, wanted)
+		if absf(spot.y - center.y) > 1.0 or Vector2(spot.x - center.x, spot.z - center.z).length() < 2.5:
+			continue
+		var crowded := false
+		for other in route:
+			crowded = crowded or other.distance_to(spot) < 2.5
+		if crowded:
+			continue
+		var path := level.local_path(center, spot)
+		if path.is_empty() or path[-1].distance_to(spot) > 1.0:
+			continue
+		var length := 0.0
+		for i in range(1, path.size()):
+			length += path[i - 1].distance_to(path[i])
+		if length <= search_radius * 2.0:
+			route.append(spot)
+	return route
 
 
 func _build_tell() -> void:

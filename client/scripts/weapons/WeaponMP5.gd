@@ -20,3 +20,4 @@ func _init() -> void:
 	max_spread_deg = 6.0
 	spread_recovery_rate = 18.0
 	max_range_m = 40.0
+	noise_radius = 6.0

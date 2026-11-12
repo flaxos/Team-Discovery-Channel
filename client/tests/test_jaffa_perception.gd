@@ -308,7 +308,8 @@ func run() -> void:
 	await retire(first)
 	await retire(second)
 
-	# --- Target lost: investigate the last seen position, wait, then resume the patrol in order.
+	# --- Target lost: investigate the last seen position, search around it, then resume the patrol
+	# in order.
 	var hideout := farthest_from(route)
 	var clearance := INF
 	for point in route:
@@ -342,11 +343,19 @@ func run() -> void:
 			break
 	assert(arrived, "The sentry walks to the last seen position")
 	var waited := 0
-	while s.investigating and waited < 60 * 15:
+	while s.investigating and waited < 60 * 40:
 		await physics_frame
 		waited += 1
-		assert(flat_distance(s.global_position, last_seen) < 2.5, "It searches where it arrived")
-	assert(not s.investigating and waited >= int((s.investigate_wait - 0.5) * 60.0))
+		assert(
+			flat_distance(s.global_position, last_seen) < s.search_radius * 2.0 + 2.0,
+			"It searches around where it arrived"
+		)
+	assert(
+		not s.investigating and waited >= int((s.investigate_wait - 0.5) * 60.0),
+		"Search ends: investigating=%s waited=%d points left=%d" % [
+			s.investigating, waited, s._search_route.size()
+		]
+	)
 	assert(s.current_state == JaffaAI.State.PATROL and s.awareness_level == 0)
 	assert(s.patrol_index == resume_index, "The patrol keeps its place in the route")
 	var reached: Array[int] = []
