@@ -137,7 +137,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f'FAIL engine-version: expected {ENGINE_VERSION}, got {version!r}', flush=True)
         else:
             if not args.skip_import:
-                imported = execute([args.godot, '--headless', '--editor', '--path', str(args.project), '--quit',
+                # --import waits for every resource to be imported before quitting; --editor --quit
+                # could exit first, leaving imports missing on a slow runner.
+                imported = execute([args.godot, '--headless', '--editor', '--import', '--path', str(args.project),
                                     '--log-file', str(args.output / 'import.engine.log')],
                                    args.import_timeout, env, args.output / 'import.log')
                 imported['name'] = 'project-import'
