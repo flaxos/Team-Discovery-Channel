@@ -206,6 +206,13 @@ func _publish_state(event: String = "", amount: float = 0.0, source: Node = null
 func request_health_snapshot() -> void:
 	if multiplayer.is_server():
 		var sender: int = multiplayer.get_remote_sender_id()
+		# A peer that is no longer ready has dropped this world (a retry is under way): its
+		# replica of this node is gone, so a reply would only log an error there. Untyped
+		# access, as in mission_rpc, so the scripts do not reference each other.
+		var net: Node = get_node_or_null("/root/NetworkManager")
+		if net != null and net.is_in_active_session() and multiplayer == net.multiplayer:
+			if not (net.get("mission_ready_peers") as Dictionary).has(sender):
+				return
 		if sender in multiplayer.get_peers():
 			replica_peers[sender] = true
 			sync_health_state.rpc_id(sender, _state(), "", 0.0, NodePath())
