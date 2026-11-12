@@ -1,0 +1,65 @@
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
+[ext_resource type="Script" path="res://scripts/mission/MissionPatrol.gd" id="3_patrol"]
+[ext_resource type="Resource" path="res://resources/levels/goauld_infiltration_01.tres" id="4_layout"]
+
+[sub_resource type="Resource" id="sabotage"]
+script = ExtResource("2_objective")
+id = &"sabotage_generator"
+kind = "interact"
+room = &"generator"
+attachment = &"console"
+text = "SABOTAGE THE GENERATOR CONTROLS"
+prompt = "SABOTAGE GENERATOR"
+
+[sub_resource type="Resource" id="download"]
+script = ExtResource("2_objective")
+id = &"download_records"
+kind = "interact"
+room = &"cmd_command"
+attachment = &"main_console"
+text = "DOWNLOAD THE COMMAND RECORDS ON THE UPPER DECK"
+prompt = "DOWNLOAD RECORDS"
+
+[sub_resource type="Resource" id="extract"]
+script = ExtResource("2_objective")
+id = &"extract"
+kind = "extract"
+room = &"gate"
+marker = &"entry"
+radius = 4.0
+text = "RETURN TO THE STARGATE — ALL STANDING OPERATIVES"
+
+[sub_resource type="Resource" id="patrol_checkpoint"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("barracks", "checkpoint", "approach2")
+size = 2
+
+[sub_resource type="Resource" id="patrol_generator"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("inner", "generator")
+size = 1
+
+[sub_resource type="Resource" id="patrol_stores"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("stores", "ring_lower")
+size = 1
+
+[sub_resource type="Resource" id="patrol_upper"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("up_hall", "cmd_antechamber")
+size = 1
+
+[sub_resource type="Resource" id="patrol_command"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("cmd_command", "cmd_observation")
+size = 1
+
+[resource]
+script = ExtResource("1_definition")
+title = "GOA'ULD INFILTRATION — GREYBOX"
+layout = ExtResource("4_layout")
+objectives = Array[ExtResource("2_objective")]([SubResource("sabotage"), SubResource("download"), SubResource("extract")])
+patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_checkpoint"), SubResource("patrol_generator"), SubResource("patrol_stores"), SubResource("patrol_upper"), SubResource("patrol_command")])

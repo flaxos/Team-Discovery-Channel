@@ -1,0 +1,65 @@
+{
+ "brief": "Goa'uld infiltration compound, greybox (roadmap GI-0). Insertion and extraction at the Stargate. A guarded route through the security checkpoint (barracks and armoury beside it) and a quiet service route through the wide service corridor and stores, both reaching the generator objective. A ramp from the inner junction to an upper deck with a ring room and a command section behind a guarded antechamber. Paired rings between the stores and the upper deck.",
+ "layout": "res://resources/levels/goauld_infiltration_01.tres",
+ "requirements": [
+  {
+   "check": "room_count",
+   "min": 18,
+   "max": 24
+  },
+  {
+   "check": "distinct_routes",
+   "from": "entry",
+   "to": "generator",
+   "min": 2,
+   "unlocked_only": true,
+   "label": "two approaches from the gate to the generator"
+  },
+  {
+   "check": "alternate_route",
+   "from": "entry",
+   "to": "generator",
+   "around": "checkpoint",
+   "label": "the quiet route avoids the checkpoint"
+  },
+  {
+   "check": "only_via",
+   "room": "cmd_command",
+   "via": "ramp",
+   "label": "command is reached only by the ramp"
+  },
+  {
+   "check": "route",
+   "through": [
+    "entry",
+    "generator",
+    "cmd_command",
+    "entry"
+   ],
+   "label": "objective order is walkable"
+  },
+  {
+   "check": "roles",
+   "required": {
+    "stargate_dhd": 1,
+    "security_checkpoint": 1,
+    "jaffa_barracks": 1,
+    "generator": 1,
+    "command": 1,
+    "ring_transport": 2
+   }
+  },
+  {
+   "check": "connected"
+  },
+  {
+   "check": "dead_ends",
+   "allowed": [
+    "ring_lower",
+    "armoury",
+    "ring_upper",
+    "cmd_observation"
+   ]
+  }
+ ]
+}

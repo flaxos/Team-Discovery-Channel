@@ -18,6 +18,7 @@ In the lobby, select a callsign and class, click **ESTABLISH SGC BASE**, choose 
 | --- | --- |
 | **SGC Defense — Levels 28/27/26** | Incoming Jaffa, objectives and outbound extraction. The host selects difficulty. |
 | **SGC UAT Base — No Hostile Activation** | The same map, equipment and friendly personnel for exploration, with automatic hostile activation and waves disabled. Difficulty is disabled. |
+| **Goa'uld Infiltration — Greybox** | A two-deck compound with sight-based Jaffa sentries: sabotage the generator, download the command records and return to the Stargate, by the guarded checkpoint or the quiet service route. See [its guide](docs/maps/goauld-infiltration-mission.md). |
 | **Modular Extraction UAT — Development** | A development slice on a modular test facility: reach the command room, use a console and return, with Jaffa patrols. See [its guide](docs/maps/modular-extraction-mission.md). |
 
 To preselect quiet UAT, run `godot --path client -- --mission sgc_uat`, then host and launch in the lobby. This flag selects the mission; it does not bypass the lobby. The normal game directory on the development machine is `/home/flax/games/Team-Discovery-Channel`; it is separate from Orca worktrees. Restart a running game after updating its checkout.
