@@ -65,6 +65,11 @@ var perception: JaffaPerception
 var awareness_level: int = 0
 var awareness: float = 0.0
 var investigating := false
+## Set on every peer by the mission's alert director while this Jaffa runs for an alarm console.
+var raising_alarm := false
+## Server: where this Jaffa is running to (Vector3.INF when not on an errand), and what to face.
+var errand := Vector3.INF
+var _errand_look := Vector3.INF
 var _search_clock := 0.0
 var _search_wait := -1.0
 var _tell: Label3D
@@ -168,6 +173,8 @@ func stand_down() -> void:
 	current_target = null
 	velocity = Vector3.ZERO
 	investigating = false
+	errand = Vector3.INF
+	raising_alarm = false
 	if perception != null:
 		perception.calm()
 	awareness_level = JaffaPerception.Level.UNAWARE
@@ -205,6 +212,57 @@ func _engage(target: Node3D, spread: bool) -> void:
 		break_formation_and_engage()
 	if spread:
 		_alert_nearby_formation_jaffa()
+
+
+## Server: go and look at `at` (an alarm). An alerted Jaffa is already fighting and ignores it.
+func investigate_at(at: Vector3) -> void:
+	if perception == null or perception.level == JaffaPerception.Level.ALERTED:
+		return
+	if current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+		return
+	perception.stimulus = at
+	_start_investigation()
+	_publish_awareness()
+
+
+## Server: run to `spot` and stand there facing `look`, ignoring combat, until end_run().
+## Perception keeps running, so the Jaffa still notices and reports what it sees.
+func run_to(spot: Vector3, look: Vector3) -> void:
+	errand = spot
+	_errand_look = look
+	_set_crouching(false)
+	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
+		current_state = State.CHASE
+
+
+func end_run() -> void:
+	if errand == Vector3.INF:
+		return
+	errand = Vector3.INF
+	if current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+		return
+	if current_target != null:
+		break_formation_and_engage()
+	else:
+		current_state = _resume_state()
+
+
+func _process_errand(delta: float) -> void:
+	_reset_staff_position()
+	var offset := errand - global_position
+	offset.y = 0.0
+	if offset.length() > 0.6:
+		_advance_towards(errand, delta, combat_run_speed)
+		var heading := Vector3(velocity.x, 0.0, velocity.z)
+		if heading.length_squared() > 0.01:
+			rotation.y = atan2(-heading.x, -heading.z)
+		return
+	velocity.x = move_toward(velocity.x, 0.0, 20.0 * delta)
+	velocity.z = move_toward(velocity.z, 0.0, 20.0 * delta)
+	var look := _errand_look - global_position
+	look.y = 0.0
+	if look.length_squared() > 0.01:
+		rotation.y = lerp_angle(rotation.y, atan2(-look.x, -look.z), clampf(8.0 * delta, 0.0, 1.0))
 
 
 func _start_investigation() -> void:
@@ -276,10 +334,16 @@ func _build_tell() -> void:
 func _process(_delta: float) -> void:
 	if _tell == null:
 		return
-	_tell.visible = awareness_level != JaffaPerception.Level.UNAWARE and current_state != State.DEAD
+	_tell.visible = (
+		(raising_alarm or awareness_level != JaffaPerception.Level.UNAWARE)
+		and current_state != State.DEAD
+	)
 	if not _tell.visible:
 		return
-	if awareness_level == JaffaPerception.Level.ALERTED:
+	if raising_alarm:
+		_tell.text = "!!"
+		_tell.modulate = Color(1.0, 0.2, 0.75)
+	elif awareness_level == JaffaPerception.Level.ALERTED:
 		_tell.text = "!"
 		_tell.modulate = Color(1.0, 0.25, 0.15)
 	else:
@@ -318,6 +382,10 @@ func _physics_process(delta: float) -> void:
 
 	if profile == Profile.SENTRY:
 		_update_perception(delta)
+		if errand != Vector3.INF:
+			_process_errand(delta)
+			move_and_slide()
+			return
 
 	# State evaluations
 	match current_state:

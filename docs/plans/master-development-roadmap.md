@@ -4,7 +4,7 @@ Audited 12 November 2026 against `main` at `bf56743` (PR #40 merged). Godot **4.
 
 [ROADMAP.md](../../ROADMAP.md) is the authoritative summary and says what to do next. This document holds the evidence and the detail: the capability matrix, dependency graph, milestone definitions, the art and content track, the risk register and three agent-ready work packages. Architectural choices are recorded in the [decision log](../DECISIONS.md). Game intent is in the [GDD](../../GDD.md).
 
-This is a plan. Nothing in sections 3 onward is implemented.
+Sections 3 onward are the plan. [ROADMAP.md](../../ROADMAP.md) records which milestones have been implemented since; the capability matrix below is updated as they land, with the milestone named.
 
 ## 1. How to read status
 
@@ -19,7 +19,7 @@ This is a plan. Nothing in sections 3 onward is implemented.
 
 The repository records human playtest feedback on the SGC (Sprint 21 findings, the UAT fixes in PRs #24, #25 and #37) but no completed acceptance sign-off for any mission. Nothing below is marked human-verified.
 
-**Regression evidence.** The last full local run is 69/69 on the PR #40 branch (recorded in [the authoring review](../reviews/ai-level-authoring-2.md)). Hosted CI is not green: see R1 in section 7.
+**Regression evidence.** The audit's last full local run was 69/69 on the PR #40 branch. Since then each milestone's pull request records its own full run (74/74 on the EV-1 branch), and hosted CI is green again since EX-1: see R1 in section 7 and [TESTING.md](../TESTING.md#current-baseline).
 
 ## 2. Capability matrix
 
@@ -30,18 +30,18 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | System | State | Evidence and gap |
 |---|---|---|
 | Hosting and joining (listen host) | Verified | `scripts/net/NetworkManager.gd`; `test_netcode_smoke`, `test_multiplayer_mission_join` |
-| Dedicated server | Partial | `--server` loads the selected mission scene directly (`MainGameCoordinator._ready`). `test_sprint5_dedicated_smoke` covers SGC. The modular mission has never been launched on a dedicated server |
+| Dedicated server | Partial | `--server` loads the selected mission scene directly (`MainGameCoordinator._ready`). `test_sprint5_dedicated_smoke` covers SGC; `test_modular_extraction_dedicated` covers the modular mission host (EX-1). Any connected client can restart the mission |
 | Player classes and loadouts | Partial | Four profiles set weapons, health and speed. Class gadget exists for Heavy (tripod turret) and Recon (C4) only (`PlayerController3D._deploy_tactical_gadget`). The lobby descriptions also promise a rocket launcher, flashbangs, sprint dodge, MALP scout, fast dialling, melee parry and symbiote regeneration: none exist in code |
-| Mission selection | Verified | Three entries in `NetworkManager.MISSIONS`; host-owned, synced on join and retry; `test_mission_selection_uat` |
+| Mission selection | Verified | Four entries in `NetworkManager.MISSIONS` (the fourth since GI-1); host-owned, synced on join and retry; `test_mission_selection_uat` |
 | World lifecycle | Verified, single world | One scene per mission id; `MainGameCoordinator` swaps the whole world. No mid-mission world change |
 | Authority and replication | Verified | Server resolves combat, objectives and shared interactions; `test_multiplayer_combat_authority`, `test_multiplayer_state_replication`, `test_gate_client_authority` |
-| Late joining | Verified, one known defect | Readiness gate plus per-object snapshots. Health updates sent to a client that is still loading are dropped with an engine error (R7) |
+| Late joining | Verified | Readiness gate plus per-object snapshots. Mission messages go only to ready peers that have the actor (EX-1, fixes R7) |
 | Reconnection | Partial | `--reconnect` retries the connection five times. A returning peer is a new operative; no health, inventory or position is restored |
 | Mission restart | Verified | Acknowledged restart (`prepare_mission_restart` / `acknowledge_mission_restart`); `test_mission_restart_cleanup`, two-process retry in `test_modular_extraction_multiplayer` |
 | Combat, weapons, damage | Verified | `WeaponBase` plus six weapons, server-validated fire, Zat stun/kill/vaporise; balance never human-accepted |
 | Downing, bleed-out, revive | Verified | `HealthComponent` (20 s bleed-out, revive to 40%); hold-to-revive in `PlayerController3D`; airmen auto-revive |
 | Inventory, ammunition, resupply | Partial | Per-weapon ammunition and reserve, armoury resupply and armour stations in the SGC only. No sharing between players; no resupply on modular levels |
-| Success, failure, debrief | Partial | Shared result RPC, debrief panel and retry. Wording and statistics are SGC-specific; the modular mission overwrites the labels each frame |
+| Success, failure, debrief | Partial | Shared result RPC, debrief panel and retry. Modular missions set their own banner and debrief text once (EX-1), including whether the alarm was raised (EV-1). The panel layout is still the SGC one |
 
 ### Tactical gameplay
 
@@ -50,10 +50,11 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Friendly squad commands | Verified (SGC) | Radial wheel, pings, move/hold/regroup/turret orders; `test_squad_radial_wheel`, `test_airman_tactical_anchors` |
 | Friendly NPC navigation | Awaiting human | Airmen navigate modular levels through `SGCNavigator` → `LevelNavigator` (PR #38). Tactical anchors, leapfrog and suppression still read SGC sectors |
 | Jaffa patrols and navigation | Awaiting human | `JaffaAI.start_patrol`; `test_modular_npc_navigation`, `test_modular_npc_multiplayer` |
-| Enemy detection | Defect | No view cone, no suspicion. A Jaffa acquires any living operative within 22 m without line of sight (`JaffaAI._find_nearest_target`, the `closest_any_target` branch) and walks to them. Firing does require line of sight |
+| Enemy detection | Awaiting human (patrols); defect (gate waves) | Patrols use sentry perception (ST-1): view cone, line of sight, suspicious before alerted, search; `test_jaffa_perception`. Gate waves and columns keep the assault rule, which acquires any operative within 22 m through walls (`_find_nearest_target`) |
 | Cover and flanking | Partial | SGC: sandbag cover and corridor flank from literal coordinates. Modular: nearest room `cover` marker, which is a room-centre point, not cover (R3). No flanking on modular levels |
 | Suppression and firefights | Partial | Lead rank halts and fires, others relocate; airman cover fire in SGC. No suppression effect on the target |
 | Door interaction | Verified | `ModularDoor` open/close, server-validated, snapshots; AI opens doors with `open_for` |
+| Level-wide alert and alarm | Awaiting human | `MissionAlert` (EV-1): calm, alerted and alarm levels; a runner must reach an alarm console; operatives can disable consoles; reinforcement budget; `test_mission_alert`, `test_mission_alert_multiplayer` |
 | Locked doors and access control | Partial | Security doors lock, replicate and block AI. Nothing in a mission can lock or unlock one: `set_locked` is only called by `ModularNpcDemo.gd` |
 | NPC avoidance and rerouting | Missing | No avoidance code. A locked door on the path produces `blocked_door` and the NPC waits |
 | Mounted weapons | Verified (SGC) | Fixed .50 cal turrets and the Heavy tripod; airmen can crew them. Not available as a modular attachment |
@@ -96,7 +97,8 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 |---|---|---|
 | SGC Defense | Wave defence across three floors, difficulty objectives, dial out, extract | Most complete. Two-human acceptance outstanding |
 | SGC UAT Base | The same base with no hostiles | Exploration and controls testing |
-| Modular Extraction UAT | Reach a room, use a console, return; five patrolling Jaffa | Development slice on a neutral test fixture. No stealth, alarm or gate |
+| Modular Extraction UAT | Reach a room, use a console, return; five patrolling Jaffa | Development slice on a neutral test fixture. No alarm consoles or gate |
+| Goa'uld Infiltration — Greybox | Sabotage, download upstairs, return to the gate; six sentries; a guarded and a quiet route; alarm consoles and reinforcements (GI-1, EV-1) | Greybox stealth testbed. Human runs outstanding |
 
 ## 3. Decision: gameplay, map or art first
 
@@ -211,7 +213,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 ### C — Mission scripting and events
 
-**EV-1 — Alert state, alarm and reinforcements**
+**EV-1 — Alert state, alarm and reinforcements** · *implemented in PR #46; see [the alert guide](../maps/mission-alert.md)*
 - **Experience:** once the compound knows you are there, a klaxon sounds, patrols converge and reinforcements arrive; reaching an alarm console first can prevent it.
 - **Baseline:** `_alert_nearby_formation_jaffa` alerts siblings within 22 m. `TransportRings` and `WaveManager` can spawn Jaffa. No level-wide state.
 - **New:** one host-owned alert level on the mission (calm, searching, alarm) with a snapshot for late joiners; escalation from ST-1 awareness; an alarm console interaction that a Jaffa must reach to raise the alarm; a reinforcement budget spawned at named room markers. Expressed as a short typed list on `MissionDefinition`, handled by one director node in the mission scene.

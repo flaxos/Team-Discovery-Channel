@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/mission/ModularMission.gd" id="1_mission"]
 [ext_resource type="Script" path="res://scripts/level/LevelAssembly.gd" id="2_level"]
 [ext_resource type="Script" path="res://scripts/mission/MissionObjectives.gd" id="3_objectives"]
+[ext_resource type="Script" path="res://scripts/mission/MissionAlert.gd" id="6_alert"]
 [ext_resource type="Resource" path="res://resources/missions/goauld_infiltration.tres" id="4_definition"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
 
@@ -16,6 +17,9 @@ script = ExtResource("2_level")
 
 [node name="Objectives" type="Node" parent="."]
 script = ExtResource("3_objectives")
+
+[node name="Alert" type="Node" parent="."]
+script = ExtResource("6_alert")
 
 [node name="Spawns" type="Node3D" parent="."]
 

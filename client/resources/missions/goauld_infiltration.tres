@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="MissionDefinition" load_steps=13 format=3]
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
 [ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
 [ext_resource type="Script" path="res://scripts/mission/MissionPatrol.gd" id="3_patrol"]
 [ext_resource type="Resource" path="res://resources/levels/goauld_infiltration_01.tres" id="4_layout"]
+[ext_resource type="Script" path="res://scripts/mission/MissionAlarm.gd" id="5_alarm"]
+[ext_resource type="Script" path="res://scripts/mission/MissionReinforcement.gd" id="6_reinforcement"]
 
 [sub_resource type="Resource" id="sabotage"]
 script = ExtResource("2_objective")
@@ -57,9 +59,36 @@ script = ExtResource("3_patrol")
 rooms = PackedStringArray("cmd_command", "cmd_observation")
 size = 1
 
+[sub_resource type="Resource" id="alarm_checkpoint"]
+script = ExtResource("5_alarm")
+room = &"checkpoint"
+attachment = &"console"
+
+[sub_resource type="Resource" id="alarm_observation"]
+script = ExtResource("5_alarm")
+room = &"cmd_observation"
+attachment = &"console"
+
+[sub_resource type="Resource" id="reinforce_first"]
+script = ExtResource("6_reinforcement")
+room = &"barracks"
+attachment = &"squad_01"
+count = 2
+delay = 6.0
+
+[sub_resource type="Resource" id="reinforce_second"]
+script = ExtResource("6_reinforcement")
+room = &"barracks"
+attachment = &"squad_03"
+count = 2
+delay = 20.0
+shock_guard = true
+
 [resource]
 script = ExtResource("1_definition")
 title = "GOA'ULD INFILTRATION — GREYBOX"
 layout = ExtResource("4_layout")
 objectives = Array[ExtResource("2_objective")]([SubResource("sabotage"), SubResource("download"), SubResource("extract")])
 patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_checkpoint"), SubResource("patrol_generator"), SubResource("patrol_stores"), SubResource("patrol_upper"), SubResource("patrol_command")])
+alarms = Array[ExtResource("5_alarm")]([SubResource("alarm_checkpoint"), SubResource("alarm_observation")])
+reinforcements = Array[ExtResource("6_reinforcement")]([SubResource("reinforce_first"), SubResource("reinforce_second")])
