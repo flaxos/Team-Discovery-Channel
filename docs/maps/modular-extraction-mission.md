@@ -47,7 +47,7 @@ Route: south from the entry corridor to the hub, south again up the ramp, then e
 |---|---|---|
 | Mission host | `client/scripts/mission/ModularMission.gd`, `client/scenes/mission/ModularExtractionMission.tscn` | Extends `GateRoom`. Player spawning, late joins, squad-down failure, result replication and retry are inherited. SGC-only nodes (map, gate, waves, shrouds) are absent |
 | Mission data | `client/resources/missions/modular_extraction_uat.tres` | Layout, ordered objectives and patrols. Room, marker and attachment ids only; no coordinates |
-| Data contract | `MissionDefinition.gd`, `MissionObjective.gd`, `MissionPatrol.gd` | Objective kinds: `reach`, `interact`, `extract`. `validate()` rejects unknown rooms and attachments |
+| Data contract | `MissionDefinition.gd`, `MissionObjective.gd`, `MissionPatrol.gd` | Objective kinds: `reach`, `interact`, `extract`. `validate()` rejects unknown rooms and attachments. Optional alarm consoles and reinforcements (`MissionAlarm`, `MissionReinforcement`, see [the alert guide](mission-alert.md)); this mission defines none |
 | Progression | `MissionObjectives.gd` | Server decides every completion. Clients receive the active index and request a snapshot on joining. Updates are monotonic, so repeats and crossed snapshots are ignored |
 | Console use | `MissionInteractable.gd` | Added to the existing `main_console` attachment. Clients send identity; the server checks sender, reach, health and objective order |
 | Lobby entry | `NetworkManager.MISSIONS`, `Lobby.gd` | Third mission; SGC Defense and SGC UAT entries are untouched |
@@ -114,7 +114,7 @@ Record commit, peer roles, expected and actual result for each line.
 
 Each item below was re-checked against the code on 12 November 2026 and is tracked, with its planned fix, in the [risk register](../plans/master-development-roadmap.md#7-risk-and-defect-register).
 
-- **Perception is sight only.** There is no hearing yet: gunfire does not draw patrols that cannot see it (ST-2), and there is no level-wide alarm or reinforcements (EV-1). The third-person camera can see round corners that a sentry cannot, so the cone and timings need human tuning.
+- **Perception is sight only.** There is no hearing yet: gunfire does not draw patrols that cannot see it (ST-2). This mission defines no alarm consoles, so the [compound alert](mission-alert.md) never goes beyond *alerted*. The third-person camera can see round corners that a sentry cannot, so the cone and timings need human tuning.
 - **Cover markers sit at room centres** in the current kit, so "cover" is a fallback position in an adjacent room, not concealment. Better cover needs authored markers, not code.
 - **A downed operative is only targeted when no standing operative is known** to that Jaffa (since EX-1). Solo play still fails on the first down, through the unchanged squad-down rule.
 - **No friendly airmen, resupply or armoury** in this mission.

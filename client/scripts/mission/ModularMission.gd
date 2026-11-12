@@ -2,7 +2,8 @@ class_name ModularMission
 extends GateRoom
 ## Hosts a modular level as a selectable mission. Player spawning, late joins, squad-down
 ## failure, the shared mission result and retry all come from GateRoom; this adds the
-## level, data-driven objectives and room-marker patrols. SGC-only nodes are simply absent.
+## level, data-driven objectives, room-marker patrols and the compound's alert state
+## (MissionAlert: alarm consoles and reinforcements). SGC-only nodes are simply absent.
 signal started
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
 @export var definition: MissionDefinition
@@ -11,6 +12,7 @@ var setup_errors := PackedStringArray()
 @onready var level: LevelAssembly = $Level
 @onready var objectives: MissionObjectives = $Objectives
 @onready var enemies: Node3D = $Enemies
+@onready var alert: MissionAlert = $Alert
 
 
 func _enter_tree() -> void:
@@ -37,6 +39,10 @@ func _ready() -> void:
 	objectives.objective_changed.connect(_show_objective)
 	objectives.completed.connect(_on_objectives_completed)
 	_show_objective(objectives.index)
+	alert.setup(definition, level, enemies)
+	alert.level_changed.connect(_on_alert_changed)
+	alert.runner_changed.connect(_on_alarm_runner)
+	alert.console_disabled.connect(_on_alarm_disabled)
 	super._ready()
 	if DisplayServer.get_name() != "headless":
 		_add_presentation()
@@ -73,12 +79,51 @@ func hostiles_alive() -> int:
 	return alive
 
 
-## The banner changes only when a hostile arrives, dies or leaves, not every frame.
+## The banner changes only when a hostile arrives, dies or leaves, or the alert level
+## changes, not every frame.
 func _show_hostiles() -> void:
 	if hud != null and not hud.is_mission_ended:
-		hud.set_mission_banner(
-			definition.title, "HOSTILE PATROLS ACTIVE: %d JAFFA" % hostiles_alive()
-		)
+		var state := "HOSTILE PATROLS ACTIVE"
+		if alert.alert_level == MissionAlert.Level.SEARCHING:
+			state = "COMPOUND ALERTED"
+		elif alert.alert_level == MissionAlert.Level.ALARM:
+			state = "ALARM RAISED"
+		hud.set_mission_banner(definition.title, "%s: %d JAFFA" % [state, hostiles_alive()])
+
+
+func _on_alert_changed(value: int) -> void:
+	_show_hostiles()
+	if hud == null or hud.is_mission_ended:
+		return
+	match value:
+		MissionAlert.Level.SEARCHING:
+			hud.show_squad_order_toast("YOU HAVE BEEN SPOTTED — HOSTILES ALERTED", 4.0)
+		MissionAlert.Level.ALARM:
+			hud.show_squad_order_toast(
+				"ALARM RAISED — REINFORCEMENTS INBOUND"
+				if not definition.reinforcements.is_empty()
+				else "ALARM RAISED",
+				5.0
+			)
+		MissionAlert.Level.CALM:
+			hud.show_squad_order_toast("ALERT OVER — PATROLS RESUMING", 3.5)
+
+
+func _on_alarm_runner(runner_name: String) -> void:
+	if hud != null and not hud.is_mission_ended and runner_name != "" and not alert.is_raised():
+		hud.show_squad_order_toast("A JAFFA IS RUNNING FOR THE ALARM — STOP HIM", 4.0)
+
+
+func _on_alarm_disabled(_index: int) -> void:
+	if hud == null or hud.is_mission_ended:
+		return
+	var remaining := alert.disabled.count(false)
+	hud.show_squad_order_toast(
+		"ALARM CONSOLE DISABLED — %s" % (
+			"NO ALARM CAN BE RAISED" if remaining == 0 else "%d STILL ACTIVE" % remaining
+		),
+		3.5
+	)
 
 
 func _spawn_patrols() -> void:
@@ -126,7 +171,7 @@ func _finish_mission(victory: bool) -> void:
 @rpc("authority", "call_local", "reliable")
 func sync_mission_result(victory: bool) -> void:
 	var standing := objectives.standing().size()
-	var hostiles := 0
+	var hostiles := alert.reinforcements_spawned
 	for patrol in definition.patrols:
 		hostiles += patrol.size
 	if hud != null:
@@ -134,6 +179,7 @@ func sync_mission_result(victory: bool) -> void:
 	super.sync_mission_result(victory)
 	# The result is final: hostiles stand down and nothing further happens to the squad.
 	objectives.set_physics_process(false)
+	alert.set_physics_process(false)
 	for enemy in enemies.get_children():
 		if enemy is JaffaAI:
 			(enemy as JaffaAI).stand_down()
@@ -154,9 +200,14 @@ func sync_mission_result(victory: bool) -> void:
 					objectives.index, definition.objectives.size()
 				],
 				"squad": "OPERATIVES STANDING: %d" % standing,
-				"status": "STATUS: %s" % (
-					"STANDING OPERATIVES EXTRACTED" if victory else "SQUAD COMPROMISED"
-				),
+				"status": "STATUS: %s — %s" % [
+					"STANDING OPERATIVES EXTRACTED" if victory else "SQUAD COMPROMISED",
+					(
+						"ALARM RAISED"
+						if alert.is_raised()
+						else ("SPOTTED, NO ALARM" if alert.spotted else "UNDETECTED")
+					)
+				],
 				"leave": "LEAVE MISSION"
 			}
 		)

@@ -61,6 +61,17 @@ Six Jaffa in five groups, all using the [sentry perception](modular-extraction-m
 
 An earlier version patrolled `stores` ↔ `svc_adapter`, along the quiet route itself. In those narrow rooms the sentry always faced an operative on its path, so the automated quiet-route check could not pass. Patrolling into the side ring room instead makes the route a matter of timing.
 
+## Alarm and reinforcements
+
+Since EV-1 being seen has consequences; the rules are in [the alert guide](mission-alert.md).
+
+| Console | Where | Who usually runs for it |
+|---|---|---|
+| `checkpoint/console` | Lower deck, in the guarded checkpoint | The checkpoint pair, or the generator watch from the inner junction |
+| `cmd_observation/console` | Upper deck, the dead end beside the command room | The command sentry |
+
+On the alarm, two Jaffa leave the barracks after 6 s and two shock guards after 20 s, and every sentry searches where the squad was last seen. Disabling the observation console on the way to the command records, or both consoles, takes the alarm away.
+
 ## Automated coverage
 
 ```sh
@@ -88,11 +99,14 @@ Record commit, peer roles, route taken, time to finish, where you were seen, and
 5. Return to the gate. Confirm extraction and the debrief.
 6. With two players: one quiet, one loud. Note whether the alert spreading to nearby sentries feels fair.
 7. Watch for the **?** and **!** tells: can you read them in time from the third-person camera?
+8. Get spotted on purpose. Can you see who runs for the alarm (**!!**) and stop him before he reaches the console? Note how long you had.
+9. Let the alarm sound once. Do the klaxon, the searching sentries and the reinforcements feel like a consequence you can still play through to extraction?
+10. Disable the observation console before the command room, or both consoles, and get spotted: confirm nobody runs and no reinforcements come.
 
 ## Known limitations
 
 - **Greybox:** neutral placeholder art; no Goa'uld visuals.
-- **No consequences beyond the local alert:** no alarm console, no reinforcements, no locked doors (EV-1, EV-2).
+- **No locked doors or lockdown** after the alarm (EV-2), and reinforcements come from the barracks only, not by rings.
 - **No hearing:** gunfire does not draw sentries that cannot see it (ST-2).
 - **Cover is still the room `cover` marker**, not the checkpoint's sandbag props (TA-1).
 - **The Stargate does nothing:** insertion is a spawn in the gate room and extraction is walking back to it. Gate travel is GT-2.

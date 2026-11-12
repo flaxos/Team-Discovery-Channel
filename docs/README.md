@@ -30,6 +30,7 @@ Maintained documentation describes `main` at `bf56743` (PR #40, 11 November 2026
 | [SGC map contract](maps/sgc.md) | Proportions, provenance, schema, art slots, navigation and enclosure rules. |
 | [Modular extraction mission](maps/modular-extraction-mission.md) | First playable modular mission: objectives, extraction rule, Jaffa combat, tests, human checklist and travel blockers. |
 | [Goa'uld infiltration mission](maps/goauld-infiltration-mission.md) | Greybox stealth mission: compound layout and requirements, objectives, patrols, quiet and guarded routes, tests, human checklist. |
+| [Compound alert, alarms and reinforcements](maps/mission-alert.md) | EV-1: alert levels, alarm runners and consoles, reinforcement budget, mission data, netcode, tests. |
 | [Modular NPC navigation](maps/modular-npc-navigation.md) | Production Jaffa/airman navigation, patrols, AI door use, demo scene and limitations. |
 
 ## Level authoring
