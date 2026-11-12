@@ -31,6 +31,8 @@ func _ready() -> void:
 		point.global_position = (
 			entry.global_transform * Vector3((i % 2 - 0.5) * 1.2, 0.05, (i / 2 - 0.5) * 1.6)
 		)
+	enemies.child_entered_tree.connect(_on_hostile_entered)
+	enemies.child_exiting_tree.connect(func(_node: Node) -> void: _show_hostiles.call_deferred())
 	objectives.setup(definition, level, players_container)
 	objectives.objective_changed.connect(_show_objective)
 	objectives.completed.connect(_on_objectives_completed)
@@ -55,17 +57,28 @@ func _ready() -> void:
 	started.emit()
 
 
-func _process(delta: float) -> void:
-	super._process(delta)
-	if hud == null or hud.is_mission_ended:
-		return
+func _on_hostile_entered(node: Node) -> void:
+	var health := node.get_node_or_null("HealthComponent") as HealthComponent
+	if health != null:
+		health.died.connect(_show_hostiles)
+	_show_hostiles.call_deferred()
+
+
+func hostiles_alive() -> int:
 	var alive := 0
 	for enemy in enemies.get_children():
 		var health := enemy.get_node_or_null("HealthComponent") as HealthComponent
 		if health != null and not health.is_dead:
 			alive += 1
-	hud.wave_label.text = "MODULAR EXTRACTION — DEVELOPMENT UAT"
-	hud.enemies_label.text = "HOSTILE PATROLS ACTIVE: %d JAFFA" % alive
+	return alive
+
+
+## The banner changes only when a hostile arrives, dies or leaves, not every frame.
+func _show_hostiles() -> void:
+	if hud != null and not hud.is_mission_ended:
+		hud.set_mission_banner(
+			definition.title, "HOSTILE PATROLS ACTIVE: %d JAFFA" % hostiles_alive()
+		)
 
 
 func _spawn_patrols() -> void:
@@ -112,24 +125,40 @@ func _finish_mission(victory: bool) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func sync_mission_result(victory: bool) -> void:
+	var standing := objectives.standing().size()
+	var hostiles := 0
+	for patrol in definition.patrols:
+		hostiles += patrol.size
+	if hud != null:
+		hud.total_kills = hostiles - hostiles_alive()
 	super.sync_mission_result(victory)
+	# The result is final: hostiles stand down and nothing further happens to the squad.
 	objectives.set_physics_process(false)
 	for enemy in enemies.get_children():
-		enemy.set_physics_process(false)
-	if hud != null and hud.debrief_subtitle != null:
-		hud.debrief_subtitle.text = (
-			"OBJECTIVE COMPLETE — STANDING OPERATIVES EXTRACTED"
-			if victory
-			else "ALL OPERATIVES DOWN — MISSION ABORTED"
-		)
-		if not victory and hud.debrief_title != null:
-			hud.debrief_title.text = "MISSION FAILED"
-		hud.stat_waves.text = "OBJECTIVES COMPLETE: %d / %d" % [
-			objectives.index, definition.objectives.size()
-		]
-		hud.stat_chevrons.text = "OPERATIVES STANDING: %d" % objectives.standing().size()
-		hud.stat_status.text = "STATUS: %s" % (
-			"STANDING OPERATIVES EXTRACTED" if victory else "SQUAD COMPROMISED"
+		if enemy is JaffaAI:
+			(enemy as JaffaAI).stand_down()
+	for player in players_container.get_children():
+		var health := player.get_node_or_null("HealthComponent") as HealthComponent
+		if health != null:
+			health.frozen = true
+	if hud != null:
+		hud.set_debrief(
+			{
+				"title": "EXTRACTION SUCCESSFUL" if victory else "MISSION FAILED",
+				"subtitle": (
+					"OBJECTIVE COMPLETE — STANDING OPERATIVES EXTRACTED"
+					if victory
+					else "ALL OPERATIVES DOWN — MISSION ABORTED"
+				),
+				"objectives": "OBJECTIVES COMPLETE: %d / %d" % [
+					objectives.index, definition.objectives.size()
+				],
+				"squad": "OPERATIVES STANDING: %d" % standing,
+				"status": "STATUS: %s" % (
+					"STANDING OPERATIVES EXTRACTED" if victory else "SQUAD COMPROMISED"
+				),
+				"leave": "LEAVE MISSION"
+			}
 		)
 
 

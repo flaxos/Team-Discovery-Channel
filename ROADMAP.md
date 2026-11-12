@@ -14,7 +14,9 @@ A new session should:
 2. Open the next milestone's work package in [section 8 of the master plan](docs/plans/master-development-roadmap.md#8-the-first-three-work-packages).
 3. Work on a new branch from `main` in a separate worktree, and leave uncommitted files in other checkouts alone.
 
-**Next milestone: EX-1 — Trustworthy baseline and extraction hardening.**
+**EX-1 — Trustworthy baseline and extraction hardening** is implemented in [PR #42](https://github.com/flaxos/Team-Discovery-Channel/pull/42). Its human gate (EX-2) is still open.
+
+**Next milestone: ST-1 — Perception and awareness core.**
 
 ## What exists today
 
@@ -31,7 +33,7 @@ The full classification, with source paths and tests, is the [capability matrix]
 
 ### Known problems that affect planning
 
-- **Hosted CI is red on `main`.** The full Godot profile has failed on every merge since PR #35 because one suite cannot find the engine on the CI runner. Local full runs pass (69/69 at PR #40).
+- **Hosted CI was red on `main` from PR #35 to #41** because one suite could not find the engine on the CI runner. EX-1 repairs the runner; confirm on the hosted run before relying on it.
 - **Jaffa detect through walls.** Any operative within 22 m is acquired without line of sight, and there is no view cone. Modular missions therefore play as running fights.
 - **"Cover" on modular levels is a room-centre marker**, not cover.
 - **The play machine's checkout is behind `main`** and does not contain the extraction mission or the planner.
@@ -52,7 +54,7 @@ The greybox layout and the art brief cost little and can proceed in parallel now
 
 | Order | Milestone | Delivers | Size | Worker |
 |---|---|---|---|---|
-| 1 | **EX-1** Trustworthy baseline and extraction hardening | Green hosted CI; the extraction mission cleaned up for a two-person run, including a dedicated-server check | M | Codex-class |
+| 1 | **EX-1** Trustworthy baseline and extraction hardening — *implemented, PR #42* | Green hosted CI; the extraction mission cleaned up for a two-person run, including a dedicated-server check | M | Codex-class |
 | 2 | **ST-1** Perception and awareness core | Patrols that see by line of sight inside a cone, become suspicious before alerted, investigate and give up | M | Fable-class |
 | 3 | **GI-1** Goa'uld infiltration greybox mission | A fourth selectable mission on a planned two-deck compound with a quiet route and a loud one | M | Scripted authoring plus Codex-class |
 
@@ -89,7 +91,7 @@ The diagram and the table of which streams can run at the same time without touc
 
 | Gate | Passed when |
 |---|---|
-| CI | Hosted `Godot full` is green on `main` |
+| CI | Hosted `Godot full` is green on `main` (repair in EX-1) |
 | EX-2 | A dated two-person record exists for Modular Extraction UAT and one SGC Defense run |
 | Stealth | Two people cross the test facility unseen on purpose, and report the awareness tell as readable |
 | Infiltration greybox | Two people finish GI-1 by each route |
@@ -137,7 +139,8 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | Modular NPC navigation (PR #38) | Production Jaffa and airmen navigate modular levels; patrols; AI door use. |
 | First modular mission (PR #39) | Modular Extraction UAT: data-driven objectives, extraction rule, patrol combat, two shared netcode fixes. 68/68 local checks. |
 | AI level authoring 2.0 (PR #40) | Graph planner, topology checks, six more composites, tactical catalogue metadata, four demonstration maps. 69/69 local checks. |
-| Master roadmap (this change) | Documentation only: audit, capability matrix, milestone plan, decision log. |
+| Master roadmap (PR #41) | Documentation only: audit, capability matrix, milestone plan, decision log. |
+| EX-1 (PR #42) | CI runner repair; readiness-gated mission messages so mid-firefight joins log no errors; hostiles stand down and squad state is final at the result; standing operatives targeted before downed ones; dedicated-server suite, client-requested retry and return to lobby on server loss; mission-owned HUD and debrief text. |
 
 ## References
 

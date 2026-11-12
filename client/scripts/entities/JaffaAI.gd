@@ -127,6 +127,17 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 		current_state = State.PATROL
 
 
+## Mission over: stop fighting and moving for good. Safe on replicas.
+func stand_down() -> void:
+	current_target = null
+	velocity = Vector3.ZERO
+	if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
+		_set_crouching(false)
+		_reset_staff_position()
+		current_state = State.IDLE
+	set_physics_process(false)
+
+
 func _resume_state() -> State:
 	return State.ADVANCE if patrol_points.is_empty() else State.PATROL
 
@@ -516,13 +527,10 @@ func _setup_staff_visual() -> void:
 
 
 func _find_nearest_target() -> void:
-	# Find closest active SGC operative or allied Airman defender in perception range
-	var closest_los_target: Node3D = null
-	var closest_los_dist: float = combat_range * 1.5  # ~33m visual awareness
-	var closest_any_target: Node3D = null
-	var min_any_dist: float = combat_range
-
+	# Find closest active SGC operative or allied Airman defender in perception range.
+	# A downed one is only a target when no standing one is known.
 	var candidates: Array[Node3D] = []
+	var downed: Array[Node3D] = []
 
 	var players_container := get_tree().root.find_child("Players", true, false)
 	if players_container != null:
@@ -531,7 +539,7 @@ func _find_nearest_target() -> void:
 			if p != null:
 				var health := p.get_node_or_null("HealthComponent") as HealthComponent
 				if health != null and not health.is_dead:
-					candidates.append(p)
+					(downed if health.is_downed else candidates).append(p)
 
 	var allies_container := get_tree().root.find_child("Allies", true, false)
 	if allies_container != null:
@@ -540,8 +548,18 @@ func _find_nearest_target() -> void:
 			if a != null:
 				var health := a.get_node_or_null("HealthComponent") as HealthComponent
 				if health != null and not health.is_dead:
-					candidates.append(a)
+					(downed if health.is_downed else candidates).append(a)
 
+	current_target = _nearest_of(candidates)
+	if current_target == null:
+		current_target = _nearest_of(downed)
+
+
+func _nearest_of(candidates: Array[Node3D]) -> Node3D:
+	var closest_los_target: Node3D = null
+	var closest_los_dist: float = combat_range * 1.5  # ~33m visual awareness
+	var closest_any_target: Node3D = null
+	var min_any_dist: float = combat_range
 	for c in candidates:
 		var d := global_position.distance_to(c.global_position)
 		if _has_line_of_sight(c):
@@ -554,11 +572,10 @@ func _find_nearest_target() -> void:
 				closest_any_target = c
 
 	if closest_los_target != null:
-		current_target = closest_los_target
-	elif closest_any_target != null and min_any_dist <= combat_range:
-		current_target = closest_any_target
-	else:
-		current_target = null
+		return closest_los_target
+	if closest_any_target != null and min_any_dist <= combat_range:
+		return closest_any_target
+	return null
 
 
 func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
@@ -710,12 +727,15 @@ func _dispatch_single_plasma_bolt() -> void:
 	staff_fired.emit(origin, dir)
 
 	# Visual muzzle burst RPC
-	rpc("play_staff_fire_fx", origin)
+	play_staff_fire_fx(origin)
+	SGCNetworkManager.mission_rpc(self, &"play_staff_fire_fx", [origin], health_component)
 
 
 func _on_damage_taken(_amount: float, source: Node, _damage_type: String) -> void:
 	if is_shock_guard and current_state != State.DEAD:
-		rpc("play_armor_spark_fx", global_position + Vector3(0, 1.2, 0))
+		var spark_at := global_position + Vector3(0, 1.2, 0)
+		play_armor_spark_fx(spark_at)
+		SGCNetworkManager.mission_rpc(self, &"play_armor_spark_fx", [spark_at], health_component)
 
 	if source is Node3D and is_instance_valid(source):
 		current_target = source as Node3D

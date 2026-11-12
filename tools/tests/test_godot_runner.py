@@ -38,7 +38,7 @@ if script.endswith('test_keybinding_restart.gd'):
     marker = pathlib.Path(os.environ['XDG_DATA_HOME']) / 'persisted'
     if '--write' in sys.argv: marker.write_text('saved')
     else: assert marker.read_text() == 'saved'
-print('PASS fixture')
+print('PASS fixture GODOT=' + os.environ.get('GODOT', ''))
 ''')
         self.fake.chmod(0o755)
 
@@ -58,6 +58,13 @@ print('PASS fixture')
         self.assertTrue(report['passed'])
         self.assertFalse(report['graphical_uat'])
         self.assertEqual(ET.parse(self.root / 'results/junit.xml').getroot().attrib['failures'], '0')
+
+    def test_engine_path_is_exported_to_nested_tools(self):
+        # test_level_authoring runs tools/level_authoring.py, which reads GODOT; an engine that is
+        # not on PATH (hosted CI) must still be the one those nested calls use.
+        result, _report = self.run_fixture('test_pass', env={'GODOT': 'not-the-engine', 'PATH': os.defpath})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('GODOT=' + str(self.fake), (self.root / 'results/test_pass.log').read_text())
 
     def test_assertion_with_zero_exit_fails(self):
         result, report = self.run_fixture('test_failure')

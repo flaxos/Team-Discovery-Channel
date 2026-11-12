@@ -1,6 +1,8 @@
 class_name MissionDefinition
 extends Resource
 ## Data for a modular mission: the level, its ordered objectives and its patrols.
+## Shown in the HUD banner while the mission runs.
+@export var title: String = ""
 @export var layout: LevelLayout
 @export var objectives: Array[MissionObjective] = []
 @export var patrols: Array[MissionPatrol] = []

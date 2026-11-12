@@ -614,10 +614,9 @@ func _on_player_extracted(_player: Node) -> void:
 func _finish_mission(victory: bool) -> void:
 	if wave_manager != null:
 		wave_manager.end_mission()
-	if multiplayer.has_multiplayer_peer():
-		sync_mission_result.rpc(victory)
-	else:
-		sync_mission_result(victory)
+	# A peer that is still loading receives the result in its room snapshot instead.
+	SGCNetworkManager.mission_rpc(self, &"sync_mission_result", [victory])
+	sync_mission_result(victory)
 
 
 @rpc("authority", "call_local", "reliable")

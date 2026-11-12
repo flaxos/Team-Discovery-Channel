@@ -327,6 +327,12 @@ func start_game(tier: int = -1, mission_id: String = "") -> void:
 
 ## Retry the selected mission on every peer; clients wait for the host's decision.
 func request_restart_game() -> bool:
+	if is_in_active_session() and not is_server:
+		# A dedicated server has no host operative, so an operative in the mission asks for it.
+		if not mission_started or peers.get(1, {}).get("class_id", "") != "dedicated_server":
+			return false
+		request_dedicated_restart.rpc_id(1)
+		return true
 	if not is_server or not mission_started or restart_pending:
 		return false
 	restart_pending = true
@@ -365,6 +371,12 @@ func _complete_mission_restart() -> void:
 		restart_game.rpc(tier, selected_mission_id)
 	else:
 		restart_game(tier, selected_mission_id)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_dedicated_restart() -> void:
+	if is_dedicated_server and mission_ready_peers.has(multiplayer.get_remote_sender_id()):
+		request_restart_game()
 
 
 @rpc("authority", "call_local", "reliable")
@@ -511,6 +523,29 @@ func configure_mission_sync(sync: MultiplayerSynchronizer) -> void:
 
 func _mission_peer_visible(id: int) -> bool:
 	return id == 1 or mission_ready_peers.has(id)
+
+
+## Sends a mission RPC to every peer that has the receiving node. A peer that is still loading
+## the world, or has not yet been sent a spawned actor, would log an engine error; it asks for
+## snapshots once its copy exists. World nodes exist on every ready peer. For a spawned actor
+## pass its HealthComponent, which knows the peers whose copy has reported in.
+## Callers run a `call_local` method themselves. `actor` is untyped on purpose: naming the
+## HealthComponent class here would make the two scripts reference each other, and Godot
+## then never frees either (reported as leaked resources at exit).
+static func mission_rpc(node: Node, method: StringName, args: Array = [], actor: Node = null) -> void:
+	if not node.is_inside_tree() or not node.multiplayer.has_multiplayer_peer():
+		return
+	# Untyped: a script that names its own class from a static function is never freed.
+	var net: Node = node.get_node_or_null("/root/NetworkManager")
+	var gated: bool = net != null and net.is_in_active_session() and node.multiplayer == net.multiplayer
+	var ready_peers: Dictionary = net.get("mission_ready_peers") if gated else {}
+	for id: int in node.multiplayer.get_peers():
+		if gated and id != 1:
+			if not ready_peers.has(id):
+				continue
+			if actor != null and not (actor.get("replica_peers") as Dictionary).has(id):
+				continue
+		node.callv(&"rpc_id", [id, method] + args)
 
 
 func set_mission(mission_id: String) -> bool:

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Two Godot processes run the production autoload, lobby start and mission host: a listen
-## host and a client that joins after the first objective. Jaffa stay live; both operatives
-## get surplus health so this suite is about shared mission state, not survival.
+## host and a client that joins after the first objective, during a firefight. Jaffa stay
+## live; both operatives get surplus health so this suite is about shared mission state.
 const MISSION := SGCNetworkManager.MISSION_MODULAR_EXTRACTION
 const PORT := 19874
 var child_pid: int = -1
@@ -20,8 +20,8 @@ func frames(count: int) -> void:
 		await process_frame
 
 
-func mark(label: String) -> void:
-	FileAccess.open(output_dir.path_join(label), FileAccess.WRITE).store_string("ok")
+func mark(label: String, text: String = "ok") -> void:
+	FileAccess.open(output_dir.path_join(label), FileAccess.WRITE).store_string(text)
 
 
 func marked(label: String, limit: int = 2400) -> bool:
@@ -100,10 +100,9 @@ func run_host() -> void:
 	place(me, room.level.marker(&"command", &"entry"))
 	await frames(10)
 	assert(room.objectives.index == 1, "Host completes the first objective before anyone joins")
-	# Hostiles hold still while the client connects: health RPCs sent before a replica
-	# exists are dropped with an engine error, which this suite treats as a failure.
-	for enemy in room.enemies.get_children():
-		enemy.set_physics_process(false)
+	# Hostiles stay live while the client connects: the join happens during a firefight.
+	var hits: Array[int] = [0]
+	me.health_component.damage_taken.connect(func(_a: float, _s: Node, _t: String) -> void: hits[0] += 1)
 	child_pid = OS.create_process(
 		OS.get_executable_path(),
 		[
@@ -116,6 +115,9 @@ func run_host() -> void:
 	assert(child_pid > 0)
 	for _i: int in range(2400):
 		await frames(1)
+		# Health changes every frame of the connection, so one is always in flight while
+		# the client is still loading.
+		me.health_component.take_damage(1.0, room.enemies.get_child(0))
 		if room.players_container.get_child_count() == 2:
 			break
 	assert(room.players_container.get_child_count() == 2, "Late operative spawned by the host")
@@ -123,11 +125,20 @@ func run_host() -> void:
 	if guest == me:
 		guest = room.players_container.get_child(0) as PlayerController3D
 	guest.health_component.current_health = 1000000.0
-	for enemy in room.enemies.get_children():
-		enemy.set_physics_process(true)
+	assert(hits[0] > 0, "The host was under fire while the client joined")
 	var entry := room.level.marker(room.level.layout.entry_instance, room.level.layout.entry_marker)
 	assert(guest.global_position.distance_to(entry) < 3.0, "Late operative uses the entry markers")
 	assert(await marked("joined"), "Client must receive the objective snapshot")
+	# The client reported where it sees each Jaffa; a replica that is not following is far off.
+	await frames(2)
+	var reported: Dictionary = JSON.parse_string(
+		FileAccess.get_file_as_string(output_dir.path_join("joined"))
+	)
+	assert(reported.size() == 5)
+	for jaffa_name: String in reported:
+		var at: Array = reported[jaffa_name]
+		var truth := (room.enemies.get_node(jaffa_name) as Node3D).global_position
+		assert(truth.distance_to(Vector3(at[0], at[1], at[2])) < 2.5, "Replica follows " + jaffa_name)
 	assert(await marked("console"), "Client console use must reach the host")
 	assert(room.objectives.index == 2 and events == [1, 2], "One completion per objective")
 	assert(await marked("at_exit"))
@@ -140,6 +151,20 @@ func run_host() -> void:
 		if room.mission_result >= 0:
 			break
 	assert(room.mission_result == 1 and events == [1, 2, 3])
+	var shots: Array[int] = [0]
+	var rest := {}
+	for enemy in room.enemies.get_children():
+		rest[enemy] = (enemy as JaffaAI).global_position
+		(enemy as JaffaAI).staff_fired.connect(func(_o: Vector3, _d: Vector3) -> void: shots[0] += 1)
+	var host_health := me.health_component.current_health
+	var guest_health := guest.health_component.current_health
+	me.health_component.take_damage(50.0, room.enemies.get_child(0))
+	await frames(180)
+	for jaffa: JaffaAI in rest:
+		assert(jaffa.global_position.distance_to(rest[jaffa]) < 0.05, "Hostiles stand down at the result")
+	assert(shots[0] == 0, "No Jaffa fires after the result")
+	assert(me.health_component.current_health == host_health, "The host takes no damage after the result")
+	assert(guest.health_component.current_health == guest_health, "The guest takes no damage after the result")
 	assert(await marked("result"), "Client must show the same result")
 	var old_room := room.get_instance_id()
 	assert(net.request_restart_game())
@@ -167,15 +192,17 @@ func run_client() -> void:
 		await frames(1)
 		if room.players_container.get_child_count() == 2 and room.enemies.get_child_count() == 5:
 			break
+	var seen := {}
+	for enemy in room.enemies.get_children():
+		seen[enemy] = (enemy as JaffaAI).global_position
 	await frames(60)
 	assert(room.level.last_errors.is_empty(), str(room.level.last_errors))
 	assert(room.objectives.index == 1, "Late join receives the completed first objective")
 	assert(room.hud.objective_label.text.begins_with("OBJECTIVE 2/3"))
 	assert(room.mission_result == -1 and room.players_container.get_child_count() == 2)
 	assert(room.enemies.get_child_count() == 5, "Host Jaffa replicate to the late client")
-	var mirror := room.enemies.get_node("Jaffa_P0_0") as JaffaAI
-	assert(mirror.get_multiplayer_authority() == 1 and mirror.patrol_points.is_empty())
-	var seen := mirror.global_position
+	for mirror: JaffaAI in seen:
+		assert(mirror.get_multiplayer_authority() == 1 and mirror.patrol_points.is_empty())
 	var console := (
 		room.level.get_node("command").find_child("MissionInteract", true, false)
 		as MissionInteractable
@@ -186,8 +213,11 @@ func run_client() -> void:
 	assert(not room.objectives.complete_interaction(room.definition.objectives[1]))
 	await frames(60)
 	assert(room.objectives.index == 1, "Server refuses a console request from the entry")
-	assert(mirror.global_position.distance_to(seen) > 0.5, "Replica follows the host patrol")
-	mark("joined")
+	var positions := {}
+	for mirror: JaffaAI in seen:
+		var at := mirror.global_position
+		positions[str(mirror.name)] = [at.x, at.y, at.z]
+	mark("joined", JSON.stringify(positions))
 	place(me, console.global_position + Vector3(0, 0, 1.5))
 	for _i: int in range(600):
 		await frames(20)
@@ -208,6 +238,17 @@ func run_client() -> void:
 			break
 	assert(room.mission_result == 1 and room.objectives.is_complete())
 	assert(room.hud.is_mission_ended and room.hud.debrief_title.text == "EXTRACTION SUCCESSFUL")
+	await frames(30)
+	var health := me.health_component.current_health
+	var rest := {}
+	for enemy in room.enemies.get_children():
+		rest[enemy] = (enemy as JaffaAI).global_position
+	await frames(120)
+	for mirror: JaffaAI in rest:
+		assert(mirror.global_position.distance_to(rest[mirror]) < 0.05, "Replicas stand down at the result")
+	assert(me.health_component.current_health == health, "No damage arrives after the result")
+	for control in room.hud.victory_modal.find_children("", "Control", true, false):
+		assert(not "SGC" in str(control.get("text")), "Debrief wording belongs to this mission")
 	mark("result")
 	var old_room := room.get_instance_id()
 	for _i: int in range(2400):

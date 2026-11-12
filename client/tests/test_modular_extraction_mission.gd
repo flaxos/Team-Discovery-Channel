@@ -83,6 +83,14 @@ func run() -> void:
 	assert(room.hud.objective_label.text.begins_with("OBJECTIVE 1/3"))
 	assert(room.get_node_or_null("WaveManager") == null and room.get_node_or_null("SGCMap") == null)
 	assert(room.enemies.get_child_count() == 5)
+	# The banner is this mission's own text, written on change and not every frame.
+	assert(room.hud.wave_label.text == definition.title and "MODULAR EXTRACTION" in definition.title)
+	assert(room.hud.enemies_label.text == "HOSTILE PATROLS ACTIVE: 5 JAFFA")
+	room.hud.wave_label.text = "probe"
+	await frames(10)
+	assert(room.hud.wave_label.text == "probe", "Nothing rewrites the banner each frame")
+	room._show_hostiles()
+	assert(room.hud.wave_label.text == definition.title)
 	var lead := room.enemies.get_node("Jaffa_P0_0") as JaffaAI
 	var wing := room.enemies.get_node("Jaffa_P0_1") as JaffaAI
 	assert(lead.current_state == JaffaAI.State.PATROL and lead.patrol_points.size() == 5)
@@ -165,6 +173,29 @@ func run() -> void:
 	room._finish_mission(true)
 	assert(room.mission_result == 0, "A finished mission keeps its first result")
 
+	# --- After the result: hostiles stand down, the squad's state is final, wording is ours.
+	assert(room.hud.return_btn.text == "LEAVE MISSION")
+	assert(room.hud.stat_kills.text == "HOSTILES ELIMINATED: 0")
+	for control in room.hud.victory_modal.find_children("", "Control", true, false):
+		assert(not "SGC" in str(control.get("text")), "Debrief wording belongs to this mission")
+	var shots_at_result := fired
+	var rest := {}
+	for enemy in room.enemies.get_children():
+		var jaffa := enemy as JaffaAI
+		rest[jaffa] = jaffa.global_position
+		assert(jaffa.current_target == null and not jaffa.is_physics_processing())
+		if jaffa not in [lead, wing]:
+			jaffa.staff_fired.connect(func(_o: Vector3, _d: Vector3) -> void: fired += 1)
+	var was_downed := player.health_component.is_downed
+	var health_at_result := player.health_component.current_health
+	player.health_component.take_damage(50.0, lead)
+	await frames(60 * 22)
+	for jaffa: JaffaAI in rest:
+		assert(jaffa.global_position.distance_to(rest[jaffa]) < 0.05, "Hostiles do not move after the result")
+	assert(fired == shots_at_result, "No Jaffa fires after the result")
+	assert(player.health_component.current_health == health_at_result)
+	assert(player.health_component.is_downed == was_downed, "Bleed-out stops with the result")
+
 	# --- Retry: fresh world, no stale actors or objective state.
 	var old_room := room.get_instance_id()
 	assert(net.request_restart_game())
@@ -205,6 +236,31 @@ func run() -> void:
 	assert(room.objectives.index == 1, "A downed operative cannot use the console")
 	await frames(5)
 	assert(room.mission_result == -1, "One standing teammate keeps the mission alive")
+
+	# --- A downed operative is not targeted while a standing one is known.
+	var sentry := room.enemies.get_node("Jaffa_P2_0") as JaffaAI
+	var here := sentry.global_position
+	var spots: Array[Vector3] = sentry.patrol_points.duplicate()
+	spots.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.distance_to(here) < b.distance_to(here))
+	assert(spots.size() >= 2 and spots[1].distance_to(here) < sentry.combat_range)
+	place(player, spots[0])
+	place(buddy, spots[1])
+	await frames(2)
+	sentry._find_nearest_target()
+	assert(sentry.current_target == buddy, "The standing operative is chosen over a nearer downed one")
+	var away := buddy_spot
+	for item in level.layout.instances:
+		var spot := level.marker(item.id, &"entry")
+		if spot.distance_to(here) > away.distance_to(here):
+			away = spot
+	place(buddy, away)
+	await frames(2)
+	assert(buddy.global_position.distance_to(here) > sentry.combat_range * 1.5, "Buddy is out of perception")
+	sentry._find_nearest_target()
+	assert(sentry.current_target == player, "With nobody standing in reach, the downed operative is the target")
+	sentry.current_target = null
+	place(buddy, buddy_spot)
+	place(player, console.global_position + Vector3(0, 0, 1.5))
 	player.health_component.revive(buddy)
 	assert(not player.health_component.is_downed and player.health_component.current_health > 0.0)
 	console.interact(player)

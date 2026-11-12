@@ -14,6 +14,8 @@ Use Godot **4.4.1** from a checkout of this branch.
 godot --path client -- --mission modular_extraction_uat
 ```
 
+For a dedicated server, run `godot --headless --path client -- --server --port 7777 --mission modular_extraction_uat` and connect clients as described in the [player guide](../PLAYING.md#multiplayer). There is no host operative; any connected operative's **Retry mission** restarts it for everyone.
+
 The flag only preselects the mission; without it, pick **Modular Extraction UAT — Development** in the lobby's mission list. Host with **Establish SGC Base**, then **Launch Extraction UAT**. A second player joins from their lobby with the host's address, before or after launch. Difficulty is not used.
 
 | Step | HUD text | Completes when |
@@ -75,16 +77,17 @@ Both are in shared code and affect SGC missions too.
 ## Automated coverage
 
 ```sh
-python3 tools/run_godot_tests.py test_modular_extraction_mission test_modular_extraction_multiplayer test_mission_selection_uat --timeout 240
+python3 tools/run_godot_tests.py test_modular_extraction_mission test_modular_extraction_multiplayer test_modular_extraction_dedicated test_mission_selection_uat --timeout 300
 ```
 
 | Suite | Covers |
 |---|---|
-| `test_modular_extraction_mission` | Lobby selection and launch; entry spawn; patrols on named room markers; locked extraction and console; real patrol detection, staff fire and damage; marker cover reached; patrol resumes after contact; lone operative downed by real fire fails the mission; first result is final; retry leaves no stale Jaffa, stations or objective events; reach, out-of-reach and downed console refusals; revive; duplicate console use; extraction with a standing, downed and absent teammate; success result |
-| `test_modular_extraction_multiplayer` | Two processes through the production autoload and lobby start. Client joins after step 1 and receives the snapshot, host operative and five Jaffa; replicated patrol movement; server refuses an out-of-reach and a local-only console attempt; client completes step 2; extraction waits for the standing host; both peers show the same result; coordinated retry |
+| `test_modular_extraction_mission` | Lobby selection and launch; entry spawn; patrols on named room markers; locked extraction and console; real patrol detection, staff fire and damage; marker cover reached; patrol resumes after contact; lone operative downed by real fire fails the mission; first result is final; after the result no Jaffa moves or fires and the operative takes no damage or bleed-out; mission banner set on change, not per frame; debrief without SGC wording; a standing operative is targeted over a nearer downed one, and a downed one only when nobody standing is in reach; retry leaves no stale Jaffa, stations or objective events; reach, out-of-reach and downed console refusals; revive; duplicate console use; extraction with a standing, downed and absent teammate; success result |
+| `test_modular_extraction_multiplayer` | Two processes through the production autoload and lobby start. Client joins after step 1 while the host is taking fire and health changes every frame, and its log must contain no engine error; it receives the snapshot, host operative and five Jaffa; each replica is checked against the host's position; server refuses an out-of-reach and a local-only console attempt; client completes step 2; extraction waits for the standing host; both peers show the same result; after it, hostiles stand still and nobody takes damage on either peer; coordinated retry |
+| `test_modular_extraction_dedicated` | A child process started with the real `--server --mission modular_extraction_uat` flags: no lobby, no host operative, patrols run with nobody connected and no squad-wipe result. A client joins, spawns on the entry markers, sees replicated patrols and the mission banner, completes step 1 by position, asks for a retry and gets a fresh world. When the server exits the client returns to the lobby. The server log must contain no engine error |
 | `test_mission_selection_uat` | Now expects three missions; SGC UAT and Defense checks unchanged |
 
-In both suites the test only places operatives and reads state. Jaffa movement, perception and fire are the production controller.
+In all three suites the test only places operatives and reads state. Jaffa movement, perception and fire are the production controller.
 
 `godot --path client --script res://tests/support/modular_extraction_review.gd` (needs a display) replays the mission through the real lobby start and writes stills to `build/extraction-review/`.
 
@@ -110,13 +113,11 @@ Each item below was re-checked against the code on 12 November 2026 and is track
 
 - **Perception is the existing rule:** any operative within 22 m is acquired even through walls or a deck. Patrols converge quickly; this is not stealth.
 - **Cover markers sit at room centres** in the current kit, so "cover" is a fallback position in an adjacent room, not concealment. Better cover needs authored markers, not code.
-- **Jaffa keep firing on downed operatives.** Existing behaviour; with the squad-down rule it makes solo play unforgiving.
-- **Health updates sent while a client is still loading are dropped** with an engine error on that client. Existing behaviour, visible when joining mid-firefight. State is correct once the operative replicates.
-- **Hostiles freeze at the result screen** rather than standing down.
+- **A downed operative is only targeted when no standing operative is known** to that Jaffa (since EX-1). Solo play still fails on the first down, through the unchanged squad-down rule.
 - **No friendly airmen, resupply or armoury** in this mission.
 - **Carried over from navigation:** no rerouting around locked doors, no avoidance between NPCs, AI leaves doors open.
-- **HUD and debrief wording** reuses SGC panels; "Return to SGC briefing" is the existing button.
-- **Dedicated-server launch** of this mission is untested.
+- **HUD and debrief panels** are the SGC ones; this mission supplies its own banner and debrief text, and the debrief's leave button reads **Leave mission**. Mission duration and hostiles eliminated are shown; other SGC statistics are replaced.
+- **On a dedicated server any operative can restart the mission** from the pause or debrief menu, not only after a result.
 
 ## Remaining blockers for SGC → Stargate → offworld travel
 

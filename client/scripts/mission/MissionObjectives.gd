@@ -97,10 +97,9 @@ func complete_interaction(objective: MissionObjective) -> bool:
 func _advance(expected: int) -> bool:
 	if not multiplayer.is_server() or expected != index or is_complete():
 		return false
-	if multiplayer.has_multiplayer_peer():
-		sync_state.rpc(index + 1)
-	else:
-		sync_state(index + 1)
+	var next := index + 1
+	SGCNetworkManager.mission_rpc(self, &"sync_state", [next])
+	sync_state(next)
 	return true
 
 
