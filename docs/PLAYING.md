@@ -36,7 +36,7 @@ godot --headless --path client -- --server --port 7777 --mission sgc_defense --d
 godot --path client -- --connect 127.0.0.1 --port 7777 --name Carter --class carter_tech
 ```
 
-For a quiet dedicated server, replace the server mission with `--mission sgc_uat`. Replace `127.0.0.1` with the server's address for another machine. The dedicated server bypasses the lobby; a normal client does not. Keep peers on compatible code. Selecting `--mission` on a joining client does not override the server.
+For a quiet dedicated server, replace the server mission with `--mission sgc_uat`; for the modular mission, use `--mission modular_extraction_uat`. A dedicated server has no host operative, so on the modular mission any connected operative's **Retry mission** restarts it for everyone. If the server stops, clients return to the lobby. Replace `127.0.0.1` with the server's address for another machine. The dedicated server bypasses the lobby; a normal client does not. Keep peers on compatible code. Selecting `--mission` on a joining client does not override the server.
 
 ## Default controls
 
