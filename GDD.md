@@ -64,7 +64,7 @@ Players use a tactical third-person camera with shoulder ADS and camera-relative
 
 ## AI as implemented
 
-**Jaffa** march in columns, advance through the SGC, patrol named room markers on modular levels, open unlocked doors, and fight with staff weapons and melee. In the SGC they take sandbag cover and flank by fixed corridor points. On modular levels the "cover" they move to is a room-centre marker.
+**Jaffa** march in columns, advance through the SGC, patrol named room markers on modular levels, open unlocked doors, and fight with staff weapons and melee. In the SGC they take sandbag cover and flank by fixed corridor points. On modular levels they crouch behind low cover props (barricades, crates), stand to fire over them and move when flanked; where a room has no such prop they fall back to a room-centre marker.
 
 **Detection depends on the Jaffa's role.** *Patrols* (modular missions) are sentries: they see inside a view cone with line of sight, become suspicious before they are alerted, show a **?** or **!** overhead, alert patrols nearby, and search the last seen position before resuming their route. Damage alerts them at once. *Gate waves and column marches* (SGC Defense) keep the original assault rule: the nearest operative in sight within about 33 m, or failing that any operative within 22 m regardless of walls. All Jaffa fire only with line of sight, and target a downed operative only when no standing one is in reach. Smoke blocks sight. Patrols also **hear** gunfire and explosions within a straight-line radius per weapon (Carter's suppressed MP5 about 6 m, rifles 25–40 m, C4 45 m) and go to search the source; walls do not muffle. A search looks around the position, then checks a few points nearby before the patrol resumes.
 

@@ -66,8 +66,9 @@ Changes to `JaffaAI.gd` are confined to the patrol state, which only `start_patr
 - **Losing the target:** after 1.5 s without sight an alerted sentry walks to where it last saw someone and looks around for 3 s. It then visits up to three reachable points about 5 m away, looking for 1.5 s at each, and resumes its route at the waypoint it was heading for (search points since ST-2).
 - **Hearing (ST-2):** a sentry that hears a shot or blast within its radius, and is not already fighting, turns suspicious and goes to search the source. Radii are straight-line, so walls do not muffle: P90 30 m, M9 25 m, M249 40 m, staff 30 m, Zat 10 m, suppressed MP5 6 m, C4 45 m, claymore 40 m, mounted turret 35 m (`WeaponBase.noise_radius`, `NOISE_RADIUS` on the explosives and turret). Jaffa and airman fire make no noise yet.
 - Every value above is exported on `JaffaAI` under *Sentry perception* and is provisional until human play. Gate waves and column marches keep the original assault rules, so SGC Defense is unchanged.
-- On a modular level, cover is the nearest reachable room `cover` marker on the same deck that is at least 4 m from the threat and within 24 m (`LevelNavigator.cover_position`). The SGC cover and flank coordinates are not used.
-- **Fallback:** with no qualifying marker the Jaffa holds its current position and fights from there.
+- **Cover props (TA-1).** On a modular level a Jaffa fights from behind solid low cover: `cover` attachments such as the checkpoint barricades, and `prop` or `equipment` pieces 0.9–1.3 m high and at least 0.9 m deep each way, such as cargo crates. The spot is behind the prop, away from the threat and at least 4 m from it, where the prop blocks the line from crouched torso height to the threat's torso (`LevelNavigator.prop_cover`). A sentry takes cover within 10 m of walking on contact; trailing ranks look 20 m. There it crouches facing the threat, stands to fire over the prop, and crouches again. Every half second it checks that the prop still blocks; once flanked it moves to other cover or back into the open.
+- **Perception looks from eye height** (1.55 m) since TA-1, so a crouched Jaffa still watches over low cover. Firing still needs a clear line from the staff.
+- **Fallback:** with no qualifying prop, cover is the nearest reachable room `cover` marker on the same deck, at least 4 m from the threat and within 24 m (`LevelNavigator.cover_position`). With neither, the Jaffa holds its position. The SGC cover and flank coordinates are not used.
 
 Weapons and damage are the existing code paths.
 
@@ -116,7 +117,7 @@ Record commit, peer roles, expected and actual result for each line.
 Each item below was re-checked against the code on 12 November 2026 and is tracked, with its planned fix, in the [risk register](../plans/master-development-roadmap.md#7-risk-and-defect-register).
 
 - **Hearing has no propagation.** A shot is heard through walls and floors within its radius, and several sentries can converge on one noise and jam a corridor (no NPC avoidance). This mission defines no alarm consoles, so the [compound alert](mission-alert.md) never goes beyond *alerted*. The third-person camera can see round corners that a sentry cannot, so the cone and timings need human tuning.
-- **Cover markers sit at room centres** in the current kit, so "cover" is a fallback position in an adjacent room, not concealment. Better cover needs authored markers, not code.
+- **Only rooms with low cover props give real cover.** In this fixture that is the cargo room's crates; elsewhere Jaffa use the room-centre marker fallback. Tall machinery and bare modules do not count. More cover is content work (presets), not code.
 - **A downed operative is only targeted when no standing operative is known** to that Jaffa (since EX-1). Solo play still fails on the first down, through the unchanged squad-down rule.
 - **No friendly airmen, resupply or armoury** in this mission.
 - **Carried over from navigation:** no rerouting around locked doors, no avoidance between NPCs, AI leaves doors open.

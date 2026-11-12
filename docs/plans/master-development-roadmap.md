@@ -19,7 +19,7 @@ Sections 3 onward are the plan. [ROADMAP.md](../../ROADMAP.md) records which mil
 
 The repository records human playtest feedback on the SGC (Sprint 21 findings, the UAT fixes in PRs #24, #25 and #37) but no completed acceptance sign-off for any mission. Nothing below is marked human-verified.
 
-**Regression evidence.** The audit's last full local run was 69/69 on the PR #40 branch. Since then each milestone's pull request records its own full run (75/75 on the ST-2 branch), and hosted CI is green again since EX-1: see R1 in section 7 and [TESTING.md](../TESTING.md#current-baseline).
+**Regression evidence.** The audit's last full local run was 69/69 on the PR #40 branch. Since then each milestone's pull request records its own full run (76/76 on the TA-1 branch), and hosted CI is green again since EX-1: see R1 in section 7 and [TESTING.md](../TESTING.md#current-baseline).
 
 ## 2. Capability matrix
 
@@ -51,7 +51,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Friendly NPC navigation | Awaiting human | Airmen navigate modular levels through `SGCNavigator` → `LevelNavigator` (PR #38). Tactical anchors, leapfrog and suppression still read SGC sectors |
 | Jaffa patrols and navigation | Awaiting human | `JaffaAI.start_patrol`; `test_modular_npc_navigation`, `test_modular_npc_multiplayer` |
 | Enemy detection | Awaiting human (patrols); defect (gate waves) | Patrols use sentry perception (ST-1): view cone, line of sight, suspicious before alerted, search; `test_jaffa_perception`. Gate waves and columns keep the assault rule, which acquires any operative within 22 m through walls (`_find_nearest_target`) |
-| Cover and flanking | Partial | SGC: sandbag cover and corridor flank from literal coordinates. Modular: nearest room `cover` marker, which is a room-centre point, not cover (R3). No flanking on modular levels |
+| Cover and flanking | Partial | SGC: sandbag cover and corridor flank from literal coordinates. Modular (TA-1): Jaffa crouch behind solid low cover props, stand to fire over them and move when flanked (`test_jaffa_prop_cover`); rooms without props fall back to the room-centre `cover` marker. No flanking manoeuvres on modular levels |
 | Suppression and firefights | Partial | Lead rank halts and fires, others relocate; airman cover fire in SGC. No suppression effect on the target |
 | Door interaction | Verified | `ModularDoor` open/close, server-validated, snapshots; AI opens doors with `open_for` |
 | Level-wide alert and alarm | Awaiting human | `MissionAlert` (EV-1): calm, alerted and alarm levels; a runner must reach an alarm console; operatives can disable consoles; reinforcement budget; `test_mission_alert`, `test_mission_alert_multiplayer` |
@@ -240,7 +240,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 ### D — Tactical AI and combat
 
-**TA-1 — Real cover from authored props**
+**TA-1 — Real cover from authored props** · *implemented in PR #48*
 - **Experience:** Jaffa fight from behind crates and barricades and can be flanked out of them.
 - **Baseline:** `LevelNavigator.cover_position` picks a room-centre marker. Presets already place solid `cover` components (for example `security_checkpoint`, `cargo`) that the AI ignores.
 - **New:** cover points derived from solid cover attachments, on the side away from the threat, checked with a ray; crouch behind low cover; relocate when the threat's angle defeats the cover.
@@ -393,7 +393,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 |---|---|---|---|---|
 | R1 | **Hosted CI full profile is red on `main`** | Fixed in EX-1 (PR #42); hosted `Godot full` passed on PRs #42 and #43 | Failing on every push to `main` since PR #35 (`ad643b2`, 10 Nov): six merges, #35 to #40. `test_level_authoring` runs `tools/level_authoring.py`, which looks for `godot` on `PATH`; the workflow installs the engine elsewhere and passes it only to the test runner. Fast and multiplayer profiles pass. Local full runs pass | EX-1 |
 | R2 | Play machine checkout is behind `main` | New, confirmed | `/home/flax/games/Team-Discovery-Channel` is on `feat/modular-npc-navigation` at `19b8317` with local edits. It does not contain PR #39 or #40, so the extraction mission is not launchable from the documented path | Owner action before EX-2 |
-| R3 | Cover markers without real cover | Confirmed | Every module gets a generated `Markers/cover`; `cover_position` uses only that. Solid `cover` attachments are ignored | TA-1 |
+| R3 | Cover markers without real cover | Fixed where rooms have low cover (TA-1, PR #48) | Sentries fight from behind solid low cover attachments (`LevelNavigator.prop_cover`). Rooms without such props, including all bare structural modules, still fall back to the generated room-centre marker | TA-1; more cover is content work |
 | R4 | Perception through walls and decks | Fixed for patrols (ST-1, PR #43); gate waves unchanged | Patrols use the sentry profile (`JaffaPerception`): range, view cone and line of sight, graded awareness. Gate waves and column marches keep the assault rule, which still acquires within 22 m without line of sight, so SGC Defense plays as before | — |
 | R5 | NPC avoidance | Confirmed missing | No avoidance code; head-on NPCs can trip the stall detector | TA-3 |
 | R6 | Locked-door rerouting | Confirmed missing | `LevelNavigator._locked_ahead` holds with `blocked_door`. Planned maps now contain loops, so an alternative often exists and is not used | TA-3 |
