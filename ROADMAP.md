@@ -21,8 +21,11 @@ A new session should:
 
 **Phase 3 (give stealth consequences), in progress:**
 - **EV-1 — Alert state, alarm and reinforcements** is implemented in [PR #46](https://github.com/flaxos/Team-Discovery-Channel/pull/46) ([guide](docs/maps/mission-alert.md)). It contains #45, so it lands correctly whichever merges first.
+- **ST-2 — Sound and search** is implemented in [PR #47](https://github.com/flaxos/Team-Discovery-Channel/pull/47), which contains #45 and #46.
+- **TA-1 — Real cover from authored props** is implemented in [PR #48](https://github.com/flaxos/Team-Discovery-Channel/pull/48), which contains #45 to #47.
+- **GI-2 — Infiltration mission complete** (agent part) is in [PR #49](https://github.com/flaxos/Team-Discovery-Channel/pull/49): an automated loud-route playthrough with every phase 3 system live, cover checked in the guarded rooms, and a [playtest record template](docs/reviews/infiltration-playtest-template.md). Its tuning and its gate are human work.
 
-**Next milestone: ST-2 — Sound and search.** Phase 3's tuning still needs the phase 2 human sessions: every value is provisional.
+That completes the implementation work of phase 3. **Next: the human sessions.** Two people play the infiltration mission by each route and fill in the template; that closes Stealth, Infiltration greybox and Infiltration complete, and drives tuning. The next agent milestones are phase 4 (GA-0 visual brief, then GA-1) or phase 5 (GT-1); they do not depend on each other. Phase 3's tuning still needs the phase 2 human sessions: every value is provisional.
 
 ## What exists today
 
@@ -32,7 +35,7 @@ A new session should:
 | **Working systems** | Host/join and dedicated launch, four classes, server-authoritative combat, downing and revive, late join and retry, squad orders, Jaffa and airman AI, sentry perception, compound alert with alarm consoles and reinforcements, gate dialling and iris in the SGC, modular doors |
 | **Content pipeline** | 15 structural modules, 16 room presets, 8 composites, a visual editor, and an AI authoring CLI with a graph planner and topology checks |
 | **Placeholder only** | Faction themes (`goauld`, `asgard`, `tokra`, `replicator`, `tauri_sgc` all render the neutral fallback). Transport rings and the gate preset on modular levels (placed, inert). Several class perks named in the lobby text |
-| **Not built** | Hearing. Gate travel between worlds. Mission stages, triggers and door actions on modular levels. Real cover on modular levels. Takedowns, Goa'uld shields. Any faction art. Outdoor terrain. Campaign progression |
+| **Not built** | Sound propagation through walls. Gate travel between worlds. Mission stages, triggers and door actions on modular levels. Cover in rooms without low props (bare modules fall back to a marker). Takedowns, Goa'uld shields. Any faction art. Outdoor terrain. Campaign progression |
 | **Not yet accepted by people** | Everything. Human playtests have produced fixes, but no mission has a signed acceptance run |
 
 The full classification, with source paths and tests, is the [capability matrix](docs/plans/master-development-roadmap.md#2-capability-matrix).
@@ -40,8 +43,8 @@ The full classification, with source paths and tests, is the [capability matrix]
 ### Known problems that affect planning
 
 - **Hosted CI was red on `main` from PR #35 to #41** because one suite could not find the engine on the CI runner. EX-1 repairs the runner; the hosted `Godot full` job passed on PRs #42 and #43.
-- **Jaffa in gate waves still detect through walls** (the assault rule kept for SGC Defense). Patrols on modular missions use sight-based perception since ST-1 and a compound alarm since EV-1; they have no hearing yet.
-- **"Cover" on modular levels is a room-centre marker**, not cover.
+- **Jaffa in gate waves still detect through walls** (the assault rule kept for SGC Defense). Patrols on modular missions use sight-based perception (ST-1), a compound alarm (EV-1) and straight-line hearing (ST-2).
+- **Cover on modular levels needs props.** Since TA-1 Jaffa use barricades and crates; rooms without low props still fall back to a room-centre marker.
 - **The play machine's checkout is behind `main`** and does not contain the extraction mission or the planner.
 
 All 20 items, each checked against current code, are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register).
@@ -64,9 +67,9 @@ The greybox layout and the art brief cost little and can proceed in parallel now
 | 2 | **ST-1** Perception and awareness core — *implemented, PR #43* | Patrols that see by line of sight inside a cone, become suspicious before alerted, investigate and give up | M | Fable-class |
 | 3 | **GI-1** Goa'uld infiltration greybox mission — *implemented, PR #44* | A fourth selectable mission on a planned two-deck compound with a quiet route and a loud one | M | Scripted authoring plus Codex-class |
 | 4 | **EV-1** Alert state, alarm and reinforcements — *implemented, PR #46* | One alert level per mission, alarm runners and consoles, a reinforcement budget; wired into the infiltration mission | M | Fable-class |
-| 5 | **ST-2** Sound and search | Gunfire and blasts draw sentries; searches visit points around the last known position | M | Fable-class |
-| 6 | **TA-1** Real cover from authored props | Jaffa fight from behind the props rooms already place | M | Fable-class |
-| 7 | **GI-2** Infiltration mission complete | The compound with consequences and cover, ready for the replay gate | M | Codex-class plus authoring |
+| 5 | **ST-2** Sound and search — *implemented, PR #47* | Gunfire and blasts draw sentries; searches visit points around the last known position | M | Fable-class |
+| 6 | **TA-1** Real cover from authored props — *implemented, PR #48* | Jaffa fight from behind the props rooms already place | M | Fable-class |
+| 7 | **GI-2** Infiltration mission complete — *agent part in PR #49; tuning and gate are human* | The compound with consequences and cover, ready for the replay gate | M | Codex-class plus authoring |
 
 Each has objective, files, boundaries, acceptance tests, human checks, risks and a handoff prompt in the master plan. The layout half of GI-1 (GI-0) can be authored at any time.
 
@@ -152,6 +155,9 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | Master roadmap (PR #41) | Documentation only: audit, capability matrix, milestone plan, decision log. |
 | GI-0 and GI-1 (PR #44) | Twenty-room two-deck compound planned with the authoring CLI (gate insertion, guarded checkpoint route and quiet service route to the generator, upper command deck, paired rings); fourth selectable mission with six sentries and an automated quiet-route check. |
 | ST-1 (PR #43) | Sentry perception for patrols: view cone and line of sight, suspicious then alerted with a replicated ? / ! tell, one-hop alert spread, search the last seen position and resume the route. Gate waves keep the assault rule. |
+| GI-2 (PR #49) | Loud-route playthrough of the infiltration mission with hearing, alarm, reinforcements and cover live; cover verified in the guarded rooms; playtest record template for the human gates. 77/77 local checks. |
+| TA-1 (PR #48) | Jaffa fight from behind solid low cover props: spot selection behind the prop, crouch and stand to fire over it, relocation when flanked, marker fallback; perception from eye height. One new suite; 76/76 local checks. |
+| ST-2 (PR #47) | Per-weapon noise radii (suppressed MP5 6 m) and explosive and turret noise; sentries hear and search the source; searches visit points around the last known position before resuming. One new suite; 75/75 local checks. |
 | EV-1 (PR #46) | Compound alert levels, alarm runners and consoles that operatives can disable, a one-time reinforcement budget, klaxon, banner, toasts and debrief line; wired into the infiltration mission. Two new suites; 74/74 local checks. |
 | EX-1 (PR #42) | CI runner repair; readiness-gated mission messages so mid-firefight joins log no errors; hostiles stand down and squad state is final at the result; standing operatives targeted before downed ones; dedicated-server suite, client-requested retry and return to lobby on server loss; mission-owned HUD and debrief text. |
 

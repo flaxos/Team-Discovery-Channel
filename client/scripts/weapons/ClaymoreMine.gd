@@ -4,6 +4,8 @@ extends Node3D
 ## Features laser tripwire detection, 1.0s arming delay, and 120-degree forward lethal fragmentation blast.
 
 signal detonated(origin: Vector3)
+## Metres the blast or shot is heard by patrolling sentries (JaffaAI.hear).
+const NOISE_RADIUS := 40.0
 
 @export var blast_damage: float = 320.0
 @export var blast_radius: float = 7.5
@@ -46,6 +48,7 @@ func _on_tripwire_tripped(body: Node) -> void:
 func detonate() -> void:
 	is_armed = false
 	detonated.emit(global_position)
+	get_tree().call_group(&"noise_listeners", &"hear", global_position, NOISE_RADIUS, planter)
 	print("Claymore: TRIPWIRE TRIGGERED! Detonating directional fragmentation blast!")
 
 	# Spatial query for all entities in forward arc

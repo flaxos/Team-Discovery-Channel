@@ -126,7 +126,10 @@ func run() -> void:
 		await physics_frame
 		if wing.current_state == JaffaAI.State.COVER:
 			took_cover = true
-			assert(wing.tactical_destination in valid, "Cover comes from a room marker")
+			assert(
+				wing.tactical_destination in valid or wing.cover_prop != null,
+				"Cover comes from a cover prop or a room marker"
+			)
 			assert(wing.tactical_destination.distance_to(player.global_position) >= 4.0)
 			var offset := wing.global_position - wing.tactical_destination
 			if Vector2(offset.x, offset.z).length() < 1.3:
@@ -157,8 +160,18 @@ func run() -> void:
 			break
 	assert(lead.current_state == JaffaAI.State.PATROL and wing.current_state == JaffaAI.State.PATROL)
 	var resumed_from := lead.global_position
-	await frames(240)
-	assert(lead.global_position.distance_to(resumed_from) > 3.0, "Patrol moves again after combat")
+	# A sentry may pause briefly (looking round at the end of a search); it must walk on within 8 s.
+	for i in range(60 * 8):
+		await physics_frame
+		if lead.global_position.distance_to(resumed_from) > 3.0:
+			break
+	assert(
+		lead.global_position.distance_to(resumed_from) > 3.0,
+		"Patrol moves again after combat: from %s to %s, nav %s, heading %s, cover %s, crouch %s, vel %s" % [
+			resumed_from, lead.global_position, lead.navigator.status, lead.patrol_points[lead.patrol_index],
+			lead.cover_prop, lead.is_crouching, lead.velocity
+		]
+	)
 
 	# --- A lone operative downed by real staff fire fails the mission once.
 	player.health_component.current_health = player.health_component.max_health

@@ -63,7 +63,7 @@ Part of the [infiltration mission checklist](goauld-infiltration-mission.md#huma
 
 ## Known limitations
 
-- **No hearing.** The alarm comes only from being seen or shot (ST-2 adds gunfire noise).
+- **Noise does not start an escalation.** A sentry sent to check a shot (ST-2) keeps an escalation going but does not start one; only being seen or shot does.
 - **Consoles are the existing placeholder props.** Nothing on the console itself shows that it is an alarm, apart from the prompt within 12 m.
 - **No door lockdown or ring-delivered reinforcements** (EV-2 and later).
 - **A runner on another deck** may take a long route; nothing stops it except operatives.

@@ -6,6 +6,8 @@ extends Node3D
 signal turret_fired(origin: Vector3, dir: Vector3)
 signal player_mounted(player: Node)
 signal player_dismounted(player: Node)
+## Metres the blast or shot is heard by patrolling sentries (JaffaAI.hear).
+const NOISE_RADIUS := 35.0
 
 @export var fire_rate_rpm: float = 500.0
 @export var damage: float = 52.0
@@ -137,6 +139,7 @@ func _fire_shot(dir: Vector3) -> void:
 				health.take_damage(damage, self, "50cal_heavy")
 
 	turret_fired.emit(origin, dir)
+	get_tree().call_group(&"noise_listeners", &"hear", origin, NOISE_RADIUS, self)
 	rpc("play_turret_fx", origin, hit_pos)
 
 

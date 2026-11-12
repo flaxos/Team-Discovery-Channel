@@ -120,7 +120,7 @@ func can_see(body: Node3D) -> bool:
 		forward.y = 0.0
 		if forward.angle_to(flat) > deg_to_rad(float(jaffa.sight_cone_deg) * 0.5):
 			return false
-	return bool(jaffa._has_line_of_sight(body))
+	return bool(jaffa._has_line_of_sight(body, true))
 
 
 func _nearest_seen(bodies: Array[Node3D]) -> Node3D:

@@ -4,6 +4,8 @@ extends RigidBody3D
 ## Can be thrown at choke points and detonated remotely or set on timed fuses (5s/10s/30s).
 
 signal exploded(origin: Vector3)
+## Metres the blast or shot is heard by patrolling sentries (JaffaAI.hear).
+const NOISE_RADIUS := 45.0
 
 enum C4Mode { REMOTE, TIMER_5S, TIMER_10S, TIMER_30S }
 
@@ -78,6 +80,7 @@ func detonate() -> void:
 		return
 	is_detonated = true
 	exploded.emit(global_position)
+	get_tree().call_group(&"noise_listeners", &"hear", global_position, NOISE_RADIUS, planter)
 
 	# Apply radial blast damage to all entities within radius
 	var space := get_world_3d().direct_space_state
