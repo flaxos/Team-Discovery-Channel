@@ -529,19 +529,21 @@ func _mission_peer_visible(id: int) -> bool:
 ## the world, or has not yet been sent a spawned actor, would log an engine error; it asks for
 ## snapshots once its copy exists. World nodes exist on every ready peer. For a spawned actor
 ## pass its HealthComponent, which knows the peers whose copy has reported in.
-## Callers run a `call_local` method themselves.
-static func mission_rpc(
-	node: Node, method: StringName, args: Array = [], actor: HealthComponent = null
-) -> void:
+## Callers run a `call_local` method themselves. `actor` is untyped on purpose: naming the
+## HealthComponent class here would make the two scripts reference each other, and Godot
+## then never frees either (reported as leaked resources at exit).
+static func mission_rpc(node: Node, method: StringName, args: Array = [], actor: Node = null) -> void:
 	if not node.is_inside_tree() or not node.multiplayer.has_multiplayer_peer():
 		return
-	var net := node.get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	# Untyped: a script that names its own class from a static function is never freed.
+	var net: Node = node.get_node_or_null("/root/NetworkManager")
 	var gated: bool = net != null and net.is_in_active_session() and node.multiplayer == net.multiplayer
+	var ready_peers: Dictionary = net.get("mission_ready_peers") if gated else {}
 	for id: int in node.multiplayer.get_peers():
 		if gated and id != 1:
-			if not net.mission_ready_peers.has(id):
+			if not ready_peers.has(id):
 				continue
-			if actor != null and not actor.replica_peers.has(id):
+			if actor != null and not (actor.get("replica_peers") as Dictionary).has(id):
 				continue
 		node.callv(&"rpc_id", [id, method] + args)
 
