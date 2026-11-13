@@ -23,9 +23,11 @@ Reports default to `build/test-results/godot/`: `summary.json`, `junit.xml`, pro
 
 ### Current baseline
 
-The last recorded full local run is **77/77 checks** on the GI-2 branch (PR #49): project import, 75 suites and the persistence reader. Each milestone's pull request records its own run.
+The last recorded full local run is **77/77 checks** at PR #49 (merged as `6af561b`): project import, 75 suites and the persistence reader. Each milestone's pull request records its own run. Local green is not hosted green: three suites passed locally and failed on the slower hosted runner in phase 3 (see below).
 
 **Hosted CI:** the `Godot full` job failed on every push to `main` from PR #35 to #41. `test_level_authoring` runs `tools/level_authoring.py`, which looks for `godot` on `PATH` (or the `GODOT` environment variable); the workflow installs the engine elsewhere and passed its path only to the test runner. Since roadmap milestone EX-1 the runner exports the engine it was given as `GODOT` to every suite, and `tools/tests/test_godot_runner.py` checks that. The hosted `Godot full` job passed on PRs #42 and #43 with this change; check each pull request's hosted run for the current state.
+
+**Hosted runs are slower than local ones.** Phase 3 hit three failures that passed locally: the runner imported with `--editor --quit`, which can exit before every asset is imported (now `--import`); a late-join test required three Jaffa to hold one awareness level for 1.5 s; and a retry could cross a health-snapshot reply, logging a missing-node error on the client. When writing multi-process tests, assert eventual or at-least states, not exact counts at one moment, and check `gh pr checks <n>` before calling a branch green.
 
 Historical baseline: at gameplay commit **`a720594`**, the full profile passed **51/51 local checks**: 49 discovered scripts, an extra persistence reader process and project import. The evidence is a baseline result, not a promise that a later branch or hosted workflow passed. CI status belongs to the corresponding pull request.
 
