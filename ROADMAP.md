@@ -1,6 +1,6 @@
 # Roadmap — Stargate SG Extraction
 
-**This is the authoritative roadmap.** Audited 12 November 2026 against `main` at `bf56743` (PR #40); status updated 13 November 2026 at `6af561b` (PR #49). Godot **4.4.1**, typed GDScript, native ENet multiplayer.
+**This is the authoritative roadmap.** Audited 12 November 2026 against `main` at `bf56743` (PR #40); status updated 14 November 2026 at `ce9ad71` (PR #50). Godot **4.4.1**, typed GDScript, native ENet multiplayer.
 
 The game: a Stargate-inspired, four-player tactical co-op shooter about reconnaissance, infiltration, combat, objectives and extraction. Design intent is in the [GDD](GDD.md). Evidence, milestone detail and agent work packages are in the [master development plan](docs/plans/master-development-roadmap.md). Architectural choices are in the [decision log](docs/DECISIONS.md).
 
@@ -8,17 +8,19 @@ Sizes below are relative effort, not dates. Nothing in this file is a delivery c
 
 ## Start here
 
-**State on 13 November 2026.** Phases 1 to 3 of the sequence below are implemented and merged. Phase 3 landed on `main` as PRs #45 (ST-1, GI-0/GI-1), #46 (EV-1) and #49 (ST-2, TA-1, GI-2; it was developed as #47 and #48, which #49 contains and which can be closed). The last full local run was **77/77** and hosted CI was green on #49. Every number in the game is provisional, because **no human has played any of it** (risk R13).
+**State on 14 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. The last full local run was **77/77** and hosted CI is green on `main`.
+
+Two owner decisions on 14 November shape what follows: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)), which reopens the gate-travel strategy.
 
 ### Pick up here
 
 | Option | What | Who | Detail |
 |---|---|---|---|
-| **A. Human play sessions** *(recommended first)* | Run extraction UAT, SGC Defense and the infiltration mission with two people, fill in the playtest template, tune from what you find | Two humans | [Next work, part A](docs/plans/next-work-packages.md#a-human-play-sessions) |
-| **B. GA-0 Goa'uld visual brief** | A written design language and a theme-slot audit; documentation only | Any agent | [Package 4](docs/plans/next-work-packages.md#b-package-4--ga-0-goauld-visual-brief-and-theme-slot-audit) |
-| **C. GT-1 session state and host split** | Make gate travel possible; no visible change; highest regression risk | Fable-class agent | [Package 5](docs/plans/next-work-packages.md#c-package-5--gt-1-mission-session-state-and-host-split) |
+| **A. GA-1 Goa'uld vertical slice** *(next)* | The palette on every room of the compound, and built pieces for the narrow corridor, the door lintel and the compact chamber | Fable-class agent | [Goa'uld visual brief](docs/maps/goauld-visual-brief.md#7-what-ga-1-should-do-with-this); milestone GA-1 in the [master plan](docs/plans/master-development-roadmap.md#f--goauld-architecture-and-visual-identity) |
+| **B. GT-0 split-world travel design** | A design for gate travel in which players can be in different worlds; documentation only. GT-1 is paused until it exists | Fable-class agent | [D-013](docs/DECISIONS.md); [next work, part C](docs/plans/next-work-packages.md#c-package-5--gt-1-mission-session-state-and-host-split) |
+| **C. Two-player sessions** *(deferred by the owner)* | The co-op checklist items no human has run: late join, shared extraction, revive, mixed quiet and loud play | Two humans | [Next work, part A](docs/plans/next-work-packages.md#a-human-play-sessions) |
 
-A, B and C do not depend on each other. C needs the owners to confirm decision D-002 (the squad always travels together). Phase 6 work (EV-2, TA-3, TA-2, CO-1, SW-1) should wait for A. Each package has a handoff prompt you can paste into a fresh session.
+A and B do not depend on each other. Phase 6 work (EV-2, TA-3, TA-2, CO-1, SW-1) is better designed after C, but is no longer blocked by it.
 
 ### Rules for any session
 
@@ -46,7 +48,7 @@ A, B and C do not depend on each other. C needs the owners to confirm decision D
 | **Content pipeline** | 15 structural modules, 16 room presets, 8 composites, a visual editor, and an AI authoring CLI with a graph planner and topology checks |
 | **Placeholder only** | Faction themes (`goauld`, `asgard`, `tokra`, `replicator`, `tauri_sgc` all render the neutral fallback). Transport rings and the gate preset on modular levels (placed, inert). Several class perks named in the lobby text |
 | **Not built** | Sound propagation through walls. Gate travel between worlds. Mission stages, triggers and door actions on modular levels. Cover in rooms without low props (bare modules fall back to a marker). Takedowns, Goa'uld shields. Any faction art. Outdoor terrain. Campaign progression |
-| **Not yet accepted by people** | Everything. Human playtests have produced fixes, but no mission has a signed acceptance run |
+| **Accepted by people** | Phases 1 to 3, by one owner playing alone on 14 November 2026 ([record](docs/reviews/2026-11-14-owner-solo-uat.md)). Not yet run by two people: late join, shared extraction, revive, mixed-route play, SGC Defense on the current build |
 
 The full classification, with source paths and tests, is the [capability matrix](docs/plans/master-development-roadmap.md#2-capability-matrix).
 
@@ -95,11 +97,11 @@ Workstream letters match the master plan.
 | **2. Make stealth possible** | ST-1, GI-0, GI-1 | A compound you can sneak through or fight through |
 | **3. Give stealth consequences** | EV-1, ST-2, TA-1, GI-2 | Alarms, reinforcements, searching patrols, firefights with real cover |
 | **4. Give it a look** | GA-0, GA-1, then GA-2 in parts | The compound looks like a Goa'uld installation |
-| **5. Travel** | GT-1, GT-2, GT-3 | Brief in the SGC, step through the gate, come home and debrief |
+| **5. Travel** | GT-0, GT-1, GT-2, GT-3 | Brief in the SGC, step through the gate, come home and debrief; players may be in different worlds |
 | **6. Deepen** | TA-2, TA-3, EV-2, CO-1, CO-2, SW-1 to SW-3 | Flanking, locked-door play, multi-stage missions, co-op roles, takedowns, shielded and specialist enemies |
 | **7. Widen** | OW-0 to OW-2, other locations, CA-1, CA-2 | Outdoor gate sites, Alpha Site, mothership, other factions, linked missions |
 
-Phases 4 and 5 do not depend on each other. Phase 4's brief and phase 2's layout can start today.
+Phases 4 and 5 do not depend on each other. Phase 4's brief (GA-0) is written; phase 5 starts with a design (GT-0), because the owners decided that players may be in different worlds.
 
 ## Dependencies
 
@@ -115,12 +117,12 @@ The diagram and the table of which streams can run at the same time without touc
 | Gate | Passed when | Status |
 |---|---|---|
 | CI | Hosted `Godot full` is green on `main` (repair in EX-1) | **Passed**: hosted CI is green on `main` at `6af561b` |
-| EX-2 | A dated two-person record exists for Modular Extraction UAT and one SGC Defense run | **Open.** Sessions 1–3 of [the plan](docs/plans/next-work-packages.md#session-plan-about-two-hours-for-two-people) |
-| Stealth | Two people cross the test facility unseen on purpose, and report the awareness tell as readable | **Open.** Sessions 4–5 |
-| Infiltration greybox | Two people finish GI-1 by each route | **Open.** Sessions 4–5 |
-| Infiltration complete | Both routes are reported as worth replaying with alarm and reinforcements active | **Open.** Session 6 and the tuning table |
+| EX-2 | A dated two-person record exists for Modular Extraction UAT and one SGC Defense run | **Accepted by the owner on solo play**, 14 November 2026 ([D-014](docs/DECISIONS.md)). The two-person and SGC Defense parts were not run |
+| Stealth | Two people cross the test facility unseen on purpose, and report the awareness tell as readable | **Accepted by the owner on solo play.** No unseen crossing was achieved in the recorded session |
+| Infiltration greybox | Two people finish GI-1 by each route | **Accepted by the owner on solo play.** Finished by the loud route; the quiet attempt failed |
+| Infiltration complete | Both routes are reported as worth replaying with alarm and reinforcements active | **Accepted by the owner on solo play** |
 
-Automated suites never satisfy a human gate.
+Automated suites never satisfy a human gate. The gates were defined for two people; the owner accepted them on one solo session and deferred the rest. The [record](docs/reviews/2026-11-14-owner-solo-uat.md) lists what was and was not run.
 
 ## Longer-term workstreams
 
@@ -131,8 +133,8 @@ Automated suites never satisfy a human gate.
 | C | Mission scripting and events | EV-1 | ST-1, preferably GI-1 |
 | D | Tactical AI and combat | TA-1 | ST-1 |
 | E | Goa'uld infiltration mission | GI-0 | Now (layout), ST-1 (mission) |
-| F | Goa'uld architecture and visuals | GA-0 | Now (brief), art-method decision (slice) |
-| G | Stargate world transitions | GT-1 | EX-1 and the transition decision |
+| F | Goa'uld architecture and visuals | GA-0 (done: [brief](docs/maps/goauld-visual-brief.md)); GA-1 next | Now |
+| G | Stargate world transitions | GT-0 split-world design, then GT-1 | Now (design); GT-1 after the design is accepted |
 | H | Expanded co-op mechanics | CO-1 | GI-1 |
 | I | Special weapons and faction mechanics | SW-1 | ST-2 |
 | J | Outdoor world construction | OW-0 | Any time; design spike only |
@@ -141,7 +143,7 @@ Automated suites never satisfy a human gate.
 
 ## Open product decisions
 
-Nine questions need an owner's answer; each has a working default so that work is not blocked. The most consequential are whether the squad always travels through the gate together, whether Jaffa attack downed operatives, and how art will be produced. See [section 10 of the master plan](docs/plans/master-development-roadmap.md#10-open-questions-for-the-product-owners).
+Two of the nine questions were answered on 14 November 2026: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)). The second went against the plan's default and roughly doubles the travel work; its design is the next travel task. Seven questions remain, each with a working default so that work is not blocked. The most consequential is whether Jaffa attack downed operatives. See [section 10 of the master plan](docs/plans/master-development-roadmap.md#10-open-questions-for-the-product-owners).
 
 ## Milestone history
 
@@ -162,6 +164,7 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | Modular NPC navigation (PR #38) | Production Jaffa and airmen navigate modular levels; patrols; AI door use. |
 | First modular mission (PR #39) | Modular Extraction UAT: data-driven objectives, extraction rule, patrol combat, two shared netcode fixes. 68/68 local checks. |
 | AI level authoring 2.0 (PR #40) | Graph planner, topology checks, six more composites, tactical catalogue metadata, four demonstration maps. 69/69 local checks. |
+| GA-0 (14 November 2026) | Documentation only: the [Goa'uld visual brief](docs/maps/goauld-visual-brief.md) (design language with dimensions and a palette checked against the Jaffa and awareness markers, theme-slot audit with eight gaps, rooms ranked by use, art-method options), the [owner's solo UAT record](docs/reviews/2026-11-14-owner-solo-uat.md) and decisions D-012 to D-014. |
 | Master roadmap (PR #41) | Documentation only: audit, capability matrix, milestone plan, decision log. |
 | GI-0 and GI-1 (PR #44) | Twenty-room two-deck compound planned with the authoring CLI (gate insertion, guarded checkpoint route and quiet service route to the generator, upper command deck, paired rings); fourth selectable mission with six sentries and an automated quiet-route check. |
 | ST-1 (PR #43) | Sentry perception for patrols: view cone and line of sight, suspicious then alerted with a replicated ? / ! tell, one-hop alert spread, search the last seen position and resume the route. Gate waves keep the assault rule. |

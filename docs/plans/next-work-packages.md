@@ -2,7 +2,9 @@
 
 Written 13 November 2026, after phase 3 landed on `main` (PRs #45, #46 and #49). It continues section 8 of the [master plan](master-development-roadmap.md#8-the-first-three-work-packages), whose three packages (EX-1, ST-1, GI-1) are done. [ROADMAP.md](../../ROADMAP.md) says which of these to pick up; this file holds the detail.
 
-Three things can start now and none blocks another:
+**Update, 14 November 2026.** An owner played both new missions alone and accepted phases 1 to 3 ([record](../reviews/2026-11-14-owner-solo-uat.md), [D-014](../DECISIONS.md)); the two-player sessions in part A are deferred, not cancelled. Package 4 (GA-0) is done: see the [Goa'uld visual brief](../maps/goauld-visual-brief.md). Package 5 (GT-1) is **paused**: the owners decided players may be in different worlds ([D-013](../DECISIONS.md)), so a split-world design (GT-0) comes first. [ROADMAP.md](../../ROADMAP.md#pick-up-here) has the current list.
+
+As written on 13 November, three things could start and none blocked another:
 
 | | Work | Who | Needs |
 |---|---|---|---|
@@ -62,6 +64,8 @@ When the template's **Infiltration complete** line can be ticked, update ROADMAP
 
 ## B. Package 4 — GA-0 Goa'uld visual brief and theme-slot audit
 
+**Done 14 November 2026.** Result: [Goa'uld visual brief](../maps/goauld-visual-brief.md). Open question 7 was answered the same day ([D-012](../DECISIONS.md)), so GA-1 can start.
+
 1. **Objective.** Give art a written target and an exact list of what the theme system can already render, so the first themed slice (GA-1) starts without rework.
 2. **Prerequisites.** None. Documentation and read-only inspection only.
 3. **Likely files.** New `docs/maps/goauld-visual-brief.md`; `client/resources/level_themes/goauld.tres` and `neutral.tres` (read); `client/scripts/level/LevelThemeResolver.gd` (read); `docs/maps/ai-level-authoring.md` and `docs/maps/modular-levels.md` (link to the new brief); `docs/README.md` index; `ROADMAP.md` status.
@@ -85,6 +89,8 @@ When the template's **Infiltration complete** line can be ticked, update ROADMAP
 > Repository `flaxos/Team-Discovery-Channel`, Godot 4.4.1. Read `ROADMAP.md`, then package 4 (GA-0) in `docs/plans/next-work-packages.md`, section 6 of `docs/plans/master-development-roadmap.md`, decision D-010 in `docs/DECISIONS.md`, `client/resources/level_themes/goauld.tres`, `neutral.tres` and `client/scripts/level/LevelThemeResolver.gd`. Write `docs/maps/goauld-visual-brief.md` with the design language, the theme-slot audit, the compound's rooms ranked by use and the art-method options, as the package describes. This is documentation only: change no code, scene, resource or test. Work on a new branch from `main` in a separate worktree and preserve uncommitted files in other checkouts. Stop when the brief and index changes are ready for review; do not start GA-1. Do not merge.
 
 ## C. Package 5 — GT-1 mission session state and host split
+
+**Paused 14 November 2026.** This package assumes the squad always travels together. The owners decided otherwise ([D-013](../DECISIONS.md)). Do not start it from the text below; a split-world design (GT-0) comes first and this package will be rewritten from it.
 
 1. **Objective.** Separate what survives a world change (roster, objective progress, result) from the world scene, and extract a slim mission host that SGC and modular missions share. No visible change.
 2. **Prerequisites.** D-002 confirmed by the owners (the squad always travels together: open question 1). Do the human sessions first if possible, because this touches the most stable code.

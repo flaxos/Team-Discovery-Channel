@@ -226,7 +226,7 @@ Only a currently declared attachment can be edited; `reset` also removes a store
 
 ## Themes and visual safety
 
-Recognised initial IDs: `neutral`, `tauri_sgc`, `goauld`, `asgard`, `tokra`, `replicator`. Faction definitions contain semantic intent and valid neutral palette/fallback references; detailed faction art is absent. Inspect/build results report both the requested theme and the effective visual source.
+Recognised initial IDs: `neutral`, `tauri_sgc`, `goauld`, `asgard`, `tokra`, `replicator`. Faction definitions contain semantic intent and valid neutral palette/fallback references; detailed faction art is absent. Inspect/build results report both the requested theme and the effective visual source. What each theme slot renders today, and the target for the first Goa'uld pieces, is in the [Goa'uld visual brief](goauld-visual-brief.md).
 
 ```json
 {"operations": [

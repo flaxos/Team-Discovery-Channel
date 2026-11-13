@@ -32,6 +32,7 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Modular extraction mission](maps/modular-extraction-mission.md) | First playable modular mission: objectives, extraction rule, Jaffa combat, tests, human checklist and travel blockers. |
 | [Goa'uld infiltration mission](maps/goauld-infiltration-mission.md) | Greybox stealth mission: compound layout and requirements, objectives, patrols, quiet and guarded routes, tests, human checklist. |
 | [Compound alert, alarms and reinforcements](maps/mission-alert.md) | EV-1: alert levels, alarm runners and consoles, reinforcement budget, mission data, netcode, tests. |
+| [Goa'uld visual brief](maps/goauld-visual-brief.md) | GA-0: design language with dimensions and palette, theme-slot audit and gaps, rooms ranked by use, art-method options. The target for GA-1. |
 | [Modular NPC navigation](maps/modular-npc-navigation.md) | Production Jaffa/airman navigation, patrols, AI door use, demo scene and limitations. |
 
 ## Level authoring
@@ -54,6 +55,7 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Offworld extraction plan](plans/offworld-extraction-mission.md) | Earlier dependency study. Superseded by the master plan; kept for its analysis. |
 | [AI level authoring 2.0 review](reviews/ai-level-authoring-2.md) | Friction study and before/after benchmark for the planner. |
 | [Infiltration playtest template](reviews/infiltration-playtest-template.md) | Copy per human session; the evidence for the Stealth and Infiltration gates. |
+| [Owner solo UAT, 14 November 2026](reviews/2026-11-14-owner-solo-uat.md) | First human session on `main` after phase 3: what the log shows, what the owner stated, what was not run; gates accepted on solo play. |
 | [Work tracker](../plan/README.md) | Implementation records for the SGC refactor and Sprint 21. |
 
 ## Historical and generated material

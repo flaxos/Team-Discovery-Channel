@@ -286,7 +286,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 See section 6 for sequencing.
 
-**GA-0 — Visual brief and slot audit** · S · Codex · documentation and read-only inspection
+**GA-0 — Visual brief and slot audit** · S · Codex · documentation and read-only inspection · **done 14 November 2026: [Goa'uld visual brief](../maps/goauld-visual-brief.md)**
 - A written design language (silhouettes, door proportions, rib spacing, palette, lighting mood) and a table of what each theme slot (`wall_panels`, `floor_detail`, `ceiling_detail`, `door_frame`, `room_detail`) actually renders today in `LevelThemeResolver`. Original designs inspired by the setting; no copied production assets.
 
 **GA-1 — Goa'uld vertical slice**
@@ -309,7 +309,7 @@ See section 6 for sequencing.
 - **Baseline:** objectives, result and operatives belong to one world scene; `ModularMission` extends the 900-line `GateRoom`.
 - **New:** a session object above the world that owns roster state (class, health, ammunition), objective progress and result; a slim mission host extracted from `GateRoom` that both the SGC and modular missions use.
 - **Non-goals:** any travel; any change to SGC Defense rules.
-- **Prerequisites:** the transition strategy confirmed ([D-002](../DECISIONS.md)).
+- **Prerequisites:** the transition strategy confirmed ([D-002](../DECISIONS.md)). **Paused 14 November 2026:** the owners decided players may be in different worlds ([D-013](../DECISIONS.md)), so a split-world design (GT-0) comes first and this milestone will be rewritten from it.
 - **Components:** `NetworkManager.gd`, `MainGameCoordinator.gd`, `GateRoom.gd`, `ModularMission.gd`.
 - **Multiplayer / AI:** every existing join, retry and snapshot test must pass unchanged.
 - **Acceptance:** all multiplayer suites green with no behaviour change; a second modular mission needs no SGC overrides.
@@ -519,12 +519,12 @@ Rules that keep cost down:
 
 These change scope or design. Each has a default that the plan assumes until answered.
 
-1. **Does the squad travel through the gate as one group, or can players be in different worlds?** Default: one group. Splitting roughly doubles the travel work.
+1. **Does the squad travel through the gate as one group, or can players be in different worlds?** **Answered 14 November 2026: players can be in different worlds** ([D-013](../DECISIONS.md)). This was not the default; it reopens D-002 and pauses GT-1 until a split-world design (GT-0) exists.
 2. **Is detection ever a mission failure?** Default: never; it escalates.
 3. **Do Jaffa attack downed operatives?** Default: not while a standing operative is known.
 4. **Do friendly airmen go offworld in the first infiltration mission?** Default: no.
 5. **Should a solo player fail on the first down?** Today yes, because the squad is then down. Default: unchanged until CO-1.
 6. **Is the offworld loop the main game, with SGC Defense as one mission among several, or the reverse?** Default: offworld becomes the main loop; SGC Defense stays as it is.
-7. **How is art made?** In-engine procedural pieces built by agents, or assets from a modelling tool. Blocks GA-1 only.
+7. **How is art made?** **Answered 14 November 2026: in-engine pieces built by agents** ([D-012](../DECISIONS.md)). Modelled replacements stay possible later.
 8. **How far should class descriptions be honoured?** Trim the text or build the perks. Default: trim until CO-2.
 9. **Is any saved progress wanted before there are three or more offworld missions?** Default: no.
