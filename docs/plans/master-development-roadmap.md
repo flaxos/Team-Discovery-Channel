@@ -1,6 +1,6 @@
 # Master development roadmap — detailed plan
 
-Audited 12 November 2026 against `main` at `bf56743` (PR #40 merged). Godot **4.4.1**, GDScript, native ENet.
+Audited 12 November 2026 against `main` at `bf56743` (PR #40 merged); status of implemented milestones updated 13 November 2026 at `6af561b` (PR #49). Godot **4.4.1**, GDScript, native ENet.
 
 [ROADMAP.md](../../ROADMAP.md) is the authoritative summary and says what to do next. This document holds the evidence and the detail: the capability matrix, dependency graph, milestone definitions, the art and content track, the risk register and three agent-ready work packages. Architectural choices are recorded in the [decision log](../DECISIONS.md). Game intent is in the [GDD](../../GDD.md).
 
@@ -198,7 +198,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 **ST-1 — Perception and awareness core** · M · Fable · full work package in section 8.
 
-**ST-2 — Sound, investigation and search** · *implemented in PR #47*
+**ST-2 — Sound, investigation and search** · *implemented in PR #49*
 - **Experience:** unsuppressed gunfire draws nearby patrols; a patrol that loses you searches the area before giving up.
 - **Baseline:** none. No noise events exist.
 - **New:** host-side noise events with a radius (weapon fire, explosions, sprinting optional); a search state that visits two or three points around the last known position; suppressed weapons emit a smaller radius.
@@ -240,7 +240,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 ### D — Tactical AI and combat
 
-**TA-1 — Real cover from authored props** · *implemented in PR #48*
+**TA-1 — Real cover from authored props** · *implemented in PR #49*
 - **Experience:** Jaffa fight from behind crates and barricades and can be flanked out of them.
 - **Baseline:** `LevelNavigator.cover_position` picks a room-centre marker. Presets already place solid `cover` components (for example `security_checkpoint`, `cargo`) that the AI ignores.
 - **New:** cover points derived from solid cover attachments, on the side away from the threat, checked with a ray; crouch behind low cover; relocate when the threat's angle defeats the cover.
@@ -393,7 +393,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 |---|---|---|---|---|
 | R1 | **Hosted CI full profile is red on `main`** | Fixed in EX-1 (PR #42); hosted `Godot full` passed on PRs #42 and #43 | Failing on every push to `main` since PR #35 (`ad643b2`, 10 Nov): six merges, #35 to #40. `test_level_authoring` runs `tools/level_authoring.py`, which looks for `godot` on `PATH`; the workflow installs the engine elsewhere and passes it only to the test runner. Fast and multiplayer profiles pass. Local full runs pass | EX-1 |
 | R2 | Play machine checkout is behind `main` | New, confirmed | `/home/flax/games/Team-Discovery-Channel` is on `feat/modular-npc-navigation` at `19b8317` with local edits. It does not contain PR #39 or #40, so the extraction mission is not launchable from the documented path | Owner action before EX-2 |
-| R3 | Cover markers without real cover | Fixed where rooms have low cover (TA-1, PR #48) | Sentries fight from behind solid low cover attachments (`LevelNavigator.prop_cover`). Rooms without such props, including all bare structural modules, still fall back to the generated room-centre marker | TA-1; more cover is content work |
+| R3 | Cover markers without real cover | Fixed where rooms have low cover (TA-1, PR #49) | Sentries fight from behind solid low cover attachments (`LevelNavigator.prop_cover`). Rooms without such props, including all bare structural modules, still fall back to the generated room-centre marker | TA-1; more cover is content work |
 | R4 | Perception through walls and decks | Fixed for patrols (ST-1, PR #43); gate waves unchanged | Patrols use the sentry profile (`JaffaPerception`): range, view cone and line of sight, graded awareness. Gate waves and column marches keep the assault rule, which still acquires within 22 m without line of sight, so SGC Defense plays as before | — |
 | R5 | NPC avoidance | Confirmed missing | No avoidance code; head-on NPCs can trip the stall detector | TA-3 |
 | R6 | Locked-door rerouting | Confirmed missing | `LevelNavigator._locked_ahead` holds with `blocked_door`. Planned maps now contain loops, so an alternative often exists and is not used | TA-3 |
@@ -415,6 +415,8 @@ Each previously reported issue was checked against the code at `bf56743`.
 Items verified as **no longer open**: server-owned actors invisible to clients (fixed in PR #39, `configure_mission_sync`), the retry race on client operatives (fixed in PR #39), and "client late join mid-patrol untested" from the navigation guide (now covered).
 
 ## 8. The first three work packages
+
+**All three are done** (EX-1, ST-1, GI-1). The next packages, GA-0 and GT-1, and the human play sessions are in [next-work-packages.md](next-work-packages.md). The text below is kept as written for the record.
 
 One package per agent session. Order: **EX-1 first**, then ST-1, then GI-1. GI-0, the layout half of GI-1, may be done at any time.
 

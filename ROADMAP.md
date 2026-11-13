@@ -1,6 +1,6 @@
 # Roadmap — Stargate SG Extraction
 
-**This is the authoritative roadmap.** Audited 12 November 2026 against `main` at `bf56743` (PR #40). Godot **4.4.1**, typed GDScript, native ENet multiplayer.
+**This is the authoritative roadmap.** Audited 12 November 2026 against `main` at `bf56743` (PR #40); status updated 13 November 2026 at `6af561b` (PR #49). Godot **4.4.1**, typed GDScript, native ENet multiplayer.
 
 The game: a Stargate-inspired, four-player tactical co-op shooter about reconnaissance, infiltration, combat, objectives and extraction. Design intent is in the [GDD](GDD.md). Evidence, milestone detail and agent work packages are in the [master development plan](docs/plans/master-development-roadmap.md). Architectural choices are in the [decision log](docs/DECISIONS.md).
 
@@ -8,24 +8,34 @@ Sizes below are relative effort, not dates. Nothing in this file is a delivery c
 
 ## Start here
 
-A new session should:
+**State on 13 November 2026.** Phases 1 to 3 of the sequence below are implemented and merged. Phase 3 landed on `main` as PRs #45 (ST-1, GI-0/GI-1), #46 (EV-1) and #49 (ST-2, TA-1, GI-2; it was developed as #47 and #48, which #49 contains and which can be closed). The last full local run was **77/77** and hosted CI was green on #49. Every number in the game is provisional, because **no human has played any of it** (risk R13).
 
-1. Read this page.
-2. Open the next milestone's work package in [section 8 of the master plan](docs/plans/master-development-roadmap.md#8-the-first-three-work-packages).
-3. Work on a new branch from `main` in a separate worktree, and leave uncommitted files in other checkouts alone.
+### Pick up here
 
-**Phase 1 and 2:**
-- EX-1 merged as [PR #42](https://github.com/flaxos/Team-Discovery-Channel/pull/42).
-- ST-1 ([#43](https://github.com/flaxos/Team-Discovery-Channel/pull/43)) and GI-0/GI-1 ([#44](https://github.com/flaxos/Team-Discovery-Channel/pull/44)) were merged into their stacked base branches rather than `main`. [PR #45](https://github.com/flaxos/Team-Discovery-Channel/pull/45) puts them on `main` unchanged.
-- Human gates EX-2, Stealth and Infiltration greybox are open.
+| Option | What | Who | Detail |
+|---|---|---|---|
+| **A. Human play sessions** *(recommended first)* | Run extraction UAT, SGC Defense and the infiltration mission with two people, fill in the playtest template, tune from what you find | Two humans | [Next work, part A](docs/plans/next-work-packages.md#a-human-play-sessions) |
+| **B. GA-0 Goa'uld visual brief** | A written design language and a theme-slot audit; documentation only | Any agent | [Package 4](docs/plans/next-work-packages.md#b-package-4--ga-0-goauld-visual-brief-and-theme-slot-audit) |
+| **C. GT-1 session state and host split** | Make gate travel possible; no visible change; highest regression risk | Fable-class agent | [Package 5](docs/plans/next-work-packages.md#c-package-5--gt-1-mission-session-state-and-host-split) |
 
-**Phase 3 (give stealth consequences), in progress:**
-- **EV-1 — Alert state, alarm and reinforcements** is implemented in [PR #46](https://github.com/flaxos/Team-Discovery-Channel/pull/46) ([guide](docs/maps/mission-alert.md)). It contains #45, so it lands correctly whichever merges first.
-- **ST-2 — Sound and search** is implemented in [PR #47](https://github.com/flaxos/Team-Discovery-Channel/pull/47), which contains #45 and #46.
-- **TA-1 — Real cover from authored props** is implemented in [PR #48](https://github.com/flaxos/Team-Discovery-Channel/pull/48), which contains #45 to #47.
-- **GI-2 — Infiltration mission complete** (agent part) is in [PR #49](https://github.com/flaxos/Team-Discovery-Channel/pull/49): an automated loud-route playthrough with every phase 3 system live, cover checked in the guarded rooms, and a [playtest record template](docs/reviews/infiltration-playtest-template.md). Its tuning and its gate are human work.
+A, B and C do not depend on each other. C needs the owners to confirm decision D-002 (the squad always travels together). Phase 6 work (EV-2, TA-3, TA-2, CO-1, SW-1) should wait for A. Each package has a handoff prompt you can paste into a fresh session.
 
-That completes the implementation work of phase 3. **Next: the human sessions.** Two people play the infiltration mission by each route and fill in the template; that closes Stealth, Infiltration greybox and Infiltration complete, and drives tuning. The next agent milestones are phase 4 (GA-0 visual brief, then GA-1) or phase 5 (GT-1); they do not depend on each other. Phase 3's tuning still needs the phase 2 human sessions: every value is provisional.
+### Rules for any session
+
+1. Read this page, then the package you are picking up. Do not start from the history.
+2. Work on a new branch from `origin/main` in a **separate worktree** (`git worktree add`). The play machine's main checkout has uncommitted work and sits on an old branch; leave it alone.
+3. Run targeted suites while working and `python3 tools/run_godot_tests.py --profile full --timeout 600` once at the end. Then **check `gh pr checks <n>`**: the hosted runner is slower than the development machine, and local green has not meant hosted green.
+4. One milestone per pull request, drafted, never merged by the agent. Update ROADMAP.md, the touched guides and the capability matrix in the same PR.
+5. Merging: the owner squash-merges. If follow-on PRs stack on an unmerged one, a squash puts the rest into conflict. Either merge only the last PR (it contains the rest), or use merge commits. Details: [merging stacked work](docs/plans/next-work-packages.md#merging-dependent-pull-requests).
+
+### What was delivered, in order
+
+| Milestone | PR | Guide |
+|---|---|---|
+| EX-1 trustworthy baseline | [#42](https://github.com/flaxos/Team-Discovery-Channel/pull/42) | [extraction guide](docs/maps/modular-extraction-mission.md) |
+| ST-1 sentry perception; GI-0/GI-1 infiltration mission | [#43](https://github.com/flaxos/Team-Discovery-Channel/pull/43), [#44](https://github.com/flaxos/Team-Discovery-Channel/pull/44), landed by [#45](https://github.com/flaxos/Team-Discovery-Channel/pull/45) | [infiltration guide](docs/maps/goauld-infiltration-mission.md) |
+| EV-1 alarm, runners, reinforcements | [#46](https://github.com/flaxos/Team-Discovery-Channel/pull/46) | [alert guide](docs/maps/mission-alert.md) |
+| ST-2 hearing and area searches; TA-1 prop cover; GI-2 loud-route suite and playtest template | [#49](https://github.com/flaxos/Team-Discovery-Channel/pull/49) (from #47, #48) | extraction and infiltration guides |
 
 ## What exists today
 
@@ -45,7 +55,7 @@ The full classification, with source paths and tests, is the [capability matrix]
 - **Hosted CI was red on `main` from PR #35 to #41** because one suite could not find the engine on the CI runner. EX-1 repairs the runner; the hosted `Godot full` job passed on PRs #42 and #43.
 - **Jaffa in gate waves still detect through walls** (the assault rule kept for SGC Defense). Patrols on modular missions use sight-based perception (ST-1), a compound alarm (EV-1) and straight-line hearing (ST-2).
 - **Cover on modular levels needs props.** Since TA-1 Jaffa use barricades and crates; rooms without low props still fall back to a room-centre marker.
-- **The play machine's checkout is behind `main`** and does not contain the extraction mission or the planner.
+- **The play machine's checkout is behind `main`** and contains none of milestones EX-1 to GI-2. Play from a separate worktree of `main`: [commands here](docs/plans/next-work-packages.md#get-a-build-to-play).
 
 All 20 items, each checked against current code, are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register).
 
@@ -67,8 +77,8 @@ The greybox layout and the art brief cost little and can proceed in parallel now
 | 2 | **ST-1** Perception and awareness core — *implemented, PR #43* | Patrols that see by line of sight inside a cone, become suspicious before alerted, investigate and give up | M | Fable-class |
 | 3 | **GI-1** Goa'uld infiltration greybox mission — *implemented, PR #44* | A fourth selectable mission on a planned two-deck compound with a quiet route and a loud one | M | Scripted authoring plus Codex-class |
 | 4 | **EV-1** Alert state, alarm and reinforcements — *implemented, PR #46* | One alert level per mission, alarm runners and consoles, a reinforcement budget; wired into the infiltration mission | M | Fable-class |
-| 5 | **ST-2** Sound and search — *implemented, PR #47* | Gunfire and blasts draw sentries; searches visit points around the last known position | M | Fable-class |
-| 6 | **TA-1** Real cover from authored props — *implemented, PR #48* | Jaffa fight from behind the props rooms already place | M | Fable-class |
+| 5 | **ST-2** Sound and search — *implemented, in PR #49* | Gunfire and blasts draw sentries; searches visit points around the last known position | M | Fable-class |
+| 6 | **TA-1** Real cover from authored props — *implemented, in PR #49* | Jaffa fight from behind the props rooms already place | M | Fable-class |
 | 7 | **GI-2** Infiltration mission complete — *agent part in PR #49; tuning and gate are human* | The compound with consequences and cover, ready for the replay gate | M | Codex-class plus authoring |
 
 Each has objective, files, boundaries, acceptance tests, human checks, risks and a handoff prompt in the master plan. The layout half of GI-1 (GI-0) can be authored at any time.
@@ -102,13 +112,13 @@ The diagram and the table of which streams can run at the same time without touc
 
 ## Near-term acceptance gates
 
-| Gate | Passed when |
-|---|---|
-| CI | Hosted `Godot full` is green on `main` (repair in EX-1) |
-| EX-2 | A dated two-person record exists for Modular Extraction UAT and one SGC Defense run |
-| Stealth | Two people cross the test facility unseen on purpose, and report the awareness tell as readable (ST-1 is implemented; this gate is open) |
-| Infiltration greybox | Two people finish GI-1 by each route (mission implemented; gate open) |
-| Infiltration complete | Both routes are reported as worth replaying with alarm and reinforcements active |
+| Gate | Passed when | Status |
+|---|---|---|
+| CI | Hosted `Godot full` is green on `main` (repair in EX-1) | **Passed**: hosted CI is green on `main` at `6af561b` |
+| EX-2 | A dated two-person record exists for Modular Extraction UAT and one SGC Defense run | **Open.** Sessions 1–3 of [the plan](docs/plans/next-work-packages.md#session-plan-about-two-hours-for-two-people) |
+| Stealth | Two people cross the test facility unseen on purpose, and report the awareness tell as readable | **Open.** Sessions 4–5 |
+| Infiltration greybox | Two people finish GI-1 by each route | **Open.** Sessions 4–5 |
+| Infiltration complete | Both routes are reported as worth replaying with alarm and reinforcements active | **Open.** Session 6 and the tuning table |
 
 Automated suites never satisfy a human gate.
 
@@ -156,8 +166,8 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | GI-0 and GI-1 (PR #44) | Twenty-room two-deck compound planned with the authoring CLI (gate insertion, guarded checkpoint route and quiet service route to the generator, upper command deck, paired rings); fourth selectable mission with six sentries and an automated quiet-route check. |
 | ST-1 (PR #43) | Sentry perception for patrols: view cone and line of sight, suspicious then alerted with a replicated ? / ! tell, one-hop alert spread, search the last seen position and resume the route. Gate waves keep the assault rule. |
 | GI-2 (PR #49) | Loud-route playthrough of the infiltration mission with hearing, alarm, reinforcements and cover live; cover verified in the guarded rooms; playtest record template for the human gates. 77/77 local checks. |
-| TA-1 (PR #48) | Jaffa fight from behind solid low cover props: spot selection behind the prop, crouch and stand to fire over it, relocation when flanked, marker fallback; perception from eye height. One new suite; 76/76 local checks. |
-| ST-2 (PR #47) | Per-weapon noise radii (suppressed MP5 6 m) and explosive and turret noise; sentries hear and search the source; searches visit points around the last known position before resuming. One new suite; 75/75 local checks. |
+| TA-1 (PR #49) | Jaffa fight from behind solid low cover props: spot selection behind the prop, crouch and stand to fire over it, relocation when flanked, marker fallback; perception from eye height. One new suite; 76/76 local checks. |
+| ST-2 (PR #49) | Per-weapon noise radii (suppressed MP5 6 m) and explosive and turret noise; sentries hear and search the source; searches visit points around the last known position before resuming. One new suite; 75/75 local checks. |
 | EV-1 (PR #46) | Compound alert levels, alarm runners and consoles that operatives can disable, a one-time reinforcement budget, klaxon, banner, toasts and debrief line; wired into the infiltration mission. Two new suites; 74/74 local checks. |
 | EX-1 (PR #42) | CI runner repair; readiness-gated mission messages so mid-firefight joins log no errors; hostiles stand down and squad state is final at the result; standing operatives targeted before downed ones; dedicated-server suite, client-requested retry and return to lobby on server loss; mission-owned HUD and debrief text. |
 

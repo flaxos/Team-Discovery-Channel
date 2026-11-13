@@ -13,7 +13,7 @@ This is an existing playable Godot **4.4.1** project, not an instruction to scaf
 ## Current scope and interfaces
 
 - The normal entry is `client/scenes/main/Main.tscn`, with `MainGameCoordinator`, the lobby and the `NetworkManager` autoload.
-- A third mission, Modular Extraction UAT, runs on a modular level through `ModularMission` and a `MissionDefinition` resource; see [its guide](docs/maps/modular-extraction-mission.md).
+- Two missions run on modular levels through `ModularMission` and a `MissionDefinition` resource: Modular Extraction UAT ([guide](docs/maps/modular-extraction-mission.md)) and Goa'uld Infiltration — Greybox ([guide](docs/maps/goauld-infiltration-mission.md)). Patrols see and hear (`JaffaPerception`), the compound has an alert level, alarm consoles and reinforcements (`MissionAlert`, [guide](docs/maps/mission-alert.md)), and Jaffa fight from cover props.
 - Defense and UAT share the three-level SGC map. UAT uses `SGCUATBase.tscn` and disables automatic hostile activation/waves. Mission/difficulty are host owned and synchronize before world initialization and on join/retry.
 - Keep the native ENet server-authoritative combat and interaction paths. Do not add a Node/WebSocket game server; the Alignment app is a separate planning service.
 - Gate state/direction belongs to `StargateRing`; wave progression/objective eligibility belongs to `WaveManager`; approved dialing/ROM upload belongs to the dialing console. Preserve reservation and stale-callback protections.
@@ -34,7 +34,7 @@ Use existing dimensioned art slots and material briefs. Replacement visuals pres
 python3 tools/run_godot_tests.py --profile full --timeout 240
 ```
 
-The last recorded full local run passed 69 checks at PR #40 (the older `a720594` baseline was 51); consult current output rather than copying either claim to untested work. Tests reject errors/assertions/leaks even with exit zero. Use targeted checks while developing, then required regression coverage. Follow the documented graphical and two-human UAT route; headless checks do not establish visual quality or game feel.
+The last recorded full local run passed 77 checks at PR #49 (earlier baselines: 69 at PR #40, 51 at `a720594`); consult current output rather than copying any claim to untested work. After pushing, check the hosted run with `gh pr checks`: it is slower than the development machine and has failed where local runs passed. Tests reject errors/assertions/leaks even with exit zero. Use targeted checks while developing, then required regression coverage. Follow the documented graphical and two-human UAT route; headless checks do not establish visual quality or game feel.
 
 Update maintained docs and PR descriptions for the final behavior. Keep generated vote snapshots separate. Preserve historical findings as dated records. Describe what changed, what was verified and what human acceptance remains. Do not expand into offworld theaters, new netcode or bespoke art merely because old planning text mentions them; planned expansion is sequenced in the [roadmap](ROADMAP.md) and starts from its work packages.
 

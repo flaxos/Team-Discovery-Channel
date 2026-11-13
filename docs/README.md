@@ -1,12 +1,13 @@
 # Documentation index
 
-Maintained documentation describes `main` at `bf56743` (PR #40, 11 November 2026) unless a document states its own baseline. Consult GitHub for merge and CI status and your local checkout for the code actually running.
+Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026) unless a document states its own baseline. Consult GitHub for merge and CI status and your local checkout for the code actually running.
 
 ## Start here
 
 | Document | Purpose |
 | --- | --- |
 | [Roadmap](../ROADMAP.md) | **Authoritative.** What exists, what is next, milestone sequence, dependencies and acceptance gates. |
+| [Next work](plans/next-work-packages.md) | **Where to resume.** Human play sessions with run instructions and tuning table, then the next two agent packages (GA-0, GT-1) with handoff prompts, and how to merge dependent PRs. |
 | [Master development plan](plans/master-development-roadmap.md) | Capability matrix with evidence, dependency graph, every milestone, the art and content track, the risk register and three agent-ready work packages. |
 | [Decision log](DECISIONS.md) | Architectural and direction decisions, with status and open questions. |
 | [Game design](../GDD.md) | Part 1: the game as implemented. Part 2: the intended game. |
