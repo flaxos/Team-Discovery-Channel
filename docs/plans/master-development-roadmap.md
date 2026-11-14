@@ -308,7 +308,7 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 
 **GT-0 — Split-world travel design** · done (documentation). Two worlds side by side in one process, every peer holding both and presenting one; the owners' rules for a split team.
 
-**GT-1 — Worlds that can coexist**
+**GT-1 — Worlds that can coexist** · built 14 November 2026 ([as built](gate-travel-split-worlds.md#gt-1-as-built))
 - **Experience:** none visible. Afterwards the SGC and an offworld site can run side by side correctly.
 - **Baseline:** 48 lookups find `Players`, `Enemies`, `Allies` or `GateRoom` by searching the whole game. With two worlds loaded a sentry cannot see an operative in front of it (GT-0 experiment).
 - **New:** `MissionWorld.of(node)` and every whole-game lookup moved to it; a `MissionSession` above the worlds that records which world each peer is in and applies the fail rule; worlds spawn only the peers placed in them; a world can be presented or hidden; `MainGameCoordinator` can load one world or two.
@@ -415,7 +415,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R20 | Authoring tools untested by a fresh agent | Outstanding | Stated in the authoring review | GI-0 doubles as that test if run by a new session |
 | R21 | Module headers outside their own cell | New, confirmed (GA-1) | The north and south headers of `Room05` to `Room13`, `Room15` and `Room16` are centred 0.1 m beyond the cell edge and overlap the adjoining room's header. Invisible with one material; flickers against a themed lintel. GA-1 stands lintel gold 5 mm proud | A structural pass on those ten modules, with collision and enclosure re-verified; before GA-2 reaches them |
 | R22 | Jaffa armour rendered dark | Fixed (GA-1, D-015) | `JaffaGuard.tscn` and `JaffaShockGuard.tscn` used metallic 0.85 to 0.95. No mission has a sky or reflection probe, so the armour rendered dark olive: 1.1 to 1.3 : 1 against Goa'uld walls. Now matte, about 5 : 1. Measured in the [kit guide](../maps/goauld-theme-kit.md#readability-measured) | Reconsider a small metallic term if the lighting pass adds reflections |
-| R23 | Whole-game lookups assume one world | New, confirmed (GT-0) | 48 lookups such as `get_tree().root.find_child("Players", true, false)` return the first match in the game. With the SGC and the compound loaded together, a sentry did not notice an operative 3 m away | GT-1 |
+| R23 | Whole-game lookups assume one world | Fixed (GT-1) | 48 lookups such as `get_tree().root.find_child("Players", true, false)` return the first match in the game. With the SGC and the compound loaded together, a sentry did not notice an operative 3 m away | Fixed: lookups go through `MissionWorld`; `tools/tests/test_world_scoping.py` fails on a new one |
 
 Items verified as **no longer open**: server-owned actors invisible to clients (fixed in PR #39, `configure_mission_sync`), the retry race on client operatives (fixed in PR #39), and "client late join mid-patrol untested" from the navigation guide (now covered).
 

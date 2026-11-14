@@ -8,7 +8,7 @@ Sizes below are relative effort, not dates. Nothing in this file is a delivery c
 
 ## Start here
 
-**State on 14 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. The last full local run was **78/78** (GA-1 branch); hosted CI is green on `main`.
+**State on 14 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. The last full local run was **80/80** (GT-1 branch); hosted CI is green on `main`.
 
 Two owner decisions on 14 November shape what follows: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)). The design that followed is written: [gate travel with a split team](docs/plans/gate-travel-split-worlds.md), with the owners' four rules for a split team in [D-017](docs/DECISIONS.md). A third, matte Jaffa armour ([D-015](docs/DECISIONS.md)), came out of building the art.
 
@@ -17,7 +17,7 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 | Option | What | Who | Detail |
 |---|---|---|---|
 | **A. Review GA-1, then GA-2 part 1** | GA-1 is built: the palette on all 20 rooms of the compound and pieces on 8. **A person has not looked at it yet.** Jaffa armour became matte gold in the same change so that they stand out from the dark walls ([D-015](docs/DECISIONS.md)). Then extend the kit to the T-junction, corners, wide corridor and adapter | An owner to review; then a Fable-class agent | [Kit guide: human review](docs/maps/goauld-theme-kit.md#human-review-pending); order of rooms in the [brief](docs/maps/goauld-visual-brief.md#42-by-module-which-is-the-order-art-should-follow) |
-| **B. GT-1 worlds that can coexist** | Make it correct to run the SGC and an offworld site side by side: 48 lookups search the whole game for `Players` or `Enemies` and must look in their own world. No travel yet, no visible change. The design (GT-0) is written and the owners' rules are decided | Fable-class agent | [Design](docs/plans/gate-travel-split-worlds.md); [next work, part C](docs/plans/next-work-packages.md#c-package-5--gt-1-worlds-that-can-coexist); [D-016](docs/DECISIONS.md), [D-017](docs/DECISIONS.md) |
+| **B. Review GT-1, then GT-2 outbound travel** | GT-1 is built: the SGC and an offworld site can run side by side, each finding only its own operatives and enemies, with a session above them. Nothing a player can see has changed. Next is travel itself: a mission in the lobby, dial out, step through the gate with health and equipment, others may stay | An owner to merge; then a Fable-class agent | [Design](docs/plans/gate-travel-split-worlds.md); [architecture](docs/ARCHITECTURE.md#worlds-and-the-session); [D-016](docs/DECISIONS.md), [D-017](docs/DECISIONS.md) |
 | **C. Two-player sessions** *(deferred by the owner)* | The co-op checklist items no human has run: late join, shared extraction, revive, mixed quiet and loud play | Two humans | [Next work, part A](docs/plans/next-work-packages.md#a-human-play-sessions) |
 
 A and B do not depend on each other. Phase 6 work (EV-2, TA-3, TA-2, CO-1, SW-1) is better designed after C, but is no longer blocked by it.
@@ -59,7 +59,6 @@ The full classification, with source paths and tests, is the [capability matrix]
 - **Jaffa in gate waves still detect through walls** (the assault rule kept for SGC Defense). Patrols on modular missions use sight-based perception (ST-1), a compound alarm (EV-1) and straight-line hearing (ST-2).
 - **Cover on modular levels needs props.** Since TA-1 Jaffa use barricades and crates; rooms without low props still fall back to a room-centre marker.
 - **Ten modules place door headers 0.2 m outside their own cell**, overlapping the neighbouring room's header. Harmless until themed pieces met them; GA-1 works round it (risk R21).
-- **Actors search the whole game for their surroundings.** 48 lookups take the first `Players`, `Enemies` or `Allies` node anywhere. Correct with one world; with the SGC and an offworld site loaded together, a sentry did not see an operative in front of it. It is the first work of gate travel (GT-1, R23).
 - **The play machine's checkout is behind `main`** and contains none of milestones EX-1 to GI-2. Play from a separate worktree of `main`: [commands here](docs/plans/next-work-packages.md#get-a-build-to-play).
 
 All 23 items, each checked against current code, are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register).
@@ -137,7 +136,7 @@ Automated suites never satisfy a human gate. The gates were defined for two peop
 | D | Tactical AI and combat | TA-1 | ST-1 |
 | E | Goa'uld infiltration mission | GI-0 | Now (layout), ST-1 (mission) |
 | F | Goa'uld architecture and visuals | GA-0 and GA-1 done ([brief](docs/maps/goauld-visual-brief.md), [kit](docs/maps/goauld-theme-kit.md)); human review, then GA-2 | Now |
-| G | Stargate world transitions | GT-1 worlds that can coexist, then GT-2 and GT-3 | Now: the design (GT-0) is written |
+| G | Stargate world transitions | GT-2 outbound travel, then GT-3 | Now: the design (GT-0) and coexisting worlds (GT-1) are done |
 | H | Expanded co-op mechanics | CO-1 | GI-1 |
 | I | Special weapons and faction mechanics | SW-1 | ST-2 |
 | J | Outdoor world construction | OW-0 | Any time; design spike only |
@@ -167,6 +166,7 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | Modular NPC navigation (PR #38) | Production Jaffa and airmen navigate modular levels; patrols; AI door use. |
 | First modular mission (PR #39) | Modular Extraction UAT: data-driven objectives, extraction rule, patrol combat, two shared netcode fixes. 68/68 local checks. |
 | AI level authoring 2.0 (PR #40) | Graph planner, topology checks, six more composites, tactical catalogue metadata, four demonstration maps. 69/69 local checks. |
+| GT-1 (14 November 2026) | Worlds that can coexist. `MissionWorld` scopes 63 lookups to the actor's own world; `MissionSession` places operatives, presents one world per peer and loses the mission only when everyone in both worlds is down; the coordinator loads one world or two. A hidden development mission runs the SGC and the compound together. No travel and no visible change. 80/80 local checks. |
 | GT-0 (14 November 2026) | Documentation only: [gate travel with a split team](docs/plans/gate-travel-split-worlds.md). An experiment ran the SGC and the infiltration compound together in one process, 2 km apart, with no errors, and showed the fault to fix first: 48 whole-game lookups, which left a sentry unable to see an operative in front of it. Strategy [D-016](docs/DECISIONS.md); the owners' rules for a split team [D-017](docs/DECISIONS.md). GT-1 to GT-3 rewritten. |
 | GA-1 (14 November 2026) | The Goa'uld theme kit: palette on all 20 rooms of the infiltration compound, generated pieces on the 8 that use the narrow corridor or compact chamber, per-module coverage reporting, slot-name validation, a capture tool, and readability measured from captures. Collision and navigation proved identical with and without the theme. Found and fixed: metallic surfaces lose their colour in missions, so Jaffa armour rendered dark; it is now matte (D-015). Found and worked round: ten modules place headers outside their own cell (R21). One new suite; 78/78 local checks. |
 | GA-0 (14 November 2026) | Documentation only: the [Goa'uld visual brief](docs/maps/goauld-visual-brief.md) (design language with dimensions and a palette checked against the Jaffa and awareness markers, theme-slot audit with eight gaps, rooms ranked by use, art-method options), the [owner's solo UAT record](docs/reviews/2026-11-14-owner-solo-uat.md) and decisions D-012 to D-014. |

@@ -15,6 +15,8 @@ godot --path client -- --mission sgc_uat
 
 A fourth entry, **Goa'uld Infiltration — Greybox** (`--mission goauld_infiltration`), is a stealth mission in a two-deck compound; see [its guide](maps/goauld-infiltration-mission.md). A third entry, **Modular Extraction UAT — Development**, runs a short objective mission on a modular test facility instead of the SGC; preselect it with `--mission modular_extraction_uat`. Its objectives, extraction rule and limitations are in the [mission guide](maps/modular-extraction-mission.md). The floor, lift, shutter and Defense sections below apply to the SGC missions only.
 
+A development mission, **Two worlds** (`--mission two_worlds_dev`), loads the quiet SGC and the Goa'uld compound side by side to prove that two places can run at once. It appears in the lobby only when chosen with the flag. There is no gate travel yet, so operatives stay in the SGC and the compound is not shown; nothing in it is playable. It exists for the automated suites and for measuring frame cost ([architecture](ARCHITECTURE.md#worlds-and-the-session)).
+
 UAT inherits the Defense map, including props, friendly personnel, stairs and the lift. It disables automatic hostile gate activations and enemy waves; it is an exploration/test mode rather than an extraction run. Difficulty is disabled. The host owns mission/difficulty selection; clients receive it, including on joining and retry.
 
 The base game on the development machine is `/home/flax/games/Team-Discovery-Channel/client`. To ensure that copy is loaded:

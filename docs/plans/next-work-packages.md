@@ -10,7 +10,7 @@ As written on 13 November, three things could start and none blocked another:
 |---|---|---|---|
 | **A** | Human play sessions: close the gates, tune the numbers | Two people | A checkout of `main`, this page |
 | **B** | Package 4 — GA-0 Goa'uld visual brief and theme-slot audit | Any agent (Codex-class) | Nothing |
-| **C** | Package 5 — GT-1 worlds that can coexist | Fable-class agent | The split-world design ([D-016](../DECISIONS.md)); done |
+| **C** | Package 5 — GT-1 worlds that can coexist | **Done** (14 November 2026) | Next is GT-2, outbound travel: [design, section 7](gate-travel-split-worlds.md#7-milestones) |
 
 Phase 6 work (EV-2, TA-3, TA-2, CO-1, SW-1) should wait for A: it is better designed from what the sessions find.
 
@@ -89,6 +89,8 @@ When the template's **Infiltration complete** line can be ticked, update ROADMAP
 > Repository `flaxos/Team-Discovery-Channel`, Godot 4.4.1. Read `ROADMAP.md`, then package 4 (GA-0) in `docs/plans/next-work-packages.md`, section 6 of `docs/plans/master-development-roadmap.md`, decision D-010 in `docs/DECISIONS.md`, `client/resources/level_themes/goauld.tres`, `neutral.tres` and `client/scripts/level/LevelThemeResolver.gd`. Write `docs/maps/goauld-visual-brief.md` with the design language, the theme-slot audit, the compound's rooms ranked by use and the art-method options, as the package describes. This is documentation only: change no code, scene, resource or test. Work on a new branch from `main` in a separate worktree and preserve uncommitted files in other checkouts. Stop when the brief and index changes are ready for review; do not start GA-1. Do not merge.
 
 ## C. Package 5 — GT-1 worlds that can coexist
+
+**Done 14 November 2026.** What was built and how it differs from the list below is in [the design, GT-1 as built](gate-travel-split-worlds.md#gt-1-as-built). The text is kept as the record of what was asked.
 
 Rewritten 14 November 2026 from the [split-world travel design](gate-travel-split-worlds.md). The earlier text, which assumed the squad always travels together, is in this file's history.
 

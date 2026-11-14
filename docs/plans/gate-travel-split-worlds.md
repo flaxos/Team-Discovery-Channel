@@ -89,7 +89,7 @@ A throwaway script hosted a server, loaded `SGCUATBase.tscn` and `GoauldInfiltra
 
 The SGC alone is 3,460 nodes. So the two worlds coexist as they are, and the only fault found was the one section 4.3 predicts: with the SGC loaded first, the compound's sentries look for operatives in the SGC.
 
-**Not measured:** the cost in frame time. The engine's headless timing figures were not additive between the runs, so no figure is given here. GT-1 must measure it with rendering on (section 8).
+**Not measured in the experiment:** the cost in frame time. The engine's headless timing figures were not additive between the runs. GT-1 measured it with rendering on: [section 8a](#8a-measured-cost).
 
 ## 5. The design
 
@@ -229,12 +229,42 @@ No travel and no visible change. Afterwards two worlds can run side by side corr
 - A working gate at the site (the `stargate_dhd` preset's gate is inert today). It opens for home when the objectives are complete.
 - The success rule, a debrief in the SGC with the mission's real figures and who was lost, and retry for a two-world mission.
 
+### GT-1 as built
+
+Built on 14 November 2026. Differences from the list above, and what was found:
+
+- **Lookups.** 45 lookups by name and 3 whole-game type searches now go through `MissionWorld`; 15 group lookups use `MissionWorld.in_group`. Two door lookups already limited themselves to their own level and are unchanged. The four group calls for noise carry a position and a radius and are unchanged.
+- **Group members in no world are seen from every world.** With one world loaded nothing is filtered, so single-world behaviour is exactly as before.
+- **Effects stay at the top of the game.** Tracers, sparks and bolts are still added to the top, in world coordinates. Moving them under a world 2,000 m from the origin would need every one checked for local-against-world position, for no change a player can see. Nothing looks them up.
+- **Load order is fixed, so it is not permuted.** The coordinator always loads home first, which is the order that failed. The suite instead checks every lookup from inside each world.
+- **The site is in a holder.** Home keeps the path a single world has (`WorldContainer/GateRoom`); the site is `WorldContainer/Site/GateRoom`. Both roots keep the name `GateRoom`.
+- **Spawning assumed the origin.** The two-process suite caught it: an operative created in the site was given the spawn point's game position as its local position, so it appeared 2,000 m beyond the site and fell. Operatives, the five gadgets and ring reinforcements now convert through `MissionWorld.local`. The SGC's own code (sectors, waves, shrouds) is written in fixed coordinates, so the SGC is always the world at the origin.
+- **A development mission, not a lobby entry.** `two_worlds_dev` is hidden from the lobby and started with `--mission two_worlds_dev`.
+- **The site runs from the start.** Deferring its patrols until the first arrival is left to GT-2, with travel.
+- **Frame cost** is in [section 8a](#8a-measured-cost).
+
+## 8a. Measured cost
+
+Measured on the development machine (NVIDIA RTX 3060, 1280 × 720 viewport, vertical sync off) with `client/scripts/world/world_cost.gd`: the host alone, standing in the SGC armoury, ten seconds, two runs each (three for the two-world case).
+
+| Mission | Worlds | Frames a second | Time a frame | Objects drawn a frame |
+|---|---|---|---|---|
+| SGC, quiet (`sgc_uat`) | 1 | 410 | 2.44 ms | 472 |
+| Infiltration compound | 1 | 1,112 to 1,130 | 0.89 ms | not recorded |
+| SGC presented, compound hidden (`two_worlds_dev`) | 2 | 357 to 372 | 2.69 to 2.80 ms | 472 |
+
+Running the hidden compound beside the SGC costs about 0.3 ms a frame here (0.25 to 0.36), roughly a tenth of the SGC's own frame. The hidden world is not drawn at all: the objects drawn are the same 472.
+
+**One fault was found and fixed by measuring.** The first measurement was 144 frames a second, far worse than the two worlds added together. The cause was not the second world's simulation. Loading both worlds left the engine's shadow atlas in an allocation it never recovered from, so all 26 shadowed lights in the SGC were redrawn every frame (3,938 objects drawn instead of 472), and it stayed that way even after the second world was removed. Rebuilding the atlas once clears it. `MissionSession` now does that 1.5 seconds after a world is presented. The trigger is timing at load, so a single-world mission on a slower machine could in principle hit the same state; it has not been observed.
+
+**Not measured:** a second player, a fight in either world, a slower machine, memory, and load time.
+
 ## 8. Risks
 
 | | Risk | Mitigation |
 |---|---|---|
 | T1 | A whole-game lookup is missed and reads the wrong world, silently | The static check; the coexistence suite runs in both load orders so whichever world is "first" is tested as "second" too |
-| T2 | The host cannot run two worlds at an acceptable frame rate | Measure in GT-1 before any travel is built. Levers: the site does not start until someone arrives; the hidden world is not drawn; airmen in a quiet SGC are idle |
+| T2 | The host cannot run two worlds at an acceptable frame rate | **Measured in GT-1: about 0.3 ms a frame on the development machine ([section 8a](#8a-measured-cost)); not yet measured with a fight running or on a slower machine.** Levers: the site does not start until someone arrives; the hidden world is not drawn; airmen in a quiet SGC are idle |
 | T3 | The travel hand-off loses a message in flight, as retry once did | Reuse the retry order exactly; test with two processes and with delay |
 | T4 | Carried state is incomplete (for example explosives refill on arrival) | One function gathers it and one applies it; a test compares every field |
 | T5 | Something from the hidden world leaks: a sound, a light, a HUD element | `set_presented` owns all of it in one place; a human check in GT-2 |
