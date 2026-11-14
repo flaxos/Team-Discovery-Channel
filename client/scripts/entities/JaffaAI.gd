@@ -681,7 +681,7 @@ func _find_nearest_cover(is_west: bool) -> Vector3:
 	if not is_inside_tree():
 		return default_pos
 
-	var cover_nodes: Array[Node] = get_tree().get_nodes_in_group("cover")
+	var cover_nodes: Array[Node] = MissionWorld.in_group(self, &"cover")
 	var min_dist: float = 99999.0
 	var chosen_pos: Vector3 = default_pos
 
@@ -931,7 +931,7 @@ func _find_nearest_target() -> void:
 	var candidates: Array[Node3D] = []
 	var downed: Array[Node3D] = []
 
-	var players_container := get_tree().root.find_child("Players", true, false)
+	var players_container := MissionWorld.find(self, "Players")
 	if players_container != null:
 		for child in players_container.get_children():
 			var p := child as CharacterBody3D
@@ -940,7 +940,7 @@ func _find_nearest_target() -> void:
 				if health != null and not health.is_dead:
 					(downed if health.is_downed else candidates).append(p)
 
-	var allies_container := get_tree().root.find_child("Allies", true, false)
+	var allies_container := MissionWorld.find(self, "Allies")
 	if allies_container != null:
 		for child in allies_container.get_children():
 			var a := child as CharacterBody3D
@@ -987,7 +987,7 @@ func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
 	if seg_len_sq < 0.001:
 		return false
 
-	for node in get_tree().get_nodes_in_group("smoke_cloud"):
+	for node in MissionWorld.in_group(self, &"smoke_cloud"):
 		var cloud := node as Area3D
 		if cloud != null and is_instance_valid(cloud):
 			var cloud_pos := cloud.global_position
@@ -1277,7 +1277,7 @@ func _on_vaporized() -> void:
 
 func _overrun_destination() -> Vector3:
 	if not patrol_points.is_empty(): return _patrol_destination()
-	var map := get_tree().get_first_node_in_group("sgc_map") as SGCMap
+	var map := MissionWorld.first_in_group(self, &"sgc_map") as SGCMap
 	if map == null: return Vector3(column_x_lane, 0.0, 24.0)
 	var destinations: Array[StringName] = [&"EAST_CORRIDOR", &"ROUND_HALLWAY", &"BRIEFING_ROOM", &"STAGING"]
 	if column_x_lane < 0: destinations[0] = &"WEST_CORRIDOR"

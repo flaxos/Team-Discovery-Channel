@@ -39,7 +39,7 @@ The [map authoring contract](docs/maps/sgc.md) covers layout references, schema,
 python3 tools/run_godot_tests.py --profile full --timeout 240
 ```
 
-The full profile discovers every `client/tests/test_*.gd`. The last recorded local result is **77/77 checks** at PR #49 (project import, 75 suites and a persistence reader process); hosted CI was green on that pull request ([testing](docs/TESTING.md#current-baseline)). Neither result is a claim of human multiplayer acceptance. See [testing and UAT](docs/TESTING.md) for profiles, reports, visual captures and the manual acceptance route.
+The full profile discovers every `client/tests/test_*.gd`. The last recorded local result is **80/80 checks** on the GT-1 branch (project import, 78 suites and a persistence reader process); hosted CI was green on PR #49, the last merged code change ([testing](docs/TESTING.md#current-baseline)). Neither result is a claim of human multiplayer acceptance. See [testing and UAT](docs/TESTING.md) for profiles, reports, visual captures and the manual acceptance route.
 
 ## Alignment & Voting app
 

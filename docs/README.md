@@ -10,6 +10,7 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Next work](plans/next-work-packages.md) | **Where to resume.** Human play sessions with run instructions and tuning table, then the next two agent packages (GA-0, GT-1) with handoff prompts, and how to merge dependent PRs. |
 | [Master development plan](plans/master-development-roadmap.md) | Capability matrix with evidence, dependency graph, every milestone, the art and content track, the risk register and three agent-ready work packages. |
 | [Decision log](DECISIONS.md) | Architectural and direction decisions, with status and open questions. |
+| [Gate travel with a split team](plans/gate-travel-split-worlds.md) | The design for travelling between the SGC and an offworld site when players need not travel together: the owners' rules, what the code does today, the experiment, the strategy, edge cases and milestones GT-1 to GT-3. |
 | [Game design](../GDD.md) | Part 1: the game as implemented. Part 2: the intended game. |
 | [Project README](../README.md) | Quick launch and developer entry points. |
 
@@ -32,6 +33,8 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Modular extraction mission](maps/modular-extraction-mission.md) | First playable modular mission: objectives, extraction rule, Jaffa combat, tests, human checklist and travel blockers. |
 | [Goa'uld infiltration mission](maps/goauld-infiltration-mission.md) | Greybox stealth mission: compound layout and requirements, objectives, patrols, quiet and guarded routes, tests, human checklist. |
 | [Compound alert, alarms and reinforcements](maps/mission-alert.md) | EV-1: alert levels, alarm runners and consoles, reinforcement budget, mission data, netcode, tests. |
+| [Goa'uld visual brief](maps/goauld-visual-brief.md) | GA-0: design language with dimensions and palette, theme-slot audit and gaps, rooms ranked by use, art-method options. The target for GA-1, with what building it corrected. |
+| [Goa'uld theme kit](maps/goauld-theme-kit.md) | GA-1: what is themed, the generator and how to extend it, coverage reporting, readability measured from captures, tests, the capture tool and the pending human review. |
 | [Modular NPC navigation](maps/modular-npc-navigation.md) | Production Jaffa/airman navigation, patrols, AI door use, demo scene and limitations. |
 
 ## Level authoring
@@ -54,6 +57,7 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Offworld extraction plan](plans/offworld-extraction-mission.md) | Earlier dependency study. Superseded by the master plan; kept for its analysis. |
 | [AI level authoring 2.0 review](reviews/ai-level-authoring-2.md) | Friction study and before/after benchmark for the planner. |
 | [Infiltration playtest template](reviews/infiltration-playtest-template.md) | Copy per human session; the evidence for the Stealth and Infiltration gates. |
+| [Owner solo UAT, 14 November 2026](reviews/2026-11-14-owner-solo-uat.md) | First human session on `main` after phase 3: what the log shows, what the owner stated, what was not run; gates accepted on solo play. |
 | [Work tracker](../plan/README.md) | Implementation records for the SGC refactor and Sprint 21. |
 
 ## Historical and generated material

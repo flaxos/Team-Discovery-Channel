@@ -55,7 +55,7 @@ func detonate() -> void:
 	var forward := -global_transform.basis.z.normalized()
 	var half_arc_rad := deg_to_rad(blast_arc_deg * 0.5)
 
-	var enemies := get_tree().root.find_child("Enemies", true, false)
+	var enemies := MissionWorld.find(self, "Enemies")
 	if enemies != null:
 		for child in enemies.get_children():
 			var jaffa := child as JaffaAI
@@ -75,7 +75,7 @@ func detonate() -> void:
 
 func _spawn_blast_fx() -> void:
 	# Screen shake for nearby operatives
-	var players := get_tree().root.find_child("Players", true, false)
+	var players := MissionWorld.find(self, "Players")
 	if players != null:
 		for p in players.get_children():
 			if p is PlayerController3D:

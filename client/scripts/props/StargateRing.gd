@@ -188,7 +188,7 @@ func sync_trigger_kawoosh() -> void:
 	_play_sfx("res://audio/sfx_kawoosh.wav", 100.0)
 
 	# Cinematic camera shake for all active operatives
-	var players_node := get_tree().root.find_child("Players", true, false)
+	var players_node := MissionWorld.find(self, "Players")
 	if players_node != null:
 		for p in players_node.get_children():
 			if p is PlayerController3D:

@@ -159,7 +159,7 @@ func _show_objective(index: int) -> void:
 
 func _on_objectives_completed() -> void:
 	if multiplayer.is_server():
-		_finish_mission(true)
+		conclude(true)
 
 
 ## One result per mission: a later squad wipe cannot overwrite a success, or the reverse.

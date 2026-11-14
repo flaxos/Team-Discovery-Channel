@@ -109,7 +109,7 @@ func detonate() -> void:
 
 func _spawn_explosion_fx() -> void:
 	# Screen shake for nearby operatives
-	var players := get_tree().root.find_child("Players", true, false)
+	var players := MissionWorld.find(self, "Players")
 	if players != null:
 		for p in players.get_children():
 			if p is PlayerController3D:

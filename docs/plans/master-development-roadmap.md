@@ -86,7 +86,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | AI-assisted planning | Verified | `LevelPlanner`, `plan` command; `test_level_planning`. No fresh-agent benchmark yet |
 | Connectivity and topology checks | Verified | `LevelTopology`, eleven checks, connectivity only |
 | Composite clusters | Verified | Eight composites in `resources/level_composites/` |
-| Theme support | Placeholder for factions | Theme contract and resolver work (`test_level_themes`). Only `neutral` has art; `goauld`, `asgard`, `tokra`, `replicator` and `tauri_sgc` all carry `art_status = "fallback"` |
+| Theme support | Working for `goauld` (first slice); placeholder for the other factions | Theme contract and resolver work (`test_level_themes`). `goauld` has a palette on every module and generated pieces for `Room01Straight` and `Room04Chamber` (GA-1, `test_goauld_theme`, [kit guide](../maps/goauld-theme-kit.md)); not yet reviewed by a person. `asgard`, `tokra`, `replicator` and `tauri_sgc` carry `art_status = "fallback"` |
 | Faction visual assets | Missing | None. The SGC map uses dimensioned placeholders and material briefs |
 | Outdoor terrain, villages | Missing | No terrain, no exterior scenes |
 | Authoring documentation | Verified | [AI authoring guide](../maps/ai-level-authoring.md); catalogue summary 13.7 KB |
@@ -149,7 +149,7 @@ flowchart LR
   GI1 -.-> GA1
   GA1 -.-> GA2[GA-2 Kit expansion]
   GI2 -.-> GA2
-  GT1[GT-1 Session state and host split] --> GT2[GT-2 Outbound travel]
+  GT1[GT-1 Worlds that can coexist] --> GT2[GT-2 Outbound travel]
   GT2 --> GT3[GT-3 Return and debrief]
   GI1 -.-> GT2
   GT3 --> CA1[CA-1 Progression]
@@ -286,10 +286,10 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 
 See section 6 for sequencing.
 
-**GA-0 — Visual brief and slot audit** · S · Codex · documentation and read-only inspection
+**GA-0 — Visual brief and slot audit** · S · Codex · documentation and read-only inspection · **done 14 November 2026: [Goa'uld visual brief](../maps/goauld-visual-brief.md)**
 - A written design language (silhouettes, door proportions, rib spacing, palette, lighting mood) and a table of what each theme slot (`wall_panels`, `floor_detail`, `ceiling_detail`, `door_frame`, `room_detail`) actually renders today in `LevelThemeResolver`. Original designs inspired by the setting; no copied production assets.
 
-**GA-1 — Goa'uld vertical slice**
+**GA-1 — Goa'uld vertical slice** · **built 14 November 2026; human capture review pending** · [kit guide](../maps/goauld-theme-kit.md)
 - **Experience:** one stretch of the mission looks like a Goa'uld installation.
 - **Baseline:** `goauld.tres` exists with `art_status = "fallback"`.
 - **New:** themed visuals for one narrow corridor, one door frame and one 8 × 8 m chamber; theme status moved off `fallback` for those modules only.
@@ -304,23 +304,25 @@ See section 6 for sequencing.
 
 ### G — Stargate world transitions
 
-**GT-1 — Mission session state and host split**
-- **Experience:** none visible. It makes travel possible.
-- **Baseline:** objectives, result and operatives belong to one world scene; `ModularMission` extends the 900-line `GateRoom`.
-- **New:** a session object above the world that owns roster state (class, health, ammunition), objective progress and result; a slim mission host extracted from `GateRoom` that both the SGC and modular missions use.
-- **Non-goals:** any travel; any change to SGC Defense rules.
-- **Prerequisites:** the transition strategy confirmed ([D-002](../DECISIONS.md)).
-- **Components:** `NetworkManager.gd`, `MainGameCoordinator.gd`, `GateRoom.gd`, `ModularMission.gd`.
-- **Multiplayer / AI:** every existing join, retry and snapshot test must pass unchanged.
-- **Acceptance:** all multiplayer suites green with no behaviour change; a second modular mission needs no SGC overrides.
-- **Risks:** highest regression risk in the plan. It touches the stable SGC mission.
-- **Complexity:** L · Fable · conflicts with EX-1; run after it.
+Rewritten 14 November 2026 from the [split-world travel design](gate-travel-split-worlds.md) (GT-0, [D-016](../DECISIONS.md), [D-017](../DECISIONS.md)). The earlier versions assumed the squad always travels together.
+
+**GT-0 — Split-world travel design** · done (documentation). Two worlds side by side in one process, every peer holding both and presenting one; the owners' rules for a split team.
+
+**GT-1 — Worlds that can coexist** · built 14 November 2026 ([as built](gate-travel-split-worlds.md#gt-1-as-built))
+- **Experience:** none visible. Afterwards the SGC and an offworld site can run side by side correctly.
+- **Baseline:** 48 lookups find `Players`, `Enemies`, `Allies` or `GateRoom` by searching the whole game. With two worlds loaded a sentry cannot see an operative in front of it (GT-0 experiment).
+- **New:** `MissionWorld.of(node)` and every whole-game lookup moved to it; a `MissionSession` above the worlds that records which world each peer is in and applies the fail rule; worlds spawn only the peers placed in them; a world can be presented or hidden; `MainGameCoordinator` can load one world or two.
+- **Non-goals:** any travel; a lobby entry; the host split of D-008 (risk R11 stays open); any change to an existing mission's behaviour.
+- **Components:** `PlayerController3D.gd`, `SGCAirmanAI.gd`, `JaffaAI.gd`, `JaffaPerception.gd`, weapons and props with lookups, `GateRoom.gd`, `MainGameCoordinator.gd`, `NetworkManager.gd`, a new session script.
+- **Acceptance:** every existing suite passes unchanged; the experiment as a permanent suite in both load orders; a static check against whole-game lookups; frame time measured on a display with one world and with two.
+- **Risks:** a missed lookup fails silently (T1); host frame time (T2).
+- **Complexity:** L · Fable.
 
 **GT-2 — Outbound travel** · L · Fable
-- Briefing in the SGC, dial out, the squad steps through and arrives in the offworld mission with its health and ammunition. Squad-level transition using the existing readiness handshake. Late joiners load the world the squad is in. Prerequisites: GT-1, one offworld mission. Risks: operatives in flight during the swap (the retry fix in PR #39 shows the failure mode).
+- A travel mission in the lobby (SGC home, infiltration compound as the site). Dial out, step through, arrive with health and equipment; others may stay. The gate stays open for the mission. Late joiners arrive in the SGC. The mission fails only when everyone in both worlds is down. An "abort mission" control in the SGC. Prerequisites: GT-1. Risks: the hand-off losing a message in flight (T3), incomplete carried state (T4), leaks from the hidden world (T5). Human check with two players, one staying.
 
 **GT-3 — Return and debrief** · M · Fable
-- Dial home from an offworld gate, return to the SGC, debrief with real mission statistics. Needs an offworld gate room: the `stargate_dhd` preset exists but its gate is inert and its rules belong to `WaveManager` today.
+- A working gate at the site (the `stargate_dhd` preset's gate is inert today) that opens for home when the objectives are complete. Success when no standing operative remains offworld and at least one came home. Debrief in the SGC with real figures and who was lost. Retry for a two-world mission.
 
 ### H — Expanded co-op mechanics
 
@@ -401,8 +403,8 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R8 | Doors left open after a patrol passes | Confirmed | `ModularDoor.open_for` never closes and there is no auto-close | TA-3 |
 | R9 | Enemy behaviour after the result | Modular fixed (EX-1); SGC open | Modular: Jaffa `stand_down()` and operative health is frozen at the result. SGC: nothing stops live Jaffa; they keep acting behind the result screen | GT-1 (shared host) |
 | R10 | Dedicated-server acceptance | Automated for both missions; human open | SGC: `test_sprint5_dedicated_smoke`. Modular: `test_modular_extraction_dedicated` (EX-1), which also found and fixed two defects: a client could not request a retry, and a client kept running a dead world after the server stopped. No human has accepted either | EX-2 |
-| R11 | SGC coupling in mission hosting | Wording fixed (EX-1); structure open | `ModularMission` still extends `GateRoom` and stubs its sector and snapshot methods. Since EX-1 it sets its banner on change and its own debrief through `HUD.set_mission_banner` and `HUD.set_debrief` | GT-1 (split) |
-| R12 | Gate travel and mission-state ownership | Confirmed missing | One operative entering the authorised gate ends the SGC mission as a victory. Objective state lives inside the world scene | GT-1 to GT-3 |
+| R11 | SGC coupling in mission hosting | Wording fixed (EX-1); structure open | `ModularMission` still extends `GateRoom` and stubs its sector and snapshot methods. Since EX-1 it sets its banner on change and its own debrief through `HUD.set_mission_banner` and `HUD.set_debrief` | Open. No longer part of GT-1 ([D-016](../DECISIONS.md)): coexistence does not need the split |
+| R12 | Gate travel and mission-state ownership | Confirmed missing | One operative entering the authorised gate ends the SGC mission as a victory. Objective state lives inside the world scene | GT-1 to GT-3, by the [split-world design](gate-travel-split-worlds.md) |
 | R13 | Human two-player testing | Outstanding | No signed checklist for any mission | EX-2 |
 | R14 | Jaffa keep attacking downed operatives | Changed in EX-1 to the default of open question 3 | A downed operative is only chosen when no standing one is in perception. Applies to all Jaffa, SGC included | Revisit if question 3 is answered differently |
 | R15 | Security doors cannot be operated in a mission | New, confirmed | `set_locked` has no caller outside the demo scene | EV-2 |
@@ -411,6 +413,9 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R18 | Class descriptions promise absent kit | New, confirmed | See the class row in section 2 | CO-2 |
 | R19 | Stale limitations in older guides | Confirmed | The navigation guide still listed modular combat as unverified and cover as SGC coordinates, both superseded by PR #39. Corrected with dated notes in this change | Done here |
 | R20 | Authoring tools untested by a fresh agent | Outstanding | Stated in the authoring review | GI-0 doubles as that test if run by a new session |
+| R21 | Module headers outside their own cell | New, confirmed (GA-1) | The north and south headers of `Room05` to `Room13`, `Room15` and `Room16` are centred 0.1 m beyond the cell edge and overlap the adjoining room's header. Invisible with one material; flickers against a themed lintel. GA-1 stands lintel gold 5 mm proud | A structural pass on those ten modules, with collision and enclosure re-verified; before GA-2 reaches them |
+| R22 | Jaffa armour rendered dark | Fixed (GA-1, D-015) | `JaffaGuard.tscn` and `JaffaShockGuard.tscn` used metallic 0.85 to 0.95. No mission has a sky or reflection probe, so the armour rendered dark olive: 1.1 to 1.3 : 1 against Goa'uld walls. Now matte, about 5 : 1. Measured in the [kit guide](../maps/goauld-theme-kit.md#readability-measured) | Reconsider a small metallic term if the lighting pass adds reflections |
+| R23 | Whole-game lookups assume one world | Fixed (GT-1) | 48 lookups such as `get_tree().root.find_child("Players", true, false)` return the first match in the game. With the SGC and the compound loaded together, a sentry did not notice an operative 3 m away | Fixed: lookups go through `MissionWorld`; `tools/tests/test_world_scoping.py` fails on a new one |
 
 Items verified as **no longer open**: server-owned actors invisible to clients (fixed in PR #39, `configure_mission_sync`), the retry race on client operatives (fixed in PR #39), and "client late join mid-patrol untested" from the navigation guide (now covered).
 
@@ -519,12 +524,12 @@ Rules that keep cost down:
 
 These change scope or design. Each has a default that the plan assumes until answered.
 
-1. **Does the squad travel through the gate as one group, or can players be in different worlds?** Default: one group. Splitting roughly doubles the travel work.
+1. **Does the squad travel through the gate as one group, or can players be in different worlds?** **Answered 14 November 2026: players can be in different worlds** ([D-013](../DECISIONS.md)). This was not the default. The design it called for is written ([gate travel with a split team](gate-travel-split-worlds.md)); the strategy is [D-016](../DECISIONS.md) and the owners' four rules for a split team are [D-017](../DECISIONS.md).
 2. **Is detection ever a mission failure?** Default: never; it escalates.
 3. **Do Jaffa attack downed operatives?** Default: not while a standing operative is known.
 4. **Do friendly airmen go offworld in the first infiltration mission?** Default: no.
 5. **Should a solo player fail on the first down?** Today yes, because the squad is then down. Default: unchanged until CO-1.
 6. **Is the offworld loop the main game, with SGC Defense as one mission among several, or the reverse?** Default: offworld becomes the main loop; SGC Defense stays as it is.
-7. **How is art made?** In-engine procedural pieces built by agents, or assets from a modelling tool. Blocks GA-1 only.
+7. **How is art made?** **Answered 14 November 2026: in-engine pieces built by agents** ([D-012](../DECISIONS.md)). Modelled replacements stay possible later.
 8. **How far should class descriptions be honoured?** Trim the text or build the perks. Default: trim until CO-2.
 9. **Is any saved progress wanted before there are three or more offworld missions?** Default: no.

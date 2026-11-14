@@ -23,7 +23,7 @@ Reports default to `build/test-results/godot/`: `summary.json`, `junit.xml`, pro
 
 ### Current baseline
 
-The last recorded full local run is **77/77 checks** at PR #49 (merged as `6af561b`): project import, 75 suites and the persistence reader. Each milestone's pull request records its own run. Local green is not hosted green: three suites passed locally and failed on the slower hosted runner in phase 3 (see below).
+The last recorded full local run is **80/80 checks** on the GT-1 branch: project import, 78 suites and the persistence reader. Each milestone's pull request records its own run. Local green is not hosted green: three suites passed locally and failed on the slower hosted runner in phase 3 (see below).
 
 **Hosted CI:** the `Godot full` job failed on every push to `main` from PR #35 to #41. `test_level_authoring` runs `tools/level_authoring.py`, which looks for `godot` on `PATH` (or the `GODOT` environment variable); the workflow installs the engine elsewhere and passed its path only to the test runner. Since roadmap milestone EX-1 the runner exports the engine it was given as `GODOT` to every suite, and `tools/tests/test_godot_runner.py` checks that. The hosted `Godot full` job passed on PRs #42 and #43 with this change; check each pull request's hosted run for the current state.
 
@@ -44,6 +44,8 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 | `test_mission_selection_uat` | Real lobby/coordinator dispatch, quiet UAT startup, retry and retained Defense activation. |
 | `test_modular_extraction_mission`, `test_modular_extraction_multiplayer`, `test_modular_extraction_dedicated` | Modular mission from the lobby and from a dedicated server: objectives, extraction rule, Jaffa patrol combat and cover, failure, stand-down after the result, retry, error-free late join during a firefight and shared result. See the [mission guide](maps/modular-extraction-mission.md). |
 | `test_goauld_infiltration_loud` | The infiltration mission's loud route with hearing, alarm, reinforcements and cover live, through extraction and stand-down. |
+| `test_goauld_theme` | The Goa'uld theme on the infiltration compound: palette on 20 rooms, pieces on 8, and collision, navigation, sockets, markers and cover identical to the same compound built neutral. |
+| `test_world_coexistence`, `test_world_coexistence_multiplayer` | Two worlds side by side (GT-1): the quiet SGC and the infiltration compound loaded together through the lobby and coordinator. Each world finds only its own operatives, enemies, props and map; a sentry notices an operative in its own world; operatives start at home and a late joiner arrives there; a hidden world has no HUD or environment and keeps simulating; the mission is lost only when every operative in both worlds is down; retry replaces both. The two-process suite checks a late-joining client loads both worlds and follows the far one. There is no travel yet: the suites move an operative by hand. |
 | `test_goauld_infiltration_mission` | Infiltration mission from the lobby: unseen insertion, guarded checkpoint, quiet route to the generator without an alert, objectives in order, extraction, retry and failure. See the [mission guide](maps/goauld-infiltration-mission.md). |
 | `test_mission_alert`, `test_mission_alert_multiplayer` | Compound alert on the infiltration mission: escalation, alarm runner and console, reinforcement budget and timing, disabled consoles, stopped runner, calm-down, debrief, retry; two-process late join during an alarm, client console disable through the server and runner tell. See the [alert guide](maps/mission-alert.md). |
 | `test_jaffa_hearing` | Sentry hearing with real weapons and a C4 charge: per-weapon radii, suppressed shot silent, unsuppressed shot heard and investigated, no escalation from noise, range limit, walls do not muffle, fighting sentry unaffected, blast heard beyond rifle range, search points visited and route resumed. |
@@ -69,6 +71,12 @@ For reproducible Forward+ captures on an available display:
 godot --path client --script res://tests/support/sgc_visual_review.gd
 ```
 
+Frame cost of a mission, on a display (prints one `WORLD_COST` line; compare `sgc_uat` with `two_worlds_dev`):
+
+```sh
+godot --path client --script res://scripts/world/world_cost.gd -- --mission two_worlds_dev
+```
+
 On the development machine's X11 desktop, prefix `DISPLAY=:0` when needed. The helper writes `build/sgc-review/` views of the corridor joins, service/spiral stairs, support rooms, gate/control/briefing sightlines, both closed shutters, alert lighting and an active gate. It hides HUD/shrouds for inspection and is not the normal gameplay entry point.
 
 Human acceptance route:
@@ -84,6 +92,8 @@ Human acceptance route:
 Record commit, mission, difficulty, peer roles, route/action, expected/actual result and screenshots or logs. Automated closure/traversal is not acceptance of combat balance, latency tolerance, sound or visual quality.
 
 ## Other repository checks
+
+`tools/tests` holds the runner's failure contract, a static check that no script searches the whole game for its surroundings (`test_world_scoping.py`: use `MissionWorld`), and the Goa'uld kit's geometry and palette rules (`test_theme_kit.py`: the committed kit matches its generator, each piece fills its slab, nothing can be seen through, gold stays above door height). They need no engine.
 
 ```sh
 python3 -m unittest discover -s tools/tests -v

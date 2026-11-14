@@ -49,7 +49,7 @@ func interact(player: PlayerController3D) -> void:
 
 
 func _activate_defense_protocol(player: PlayerController3D) -> void:
-	var gateroom := get_tree().root.find_child("GateRoom", true, false) as GateRoom
+	var gateroom := MissionWorld.find(self, "GateRoom") as GateRoom
 
 	# 1. Deploy automated defense sentry at Gate Room choke point
 	var turret_scene := load(TURRET_SCENE_PATH) as PackedScene

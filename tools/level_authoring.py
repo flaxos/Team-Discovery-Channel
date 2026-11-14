@@ -183,6 +183,8 @@ def main(argv: list[str] | None = None) -> int:
                     sources: dict = {}
                     for room in response['themes']:
                         key = f"{room['theme']['requested']} -> {room['theme']['visual_source']}"
+                        if room['theme'].get('coverage'):
+                            key += f" ({room['theme']['coverage']})"
                         sources[key] = sources.get(key, 0) + 1
                     response['themes'] = sources
         print(json.dumps(response, ensure_ascii=False))

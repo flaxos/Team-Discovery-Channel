@@ -235,7 +235,7 @@ func _is_ui_modal_open() -> bool:
 		return true
 	if not is_inside_tree() or get_tree() == null:
 		return false
-	var hud := get_tree().root.find_child("TacticalHUD", true, false)
+	var hud := MissionWorld.find(self, "TacticalHUD")
 	if hud != null:
 		if hud.get("is_mission_ended") == true:
 			return true
@@ -248,7 +248,7 @@ func _is_ui_modal_open() -> bool:
 		var km: Control = hud.get("keybindings_modal") as Control
 		if km != null and km.visible:
 			return true
-	var standalone_km := get_tree().root.find_child("KeybindingsModal", true, false) as Control
+	var standalone_km := MissionWorld.find(self, "KeybindingsModal") as Control
 	if standalone_km != null and standalone_km.visible:
 		return true
 	return false
@@ -617,12 +617,12 @@ func _physics_process(delta: float) -> void:
 	_process_revive(delta)
 
 	# Process Iris servo repair channeling
-	var iris_servo := get_tree().root.find_child("IrisServoHousing", true, false) as IrisServoHousingScript
+	var iris_servo := MissionWorld.find(self, "IrisServoHousing") as IrisServoHousingScript
 	if iris_servo != null and iris_servo.is_repairing and iris_servo.repairer_player == self:
 		iris_servo.update_repair(delta)
 
 	# Process SGC Dialing console patch upload channeling
-	var sgc_console := get_tree().root.find_child("SGCDialingConsole", true, false) as SGCDialingConsoleScript
+	var sgc_console := MissionWorld.find(self, "SGCDialingConsole") as SGCDialingConsoleScript
 	if sgc_console != null and sgc_console.is_uploading_patch and sgc_console.uploader_player == self:
 		if sgc_console.update_upload(delta):
 			is_carrying_patch_rom = false
@@ -640,9 +640,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	# If actively dialing SGC console or DHD console, route directional inputs to glyph entries
-	var dhd := get_tree().root.find_child("SGCDialingConsole", true, false) as DHDDialer
+	var dhd := MissionWorld.find(self, "SGCDialingConsole") as DHDDialer
 	if dhd == null:
-		dhd = get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
+		dhd = MissionWorld.find(self, "DHDConsole") as DHDDialer
 	if dhd != null and dhd.active_dialer == self:
 		if Input.is_action_just_pressed("move_up"):
 			dhd.input_glyph("UP")
@@ -737,7 +737,7 @@ func _update_camera_and_occlusion(delta: float) -> void:
 	if get_tree() != null and get_tree().current_scene != null:
 		l27_node = get_tree().current_scene.get_node_or_null("Level27Complex") as Node3D
 	if l27_node == null and get_tree() != null and get_tree().root != null:
-		l27_node = get_tree().root.find_child("Level27Complex", true, false) as Node3D
+		l27_node = MissionWorld.find(self, "Level27Complex") as Node3D
 	if l27_node != null and not l27_node.visible:
 		l27_node.visible = true
 
@@ -1069,7 +1069,7 @@ func _deploy_tactical_gadget() -> void:
 		var turret_scene := load("res://scenes/props/DeployableTurret.tscn") as PackedScene
 		if turret_scene != null:
 			var turret := turret_scene.instantiate() as DeployableTurret
-			turret.position = global_position - global_transform.basis.z * 1.6
+			turret.position = MissionWorld.local(get_parent(), global_position - global_transform.basis.z * 1.6)
 			get_parent().add_child(turret)
 			active_turret = turret
 			turret_cooldown = TURRET_COOLDOWN_S
@@ -1086,7 +1086,7 @@ func _deploy_tactical_gadget() -> void:
 			var c4_scene := load("res://scenes/props/C4Satchel.tscn") as PackedScene
 			if c4_scene != null:
 				var c4 := c4_scene.instantiate() as C4Satchel
-				c4.position = global_position + Vector3(0, 1.0, 0)
+				c4.position = MissionWorld.local(get_parent(), global_position + Vector3(0, 1.0, 0))
 				c4.planter = self
 				if active_c4_timer_mode == 1:
 					c4.set_timer_mode(5.0)
@@ -1110,7 +1110,7 @@ func _plant_claymore() -> void:
 	var claymore_scene := load("res://scenes/props/ClaymoreMine.tscn") as PackedScene
 	if claymore_scene != null:
 		var claymore := claymore_scene.instantiate() as Node3D
-		claymore.position = global_position - global_transform.basis.z * 1.2 + Vector3(0, 0.05, 0)
+		claymore.position = MissionWorld.local(get_parent(), global_position - global_transform.basis.z * 1.2 + Vector3(0, 0.05, 0))
 		claymore.rotation.y = rotation.y
 		claymore.set("planter", self)
 		get_parent().add_child(claymore)
@@ -1258,7 +1258,7 @@ func _process_revive(delta: float) -> void:
 	# Find closest downed squadmate or allied SGC Airman within 2.4m
 	var closest_downed: CharacterBody3D = null
 	var min_d: float = 2.4
-	var players_container := get_tree().root.find_child("Players", true, false)
+	var players_container := MissionWorld.find(self, "Players")
 	if players_container != null:
 		for p in players_container.get_children():
 			var teammate := p as CharacterBody3D
@@ -1270,7 +1270,7 @@ func _process_revive(delta: float) -> void:
 						min_d = d
 						closest_downed = teammate
 
-	var allies_container := get_tree().root.find_child("Allies", true, false)
+	var allies_container := MissionWorld.find(self, "Allies")
 	if allies_container != null:
 		for a in allies_container.get_children():
 			var ally := a as CharacterBody3D
@@ -1345,7 +1345,7 @@ func _check_near_cover() -> bool:
 		return false
 
 	# 1. Check nearby nodes in 'cover' group
-	for node in get_tree().get_nodes_in_group("cover"):
+	for node in MissionWorld.in_group(self, &"cover"):
 		if node is Node3D and is_instance_valid(node):
 			var n3d := node as Node3D
 			var d := global_position.distance_to(n3d.global_position)
@@ -1353,7 +1353,7 @@ func _check_near_cover() -> bool:
 				return true
 
 	# 2. Check barricades container in bunker geometry
-	var barricades := get_tree().root.find_child("Barricades", true, false)
+	var barricades := MissionWorld.find(self, "Barricades")
 	if barricades != null:
 		for child in barricades.get_children():
 			if child is Node3D:
@@ -1418,7 +1418,7 @@ func _find_nearby_drag_target() -> CharacterBody3D:
 	var best_target: CharacterBody3D = null
 
 	# 1. Downed players
-	var players_container := get_tree().root.find_child("Players", true, false)
+	var players_container := MissionWorld.find(self, "Players")
 	if players_container != null:
 		for p in players_container.get_children():
 			var body := p as CharacterBody3D
@@ -1431,7 +1431,7 @@ func _find_nearby_drag_target() -> CharacterBody3D:
 						best_target = body
 
 	# 2. Downed allies
-	var allies_container := get_tree().root.find_child("Allies", true, false)
+	var allies_container := MissionWorld.find(self, "Allies")
 	if allies_container != null:
 		for a in allies_container.get_children():
 			var body := a as CharacterBody3D
@@ -1444,7 +1444,7 @@ func _find_nearby_drag_target() -> CharacterBody3D:
 						best_target = body
 
 	# 3. Dead enemies (Jaffa corpses)
-	var enemies_container := get_tree().root.find_child("Enemies", true, false)
+	var enemies_container := MissionWorld.find(self, "Enemies")
 	if enemies_container != null:
 		for e in enemies_container.get_children():
 			var body := e as CharacterBody3D
@@ -1699,12 +1699,12 @@ func _play_command_radio_sound() -> void:
 func _get_tactical_hud() -> TacticalHUD:
 	if not is_inside_tree():
 		return null
-	return get_tree().root.find_child("TacticalHUD", true, false) as TacticalHUD
+	return MissionWorld.find(self, "TacticalHUD") as TacticalHUD
 
 
 func _get_all_active_airmen() -> Array[SGCAirmanAIScript]:
 	var result: Array[SGCAirmanAIScript] = []
-	var allies := get_tree().root.find_child("Allies", true, false)
+	var allies := MissionWorld.find(self, "Allies")
 	if allies != null:
 		for child: Node in allies.get_children():
 			var a := child as SGCAirmanAIScript
@@ -1714,7 +1714,7 @@ func _get_all_active_airmen() -> Array[SGCAirmanAIScript]:
 
 
 func _find_nearest_turret(pos: Vector3) -> DeployableTurret:
-	var turrets := get_tree().get_nodes_in_group("turret")
+	var turrets := MissionWorld.in_group(self, &"turret")
 	var best_turret: DeployableTurret = null
 	var min_d: float = 999999.0
 	for t: Node in turrets:
@@ -1728,7 +1728,7 @@ func _find_nearest_turret(pos: Vector3) -> DeployableTurret:
 
 
 func _get_sector_name_for_pos(pos: Vector3) -> String:
-	var gateroom := get_tree().root.find_child("GateRoom", true, false)
+	var gateroom := MissionWorld.find(self, "GateRoom")
 	if gateroom != null and gateroom.has_method("get_current_sector"):
 		var sec: String = gateroom.call("get_current_sector", pos) as String
 		if not sec.is_empty() and sec != "UNKNOWN":
@@ -1811,7 +1811,7 @@ func issue_squad_regroup() -> void:
 
 
 func _find_nearest_active_airman() -> SGCAirmanAIScript:
-	var allies := get_tree().root.find_child("Allies", true, false)
+	var allies := MissionWorld.find(self, "Allies")
 	if allies == null:
 		return null
 	var best_airman: SGCAirmanAIScript = null
@@ -1863,7 +1863,7 @@ func deploy_shield() -> void:
 	var shield := (load(DEPLOYABLE_SHIELD_PATH) as PackedScene).instantiate() as DeployableShieldScript
 	var spawn_pos := global_position - global_transform.basis.z * 1.3
 	spawn_pos.y = global_position.y
-	shield.position = spawn_pos
+	shield.position = MissionWorld.local(get_parent(), spawn_pos)
 	shield.rotation.y = rotation.y
 
 	var parent := get_parent()
@@ -1883,7 +1883,7 @@ func throw_smoke_grenade() -> void:
 
 	var grenade := (load(SMOKE_GRENADE_PATH) as PackedScene).instantiate() as SmokeGrenadeScript
 	var spawn_pos := global_position + Vector3(0, 1.4, 0) - global_transform.basis.z * 0.8
-	grenade.position = spawn_pos
+	grenade.position = MissionWorld.local(get_parent(), spawn_pos)
 	var throw_vel := (-global_transform.basis.z * 12.0) + Vector3(0, 3.5, 0)
 	grenade.linear_velocity = throw_vel
 
@@ -1986,7 +1986,7 @@ func _try_interact() -> void:
 	# 2. Check for nearby DeployableTurret to mount
 	var nearest_turret: DeployableTurret = null
 	var min_turret_dist: float = 2.4
-	for node in get_tree().root.find_children("", "DeployableTurret", true, false):
+	for node in MissionWorld.of(self).find_children("", "DeployableTurret", true, false):
 		var t := node as DeployableTurret
 		if t != null and t.mounted_player == null:
 			var d := global_position.distance_to(t.global_position)
@@ -2008,7 +2008,7 @@ func _try_interact() -> void:
 	# 3. Check for nearby interactable stations (Armory, Defense Terminal, Security Console, etc.)
 	var nearest_interactable: Node = null
 	var min_interact_dist: float = 3.2
-	for node in get_tree().get_nodes_in_group("interactable"):
+	for node in MissionWorld.in_group(self, &"interactable"):
 		if is_instance_valid(node) and node is Node3D:
 			var d := global_position.distance_to((node as Node3D).global_position)
 			if d < min_interact_dist:
@@ -2020,26 +2020,26 @@ func _try_interact() -> void:
 		return
 
 	# 4. Check for SGC Blast Door console (any console in complex)
-	for console_node in get_tree().get_nodes_in_group("blast_door_console"):
+	for console_node in MissionWorld.in_group(self, &"blast_door_console"):
 		var c := console_node as Node3D
 		if c != null and global_position.distance_to(c.global_position) <= 3.0:
 			if c.has_method("interact"):
 				c.interact(self)
 			else:
-				var gateroom := get_tree().root.find_child("GateRoom", true, false)
+				var gateroom := MissionWorld.find(self, "GateRoom")
 				if gateroom != null and gateroom.has_method("toggle_blast_doors"):
 					gateroom.toggle_blast_doors()
 			return
 
 	# 5. Check for Lab Data Patch Drive (Research Lab)
-	var patch_drive := get_tree().root.find_child("LabDataPatchDrive", true, false) as LabDataPatchDriveScript
+	var patch_drive := MissionWorld.find(self, "LabDataPatchDrive") as LabDataPatchDriveScript
 	if patch_drive != null and not patch_drive.is_retrieved and global_position.distance_to(patch_drive.global_position) <= 3.2:
 		patch_drive.pickup_patch(self)
 		is_carrying_patch_rom = true
 		return
 
 	# 6. Check for Iris Servo Housing (Gate Room ramp)
-	var iris_servo := get_tree().root.find_child("IrisServoHousing", true, false) as IrisServoHousingScript
+	var iris_servo := MissionWorld.find(self, "IrisServoHousing") as IrisServoHousingScript
 	if iris_servo != null and not iris_servo.is_repaired and global_position.distance_to(iris_servo.global_position) <= 3.2:
 		if not iris_servo.is_repairing:
 			iris_servo.start_repair(self)
@@ -2048,9 +2048,9 @@ func _try_interact() -> void:
 		return
 
 	# 7. Check for SGC Dialing Computer / DHD Console (Control Room Mezzanine)
-	var dialer := get_tree().root.find_child("SGCDialingConsole", true, false) as DHDDialer
+	var dialer := MissionWorld.find(self, "SGCDialingConsole") as DHDDialer
 	if dialer == null:
-		dialer = get_tree().root.find_child("DHDConsole", true, false) as DHDDialer
+		dialer = MissionWorld.find(self, "DHDConsole") as DHDDialer
 	if dialer != null and global_position.distance_to(dialer.global_position) <= 3.5:
 		var sgc := dialer as SGCDialingConsoleScript
 		if sgc != null and is_carrying_patch_rom and sgc.is_buffer_corrupted:

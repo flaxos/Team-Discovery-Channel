@@ -95,3 +95,5 @@ Delivery evidence, the final scope boundary and the complete file manifest are r
 Batch B extends the same schema with per-socket deck bindings, optional sloped boundary patches and equipment/transport interfaces. Existing planar definitions remain valid. See [vertical kit authoring](modular-vertical-kit.md).
 
 Batch C composes optional functional presets beneath the existing attachment branches and adds a security-door classification. Structural module authoring remains independent of role and material themes; see [room-preset authoring](modular-room-presets.md).
+
+The first faction art target, and an audit of what the theme slots render, is in the [Goa'uld visual brief](goauld-visual-brief.md).

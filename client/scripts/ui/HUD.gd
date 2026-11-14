@@ -488,7 +488,7 @@ func _on_health_revived() -> void:
 
 
 func _on_local_player_died(pid: int) -> void:
-	var gateroom := get_tree().root.find_child("GateRoom", true, false)
+	var gateroom := MissionWorld.find(self, "GateRoom")
 	if gateroom != null and gateroom.has_method("_check_squad_status"):
 		gateroom.call_deferred("_check_squad_status", pid)
 	elif not is_mission_ended:

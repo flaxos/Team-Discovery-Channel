@@ -9,16 +9,22 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 | # | Decision | Status |
 |---|---|---|
 | D-001 | Gameplay systems before the mission map before art | Recommended |
-| D-002 | Gate travel by sequential world swap, squad together | Recommended, with one open question |
+| D-002 | Gate travel by sequential world swap, squad together | Superseded by D-016 |
 | D-003 | Mission events extend the existing mission data; no second mission manager | Recommended |
 | D-004 | Perception is a server-side component of the enemy controller, with two profiles | Recommended |
 | D-005 | One navigation adapter; reroute on the room graph, not by rebaking | Accepted (adapter), Recommended (rerouting) |
 | D-006 | Indoor modules and outdoor terrain are separate authoring systems | Recommended, pending a spike |
 | D-007 | Host-authoritative ENet; no persistence yet | Accepted (authority), Open (persistence) |
-| D-008 | Modular missions inherit `GateRoom` until gate-travel work begins | Accepted |
+| D-008 | Modular missions inherit `GateRoom` | Accepted; the planned split is deferred by D-016 |
 | D-009 | Native `LevelLayout` resources are the only saved map format | Accepted |
 | D-010 | Themes never change collision or navigation | Accepted |
 | D-011 | Automated tests never count as human acceptance | Accepted |
+| D-012 | Faction art is built in the engine by agents | Accepted |
+| D-013 | Players may be in different worlds at once | Accepted; strategy in D-016, rules in D-017 |
+| D-014 | Phase 1 to 3 gates accepted on a solo owner session | Accepted |
+| D-015 | Jaffa armour is matte, not metallic | Accepted |
+| D-016 | Gate travel: two worlds side by side in one process; every peer holds both and presents one | Recommended |
+| D-017 | Rules for a split team: world count, failure, late joiners, gate direction | Accepted |
 
 ---
 
@@ -99,3 +105,67 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 ## D-011 — Acceptance
 
 **Accepted.** A passing suite establishes that code behaves as tested. It does not establish feel, balance, readability or latency tolerance. Documents may say "human-accepted" only when a dated record of a human run exists under `docs/reviews/`.
+
+## D-012 — How art is made
+
+**Accepted (owner, 14 November 2026).** Faction art is built in the engine by agents: a tool writes each piece as a cosmetic scene of primitive meshes and materials, placed by theme variants. This answers open question 7 of the master plan.
+
+**Why.** It needs nothing the theme system does not already accept, an agent can do it now, every piece is reviewable as text, and a piece matches its slab exactly by construction (D-010). The cost is a blocky look.
+
+**Not ruled out.** Replacing individual pieces with modelled assets later. The piece dimensions in the [Goa'uld visual brief](maps/goauld-visual-brief.md#25-pieces-for-ga-1) are the contract a modelled replacement must meet.
+
+## D-013 — Players may be in different worlds
+
+**Accepted as a requirement (owner, 14 November 2026).** Players do not have to travel through the gate together. Some may be offworld while others are in the SGC. This answers open question 1 of the master plan and the open question in D-002, against that decision's recommendation.
+
+**Consequences.** D-002's strategy (one world loaded at a time, a squad-level swap) no longer satisfies the requirement and is reopened. GT-1, GT-2 and GT-3 as written assume it. **GT-1 is paused** until a split-world design exists, because the session object GT-1 introduces has to know whether there is one world or several.
+
+**Open.** How it is done: one server holding several worlds, per-world visibility and navigation, what "the squad is down" and "extraction" mean when the squad is split, where a late joiner arrives, and what it costs. To be answered by a design document (GT-0) before any code.
+
+## D-014 — Acceptance of phases 1 to 3
+
+**Accepted (owner, 14 November 2026).** After a solo session on `main` at `ce9ad71`, the owner declared UAT passed and deferred the two-player sessions. The roadmap's EX-2, Stealth, Infiltration greybox and Infiltration complete gates are treated as accepted so that later phases can start.
+
+**Record.** [Owner solo UAT, 14 November 2026](reviews/2026-11-14-owner-solo-uat.md), as D-011 requires. It lists which checklist items the log shows, which rest on the owner's statement, and which were not run.
+
+**What this does not establish.** Two-player behaviour on a human run: late join, shared extraction, revive and alert spread between players are covered by automated suites only. The quiet route was attempted once and failed. Tuning values remain provisional.
+
+## D-015 — Jaffa armour finish
+
+**Accepted (owner, 14 November 2026).** The armour and crest materials of `JaffaGuard.tscn` and `JaffaShockGuard.tscn` have no metallic term. The staff weapon is unchanged.
+
+**Why.** No mission has a sky or a reflection probe, so a metallic surface has nothing to reflect and loses its albedo: gold armour rendered dark olive everywhere. Against the Goa'uld walls that measured 1.1 to 1.3 : 1, worse than against the neutral walls it replaced (1.9 : 1). Matte, it measures 3.6 to 5.0 : 1. Sentries must be visible before they are alerted, when they carry no marker. Measurements and captures: [kit guide](maps/goauld-theme-kit.md#readability-measured).
+
+**Consequences.** Jaffa are brighter in every mission, SGC Defense included. A unit test keeps the term at zero. If a lighting pass later adds reflections, a small metallic term can be reconsidered then.
+
+## D-016 — Split-world travel strategy
+
+**Recommended (GT-0 design, 14 November 2026).** Supersedes D-002. Detail and evidence: [Gate travel with a split team](plans/gate-travel-split-worlds.md).
+
+**Decision.** The SGC and one offworld site are both loaded under `WorldContainer` in one server process, in the same 3D space, the site 2,000 m away. Every peer loads both worlds and presents the one its operative is in; the server simulates both. Worlds remain self-contained scenes. A session object above them records which world each peer is in and owns the mission result. Travel hands one operative from a world to the other with the prepare, acknowledge, despawn order that retry already uses.
+
+**Why.** An experiment ran `SGCUATBase.tscn` and the infiltration compound together, 2,000 m apart, with no engine errors; the compound built and its navigation routed at the offset. Each world already has its own navigation map and spawners. Because nothing is loaded or unloaded when someone travels, replication needs no per-world filtering, which avoids the class of fault fixed in PR #39.
+
+**The cost it exposes.** 48 places find `Players`, `Enemies`, `Allies` or `GateRoom` by searching the whole game and taking the first match. With two worlds that is the wrong world for one of them: in the experiment a sentry could not see an operative 3 m away once the SGC was loaded first. Scoping those lookups to the actor's own world is most of GT-1.
+
+**Alternatives rejected.** Each client loading only its own world (needs per-peer visibility and a load handshake per traveller; kept as a later optimisation). Sub-viewports with separate 3D worlds (moves too much stable code). A connection or a process per world (the host is also a player). Operatives owned by the session and teleported (removes `Players` from every world scene, which every suite addresses).
+
+**Consequences.** GT-1 to GT-3 are rewritten in the master plan. The host split planned in D-008 is no longer a prerequisite of travel and stays as risk R11. The four existing missions remain single-world and unchanged; travel is a new kind of mission entry.
+
+**Not established.** Frame time on the host with two worlds, load time and memory on clients, and movement feel 2 km from the origin. GT-1 measures the first before any travel is built.
+
+## D-017 — Rules for a split team
+
+**Accepted (owner, 14 November 2026).** Four answers given to the GT-0 design:
+
+| Question | Decision |
+|---|---|
+| How many places are live at once | The SGC plus one offworld site |
+| When the mission fails | When every operative, in either place, is down |
+| Where a late joiner arrives | In the SGC |
+| When the gate can be used | Out at any time during the mission; home only after the objectives are complete |
+
+**Defaults set by the design, not by an owner.** The mission succeeds when the objectives are complete and no standing operative remains offworld, provided at least one came home. The SGC is quiet while a team is away. Either can be changed without changing D-016.
+
+**Consequences.** A whole away team can be down while the mission continues, if someone in the SGC is standing. Bleed-out is 20 seconds, so a rescue through the gate only works for a rescuer already beside it. The SGC needs an "abort mission" control so that players are not forced to leave the session (GT-2).
+

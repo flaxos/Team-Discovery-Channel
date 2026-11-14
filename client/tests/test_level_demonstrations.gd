@@ -20,7 +20,12 @@ func run() -> void:
 			assert(LevelCatalogue.module_by_id(item.module.id) != null)
 			if item.room_preset != null:
 				roles[item.room_preset.id] = true
-			assert(LevelThemeResolver.describe(source, item).visual_source == "neutral")
+			assert(
+				(
+					LevelThemeResolver.describe(source, item).visual_source
+					== ("goauld" if brief[1] == &"goauld" else "neutral")
+				)
+			)
 		for required: StringName in brief[2]:
 			assert(roles.has(required))
 		for edge in source.connections:

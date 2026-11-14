@@ -36,11 +36,18 @@ const MISSION_SGC_DEFENSE: String = "sgc_defense"
 const MISSION_SGC_UAT: String = "sgc_uat"
 const MISSION_MODULAR_EXTRACTION: String = "modular_extraction_uat"
 const MISSION_GOAULD_INFILTRATION: String = "goauld_infiltration"
+## Development only: the SGC and the infiltration compound loaded side by side, to prove two
+## worlds coexist (roadmap GT-1). No travel yet, so the squad stays in the SGC. Not listed in
+## the lobby; start it with `--mission two_worlds_dev`.
+const MISSION_TWO_WORLDS_DEV: String = "two_worlds_dev"
+## "scene" is the mission's world. "site" adds a second world beside it (see
+## MainGameCoordinator). "hidden" keeps an entry out of the lobby.
 const MISSIONS: Dictionary = {
 	MISSION_SGC_DEFENSE: {"name": "SGC Defense — Levels 28/27/26", "description": "Refactored three-level SGC. Defend against incoming Jaffa, complete objectives and extract.", "scene": "res://scenes/main/GateRoom.tscn"},
 	MISSION_SGC_UAT: {"name": "SGC UAT Base — No Hostile Activation", "description": "Explore the same three-level SGC with lifts, stairs, props and friendly personnel. No automatic hostile gate activations or enemy waves.", "scene": "res://scenes/main/SGCUATBase.tscn"},
 	MISSION_MODULAR_EXTRACTION: {"name": "Modular Extraction UAT — Development", "description": "Development slice on the modular test facility: reach the command room, download data from the main console and return to the insertion point. Jaffa patrols are active.", "scene": "res://scenes/mission/ModularExtractionMission.tscn"},
-	MISSION_GOAULD_INFILTRATION: {"name": "Goa'uld Infiltration — Greybox", "description": "Greybox stealth mission in a two-deck Goa'uld compound: sabotage the generator, download the command records upstairs and return to the Stargate. Sentries see by sight and raise suspicion before an alert; take the guarded checkpoint or the quiet service route.", "scene": "res://scenes/mission/GoauldInfiltrationMission.tscn"}
+	MISSION_GOAULD_INFILTRATION: {"name": "Goa'uld Infiltration — Greybox", "description": "Greybox stealth mission in a two-deck Goa'uld compound: sabotage the generator, download the command records upstairs and return to the Stargate. Sentries see by sight and raise suspicion before an alert; take the guarded checkpoint or the quiet service route.", "scene": "res://scenes/mission/GoauldInfiltrationMission.tscn"},
+	MISSION_TWO_WORLDS_DEV: {"name": "Two worlds — development", "description": "Development only: the quiet SGC and the Goa'uld compound running side by side. There is no gate travel yet, so operatives stay in the SGC.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldInfiltrationMission.tscn", "hidden": true}
 }
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"
