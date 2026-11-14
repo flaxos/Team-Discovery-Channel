@@ -3,7 +3,8 @@ extends SceneTree
 ## the Goa'uld compound side by side, with its own operative in the compound. A client joins
 ## late: it must load both worlds, arrive in the SGC (decision D-017), present the SGC, and
 ## still receive the compound's operative and patrols 2 km away. The mission is lost only
-## when the operatives in both worlds are down, and both peers see that result.
+## when the operatives in both worlds are down, and both peers see that result. Then the host
+## leaves, and the client must return to its lobby cleanly.
 const MISSION := SGCNetworkManager.MISSION_TWO_WORLDS_DEV
 const PORT := 19877
 var child_pid: int = -1
@@ -82,10 +83,11 @@ func run_test() -> void:
 	else:
 		await run_host()
 	net.multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-	main.queue_free()
+	if is_instance_valid(main):
+		main.queue_free()
 	await frames(2)
 	net.disconnect_game()
-	print("PASS late client in two worlds" if is_child() else "PASS two peers, two worlds: late joiner at home, replication across both, shared loss")
+	print("PASS late client in two worlds" if is_child() else "PASS two peers, two worlds: late joiner at home, replication across both, shared loss, host leaving")
 	quit(0)
 
 
@@ -157,6 +159,15 @@ func run_host() -> void:
 	assert(session.result == 0 and home.mission_result == 0 and site.mission_result == 0)
 	assert(await marked("result"), "The client must show the same result in both worlds")
 	await frames(30)
+	# The host leaves while the client is in both worlds. The client must drop both and
+	# return to its lobby without an engine error: a client's SGC used to ask whether it
+	# was the server after its peer had gone.
+	net.multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	main.queue_free()
+	await frames(2)
+	net.disconnect_game()
+	assert(await marked("left"), "The client returns to the lobby when the host leaves")
+	await frames(30)
 	var log_text := FileAccess.get_file_as_string(output_dir.path_join("client.log"))
 	assert(not "ERROR:" in log_text and not "ObjectDB" in log_text, log_text)
 
@@ -200,4 +211,13 @@ func run_client() -> void:
 	assert(home.mission_result == 0 and site.mission_result == 0, "Both worlds show the loss")
 	assert(home.hud.is_mission_ended)
 	mark("result")
-	await frames(60)
+	for _i: int in range(2400):
+		await frames(1)
+		if not net.is_in_active_session():
+			break
+	assert(not net.is_in_active_session(), "The client notices the host has gone")
+	await frames(5)
+	assert(main.current_lobby != null and main.world_container.get_child_count() == 0)
+	assert(main.session == null and main.current_site == null, "Both worlds and the session are gone")
+	mark("left")
+	await frames(30)
