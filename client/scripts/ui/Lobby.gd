@@ -251,7 +251,11 @@ func _update_ui_state() -> void:
 
 func _setup_mission_options() -> void:
 	mission_option_button.clear()
+	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	for mission_id: String in SGCNetworkManager.MISSIONS:
+		# A development mission is offered only when it was chosen with --mission.
+		if SGCNetworkManager.MISSIONS[mission_id].get("hidden", false) and (net == null or net.selected_mission_id != mission_id):
+			continue
 		mission_option_button.add_item(SGCNetworkManager.MISSIONS[mission_id]["name"])
 		mission_option_button.set_item_metadata(mission_option_button.item_count - 1, mission_id)
 	_sync_mission_selection()
@@ -262,7 +266,7 @@ func _sync_mission_selection() -> void:
 	for i in range(mission_option_button.item_count):
 		if mission_option_button.get_item_metadata(i) == mission_id: mission_option_button.select(i)
 	mission_description_label.text = SGCNetworkManager.MISSIONS[mission_id]["description"]
-	start_game_button.text = {SGCNetworkManager.MISSION_SGC_UAT: "LAUNCH UAT BASE", SGCNetworkManager.MISSION_MODULAR_EXTRACTION: "LAUNCH EXTRACTION UAT", SGCNetworkManager.MISSION_GOAULD_INFILTRATION: "LAUNCH INFILTRATION"}.get(mission_id, "LAUNCH SGC DEFENSE")
+	start_game_button.text = {SGCNetworkManager.MISSION_SGC_UAT: "LAUNCH UAT BASE", SGCNetworkManager.MISSION_MODULAR_EXTRACTION: "LAUNCH EXTRACTION UAT", SGCNetworkManager.MISSION_GOAULD_INFILTRATION: "LAUNCH INFILTRATION", SGCNetworkManager.MISSION_TWO_WORLDS_DEV: "LAUNCH TWO WORLDS (DEV)"}.get(mission_id, "LAUNCH SGC DEFENSE")
 
 func _on_mission_selected(index: int) -> void:
 	if _network_manager != null: _network_manager.set_mission(str(mission_option_button.get_item_metadata(index)))

@@ -75,6 +75,10 @@ var player_sectors: Dictionary = {}
 @export var mission_id: String = SGCNetworkManager.MISSION_SGC_DEFENSE
 var mission_result: int = -1
 var visited_sectors: Dictionary = {}
+## Set when this world is one of several in a mission (MissionSession); null otherwise.
+var session: MissionSession = null
+## Whether this peer draws and hears this world. See set_presented.
+var is_presented: bool = true
 
 var neutralized_players: Dictionary = {}
 var sector_shrouds: Dictionary = {}
@@ -104,6 +108,11 @@ signal blast_doors_toggled(closed: bool)
 signal observation_shutters_toggled(closed: bool)
 signal control_window_toggled(closed: bool)
 signal sector_changed(player_id: int, old_sector: String, new_sector: String)
+
+
+func _init() -> void:
+	# Actors find their own world through this group (MissionWorld.of).
+	add_to_group(MissionWorld.GROUP)
 
 
 func _find_dialing_console() -> DHDDialer:
@@ -249,7 +258,8 @@ func _process(delta: float) -> void:
 				local_sector = get_current_sector(local_player.global_position)
 		if local_sector.is_empty():
 			local_sector = SECTOR_GATE_ROOM
-	_update_sector_shrouding(local_sector)
+	if is_presented:
+		_update_sector_shrouding(local_sector)
 
 
 func _setup_sector_shrouds() -> void:
@@ -419,7 +429,7 @@ func _update_sector_shrouding(local_sec: String) -> void:
 	# Cull generic pickup items in non-current sectors
 	var tree := get_tree()
 	if tree != null:
-		for p_item in tree.get_nodes_in_group("pickups"):
+		for p_item in MissionWorld.in_group(self, &"pickups"):
 			var p_node := p_item as Node3D
 			if p_node != null and is_instance_valid(p_node):
 				var p_sec := get_current_sector(p_node.global_position)
@@ -569,6 +579,9 @@ func _on_player_child_entered(node: Node) -> void:
 			var local_id := multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else 1
 			if player.name == str(local_id) or (local_id == 1 and player.name == "1"):
 				hud.bind_local_player(player)
+				# This peer's operative is here, so this is the world it shows.
+				if session != null:
+					session.present(self)
 
 
 func _check_squad_status(id: int = 0) -> void:
@@ -595,7 +608,40 @@ func report_squad_status(id: int, neutralized: bool) -> void:
 	_evaluate_squad_status()
 
 
+## Operatives in this world (x) and how many of them are standing (y).
+func squad_state() -> Vector2i:
+	var state := Vector2i.ZERO
+	if players_container == null:
+		return state
+	for body: Node in players_container.get_children():
+		var operative := body as PlayerController3D
+		if operative == null or operative.health_component == null:
+			continue
+		state.x += 1
+		if not neutralized_players.get(operative.peer_id, false) and not operative.health_component.is_dead and not operative.health_component.is_downed:
+			state.y += 1
+	return state
+
+
+## Whether this world should create an operative for the peer. With several worlds the
+## session says where each peer is; alone, a world takes everyone.
+func hosts_peer(peer_id: int) -> bool:
+	return session == null or session.world_of(peer_id) == self
+
+
+## Ends the mission from inside this world. With several worlds the result is the session's.
+func conclude(victory: bool) -> void:
+	if session != null:
+		session.finish(victory)
+	else:
+		_finish_mission(victory)
+
+
 func _evaluate_squad_status() -> void:
+	if session != null:
+		# The mission is lost only when every world's operatives are down (D-017).
+		session.squad_changed()
+		return
 	if players_container == null or players_container.get_child_count() == 0:
 		return
 	for body: Node in players_container.get_children():
@@ -606,9 +652,29 @@ func _evaluate_squad_status() -> void:
 	_finish_mission(false)
 
 
+## Whether this peer draws and hears this world. A world that is not presented is hidden,
+## silent and has no HUD or active environment, but keeps simulating: physics, navigation,
+## AI and replication are untouched. The host runs both worlds and presents one.
+func set_presented(on: bool) -> void:
+	is_presented = on
+	visible = on
+	if hud != null:
+		hud.visible = on
+		hud.process_mode = Node.PROCESS_MODE_INHERIT if on else Node.PROCESS_MODE_DISABLED
+	# Only one environment can apply to the view: a hidden world gives its own up.
+	for node in find_children("*", "WorldEnvironment", true, false):
+		var holder := node as WorldEnvironment
+		if on and holder.has_meta(&"presented_environment"):
+			holder.environment = holder.get_meta(&"presented_environment") as Environment
+			holder.remove_meta(&"presented_environment")
+		elif not on and holder.environment != null:
+			holder.set_meta(&"presented_environment", holder.environment)
+			holder.environment = null
+
+
 func _on_player_extracted(_player: Node) -> void:
 	if multiplayer.is_server():
-		_finish_mission(true)
+		conclude(true)
 
 
 func _finish_mission(victory: bool) -> void:
@@ -792,7 +858,7 @@ func _spawn_all_players() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 
 	# Spawn host player first (if not dedicated server)
-	if net == null or not net.is_dedicated_server:
+	if (net == null or not net.is_dedicated_server) and hosts_peer(1):
 		var host_class: String = SGCNetworkManager.CLASS_SG3_HEAVY
 		if net != null and net.peers.has(1):
 			host_class = net.peers[1].get("class_id", net.selected_class_id)
@@ -802,7 +868,7 @@ func _spawn_all_players() -> void:
 	# Spawn connected client peers
 	if net != null:
 		for peer_id: int in net.peers:
-			if peer_id == 1 or not net.mission_ready_peers.has(peer_id):
+			if peer_id == 1 or not net.mission_ready_peers.has(peer_id) or not hosts_peer(peer_id):
 				continue
 			var peer_data: Dictionary = net.peers[peer_id]
 			var p_class: String = peer_data.get("class_id", SGCNetworkManager.CLASS_SG3_HEAVY)
@@ -821,7 +887,7 @@ func _spawn_player(peer_id: int, p_class_id: String, spawn_pos: Vector3) -> void
 
 	var player_instance := player_scene.instantiate() as PlayerController3D
 	player_instance.name = str(peer_id)
-	player_instance.position = spawn_pos
+	player_instance.position = MissionWorld.local(players_container, spawn_pos)
 	player_instance.class_id = p_class_id
 
 	players_container.add_child(player_instance, true)
@@ -830,6 +896,8 @@ func _spawn_player(peer_id: int, p_class_id: String, spawn_pos: Vector3) -> void
 
 func _on_peer_connected_during_mission(peer_id: int) -> void:
 	if not multiplayer.is_server() or players_container.has_node(str(peer_id)) or not multiplayer.get_peers().has(peer_id):
+		return
+	if not hosts_peer(peer_id):
 		return
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net == null or not net.peers.has(peer_id):

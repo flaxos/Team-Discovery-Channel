@@ -486,7 +486,7 @@ func _on_iris_servo_repaired() -> void:
 
 
 func _play_klaxon() -> void:
-	if DisplayServer.get_name() == "headless":
+	if DisplayServer.get_name() == "headless" or not MissionWorld.presented(self):
 		return
 	if ResourceLoader.exists("res://audio/sfx_klaxon.wav"):
 		var audio := AudioStreamPlayer.new()

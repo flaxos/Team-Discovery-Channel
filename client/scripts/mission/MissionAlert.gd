@@ -360,6 +360,9 @@ func request_snapshot() -> void:
 func _play_klaxon() -> void:
 	if DisplayServer.get_name() == "headless" or not ResourceLoader.exists("res://audio/sfx_klaxon.wav"):
 		return
+	# The klaxon has no position: a peer whose operative is in another world must not hear it.
+	if not MissionWorld.presented(self):
+		return
 	var audio := AudioStreamPlayer.new()
 	audio.stream = load("res://audio/sfx_klaxon.wav")
 	for bus: StringName in [&"Klaxons / Ambience", &"Ambience"]:
