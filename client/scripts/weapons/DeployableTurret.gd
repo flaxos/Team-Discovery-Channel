@@ -102,7 +102,7 @@ func _on_interact_exited(body: Node) -> void:
 
 
 func _find_target() -> void:
-	var enemies_container := get_tree().root.find_child("Enemies", true, false)
+	var enemies_container := MissionWorld.find(self, "Enemies")
 	if enemies_container == null:
 		return
 

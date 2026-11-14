@@ -82,7 +82,7 @@ func _find_local_player() -> CharacterBody3D:
 	if net != null and net.multiplayer.has_multiplayer_peer():
 		local_id = net.multiplayer.get_unique_id()
 
-	var players_container: Node = get_tree().root.find_child("Players", true, false)
+	var players_container: Node = MissionWorld.find(self, "Players")
 	if players_container != null:
 		var p_by_id: CharacterBody3D = players_container.get_node_or_null(str(local_id)) as CharacterBody3D
 		if p_by_id != null:
@@ -95,7 +95,7 @@ func _find_local_player() -> CharacterBody3D:
 			if cb != null:
 				return cb
 
-	var group_players: Array[Node] = get_tree().get_nodes_in_group("player")
+	var group_players: Array[Node] = MissionWorld.in_group(self, &"player")
 	for p: Node in group_players:
 		var cb: CharacterBody3D = p as CharacterBody3D
 		if cb != null:

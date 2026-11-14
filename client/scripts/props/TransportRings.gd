@@ -76,7 +76,7 @@ func _slam_rings_down() -> void:
 	print("Transport Rings: SLAM! Concentric rings hit floor plate.")
 
 	# Screen shake on kinetic floor slam
-	var players_node := get_tree().root.find_child("Players", true, false)
+	var players_node := MissionWorld.find(self, "Players")
 	if players_node != null:
 		for p in players_node.get_children():
 			if p is PlayerController3D:
@@ -112,7 +112,7 @@ func _discharge_beam() -> void:
 	var intercepted_explosive: bool = false
 
 	# 1. Check for explosives inside the rings (Tactical Interception)
-	var satchels := get_tree().root.find_children("", "C4Satchel", true, false)
+	var satchels := MissionWorld.of(self).find_children("", "C4Satchel", true, false)
 	for s in satchels:
 		var satchel := s as Node3D
 		if satchel != null and global_position.distance_to(satchel.global_position) <= 2.2:
@@ -126,7 +126,7 @@ func _discharge_beam() -> void:
 	if paired_rings == null:
 		_resolve_paired_rings()
 	if paired_rings != null and is_instance_valid(paired_rings):
-		var players := get_tree().root.find_children("", "PlayerController3D", true, false)
+		var players := MissionWorld.of(self).find_children("", "PlayerController3D", true, false)
 		for p in players:
 			var player := p as PlayerController3D
 			if player != null and global_position.distance_to(player.global_position) <= 2.2:
@@ -147,13 +147,13 @@ func _spawn_ring_reinforcements() -> void:
 	var jaffa_scene: PackedScene = reinforcement_scene
 	if jaffa_scene == null:
 		jaffa_scene = load("res://scenes/entities/JaffaGuard.tscn") as PackedScene
-	var enemies_container := get_tree().root.find_child("Enemies", true, false)
+	var enemies_container := MissionWorld.find(self, "Enemies")
 	if jaffa_scene != null and enemies_container != null:
 		for i in range(reinforcements_per_beam):
 			var jaffa := jaffa_scene.instantiate() as JaffaAI
 			jaffa.name = "RingJaffa_%d" % randi()
 			var offset := Vector3(randf_range(-0.7, 0.7), 0.1, randf_range(-0.7, 0.7)) if reinforcements_per_beam > 1 else Vector3(0, 0.1, 0)
-			jaffa.position = global_position + offset
+			jaffa.position = MissionWorld.local(enemies_container, global_position + offset)
 			enemies_container.add_child(jaffa, true)
 			reinforcement_spawned.emit(jaffa)
 			print("Transport Rings: Beamed down reinforcement %s!" % ("Shock Guard" if jaffa.is_shock_guard else "Jaffa Guard"))

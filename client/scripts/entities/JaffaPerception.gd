@@ -143,8 +143,8 @@ func _operative_containers() -> Array[Node]:
 			break
 	if _containers.is_empty() and bool(jaffa.is_inside_tree()):
 		for id: String in ["Players", "Allies"]:
-			var tree: SceneTree = jaffa.get_tree()
-			var found: Node = tree.root.find_child(id, true, false)
+			# The sentry's own world: with two loaded, the other one's operatives are not here.
+			var found: Node = MissionWorld.find(jaffa as Node, id)
 			if found != null:
 				_containers.append(found)
 	return _containers

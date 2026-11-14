@@ -445,7 +445,7 @@ func _physics_process(delta: float) -> void:
 		return
 	overrun_stage = stage
 	var destination := definition.region(&"BRIEFING_ROOM" if stage == 1 else &"STAGING").anchor
-	for ally in get_tree().get_nodes_in_group("sgc_airmen"):
+	for ally in MissionWorld.in_group(self, &"sgc_airmen"):
 		if (
 			ally is SGCAirmanAI
 			and (

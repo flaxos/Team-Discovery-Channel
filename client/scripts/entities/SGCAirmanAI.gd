@@ -253,7 +253,7 @@ func _is_target_obscured_by_smoke(target_pos: Vector3) -> bool:
 	if seg_len_sq < 0.001:
 		return false
 
-	var smoke_nodes: Array[Node] = get_tree().get_nodes_in_group("smoke_cloud")
+	var smoke_nodes: Array[Node] = MissionWorld.in_group(self, &"smoke_cloud")
 	for node: Node in smoke_nodes:
 		var cloud: Area3D = node as Area3D
 		if cloud != null and is_instance_valid(cloud):
@@ -425,7 +425,7 @@ func _process_turret(delta: float) -> void:
 		return
 
 	# If a player approaches within 2.2m of turret, politely dismount so player can use it
-	var players_container: Node = get_tree().root.find_child("Players", true, false)
+	var players_container: Node = MissionWorld.find(self, "Players")
 	if players_container != null:
 		for child: Node in players_container.get_children():
 			var p: PlayerController3D = child as PlayerController3D
@@ -1053,7 +1053,7 @@ func find_best_tactical_anchor(preferred_sector: String = "") -> Dictionary:
 	var min_dist: float = 999999.0
 
 	# 1. Dynamic cover checks (DeployableShield / barricades in 'cover' group)
-	var cover_nodes: Array[Node] = get_tree().get_nodes_in_group("cover")
+	var cover_nodes: Array[Node] = MissionWorld.in_group(self, &"cover")
 	for node: Node in cover_nodes:
 		if node is Node3D and is_instance_valid(node):
 			var n3d: Node3D = node as Node3D
@@ -1094,14 +1094,14 @@ func _find_fireteam_partner() -> SGCAirmanAI:
 
 func _get_allied_airmen() -> Array[SGCAirmanAI]:
 	var result: Array[SGCAirmanAI] = []
-	var allies_node: Node = get_tree().root.find_child("Allies", true, false)
+	var allies_node: Node = MissionWorld.find(self, "Allies")
 	if allies_node != null:
 		for child: Node in allies_node.get_children():
 			var a: SGCAirmanAI = child as SGCAirmanAI
 			if a != null and is_instance_valid(a):
 				result.append(a)
 	else:
-		var airmen_nodes: Array[Node] = get_tree().get_nodes_in_group("airmen")
+		var airmen_nodes: Array[Node] = MissionWorld.in_group(self, &"airmen")
 		for node: Node in airmen_nodes:
 			var a: SGCAirmanAI = node as SGCAirmanAI
 			if a != null and is_instance_valid(a):
@@ -1110,7 +1110,7 @@ func _get_allied_airmen() -> Array[SGCAirmanAI]:
 
 
 func _get_human_pointman() -> PlayerController3D:
-	var players_container: Node = get_tree().root.find_child("Players", true, false)
+	var players_container: Node = MissionWorld.find(self, "Players")
 	if players_container != null:
 		for child: Node in players_container.get_children():
 			var p: PlayerController3D = child as PlayerController3D
@@ -1121,7 +1121,7 @@ func _get_human_pointman() -> PlayerController3D:
 
 func _count_hostiles_in_sector(sec: String) -> int:
 	var count: int = 0
-	var enemies_container: Node = get_tree().root.find_child("Enemies", true, false)
+	var enemies_container: Node = MissionWorld.find(self, "Enemies")
 	if enemies_container != null:
 		for child: Node in enemies_container.get_children():
 			var jaffa: JaffaAI = child as JaffaAI
@@ -1133,7 +1133,7 @@ func _count_hostiles_in_sector(sec: String) -> int:
 
 
 func _get_sector_for_pos(pos: Vector3) -> String:
-	var gr: GateRoom = get_tree().root.find_child("GateRoom", true, false) as GateRoom
+	var gr: GateRoom = MissionWorld.find(self, "GateRoom") as GateRoom
 	if gr != null:
 		return gr.get_current_sector(pos)
 	if pos.x >= -7.5 and pos.x <= 7.5 and pos.z >= 7.8 and pos.z <= 22.0:
@@ -1152,7 +1152,7 @@ func _get_current_sector() -> String:
 
 
 func _find_nearest_jaffa() -> void:
-	var enemies_container: Node = get_tree().root.find_child("Enemies", true, false)
+	var enemies_container: Node = MissionWorld.find(self, "Enemies")
 	if enemies_container == null:
 		current_target_jaffa = null
 		return
@@ -1170,7 +1170,7 @@ func _find_nearest_jaffa() -> void:
 
 
 func _find_nearest_downed_player() -> PlayerController3D:
-	var players_container: Node = get_tree().root.find_child("Players", true, false)
+	var players_container: Node = MissionWorld.find(self, "Players")
 	if players_container == null:
 		return null
 
@@ -1183,14 +1183,14 @@ func _find_nearest_downed_player() -> PlayerController3D:
 
 func _find_available_turret() -> DeployableTurret:
 	var candidates: Array[DeployableTurret] = []
-	var mounted_turret_nodes: Array[Node] = get_tree().get_nodes_in_group("mounted_turret")
+	var mounted_turret_nodes: Array[Node] = MissionWorld.in_group(self, &"mounted_turret")
 	for node: Node in mounted_turret_nodes:
 		var t: DeployableTurret = node as DeployableTurret
 		if t != null and is_instance_valid(t) and t.mounted_player == null:
 			if not candidates.has(t):
 				candidates.append(t)
 
-	var turret_nodes: Array[Node] = get_tree().get_nodes_in_group("turret")
+	var turret_nodes: Array[Node] = MissionWorld.in_group(self, &"turret")
 	for node: Node in turret_nodes:
 		var t: DeployableTurret = node as DeployableTurret
 		if t != null and is_instance_valid(t) and t.mounted_player == null:
@@ -1198,13 +1198,13 @@ func _find_available_turret() -> DeployableTurret:
 				candidates.append(t)
 
 	# Named bunker geometry turrets
-	var west: DeployableTurret = get_tree().root.find_child("TurretWest", true, false) as DeployableTurret
+	var west: DeployableTurret = MissionWorld.find(self, "TurretWest") as DeployableTurret
 	if west != null and is_instance_valid(west) and west.mounted_player == null and not candidates.has(west):
 		candidates.append(west)
-	var east: DeployableTurret = get_tree().root.find_child("TurretEast", true, false) as DeployableTurret
+	var east: DeployableTurret = MissionWorld.find(self, "TurretEast") as DeployableTurret
 	if east != null and is_instance_valid(east) and east.mounted_player == null and not candidates.has(east):
 		candidates.append(east)
-	var hallway: DeployableTurret = get_tree().root.find_child("FixedTurretHallway", true, false) as DeployableTurret
+	var hallway: DeployableTurret = MissionWorld.find(self, "FixedTurretHallway") as DeployableTurret
 	if hallway != null and is_instance_valid(hallway) and hallway.mounted_player == null and not candidates.has(hallway):
 		candidates.append(hallway)
 
