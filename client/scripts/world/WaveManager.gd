@@ -170,6 +170,10 @@ func end_mission() -> void:
 	is_wave_active = false
 	is_wormhole_open = false
 	is_intermission = false
+	# A client whose host has gone ends its mission on the way back to the lobby. It has no
+	# peer by then, and asking whether it is the server without one logs an engine error.
+	if not multiplayer.has_multiplayer_peer():
+		return
 	var gate: StargateRing = _gate()
 	if gate != null and multiplayer.is_server():
 		gate.close_wormhole()

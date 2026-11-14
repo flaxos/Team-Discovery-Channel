@@ -585,6 +585,9 @@ func _on_player_child_entered(node: Node) -> void:
 
 
 func _check_squad_status(id: int = 0) -> void:
+	# The host may have gone, or this world may be on its way out: there is nobody to tell.
+	if not is_inside_tree() or not multiplayer.has_multiplayer_peer():
+		return
 	if not multiplayer.is_server():
 		var local_id: int = multiplayer.get_unique_id()
 		var local: PlayerController3D = players_container.get_node_or_null(str(local_id)) as PlayerController3D
