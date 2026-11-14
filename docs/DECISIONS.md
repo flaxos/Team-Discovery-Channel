@@ -22,6 +22,7 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 | D-012 | Faction art is built in the engine by agents | Accepted |
 | D-013 | Players may be in different worlds at once | Accepted (requirement); strategy open |
 | D-014 | Phase 1 to 3 gates accepted on a solo owner session | Accepted |
+| D-015 | Jaffa armour is matte, not metallic | Accepted |
 
 ---
 
@@ -126,3 +127,12 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 **Record.** [Owner solo UAT, 14 November 2026](reviews/2026-11-14-owner-solo-uat.md), as D-011 requires. It lists which checklist items the log shows, which rest on the owner's statement, and which were not run.
 
 **What this does not establish.** Two-player behaviour on a human run: late join, shared extraction, revive and alert spread between players are covered by automated suites only. The quiet route was attempted once and failed. Tuning values remain provisional.
+
+## D-015 — Jaffa armour finish
+
+**Accepted (owner, 14 November 2026).** The armour and crest materials of `JaffaGuard.tscn` and `JaffaShockGuard.tscn` have no metallic term. The staff weapon is unchanged.
+
+**Why.** No mission has a sky or a reflection probe, so a metallic surface has nothing to reflect and loses its albedo: gold armour rendered dark olive everywhere. Against the Goa'uld walls that measured 1.1 to 1.3 : 1, worse than against the neutral walls it replaced (1.9 : 1). Matte, it measures 3.6 to 5.0 : 1. Sentries must be visible before they are alerted, when they carry no marker. Measurements and captures: [kit guide](maps/goauld-theme-kit.md#readability-measured).
+
+**Consequences.** Jaffa are brighter in every mission, SGC Defense included. A unit test keeps the term at zero. If a lighting pass later adds reflections, a small metallic term can be reconsidered then.
+

@@ -8,15 +8,15 @@ Sizes below are relative effort, not dates. Nothing in this file is a delivery c
 
 ## Start here
 
-**State on 14 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. The last full local run was **77/77** and hosted CI is green on `main`.
+**State on 14 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. The last full local run was **78/78** (GA-1 branch); hosted CI is green on `main`.
 
-Two owner decisions on 14 November shape what follows: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)), which reopens the gate-travel strategy.
+Two owner decisions on 14 November shape what follows: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)), which reopens the gate-travel strategy. A third, matte Jaffa armour ([D-015](docs/DECISIONS.md)), came out of building the art.
 
 ### Pick up here
 
 | Option | What | Who | Detail |
 |---|---|---|---|
-| **A. GA-1 Goa'uld vertical slice** *(next)* | The palette on every room of the compound, and built pieces for the narrow corridor, the door lintel and the compact chamber | Fable-class agent | [Goa'uld visual brief](docs/maps/goauld-visual-brief.md#7-what-ga-1-should-do-with-this); milestone GA-1 in the [master plan](docs/plans/master-development-roadmap.md#f--goauld-architecture-and-visual-identity) |
+| **A. Review GA-1, then GA-2 part 1** | GA-1 is built: the palette on all 20 rooms of the compound and pieces on 8. **A person has not looked at it yet.** Jaffa armour became matte gold in the same change so that they stand out from the dark walls ([D-015](docs/DECISIONS.md)). Then extend the kit to the T-junction, corners, wide corridor and adapter | An owner to review; then a Fable-class agent | [Kit guide: human review](docs/maps/goauld-theme-kit.md#human-review-pending); order of rooms in the [brief](docs/maps/goauld-visual-brief.md#42-by-module-which-is-the-order-art-should-follow) |
 | **B. GT-0 split-world travel design** | A design for gate travel in which players can be in different worlds; documentation only. GT-1 is paused until it exists | Fable-class agent | [D-013](docs/DECISIONS.md); [next work, part C](docs/plans/next-work-packages.md#c-package-5--gt-1-mission-session-state-and-host-split) |
 | **C. Two-player sessions** *(deferred by the owner)* | The co-op checklist items no human has run: late join, shared extraction, revive, mixed quiet and loud play | Two humans | [Next work, part A](docs/plans/next-work-packages.md#a-human-play-sessions) |
 
@@ -46,7 +46,8 @@ A and B do not depend on each other. Phase 6 work (EV-2, TA-3, TA-2, CO-1, SW-1)
 | **Playable** | **SGC Defense** (three-floor wave defence, difficulty objectives, dial out and extract). **SGC UAT Base** (the same base, no hostiles). **Modular Extraction UAT** (development slice: reach a room, use a console, return, with five patrolling Jaffa). **Goa'uld Infiltration — Greybox** (stealth testbed: sight-based sentries, a guarded and a quiet route, three objectives, alarm consoles and reinforcements) |
 | **Working systems** | Host/join and dedicated launch, four classes, server-authoritative combat, downing and revive, late join and retry, squad orders, Jaffa and airman AI, sentry perception, compound alert with alarm consoles and reinforcements, gate dialling and iris in the SGC, modular doors |
 | **Content pipeline** | 15 structural modules, 16 room presets, 8 composites, a visual editor, and an AI authoring CLI with a graph planner and topology checks |
-| **Placeholder only** | Faction themes (`goauld`, `asgard`, `tokra`, `replicator`, `tauri_sgc` all render the neutral fallback). Transport rings and the gate preset on modular levels (placed, inert). Several class perks named in the lobby text |
+| **First faction art** | The `goauld` theme: a dark stone, bronze and gold palette on every room, and built pieces (ribbed walls, lintels, floors, coffered ceilings) for the narrow corridor and the compact chamber. Generated in the engine; not yet reviewed by a person. [Kit guide](docs/maps/goauld-theme-kit.md) |
+| **Placeholder only** | The other faction themes (`asgard`, `tokra`, `replicator`, `tauri_sgc` render the neutral fallback). Goa'uld pieces for the other 13 modules. Transport rings and the gate preset on modular levels (placed, inert). Several class perks named in the lobby text |
 | **Not built** | Sound propagation through walls. Gate travel between worlds. Mission stages, triggers and door actions on modular levels. Cover in rooms without low props (bare modules fall back to a marker). Takedowns, Goa'uld shields. Any faction art. Outdoor terrain. Campaign progression |
 | **Accepted by people** | Phases 1 to 3, by one owner playing alone on 14 November 2026 ([record](docs/reviews/2026-11-14-owner-solo-uat.md)). Not yet run by two people: late join, shared extraction, revive, mixed-route play, SGC Defense on the current build |
 
@@ -57,6 +58,7 @@ The full classification, with source paths and tests, is the [capability matrix]
 - **Hosted CI was red on `main` from PR #35 to #41** because one suite could not find the engine on the CI runner. EX-1 repairs the runner; the hosted `Godot full` job passed on PRs #42 and #43.
 - **Jaffa in gate waves still detect through walls** (the assault rule kept for SGC Defense). Patrols on modular missions use sight-based perception (ST-1), a compound alarm (EV-1) and straight-line hearing (ST-2).
 - **Cover on modular levels needs props.** Since TA-1 Jaffa use barricades and crates; rooms without low props still fall back to a room-centre marker.
+- **Ten modules place door headers 0.2 m outside their own cell**, overlapping the neighbouring room's header. Harmless until themed pieces met them; GA-1 works round it (risk R21).
 - **The play machine's checkout is behind `main`** and contains none of milestones EX-1 to GI-2. Play from a separate worktree of `main`: [commands here](docs/plans/next-work-packages.md#get-a-build-to-play).
 
 All 20 items, each checked against current code, are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register).
@@ -133,7 +135,7 @@ Automated suites never satisfy a human gate. The gates were defined for two peop
 | C | Mission scripting and events | EV-1 | ST-1, preferably GI-1 |
 | D | Tactical AI and combat | TA-1 | ST-1 |
 | E | Goa'uld infiltration mission | GI-0 | Now (layout), ST-1 (mission) |
-| F | Goa'uld architecture and visuals | GA-0 (done: [brief](docs/maps/goauld-visual-brief.md)); GA-1 next | Now |
+| F | Goa'uld architecture and visuals | GA-0 and GA-1 done ([brief](docs/maps/goauld-visual-brief.md), [kit](docs/maps/goauld-theme-kit.md)); human review, then GA-2 | Now |
 | G | Stargate world transitions | GT-0 split-world design, then GT-1 | Now (design); GT-1 after the design is accepted |
 | H | Expanded co-op mechanics | CO-1 | GI-1 |
 | I | Special weapons and faction mechanics | SW-1 | ST-2 |
@@ -164,6 +166,7 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | Modular NPC navigation (PR #38) | Production Jaffa and airmen navigate modular levels; patrols; AI door use. |
 | First modular mission (PR #39) | Modular Extraction UAT: data-driven objectives, extraction rule, patrol combat, two shared netcode fixes. 68/68 local checks. |
 | AI level authoring 2.0 (PR #40) | Graph planner, topology checks, six more composites, tactical catalogue metadata, four demonstration maps. 69/69 local checks. |
+| GA-1 (14 November 2026) | The Goa'uld theme kit: palette on all 20 rooms of the infiltration compound, generated pieces on the 8 that use the narrow corridor or compact chamber, per-module coverage reporting, slot-name validation, a capture tool, and readability measured from captures. Collision and navigation proved identical with and without the theme. Found and fixed: metallic surfaces lose their colour in missions, so Jaffa armour rendered dark; it is now matte (D-015). Found and worked round: ten modules place headers outside their own cell (R21). One new suite; 78/78 local checks. |
 | GA-0 (14 November 2026) | Documentation only: the [Goa'uld visual brief](docs/maps/goauld-visual-brief.md) (design language with dimensions and a palette checked against the Jaffa and awareness markers, theme-slot audit with eight gaps, rooms ranked by use, art-method options), the [owner's solo UAT record](docs/reviews/2026-11-14-owner-solo-uat.md) and decisions D-012 to D-014. |
 | Master roadmap (PR #41) | Documentation only: audit, capability matrix, milestone plan, decision log. |
 | GI-0 and GI-1 (PR #44) | Twenty-room two-deck compound planned with the authoring CLI (gate insertion, guarded checkpoint route and quiet service route to the generator, upper command deck, paired rings); fourth selectable mission with six sentries and an automated quiet-route check. |

@@ -86,7 +86,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | AI-assisted planning | Verified | `LevelPlanner`, `plan` command; `test_level_planning`. No fresh-agent benchmark yet |
 | Connectivity and topology checks | Verified | `LevelTopology`, eleven checks, connectivity only |
 | Composite clusters | Verified | Eight composites in `resources/level_composites/` |
-| Theme support | Placeholder for factions | Theme contract and resolver work (`test_level_themes`). Only `neutral` has art; `goauld`, `asgard`, `tokra`, `replicator` and `tauri_sgc` all carry `art_status = "fallback"` |
+| Theme support | Working for `goauld` (first slice); placeholder for the other factions | Theme contract and resolver work (`test_level_themes`). `goauld` has a palette on every module and generated pieces for `Room01Straight` and `Room04Chamber` (GA-1, `test_goauld_theme`, [kit guide](../maps/goauld-theme-kit.md)); not yet reviewed by a person. `asgard`, `tokra`, `replicator` and `tauri_sgc` carry `art_status = "fallback"` |
 | Faction visual assets | Missing | None. The SGC map uses dimensioned placeholders and material briefs |
 | Outdoor terrain, villages | Missing | No terrain, no exterior scenes |
 | Authoring documentation | Verified | [AI authoring guide](../maps/ai-level-authoring.md); catalogue summary 13.7 KB |
@@ -289,7 +289,7 @@ See section 6 for sequencing.
 **GA-0 — Visual brief and slot audit** · S · Codex · documentation and read-only inspection · **done 14 November 2026: [Goa'uld visual brief](../maps/goauld-visual-brief.md)**
 - A written design language (silhouettes, door proportions, rib spacing, palette, lighting mood) and a table of what each theme slot (`wall_panels`, `floor_detail`, `ceiling_detail`, `door_frame`, `room_detail`) actually renders today in `LevelThemeResolver`. Original designs inspired by the setting; no copied production assets.
 
-**GA-1 — Goa'uld vertical slice**
+**GA-1 — Goa'uld vertical slice** · **built 14 November 2026; human capture review pending** · [kit guide](../maps/goauld-theme-kit.md)
 - **Experience:** one stretch of the mission looks like a Goa'uld installation.
 - **Baseline:** `goauld.tres` exists with `art_status = "fallback"`.
 - **New:** themed visuals for one narrow corridor, one door frame and one 8 × 8 m chamber; theme status moved off `fallback` for those modules only.
@@ -411,6 +411,8 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R18 | Class descriptions promise absent kit | New, confirmed | See the class row in section 2 | CO-2 |
 | R19 | Stale limitations in older guides | Confirmed | The navigation guide still listed modular combat as unverified and cover as SGC coordinates, both superseded by PR #39. Corrected with dated notes in this change | Done here |
 | R20 | Authoring tools untested by a fresh agent | Outstanding | Stated in the authoring review | GI-0 doubles as that test if run by a new session |
+| R21 | Module headers outside their own cell | New, confirmed (GA-1) | The north and south headers of `Room05` to `Room13`, `Room15` and `Room16` are centred 0.1 m beyond the cell edge and overlap the adjoining room's header. Invisible with one material; flickers against a themed lintel. GA-1 stands lintel gold 5 mm proud | A structural pass on those ten modules, with collision and enclosure re-verified; before GA-2 reaches them |
+| R22 | Jaffa armour rendered dark | Fixed (GA-1, D-015) | `JaffaGuard.tscn` and `JaffaShockGuard.tscn` used metallic 0.85 to 0.95. No mission has a sky or reflection probe, so the armour rendered dark olive: 1.1 to 1.3 : 1 against Goa'uld walls. Now matte, about 5 : 1. Measured in the [kit guide](../maps/goauld-theme-kit.md#readability-measured) | Reconsider a small metallic term if the lighting pass adds reflections |
 
 Items verified as **no longer open**: server-owned actors invisible to clients (fixed in PR #39, `configure_mission_sync`), the retry race on client operatives (fixed in PR #39), and "client late join mid-patrol untested" from the navigation guide (now covered).
 

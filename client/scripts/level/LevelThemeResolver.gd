@@ -2,6 +2,8 @@
 class_name LevelThemeResolver
 extends RefCounted
 const DIRECTORY = "res://resources/level_themes/"
+## Every slot a mesh or prop can resolve to: the only valid keys of a theme's materials.
+const SLOTS: PackedStringArray = ["floor", "ceiling", "door_frame", "portal", "wall", "detail", "prop"]
 static var _themes: Dictionary = {}
 static var _theme_files: PackedStringArray = []
 
@@ -113,6 +115,8 @@ static func validate_theme(theme: LevelVisualTheme) -> PackedStringArray:
 		for key: Variant in cursor.materials:
 			if not cursor.materials[key] is Material:
 				errors.append("Invalid theme material: %s/%s" % [cursor.id, key])
+			if not str(key) in SLOTS:
+				errors.append("Unknown theme material slot: %s/%s" % [cursor.id, key])
 		if (
 			cursor.lighting != null
 			and (
@@ -258,10 +262,14 @@ static func lighting(layout: LevelLayout, item: LevelModuleInstance = null) -> L
 	return null
 
 
+## What a room shows. visual_source is the first theme in the chain with art of its own;
+## coverage says how much of this module that theme reaches: "pieces" when it has built
+## scenes for this module, "palette" when it only recolours the slabs, "generic" otherwise.
 static func describe(layout: LevelLayout, item: LevelModuleInstance) -> Dictionary:
 	var theme := selected(layout, item)
 	var names := PackedStringArray()
 	var visual_source: StringName = &"generic"
+	var coverage := "generic"
 	for value in chain(theme):
 		names.append(str(value.id))
 		if (
@@ -270,12 +278,28 @@ static func describe(layout: LevelLayout, item: LevelModuleInstance) -> Dictiona
 			and value.art_status != "fallback"
 		):
 			visual_source = value.id
+			coverage = "pieces" if pieces(value, item) > 0 else "palette"
 	return {
 		"requested": str(theme.id),
 		"visual_source": str(visual_source),
+		"coverage": coverage,
 		"fallback_chain": names,
 		"art_status": theme.art_status
 	}
+
+
+## Built scenes a theme has for this room's module (its own, not its fallbacks').
+static func pieces(theme: LevelVisualTheme, item: LevelModuleInstance) -> int:
+	var count := 0
+	for variant in theme.variants:
+		if (
+			variant != null
+			and not variant.scene_path.is_empty()
+			and ResourceLoader.exists(variant.scene_path)
+			and (variant.module_ids.is_empty() or str(item.module.id) in variant.module_ids)
+		):
+			count += 1
+	return count
 
 
 static func apply(

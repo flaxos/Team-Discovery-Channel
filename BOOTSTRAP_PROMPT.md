@@ -34,7 +34,7 @@ Use existing dimensioned art slots and material briefs. Replacement visuals pres
 python3 tools/run_godot_tests.py --profile full --timeout 240
 ```
 
-The last recorded full local run passed 77 checks at PR #49 (earlier baselines: 69 at PR #40, 51 at `a720594`); consult current output rather than copying any claim to untested work. After pushing, check the hosted run with `gh pr checks`: it is slower than the development machine and has failed where local runs passed. Tests reject errors/assertions/leaks even with exit zero. Use targeted checks while developing, then required regression coverage. Follow the documented graphical and two-human UAT route; headless checks do not establish visual quality or game feel.
+The last recorded full local run passed 78 checks on the GA-1 branch (earlier baselines: 77 at PR #49, 69 at PR #40, 51 at `a720594`); consult current output rather than copying any claim to untested work. After pushing, check the hosted run with `gh pr checks`: it is slower than the development machine and has failed where local runs passed. Tests reject errors/assertions/leaks even with exit zero. Use targeted checks while developing, then required regression coverage. Follow the documented graphical and two-human UAT route; headless checks do not establish visual quality or game feel.
 
 Update maintained docs and PR descriptions for the final behavior. Keep generated vote snapshots separate. Preserve historical findings as dated records. Describe what changed, what was verified and what human acceptance remains. Do not expand into offworld theaters, new netcode or bespoke art merely because old planning text mentions them; planned expansion is sequenced in the [roadmap](ROADMAP.md) and starts from its work packages.
 

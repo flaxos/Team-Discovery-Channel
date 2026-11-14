@@ -32,7 +32,8 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Modular extraction mission](maps/modular-extraction-mission.md) | First playable modular mission: objectives, extraction rule, Jaffa combat, tests, human checklist and travel blockers. |
 | [Goa'uld infiltration mission](maps/goauld-infiltration-mission.md) | Greybox stealth mission: compound layout and requirements, objectives, patrols, quiet and guarded routes, tests, human checklist. |
 | [Compound alert, alarms and reinforcements](maps/mission-alert.md) | EV-1: alert levels, alarm runners and consoles, reinforcement budget, mission data, netcode, tests. |
-| [Goa'uld visual brief](maps/goauld-visual-brief.md) | GA-0: design language with dimensions and palette, theme-slot audit and gaps, rooms ranked by use, art-method options. The target for GA-1. |
+| [Goa'uld visual brief](maps/goauld-visual-brief.md) | GA-0: design language with dimensions and palette, theme-slot audit and gaps, rooms ranked by use, art-method options. The target for GA-1, with what building it corrected. |
+| [Goa'uld theme kit](maps/goauld-theme-kit.md) | GA-1: what is themed, the generator and how to extend it, coverage reporting, readability measured from captures, tests, the capture tool and the pending human review. |
 | [Modular NPC navigation](maps/modular-npc-navigation.md) | Production Jaffa/airman navigation, patrols, AI door use, demo scene and limitations. |
 
 ## Level authoring

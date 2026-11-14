@@ -1,6 +1,8 @@
 # Goa'uld visual brief and theme-slot audit (GA-0)
 
-Written 14 November 2026 against `main` at `ce9ad71`. This is the target for the first themed slice (GA-1) and for the kit expansion after it (GA-2). It changes no code, scene, resource or test.
+Written 14 November 2026 against `main` at `ce9ad71` as the target for the first themed slice (GA-1) and for the kit expansion after it (GA-2).
+
+**GA-1 has since been built to it.** What exists, how to regenerate it, and readability measured from captures are in the [Goa'uld theme kit guide](goauld-theme-kit.md). Building it corrected this brief in five places, each marked *As built* below. The audit in section 3 describes the code before GA-1; gaps G-1, G-6 and G-7 are closed.
 
 **Art method (decided 14 November 2026, [D-012](../DECISIONS.md)):** pieces are built in the engine by agents, from primitive meshes and materials, behind the existing theme slots. Section 6 keeps the alternatives for the record.
 
@@ -40,12 +42,12 @@ Colours are Godot `Color(r, g, b)` values as written in a `.tres`, with their he
 | Role | Theme slot | Colour | Hex | L | Metallic / roughness |
 |---|---|---|---|---|---|
 | Wall field (basalt) | `wall` | `Color(0.16, 0.13, 0.11)` | `#29211c` | 0.016 | 0.0 / 0.85 |
-| Rib, plinth, lintel (aged bronze) | part of the wall and header pieces | `Color(0.30, 0.22, 0.13)` | `#4c3821` | 0.045 | 0.6 / 0.5 |
-| Frieze accent (gold) | part of the wall and header pieces, above 2.8 m only | `Color(0.66, 0.49, 0.18)` | `#a87d2e` | 0.232 | 0.8 / 0.35 |
+| Rib, plinth, lintel (aged bronze) | part of the wall and header pieces | `Color(0.30, 0.22, 0.13)` | `#4c3821` | 0.045 | 0.0 / 0.5 |
+| Frieze accent (gold) | part of the wall and header pieces, above 2.8 m only | `Color(0.66, 0.49, 0.18)` | `#a87d2e` | 0.232 | 0.0 / 0.35 |
 | Floor margin | `floor` | `Color(0.11, 0.10, 0.10)` | `#1c1a1a` | 0.010 | 0.0 / 0.45 |
 | Floor runner | part of the floor piece | `Color(0.21, 0.18, 0.14)` | `#362e24` | 0.028 | 0.0 / 0.6 |
 | Ceiling | `ceiling` | `Color(0.08, 0.07, 0.07)` | `#141212` | 0.006 | 0.0 / 0.9 |
-| Sealed opening | `portal` | `Color(0.13, 0.11, 0.10)` | `#211c1a` | 0.012 | 0.2 / 0.7 |
+| Sealed opening | `portal` | `Color(0.13, 0.11, 0.10)` | `#211c1a` | 0.012 | 0.0 / 0.7 |
 | Cover and placeholder props (sandstone) | `prop` | `Color(0.50, 0.43, 0.32)` | `#806e52` | 0.162 | 0.0 / 0.8 |
 
 Rules a reviewer can check:
@@ -53,7 +55,9 @@ Rules a reviewer can check:
 1. No surface below 2.8 m has L above 0.05, except props.
 2. Gold (L above 0.2) is never below 2.8 m, and covers no more than 15% of a wall piece's visible face. The one larger gold shape is the cartouche block on a door lintel.
 3. Props are the lightest large shapes at floor level: at least 2.5 : 1 against both floor colours and the wall field (they measure 3.5, 2.7 and 3.2).
-4. Surfaces are flat colour with metallic and roughness only. No textures in GA-1; a texture pass belongs to GA-2 once the shapes are approved.
+4. Surfaces are flat colour with roughness only. No textures in GA-1; a texture pass belongs to GA-2 once the shapes are approved.
+
+*As built:* the first draft gave bronze and gold a metallic term (0.6 and 0.8). A mission has no sky or reflection probe, so those surfaces lost their albedo and the two rendered the same dull brown. Nothing in the kit is metallic.
 
 ### 2.4 Wall rhythm
 
@@ -88,14 +92,16 @@ A reviewer should be able to choose and check each of these from this section al
 
 - Box: 3.0 × 0.6 × 0.2 m. A bronze lintel, flush, carrying the same gold band at the same height as the frieze.
 - A centred cartouche block 1.0 m wide and the full 0.6 m high, gold, flush with the lintel face; the lintel either side of it is recessed 0.04 m so the block reads as a keystone.
+- *As built:* the gold block and band stand 5 mm proud of the slab and the block stops 2 cm above the soffit, so that they are drawn in front of a neighbouring module's header where one overlaps the lintel (gap G-9).
 - In a chamber the jambs are the ends of the wall segments (piece C). In a corridor the opening is the full corridor width and there are no jambs; the last half panels of piece A stand in for them.
 - The opening stays 3.0 × 2.8 m. A tapered or trapezoid doorway is not possible: it would put visuals inside the opening the door leaf and the players use.
 
 **Piece C: chamber wall segment** (`Room04Chamber`, meshes `Wall2` to `Wall9`)
 
-- Box: 0.2 × 3.4 × 2.5 m. Eight per chamber: two on each side, flanking the 3 m door opening. One scene, turned in quarter-turns.
-- A 0.4 m rib at each end of the segment. At the door end it is the jamb; at the corner end two ribs meet and read as a corner pier. The piece is symmetric so it never needs mirroring.
-- One panel 1.7 m wide between the ribs, recessed 0.10 m between 0.6 m and 2.8 m. Plinth, frieze and gold band as piece A.
+- Box: 0.2 × 3.4 × 2.5 m. Eight per chamber: two on each side, flanking the 3 m door opening.
+- A 0.4 m jamb at the door end, bronze through the full depth of the slab so the door reveal is one colour.
+- A pier at the corner end. *As built:* 0.6 m long, because the last 0.2 m of each segment is inside the wall it meets; a 0.4 m rib there would have shown only 0.2 m. The piece is therefore not symmetric, and there are two scenes, one the mirror of the other.
+- One panel 1.5 m wide between them, recessed 0.10 m between 0.6 m and 2.8 m. Plinth, frieze and gold band as piece A.
 
 **Piece D: floors** (`Floor0` of both modules)
 
@@ -106,7 +112,8 @@ A reviewer should be able to choose and check each of these from this section al
 **Piece E: ceilings** (`Roof0` of both modules)
 
 - Corridor: 3.0 × 0.2 × 8.0 m. Chamber: 8.0 × 0.2 × 8.0 m.
-- Transverse beams 0.4 m wide on the same 2 m grid as the wall ribs, flush with the slab's lower face; the bays between them recessed 0.10 m upward. Ribs and beams then line up as portal frames down a corridor.
+- Corridor: transverse beams 0.4 m wide on the same 2 m grid as the wall ribs, flush with the slab's lower face; the bays between them recessed 0.10 m upward. Ribs and beams then line up as portal frames down a corridor.
+- *As built:* a chamber's beams spring from the door jambs (±1.7 m) in both directions, which frames a centre bay the width of the doors; the 2 m grid lines up with nothing in a chamber. Every ceiling also has a flush border round its edge (0.2 m visible), because a bay that reached the edge left a slit above the walls, open to the outside.
 
 Counts for GA-1: two wall variants, two header variants, a floor and a ceiling for the corridor; eight wall variants, four header variants, a floor and a ceiling for the chamber. Section 3.3 explains why each mesh needs its own variant entry.
 
@@ -168,6 +175,8 @@ Two further resolver slots are not in the declared list:
 | G-7 | A test asserts the current fallback | [`test_level_themes.gd:35`](../../client/tests/test_level_themes.gd#L35) expects `visual_source == "neutral"` for every faction | GA-1 must change that assertion for `goauld` on purpose, in the same commit as the theme |
 | G-8 | Tall rooms are single slabs | Ramp walls are one 7.4 m piece, the transport chamber's 10.4 m, the hangar's 12 m | The frieze-at-2.8 m rule needs a second tier for these. GA-2, not GA-1 |
 
+| G-9 | Ten modules place headers outside their own cell | *Found while building GA-1.* The north and south `Header*` meshes of `Room05` to `Room13`, `Room15` and `Room16` are centred 0.1 m beyond the cell edge, inside the slab where the adjoining room's own header is. `Room01` to `Room04` and `Room14` keep theirs inside | Invisible while both use one material; against a built lintel the two flickered. GA-1 stands the lintel's gold 5 mm proud so it wins. Moving the headers changes collision in ten modules and is a separate structural task (risk R21) |
+
 None of these blocks GA-1. G-1, G-6 and G-7 are small changes GA-1 should make; G-4 decides how GA-1 is built (a generator).
 
 ## 4. Which rooms matter
@@ -223,6 +232,8 @@ Recommended GA-2 parts, in order: (1) the remaining corridor family, which reuse
 
 These are requirements on GA-1, checked against the palette in section 2.3. Contrast ratios are (L₁ + 0.05) / (L₂ + 0.05).
 
+**The table below is calculated from stated colours. Measured values from captures are in the [kit guide](goauld-theme-kit.md#readability-measured), and two rows did not hold up:** Jaffa armour was metallic and rendered far darker than its stated gold, so against the dark walls it measured 1.1 to 1.3 : 1, worse than against neutral walls (1.9 : 1), until the armour was made matte ([D-015](../DECISIONS.md); now 3.6 to 5.0 : 1); and a door leaf against the bronze jamb beside it measures 1.0 : 1 by brightness. The markers and cover measured as predicted.
+
 | What must stay readable | Its colour | Against neutral walls today | Against the Goa'uld wall field | Against the bronze ribs | Against gold |
 |---|---|---|---|---|---|
 | Suspicion marker **?** | yellow, [`JaffaAI.gd:435`](../../client/scripts/entities/JaffaAI.gd#L435) | 4.7 | 11.4 | 8.0 | 2.7 |
@@ -235,7 +246,7 @@ These are requirements on GA-1, checked against the palette in section 2.3. Cont
 
 What follows from the table:
 
-1. **Every marker and the Jaffa read better against the dark palette than they do today.** The risk the master plan lists for GA-1 (doors and cover lost under a dark palette) does not materialise for these values, provided rule 2 below holds.
+1. **Every marker reads better against the dark palette than it does today.** *As built:* the same was predicted for the Jaffa and was false while their armour was metallic; see the note above.
 2. **Gold must stay above 2.8 m.** Against gold, the red and magenta markers and the Jaffa themselves are near 1 : 1. The markers are drawn at about 2.2 to 2.7 m, so the frieze must not come lower.
 3. **Doors are the weakest item** at about 2 : 1. A door is a 3 × 2.8 m shape set in a dark wall under a gold lintel, so shape and position carry it. If the human capture review finds doors hard to pick out, the remedy is the `door` slot of G-2, not a lighter wall.
 4. **Cover must be findable at a glance**, because both players and Jaffa use it ([`LevelNavigator.gd:85-99`](../../client/scripts/level/LevelNavigator.gd#L85)). Props are the only light shapes at floor level. Their size and collision do not change.
@@ -255,10 +266,12 @@ These are calculations on flat colours. They do not replace looking at it: GA-1'
 
 A now does not rule out C. If an artist joins, section 2.5's boxes are their brief.
 
-## 7. What GA-1 should do with this
+## 7. What GA-1 did with this
 
-1. Add the palette to `goauld.tres` as `materials` under the resolver's slot names (G-1). This alone themes all 20 rooms.
-2. Write a small generator that produces pieces A to E as cosmetic scenes and the 20 variant entries for `Room01Straight` and `Room04Chamber` (G-4).
-3. Report status per module (G-6) and change the one test that asserts the fallback (G-7).
-4. Prove that collision and navigation output are identical with and without the theme, and capture the corridor, a door and the chamber for a person to review.
-5. Leave lighting (G-3), door leaves (G-2), free-standing decoration (G-5) and tall rooms (G-8) alone.
+1. The palette is in `goauld.tres` as `materials` under the resolver's slot names (G-1), which themes all 20 rooms.
+2. `tools/theme_kit.py` generates pieces A to E as cosmetic scenes and the 20 variant entries for `Room01Straight` and `Room04Chamber` (G-4).
+3. `describe` reports coverage per module (G-6), `validate_theme` rejects unknown material keys (G-1), and the two tests that asserted the fallback were changed (G-7).
+4. `test_goauld_theme` proves collision and navigation are identical with and without the theme; captures of the corridor, a door and the chamber are in `docs/reviews/ga1-captures/` for a person to review.
+5. Lighting (G-3), door leaves (G-2), free-standing decoration (G-5), tall rooms (G-8) and the header overlap (G-9) are untouched.
+
+Details: [Goa'uld theme kit guide](goauld-theme-kit.md).

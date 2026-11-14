@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("bronze")
+size = Vector3(0.16, 0.6, 3)
+
+[sub_resource type="BoxMesh" id="m1"]
+material = ExtResource("gold")
+size = Vector3(0.045, 0.58, 1)
+
+[sub_resource type="BoxMesh" id="m2"]
+material = ExtResource("gold")
+size = Vector3(0.045, 0.12, 1)
+
+[sub_resource type="BoxMesh" id="m3"]
+material = ExtResource("gold")
+size = Vector3(0.045, 0.12, 1)
+
+[node name="Lintel" type="Node3D"]
+
+[node name="Back" type="MeshInstance3D" parent="."]
+position = Vector3(-0.02, 0, 0)
+mesh = SubResource("m0")
+
+[node name="Cartouche" type="MeshInstance3D" parent="."]
+position = Vector3(0.0825, 0.01, 0)
+mesh = SubResource("m1")
+
+[node name="BandA" type="MeshInstance3D" parent="."]
+position = Vector3(0.0825, 0, -1)
+mesh = SubResource("m2")
+
+[node name="BandB" type="MeshInstance3D" parent="."]
+position = Vector3(0.0825, 0, 1)
+mesh = SubResource("m3")

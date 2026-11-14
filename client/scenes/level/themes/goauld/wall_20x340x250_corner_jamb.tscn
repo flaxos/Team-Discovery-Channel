@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("basalt")
+size = Vector3(0.1, 3.4, 2.1)
+
+[sub_resource type="BoxMesh" id="m1"]
+material = ExtResource("bronze")
+size = Vector3(0.1, 3.4, 0.4)
+
+[sub_resource type="BoxMesh" id="m2"]
+material = ExtResource("bronze")
+size = Vector3(0.1, 0.6, 2.5)
+
+[sub_resource type="BoxMesh" id="m3"]
+material = ExtResource("bronze")
+size = Vector3(0.1, 2.2, 0.6)
+
+[sub_resource type="BoxMesh" id="m4"]
+material = ExtResource("bronze")
+size = Vector3(0.1, 2.2, 0.4)
+
+[sub_resource type="BoxMesh" id="m5"]
+material = ExtResource("bronze")
+size = Vector3(0.1, 0.24, 2.5)
+
+[sub_resource type="BoxMesh" id="m6"]
+material = ExtResource("gold")
+size = Vector3(0.1, 0.12, 2.5)
+
+[sub_resource type="BoxMesh" id="m7"]
+material = ExtResource("bronze")
+size = Vector3(0.1, 0.24, 2.5)
+
+[node name="Wall" type="Node3D"]
+
+[node name="Back0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.05, 0, -0.2)
+mesh = SubResource("m0")
+
+[node name="Reveal1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.05, 0, 1.05)
+mesh = SubResource("m1")
+
+[node name="Plinth" type="MeshInstance3D" parent="."]
+position = Vector3(0.05, -1.4, 0)
+mesh = SubResource("m2")
+
+[node name="Pier0" type="MeshInstance3D" parent="."]
+position = Vector3(0.05, 0, -0.95)
+mesh = SubResource("m3")
+
+[node name="Jamb1" type="MeshInstance3D" parent="."]
+position = Vector3(0.05, 0, 1.05)
+mesh = SubResource("m4")
+
+[node name="FriezeLower" type="MeshInstance3D" parent="."]
+position = Vector3(0.05, 1.22, 0)
+mesh = SubResource("m5")
+
+[node name="Band" type="MeshInstance3D" parent="."]
+position = Vector3(0.05, 1.4, 0)
+mesh = SubResource("m6")
+
+[node name="FriezeUpper" type="MeshInstance3D" parent="."]
+position = Vector3(0.05, 1.58, 0)
+mesh = SubResource("m7")

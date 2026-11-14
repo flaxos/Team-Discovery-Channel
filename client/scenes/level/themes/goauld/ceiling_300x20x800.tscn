@@ -1,0 +1,78 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/ceiling.tres" id="ceiling"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("ceiling")
+size = Vector3(3, 0.1, 8)
+
+[sub_resource type="BoxMesh" id="m1"]
+material = ExtResource("bronze")
+size = Vector3(3, 0.1, 0.2)
+
+[sub_resource type="BoxMesh" id="m2"]
+material = ExtResource("bronze")
+size = Vector3(3, 0.1, 0.2)
+
+[sub_resource type="BoxMesh" id="m3"]
+material = ExtResource("bronze")
+size = Vector3(0.2, 0.1, 7.6)
+
+[sub_resource type="BoxMesh" id="m4"]
+material = ExtResource("bronze")
+size = Vector3(0.2, 0.1, 7.6)
+
+[sub_resource type="BoxMesh" id="m5"]
+material = ExtResource("bronze")
+size = Vector3(2.6, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m6"]
+material = ExtResource("bronze")
+size = Vector3(2.6, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m7"]
+material = ExtResource("bronze")
+size = Vector3(2.6, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m8"]
+material = ExtResource("bronze")
+size = Vector3(2.6, 0.1, 0.4)
+
+[node name="Ceiling" type="Node3D"]
+
+[node name="Bays" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.05, 0)
+mesh = SubResource("m0")
+
+[node name="BorderNorth" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, -3.9)
+mesh = SubResource("m1")
+
+[node name="BorderSouth" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 3.9)
+mesh = SubResource("m2")
+
+[node name="BorderWest" type="MeshInstance3D" parent="."]
+position = Vector3(-1.4, -0.05, 0)
+mesh = SubResource("m3")
+
+[node name="BorderEast" type="MeshInstance3D" parent="."]
+position = Vector3(1.4, -0.05, 0)
+mesh = SubResource("m4")
+
+[node name="Beam0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, -3)
+mesh = SubResource("m5")
+
+[node name="Beam1" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, -1)
+mesh = SubResource("m6")
+
+[node name="Beam2" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 1)
+mesh = SubResource("m7")
+
+[node name="Beam3" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 3)
+mesh = SubResource("m8")

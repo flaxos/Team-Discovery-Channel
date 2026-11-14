@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/floor_margin.tres" id="floor_margin"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/floor_runner.tres" id="floor_runner"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("floor_margin")
+size = Vector3(0.7, 0.2, 8)
+
+[sub_resource type="BoxMesh" id="m1"]
+material = ExtResource("floor_runner")
+size = Vector3(1.6, 0.2, 8)
+
+[sub_resource type="BoxMesh" id="m2"]
+material = ExtResource("floor_margin")
+size = Vector3(0.7, 0.2, 8)
+
+[node name="Floor" type="Node3D"]
+
+[node name="MarginA" type="MeshInstance3D" parent="."]
+position = Vector3(-1.15, 0, 0)
+mesh = SubResource("m0")
+
+[node name="Runner" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("m1")
+
+[node name="MarginB" type="MeshInstance3D" parent="."]
+position = Vector3(1.15, 0, 0)
+mesh = SubResource("m2")
