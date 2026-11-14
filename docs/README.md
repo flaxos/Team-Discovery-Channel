@@ -10,6 +10,7 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Next work](plans/next-work-packages.md) | **Where to resume.** Human play sessions with run instructions and tuning table, then the next two agent packages (GA-0, GT-1) with handoff prompts, and how to merge dependent PRs. |
 | [Master development plan](plans/master-development-roadmap.md) | Capability matrix with evidence, dependency graph, every milestone, the art and content track, the risk register and three agent-ready work packages. |
 | [Decision log](DECISIONS.md) | Architectural and direction decisions, with status and open questions. |
+| [Gate travel with a split team](plans/gate-travel-split-worlds.md) | The design for travelling between the SGC and an offworld site when players need not travel together: the owners' rules, what the code does today, the experiment, the strategy, edge cases and milestones GT-1 to GT-3. |
 | [Game design](../GDD.md) | Part 1: the game as implemented. Part 2: the intended game. |
 | [Project README](../README.md) | Quick launch and developer entry points. |
 
