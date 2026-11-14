@@ -136,7 +136,7 @@ Automated suites never satisfy a human gate. The gates were defined for two peop
 | D | Tactical AI and combat | TA-1 | ST-1 |
 | E | Goa'uld infiltration mission | GI-0 | Now (layout), ST-1 (mission) |
 | F | Goa'uld architecture and visuals | GA-0 and GA-1 done ([brief](docs/maps/goauld-visual-brief.md), [kit](docs/maps/goauld-theme-kit.md)); human review, then GA-2 | Now |
-| G | Stargate world transitions | GT-2 outbound travel, then GT-3 | Now: the design (GT-0) and coexisting worlds (GT-1) are done |
+| G | Stargate world transitions | GT-2 done, then GT-3 return & debrief | GT-2 complete; GT-3 next |
 | H | Expanded co-op mechanics | CO-1 | GI-1 |
 | I | Special weapons and faction mechanics | SW-1 | ST-2 |
 | J | Outdoor world construction | OW-0 | Any time; design spike only |
@@ -166,6 +166,7 @@ Earlier sprint numbers describe the order of development, not current geometry o
 | Modular NPC navigation (PR #38) | Production Jaffa and airmen navigate modular levels; patrols; AI door use. |
 | First modular mission (PR #39) | Modular Extraction UAT: data-driven objectives, extraction rule, patrol combat, two shared netcode fixes. 68/68 local checks. |
 | AI level authoring 2.0 (PR #40) | Graph planner, topology checks, six more composites, tactical catalogue metadata, four demonstration maps. 69/69 local checks. |
+| GT-2 (14 November 2026) | Outbound gate travel from SGC to offworld compound. `MISSION_TRAVEL_INFILTRATION` selectable mission; SGC outbound dialing and extraction authorization; complete operative state capture and hand-off (health, inventory, weapons, ammo, heat, gadget cooldowns, patch ROM); peer presentation switching; late joiner spawning at home; split-squad failure rule; SGC Mezzanine abort control. Single-process and two-process multiplayer test suites pass cleanly. |
 | GT-1 (14 November 2026) | Worlds that can coexist. `MissionWorld` scopes 63 lookups to the actor's own world; `MissionSession` places operatives, presents one world per peer and loses the mission only when everyone in both worlds is down; the coordinator loads one world or two. A hidden development mission runs the SGC and the compound together. No travel and no visible change. 80/80 local checks. |
 | GT-0 (14 November 2026) | Documentation only: [gate travel with a split team](docs/plans/gate-travel-split-worlds.md). An experiment ran the SGC and the infiltration compound together in one process, 2 km apart, with no errors, and showed the fault to fix first: 48 whole-game lookups, which left a sentry unable to see an operative in front of it. Strategy [D-016](docs/DECISIONS.md); the owners' rules for a split team [D-017](docs/DECISIONS.md). GT-1 to GT-3 rewritten. |
 | GA-1 (14 November 2026) | The Goa'uld theme kit: palette on all 20 rooms of the infiltration compound, generated pieces on the 8 that use the narrow corridor or compact chamber, per-module coverage reporting, slot-name validation, a capture tool, and readability measured from captures. Collision and navigation proved identical with and without the theme. Found and fixed: metallic surfaces lose their colour in missions, so Jaffa armour rendered dark; it is now matte (D-015). Found and worked round: ten modules place headers outside their own cell (R21). One new suite; 78/78 local checks. |

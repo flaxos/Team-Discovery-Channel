@@ -2062,6 +2062,12 @@ func _try_interact() -> void:
 
 		if dialer.current_phase == DHDDialer.DialPhase.INACTIVE:
 			dialer.start_dialing(self)
+		elif dialer.current_phase == DHDDialer.DialPhase.COMPLETE:
+			var world: Node = MissionWorld.of(self)
+			if world != null and world.get("session") != null and sgc != null:
+				sgc.request_abort_mission()
+				return
+			dialer.cancel_dialing()
 		else:
 			dialer.cancel_dialing()
 		return
