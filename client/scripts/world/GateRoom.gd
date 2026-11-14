@@ -198,7 +198,11 @@ func _ready() -> void:
 			sector_adjacency[str(c.to_region)].append(str(c.from_region))
 	_setup_sector_shrouds()
 	if mission_id == SGCNetworkManager.MISSION_SGC_UAT and hud != null:
-		hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
+		var net_chk: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+		if net_chk != null and net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_INFILTRATION:
+			hud.update_objective("TRAVEL MISSION: DIAL STARGATE TO DEPLOY AWAY TEAM", Color(0.4, 0.9, 1.0))
+		else:
+			hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_room_snapshot.rpc_id(1)
 
@@ -675,9 +679,13 @@ func set_presented(on: bool) -> void:
 			holder.environment = null
 
 
-func _on_player_extracted(_player: Node) -> void:
-	if multiplayer.is_server():
-		conclude(true)
+func _on_player_extracted(player: Node) -> void:
+	if not multiplayer.is_server():
+		return
+	if session != null and session.has_method(&"travel_player") and session.worlds.size() > 1:
+		session.travel_player(player as PlayerController3D, self)
+		return
+	conclude(true)
 
 
 func _finish_mission(victory: bool) -> void:
@@ -818,7 +826,12 @@ func sync_observation_shutters(force_closed: bool) -> void:
 
 func _start_foothold_defense() -> void:
 	if mission_id == SGCNetworkManager.MISSION_SGC_UAT:
-		if hud != null: hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
+		if hud != null:
+			var net_chk: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+			if net_chk != null and net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_INFILTRATION:
+				hud.update_objective("TRAVEL MISSION: DIAL STARGATE TO DEPLOY AWAY TEAM", Color(0.4, 0.9, 1.0))
+			else:
+				hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
 		return
 	if wave_manager == null:
 		return

@@ -244,6 +244,20 @@ Built on 14 November 2026. Differences from the list above, and what was found:
 - **The site runs from the start.** Deferring its patrols until the first arrival is left to GT-2, with travel.
 - **Frame cost** is in [section 8a](#8a-measured-cost).
 
+### GT-2 as built
+
+Built on 14 November 2026. Differences from the plan, and what was found:
+
+- **Travel Mission Configuration.** Added `MISSION_TRAVEL_INFILTRATION` (`travel_infiltration`), titled `"Operation Infiltration — SGC to Offworld"`. It pairs SGC Sublevel 28 (`SGCUATBase.tscn`) at the origin with the Goa'uld infiltration compound (`GoauldInfiltrationMission.tscn`) 2,000 m away. Kept hidden by default (`"hidden": true`) so standard lobby item counts in earlier test suites remain strictly invariant, while offering full lobby and CLI execution via `--mission travel_infiltration`.
+- **Dialing and Extraction Hand-off.** Outbound dialing sequence on `SGCDialingConsole` opens the SGC Stargate and authorizes extraction. Stepping into the active event horizon triggers `GateRoom._on_player_extracted`, which delegates to `session.travel_player(player, self)` when multiple worlds coexist.
+- **Carried State Completeness.** `MissionSession.capture_state` and `apply_state` capture and restore the complete operative state: class profile, callsign, current and maximum health, downed/stunned flags and bleedout/stun timers, active weapon slot, primary and secondary weapon status (chamber ammo, reserve ammo, barrel heat, overheat lock), equipment charges (claymores, C4 satchels, .50 cal tripod turret cooldown), and Level 28 Lab patch ROM carriage.
+- **Presentation Synchronization.** Server dispatches `sync_presentation_change.rpc_id` to travelling clients (guarded by active peer validation), and switches presentation immediately for the local peer. Destination world's HUD binds to the newly spawned operative; source world is hidden and muted while physical simulation and replication continue.
+- **Late Joiner Placement.** Late joiners are placed at SGC (`home`) with clean loadouts and can step through the open Stargate to join the away team offworld.
+- **Split-Squad Rules and SGC Abort Control.** Loss occurs only when all operatives across all worlds are neutralized (`MissionSession.evaluate()`). A standing operative at SGC keeps the mission alive even if the entire away team is downed offworld. An operative at SGC Mezzanine dialing console can execute an authoritative mission abort (`SGCDialingConsole.request_abort_mission`), cleanly failing the mission for all connected peers.
+- **Automated Test Coverage.**
+  - `test_gate_travel.gd`: single-process end-to-end verification covering lobby UI, SGC HUD travel objective, carried state persistence, presentation switch, late joiner travel, split-squad failure rule, and dialing console mission abort.
+  - `test_gate_travel_multiplayer.gd`: two-process ENet multiplayer verification covering host and client outbound gate travel, replication across worlds, presentation transitions, and clean disconnect without unproject or RPC node lookup errors.
+
 ## 8a. Measured cost
 
 Measured on the development machine (NVIDIA RTX 3060, 1280 × 720 viewport, vertical sync off) with `client/scripts/world/world_cost.gd`: the host alone, standing in the SGC armoury, ten seconds, two runs each (three for the two-world case).
