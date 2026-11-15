@@ -83,9 +83,9 @@ func run() -> void:
 	root.add_child(main)
 	await frames(3)
 	# A development mission: offered in the lobby only because the flag chose it. The suites
-	# of the listed missions check that a lobby without the flag has four entries.
+	# of the listed missions check that a lobby without the flag has five entries.
 	var lobby := main.current_lobby as LobbyUI
-	assert(lobby.mission_option_button.item_count == 5)
+	assert(lobby.mission_option_button.item_count == 6)
 	assert(lobby.mission_option_button.get_item_metadata(4) == MISSION)
 	assert(lobby.mission_option_button.selected == 4 and lobby.start_game_button.text == "LAUNCH TWO WORLDS (DEV)")
 	assert(net.host_game(0) == OK)

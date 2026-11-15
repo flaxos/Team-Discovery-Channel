@@ -43,7 +43,7 @@ A **world** is one self-contained place: its level, players, enemies, spawners, 
 
 `client/scripts/world/world_cost.gd` measures a mission's frame cost on a display; the figures for one world and two are in [the design](plans/gate-travel-split-worlds.md#8a-measured-cost). The session rebuilds the shadow atlas once after presenting a world, because loading two worlds can leave every shadowed light redrawing each frame.
 
-A single-world mission has no session and behaves as it did. `two_worlds_dev` is a development mission (the quiet SGC and the infiltration compound) that is not listed in the lobby: start it with `--mission two_worlds_dev`. Sentry perception is a component of the enemy controller ([`JaffaPerception`](../client/scripts/entities/JaffaPerception.gd), decision D-004).
+A single-world mission has no session and behaves as it did. `travel_infiltration` (**Operation Infiltration — SGC to Offworld**) is the playable two-world mission combining SGC Sublevel 28 (`home`) and the Goa'uld infiltration compound (`site`) with two-way Stargate travel and SGC debrief; `two_worlds_dev` is a hidden development fixture started with `--mission two_worlds_dev`. Sentry perception is a component of the enemy controller ([`JaffaPerception`](../client/scripts/entities/JaffaPerception.gd), decision D-004).
 
 ## Gate and mission lifecycle
 
