@@ -146,11 +146,17 @@ flowchart TD
 
 ## 5. Licensing, Attribution & Compliance
 
-Every third-party community model or animation imported into the repository must adhere strictly to open-source compliance:
-1. **Asset Manifest:** Recorded in `credits/ATTRIBUTIONS.md` with:
-   - Asset title and creator name.
-   - Original download source URL.
-   - License type (CC0 1.0, CC-BY 3.0, CC-BY 4.0, MIT).
-   - Any modifications made (e.g. LOD simplification, texture rebaking, bone renaming).
-2. **License Text:** Full license terms bundled in `credits/licenses/`.
-3. **No Commercial Exclusives:** No proprietary non-distributable assets that would compromise repository openness or hosted CI builds.
+Every third-party community model or animation imported into the repository must pass a mandatory 7-point provenance and technical check before commit:
+
+1. **Exact Asset URL & Creator:** Recorded in `credits/ATTRIBUTIONS.md` with asset title, creator handle/name, and canonical source URL.
+2. **Verified Licence & Attribution Obligations:** License type (`CC0 1.0`, `CC-BY 3.0`, `CC-BY 4.0`, `MIT`) verified, attribution text recorded in `credits/ATTRIBUTIONS.md`, and full license text bundled in `credits/licenses/`.
+3. **Uploader Rights Confirmation:** Verification that the uploader is the original modeler/creator (not an unverified game-rip repost). Community CC0 / CC-BY models on Sketchfab, OpenGameArt, Kenney, Quaternius, and Poly Haven — including community-modeled CC-BY Stargate props (Stargate rings, DHDs, Zat'nik'tel, Ma'Tok staff, Jaffa helmets) — are permitted by product owner decision (15 Nov 2026) provided creator attribution and CC-BY terms are honoured. Distinguish generic tactical assets from community Stargate fan models in `credits/ATTRIBUTIONS.md`.
+4. **Godot 4.4.1 Compatibility:** Clean headless and Forward+ `.glb` / `.gltf` 2.0 import in Godot 4.4.1 with zero engine errors, OpenGL (`+Y`) normal maps, and Decision D-015 material compliance (`metallic = 0.0` in scenes without reflection probes/sky so albedo remains readable).
+5. **Import Format & Skeleton Requirements:** Static props as self-contained binary `.glb`; rigged characters mapped to `SkeletonProfileHumanoid` (`BoneMap`) with `BoneAttachment3D` sockets (`RightHandSocket`, `LeftHandSocket`, `BackHolsterSocket`).
+6. **Dimensions & Scene Attachment Points:** Exact metric bounding box matching gameplay collision/weapon conventions and explicit `Marker3D` sockets (e.g. `MuzzlePoint` for weapon tracers and muzzle flash).
+7. **Estimated Integration Difficulty:** Tagged `S` (static mesh swap), `M` (multi-part/articulated prop), or `L` (rigged humanoid + `AnimationTree`).
+8. **No Commercial Exclusives:** No proprietary non-distributable assets that would compromise repository openness or hosted CI builds.
+
+### Milestone AP-1a Proof of Concept — **Implemented 15 November 2026**
+- **Delivered:** Ingested two CC0 1.0 weapon `.glb` models from Kenney's Weapon Pack (`client/assets/weapons/p90_smg.glb` and `client/assets/weapons/mp5_silenced.glb`), recorded full provenance in `credits/ATTRIBUTIONS.md` and `credits/licenses/CC0-1.0.txt`, wired `WeaponBase.load_glb_model()` with D-015 `metallic = 0.0` material sanitization and verified `MuzzlePoint` sockets, and added automated verification in `test_stealth_takedowns_and_weapons.gd`.
+- **Headless CI note:** `.glb.import` files use `importer="keep"` and `GLTFDocument` runtime loading so `godot --headless --editor --import` does not trigger Dummy renderer `texture_2d_get` thumbnail errors in CI.

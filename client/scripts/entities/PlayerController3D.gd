@@ -691,7 +691,14 @@ func _physics_process(delta: float) -> void:
 
 	# Body Dragging Physics follow
 	if is_dragging_body:
-		if is_instance_valid(dragged_body) and not health_component.is_dead and not health_component.is_downed:
+		var dragged_health := dragged_body.get_node_or_null("HealthComponent") as HealthComponent if is_instance_valid(dragged_body) else null
+		var can_keep_dragging := (
+			is_instance_valid(dragged_body)
+			and not health_component.is_dead
+			and not health_component.is_downed
+			and (dragged_health == null or dragged_health.is_dead or dragged_health.is_downed or dragged_health.is_stunned)
+		)
+		if can_keep_dragging:
 			var pull_target := global_position - global_transform.basis.z * 1.1
 			dragged_body.global_position = dragged_body.global_position.lerp(pull_target, 12.0 * delta)
 			dragged_body.rotation.y = lerp_angle(dragged_body.rotation.y, rotation.y, 8.0 * delta)
@@ -1414,6 +1421,46 @@ func stop_dragging_body() -> void:
 	dragged_body = null
 
 
+func find_takedown_target() -> JaffaAI:
+	if not is_inside_tree():
+		return null
+	var enemies_container := MissionWorld.find(self, "Enemies")
+	if enemies_container == null:
+		return null
+	var best_jaffa: JaffaAI = null
+	var min_d: float = JaffaAI.TAKEDOWN_RANGE + 0.01
+	for e in enemies_container.get_children():
+		var jaffa := e as JaffaAI
+		if jaffa != null and jaffa.can_be_taken_down_by(self):
+			var d := Vector2(global_position.x - jaffa.global_position.x, global_position.z - jaffa.global_position.z).length()
+			if d < min_d:
+				min_d = d
+				best_jaffa = jaffa
+	return best_jaffa
+
+
+func try_stealth_takedown() -> bool:
+	if not _can_use_weapon(1) or health_component.is_downed:
+		return false
+	var target := find_takedown_target()
+	if target == null:
+		return false
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		return target.perform_stealth_takedown(self)
+	server_request_takedown.rpc_id(1, target.get_path())
+	return true
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_takedown(target_path: NodePath) -> void:
+	if not _valid_combat_sender() or not _can_use_weapon(1) or health_component.is_downed:
+		return
+	var target := get_node_or_null(target_path) as JaffaAI
+	if target == null or MissionWorld.of(target) != MissionWorld.of(self):
+		return
+	target.perform_stealth_takedown(self)
+
+
 func _find_nearby_drag_target() -> CharacterBody3D:
 	if not is_inside_tree():
 		return null
@@ -1446,14 +1493,14 @@ func _find_nearby_drag_target() -> CharacterBody3D:
 						min_d = d
 						best_target = body
 
-	# 3. Dead enemies (Jaffa corpses)
+	# 3. Dead or Zat-stunned enemies (Jaffa corpses / unconscious bodies)
 	var enemies_container := MissionWorld.find(self, "Enemies")
 	if enemies_container != null:
 		for e in enemies_container.get_children():
 			var body := e as CharacterBody3D
 			if body != null:
 				var health := body.get_node_or_null("HealthComponent") as HealthComponent
-				if health != null and health.is_dead:
+				if health != null and (health.is_dead or health.is_stunned):
 					var d := global_position.distance_to(body.global_position)
 					if d < min_d:
 						min_d = d
@@ -1984,6 +2031,10 @@ func _try_interact() -> void:
 	if mounted_turret != null:
 		mounted_turret.dismount()
 		mounted_turret = null
+		return
+
+	# 1b. Stealth takedown from behind on an unalerted Jaffa within reach
+	if try_stealth_takedown():
 		return
 
 	# 2. Check for nearby DeployableTurret to mount

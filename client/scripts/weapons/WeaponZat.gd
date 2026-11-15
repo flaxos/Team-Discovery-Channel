@@ -22,4 +22,4 @@ func _init() -> void:
 	max_range_m = 35.0
 	is_zat = true
 	fire_sound_path = "res://audio/sfx_zat.wav"
-	noise_radius = 10.0
+	noise_radius = 4.0

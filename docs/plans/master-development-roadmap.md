@@ -318,11 +318,11 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 - **Risks:** a missed lookup fails silently (T1); host frame time (T2).
 - **Complexity:** L · Fable.
 
-**GT-2 — Outbound travel** · L · Fable
+**GT-2 — Outbound travel** · L · Fable · **built 14 November 2026 ([as built](gate-travel-split-worlds.md#gt-2-as-built))**
 - A travel mission in the lobby (SGC home, infiltration compound as the site). Dial out, step through, arrive with health and equipment; others may stay. The gate stays open for the mission. Late joiners arrive in the SGC. The mission fails only when everyone in both worlds is down. An "abort mission" control in the SGC. Prerequisites: GT-1. Risks: the hand-off losing a message in flight (T3), incomplete carried state (T4), leaks from the hidden world (T5). Human check with two players, one staying.
 
-**GT-3 — Return and debrief** · M · Fable
-- A working gate at the site (the `stargate_dhd` preset's gate is inert today) that opens for home when the objectives are complete. Success when no standing operative remains offworld and at least one came home. Debrief in the SGC with real figures and who was lost. Retry for a two-world mission.
+**GT-3 — Return and debrief** · M · Fable · **built 15 November 2026 ([as built](gate-travel-split-worlds.md#gt-3-as-built))**
+- A working gate at the site (the `stargate_dhd` preset's gate is wired inside `ModularMission`) that opens for home when the objectives are complete. Success when no standing operative remains offworld and at least one came home. Debrief in the SGC with real figures and who was lost. Retry for a two-world mission.
 
 ### H — Expanded co-op mechanics
 
@@ -334,8 +334,8 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 
 ### I — Special weapons and faction mechanics
 
-**SW-1 — Stealth takedown and quiet weapons** · M · Fable · needs ST-1 and ST-2
-- Takedown on an unaware Jaffa from behind; Zat as the quiet option (stun is already 20 s); bodies can already be dragged. Intended interaction: quiet tools trade speed and ammunition for not raising awareness.
+**SW-1 — Stealth takedown and quiet weapons** · M · Fable · **built 15 November 2026 (`test_stealth_takedowns_and_weapons`)**
+- Takedown on an unalerted Jaffa from behind (`JaffaAI.can_be_taken_down_by`, `perform_stealth_takedown`, `PlayerController3D.try_stealth_takedown`); Zat as the quiet option (`noise_radius = 4.0`, silent stun/kill/vaporize on unalerted sentries without spreading a 1-hop alert or raising `MissionAlert`); both dead and Zat-stunned Jaffa bodies can be dragged out of sightlines. Licensed external `.glb` weapon meshes (`p90_smg.glb`, `mp5_silenced.glb`) wired in `WeaponBase` alongside SW-1 (`AP-1a`).
 
 **SW-2 — Goa'uld personal shield and countermeasures** · M · design first
 - A shielded enemy that stops fast projectiles and is beaten by slow or thrown attacks and flanking. Needs a thrown or melee attack to exist first.
@@ -404,7 +404,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R9 | Enemy behaviour after the result | Modular fixed (EX-1); SGC open | Modular: Jaffa `stand_down()` and operative health is frozen at the result. SGC: nothing stops live Jaffa; they keep acting behind the result screen | GT-1 (shared host) |
 | R10 | Dedicated-server acceptance | Automated for both missions; human open | SGC: `test_sprint5_dedicated_smoke`. Modular: `test_modular_extraction_dedicated` (EX-1), which also found and fixed two defects: a client could not request a retry, and a client kept running a dead world after the server stopped. No human has accepted either | EX-2 |
 | R11 | SGC coupling in mission hosting | Wording fixed (EX-1); structure open | `ModularMission` still extends `GateRoom` and stubs its sector and snapshot methods. Since EX-1 it sets its banner on change and its own debrief through `HUD.set_mission_banner` and `HUD.set_debrief` | Open. No longer part of GT-1 ([D-016](../DECISIONS.md)): coexistence does not need the split |
-| R12 | Gate travel and mission-state ownership | Confirmed missing | One operative entering the authorised gate ends the SGC mission as a victory. Objective state lives inside the world scene | GT-1 to GT-3, by the [split-world design](gate-travel-split-worlds.md) |
+| R12 | Gate travel and mission-state ownership | Fixed (GT-1 to GT-3) | `MissionSession` coordinates two-world coexistence, outbound/return Stargate travel, carried state, D-017 split-team outcome evaluation, and SGC debrief (`test_gate_travel`, `test_gate_return`) | Fixed in GT-1, GT-2, GT-3 |
 | R13 | Human two-player testing | Outstanding | No signed checklist for any mission | EX-2 |
 | R14 | Jaffa keep attacking downed operatives | Changed in EX-1 to the default of open question 3 | A downed operative is only chosen when no standing one is in perception. Applies to all Jaffa, SGC included | Revisit if question 3 is answered differently |
 | R15 | Security doors cannot be operated in a mission | New, confirmed | `set_locked` has no caller outside the demo scene | EV-2 |

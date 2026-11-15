@@ -102,20 +102,20 @@ func take_damage(amount: float, source: Node = null, damage_type: String = "bull
 		elif airman.is_crouching or airman.is_in_cover:
 			final_dmg *= 0.35  # 65% damage mitigation while crouched behind cover
 
-	if damage_type in ["zat_kill", "zat_vaporize", "kawoosh_vortex"]:
+	if damage_type in ["zat_kill", "zat_vaporize", "kawoosh_vortex", "stealth_takedown"]:
 		final_dmg = amount
 	current_health = maxf(0.0, current_health - final_dmg)
 	damage_taken.emit(final_dmg, source, damage_type)
 	health_changed.emit(current_health, max_health)
 
 	if current_health <= 0.0 and not is_dead:
-		if can_be_downed and not is_downed and damage_type != "kawoosh_vortex" and damage_type != "zat_vaporize" and damage_type != "zat_kill":
+		if can_be_downed and not is_downed and damage_type != "kawoosh_vortex" and damage_type != "zat_vaporize" and damage_type != "zat_kill" and damage_type != "stealth_takedown":
 			is_downed = true
 			is_stunned = false
 			bleedout_timer = MAX_BLEEDOUT_TIME
 			current_health = 0.0
 			downed.emit()
-		elif not is_downed or damage_type == "zat_kill" or damage_type == "kawoosh_vortex":
+		elif not is_downed or damage_type == "zat_kill" or damage_type == "kawoosh_vortex" or damage_type == "stealth_takedown":
 			is_downed = false
 			is_dead = true
 			is_stunned = false

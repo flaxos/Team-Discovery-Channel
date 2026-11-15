@@ -1137,14 +1137,82 @@ func _dispatch_single_plasma_bolt() -> void:
 	SGCNetworkManager.mission_rpc(self, &"play_staff_fire_fx", [origin], health_component)
 
 
-func _on_damage_taken(_amount: float, source: Node, _damage_type: String) -> void:
+const TAKEDOWN_RANGE := 2.2
+const TAKEDOWN_MAX_DY := 1.2
+## Cosine threshold: forward.dot(to_operative) <= TAKEDOWN_REAR_DOT means the operative is behind
+## the Jaffa (outside its front cone, in the rear hemisphere).
+const TAKEDOWN_REAR_DOT := -0.15
+
+
+## True when `operative` can silently take down this standing, unalerted Jaffa from behind.
+func can_be_taken_down_by(operative: Node3D) -> bool:
+	if operative == null or not is_instance_valid(operative) or not is_inside_tree():
+		return false
+	if health_component == null or health_component.is_dead or health_component.is_stunned or health_component.is_downed:
+		return false
+	if current_state in [State.DEAD, State.STUNNED, State.DOWNED, State.COMBAT, State.ATTACK, State.MELEE, State.COVER]:
+		return false
+	var op_health := operative.get_node_or_null("HealthComponent") as HealthComponent
+	if op_health != null and (op_health.is_dead or op_health.is_downed or op_health.is_stunned):
+		return false
+	var flat_dist := Vector2(
+		operative.global_position.x - global_position.x,
+		operative.global_position.z - global_position.z
+	).length()
+	if flat_dist > TAKEDOWN_RANGE or absf(operative.global_position.y - global_position.y) > TAKEDOWN_MAX_DY:
+		return false
+	if not _has_line_of_sight(operative, true):
+		return false
+	if profile == Profile.SENTRY and perception != null and perception.level == JaffaPerception.Level.ALERTED:
+		return false
+	var forward := -global_transform.basis.z
+	forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		return false
+	forward = forward.normalized()
+	var to_op := operative.global_position - global_position
+	to_op.y = 0.0
+	if to_op.length_squared() > 0.0001 and forward.dot(to_op.normalized()) > TAKEDOWN_REAR_DOT:
+		return false
+	return true
+
+
+## Server: silently eliminates this Jaffa via a close-quarters takedown without alerting nearby sentries.
+func perform_stealth_takedown(operative: Node3D) -> bool:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return false
+	if not can_be_taken_down_by(operative):
+		return false
+	current_target = null
+	investigating = false
+	errand = Vector3.INF
+	raising_alarm = false
+	if perception != null:
+		perception.calm()
+		_publish_awareness()
+	health_component.take_damage(health_component.current_health + 50.0, operative, "stealth_takedown")
+	print("Jaffa Guard [%s] silently neutralized via stealth takedown!" % name)
+	return true
+
+
+func _on_damage_taken(_amount: float, source: Node, damage_type: String) -> void:
 	if is_shock_guard and current_state != State.DEAD:
 		var spark_at := global_position + Vector3(0, 1.2, 0)
 		play_armor_spark_fx(spark_at)
 		SGCNetworkManager.mission_rpc(self, &"play_armor_spark_fx", [spark_at], health_component)
 
+	var is_silent_incapacitation := damage_type in ["zat_stun", "zat_kill", "zat_vaporize", "stealth_takedown"]
+
 	if profile == Profile.SENTRY and perception != null and multiplayer.is_server():
-		# Being hit is an immediate alert, wherever the shot came from.
+		if is_silent_incapacitation and perception.level != JaffaPerception.Level.ALERTED:
+			# Silent Zat incapacitation or stealth takedown drops an unalerted sentry before it can
+			# shout or alert nearby sentries.
+			investigating = false
+			current_target = null
+			perception.calm()
+			_publish_awareness()
+			return
+		# Being hit by loud fire is an immediate alert, wherever the shot came from.
 		var hit_by_operative := (
 			source is Node3D and is_instance_valid(source) and source.has_node("HealthComponent")
 		)
@@ -1161,6 +1229,9 @@ func _on_damage_taken(_amount: float, source: Node, _damage_type: String) -> voi
 			_engage(attacker, true)
 		elif attacker != null:
 			current_target = attacker
+		return
+
+	if is_silent_incapacitation:
 		return
 
 	if source is Node3D and is_instance_valid(source):
@@ -1217,6 +1288,14 @@ func play_staff_fire_fx(origin_pos: Vector3) -> void:
 
 func _on_stunned(duration: float) -> void:
 	current_state = State.STUNNED
+	current_target = null
+	investigating = false
+	errand = Vector3.INF
+	raising_alarm = false
+	velocity = Vector3.ZERO
+	if perception != null and perception.level != JaffaPerception.Level.ALERTED:
+		perception.calm()
+		_publish_awareness()
 	_set_crouching(false)
 	if stun_fx != null:
 		stun_fx.visible = true
