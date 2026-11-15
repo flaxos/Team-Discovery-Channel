@@ -38,6 +38,8 @@ signal dialing_denied(reason: String)
 func _ready() -> void:
 	if has_node(stargate_path):
 		target_stargate = get_node(stargate_path) as StargateRing
+	if target_stargate == null:
+		target_stargate = MissionWorld.find(self, "Stargate") as StargateRing
 
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_body_entered)
@@ -71,6 +73,13 @@ func _wave_manager() -> Node:
 	return gate.get_parent().get_node_or_null("WaveManager") if gate != null else null
 
 
+func _world_root() -> Node:
+	var world: Node = MissionWorld.of(self)
+	if world != null:
+		return world
+	return target_stargate.get_parent() if target_stargate != null else self
+
+
 func start_dialing(player: PlayerController3D) -> void:
 	if player == null:
 		return
@@ -81,11 +90,11 @@ func start_dialing(player: PlayerController3D) -> void:
 
 
 func _player_path(player: PlayerController3D) -> NodePath:
-	return target_stargate.get_parent().get_path_to(player) if target_stargate != null else get_path_to(player)
+	return _world_root().get_path_to(player)
 
 
 func _player_node(path: NodePath) -> PlayerController3D:
-	return target_stargate.get_parent().get_node_or_null(path) as PlayerController3D if target_stargate != null else get_node_or_null(path) as PlayerController3D
+	return _world_root().get_node_or_null(path) as PlayerController3D
 
 
 func _request_player(path: NodePath) -> PlayerController3D:
@@ -96,6 +105,14 @@ func _request_player(path: NodePath) -> PlayerController3D:
 	return player
 
 
+func _send_denial(reason: String) -> void:
+	denial_reason = reason
+	if multiplayer.has_multiplayer_peer():
+		sync_denial.rpc(denial_reason)
+	else:
+		sync_denial(denial_reason)
+
+
 @rpc("any_peer", "call_local", "reliable")
 func request_start_dialing(player_path: NodePath) -> void:
 	if not multiplayer.is_server() or current_phase != DialPhase.INACTIVE:
@@ -103,16 +120,23 @@ func request_start_dialing(player_path: NodePath) -> void:
 	var player: PlayerController3D = _request_player(player_path)
 	if player == null:
 		return
+	var world: Node = MissionWorld.of(self)
+	if world != null and world.get(&"mission_result") is int and int(world.get(&"mission_result")) >= 0:
+		_send_denial("MISSION ENDED")
+		return
+	var objectives: Variant = world.get(&"objectives") if world != null else null
+	if objectives != null and not bool(objectives.call(&"is_complete")):
+		_send_denial("COMPLETE OBJECTIVES BEFORE DIALING HOME")
+		return
 	var manager: Node = _wave_manager()
 	if manager != null and not manager.request_outbound():
-		denial_reason = manager.dialing_block_reason()
-		if multiplayer.has_multiplayer_peer():
-			sync_denial.rpc(denial_reason)
-		else:
-			sync_denial(denial_reason)
+		_send_denial(manager.dialing_block_reason())
 		return
 	if manager == null and target_stargate != null and not target_stargate.reserve_connection(false):
-		sync_denial("GATE BUSY")
+		if objectives != null and bool(objectives.call(&"is_complete")) and target_stargate.direction == StargateRing.GateDirection.OUTBOUND:
+			_send_denial("STARGATE OPEN FOR HOME — STEP THROUGH EVENT HORIZON")
+		else:
+			_send_denial("GATE BUSY")
 		return
 	active_dialer = player
 	_generate_sequences()

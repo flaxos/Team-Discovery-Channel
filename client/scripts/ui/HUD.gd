@@ -786,7 +786,7 @@ func _draw_crosshair(ci: Control) -> void:
 		aim_pos = crosshair_override_pos
 	elif local_player != null and local_player.is_aiming_down_sights:
 		aim_pos = v_size * 0.5
-	elif local_player != null and local_player.camera != null and local_player.current_aim_target != Vector3.ZERO:
+	elif local_player != null and local_player.camera != null and local_player.camera.is_inside_tree() and local_player.current_aim_target != Vector3.ZERO:
 		if not local_player.camera.is_position_behind(local_player.current_aim_target):
 			aim_pos = local_player.camera.unproject_position(local_player.current_aim_target)
 		else:
@@ -1105,10 +1105,11 @@ func set_mission_banner(title: String, detail: String) -> void:
 		enemies_label.text = detail
 
 
-## Keys: title, subtitle, objectives, squad, status, leave. Call after show_victory/show_defeat.
+## Keys: title, subtitle, time, kills, objectives, squad, status, leave. Call after show_victory/show_defeat.
 func set_debrief(text: Dictionary) -> void:
 	var targets := {
-		"title": debrief_title, "subtitle": debrief_subtitle, "objectives": stat_waves,
+		"title": debrief_title, "subtitle": debrief_subtitle, "time": stat_time,
+		"kills": stat_kills, "objectives": stat_waves,
 		"squad": stat_chevrons, "status": stat_status, "leave": return_btn
 	}
 	for key: String in text:

@@ -54,6 +54,7 @@ var _revive_lease: float = 0.0
 var _server_revive_target: NodePath = NodePath()
 var _server_revive_time: float = 0.0
 var _revive_send_timer: float = 0.0
+var _sending_revive_hold: bool = false
 var current_aim_target: Vector3 = Vector3.ZERO
 var primary_weapon_id: String = "m249"
 var secondary_weapon_id: String = "m9"
@@ -643,6 +644,8 @@ func _physics_process(delta: float) -> void:
 	var dhd := MissionWorld.find(self, "SGCDialingConsole") as DHDDialer
 	if dhd == null:
 		dhd = MissionWorld.find(self, "DHDConsole") as DHDDialer
+	if dhd == null:
+		dhd = MissionWorld.find(self, "DHD") as DHDDialer
 	if dhd != null and dhd.active_dialer == self:
 		if Input.is_action_just_pressed("move_up"):
 			dhd.input_glyph("UP")
@@ -2051,6 +2054,8 @@ func _try_interact() -> void:
 	var dialer := MissionWorld.find(self, "SGCDialingConsole") as DHDDialer
 	if dialer == null:
 		dialer = MissionWorld.find(self, "DHDConsole") as DHDDialer
+	if dialer == null:
+		dialer = MissionWorld.find(self, "DHD") as DHDDialer
 	if dialer != null and global_position.distance_to(dialer.global_position) <= 3.5:
 		var sgc := dialer as SGCDialingConsoleScript
 		if sgc != null and is_carrying_patch_rom and sgc.is_buffer_corrupted:
@@ -2062,6 +2067,12 @@ func _try_interact() -> void:
 
 		if dialer.current_phase == DHDDialer.DialPhase.INACTIVE:
 			dialer.start_dialing(self)
+		elif dialer.current_phase == DHDDialer.DialPhase.COMPLETE:
+			var world: Node = MissionWorld.of(self)
+			if world != null and world.get("session") != null and sgc != null:
+				sgc.request_abort_mission()
+				return
+			dialer.cancel_dialing()
 		else:
 			dialer.cancel_dialing()
 		return
@@ -2210,10 +2221,19 @@ func sync_weapon_state(slot: int, weapon_id: String, ammo: int, reserve: int, he
 
 
 func _send_revive_hold(target: Node) -> void:
-	if not multiplayer.has_multiplayer_peer() or _revive_send_timer > 0.0:
+	if not multiplayer.has_multiplayer_peer():
 		return
+	var holding: bool = is_instance_valid(target)
+	if not holding:
+		if not _sending_revive_hold:
+			return
+		_sending_revive_hold = false
+	else:
+		if _sending_revive_hold and _revive_send_timer > 0.0:
+			return
+		_sending_revive_hold = true
 	_revive_send_timer = 0.1
-	var path: NodePath = get_parent().get_path_to(target) if is_instance_valid(target) else NodePath()
+	var path: NodePath = get_parent().get_path_to(target) if holding else NodePath()
 	if multiplayer.is_server():
 		server_revive_hold(path)
 	else:

@@ -191,3 +191,25 @@ func _update_screen_visuals() -> void:
 	else:
 		status_light.light_color = Color(0.3, 0.8, 0.4)
 		status_light.light_energy = 1.2
+
+
+func request_abort_mission() -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		server_abort_mission.rpc_id(1)
+		return
+	_execute_abort()
+
+
+@rpc("any_peer", "call_local", "reliable")
+func server_abort_mission() -> void:
+	if multiplayer.is_server():
+		_execute_abort()
+
+
+func _execute_abort() -> void:
+	var world: Node = MissionWorld.of(self)
+	if world != null:
+		var sess: Variant = world.get("session")
+		if sess != null and sess.has_method("abort_mission"):
+			print("SGCDialingConsole: [ABORT] Mission aborted by SGC Control Mezzanine!")
+			sess.call(&"abort_mission")
