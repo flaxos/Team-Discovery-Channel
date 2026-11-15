@@ -157,5 +157,6 @@ Every third-party community model or animation imported into the repository must
 7. **Estimated Integration Difficulty:** Tagged `S` (static mesh swap), `M` (multi-part/articulated prop), or `L` (rigged humanoid + `AnimationTree`).
 8. **No Commercial Exclusives:** No proprietary non-distributable assets that would compromise repository openness or hosted CI builds.
 
-### Milestone AP-1a Proof of Concept
-- **Target:** Ingest a single CC0 / CC-BY primary weapon `.glb` (FN P90 or MP5) into `client/assets/weapons/`, record full provenance in `credits/ATTRIBUTIONS.md` and `credits/licenses/`, attach it to the weapon visual mount with a verified `MuzzlePoint` socket and D-015 matte PBR material (`metallic = 0.0`), and verify via an automated test suite (`test_weapon_asset_import.gd`).
+### Milestone AP-1a Proof of Concept — **Implemented 15 November 2026**
+- **Delivered:** Ingested two CC0 1.0 weapon `.glb` models from Kenney's Weapon Pack (`client/assets/weapons/p90_smg.glb` and `client/assets/weapons/mp5_silenced.glb`), recorded full provenance in `credits/ATTRIBUTIONS.md` and `credits/licenses/CC0-1.0.txt`, wired `WeaponBase.load_glb_model()` with D-015 `metallic = 0.0` material sanitization and verified `MuzzlePoint` sockets, and added automated verification in `test_stealth_takedowns_and_weapons.gd`.
+- **Headless CI note:** `.glb.import` files use `importer="keep"` and `GLTFDocument` runtime loading so `godot --headless --editor --import` does not trigger Dummy renderer `texture_2d_get` thumbnail errors in CI.

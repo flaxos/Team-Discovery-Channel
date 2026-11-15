@@ -334,8 +334,8 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 
 ### I — Special weapons and faction mechanics
 
-**SW-1 — Stealth takedown and quiet weapons** · M · Fable · needs ST-1 and ST-2
-- Takedown on an unaware Jaffa from behind; Zat as the quiet option (stun is already 20 s); bodies can already be dragged. Intended interaction: quiet tools trade speed and ammunition for not raising awareness.
+**SW-1 — Stealth takedown and quiet weapons** · M · Fable · **built 15 November 2026 (`test_stealth_takedowns_and_weapons`)**
+- Takedown on an unalerted Jaffa from behind (`JaffaAI.can_be_taken_down_by`, `perform_stealth_takedown`, `PlayerController3D.try_stealth_takedown`); Zat as the quiet option (`noise_radius = 4.0`, silent stun/kill/vaporize on unalerted sentries without spreading a 1-hop alert or raising `MissionAlert`); both dead and Zat-stunned Jaffa bodies can be dragged out of sightlines. Licensed external `.glb` weapon meshes (`p90_smg.glb`, `mp5_silenced.glb`) wired in `WeaponBase` alongside SW-1 (`AP-1a`).
 
 **SW-2 — Goa'uld personal shield and countermeasures** · M · design first
 - A shielded enemy that stops fast projectiles and is beaten by slow or thrown attacks and flanking. Needs a thrown or melee attack to exist first.

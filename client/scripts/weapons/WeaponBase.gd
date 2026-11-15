@@ -74,6 +74,48 @@ func _setup_audio() -> void:
 		add_child(audio_player)
 
 
+const GLB_MODELS := {
+	"p90": "res://assets/weapons/p90_smg.glb",
+	"mp5": "res://assets/weapons/mp5_silenced.glb",
+}
+
+
+static func load_glb_model(res_path: String) -> Node3D:
+	var global_path := ProjectSettings.globalize_path(res_path)
+	if not FileAccess.file_exists(global_path):
+		return null
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	if doc.append_from_file(global_path, state) != OK:
+		return null
+	var imported := doc.generate_scene(state) as Node3D
+	if imported == null:
+		return null
+	imported.name = "ImportedGLB"
+	_sanitize_glb_materials(imported)
+	return imported
+
+
+static func _sanitize_glb_materials(root_node: Node) -> void:
+	if root_node is MeshInstance3D:
+		var mi := root_node as MeshInstance3D
+		if mi.material_override is BaseMaterial3D:
+			var mat := (mi.material_override as BaseMaterial3D).duplicate() as BaseMaterial3D
+			mat.metallic = 0.0
+			mi.material_override = mat
+		if mi.mesh != null:
+			for s in range(mi.mesh.get_surface_count()):
+				var smat := mi.get_surface_override_material(s) as BaseMaterial3D
+				if smat == null:
+					smat = mi.mesh.surface_get_material(s) as BaseMaterial3D
+				if smat != null:
+					var clean := smat.duplicate() as BaseMaterial3D
+					clean.metallic = 0.0
+					mi.set_surface_override_material(s, clean)
+	for child in root_node.get_children():
+		_sanitize_glb_materials(child)
+
+
 func _build_weapon_visual_mesh() -> void:
 	if has_node("WeaponModel"):
 		return
@@ -86,27 +128,32 @@ func _build_weapon_visual_mesh() -> void:
 
 	match weapon_id:
 		"p90":
-			# Compact bullpup frame
-			var receiver := MeshInstance3D.new()
-			var rm := BoxMesh.new()
-			rm.size = Vector3(0.08, 0.14, 0.44)
-			receiver.mesh = rm
-			var rmat := StandardMaterial3D.new()
-			rmat.albedo_color = Color(0.18, 0.20, 0.22)
-			receiver.material_override = rmat
-			model_root.add_child(receiver)
+			var glb_p90 := load_glb_model(GLB_MODELS["p90"])
+			if glb_p90 != null:
+				glb_p90.position = Vector3(0, -0.10, 0)
+				model_root.add_child(glb_p90)
+			else:
+				# Compact bullpup frame fallback
+				var receiver := MeshInstance3D.new()
+				var rm := BoxMesh.new()
+				rm.size = Vector3(0.08, 0.14, 0.44)
+				receiver.mesh = rm
+				var rmat := StandardMaterial3D.new()
+				rmat.albedo_color = Color(0.18, 0.20, 0.22)
+				receiver.material_override = rmat
+				model_root.add_child(receiver)
 
-			# Top horizontal magazine strip
-			var mag := MeshInstance3D.new()
-			var mm := BoxMesh.new()
-			mm.size = Vector3(0.06, 0.03, 0.32)
-			mag.mesh = mm
-			var mmat := StandardMaterial3D.new()
-			mmat.albedo_color = Color(0.85, 0.65, 0.2, 0.85)
-			mmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-			mag.material_override = mmat
-			mag.position = Vector3(0, 0.08, 0.02)
-			model_root.add_child(mag)
+				# Top horizontal magazine strip
+				var mag := MeshInstance3D.new()
+				var mm := BoxMesh.new()
+				mm.size = Vector3(0.06, 0.03, 0.32)
+				mag.mesh = mm
+				var mmat := StandardMaterial3D.new()
+				mmat.albedo_color = Color(0.85, 0.65, 0.2, 0.85)
+				mmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				mag.material_override = mmat
+				mag.position = Vector3(0, 0.08, 0.02)
+				model_root.add_child(mag)
 
 			muzzle_offset = Vector3(0, 0.02, -0.30)
 
@@ -148,26 +195,31 @@ func _build_weapon_visual_mesh() -> void:
 			muzzle_offset = Vector3(0, 0.03, -0.62)
 
 		"mp5":
-			# SMG frame + curved magazine
-			var receiver := MeshInstance3D.new()
-			var rm := BoxMesh.new()
-			rm.size = Vector3(0.07, 0.12, 0.40)
-			receiver.mesh = rm
-			var rmat := StandardMaterial3D.new()
-			rmat.albedo_color = Color(0.12, 0.13, 0.15)
-			receiver.material_override = rmat
-			model_root.add_child(receiver)
+			var glb_mp5 := load_glb_model(GLB_MODELS["mp5"])
+			if glb_mp5 != null:
+				glb_mp5.position = Vector3(0, -0.12, 0)
+				model_root.add_child(glb_mp5)
+			else:
+				# SMG frame + curved magazine fallback
+				var receiver := MeshInstance3D.new()
+				var rm := BoxMesh.new()
+				rm.size = Vector3(0.07, 0.12, 0.40)
+				receiver.mesh = rm
+				var rmat := StandardMaterial3D.new()
+				rmat.albedo_color = Color(0.12, 0.13, 0.15)
+				receiver.material_override = rmat
+				model_root.add_child(receiver)
 
-			var mag := MeshInstance3D.new()
-			var mm := BoxMesh.new()
-			mm.size = Vector3(0.04, 0.16, 0.06)
-			mag.mesh = mm
-			var mmat := StandardMaterial3D.new()
-			mmat.albedo_color = Color(0.2, 0.2, 0.22)
-			mag.material_override = mmat
-			mag.position = Vector3(0, -0.11, -0.06)
-			mag.rotation_degrees.x = 15.0
-			model_root.add_child(mag)
+				var mag := MeshInstance3D.new()
+				var mm := BoxMesh.new()
+				mm.size = Vector3(0.04, 0.16, 0.06)
+				mag.mesh = mm
+				var mmat := StandardMaterial3D.new()
+				mmat.albedo_color = Color(0.2, 0.2, 0.22)
+				mag.material_override = mmat
+				mag.position = Vector3(0, -0.11, -0.06)
+				mag.rotation_degrees.x = 15.0
+				model_root.add_child(mag)
 
 			muzzle_offset = Vector3(0, 0.01, -0.36)
 
