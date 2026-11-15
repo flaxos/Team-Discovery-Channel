@@ -68,12 +68,12 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Gate operation and dialling | Verified (SGC) | `StargateRing` states and direction reservation; `DHDDialer` seven chevrons plus GDO; `test_gate_lifecycle_and_modes` |
 | DHD and SGC console | Verified (SGC) | `SGCDialingConsole`, buffer lockout and ROM upload |
 | Iris | Verified (SGC) | Hard-difficulty iris repair (`IrisServoHousing`) |
-| Gate travel, world transitions | Missing | Entering an authorised outbound gate ends the mission with a victory (`GateRoom._on_player_extracted`). No second world |
+| Gate travel, world transitions | Verified (GT-2/GT-3) | Two-world `MissionSession` (`travel_infiltration`) with outbound dialing, complete state hand-off, presentation switching, and D-017 split-squad rules (`test_gate_travel`, `test_gate_travel_multiplayer`) |
 | Transport rings | Placeholder in missions | `TransportRings` has beam, pair teleport and reinforcement code from the early sprints. It is not instanced in the SGC. On modular levels the `ring_transport` preset places paired but idle rings; nothing triggers them, and the teleport runs on every peer without server validation |
 | Goa'uld shield mechanics | Missing | `DeployableShield` is the Tau'ri ballistic shield |
 | Jaffa and faction equipment | Partial | Jaffa guard and shock guard with staff weapons; player staff and Zat. No other faction units |
-| Offworld entry and extraction | Partial | Modular Extraction UAT spawns at a layout entry marker and extracts by returning to it. No gate is involved |
-| SGC return and debrief | Missing | The debrief panel exists; there is no return to a persistent SGC |
+| Offworld entry and extraction | Verified (GT-3) | `ModularMission` wires nested `Stargate` and `DHD`; site gate opens for home after objectives complete and lands returning operatives on the SGC ramp (`test_gate_return`, `test_gate_return_multiplayer`) |
+| SGC return and debrief | Verified (GT-3) | `MissionSession.sync_debrief` presents SGC debrief with real kills, objectives, duration, alert status, and returned vs lost operative callsigns across both worlds (`test_gate_return`, `test_gate_return_multiplayer`) |
 
 ### Content creation
 

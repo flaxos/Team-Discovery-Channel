@@ -119,10 +119,19 @@ func _find_dialing_console() -> DHDDialer:
 	var console := find_child("SGCDialingConsole", true, false) as DHDDialer
 	if console == null:
 		console = find_child("DHDConsole", true, false) as DHDDialer
+	if console == null:
+		console = find_child("DHD", true, false) as DHDDialer
 	return console
 
 
 func _ready() -> void:
+	if stargate_mesh == null:
+		stargate_mesh = find_child("Stargate", true, false) as StargateRing
+	if event_horizon == null and stargate_mesh != null:
+		event_horizon = stargate_mesh.get_node_or_null("EventHorizon") as MeshInstance3D
+	if dialing_console == null:
+		dialing_console = _find_dialing_console()
+
 	# Configure spawner
 	if spawner != null:
 		spawner.spawn_path = NodePath("../Players")
@@ -688,9 +697,21 @@ func _on_player_extracted(player: Node) -> void:
 	conclude(true)
 
 
+func return_spawn_position(peer_id: int) -> Vector3:
+	if has_node("BunkerGeometry/StargatePlatform"):
+		var lane: float = float(posmod(peer_id, 3) - 1) * 0.8
+		return global_transform * Vector3(lane, 2.05, -9.5)
+	if spawns_container != null and spawns_container.get_child_count() > 0:
+		var points: Array[Node] = spawns_container.get_children()
+		return (points[posmod(peer_id, points.size())] as Node3D).global_position
+	return global_position
+
+
 func _finish_mission(victory: bool) -> void:
 	if wave_manager != null:
 		wave_manager.end_mission()
+	elif stargate_mesh != null and multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		stargate_mesh.close_wormhole()
 	# A peer that is still loading receives the result in its room snapshot instead.
 	SGCNetworkManager.mission_rpc(self, &"sync_mission_result", [victory])
 	sync_mission_result(victory)
@@ -907,6 +928,11 @@ func _spawn_player(peer_id: int, p_class_id: String, spawn_pos: Vector3) -> void
 	player_instance.class_id = p_class_id
 
 	players_container.add_child(player_instance, true)
+	if session != null and session.has_method(&"record_participant"):
+		var label: String = player_instance.player_callsign
+		if label == "OPERATIVE" and peer_id != 1:
+			label = "OPERATIVE %d" % peer_id
+		session.call(&"record_participant", peer_id, p_class_id, label)
 	print("GateRoom: Spawned player %d (%s) at %s" % [peer_id, p_class_id, str(spawn_pos)])
 
 
@@ -930,6 +956,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	var player_node := players_container.get_node_or_null(str(peer_id))
 	if player_node != null:
 		print("GateRoom: Removing disconnected player %d" % peer_id)
+		players_container.remove_child(player_node)
 		player_node.queue_free()
 	call_deferred("_check_squad_status")
 

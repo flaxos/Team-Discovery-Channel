@@ -258,6 +258,18 @@ Built on 14 November 2026. Differences from the plan, and what was found:
   - `test_gate_travel.gd`: single-process end-to-end verification covering lobby UI, SGC HUD travel objective, carried state persistence, presentation switch, late joiner travel, split-squad failure rule, and dialing console mission abort.
   - `test_gate_travel_multiplayer.gd`: two-process ENet multiplayer verification covering host and client outbound gate travel, replication across worlds, presentation transitions, and clean disconnect without unproject or RPC node lookup errors.
 
+### GT-3 as built
+
+Built on 15 November 2026. Implementation details and verified fixes:
+
+- **Site Stargate & DHD Wiring.** `GateRoom` and `DHDDialer` now discover nested `Stargate` and `DHD` attachment nodes inside `ModularMission/Level` via world-scoped lookups (`find_child` on world / `MissionWorld.find`), and `PlayerController3D` recognizes `"DHD"` alongside `"DHDConsole"` and `"SGCDialingConsole"`. `WaveManager` enables outbound dialing when the SGC world belongs to a travel `MissionSession` (`_is_travel_home()`) while keeping hostile gate waves and buffer corruption disabled.
+- **Objective-Gated Return Gate (D-017).** Offworld `DHDDialer` denies dialing before all site objectives are complete (`"COMPLETE OBJECTIVES BEFORE DIALING HOME"`). In `ModularMission._on_objectives_completed()`, split-world sessions (`session != null`) keep the mission running and open the site's `StargateRing` for return home (7-chevron lock, kawoosh, stabilized horizon, `authorize_extraction()`), while single-world `goauld_infiltration` concludes immediately as before.
+- **Return Spawn on SGC Ramp & D-017 Success Rule.** Returning operatives spawn on the SGC Stargate platform (`GateRoom.return_spawn_position` at `Vector3(lane, 2.05, -9.5)`, facing down the ramp), clear of both the Armory and the SGC gate's `ExtractionArea`. `MissionSession.evaluate_outcome()` monitors both loss (all operatives across all worlds down) and success (site objectives complete, zero standing operatives remaining offworld, and `returned_home` non-empty).
+- **SGC Debrief & Gate Closure.** `MissionSession.finish()` closes wormholes in both worlds (`WaveManager.end_mission()` at home and `stargate_mesh.close_wormhole()` at site) and blocks any post-result travel (`if result >= 0: return`). Real mission metrics (eliminated hostiles, `objectives / total`, real wall-clock duration across both worlds, alert/stealth status, and explicit lists of returned vs lost operative callsigns including downed/vaporized/disconnected offworld operatives) are broadcast via `MissionSession.sync_debrief` to both worlds' HUDs, presenting the SGC on victory so every peer sees the debrief in SGC.
+- **Automated Test Coverage.**
+  - `test_gate_return.gd`: single-process verification covering real SGC dialing, site DHD denial before objectives, objective completion opening the site gate, SGC ramp landing, split-team wait and D-017 success when the offworld survivor is downed, SGC debrief stats and lost callsign reporting, post-result gate closure, and two-world retry.
+  - `test_gate_return_multiplayer.gd`: two-process ENet multiplayer verification of outbound travel, site gate opening on both peers, host return to SGC ramp, offworld loss debrief shown in SGC on both host and client, two-world retry (`net.request_restart_game()`), and clean teardown with zero engine errors.
+
 ## 8a. Measured cost
 
 Measured on the development machine (NVIDIA RTX 3060, 1280 × 720 viewport, vertical sync off) with `client/scripts/world/world_cost.gd`: the host alone, standing in the SGC armoury, ten seconds, two runs each (three for the two-world case).

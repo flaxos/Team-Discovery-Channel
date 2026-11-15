@@ -158,8 +158,46 @@ func _show_objective(index: int) -> void:
 
 
 func _on_objectives_completed() -> void:
+	if session != null:
+		if hud != null:
+			hud.update_objective(
+				"STARGATE OPEN FOR HOME — STEP THROUGH EVENT HORIZON",
+				Color(0.3, 1.0, 0.5)
+			)
+		if multiplayer.is_server():
+			_open_return_gate()
+		return
 	if multiplayer.is_server():
 		conclude(true)
+
+
+func _open_return_gate() -> void:
+	if stargate_mesh == null or not multiplayer.is_server():
+		return
+	if stargate_mesh.current_state == StargateRing.GateState.INACTIVE:
+		stargate_mesh.reserve_connection(false)
+	if stargate_mesh.current_state == StargateRing.GateState.DIALING:
+		for i in range(stargate_mesh.locked_chevrons_count + 1, stargate_mesh.max_chevrons + 1):
+			stargate_mesh.lock_chevron(i)
+	stargate_mesh.authorize_extraction()
+
+
+func hostiles_eliminated_count() -> int:
+	var hostiles := alert.reinforcements_spawned if alert != null else 0
+	if definition != null:
+		for patrol in definition.patrols:
+			hostiles += patrol.size
+	return maxi(0, hostiles - hostiles_alive())
+
+
+func alert_summary() -> String:
+	if alert == null:
+		return "UNDETECTED"
+	if alert.is_raised():
+		return "ALARM RAISED"
+	if alert.spotted:
+		return "SPOTTED, NO ALARM"
+	return "UNDETECTED"
 
 
 ## One result per mission: a later squad wipe cannot overwrite a success, or the reverse.
@@ -171,11 +209,8 @@ func _finish_mission(victory: bool) -> void:
 @rpc("authority", "call_local", "reliable")
 func sync_mission_result(victory: bool) -> void:
 	var standing := objectives.standing().size()
-	var hostiles := alert.reinforcements_spawned
-	for patrol in definition.patrols:
-		hostiles += patrol.size
 	if hud != null:
-		hud.total_kills = hostiles - hostiles_alive()
+		hud.total_kills = hostiles_eliminated_count()
 	super.sync_mission_result(victory)
 	# The result is final: hostiles stand down and nothing further happens to the squad.
 	objectives.set_physics_process(false)
@@ -202,11 +237,7 @@ func sync_mission_result(victory: bool) -> void:
 				"squad": "OPERATIVES STANDING: %d" % standing,
 				"status": "STATUS: %s — %s" % [
 					"STANDING OPERATIVES EXTRACTED" if victory else "SQUAD COMPROMISED",
-					(
-						"ALARM RAISED"
-						if alert.is_raised()
-						else ("SPOTTED, NO ALARM" if alert.spotted else "UNDETECTED")
-					)
+					alert_summary()
 				],
 				"leave": "LEAVE MISSION"
 			}

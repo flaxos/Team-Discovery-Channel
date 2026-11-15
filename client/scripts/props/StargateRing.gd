@@ -238,6 +238,9 @@ func _stabilize_wormhole() -> void:
 	print("Stargate: Wormhole stabilized! Extraction aperture open.")
 	if gate_light != null:
 		gate_light.light_energy = 2.5
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server() and direction == GateDirection.OUTBOUND and extraction_authorized and extraction_area != null:
+		for body: Node in extraction_area.get_overlapping_bodies():
+			_on_extraction_entered(body)
 
 
 @rpc("authority", "call_remote", "reliable")
