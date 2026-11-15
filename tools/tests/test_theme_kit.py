@@ -67,7 +67,7 @@ class GoauldKit(unittest.TestCase):
             wanted = {slab.name for slab in kit.read_slabs(kit.MODULE_SCENES / scene) if slab.slot != 'portal'}
             got = {variant['slot'] for variant in self.variants if variant['module'] == module_id}
             self.assertEqual(got, wanted, module_id)
-        self.assertEqual(len(self.variants), 20)
+        self.assertEqual(len(self.variants), 70)
         self.assertEqual(len({variant['id'] for variant in self.variants}), len(self.variants))
 
     def test_each_piece_fills_exactly_its_slab(self):
@@ -143,13 +143,27 @@ class GoauldKit(unittest.TestCase):
             self.assertGreater(gold, 0, name)
 
     def test_wall_rhythm(self):
-        slab, boxes, _turn = self.pieces['room01_Wall2']
-        ribs = sorted(box.centre[2] for box in boxes if box.name.startswith('Rib'))
-        self.assertEqual(ribs, [-3.0, -1.0, 1.0, 3.0], 'A 2 m grid from the module centre')
+        for name in ('room01_Wall2', 'room03_Wall8', 'room06_Wall2'):
+            _slab, boxes, _turn = self.pieces[name]
+            ribs = sorted(box.centre[2] for box in boxes if box.name.startswith('Rib'))
+            self.assertEqual(ribs, [-3.0, -1.0, 1.0, 3.0], 'A 2 m grid from the module centre: ' + name)
         for name in ('room04_Wall2', 'room04_Wall7'):
             kinds = sorted(box.name.rstrip('0123456789') for box in self.pieces[name][1]
                            if box.name.startswith(('Rib', 'Pier', 'Jamb')))
             self.assertEqual(kinds, ['Jamb', 'Pier'], name)
+        for name, expected in (
+            ('room02_Wall4', ['Pier', 'Rib', 'Rib']),
+            ('room02_Wall5', ['Pier', 'Rib']),
+            ('room03_Wall4', ['Pier', 'Rib']),
+            ('room07_Wall4', ['Pier', 'Rib', 'Rib', 'Rib']),
+            ('room07_Wall5', ['Pier']),
+            ('room09_Wall4', ['Pier', 'Rib', 'Rib', 'Rib']),
+            ('room09_Wall5', ['Pier']),
+            ('room09_Wall10', ['Pier', 'Pier']),
+        ):
+            kinds = sorted(box.name.rstrip('0123456789') for box in self.pieces[name][1]
+                           if box.name.startswith(('Rib', 'Pier', 'Jamb')))
+            self.assertEqual(kinds, expected, name)
 
     def test_palette_keeps_play_readable(self):
         colour = {name: values[0] for name, values in kit.PALETTE.items()}

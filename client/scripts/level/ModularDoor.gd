@@ -6,8 +6,11 @@ signal access_changed(access_id: StringName, is_locked: bool)
 @export var locked := false
 @export var width: float = 3.0
 @export var height: float = 2.8
+@export var auto_close_delay: float = 2.5
 var is_open := false
 var prompt: Label3D
+var _ai_auto_close_timer: float = 0.0
+var _last_ai_actor: Node3D = null
 
 
 func _ready() -> void:
@@ -26,7 +29,7 @@ func _ready() -> void:
 	visual.position = collision.position
 	var material := StandardMaterial3D.new()
 	material.albedo_color = Color(0.45, 0.32, 0.2) if is_security else Color(0.23, 0.32, 0.35)
-	material.metallic = 0.4
+	material.metallic = 0.0
 	visual.material_override = material
 	visual.name = "Panel"
 	add_child(visual)
@@ -38,6 +41,50 @@ func _ready() -> void:
 	sync_open(false)
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_snapshot.rpc_id(1)
+
+
+func _physics_process(delta: float) -> void:
+	if not is_inside_tree() or not multiplayer.is_server():
+		return
+	if _ai_auto_close_timer <= 0.0:
+		return
+	if not is_open or locked:
+		_ai_auto_close_timer = 0.0
+		return
+	if _has_nearby_npc(2.5):
+		_ai_auto_close_timer = auto_close_delay
+		return
+	_ai_auto_close_timer -= delta
+	if _ai_auto_close_timer <= 0.0:
+		if _can_close():
+			_toggle()
+			_ai_auto_close_timer = 0.0
+		else:
+			_ai_auto_close_timer = 0.2
+
+
+func _has_nearby_npc(radius: float) -> bool:
+	if (
+		_last_ai_actor != null
+		and is_instance_valid(_last_ai_actor)
+		and _last_ai_actor.is_inside_tree()
+		and global_position.distance_to(_last_ai_actor.global_position) <= radius
+	):
+		return true
+	for group_name: String in ["Enemies", "Allies"]:
+		var container := MissionWorld.find(self, group_name)
+		if container == null:
+			continue
+		for child in container.get_children():
+			var npc := child as Node3D
+			if npc != null and is_instance_valid(npc) and global_position.distance_to(npc.global_position) <= radius:
+				return true
+	return false
+
+
+func _in_legacy_demo() -> bool:
+	var p := get_parent()
+	return p != null and p.get_parent() != null and p.get_parent().name == "ModularNpcDemo"
 
 
 func interact(player: Node = null) -> void:
@@ -75,6 +122,9 @@ func open_for(actor: Node3D) -> bool:
 		return false
 	if not is_open:
 		_toggle()
+	if is_open and auto_close_delay > 0.0 and not _in_legacy_demo():
+		_last_ai_actor = actor
+		_ai_auto_close_timer = auto_close_delay
 	return is_open
 
 

@@ -77,6 +77,10 @@ func _setup_audio() -> void:
 const GLB_MODELS := {
 	"p90": "res://assets/weapons/p90_smg.glb",
 	"mp5": "res://assets/weapons/mp5_silenced.glb",
+	"m249": "res://assets/weapons/m249_saw.glb",
+	"m9": "res://assets/weapons/m9_pistol.glb",
+	"zat": "res://assets/weapons/zat_sidearm.glb",
+	"staff_weapon": "res://assets/weapons/staff_weapon.glb",
 }
 
 
@@ -158,39 +162,43 @@ func _build_weapon_visual_mesh() -> void:
 			muzzle_offset = Vector3(0, 0.02, -0.30)
 
 		"m249":
-			# Heavy machine gun receiver + box drum
-			var receiver := MeshInstance3D.new()
-			var rm := BoxMesh.new()
-			rm.size = Vector3(0.10, 0.16, 0.62)
-			receiver.mesh = rm
-			var rmat := StandardMaterial3D.new()
-			rmat.albedo_color = Color(0.24, 0.26, 0.28)
-			rmat.metallic = 0.8
-			receiver.material_override = rmat
-			model_root.add_child(receiver)
+			var glb_m249 := load_glb_model(GLB_MODELS["m249"])
+			if glb_m249 != null:
+				model_root.add_child(glb_m249)
+			else:
+				# Heavy machine gun receiver + box drum fallback
+				var receiver := MeshInstance3D.new()
+				var rm := BoxMesh.new()
+				rm.size = Vector3(0.10, 0.16, 0.62)
+				receiver.mesh = rm
+				var rmat := StandardMaterial3D.new()
+				rmat.albedo_color = Color(0.24, 0.26, 0.28)
+				rmat.metallic = 0.0
+				receiver.material_override = rmat
+				model_root.add_child(receiver)
 
-			var drum := MeshInstance3D.new()
-			var dm := BoxMesh.new()
-			dm.size = Vector3(0.12, 0.14, 0.16)
-			drum.mesh = dm
-			var dmat := StandardMaterial3D.new()
-			dmat.albedo_color = Color(0.22, 0.30, 0.18)
-			drum.material_override = dmat
-			drum.position = Vector3(0, -0.12, 0.04)
-			model_root.add_child(drum)
+				var drum := MeshInstance3D.new()
+				var dm := BoxMesh.new()
+				dm.size = Vector3(0.12, 0.14, 0.16)
+				drum.mesh = dm
+				var dmat := StandardMaterial3D.new()
+				dmat.albedo_color = Color(0.22, 0.30, 0.18)
+				drum.material_override = dmat
+				drum.position = Vector3(0, -0.12, 0.04)
+				model_root.add_child(drum)
 
-			var barrel := MeshInstance3D.new()
-			var bm := CylinderMesh.new()
-			bm.top_radius = 0.02
-			bm.bottom_radius = 0.02
-			bm.height = 0.35
-			barrel.mesh = bm
-			var bmat := StandardMaterial3D.new()
-			bmat.albedo_color = Color(0.15, 0.15, 0.15)
-			bmat.metallic = 0.9
-			barrel.material_override = bmat
-			barrel.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0.03, -0.42))
-			model_root.add_child(barrel)
+				var barrel := MeshInstance3D.new()
+				var bm := CylinderMesh.new()
+				bm.top_radius = 0.02
+				bm.bottom_radius = 0.02
+				bm.height = 0.35
+				barrel.mesh = bm
+				var bmat := StandardMaterial3D.new()
+				bmat.albedo_color = Color(0.15, 0.15, 0.15)
+				bmat.metallic = 0.0
+				barrel.material_override = bmat
+				barrel.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0.03, -0.42))
+				model_root.add_child(barrel)
 
 			muzzle_offset = Vector3(0, 0.03, -0.62)
 
@@ -224,86 +232,99 @@ func _build_weapon_visual_mesh() -> void:
 			muzzle_offset = Vector3(0, 0.01, -0.36)
 
 		"staff_weapon":
-			# Long Goa'uld Naquadah bronze polearm with flared plasma head
-			var shaft := MeshInstance3D.new()
-			var sm := CylinderMesh.new()
-			sm.top_radius = 0.025
-			sm.bottom_radius = 0.025
-			sm.height = 1.6
-			shaft.mesh = sm
-			var smat := StandardMaterial3D.new()
-			smat.albedo_color = Color(0.68, 0.50, 0.20)
-			smat.metallic = 0.85
-			smat.roughness = 0.3
-			shaft.material_override = smat
-			shaft.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0, -0.2))
-			model_root.add_child(shaft)
+			var glb_staff := load_glb_model(GLB_MODELS["staff_weapon"])
+			if glb_staff != null:
+				model_root.add_child(glb_staff)
+			else:
+				# Long Goa'uld Naquadah bronze polearm with flared plasma head fallback
+				var shaft := MeshInstance3D.new()
+				var sm := CylinderMesh.new()
+				sm.top_radius = 0.025
+				sm.bottom_radius = 0.025
+				sm.height = 1.6
+				shaft.mesh = sm
+				var smat := StandardMaterial3D.new()
+				smat.albedo_color = Color(0.68, 0.50, 0.20)
+				smat.metallic = 0.0
+				smat.roughness = 0.3
+				shaft.material_override = smat
+				shaft.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0, -0.2))
+				model_root.add_child(shaft)
 
-			var head := MeshInstance3D.new()
-			var hm := BoxMesh.new()
-			hm.size = Vector3(0.09, 0.14, 0.24)
-			head.mesh = hm
-			var hmat := StandardMaterial3D.new()
-			hmat.albedo_color = Color(0.9, 0.6, 0.15)
-			hmat.emission_enabled = true
-			hmat.emission = Color(1.0, 0.55, 0.1)
-			hmat.emission_energy_multiplier = 1.2
-			head.material_override = hmat
-			head.position = Vector3(0, 0, -0.95)
-			model_root.add_child(head)
+				var head := MeshInstance3D.new()
+				var hm := BoxMesh.new()
+				hm.size = Vector3(0.09, 0.14, 0.24)
+				head.mesh = hm
+				var hmat := StandardMaterial3D.new()
+				hmat.albedo_color = Color(0.9, 0.6, 0.15)
+				hmat.emission_enabled = true
+				hmat.emission = Color(1.0, 0.55, 0.1)
+				hmat.emission_energy_multiplier = 1.2
+				head.material_override = hmat
+				head.position = Vector3(0, 0, -0.95)
+				model_root.add_child(head)
 
 			muzzle_offset = Vector3(0, 0, -1.05)
 
 		"zat":
-			# Serpentine curved Goa'uld sidearm with glowing blue arc emitter
-			var body := MeshInstance3D.new()
-			var bm := BoxMesh.new()
-			bm.size = Vector3(0.06, 0.14, 0.24)
-			body.mesh = bm
-			var bmat := StandardMaterial3D.new()
-			bmat.albedo_color = Color(0.60, 0.45, 0.20)
-			bmat.metallic = 0.85
-			body.material_override = bmat
-			model_root.add_child(body)
+			var glb_zat := load_glb_model(GLB_MODELS["zat"])
+			if glb_zat != null:
+				model_root.add_child(glb_zat)
+			else:
+				# Serpentine curved Goa'uld sidearm with glowing blue arc emitter fallback
+				var body := MeshInstance3D.new()
+				var bm := BoxMesh.new()
+				bm.size = Vector3(0.06, 0.14, 0.24)
+				body.mesh = bm
+				var bmat := StandardMaterial3D.new()
+				bmat.albedo_color = Color(0.60, 0.45, 0.20)
+				bmat.metallic = 0.0
+				body.material_override = bmat
+				model_root.add_child(body)
 
-			var arc := MeshInstance3D.new()
-			var am := SphereMesh.new()
-			am.radius = 0.035
-			am.height = 0.07
-			arc.mesh = am
-			var amat := StandardMaterial3D.new()
-			amat.albedo_color = Color(0.2, 0.65, 1.0)
-			amat.emission_enabled = true
-			amat.emission = Color(0.2, 0.65, 1.0)
-			amat.emission_energy_multiplier = 1.5
-			arc.material_override = amat
-			arc.position = Vector3(0, 0.05, -0.14)
-			model_root.add_child(arc)
+				var arc := MeshInstance3D.new()
+				var am := SphereMesh.new()
+				am.radius = 0.035
+				am.height = 0.07
+				arc.mesh = am
+				var amat := StandardMaterial3D.new()
+				amat.albedo_color = Color(0.2, 0.65, 1.0)
+				amat.emission_enabled = true
+				amat.emission = Color(0.2, 0.65, 1.0)
+				amat.emission_energy_multiplier = 1.5
+				arc.material_override = amat
+				arc.position = Vector3(0, 0.05, -0.14)
+				model_root.add_child(arc)
 
 			muzzle_offset = Vector3(0, 0.05, -0.20)
 
 		"m9":
-			# Sleek black 9mm handgun
-			var slide := MeshInstance3D.new()
-			var sm := BoxMesh.new()
-			sm.size = Vector3(0.05, 0.07, 0.20)
-			slide.mesh = sm
-			var smat := StandardMaterial3D.new()
-			smat.albedo_color = Color(0.12, 0.12, 0.14)
-			smat.metallic = 0.7
-			slide.material_override = smat
-			model_root.add_child(slide)
+			var glb_m9 := load_glb_model(GLB_MODELS["m9"])
+			if glb_m9 != null:
+				glb_m9.position = Vector3(0, -0.08, 0)
+				model_root.add_child(glb_m9)
+			else:
+				# Sleek black 9mm handgun fallback
+				var slide := MeshInstance3D.new()
+				var sm := BoxMesh.new()
+				sm.size = Vector3(0.05, 0.07, 0.20)
+				slide.mesh = sm
+				var smat := StandardMaterial3D.new()
+				smat.albedo_color = Color(0.12, 0.12, 0.14)
+				smat.metallic = 0.0
+				slide.material_override = smat
+				model_root.add_child(slide)
 
-			var grip := MeshInstance3D.new()
-			var gm := BoxMesh.new()
-			gm.size = Vector3(0.05, 0.10, 0.06)
-			grip.mesh = gm
-			var gmat := StandardMaterial3D.new()
-			gmat.albedo_color = Color(0.08, 0.08, 0.08)
-			grip.material_override = gmat
-			grip.position = Vector3(0, -0.06, 0.06)
-			grip.rotation_degrees.x = 12.0
-			model_root.add_child(grip)
+				var grip := MeshInstance3D.new()
+				var gm := BoxMesh.new()
+				gm.size = Vector3(0.05, 0.10, 0.06)
+				grip.mesh = gm
+				var gmat := StandardMaterial3D.new()
+				gmat.albedo_color = Color(0.08, 0.08, 0.08)
+				grip.material_override = gmat
+				grip.position = Vector3(0, -0.06, 0.06)
+				grip.rotation_degrees.x = 12.0
+				model_root.add_child(grip)
 
 			muzzle_offset = Vector3(0, 0.02, -0.18)
 

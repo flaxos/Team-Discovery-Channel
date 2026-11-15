@@ -31,7 +31,15 @@ MATERIAL_DIR = CLIENT / "resources/level_themes/goauld"
 SCENE_DIR = CLIENT / "scenes/level/themes/goauld"
 
 # Modules that receive built pieces. Every other module gets the palette only.
-MODULES = {"room01": "Room01Straight.tscn", "room04": "Room04Chamber.tscn"}
+MODULES = {
+    "room01": "Room01Straight.tscn",
+    "room02": "Room02Corner.tscn",
+    "room03": "Room03TJunction.tscn",
+    "room04": "Room04Chamber.tscn",
+    "room06": "Room06WideStraight.tscn",
+    "room07": "Room07WideCorner.tscn",
+    "room09": "Room09WidthAdapter.tscn",
+}
 
 # name: (albedo, metallic, roughness). Values and contrast checks: brief, section 2.3.
 # Nothing is metallic: a mission has no sky or reflection probe, so a metallic surface
@@ -162,6 +170,10 @@ def overlaps(a: Slab, b: Slab) -> bool:
     return all(al < bh - EPS and bl < ah - EPS for al, ah, bl, bh in zip(a.low(), a.high(), b.low(), b.high()))
 
 
+def touches(a: Slab, b: Slab) -> bool:
+    return all(al <= bh + EPS and bl <= ah + EPS for al, ah, bl, bh in zip(a.low(), a.high(), b.low(), b.high()))
+
+
 # --- Orientation ------------------------------------------------------------------------
 # Walls and lintels are authored once, facing +X with their length along Z, and turned
 # about Y to face the room. turn is in quarter-turns; ROTATIONS holds the basis rows as
@@ -201,28 +213,30 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
 
     # What each end of the slab meets, in the piece's own -Z / +Z order.
     ends = {}
+    pier_widths = {}
     for end in (-1, 1):
         module_end = centre + sign * end * half
         kind = "jamb"
         for other in walls:
             other_thin = 0 if other.size[0] < other.size[2] else 2
-            if other is not slab and other_thin != thin and overlaps(slab, other):
+            if other is not slab and other_thin != thin and touches(slab, other):
                 reach = (other.low()[axis], other.high()[axis])
                 if reach[0] - EPS <= module_end <= reach[1] + EPS:
                     kind = "corner"
+                    pier_widths[end] = RIB + (slab.size[thin] if overlaps(slab, other) else 0.0)
         if kind == "jamb" and abs(abs(module_end) - extent[0 if axis == 0 else 1]) < 0.01:
             kind = "edge"
         ends[end] = kind
 
     # Ribs: a jamb beside an opening, a pier in a corner (0.2 m of it is inside the other
-    # wall), and the 2 m grid wherever a full rib fits with a panel either side.
+    # wall when they overlap), and the 2 m grid wherever a full rib fits with a panel either side.
     ribs: list[tuple[float, float, str]] = []
     free_low, free_high = -half, half
     for end, kind in ends.items():
         if kind == "jamb":
             ribs.append((end * half - (RIB if end > 0 else 0), end * half + (RIB if end < 0 else 0), "Jamb"))
         elif kind == "corner":
-            width = RIB + slab.size[thin]
+            width = pier_widths[end]
             ribs.append((end * half - (width if end > 0 else 0), end * half + (width if end < 0 else 0), "Pier"))
         else:
             continue
@@ -292,8 +306,13 @@ def lintel_piece(slab: Slab) -> tuple[list[Box], int]:
 
 
 def is_passage(slab: Slab) -> bool:
-    """A floor or ceiling of a corridor (3 m wide) rather than of a room."""
-    return min(slab.size[0], slab.size[2]) <= 3.0 + EPS
+    """A floor or ceiling of a corridor (3 m or 6 m wide) rather than of a room."""
+    return min(slab.size[0], slab.size[2]) <= 6.0 + EPS
+
+
+def passage_along_z(slab: Slab) -> bool:
+    """Whether a passage floor or ceiling slab runs along the module's Z axis."""
+    return abs(slab.position[0]) < EPS and slab.size[0] in (3.0, 6.0)
 
 
 def floor_piece(slab: Slab) -> list[Box]:
@@ -302,7 +321,7 @@ def floor_piece(slab: Slab) -> list[Box]:
     full = (-t, t)
     if is_passage(slab):
         r = RUNNER / 2
-        if slab.size[2] >= slab.size[0]:
+        if passage_along_z(slab):
             return [
                 span("MarginA", "floor_margin", (-x, -r), full, (-z, z)),
                 span("Runner", "floor_runner", (-r, r), full, (-z, z)),
@@ -343,13 +362,19 @@ def ceiling_piece(slab: Slab, jambs: list[float]) -> list[Box]:
     ]
     inner_x, inner_z = x - edge, z - edge
     if passage:
-        along_z = slab.size[2] >= slab.size[0]
-        for index, grid in enumerate(GRID):
-            low, high = grid - RIB / 2, grid + RIB / 2
-            if along_z:
-                boxes.append(span("Beam%d" % index, "bronze", (-inner_x, inner_x), beam, (low, high)))
-            else:
-                boxes.append(span("Beam%d" % index, "bronze", (low, high), beam, (-inner_z, inner_z)))
+        along_z = passage_along_z(slab)
+        axis = 2 if along_z else 0
+        limit = inner_z if along_z else inner_x
+        centre = slab.position[axis]
+        index = 0
+        for grid in GRID:
+            low, high = grid - centre - RIB / 2, grid - centre + RIB / 2
+            if low >= -limit + CLEARANCE - EPS and high <= limit - CLEARANCE + EPS:
+                if along_z:
+                    boxes.append(span("Beam%d" % index, "bronze", (-inner_x, inner_x), beam, (low, high)))
+                else:
+                    boxes.append(span("Beam%d" % index, "bronze", (low, high), beam, (-inner_z, inner_z)))
+                index += 1
         return boxes
     # A room: beams spring from the door jambs in both directions. Those along X run
     # through; those along Z are cut where they cross, so no two boxes share a volume.
@@ -468,8 +493,8 @@ def build() -> tuple[dict[Path, str], list[dict], dict[str, tuple[Slab, list[Box
         slabs = read_slabs(MODULE_SCENES / scene_file)
         walls = [slab for slab in slabs if slab.slot == "wall"]
         extent = (
-            max(abs(v) for slab in slabs for v in (slab.low()[0], slab.high()[0])),
-            max(abs(v) for slab in slabs for v in (slab.low()[2], slab.high()[2])),
+            max(abs(v) for slab in walls for v in (slab.low()[0], slab.high()[0])),
+            max(abs(v) for slab in walls for v in (slab.low()[2], slab.high()[2])),
         )
         # Door jamb lines, from the lintels: where the room's ceiling beams spring.
         jambs = sorted(

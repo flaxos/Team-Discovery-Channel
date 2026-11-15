@@ -256,16 +256,9 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 **TA-2 — Flanking, suppression and squad tactics on modular levels** · L · Fable
 - Jaffa choose a second route to the threat using the room graph; airmen get anchors from room markers instead of SGC sectors. Prerequisites: TA-1, TA-3. Split before starting.
 
-**TA-3 — Navigation follow-ups: rerouting, avoidance, door closing**
+**TA-3 — Navigation follow-ups: rerouting, avoidance, door closing** · **built 15 November 2026 (`test_modular_navigation_ta3`)**
 - **Experience:** patrols walk round a locked door, do not jam in corridors, and close doors behind them.
-- **Baseline:** all three confirmed missing (R4, R5, R6).
-- **New:** reroute using the layout's room graph with the locked connection removed (`LevelTopology.path` already does this search), then path room to room; simple yielding between NPCs in narrow rooms; optional door close after passing, with the existing occupied-doorway check.
-- **Non-goals:** runtime navmesh rebake, crowd simulation.
-- **Prerequisites:** none. Becomes necessary with EV-2 door actions and looped maps.
-- **Components:** `LevelNavigator.gd`, `ModularDoor.gd`.
-- **Acceptance:** on a looped layout with one locked door, a patrol reaches its waypoint by the other route; two NPCs meeting head-on both arrive.
-- **Risks:** closed doors change sight lines, which interacts with ST-1.
-- **Complexity:** M · Fable.
+- **Delivered:** Room-graph BFS rerouting around locked `ModularDoor` connections (`LevelNavigator._reroute_around_locked_doors`), right-hand corridor NPC yielding/avoidance (`LevelNavigator._avoid_corridor_npc`), and server-authoritative NPC door auto-closing after `2.5 s` in `ModularDoor._physics_process` once no NPC is within `2.5 m` (plus D-015 `metallic = 0.0` door panel sanitization).
 
 ### E — Goa'uld infiltration mission
 
@@ -300,7 +293,7 @@ See section 6 for sequencing.
 - **Risks:** readability of doors and cover under a dark palette; scope creep into props.
 - **Complexity:** M–L · depends on the art method · independent of all gameplay streams.
 
-**GA-2 — Kit expansion** · XL · split per room group, ordered by the rooms the first mission uses: remaining corridors and junctions, large chambers, ramp and tall rooms, functional props (consoles, generator, crates), lighting and atmosphere.
+**GA-2 — Kit expansion** · XL · **Part 1 built 15 November 2026 (`test_goauld_theme`)**: expanded `tools/theme_kit.py` and `goauld.tres` to 70 variants across 7 structural modules (`room01`–`room04`, `room06`, `room07`, `room09`), covering 14 of the 20 rooms in the Goa'uld infiltration compound with full 3D pieces (1,046 cosmetic meshes) and 100% identical collision and navigation. Remaining parts: large chambers, ramp and tall rooms, functional props (consoles, generator, crates), lighting and atmosphere.
 
 ### G — Stargate world transitions
 
@@ -397,10 +390,10 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R2 | Play machine checkout is behind `main` | New, confirmed | `/home/flax/games/Team-Discovery-Channel` is on `feat/modular-npc-navigation` at `19b8317` with local edits. It does not contain PR #39 or #40, so the extraction mission is not launchable from the documented path | Owner action before EX-2 |
 | R3 | Cover markers without real cover | Fixed where rooms have low cover (TA-1, PR #49) | Sentries fight from behind solid low cover attachments (`LevelNavigator.prop_cover`). Rooms without such props, including all bare structural modules, still fall back to the generated room-centre marker | TA-1; more cover is content work |
 | R4 | Perception through walls and decks | Fixed for patrols (ST-1, PR #43); gate waves unchanged | Patrols use the sentry profile (`JaffaPerception`): range, view cone and line of sight, graded awareness. Gate waves and column marches keep the assault rule, which still acquires within 22 m without line of sight, so SGC Defense plays as before | — |
-| R5 | NPC avoidance | Confirmed missing | No avoidance code; head-on NPCs can trip the stall detector | TA-3 |
-| R6 | Locked-door rerouting | Confirmed missing | `LevelNavigator._locked_ahead` holds with `blocked_door`. Planned maps now contain loops, so an alternative often exists and is not used | TA-3 |
+| R5 | NPC avoidance | Fixed (TA-3) | Right-hand corridor NPC yielding/avoidance in `LevelNavigator._avoid_corridor_npc` lets head-on patrols pass each other without stalling (`test_modular_navigation_ta3`) | Fixed in TA-3 |
+| R6 | Locked-door rerouting | Fixed (TA-3) | `LevelNavigator._reroute_around_locked_doors` searches the unlocked room graph and stitches room-to-room paths around locked security doors (`test_modular_navigation_ta3`) | Fixed in TA-3 |
 | R7 | Late join during combat | Fixed for actors, doors, objectives and result (EX-1) | Reproduced in EX-1, then fixed: `SGCNetworkManager.mission_rpc` sends only to peers that have the receiving node, and `test_modular_extraction_multiplayer` now joins during a firefight with an error-free client log. SGC-only props (gate, lift, wave manager, shutters) still broadcast to every peer; not reproduced, not changed | EX-1; SGC props open |
-| R8 | Doors left open after a patrol passes | Confirmed | `ModularDoor.open_for` never closes and there is no auto-close | TA-3 |
+| R8 | Doors left open after a patrol passes | Fixed (TA-3) | `ModularDoor.open_for` arms a server-authoritative `auto_close_delay = 2.5 s` timer that closes the door once no NPC is within `2.5 m` and `_can_close()` is true (`test_modular_navigation_ta3`) | Fixed in TA-3 |
 | R9 | Enemy behaviour after the result | Modular fixed (EX-1); SGC open | Modular: Jaffa `stand_down()` and operative health is frozen at the result. SGC: nothing stops live Jaffa; they keep acting behind the result screen | GT-1 (shared host) |
 | R10 | Dedicated-server acceptance | Automated for both missions; human open | SGC: `test_sprint5_dedicated_smoke`. Modular: `test_modular_extraction_dedicated` (EX-1), which also found and fixed two defects: a client could not request a retry, and a client kept running a dead world after the server stopped. No human has accepted either | EX-2 |
 | R11 | SGC coupling in mission hosting | Wording fixed (EX-1); structure open | `ModularMission` still extends `GateRoom` and stubs its sector and snapshot methods. Since EX-1 it sets its banner on change and its own debrief through `HUD.set_mission_banner` and `HUD.set_debrief` | Open. No longer part of GT-1 ([D-016](../DECISIONS.md)): coexistence does not need the split |
