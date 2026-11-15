@@ -12,6 +12,13 @@ signal presented_changed(world: Node)
 var worlds: Array[Node] = []
 ## Host only: peer id -> the world its operative belongs in.
 var placement: Dictionary = {}
+## Host only: mission participant tracking for debrief reporting.
+var participants: Dictionary = {}
+var went_offworld: Dictionary = {}
+var returned_home: Dictionary = {}
+var disconnected_offworld: Dictionary = {}
+var mission_start_msec: int = 0
+var last_debrief: Dictionary = {}
 var result: int = -1
 var presented: Node = null
 const SHADOW_SETTLE_S := 1.5
@@ -19,7 +26,12 @@ var _settling := false
 
 
 func _ready() -> void:
-	multiplayer.peer_disconnected.connect(func(id: int) -> void: placement.erase(id))
+	mission_start_msec = Time.get_ticks_msec()
+	multiplayer.peer_disconnected.connect(func(id: int) -> void:
+		if worlds.size() >= 2 and world_of(id) != home():
+			disconnected_offworld[id] = true
+		placement.erase(id)
+	)
 
 
 func add_world(world: Node) -> void:
@@ -38,6 +50,33 @@ func world_of(peer_id: int) -> Node:
 
 func place(peer_id: int, world: Node) -> void:
 	placement[peer_id] = world
+
+
+func record_participant(peer_id: int, class_id: String, callsign: String) -> void:
+	var label := callsign.strip_edges()
+	if label.is_empty():
+		label = "OPERATIVE %d" % peer_id if peer_id != 1 else "OPERATIVE"
+	participants[peer_id] = {"callsign": label, "class_id": class_id}
+	disconnected_offworld.erase(peer_id)
+
+
+func _ensure_participants_recorded() -> void:
+	var home_world: Node = home()
+	for world in worlds:
+		var players_node: Node = world.get(&"players_container") as Node
+		if players_node == null:
+			continue
+		for child in players_node.get_children():
+			var p := child as PlayerController3D
+			if p == null:
+				continue
+			if not participants.has(p.peer_id):
+				var label: String = p.player_callsign
+				if label == "OPERATIVE" and p.peer_id != 1:
+					label = "OPERATIVE %d" % p.peer_id
+				record_participant(p.peer_id, p.class_id, label)
+			if world != home_world:
+				went_offworld[p.peer_id] = true
 
 
 ## Draw and hear `world` on this peer and hide the others. Every world keeps simulating.
@@ -67,9 +106,15 @@ func _settle_shadows() -> void:
 		viewport.positional_shadow_atlas_size = size
 
 
-## Decision D-017: the mission is lost when every operative, in every world, is down.
-## A world with no operatives in it does not count either way.
+## Decision D-017:
+## - Lost when every operative, in every world, is down.
+## - Succeeded when site objectives are complete, no standing operative remains offworld,
+##   and at least one operative came home.
 func squad_changed() -> void:
+	evaluate_outcome()
+
+
+func evaluate_outcome() -> void:
 	if result >= 0 or not multiplayer.is_server():
 		return
 	var operatives := 0
@@ -80,6 +125,14 @@ func squad_changed() -> void:
 		standing += state.y
 	if operatives > 0 and standing == 0:
 		finish(false)
+		return
+	if worlds.size() >= 2:
+		var site: Node = worlds[1]
+		var site_objectives: Variant = site.get(&"objectives")
+		var objectives_done: bool = site_objectives != null and bool(site_objectives.call(&"is_complete"))
+		var site_squad: Vector2i = site.call(&"squad_state")
+		if objectives_done and site_squad.y == 0 and not returned_home.is_empty():
+			finish(true)
 
 
 ## One result for the whole mission, shown in every world.
@@ -87,8 +140,89 @@ func finish(victory: bool) -> void:
 	if result >= 0:
 		return
 	result = 1 if victory else 0
+	var debrief: Dictionary = _build_debrief(victory)
+	last_debrief = debrief
 	for world in worlds:
 		world.call(&"_finish_mission", victory)
+	if not debrief.is_empty():
+		SGCNetworkManager.mission_rpc(self, &"sync_debrief", [debrief, victory])
+		sync_debrief(debrief, victory)
+
+
+func _build_debrief(victory: bool) -> Dictionary:
+	if worlds.size() < 2:
+		return {}
+	_ensure_participants_recorded()
+	var home_world: Node = home()
+	var site_world: Node = worlds[1]
+	var home_players: Node = home_world.get(&"players_container") as Node
+	var site_players: Node = site_world.get(&"players_container") as Node
+
+	var returned_names: Array[String] = []
+	var lost_names: Array[String] = []
+	var pids: Array = participants.keys()
+	pids.sort()
+	for pid_v: Variant in pids:
+		var pid: int = int(pid_v)
+		var label: String = str(participants[pid].get("callsign", "OPERATIVE %d" % pid))
+		var hp := home_players.get_node_or_null(str(pid)) as PlayerController3D if home_players != null else null
+		var sp := site_players.get_node_or_null(str(pid)) as PlayerController3D if site_players != null else null
+		if hp != null:
+			var hc: HealthComponent = hp.health_component
+			if hc != null and (hc.is_dead or hc.is_downed):
+				lost_names.append(label)
+			elif returned_home.get(pid, false):
+				returned_names.append(label)
+		elif sp != null:
+			var sc: HealthComponent = sp.health_component
+			if (sc != null and (sc.is_dead or sc.is_downed)) or not victory:
+				lost_names.append(label)
+		elif went_offworld.get(pid, false) or disconnected_offworld.get(pid, false):
+			lost_names.append(label)
+
+	var kills: int = int(site_world.call(&"hostiles_eliminated_count")) if site_world.has_method(&"hostiles_eliminated_count") else 0
+	var site_obj: Variant = site_world.get(&"objectives")
+	var site_def: Variant = site_world.get(&"definition")
+	var obj_done: int = int(site_obj.get(&"index")) if site_obj != null else 0
+	var obj_total: int = site_def.objectives.size() if site_def != null else 0
+	var stealth: String = str(site_world.call(&"alert_summary")) if site_world.has_method(&"alert_summary") else "UNDETECTED"
+	var duration_s: int = maxi(0, (Time.get_ticks_msec() - mission_start_msec) / 1000)
+
+	var ret_text: String = "NONE" if returned_names.is_empty() else "%d (%s)" % [returned_names.size(), ", ".join(returned_names)]
+	var lost_text: String = "NONE" if lost_names.is_empty() else "%d (%s)" % [lost_names.size(), ", ".join(lost_names)]
+	var outcome: String = ("ALL AWAY TEAM RETURNED" if lost_names.is_empty() else "RETURNED WITH LOSSES") if victory else "SQUAD LOST"
+
+	return {
+		"title": "EXTRACTION SUCCESSFUL" if victory else "MISSION FAILED",
+		"subtitle": (
+			"AWAY TEAM DEBRIEF — RETURNED TO SGC"
+			if victory
+			else "OFFWORLD OPERATION FAILED — SGC DEBRIEF"
+		),
+		"time": "MISSION DURATION: %02d:%02d" % [duration_s / 60, duration_s % 60],
+		"kills": "HOSTILES ELIMINATED: %d" % kills,
+		"objectives": "OBJECTIVES COMPLETE: %d / %d" % [obj_done, obj_total],
+		"squad": "RETURNED: %s | LOST: %s" % [ret_text, lost_text],
+		"status": "STATUS: %s — %s" % [outcome, stealth],
+		"leave": "RETURN TO SGC BRIEFING",
+		"kill_count": kills,
+		"duration_seconds": duration_s
+	}
+
+
+@rpc("authority", "call_local", "reliable")
+func sync_debrief(debrief: Dictionary, victory: bool) -> void:
+	last_debrief = debrief
+	if victory and home() != null:
+		present(home())
+	for world in worlds:
+		var world_hud: Variant = world.get(&"hud")
+		if world_hud != null:
+			if debrief.has("kill_count"):
+				world_hud.set(&"total_kills", int(debrief["kill_count"]))
+			if debrief.has("duration_seconds"):
+				world_hud.set(&"mission_seconds", float(debrief["duration_seconds"]))
+			world_hud.call(&"set_debrief", debrief)
 
 
 signal player_traveled(peer_id: int, from_world: Node, to_world: Node)
@@ -184,7 +318,7 @@ func apply_state(player: PlayerController3D, state: Dictionary) -> void:
 
 ## Moves one operative from its current world to the destination world.
 func travel_player(player: PlayerController3D, from_world: Node = null) -> void:
-	if not multiplayer.is_server() or player == null or worlds.size() < 2:
+	if result >= 0 or not multiplayer.is_server() or player == null or worlds.size() < 2:
 		return
 	var peer_id: int = player.peer_id
 	if from_world == null:
@@ -192,21 +326,40 @@ func travel_player(player: PlayerController3D, from_world: Node = null) -> void:
 	var to_world: Node = worlds[1] if from_world == home() else home()
 	if to_world == from_world:
 		return
+	if from_world != home() and to_world == home():
+		var site_objectives: Variant = from_world.get(&"objectives")
+		if site_objectives != null and not bool(site_objectives.call(&"is_complete")):
+			return
+	if not participants.has(peer_id):
+		var label: String = player.player_callsign
+		if label == "OPERATIVE" and peer_id != 1:
+			label = "OPERATIVE %d" % peer_id
+		record_participant(peer_id, player.class_id, label)
+
 	var state: Dictionary = capture_state(player)
 
 	# Despawn from from_world
 	var players_container: Node3D = from_world.get("players_container") as Node3D
-	if players_container != null and players_container.has_node(str(peer_id)):
-		players_container.remove_child(player)
-		player.queue_free()
+	if players_container == null or not players_container.has_node(str(peer_id)):
+		return
+	players_container.remove_child(player)
+	player.queue_free()
 
-	# Record new world placement
+	# Record new world placement and travel history
 	place(peer_id, to_world)
+	if to_world != home():
+		went_offworld[peer_id] = true
+	elif from_world != home():
+		returned_home[peer_id] = true
 
-	# Spawn in to_world at its spawn point
-	var spawns_container: Node3D = to_world.get("spawns_container") as Node3D
-	var spawn_points: Array[Node] = spawns_container.get_children() if spawns_container != null else []
-	var spawn_pos: Vector3 = (spawn_points[0] as Node3D).global_position if not spawn_points.is_empty() else to_world.global_position
+	# Spawn in to_world at its arrival point
+	var spawn_pos: Vector3
+	if to_world == home() and to_world.has_method(&"return_spawn_position"):
+		spawn_pos = to_world.call(&"return_spawn_position", peer_id)
+	else:
+		var spawns_container: Node3D = to_world.get("spawns_container") as Node3D
+		var spawn_points: Array[Node] = spawns_container.get_children() if spawns_container != null else []
+		spawn_pos = (spawn_points[0] as Node3D).global_position if not spawn_points.is_empty() else (to_world as Node3D).global_position
 	to_world.call(&"_spawn_player", peer_id, state.get("class_id", SGCNetworkManager.CLASS_SG3_HEAVY), spawn_pos)
 
 	var target_players: Node3D = to_world.get("players_container") as Node3D
@@ -214,6 +367,8 @@ func travel_player(player: PlayerController3D, from_world: Node = null) -> void:
 		var new_player := target_players.get_node_or_null(str(peer_id)) as PlayerController3D
 		if new_player != null:
 			apply_state(new_player, state)
+			if to_world == home():
+				new_player.rotation.y = PI
 
 	# Synchronize presentation switch to the travelling client
 	if multiplayer.has_multiplayer_peer() and multiplayer.get_peers().has(peer_id):
@@ -222,8 +377,8 @@ func travel_player(player: PlayerController3D, from_world: Node = null) -> void:
 	if peer_id == local_id:
 		present(to_world)
 
-	squad_changed()
 	player_traveled.emit(peer_id, from_world, to_world)
+	evaluate_outcome()
 
 
 @rpc("authority", "call_local", "reliable")

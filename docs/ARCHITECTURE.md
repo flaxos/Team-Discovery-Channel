@@ -32,12 +32,12 @@ A second mission path runs on modular levels. It shares the player, weapon, heal
 
 ## Worlds and the session
 
-A **world** is one self-contained place: its level, players, enemies, spawners, objectives and HUD under one root (`GateRoom` or a `ModularMission`). A mission is one world, or two side by side. There is no travel between them yet; the design and the reasons are in [gate travel with a split team](plans/gate-travel-split-worlds.md) (decisions D-016 and D-017).
+A **world** is one self-contained place: its level, players, enemies, spawners, objectives and HUD under one root (`GateRoom` or a `ModularMission`). A mission is one world, or two side by side with two-way Stargate travel between them; the design and the reasons are in [gate travel with a split team](plans/gate-travel-split-worlds.md) (decisions D-016 and D-017).
 
 | Component | Responsibility |
 | --- | --- |
 | [`MissionWorld`](../client/scripts/world/MissionWorld.gd) | How an actor finds its own world. `of(node)` is the nearest ancestor world; `find(node, name)` looks a node up inside it; `in_group(node, group)` returns the group members the actor can meet. **Never search the whole game** (`get_tree().root.find_child`, `get_tree().get_nodes_in_group`): with two worlds loaded that returns the wrong one. `tools/tests/test_world_scoping.py` fails on such a lookup |
-| [`MissionSession`](../client/scripts/world/MissionSession.gd) | Exists only for a two-world mission, above both worlds. Records which world each peer's operative belongs in (default: home), loses the mission only when every operative in every world is down, gives both worlds one result, and decides which world this peer presents |
+| [`MissionSession`](../client/scripts/world/MissionSession.gd) | Exists only for a two-world mission, above both worlds. Records which world each peer's operative belongs in (default: home), transfers operatives and carried state across worlds (`travel_player`), applies D-017 loss and success rules (`evaluate_outcome`), syncs real mission debriefs with returned/lost operatives (`sync_debrief`), and decides which world this peer presents |
 | `MainGameCoordinator` | Loads one world at `WorldContainer/GateRoom`, or two: home at that same path and the site at `WorldContainer/Site/GateRoom`, 2,000 m away (`SITE_OFFSET`). A mission entry with a `"site"` scene is a two-world mission. Every peer loads both worlds, so one readiness report covers them |
 | `GateRoom.set_presented` | A peer presents the world its own operative is in. A world that is not presented is hidden, has no HUD and no active environment, and plays no positionless sound; it keeps simulating |
 

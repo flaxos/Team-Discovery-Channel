@@ -107,7 +107,11 @@ func _configure_difficulty() -> void:
 	max_waves = 3
 	var dialer := _dialer()
 	if dialer != null:
-		dialer.set_buffer_corrupted(difficulty != DifficultyTier.EASY and not computer_upgraded)
+		dialer.set_buffer_corrupted(hostile_gate_activation_enabled and difficulty != DifficultyTier.EASY and not computer_upgraded)
+
+
+func _is_travel_home() -> bool:
+	return get_parent() != null and get_parent().get("session") != null
 
 
 func _gate() -> StargateRing:
@@ -123,9 +127,15 @@ func requirements_met() -> bool:
 
 
 func dialing_block_reason() -> String:
-	if not hostile_gate_activation_enabled: return "UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION"
 	if mission_ended:
 		return "MISSION ENDED"
+	if not hostile_gate_activation_enabled:
+		if _is_travel_home():
+			var travel_gate: StargateRing = _gate()
+			if travel_gate != null and travel_gate.current_state != StargateRing.GateState.INACTIVE:
+				return "STARGATE ALREADY OPEN TO OFFWORLD SITE"
+			return ""
+		return "UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION"
 	if completed_incursions < target_activations:
 		return "SURVIVE INCURSIONS: %d / %d CLEARED" % [completed_incursions, target_activations]
 	if difficulty != DifficultyTier.EASY and not computer_upgraded:
@@ -139,7 +149,7 @@ func dialing_block_reason() -> String:
 
 
 func request_outbound() -> bool:
-	if not hostile_gate_activation_enabled: return false
+	if not hostile_gate_activation_enabled and not _is_travel_home(): return false
 	if not multiplayer.is_server() or not dialing_block_reason().is_empty():
 		objective_status_changed.emit(dialing_block_reason())
 		return false
