@@ -24,7 +24,7 @@ Sector naming, turret and tactical-anchor logic in the airman remain SGC-flavour
 
 - `client/scripts/level/LevelNavigator.gd` (new): plans a navmesh path, follows it corner by corner, and returns only a steering point. It never moves the actor.
 - `SGCNavigator`: when no `SGCMap` is present it delegates to `LevelNavigator`. With an `SGCMap` the original code path is untouched.
-- `ModularDoor.open_for(actor)`: server-only request for server-owned actors, with the same 3.2 m reach and lock rules as a player. It never unlocks, never closes and never touches collision directly.
+- `ModularDoor.open_for(actor)`: server-only request for server-owned actors, with the same 3.2 m reach and lock rules as a player. It never unlocks. TA-3 schedules safe closing for doors it opens; manual openings stay open.
 - `JaffaAI.start_patrol(points, loop)` with `patrol_waypoint_reached` and `patrol_lap_completed` signals. Patrol resumes after combat because it replaces the idle advance destination.
 - Friendly movement needs no controller change: `order_move_to(level.marker(room, marker))`.
 
@@ -36,7 +36,7 @@ Sector naming, turret and tactical-anchor logic in the airman remain SGC-flavour
 |---|---|---|
 | `moving` / `arrived` | Normal travel | Walks / stops |
 | `waiting_for_door` | Closed door in reach could not be opened this tick | Holds, retries |
-| `blocked_door` | A locked door lies on the route (`level_route.blocked_door`) | Holds where it is, re-checks every second |
+| `blocked_door` | No navmesh route avoiding locked connections can be built (`level_route.blocked_door`) | Holds where it is, re-checks every second |
 | `unreachable` | Goal is not on the navigation mesh | Holds, re-checks every second |
 | `stuck` | No progress after three replans (about 12 s) | Holds, re-checks every second, resumes if cleared |
 
@@ -56,7 +56,7 @@ Run it with Godot 4.4.1:
 godot --path client res://scenes/level/ModularNpcDemo.tscn
 ```
 
-The view is a fixed overview with roofs hidden and a status readout. `L` locks or unlocks the security door on the host. Set `unlock_after` to `0` on the root node to keep the door locked.
+The view is a fixed overview with roofs hidden and a status readout. `L` locks or unlocks the security door on the host. Set `unlock_after` to `0` on the root node to keep the door locked. The overview demo sets `npc_door_auto_close_delay = 0` so traversed doors remain open and the route is visible; normal mission doors use 2.5 seconds.
 
 ### UAT checklist (pending human sign-off)
 
@@ -93,18 +93,31 @@ python3 tools/run_godot_tests.py test_modular_npc_navigation test_modular_npc_mu
 
 Existing SGC AI suites are unchanged and run in the full regression.
 
+## TA-3 navigation follow-ups
+
+Implemented 16 November 2026 on this branch. Native `LevelLayout` resources remain authoritative; no saved layout, navigation mesh or structural geometry changes.
+
+- A locked door removes its connection from the walking graph passed to `LevelTopology.path`. The navigator stitches navmesh legs through the alternate rooms and checks every leg for locked crossings. It replans when a remaining route door locks; when all routes are blocked it holds and retries once per second, including after an unlock.
+- Nearby NPCs on the same deck steer to their right on the assembly navigation map. This is local passing, not crowd simulation. The test uses production Jaffa with mutual body collision and observes both arriving without moving them during traversal.
+- An AI-opened door closes on the server after nearby NPCs clear 2.5 m and `auto_close_delay` elapses (default 2.5 s). The existing occupied-doorway query protects players and NPCs. Set the delay to zero to leave doors open. An AI passing through a manually opened door does not start its close timer. Open/closed state uses the existing RPC and late-join snapshot; clients never run the timer.
+
+```sh
+python3 tools/run_godot_tests.py test_modular_navigation_ta3 test_modular_navigation_ta3_multiplayer test_modular_npc_navigation test_modular_npc_multiplayer --timeout 240
+```
+
+The existing alarm suite now checks the runner’s selected working console and its destination, since passing changes patrol positions and either console may be closest. Its alarm, reinforcement, retry, disabled-console and calm-down checks remain.
+
+The new suites cover a production patrol walking the alternative arm of a loop, both arms locked, runtime lock/unlock recovery, planning on the canonical infiltration loop, head-on passing, automatic closure, occupied doorways, explicit opt-out and manual openings. The multiplayer suite connects after a door opens, checks its snapshot and replicated closure, rejects client AI requests, and tears down without timer errors.
+
+Human verification remains pending: walk a loop with one locked security door, observe patrols meeting head-on, watch doors close behind patrols without closing on an operative, and check that the changed sight lines remain readable with sentry perception active. Run with two players to confirm both see the same door state.
+
 ## Known limitations
 
-> **Status update, 12 November 2026.** This list is as written for PR #38. Three items were superseded by PR #39: combat on modular levels now runs and is tested (the mission uses the standard `Players` and `Enemies` containers), Jaffa on modular levels take room `cover` markers instead of gate-room coordinates, and a client joining with patrols in progress is covered by `test_modular_extraction_multiplayer`. Rerouting, avoidance, door closing and ring links remain open and are tracked in the [risk register](../plans/master-development-roadmap.md#7-risk-and-defect-register).
-
-- **No rerouting around a locked door.** The level bakes one navigation region, so a locked door is detected on the planned path and the NPC holds. Choosing an alternative route needs per-connection navigation links or a room-graph planner. The canonical fixture is a tree, so no alternative exists there anyway.
-- **The navmesh is not rebaked at runtime.** Locking a door after the bake leaves walkable mesh behind it (handled by the door check above). Geometry added later is only discovered by stalling, which takes about 12 s to report.
-- **NPCs leave doors open.** `open_for` never closes.
-- **No local avoidance between NPCs.** Two actors meeting head-on in a narrow corridor push against each other and may trip the stall detector.
-- **Perception looks for containers named `Players`, `Allies` and `Enemies`.** The demo names its containers `Hostiles` and `Friendlies` so the two factions do not fight and the routes stay repeatable. Combat on modular levels is unverified.
-- **Jaffa tactical cover and flanking positions are hard-coded gate-room coordinates.** They are not used while patrolling but would be wrong if combat started on a modular level.
-- **Transport rings are not a navigation link.** NPCs only walk.
-- **Client late-join mid-patrol is not tested** beyond what the spawner and door snapshots already provide.
+- Runtime geometry changes do not rebake the navmesh. An obstruction still uses bounded stall detection and retries.
+- Room-graph rerouting requires an alternate walking connection and valid navmesh legs. It does not invent links or use transport rings.
+- Local passing is not a guarantee against arbitrary crowds or formations in a doorway. Human co-op and combat tuning remain outstanding.
+- The demonstration deliberately names factions `Hostiles` and `Friendlies` so they do not acquire each other. Actual missions use world-scoped `Players`, `Allies` and `Enemies` and have combat/late-join coverage. Modular cover uses props when available and markers as a fallback; coordinated flanking is TA-2.
+- Transport rings are not NPC navigation links.
 
 ## Recorded delivery evidence
 

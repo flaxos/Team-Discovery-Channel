@@ -53,10 +53,10 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Enemy detection | Awaiting human (patrols); defect (gate waves) | Patrols use sentry perception (ST-1): view cone, line of sight, suspicious before alerted, search; `test_jaffa_perception`. Gate waves and columns keep the assault rule, which acquires any operative within 22 m through walls (`_find_nearest_target`) |
 | Cover and flanking | Partial | SGC: sandbag cover and corridor flank from literal coordinates. Modular (TA-1): Jaffa crouch behind solid low cover props, stand to fire over them and move when flanked (`test_jaffa_prop_cover`); rooms without props fall back to the room-centre `cover` marker. No flanking manoeuvres on modular levels |
 | Suppression and firefights | Partial | Lead rank halts and fires, others relocate; airman cover fire in SGC. No suppression effect on the target |
-| Door interaction | Verified | `ModularDoor` open/close, server-validated, snapshots; AI opens doors with `open_for` |
+| Door interaction | Verified | `ModularDoor` open/close, server-validated, snapshots; AI opens doors with `open_for`; TA-3 closes AI-opened doors after clearance, respects occupied doorways and preserves manual openings (`test_modular_navigation_ta3_multiplayer` covers late-join snapshot and closure) |
 | Level-wide alert and alarm | Awaiting human | `MissionAlert` (EV-1): calm, alerted and alarm levels; a runner must reach an alarm console; operatives can disable consoles; reinforcement budget; `test_mission_alert`, `test_mission_alert_multiplayer` |
 | Locked doors and access control | Partial | Security doors lock, replicate and block AI. Nothing in a mission can lock or unlock one: `set_locked` is only called by `ModularNpcDemo.gd` |
-| NPC avoidance and rerouting | Missing | No avoidance code. A locked door on the path produces `blocked_door` and the NPC waits |
+| NPC avoidance and rerouting | Awaiting human (TA-3) | `LevelNavigator` uses the room graph with live locks and navmesh legs, and steers nearby NPCs to their right. `blocked_door` holds only when no alternate route can be built. `test_modular_navigation_ta3` |
 | Mounted weapons | Verified (SGC) | Fixed .50 cal turrets and the Heavy tripod; airmen can crew them. Not available as a modular attachment |
 | Deployable equipment | Verified (SGC) | Claymore, C4, ballistic shield, smoke; smoke blocks AI sight |
 | Stealth interactions, takedowns | Partial | Body dragging exists. Weapon noise with a suppressed MP5 and sentry hearing and search (ST-2, `test_jaffa_hearing`). No takedown, knife or body discovery |
@@ -256,14 +256,14 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 **TA-2 — Flanking, suppression and squad tactics on modular levels** · L · Fable
 - Jaffa choose a second route to the threat using the room graph; airmen get anchors from room markers instead of SGC sectors. Prerequisites: TA-1, TA-3. Split before starting.
 
-**TA-3 — Navigation follow-ups: rerouting, avoidance, door closing**
+**TA-3 — Navigation follow-ups: rerouting, avoidance, door closing** · **implemented 16 November 2026 on this branch; human check pending**
 - **Experience:** patrols walk round a locked door, do not jam in corridors, and close doors behind them.
-- **Baseline:** all three confirmed missing (R4, R5, R6).
+- **Baseline:** avoidance, rerouting and automatic closing were missing (R5, R6, R8).
 - **New:** reroute using the layout's room graph with the locked connection removed (`LevelTopology.path` already does this search), then path room to room; simple yielding between NPCs in narrow rooms; optional door close after passing, with the existing occupied-doorway check.
 - **Non-goals:** runtime navmesh rebake, crowd simulation.
 - **Prerequisites:** none. Becomes necessary with EV-2 door actions and looped maps.
 - **Components:** `LevelNavigator.gd`, `ModularDoor.gd`.
-- **Acceptance:** on a looped layout with one locked door, a patrol reaches its waypoint by the other route; two NPCs meeting head-on both arrive.
+- **Acceptance:** on a looped layout with one locked door, a patrol reaches its waypoint by the other route; two NPCs meeting head-on both arrive. `test_modular_navigation_ta3` also checks live locks, all-routes-blocked recovery, the infiltration graph and safe closing. `test_modular_navigation_ta3_multiplayer` checks server authority, late-join open state and replicated automatic closure. The overview demo explicitly opts out of closing to preserve route visibility.
 - **Risks:** closed doors change sight lines, which interacts with ST-1.
 - **Complexity:** M · Fable.
 
@@ -397,10 +397,10 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R2 | Play machine checkout is behind `main` | New, confirmed | `/home/flax/games/Team-Discovery-Channel` is on `feat/modular-npc-navigation` at `19b8317` with local edits. It does not contain PR #39 or #40, so the extraction mission is not launchable from the documented path | Owner action before EX-2 |
 | R3 | Cover markers without real cover | Fixed where rooms have low cover (TA-1, PR #49) | Sentries fight from behind solid low cover attachments (`LevelNavigator.prop_cover`). Rooms without such props, including all bare structural modules, still fall back to the generated room-centre marker | TA-1; more cover is content work |
 | R4 | Perception through walls and decks | Fixed for patrols (ST-1, PR #43); gate waves unchanged | Patrols use the sentry profile (`JaffaPerception`): range, view cone and line of sight, graded awareness. Gate waves and column marches keep the assault rule, which still acquires within 22 m without line of sight, so SGC Defense plays as before | — |
-| R5 | NPC avoidance | Confirmed missing | No avoidance code; head-on NPCs can trip the stall detector | TA-3 |
-| R6 | Locked-door rerouting | Confirmed missing | `LevelNavigator._locked_ahead` holds with `blocked_door`. Planned maps now contain loops, so an alternative often exists and is not used | TA-3 |
+| R5 | NPC avoidance | Implemented (TA-3); human pending | Local right-hand steering on the assembly navigation map; colliding head-on Jaffa both reach their waypoints (`test_modular_navigation_ta3`). Not crowd simulation | Human corridor check |
+| R6 | Locked-door rerouting | Implemented (TA-3); human pending | `LevelTopology.path` searches the native room graph with live locked connections excluded; navmesh legs are checked for locked crossings. No available route still reports `blocked_door`; runtime unlocks retry | Human loop check |
 | R7 | Late join during combat | Fixed for actors, doors, objectives and result (EX-1) | Reproduced in EX-1, then fixed: `SGCNetworkManager.mission_rpc` sends only to peers that have the receiving node, and `test_modular_extraction_multiplayer` now joins during a firefight with an error-free client log. SGC-only props (gate, lift, wave manager, shutters) still broadcast to every peer; not reproduced, not changed | EX-1; SGC props open |
-| R8 | Doors left open after a patrol passes | Confirmed | `ModularDoor.open_for` never closes and there is no auto-close | TA-3 |
+| R8 | Doors left open after a patrol passes | Implemented (TA-3); human pending | Server timer closes AI-opened doors after nearby NPCs leave and the doorway clears. `auto_close_delay = 0` opts out; manually opened doors stay open; closure and late-join state replicate | Human sight-line check |
 | R9 | Enemy behaviour after the result | Modular fixed (EX-1); SGC open | Modular: Jaffa `stand_down()` and operative health is frozen at the result. SGC: nothing stops live Jaffa; they keep acting behind the result screen | GT-1 (shared host) |
 | R10 | Dedicated-server acceptance | Automated for both missions; human open | SGC: `test_sprint5_dedicated_smoke`. Modular: `test_modular_extraction_dedicated` (EX-1), which also found and fixed two defects: a client could not request a retry, and a client kept running a dead world after the server stopped. No human has accepted either | EX-2 |
 | R11 | SGC coupling in mission hosting | Wording fixed (EX-1); structure open | `ModularMission` still extends `GateRoom` and stubs its sector and snapshot methods. Since EX-1 it sets its banner on change and its own debrief through `HUD.set_mission_banner` and `HUD.set_debrief` | Open. No longer part of GT-1 ([D-016](../DECISIONS.md)): coexistence does not need the split |

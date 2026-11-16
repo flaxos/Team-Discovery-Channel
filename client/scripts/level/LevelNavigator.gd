@@ -187,16 +187,40 @@ func _plan(goal: Vector3) -> void:
 		points.clear()
 		status = "unreachable"
 		return
-	var candidates := actor.get_tree().get_nodes_in_group("modular_door")
-	for segment in range(points.size() - 1):
-		for node in candidates:
-			var door := node as ModularDoor
-			if door != null and level.is_ancestor_of(door) and _crosses(door, segment):
-				if doors.is_empty() or doors[-1]["door"] != door:
-					doors.append({"door": door, "segment": segment})
-	if _locked_ahead():
+	var candidates := MissionWorld.in_group(actor, &"modular_door")
+	doors = _doors_along(points, candidates)
+	if _has_locked_door(doors):
+		if _reroute_around_locked_doors(goal, candidates):
+			return
+		_locked_ahead()
 		return
 	status = "moving"
+
+
+func _doors_along(path_points: PackedVector3Array, candidates: Array[Node]) -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for segment in range(path_points.size() - 1):
+		for node in candidates:
+			var door := node as ModularDoor
+			if door != null and level.is_ancestor_of(door) and _segment_crosses(door, path_points[segment], path_points[segment + 1]):
+				if found.is_empty() or found[-1]["door"] != door:
+					found.append({"door": door, "segment": segment})
+	# A single navmesh leg can cross several doors; open the closest one first.
+	found.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if a.segment != b.segment:
+			return a.segment < b.segment
+		var origin := path_points[int(a.segment)]
+		return origin.distance_squared_to(a.door.global_position) < origin.distance_squared_to(b.door.global_position)
+	)
+	return found
+
+
+func _has_locked_door(door_list: Array[Dictionary]) -> bool:
+	for entry in door_list:
+		var door := entry["door"] as ModularDoor
+		if is_instance_valid(door) and door.locked:
+			return true
+	return false
 
 
 func _locked_ahead() -> bool:
@@ -209,13 +233,199 @@ func _locked_ahead() -> bool:
 	return false
 
 
-func _crosses(door: ModularDoor, segment: int) -> bool:
-	var a := door.to_local(points[segment])
-	var b := door.to_local(points[segment + 1])
+func _segment_crosses(door: ModularDoor, pt_a: Vector3, pt_b: Vector3) -> bool:
+	var a := door.to_local(pt_a)
+	var b := door.to_local(pt_b)
 	if a.z * b.z > 0.0 or is_equal_approx(a.z, b.z):
 		return false
 	var hit := a.lerp(b, a.z / (a.z - b.z))
 	return absf(hit.x) <= door.width / 2 + 0.3 and hit.y > -1.0 and hit.y < door.height + 1.0
+
+
+func _reroute_around_locked_doors(goal: Vector3, candidates: Array[Node]) -> bool:
+	if level == null or level.layout == null:
+		return false
+	var from_room := _room_at(actor.global_position)
+	var to_room := _room_at(goal)
+	if from_room == &"" or to_room == &"" or from_room == to_room:
+		return false
+	# Use the authored walking graph with current door locks, never mutate the layout.
+	var links := {}
+	for item in level.layout.instances:
+		links[str(item.id)] = []
+	for i in range(level.layout.connections.size()):
+		if _is_connection_locked(i):
+			continue
+		var edge := level.layout.connections[i]
+		var a := str(edge.from_instance)
+		var b := str(edge.to_instance)
+		links[a].append({"to": b, "connection": i})
+		links[b].append({"to": a, "connection": i})
+	var room_seq := LevelTopology.path(links, str(from_room), str(to_room))
+	if room_seq.is_empty():
+		return false
+	var conn_seq: Array[int] = []
+	for i in range(room_seq.size() - 1):
+		for edge: Dictionary in links[room_seq[i]]:
+			if edge.to == room_seq[i + 1]:
+				conn_seq.append(edge.connection)
+				break
+	# First try stitching through intermediate room entry/patrol markers.
+	var room_waypoints: Array[Vector3] = [actor.global_position]
+	for i in range(1, room_seq.size() - 1):
+		room_waypoints.append(_room_waypoint(room_seq[i]))
+	room_waypoints.append(goal)
+	if _try_apply_stitched_route(room_waypoints, candidates):
+		return true
+	# Fallback: include connection socket approach points so tight loops cannot shortcut back.
+	var detailed_waypoints: Array[Vector3] = [actor.global_position]
+	for i in range(conn_seq.size()):
+		for pt in _connection_approach_points(conn_seq[i], room_seq[i]):
+			detailed_waypoints.append(pt)
+		if i + 1 < room_seq.size() - 1:
+			detailed_waypoints.append(_room_waypoint(room_seq[i + 1]))
+	detailed_waypoints.append(goal)
+	return _try_apply_stitched_route(detailed_waypoints, candidates)
+
+
+func _try_apply_stitched_route(waypoints: Array[Vector3], candidates: Array[Node]) -> bool:
+	if waypoints.size() < 2:
+		return false
+	var stitched := _stitch_waypoints(waypoints)
+	if stitched.is_empty():
+		return false
+	var stitched_doors := _doors_along(stitched, candidates)
+	if _has_locked_door(stitched_doors):
+		return false
+	points = stitched
+	doors = stitched_doors
+	index = 0
+	blocked_door = null
+	status = "moving"
+	return true
+
+
+func _stitch_waypoints(waypoints: Array[Vector3]) -> PackedVector3Array:
+	var stitched := PackedVector3Array()
+	for i in range(waypoints.size() - 1):
+		var a := waypoints[i] if stitched.is_empty() else stitched[-1]
+		var b := waypoints[i + 1]
+		if a.distance_to(b) < 0.2:
+			continue
+		var leg := level.local_path(a, b)
+		if leg.is_empty() or leg[-1].distance_to(b) > 1.0:
+			return PackedVector3Array()
+		var start_idx := 0 if stitched.is_empty() else 1
+		for j in range(start_idx, leg.size()):
+			stitched.append(leg[j])
+	return stitched
+
+
+func _is_connection_locked(conn_index: int) -> bool:
+	# LevelAssembler names runtime doors by their native layout connection index.
+	var door := level.get_node_or_null("Door_%03d" % conn_index) as ModularDoor
+	return door != null and door.locked
+
+
+func _room_at(pos: Vector3) -> StringName:
+	var best_inside := &""
+	var best_inside_dist := INF
+	var best_near := &""
+	var best_near_dist := INF
+	for item in level.layout.instances:
+		var mod := level.get_node_or_null(str(item.id)) as Node3D
+		if mod == null or item.module == null:
+			continue
+		var local_pos := mod.to_local(pos)
+		var box := item.module.occupied
+		var center_dist := local_pos.distance_to(box.get_center())
+		if box.grow(0.3).has_point(local_pos):
+			if center_dist < best_inside_dist:
+				best_inside_dist = center_dist
+				best_inside = item.id
+		elif absf(local_pos.y - box.get_center().y) <= box.size.y * 0.5 + 1.5:
+			if center_dist < best_near_dist:
+				best_near_dist = center_dist
+				best_near = item.id
+	return best_inside if best_inside != &"" else best_near
+
+
+func _room_waypoint(room_id: StringName) -> Vector3:
+	for marker_name: String in ["entry", "patrol", "destination"]:
+		var marker := level.get_node_or_null(str(room_id) + "/Markers/" + marker_name) as Node3D
+		if marker != null:
+			return NavigationServer3D.map_get_closest_point(level.navigation_map, marker.global_position)
+	var mod := level.get_node_or_null(str(room_id)) as Node3D
+	if mod != null:
+		return NavigationServer3D.map_get_closest_point(level.navigation_map, mod.global_position)
+	return actor.global_position
+
+
+func _connection_approach_points(conn_index: int, from_room: StringName) -> Array[Vector3]:
+	var result: Array[Vector3] = []
+	var edge := level.layout.connections[conn_index]
+	var a_id := edge.from_instance if edge.from_instance == from_room else edge.to_instance
+	var a_sock_id := edge.from_socket if edge.from_instance == from_room else edge.to_socket
+	var b_id := edge.to_instance if edge.from_instance == from_room else edge.from_instance
+	var b_sock_id := edge.to_socket if edge.from_instance == from_room else edge.from_socket
+	for pair: Array in [[a_id, a_sock_id], [b_id, b_sock_id]]:
+		var mod := level.get_node_or_null(str(pair[0])) as Node3D
+		var item := level.layout.instance(pair[0])
+		if mod != null and item != null and item.module != null:
+			var sock := item.module.socket(pair[1])
+			if sock != null:
+				var world_pt := mod.to_global(sock.approach)
+				result.append(NavigationServer3D.map_get_closest_point(level.navigation_map, world_pt))
+	return result
+
+
+func _nearby_npcs(here: Vector3) -> Array[CharacterBody3D]:
+	var result: Array[CharacterBody3D] = []
+	if actor == null or not is_instance_valid(actor) or not actor.is_inside_tree():
+		return result
+	var containers: Array[Node] = []
+	for group_name: String in ["Enemies", "Allies"]:
+		var found := MissionWorld.find(actor, group_name)
+		if found != null and not containers.has(found):
+			containers.append(found)
+	var parent := actor.get_parent()
+	if parent != null and not containers.has(parent):
+		containers.append(parent)
+	for container in containers:
+		for child in container.get_children():
+			var other := child as CharacterBody3D
+			if (
+				other == null
+				or other == actor
+				or not is_instance_valid(other)
+				or not other.is_inside_tree()
+				or other.collision_layer == 0
+			):
+				continue
+			if absf(other.global_position.y - here.y) > 1.0:
+				continue
+			var flat := Vector2(other.global_position.x - here.x, other.global_position.z - here.z).length()
+			if flat <= 3.2 and not result.has(other):
+				result.append(other)
+	return result
+
+
+func _avoid_corridor_npc(here: Vector3, target: Vector3) -> Vector3:
+	var to_next := Vector3(target.x - here.x, 0.0, target.z - here.z)
+	if to_next.length_squared() < 0.0001:
+		return target
+	var dir := to_next.normalized()
+	var right := dir.cross(Vector3.UP).normalized()
+	for other in _nearby_npcs(here):
+		var rel := Vector3(other.global_position.x - here.x, 0.0, other.global_position.z - here.z)
+		var dist := rel.length()
+		if dist <= 3.0 and dir.dot(rel) > -1.0 and absf(right.dot(rel)) < 1.5:
+			var ahead := 0.35 if dist < 1.5 else 0.7
+			var wanted := here + dir * ahead + right * 0.85
+			var spot := NavigationServer3D.map_get_closest_point(level.navigation_map, wanted)
+			if absf(spot.y - here.y) <= 1.0 and Vector2(spot.x - here.x, spot.z - here.z).length() > 0.1:
+				return spot
+	return target
 
 
 func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
@@ -255,20 +465,25 @@ func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
 			_plan(goal)
 			if status != "moving":
 				return here
+	var look_point := points[min(index + 1, points.size() - 1)] if index < points.size() - 1 and Vector2(points[index].x - here.x, points[index].z - here.z).length() < 0.9 else points[index]
+	var avoiding := _avoid_corridor_npc(here, look_point) != look_point
 	while index < points.size() - 1:
 		var offset := points[index] - here
-		if Vector2(offset.x, offset.z).length() > 0.25 or absf(offset.y) > 1.0:
+		var reach := 0.85 if avoiding else 0.25
+		if Vector2(offset.x, offset.z).length() > reach or absf(offset.y) > 1.0:
 			break
 		index += 1
 	while not doors.is_empty() and index > int(doors[0]["segment"]) + 1:
 		doors.pop_front()
 	if _locked_ahead():
-		return here
+		_plan(goal)
+		if status != "moving":
+			return here
 	if not doors.is_empty():
 		var door := doors[0]["door"] as ModularDoor
-		if is_instance_valid(door) and not door.is_open:
-			if here.distance_to(door.global_position) <= DOOR_REACH and not door.open_for(actor):
+		if is_instance_valid(door) and here.distance_to(door.global_position) <= DOOR_REACH:
+			if not door.open_for(actor):
 				status = "waiting_for_door"
 				return here
 	status = "moving"
-	return points[index]
+	return _avoid_corridor_npc(here, points[index])

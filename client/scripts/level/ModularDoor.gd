@@ -6,8 +6,12 @@ signal access_changed(access_id: StringName, is_locked: bool)
 @export var locked := false
 @export var width: float = 3.0
 @export var height: float = 2.8
+## Seconds after an AI clears the door; zero leaves AI-opened doors open.
+@export var auto_close_delay: float = 2.5
 var is_open := false
 var prompt: Label3D
+var _ai_auto_close_timer: float = 0.0
+var _last_ai_actor: Node3D = null
 
 
 func _ready() -> void:
@@ -40,6 +44,44 @@ func _ready() -> void:
 		request_snapshot.rpc_id(1)
 
 
+func _physics_process(delta: float) -> void:
+	if not is_inside_tree() or multiplayer.multiplayer_peer == null or not multiplayer.is_server():
+		return
+	if _ai_auto_close_timer <= 0.0:
+		return
+	if not is_open or locked or auto_close_delay <= 0.0:
+		_ai_auto_close_timer = 0.0
+		return
+	if _has_nearby_npc(2.5):
+		_ai_auto_close_timer = auto_close_delay
+		return
+	_ai_auto_close_timer -= delta
+	if _ai_auto_close_timer <= 0.0:
+		if _can_close():
+			_toggle()
+			_ai_auto_close_timer = 0.0
+		else:
+			_ai_auto_close_timer = 0.2
+
+
+func _has_nearby_npc(radius: float) -> bool:
+	if (
+		is_instance_valid(_last_ai_actor)
+		and _last_ai_actor.is_inside_tree()
+		and global_position.distance_to(_last_ai_actor.global_position) <= radius
+	):
+		return true
+	for group_name: String in ["Enemies", "Allies"]:
+		var container := MissionWorld.find(self, group_name)
+		if container == null:
+			continue
+		for child in container.get_children():
+			var npc := child as CharacterBody3D
+			if npc != null and npc.collision_layer != 0 and global_position.distance_to(npc.global_position) <= radius:
+				return true
+	return false
+
+
 func interact(player: Node = null) -> void:
 	if (
 		player == null
@@ -54,7 +96,7 @@ func interact(player: Node = null) -> void:
 
 
 func _toggle() -> void:
-	if not multiplayer.is_server():
+	if multiplayer.multiplayer_peer == null or not multiplayer.is_server():
 		return
 	if locked or (is_open and not _can_close()):
 		return
@@ -64,17 +106,22 @@ func _toggle() -> void:
 
 
 ## Authorised opening for server-owned AI: same reach and lock rules as a player request.
-## Never unlocks and never closes; returns whether the doorway is open.
+## Never unlocks. Doors opened by AI close later when clear; manually opened doors stay open.
 func open_for(actor: Node3D) -> bool:
 	if (
-		not multiplayer.is_server()
+		multiplayer.multiplayer_peer == null
+		or not multiplayer.is_server()
 		or actor == null
 		or actor.get_multiplayer_authority() != 1
 		or global_position.distance_to(actor.global_position) > 3.2
 	):
 		return false
+	var opened_by_ai := not is_open or _ai_auto_close_timer > 0.0
 	if not is_open:
 		_toggle()
+	if is_open and opened_by_ai and auto_close_delay > 0.0:
+		_last_ai_actor = actor
+		_ai_auto_close_timer = auto_close_delay
 	return is_open
 
 
@@ -131,6 +178,9 @@ func sync_open(open: bool) -> void:
 	if locked and open:
 		return
 	is_open = open
+	if not open:
+		_ai_auto_close_timer = 0.0
+		_last_ai_actor = null
 	collision_layer = 0 if open else 1
 	if has_node("Panel"):
 		get_node("Panel").visible = not open

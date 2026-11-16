@@ -125,8 +125,10 @@ func run() -> void:
 	assert(alert.spotted and room.hud.enemies_label.text.begins_with("COMPOUND ALERTED"))
 	assert(await until(func() -> bool: return alert.runner != null, 5.0), "A runner is chosen")
 	var runner := alert.runner
-	assert(alert.runner_console == 0, "The checkpoint console is nearest the checkpoint guards")
-	assert(runner.raising_alarm and runner.errand != Vector3.INF)
+	# Local passing changes patrol positions: either working console may be the shortest walk.
+	assert(alert.runner_console >= 0 and alert.runner_console < alert.consoles.size())
+	assert(not alert.is_disabled(alert.runner_console))
+	assert(runner.raising_alarm and runner.errand.is_equal_approx(alert.console_spot(alert.runner_console)))
 	assert(runner.perception.level == JaffaPerception.Level.ALERTED)
 	await frames(2)
 	assert(runner._tell.visible and runner._tell.text == "!!")
