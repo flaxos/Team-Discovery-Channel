@@ -319,31 +319,47 @@ func test_co_patrol_non_interference_and_trailing_avoidance() -> void:
 	enemies.name = "Enemies"
 	world.add_child(enemies)
 
-	var level := LevelAssembly.new()
-	level.layout = build_straight_corridor_layout()
-	world.add_child(level)
-	while not level.ready_for_navigation and level.last_errors.is_empty():
-		await process_frame
-	assert(level.last_errors.is_empty(), str(level.last_errors))
+	var demo_layout := load("res://resources/levels/modular_integration_demo.tres") as LevelLayout
+	var level := await spawn_assembly(demo_layout)
 
-	# Co-patrol non-interference regression:
-	# Lead and wing share patrol_points. Wing is placed in front of lead (e.g. recovering
-	# from tactical cover / search post-combat). Lead must NOT steer into the right wall
-	# or stall against wing; it must walk smoothly forward along its patrol route.
-	var start_pos := level.marker(&"room_001", &"entry")
-	var goal_pos := level.marker(&"room_002", &"entry")
-	var patrol_route: Array[Vector3] = [goal_pos]
-
-	var lead := spawn_jaffa(enemies, start_pos, "PatrolLead")
-	var wing := spawn_jaffa(enemies, start_pos + Vector3(0, 0, 2.5), "PatrolWing")
+	# 1. Trailing actor non-interference:
+	# An actor 0.6m behind the navigator must NOT trigger avoidance steering.
+	# Under f45e909, dir.dot(rel) > -1.0 triggered on actors up to 1.0m behind,
+	# causing the navigator to steer into the right wall.
+	var lead := spawn_jaffa(enemies, Vector3(-20.95176, 0.0003, 5.589154), "Lead")
+	var wing := spawn_jaffa(enemies, Vector3(-21.4, 0.0003, 4.2), "Wing")
 	lead.collision_mask |= 4
 	wing.collision_mask |= 4
 
-	lead.start_patrol(patrol_route, false)
-	wing.start_patrol(patrol_route, false)
-	wing.velocity = Vector3.ZERO
+	var goal_pos := Vector3(-16.0, 0.0, 0.0)
+	var nav := LevelNavigator.new(lead, level)
+	nav.next_position(goal_pos, 1.0 / 60.0)
 
-	# Lead must advance at least 3.0m within 4s without stalling or getting stuck
+	# Place wing 0.6m behind lead along its travel heading
+	var to_goal := (goal_pos - lead.global_position)
+	to_goal.y = 0.0
+	var travel_dir := to_goal.normalized()
+	wing.global_position = lead.global_position - travel_dir * 0.6
+	var steer_behind: Vector3 = nav._avoid_corridor_npc(lead.global_position, goal_pos)
+	assert(
+		steer_behind == goal_pos,
+		"Actor 0.6m behind travel heading must not trigger avoidance steering"
+	)
+
+	# 2. Co-patrol corner resumption stall regression:
+	# Lead at corner (-20.95, 0, 5.59) resuming patrol towards (-16, 0, 0) while co-patrol
+	# wing is ahead at (-21.4, 0, 4.2) (e.g. recovering from tactical cover / search post-combat).
+	# Under f45e909, lead steers right into the east wall, radial arrival tolerance reach=0.85
+	# skips or locks path indexing, and inverted steering stalls lead (moving < 0.04m in 4s).
+	# Hardened navigation must advance lead > 3.0m in 4s without stalling.
+	wing.global_position = Vector3(-21.4, 0.0003, 4.2)
+	wing.velocity = Vector3.ZERO
+	lead.global_position = Vector3(-20.95176, 0.0003, 5.589154)
+	lead.velocity = Vector3.ZERO
+
+	lead.start_patrol([goal_pos], false)
+	wing.start_patrol([goal_pos], false)
+
 	var lead_start := lead.global_position
 	for _i in range(int(4.0 * 60.0)):
 		await tick()
@@ -356,14 +372,17 @@ func test_co_patrol_non_interference_and_trailing_avoidance() -> void:
 	)
 	assert(lead.navigator.status != "stuck", "Patrol lead must not be stuck")
 
-	# Trailing actor non-interference: an actor behind lead must not trigger right-wall avoidance
-	wing.global_position = lead.global_position + Vector3(0, 0, -1.8)
-	var steer_behind: Vector3 = lead.navigator.level_route._avoid_corridor_npc(lead.global_position, goal_pos)
+	# 3. Head-on passing remains active for opposing oncoming actors:
+	var headon_dir := (goal_pos - lead.global_position).normalized()
+	wing.global_position = lead.global_position + headon_dir * 2.0
+	wing.velocity = -headon_dir * 2.4
+	var steer_headon: Vector3 = lead.navigator.level_route._avoid_corridor_npc(lead.global_position, goal_pos)
 	assert(
-		steer_behind == goal_pos,
-		"Actor behind travel heading must not trigger avoidance steering"
+		steer_headon != goal_pos,
+		"Oncoming actor on same layout must trigger right-hand yielding"
 	)
 
+	level.free()
 	world.free()
 	await process_frame
 	print("PASS TA-3 co-patrol non-interference and trailing actor avoidance regression")

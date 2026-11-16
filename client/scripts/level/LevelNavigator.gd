@@ -426,11 +426,24 @@ func _avoid_corridor_npc(here: Vector3, target: Vector3) -> Vector3:
 		if forward_dist <= 0.2:
 			continue
 		# Squadmates on the same patrol route do not pass each other head-on
+		# unless moving in opposing directions (e.g. patrol loops or backtracking).
 		if "patrol_points" in other and "patrol_points" in actor:
 			var other_patrol: Array = other.get("patrol_points")
 			var my_patrol: Array = actor.get("patrol_points")
 			if not my_patrol.is_empty() and other_patrol == my_patrol:
-				continue
+				var opposing := false
+				var other_vel_flat := Vector3(other.velocity.x, 0.0, other.velocity.z)
+				if other_vel_flat.length_squared() > 0.05 and dir.dot(other_vel_flat.normalized()) < -0.2:
+					opposing = true
+				elif "navigator" in other and other.navigator != null and "level_route" in other.navigator:
+					var route := other.navigator.get("level_route") as LevelNavigator
+					if route != null and route.status == "moving" and route.points.size() > route.index:
+						var other_target: Vector3 = route.points[route.index]
+						var other_dir := Vector3(other_target.x - other.global_position.x, 0.0, other_target.z - other.global_position.z)
+						if other_dir.length_squared() > 0.01 and dir.dot(other_dir.normalized()) < -0.2:
+							opposing = true
+				if not opposing:
+					continue
 		# Actors moving in our travel direction are marching ahead, not oncoming
 		var other_vel := other.velocity
 		other_vel.y = 0.0
