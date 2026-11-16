@@ -14,6 +14,9 @@ enum StationType { AMMO_CRATE, WEAPON_RACK }
 @export var rack_weapons: Array[String] = ["p90", "m249", "mp5", "zat"]
 @export var station_name: String = "Armory Munitions Crate"
 @export var cooldown_time: float = 0.0
+## AP-1c: an ammo crate drawn as a box is dressed with imported plastic crates. Cosmetic only;
+## the box keeps its collision and interaction, and stays visible if the model fails to load.
+@export var imported_crate_visual: bool = true
 
 var current_cooldown: float = 0.0
 var rack_index: int = 0
@@ -27,6 +30,10 @@ var crate_visual: CrateStackVisual = null
 func _ready() -> void:
 	add_to_group("interactable")
 	_setup_visual_indicator()
+	# Only the SGC's CSG ammo boxes are dressed; CO-1's offworld station scene draws its own mesh.
+	var box := get_node(^".") as CSGBox3D
+	if station_type == StationType.AMMO_CRATE and imported_crate_visual and box != null:
+		crate_visual = CrateStackVisual.dress_box(box)
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_body_entered)
 		interact_area.body_exited.connect(_on_body_exited)

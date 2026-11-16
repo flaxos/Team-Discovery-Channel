@@ -145,11 +145,13 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
 | A dressed box still fades for the camera, not its visual | Camera occlusion fades the collider's material; known limitation |
 | `grep` output looks mangled on the dev box | The RTK hook rewrites it; use `rtk proxy grep …` |
 | Hosted `Godot full` or `Godot multiplayer` fails in `test_gate_*_multiplayer` after the suite printed PASS, on `Node not found: "…/Players/<peer>/MultiplayerSynchronizer"` | Pre-existing teardown race on `main` (hosted runs 43819943281 on #61 and 43818024196 on CO-1, 16 November 2026), not caused by asset work. Re-run the job once, say so in the PR, and do not chase it inside an asset PR |
+| A stacked PR shows as merged but its work is not on `main` | A PR merges into its base branch. GitHub retargets it to `main` only after the base PR merges **and** its branch is deleted. Merge the base PR, check the stacked PR's base says `main` (or change it), then merge. This happened to #64 |
+| Work vanishes after a conflict was resolved on GitHub | The #63 merge on top of CO-1 dropped the crate hook from `ArmoryResupplyStation.gd`. After any merge that needed conflict resolution, run the asset's suite on the new `main` |
 | CC BY credit missing from a shipped build | `credits/` is outside `client/` and there is no credits screen yet; flag it before any build is distributed |
 
 ## 10. Working in parallel
 
-One asset per agent, each in its own worktree from `origin/main`, or from the newest unmerged asset branch if it needs that code (AP-1d is stacked on AP-1c; say so in the PR). Share `/tmp/tdc-godot-network-tests.lock` for full runs and anything that hosts a game. Stage under `/tmp/tdc-asset-intake/<id>/`. Leave the owner's checkout and downloads untouched.
+One asset per agent, each in its own worktree from `origin/main`. Avoid stacking asset PRs; if one must build on another unmerged branch, say so in the PR and see the stacked-PR pitfall above. Share `/tmp/tdc-godot-network-tests.lock` for full runs and anything that hosts a game. Stage under `/tmp/tdc-asset-intake/<id>/`. Leave the owner's checkout and downloads untouched.
 
 ## 11. Next in the queue
 
