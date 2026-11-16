@@ -55,6 +55,7 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 | `test_jaffa_prop_cover` | Cover props on the integrated fixture: which attachments count, a spot behind the prop away from the threat and blocked at crouched height, held spots not reused, a sentry taking the crate, crouching most of the time and standing to fire hits over it, still alerted, relocation when flanked, and the unchanged fallback far from any prop. |
 | `test_jaffa_perception` | Sentry perception on the integrated fixture with fresh sentries: nothing seen through walls or floors (where the assault rule would acquire), nothing outside the cone, suspicious before alerted no sooner than the notice time, forgetting, smoke, closed and open doors, damage alert, one-hop spread, search of the last seen position and resumption of the route at the same waypoint. |
 | `test_stealth_takedowns_and_weapons` | Stealth takedowns from behind on unalerted sentries, rejection of frontal or alerted takedowns, quiet Zat stun/kill/vaporize without alerting target or nearby sentries or raising `MissionAlert`, dragging Zat-stunned and taken-down Jaffa bodies, and AP-1a `.glb` weapon ingestion (`p90_smg.glb`, `mp5_silenced.glb`) with D-015 `metallic = 0.0` material sanitization and provenance checks. |
+| `test_imported_crate_visual` | AP-1c: the Poly Haven crate loads from `res://` bytes at its measured size and triangle count; runtime material changes leave the source material untouched; both SGC armoury ammo crates are dressed inside their unchanged collision boxes, with no collision in the visual and one shared mesh; a ray still stops at the original box face; weapon racks are untouched; a missing model, a box too small for whole crates and the opt-out flag all leave the box as it was. `test_multiplayer_mission_join` also checks the dressed crate on a late joiner and after retry. See the [review record](reviews/2026-11-16-ap1c-plastic-crate.md). |
 | `test_buffer_lockout_hud` | Denied dialing and upload/cancel/snapshot updates leave no orphan panel; approved dialing can open and dismiss its panel. |
 
 The full inventory also covers gate lifecycle/difficulty, combat authority, native multiplayer joins/state/retry, inventory, controls/remapping, camera and objectives. Use `--list` for exact names rather than maintaining a second hand-written inventory.
@@ -73,6 +74,12 @@ For reproducible Forward+ captures on an available display:
 
 ```sh
 godot --path client --script res://tests/support/sgc_visual_review.gd
+```
+
+AP-1c crate captures and render cost, on a display (writes `build/asset-review/plastic-crate/`, prints `CRATE_COST` lines for the dressed and original armoury):
+
+```sh
+godot --path client --script res://tests/support/crate_visual_review.gd
 ```
 
 Frame cost of a mission, on a display (prints one `WORLD_COST` line; compare `sgc_uat` with `two_worlds_dev`):

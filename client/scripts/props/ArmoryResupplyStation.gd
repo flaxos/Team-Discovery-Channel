@@ -13,14 +13,21 @@ enum StationType { AMMO_CRATE, WEAPON_RACK }
 @export var station_type: StationType = StationType.AMMO_CRATE
 @export var rack_weapons: Array[String] = ["p90", "m249", "mp5", "zat"]
 @export var station_name: String = "Armory Munitions Crate"
+## AP-1c: an ammo crate drawn as a box is dressed with imported plastic crates. Cosmetic only;
+## the box keeps its collision and interaction, and stays visible if the model fails to load.
+@export var imported_crate_visual: bool = true
 
 var rack_index: int = 0
 var status_light: OmniLight3D = null
+var crate_visual: CrateStackVisual = null
 
 
 func _ready() -> void:
 	add_to_group("interactable")
 	_setup_visual_indicator()
+	var box := get_node(^".") as CSGBox3D
+	if station_type == StationType.AMMO_CRATE and imported_crate_visual and box != null:
+		crate_visual = CrateStackVisual.dress_box(box)
 
 
 func _setup_visual_indicator() -> void:

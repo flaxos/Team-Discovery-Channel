@@ -87,7 +87,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Connectivity and topology checks | Verified | `LevelTopology`, eleven checks, connectivity only |
 | Composite clusters | Verified | Eight composites in `resources/level_composites/` |
 | Theme support | Working for `goauld` (first slice); placeholder for the other factions | Theme contract and resolver work (`test_level_themes`). `goauld` has a palette on every module and generated pieces for `Room01Straight` and `Room04Chamber` (GA-1, `test_goauld_theme`, [kit guide](../maps/goauld-theme-kit.md)); not yet reviewed by a person. `asgard`, `tokra`, `replicator` and `tauri_sgc` carry `art_status = "fallback"` |
-| Community asset intake | Partial | AP-1a ships two stylized Kenney weapons; researched high-fidelity/static/rig candidates and `tools/asset_intake.py` now support staging ([handoff](../assets/README.md)). No new external binaries, humanoid adapter or complete tactical animation set imported |
+| Community asset intake | Partial | AP-1a ships two stylized Kenney weapons; researched high-fidelity/static/rig candidates, `tools/asset_intake.py` and `tools/gltf_to_glb.py` support staging ([handoff](../assets/README.md)). AP-1c dresses the SGC armoury ammo stations with a CC0 Poly Haven crate (`CrateStackVisual`, `test_imported_crate_visual`, art review pending). No high-fidelity weapon, humanoid adapter or complete tactical animation set imported |
 | Faction visual assets | Missing | None. The SGC map uses dimensioned placeholders and material briefs |
 | Outdoor terrain, villages | Missing | No terrain, no exterior scenes |
 | Authoring documentation | Verified | [AI authoring guide](../maps/ai-level-authoring.md); catalogue summary 13.7 KB |

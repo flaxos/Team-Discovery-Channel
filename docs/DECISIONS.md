@@ -169,3 +169,17 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 
 **Consequences.** A whole away team can be down while the mission continues, if someone in the SGC is standing. Bleed-out is 20 seconds, so a rescue through the gate only works for a rescuer already beside it. The SGC needs an "abort mission" control so that players are not forced to leave the session (GT-2).
 
+
+## D-018 — First community asset: crates dress the SGC ammo stations
+
+**Recommended (AP-1c, 16 November 2026; owner art review pending).** The CC0 Poly Haven "Plastic Crate 02" dresses the two SGC armoury ammo resupply stations as a 3 × 3 × 4 stack. The stations' 1.6 × 1.0 × 1.2 m CSG boxes stay as their collision and interaction bodies and stop being drawn; the crates are a collision-free `MultiMeshInstance3D` child. Record: [AP-1c review](reviews/2026-11-16-ap1c-plastic-crate.md).
+
+**Why this asset.** The handoff's first choice, the Sketchfab M9, needs an account download that was not available. The crate is the documented CC0 fallback.
+
+**Why there.** Those boxes take whole crates at a uniform 0.984 scale with no more than 0.11 m to spare, so the visual matches the collision. The modular cargo-room crates would need a stretch of up to 15 % or would leave 0.28 m of invisible collision, and they are TA-1 cover.
+
+**Why the box is kept, not replaced.** Its collision, size, script, interaction and every test that addresses `AmmoCrate1` stay valid, and the baked SGC navigation was built from it. A box that is not drawn (`transparency = 1`, no shadow) still collides; `visible = false` would also hide the crates under it.
+
+**Material.** The source asks for glTF `BLEND` but its JPEG base colour has no alpha, so it is drawn opaque. The source orange is tinted olive to sit with the armoury, its ARM occlusion channel is wired, and mipmaps are generated. All of this happens at runtime; the committed GLB keeps the source material.
+
+**Consequences.** About 385,000 more triangles when both stacks are in view (+0.2 to +0.5 ms GPU on an RTX 3060), because runtime LOD generation did not complete on this mesh. The third-person camera does not fade a stack that hides the player, as it fades the invisible box instead. Owners may change the tint (`CrateStackVisual.DEFAULT_TINT`) or turn the dressing off per station (`imported_crate_visual`).
