@@ -159,9 +159,22 @@ func run_host() -> void:
 	assert(await marked("client_finished_travel"), "Client confirmed presentation in compound")
 	assert(await marked("client_disconnected"), "Client disconnected cleanly")
 
+	# Remote disconnect coverage: host sees peer removed while ENet is active
+	for _i: int in range(1200):
+		if (
+			site.players_container.get_node_or_null(str(client_id)) == null
+			and not net.peers.has(client_id)
+		):
+			break
+		await frames(1)
+	assert(site.players_container.get_node_or_null(str(client_id)) == null, "Host sees remote player removed while ENet active")
+	assert(not net.peers.has(client_id), "Host peer list cleared disconnected client")
+
 	await frames(10)
 	net.disconnect_game()
 	mark("host_done")
+	var log_text := FileAccess.get_file_as_string(output_dir.path_join("client.log"))
+	assert(not "ERROR:" in log_text and not "ObjectDB" in log_text and not "Node not found" in log_text, log_text)
 
 
 func run_client() -> void:
@@ -186,14 +199,20 @@ func run_client() -> void:
 	# Wait for server to process client's travel
 	assert(await marked("client_traveled_server"))
 	for _i: int in range(1200):
-		if session.presented == site and site.players_container.has_node(str(net.local_peer_id)):
+		if (
+			session.presented == site
+			and site.players_container.has_node(str(net.local_peer_id))
+			and home.players_container.get_node_or_null(str(net.local_peer_id)) == null
+		):
 			break
 		await frames(1)
 
 	assert(session.presented == site, "Client presentation switched to offworld site")
 	assert(site.visible and site.hud.visible, "Site visible on client")
+	assert(home.players_container.get_node_or_null(str(net.local_peer_id)) == null, "Client despawned from SGC")
 	mark("client_finished_travel")
 
 	await frames(10)
 	net.disconnect_game()
+	net.multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	mark("client_disconnected")
