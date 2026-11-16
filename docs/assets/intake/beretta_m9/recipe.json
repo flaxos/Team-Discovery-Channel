@@ -1,0 +1,19 @@
+{
+  "source": "/tmp/tdc-asset-intake/beretta_m9/extracted/source/Beretta M9 Sketchfab.fbx",
+  "output": "../../../../client/assets/weapons/beretta_m9.glb",
+  "root_name": "BerettaM9",
+  "keep_nodes": ["Gun", "Magazine"],
+  "max_texture_size": 1024,
+  "image_format": "JPEG",
+  "lossy_quality": 0.9,
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/beretta_m9/extracted/textures/BerettaM9_albedo.jpeg",
+      "normal": "/tmp/tdc-asset-intake/beretta_m9/extracted/textures/BerettaM9_normal.png",
+      "normal_convention": "opengl",
+      "roughness": "/tmp/tdc-asset-intake/beretta_m9/extracted/textures/BerettaM9_roughness.jpeg",
+      "metallic": "/tmp/tdc-asset-intake/beretta_m9/extracted/textures/BerettaM9_metallic.jpeg",
+      "ao": "/tmp/tdc-asset-intake/beretta_m9/extracted/textures/BerettaM9_AO.jpeg"
+    }
+  }
+}

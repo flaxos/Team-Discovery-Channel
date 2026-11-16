@@ -54,11 +54,13 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 
 | Document | Purpose |
 | --- | --- |
+| [Community asset integration playbook](assets/community-asset-playbook.md) | Start here to put a community model in the game: routes by target, licence gate, staging, the packer, wrappers, proof and records, with pitfalls from AP-1c and AP-1d. |
 | [Community asset handoff](assets/README.md) | Ranked first insertion queue, verified sourcing, outstanding acquisition/rig/licence gaps and a ready-to-run intake workflow. |
 | [Static asset shortlist](assets/community-static-shortlist.md) | Specific tactical weapons, Stargate props, industrial dressing and PBR material candidates with primary evidence. |
 | [Characters and animation shortlist](assets/community-characters-animation-shortlist.md) | Specific rig/motion candidates, raw redistribution constraints, current controller contracts and first Airman visual proof. |
 | [Asset import pipeline](plans/asset-import-pipeline.md) | What is actually implemented, GLB inspection tool, source/credit records, wrapper/socket rules and insertion acceptance. |
 | [AP-1c crate record](reviews/2026-11-16-ap1c-plastic-crate.md) | The first community asset in the game: acquisition, licence, measurements, placement, captures, render cost and the exported-build check. |
+| [AP-1d M9 record](reviews/2026-11-16-ap1d-beretta-m9.md) | The first realistic weapon: owner-downloaded CC BY archive, FBX conversion by recipe, bore alignment, finish comparison, sharing and the exported-build check. |
 
 ## Plans and records
 
