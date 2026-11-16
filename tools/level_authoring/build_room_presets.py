@@ -40,7 +40,7 @@ PRESETS = [
  ('armoury','Armoury',ROOMS,common()+[
      dict(id='armour_station',position=(2.6,0,2.6),scene='ArmoryArmorStation',bounds=(-.7,0,-.35,1.4,2.1,.7),approach=(-1.2,0,-1.2),component='equipment'),
      prop('weapon_rack',(-2.6,0,-2.6),(1,1.8,.5),(1.2,0,1.2)),
-     marker('inventory',(-2.6,0,2.6),'interaction',['inventory.storage'])],['inventory.storage']),
+     dict(id='inventory',position=(-2.6,0,2.6),scene='ArmoryResupplyStation',bounds=(-.8,0,-.6,1.6,1.0,1.2),approach=(1.2,0,-1.2),component='equipment',refs=['inventory.storage'])],['inventory.storage']),
  ('detention','Detention / holding',ROOMS,common()+[
      prop('cot',(-2.7,0,2.5),(1.3,.5,1.8),(1.3,0,-1.1)),
      marker('prisoner',(2.6,0,2.6),'objective'),marker('guard',(0,0,0),'spawn'),
@@ -119,7 +119,7 @@ def bake():
             if a.get('anchor'):lines.append(f'anchor = &"{a["anchor"]}"')
             if a.get('scene'):
                 lines.append(f'scene = ExtResource("{a["scene"]}")')
-                if a['scene'] in ['ArmoryArmorStation','DHDConsole']:lines.append('blocks_movement = true')
+                if a['scene'] in ['ArmoryArmorStation','ArmoryResupplyStation','DHDConsole']:lines.append('blocks_movement = true')
             if a.get('size'):
                 sx,sy,sz=a['size']
                 lines += [f'placeholder_size = {vector(a["size"])}',f'bounds = AABB({-sx/2},0,{-sz/2},{sx},{sy},{sz})']

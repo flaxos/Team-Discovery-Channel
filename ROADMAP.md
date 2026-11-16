@@ -21,7 +21,7 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 | **C. Two-player sessions** *(deferred by the owner)* | The co-op checklist items no human has run: late join, shared extraction, revive, mixed quiet and loud play | Two humans | [Next work, part A](docs/plans/next-work-packages.md#a-human-play-sessions) |
 | **D. Community asset insertion** | AP-1c, the first cosmetic proof, is built on `feat/ap1c-crate-cosmetic-proof`: the CC0 Poly Haven crate dresses the SGC armoury ammo stations. **An owner has not reviewed it yet.** The M9 needs a Sketchfab account download; with one, the weapon proof (M9, then P90/M249) is next. A realistic Airman rig is the first character experiment | Owner art review; asset integration agent with an account download | [AP-1c record](docs/reviews/2026-11-16-ap1c-plastic-crate.md); [asset handoff](docs/assets/README.md) |
 
-A and B do not depend on each other. Gate travel (GT-1 to GT-3) and SW-1 are merged in PRs #54–#58. TA-3 is implemented on this branch; EV-2, TA-2 and CO-1 remain next gameplay options. Human co-op sessions remain deferred. Weapon art expansion (AP-1b) and GA-2 part 1 are committed on the old SW-1 branch after its merge and are not in `main`; review them as separate milestones.
+A and B do not depend on each other. Gate travel (GT-1 to GT-3) and SW-1 are merged in PRs #54–#58. TA-3 is implemented; CO-1 offworld resupply is implemented on this branch; EV-2 and TA-2 remain next gameplay options. Human co-op sessions remain deferred. Weapon art expansion (AP-1b) and GA-2 part 1 are committed on the old SW-1 branch after its merge and are not in `main`; review them as separate milestones.
 
 Community asset preparation now includes source-verified shortlists, a staged intake record and an offline GLB inspector. The [handoff](docs/assets/README.md) records acquisition, licence, fidelity and rig/animation gaps. AP-1c then imported the first community binary, a CC0 crate, with its intake record, validator report, captures and an exported-build check ([D-018](docs/DECISIONS.md)).
 
@@ -43,6 +43,7 @@ Community asset preparation now includes source-verified shortlists, a staged in
 | ST-2 hearing and area searches; TA-1 prop cover; GI-2 loud-route suite and playtest template | [#49](https://github.com/flaxos/Team-Discovery-Channel/pull/49) (from #47, #48) | extraction and infiltration guides |
 | GA-0 visual brief and GA-1 Goa'uld theme slice | [#51](https://github.com/flaxos/Team-Discovery-Channel/pull/51), [#53](https://github.com/flaxos/Team-Discovery-Channel/pull/53) | [kit guide](docs/maps/goauld-theme-kit.md) |
 | GT-1 world coexistence; GT-2 outbound gate travel; GT-3 return gate travel and SGC debrief | [#54](https://github.com/flaxos/Team-Discovery-Channel/pull/54), [#55](https://github.com/flaxos/Team-Discovery-Channel/pull/55), [#56](https://github.com/flaxos/Team-Discovery-Channel/pull/56), [#57](https://github.com/flaxos/Team-Discovery-Channel/pull/57) | [split-world travel design](docs/plans/gate-travel-split-worlds.md) |
+| CO-1 offworld co-op resupply & armoury | Draft PR (pending) | [mission guide](docs/maps/goauld-infiltration-mission.md#offworld-armoury--resupply-co-1) |
 
 ## What exists today
 
