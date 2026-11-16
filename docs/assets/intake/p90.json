@@ -1,0 +1,61 @@
+{
+  "status": "integrated_pending_owner_art_review",
+  "title": "P90",
+  "creator": "Rotuma",
+  "canonical_source_url": "https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b",
+  "category": "generic",
+  "checked_on": "2026-11-16",
+  "download": {
+    "availability": "free download behind a Sketchfab account (the API download endpoint answers HTTP 401 without a session)",
+    "route": "downloaded by the owner through their Sketchfab account (original format) and placed in ~/Downloads as p90.zip; staged by copy, the owner's file left in place",
+    "archive_sha256": "4f80c77614e744e57c6fde9d5dcc06fa23aeed673979ada7855d43002aea96a9",
+    "archive_contents": {
+      "source/P90.fbx": "62d5cba4e42f66b2841b1db18f68de33d78f21bc9808ebc871894c1cbdcbf655",
+      "textures/Low2_low2_BaseColor.png": "22b25019f5acecc8e2433067dbffd165c448766175979af7aa9e36e935f2ca81",
+      "textures/Low2_low2_Normal.png": "b0a22852f5d00f40bd91c49e423d2b41571781f17504a632b452bb26dcb8ec8e",
+      "textures/Low2_low2_Roughness.png": "02debc6e34e9e7d8f1c0d31257b045758fef42b6a25222def811d56f6dff778b",
+      "textures/Low2_low2_Metallic.png": "27daa675a057fedccb81aaa8c943ac4509f0bab585fbefd78f95bb12bee52d36",
+      "textures/Low2_low2_Emissive.png": "a209ed9aaf21fef04c8c597ec8d53351a6787a7da5e7a598701959a025fccd2e",
+      "textures/Opacity.png": "cf31af93223a551de16162a0085c57aea39f357919b58f54cb15e96ebd22099d"
+    },
+    "archive_notes": "All entries dated 2024-11-09. Maps are 4096 x 4096. No licence or readme file in the archive; no path traversal.",
+    "model_sha256": "926ab64ee651ee9b433bebed1a93566646fdb5152b8a9aabb14879e4354b4af4",
+    "staging_path": "/tmp/tdc-asset-intake/p90/ (outside client/; not committed)"
+  },
+  "licence": {
+    "id": "CC-BY-4.0",
+    "version": "4.0",
+    "evidence_url": "https://api.sketchfab.com/v3/models/82d8b9f1e02b48f9b012698dcfa3352b",
+    "evidence_summary": "API on 2026-11-16: license.slug \"by\", url http://creativecommons.org/licenses/by/4.0/, isDownloadable true, faceCount 38083, animationCount 0. Creator's description: modelled in Maya, textured in Substance Painter, graphics in Krita, rendered in Blender.",
+    "bundled_text_path": "credits/licenses/CC-BY-4.0.txt",
+    "redistribution_status": "cleared (CC BY 4.0 with attribution and a statement of changes)",
+    "required_attribution": "\"P90\" by Rotuma, https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b, CC BY 4.0; modified",
+    "creator_or_archive_conflicts": "none found. Trademarks: the model reproduces FN Herstal's P90 markings and form factor; CC BY covers the modeller's copyright only"
+  },
+  "integration": {
+    "target_scene_or_script": "scripts/weapons/WeaponBase.gd weapon id p90 (WeaponP90): WeaponModel/ImportedGLB",
+    "source_forward_axis": "muzzle faces -Z",
+    "source_units": "centimetres in raw vertices (50.049 x 21.226 x 6.847 cm); scaled by 0.02847984 in the game wrapper to real size (0.5005 x 0.2123 x 0.0685 m)",
+    "wrapper_transform": "scale 0.02847984, then translate so the measured bore centre (-0.002205, -0.448702, -8.765554) lands on unchanged MuzzlePoint (0, 0.02, -0.30)",
+    "world_bounds_metres": [0.0685, 0.2123, 0.5005],
+    "gameplay_envelope_metres": [0.08, 0.14, 0.44],
+    "required_sockets": ["MuzzlePoint (0, 0.02, -0.30), unchanged"],
+    "material_modifications": [
+      "four maps bound by recipe (the FBX binds none); normal map OpenGL convention",
+      "maps downscaled 4096 -> 1024 (Lanczos); roughness and metallic packed into one ORM image; images stored as JPEG quality 0.9",
+      "magazine kept opaque at runtime avoiding alpha sorting and shadow artifacts",
+      "runtime: metallic set to 0 by the existing weapon sanitizer (D-015); mipmaps generated"
+    ],
+    "effort": "S",
+    "modifications": "Kept single node P90 (38,083 triangles). Dropped empty animation take Take 001. Bound the maps, downscaled to 1024², packed ORM, and exported as GLB with JPEG (0.9). Scaled by 0.02847984 in the wrapper to match real size. Recipe: docs/assets/intake/p90/recipe.json; packer: client/scripts/assets/pack_model_glb.gd (reproducible: same sha256 on repeat runs)."
+  },
+  "evidence": {
+    "intake_report": "docs/assets/intake/p90/intake-report.json (ok: true, 38,083 triangles, three embedded images, no external dependencies)",
+    "gltf_validation_report": "docs/assets/intake/p90/gltf-validator.json (Khronos glTF-Validator 2.0.0-dev.3.10: 0 errors, 0 warnings)",
+    "godot_import_log": "runtime GLTFDocument load, importer=\"keep\"; measured by tests/test_imported_p90_visual.gd",
+    "mission_capture": "docs/reviews/ap1e-captures/ (SGC UAT and Goa'uld infiltration, Forward+, RTX 3060); record docs/reviews/2026-11-16-ap1e-p90.md",
+    "export_smoke_log": "Linux release template 4.4.1, throwaway preset outside the repo: WeaponP90 builds ImportedGLB from the .pck with 38,083 triangles, mipmapped textures and unchanged MuzzlePoint (0, 0.02, -0.30)",
+    "behaviour_tests": ["test_imported_p90_visual", "test_stealth_takedowns_and_weapons", "full profile"],
+    "reviewer": ""
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "ok": true,
+  "file": "client/assets/weapons/p90.glb",
+  "bytes": 2006024,
+  "sha256": "926ab64ee651ee9b433bebed1a93566646fdb5152b8a9aabb14879e4354b4af4",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Godot Engine v4.4.1.stable.official@49a5bc7b616bd04689a2c89e89bda41f50241464",
+  "declared_triangles_unique_meshes": 38083,
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 26018,
+          "declared_triangles": 38083,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -3.42363667488098,
+              -10.5855398178101,
+              -25.0149059295654
+            ],
+            "max": [
+              3.42363667488098,
+              10.6400985717773,
+              25.0341320037842
+            ],
+            "size": [
+              6.84727334976196,
+              21.2256383895874,
+              50.0490379333496
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "P90",
+    "P902"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "blinn1",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ]
+}
