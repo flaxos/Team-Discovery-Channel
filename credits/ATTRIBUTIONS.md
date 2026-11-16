@@ -46,6 +46,16 @@ Every external 3D model, texture, material, or animation imported into **Team Di
 - **Modifications:** Converted from FBX to GLB with `client/scripts/assets/pack_model_glb.gd` and the recipe in `docs/assets/intake/p90/`. Kept the single `P90` mesh (38,083 triangles), bound albedo, normal (OpenGL), roughness, and metallic maps downscaled to 1024², packed roughness and metallic into glTF ORM, and exported as JPEG (quality 0.9). Kept the magazine opaque at runtime as instructed. Scaled by 0.02847984 in the game wrapper to match real-world dimensions (500.5 mm length). At runtime the game sets metallic to 0 (D-015) and generates mipmaps.
 - **Trademarks:** The model reproduces FN Herstal P90 form factor and weapon markings. The CC BY grant covers the modeller's copyright, not the manufacturer's trademarks.
 
+| Asset File | Title & Description | Creator | Source URL | License | Dimensions & Attachment | Difficulty |
+|---|---|---|---|---|---|---|
+| `client/assets/weapons/m249.glb` | "M249 light machine gun" — textured SAW with optic and extended bipod | **AK / skaf13** | https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244 | [CC BY 4.0](licenses/CC-BY-4.0.txt) | `0.467m × 0.501m × 0.963m`; measured bore aligned to unchanged `MuzzlePoint` `(0, 0.03, -0.62)`; D-015 at runtime | `S` |
+
+### Provenance & Technical Verification (AP-1f)
+- **Attribution:** "M249 light machine gun" by AK (skaf13), https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244, CC BY 4.0. Modified as below.
+- **Source and rights:** The creator states they modelled it in Blender and textured it in Substance Painter following Darrin Lile's course. The Sketchfab API confirms CC BY 4.0 and downloadable status. Owner download `~/Downloads/m249-light-machine-gun.zip`, preserved in place; the archive contains `source/model.zip`, a COLLADA scene and textures, with no separate licence. Listing and hashes: [intake record](../docs/assets/intake/m249.json).
+- **Modifications:** Imported COLLADA in an isolated Godot staging project, then recipe-packed `M249_low` to GLB. Bound albedo, OpenGL normal, roughness, metallic and AO; downscaled to 1024², packed ORM, JPEG quality 0.9. Geometry and UVs retained, including fused extended bipod. Runtime wrapper rotates -X to -Z, scales by 0.001, aligns the measured crown, ignores source part-ID vertex colours, generates mipmaps and applies metallic 0 (D-015). No reload or bipod animation added.
+- **Trademarks:** The licence covers the artist's model, not manufacturer trademarks.
+
 ---
 
 ## 2. Community Stargate Props & Faction Assets

@@ -1,0 +1,24 @@
+{
+  "name": "M249 light machine gun",
+  "uid": "75cacc16a52640c7adb100d7294da244",
+  "license": {
+    "uri": "https://api.sketchfab.com/v3/licenses/322a749bcfa841b29dff1e8a1bb74b0b",
+    "label": "CC Attribution",
+    "fullName": "Creative Commons Attribution",
+    "requirements": "Author must be credited. Commercial use is allowed.",
+    "url": "http://creativecommons.org/licenses/by/4.0/",
+    "slug": "by"
+  },
+  "isDownloadable": true,
+  "faceCount": 13328,
+  "vertexCount": 6914,
+  "publishedAt": "2020-07-08T05:48:30.168057",
+  "creator": {
+    "uid": "1169131b73db4d7d981548a9b8e5351b",
+    "displayName": "AK",
+    "username": "skaf13",
+    "profileUrl": "https://sketchfab.com/skaf13"
+  },
+  "creator_authorship_excerpt": "Model was made in Blender; texture in Substance Painter.",
+  "description_summary": "Creator describes a second Substance Painter project, made in Blender following Darrin Lile\u2019s game-asset course, and intended for a game engine."
+}
