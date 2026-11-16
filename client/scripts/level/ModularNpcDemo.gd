@@ -12,6 +12,8 @@ const PATROL: Array[StringName] = [
 ]
 ## Seconds before the host releases the locked security door; 0 keeps it locked.
 @export var unlock_after: float = 30.0
+## Keep traversed doors open in this overview demonstration so the route stays visible.
+@export var npc_door_auto_close_delay: float = 0.0
 var jaffa: JaffaAI
 var runner: SGCAirmanAI
 var sentry: SGCAirmanAI
@@ -26,6 +28,9 @@ var status_label: Label
 func _ready() -> void:
 	if not level.ready_for_navigation:
 		await level.navigation_ready
+	for child in level.get_children():
+		if child is ModularDoor:
+			child.auto_close_delay = npc_door_auto_close_delay
 	for i in range(level.layout.connections.size()):
 		if level.layout.connections[i].security_id == &"crew_quarters":
 			security_door = level.get_node("Door_%03d" % i) as ModularDoor
