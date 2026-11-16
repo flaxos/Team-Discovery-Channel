@@ -419,12 +419,45 @@ func _avoid_corridor_npc(here: Vector3, target: Vector3) -> Vector3:
 	for other in _nearby_npcs(here):
 		var rel := Vector3(other.global_position.x - here.x, 0.0, other.global_position.z - here.z)
 		var dist := rel.length()
-		if dist <= 3.0 and dir.dot(rel) > -1.0 and absf(right.dot(rel)) < 1.5:
-			var ahead := 0.35 if dist < 1.5 else 0.7
-			var wanted := here + dir * ahead + right * 0.85
-			var spot := NavigationServer3D.map_get_closest_point(level.navigation_map, wanted)
-			if absf(spot.y - here.y) <= 1.0 and Vector2(spot.x - here.x, spot.z - here.z).length() > 0.1:
-				return spot
+		if dist > 3.0:
+			continue
+		var forward_dist := dir.dot(rel)
+		# Only yield to actors ahead of us along our travel heading
+		if forward_dist <= 0.2:
+			continue
+		# Squadmates on the same patrol route do not pass each other head-on
+		# unless moving in opposing directions (e.g. patrol loops or backtracking).
+		if "patrol_points" in other and "patrol_points" in actor:
+			var other_patrol: Array = other.get("patrol_points")
+			var my_patrol: Array = actor.get("patrol_points")
+			if not my_patrol.is_empty() and other_patrol == my_patrol:
+				var opposing := false
+				var other_vel_flat := Vector3(other.velocity.x, 0.0, other.velocity.z)
+				if other_vel_flat.length_squared() > 0.05 and dir.dot(other_vel_flat.normalized()) < -0.2:
+					opposing = true
+				elif "navigator" in other and other.navigator != null and "level_route" in other.navigator:
+					var route := other.navigator.get("level_route") as LevelNavigator
+					if route != null and route.status == "moving" and route.points.size() > route.index:
+						var other_target: Vector3 = route.points[route.index]
+						var other_dir := Vector3(other_target.x - other.global_position.x, 0.0, other_target.z - other.global_position.z)
+						if other_dir.length_squared() > 0.01 and dir.dot(other_dir.normalized()) < -0.2:
+							opposing = true
+				if not opposing:
+					continue
+		# Actors moving in our travel direction are marching ahead, not oncoming
+		var other_vel := other.velocity
+		other_vel.y = 0.0
+		if other_vel.length_squared() > 0.05 and dir.dot(other_vel.normalized()) > 0.1:
+			continue
+		# Lateral offset: only pass if other is within the corridor width and not already to our right
+		var lat_dist := right.dot(rel)
+		if lat_dist > 0.35 or lat_dist < -1.5:
+			continue
+		var ahead := 0.5 if dist < 1.5 else 0.8
+		var wanted := here + dir * ahead + right * 0.45
+		var spot := NavigationServer3D.map_get_closest_point(level.navigation_map, wanted)
+		if absf(spot.y - here.y) <= 1.0 and Vector2(spot.x - here.x, spot.z - here.z).length() > 0.1:
+			return spot
 	return target
 
 
@@ -469,7 +502,7 @@ func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
 	var avoiding := _avoid_corridor_npc(here, look_point) != look_point
 	while index < points.size() - 1:
 		var offset := points[index] - here
-		var reach := 0.85 if avoiding else 0.25
+		var reach := 0.55 if avoiding else 0.25
 		if Vector2(offset.x, offset.z).length() > reach or absf(offset.y) > 1.0:
 			break
 		index += 1
