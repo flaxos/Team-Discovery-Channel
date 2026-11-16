@@ -98,7 +98,7 @@ Existing SGC AI suites are unchanged and run in the full regression.
 Implemented 16 November 2026 on this branch. Native `LevelLayout` resources remain authoritative; no saved layout, navigation mesh or structural geometry changes.
 
 - A locked door removes its connection from the walking graph passed to `LevelTopology.path`. The navigator stitches navmesh legs through the alternate rooms and checks every leg for locked crossings. It replans when a remaining route door locks; when all routes are blocked it holds and retries once per second, including after an unlock.
-- Nearby NPCs on the same deck steer to their right on the assembly navigation map. This is local passing, not crowd simulation. The test uses production Jaffa with mutual body collision and observes both arriving without moving them during traversal.
+- Nearby NPCs on the same deck steer to their right on the assembly navigation map when meeting head-on. Local passing applies to oncoming actors ahead of the navigating NPC; actors trailing behind, marching ahead in the same travel direction, or sharing the same patrol route do not trigger avoidance, avoiding mutual wall stalling and post-combat patrol resumption regressions. The test uses production Jaffa with mutual body collision and observes both arriving without moving them during traversal.
 - An AI-opened door closes on the server after nearby NPCs clear 2.5 m and `auto_close_delay` elapses (default 2.5 s). The existing occupied-doorway query protects players and NPCs. Set the delay to zero to leave doors open. An AI passing through a manually opened door does not start its close timer. Open/closed state uses the existing RPC and late-join snapshot; clients never run the timer.
 
 ```sh
@@ -107,7 +107,7 @@ python3 tools/run_godot_tests.py test_modular_navigation_ta3 test_modular_naviga
 
 The existing alarm suite now checks the runner’s selected working console and its destination, since passing changes patrol positions and either console may be closest. Its alarm, reinforcement, retry, disabled-console and calm-down checks remain.
 
-The new suites cover a production patrol walking the alternative arm of a loop, both arms locked, runtime lock/unlock recovery, planning on the canonical infiltration loop, head-on passing, automatic closure, occupied doorways, explicit opt-out and manual openings. The multiplayer suite connects after a door opens, checks its snapshot and replicated closure, rejects client AI requests, and tears down without timer errors.
+The new suites cover a production patrol walking the alternative arm of a loop, both arms locked, runtime lock/unlock recovery, planning on the canonical infiltration loop, head-on passing, co-patrol non-interference and trailing actor avoidance regression, automatic closure, occupied doorways, explicit opt-out and manual openings. The multiplayer suite connects after a door opens, checks its snapshot and replicated closure, rejects client AI requests, and tears down without timer errors.
 
 Human verification remains pending: walk a loop with one locked security door, observe patrols meeting head-on, watch doors close behind patrols without closing on an operative, and check that the changed sight lines remain readable with sentry perception active. Run with two players to confirm both see the same door state.
 

@@ -263,7 +263,7 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 - **Non-goals:** runtime navmesh rebake, crowd simulation.
 - **Prerequisites:** none. Becomes necessary with EV-2 door actions and looped maps.
 - **Components:** `LevelNavigator.gd`, `ModularDoor.gd`.
-- **Acceptance:** on a looped layout with one locked door, a patrol reaches its waypoint by the other route; two NPCs meeting head-on both arrive. `test_modular_navigation_ta3` also checks live locks, all-routes-blocked recovery, the infiltration graph and safe closing. `test_modular_navigation_ta3_multiplayer` checks server authority, late-join open state and replicated automatic closure. The overview demo explicitly opts out of closing to preserve route visibility.
+- **Acceptance:** on a looped layout with one locked door, a patrol reaches its waypoint by the other route; two NPCs meeting head-on both arrive while co-patrol and trailing non-interference is preserved (resolving post-combat patrol resumption stalls). `test_modular_navigation_ta3` also checks live locks, all-routes-blocked recovery, the infiltration graph and safe closing. `test_modular_navigation_ta3_multiplayer` checks server authority, late-join open state and replicated automatic closure. The overview demo explicitly opts out of closing to preserve route visibility.
 - **Risks:** closed doors change sight lines, which interacts with ST-1.
 - **Complexity:** M · Fable.
 
