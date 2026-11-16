@@ -1,0 +1,67 @@
+{
+  "status": "integrated_owner_authorized_with_authorship_gap",
+  "title": "Stargate SG1",
+  "creator": "rossrobotics (uploader; authorship unconfirmed)",
+  "canonical_source_url": "https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165",
+  "category": "community_fan_model",
+  "checked_on": "2026-11-16",
+  "download": {
+    "availability": "Owner-downloaded Sketchfab archive",
+    "archive_sha256": "6f4a191709c8209ab40d5e9b34ee485ed17502b9dda99055af0ef9340bb2024b",
+    "model_sha256": "46f1b660ea0d77fc117907a48701b7be504e46f3570584aea7704841628baf64",
+    "staging_path": "/tmp/tdc-asset-intake/stargate_sg1",
+    "route": "Existing ~/Downloads/stargate.zip copied to staging; original preserved",
+    "archive_contents": "FBX and 13 maps; all hashes in stargate_sg1/source-hashes.json; no licence/readme; no traversal or symlinks"
+  },
+  "licence": {
+    "id": "CC-BY-4.0 (per listing)",
+    "version": "4.0",
+    "evidence_url": "https://api.sketchfab.com/v3/models/e2d6167c932e4c16b293d3bb8b6a3165",
+    "bundled_text_path": "credits/licenses/CC-BY-4.0.txt",
+    "redistribution_status": "Owner authorized committing and merging this integration on 2026-11-17 with the CC BY 4.0 listing and missing uploader-authorship evidence documented; authorship remains unverified",
+    "required_attribution": "Stargate SG1, uploaded by rossrobotics, canonical source, CC BY 4.0 per listing; modified",
+    "creator_or_archive_conflicts": "No conflicting terms found, but the listing is blank and does not satisfy the playbook’s explicit creator-authorship statement requirement. Franchise rights are separate.",
+    "owner_decision": {
+      "date": "2026-11-17",
+      "instruction": "commit everything and merge to main",
+      "scope": "Include the prepared Stargate integration with the already disclosed authorship-evidence gap; this does not establish uploader or underlying franchise rights"
+    }
+  },
+  "integration": {
+    "target_scene_or_script": "StargateRing._ready attaches StargateVisual; CommunityVisual is visual-only",
+    "source_forward_axis": "+X face, -Z up; converted to gate +Z face, +Y up",
+    "source_units": "FBX applies 0.0254 scale; converted ring measured aperture radius 0.06711667 units",
+    "wrapper_transform": "Ring uniform scale 40.97343; chevron template scale 27.7, centred at (0,0,-0.0778175), repeated at the seven unchanged CSGBox3D transforms",
+    "world_bounds_metres": [
+      6.290327,
+      6.381565,
+      0.379798
+    ],
+    "required_sockets": [
+      "Seven Chevrons child transforms unchanged",
+      "EventHorizon, KawooshArea, ExtractionArea, GateLight unchanged",
+      "Iris and DHD remain separate existing gameplay systems"
+    ],
+    "material_modifications": [
+      "1024² albedo/metallic, chevron roughness, JPEG .9; unlit albedo on chevron housings",
+      "Runtime opaque, metallic0, mipmaps; original replicated chevron count controls only seven front/back emissive insert pairs",
+      "Height/bump maps omitted; no verified tangent-space normals supplied"
+    ],
+    "effort": "M",
+    "modifications": "Keep only glyph ring and one front/back chevron/light insert. Repeat inserts on existing anchors. Omit source body, frames and nine-chevron arrangement: source body cannot match existing clear aperture and outer envelope under uniform scaling. Original torus and box visuals remain fallback. No imported collision, movement/articulation or gameplay changes."
+  },
+  "evidence": {
+    "intake_report": "docs/assets/intake/stargate_sg1/intake-report.json",
+    "gltf_validation_report": "0 errors, 0 warnings; infos include two source degenerate triangles, unused tangents and GODOT_single_root",
+    "godot_import_log": "Godot 4.4.1 runtime GLB loads; pack-result.json. FBX source references maps missing from its original paths, including absent chevron_transparency; explicit recipe rebinds used maps.",
+    "mission_capture": "docs/reviews/ap1g-captures/",
+    "export_smoke_log": "Linux release PCK: imported true, 7 anchors, 14 lights, snapshot 5 drives horizon and emission",
+    "behaviour_tests": [
+      "test_imported_stargate_visual",
+      "isolated incorrect ring scale detected",
+      "isolated missing-GLB fallback",
+      "full Godot profile"
+    ],
+    "reviewer": ""
+  }
+}

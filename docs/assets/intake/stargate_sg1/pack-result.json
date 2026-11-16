@@ -1,0 +1,35 @@
+{
+  "bytes": 1206304,
+  "image_format": "JPEG",
+  "lossy_quality": 0.899999976158142,
+  "max_texture_size": 1024,
+  "meshes": [
+    {
+      "bounds": "[P: (0.003955, -0.009015, -0.083294), S: (0.002901, 0.01803, 0.010953)]",
+      "name": "chevron",
+      "triangles": 428
+    },
+    {
+      "bounds": "[P: (-0.006856, -0.009015, -0.083294), S: (0.002901, 0.01803, 0.010953)]",
+      "name": "chevron_back",
+      "triangles": 428
+    },
+    {
+      "bounds": "[P: (0.001177, -0.00479, -0.086399), S: (0.00548, 0.00958, 0.006892)]",
+      "name": "chevron_light",
+      "triangles": 52
+    },
+    {
+      "bounds": "[P: (-0.006645, -0.00479, -0.086399), S: (0.00548, 0.00958, 0.006892)]",
+      "name": "chevron_light_back",
+      "triangles": 52
+    },
+    {
+      "bounds": "[P: (0.000652, -0.076793, -0.076729), S: (0.003235, 0.153522, 0.153459)]",
+      "name": "gate_ring",
+      "triangles": 5337
+    }
+  ],
+  "output": "/home/flax/games/Team-Discovery-Channel-stargate/client/assets/props/stargate_sg1.glb",
+  "sha256": "46f1b660ea0d77fc117907a48701b7be504e46f3570584aea7704841628baf64"
+}

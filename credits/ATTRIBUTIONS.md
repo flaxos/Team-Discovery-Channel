@@ -60,4 +60,12 @@ Every external 3D model, texture, material, or animation imported into **Team Di
 
 ## 2. Community Stargate Props & Faction Assets
 
-*(None imported yet. Future community CC-BY Stargate models from Sketchfab / OpenGameArt must be listed in this section with creator name, canonical URL, CC-BY license version, and modifications.)*
+| Asset file | Title | Uploader | Source | Licence | Use |
+|---|---|---|---|---|---|
+| `client/assets/props/stargate_sg1.glb` | Stargate SG1 | **rossrobotics** | https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165 | [CC BY 4.0](licenses/CC-BY-4.0.txt), per listing | Imported glyph ring plus seven chevron inserts on existing anchors |
+
+### Provenance and owner-authorized integration (AP-1g)
+- **Attribution:** "Stargate SG1" uploaded by rossrobotics, source above, listed under CC BY 4.0. Modified as below. The listing has no authorship description and the archive has no licence/readme; uploader authorship is **not established**. On 17 November 2026 the owner authorized committing and merging this integration with the gap documented. That authorization does not independently establish uploader authorship.
+- **Acquisition:** Existing owner download `~/Downloads/stargate.zip`, copied to staging outside `client/`, original preserved. Full hashes and listing evidence: [intake](../docs/assets/intake/stargate_sg1.json).
+- **Changes:** Recipe-packed FBX into a GLB with the glyph ring and one front/back chevron/light insert. Albedo and metallic maps downscaled 4096² to 1024², chevron roughness bound, ORM packed, JPEG quality 0.9. Bump maps are height maps, not verified tangent-space normals, and are omitted. The runtime wrapper fits the ring to the existing 2.75 m opening, repeats the insert at the seven existing anchors, uses unlit albedo for housings, drives front/back emissive inserts from existing replicated chevron count, generates mipmaps and draws opaque with metallic 0. Source body, frames and nine-chevron arrangement are omitted because they cannot fit both existing aperture and envelope unchanged. No ring spinning, chevron movement or iris art added.
+- **Underlying rights:** This is a community fan model; the listing licence does not grant Stargate franchise rights.

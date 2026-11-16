@@ -1,0 +1,257 @@
+{
+  "ok": true,
+  "file": "client/assets/props/stargate_sg1.glb",
+  "bytes": 1206304,
+  "sha256": "46f1b660ea0d77fc117907a48701b7be504e46f3570584aea7704841628baf64",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Godot Engine v4.4.1.stable.official@49a5bc7b616bd04689a2c89e89bda41f50241464",
+  "declared_triangles_unique_meshes": 6297,
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 843,
+          "declared_triangles": 428,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.354928612709045,
+              -0.269903749227524,
+              2.84807133674622
+            ],
+            "max": [
+              0.354928612709045,
+              -0.15570904314518,
+              3.27927684783936
+            ],
+            "size": [
+              0.70985722541809,
+              0.11419470608234403,
+              0.4312055110931401
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "mesh_1",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 843,
+          "declared_triangles": 428,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.354928612709045,
+              -0.269903749227524,
+              2.84807133674622
+            ],
+            "max": [
+              0.354928612709045,
+              -0.15570904314518,
+              3.27927684783936
+            ],
+            "size": [
+              0.70985722541809,
+              0.11419470608234403,
+              0.4312055110931401
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "mesh_2",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 108,
+          "declared_triangles": 52,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.188589319586754,
+              -0.262099862098694,
+              3.13017535209656
+            ],
+            "max": [
+              0.188589319586754,
+              -0.0463438369333744,
+              3.40151977539062
+            ],
+            "size": [
+              0.377178639173508,
+              0.2157560251653196,
+              0.2713444232940603
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "mesh_3",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 108,
+          "declared_triangles": 52,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.188589319586754,
+              3.13017535209656,
+              0.045873835682869
+            ],
+            "max": [
+              0.188589319586754,
+              3.40151977539062,
+              0.261629849672318
+            ],
+            "size": [
+              0.377178639173508,
+              0.2713444232940603,
+              0.215756013989449
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "mesh_4",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 9605,
+          "declared_triangles": 5337,
+          "attributes": [
+            "COLOR_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -3.02084422111511,
+              -3.02084422111511,
+              0.0256881788372993
+            ],
+            "max": [
+              3.02333283424377,
+              3.02084422111511,
+              0.153066843748093
+            ],
+            "size": [
+              6.04417705535888,
+              6.04168844223022,
+              0.12737866491079372
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "StargateSG1",
+    "chevron",
+    "chevron_back",
+    "chevron_light",
+    "chevron_light_back",
+    "gate_ring"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "Chevron",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": false,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "Chevron_unlit",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": false,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "Ring",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": false,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ]
+}

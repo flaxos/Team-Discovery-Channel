@@ -20,18 +20,16 @@ Nothing an agent can do replaces these. They close the **EX-2**, **Stealth**, **
 
 ### Get a build to play
 
-The play machine's main checkout (`/home/flax/games/Team-Discovery-Channel`) is on an old branch with local edits. **Do not switch it.** Make a separate checkout of `main`:
+Use the existing checkout. Preserve any unfinished work; do not create another worktree, clone or play directory. When the user requests an update/merge, finish the existing checkout on `main` first, following [AGENTS.md](../../AGENTS.md).
 
 ```sh
 cd /home/flax/games/Team-Discovery-Channel
-git fetch origin
-git worktree add ../tdc-play origin/main --detach
-godot --path ../tdc-play/client -- --mission goauld_infiltration
+git status --short --branch
+git rev-parse --short HEAD
+godot --path client -- --mission goauld_infiltration
 ```
 
-Record `git -C ../tdc-play rev-parse --short HEAD` in the record. Godot must be **4.4.1**. A running game must be restarted to load changes.
-
-Two players: one hosts from the lobby; the other joins with `godot --path ../tdc-play/client -- --connect <host-ip> --port 7777 --name Carter --class carter_tech`. For a dedicated server: `godot --headless --path ../tdc-play/client -- --server --port 7777 --mission goauld_infiltration`. Flags are listed in the [player guide](../PLAYING.md).
+Record the commit above. Godot must be **4.4.1**. Restart a running game to load changes. A second player can join with `godot --path client -- --connect <host-ip> --port 7777 --name Carter --class carter_tech`; a dedicated server uses `godot --headless --path client -- --server --port 7777 --mission goauld_infiltration`. See the [player guide](../PLAYING.md).
 
 ### Session plan (about two hours for two people)
 
@@ -86,7 +84,7 @@ When the template's **Infiltration complete** line can be ticked, update ROADMAP
 
 **Handoff prompt**
 
-> Repository `flaxos/Team-Discovery-Channel`, Godot 4.4.1. Read `ROADMAP.md`, then package 4 (GA-0) in `docs/plans/next-work-packages.md`, section 6 of `docs/plans/master-development-roadmap.md`, decision D-010 in `docs/DECISIONS.md`, `client/resources/level_themes/goauld.tres`, `neutral.tres` and `client/scripts/level/LevelThemeResolver.gd`. Write `docs/maps/goauld-visual-brief.md` with the design language, the theme-slot audit, the compound's rooms ranked by use and the art-method options, as the package describes. This is documentation only: change no code, scene, resource or test. Work on a new branch from `main` in a separate worktree and preserve uncommitted files in other checkouts. Stop when the brief and index changes are ready for review; do not start GA-1. Do not merge.
+> Repository `flaxos/Team-Discovery-Channel`, Godot 4.4.1. Read `ROADMAP.md`, then package 4 (GA-0) in `docs/plans/next-work-packages.md`, section 6 of `docs/plans/master-development-roadmap.md`, decision D-010 in `docs/DECISIONS.md`, `client/resources/level_themes/goauld.tres`, `neutral.tres` and `client/scripts/level/LevelThemeResolver.gd`. Write `docs/maps/goauld-visual-brief.md` with the design language, the theme-slot audit, the compound's rooms ranked by use and the art-method options, as the package describes. This is documentation only: change no code, scene, resource or test. Work in the existing checkout and preserve unfinished work; follow AGENTS.md for branches and delivery. Stop when the brief and index changes are ready for review; do not start GA-1. Merge only when the user requests it.
 
 ## C. Package 5 — GT-1 worlds that can coexist
 
@@ -113,7 +111,7 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 
 **Handoff prompt**
 
-> Repository `flaxos/Team-Discovery-Channel`, Godot 4.4.1. Read `ROADMAP.md`, `docs/plans/gate-travel-split-worlds.md`, package 5 (GT-1) in `docs/plans/next-work-packages.md`, and decisions D-016 and D-017. Add `MissionWorld.of(node)` and move every whole-game lookup by name to it; classify the group lookups. Add a `MissionSession` above the worlds that places peers and applies the fail rule, let `MainGameCoordinator` load one world or two, and add `set_presented` to a world. No travel, no lobby entry, no behaviour change: every existing suite must pass unchanged. Write the coexistence suite first and watch it fail on the sentry. Work on a new branch in a separate worktree, in small commits, and preserve uncommitted files in other checkouts. Check `gh pr checks` before calling it green. Stop when ready for review; do not start GT-2. Do not merge.
+> Repository `flaxos/Team-Discovery-Channel`, Godot 4.4.1. Read `ROADMAP.md`, `docs/plans/gate-travel-split-worlds.md`, package 5 (GT-1) in `docs/plans/next-work-packages.md`, and decisions D-016 and D-017. Add `MissionWorld.of(node)` and move every whole-game lookup by name to it; classify the group lookups. Add a `MissionSession` above the worlds that places peers and applies the fail rule, let `MainGameCoordinator` load one world or two, and add `set_presented` to a world. No travel, no lobby entry, no behaviour change: every existing suite must pass unchanged. Write the coexistence suite first and watch it fail on the sentry. Work in the existing checkout, in small commits, and preserve unfinished work; follow AGENTS.md for branches and delivery. Check `gh pr checks` before calling it green. Stop when ready for review; do not start GT-2. Merge only when the user requests it.
 
 ## Merging dependent pull requests
 

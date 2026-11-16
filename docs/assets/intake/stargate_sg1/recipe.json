@@ -1,0 +1,31 @@
+{
+  "source": "/tmp/tdc-asset-intake/stargate_sg1/extracted/source/stargate.fbx",
+  "output": "../../../../client/assets/props/stargate_sg1.glb",
+  "root_name": "StargateSG1",
+  "keep_nodes": [
+    "gate_ring",
+    "chevron",
+    "chevron_back",
+    "chevron_light",
+    "chevron_light_back"
+  ],
+  "max_texture_size": 1024,
+  "image_format": "JPEG",
+  "lossy_quality": 0.9,
+  "materials": {
+    "Ring": {
+      "albedo": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/ring_albedo.png",
+      "metallic": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/ring_metalness.png"
+    },
+    "Chevron": {
+      "albedo": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/chevron_albedo_unlit.png",
+      "metallic": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/chevron_metalness.png",
+      "roughness": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/chevron_roughness.png"
+    },
+    "Chevron_unlit": {
+      "albedo": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/chevron_albedo_unlit.png",
+      "metallic": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/chevron_metalness.png",
+      "roughness": "/tmp/tdc-asset-intake/stargate_sg1/extracted/textures/chevron_roughness.png"
+    }
+  }
+}
