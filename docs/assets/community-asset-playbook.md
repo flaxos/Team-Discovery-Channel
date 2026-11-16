@@ -144,6 +144,7 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
 | A first draw of a weapon stalls | Texture decoding takes about 55 ms per weapon model; the session cache pays it once |
 | A dressed box still fades for the camera, not its visual | Camera occlusion fades the collider's material; known limitation |
 | `grep` output looks mangled on the dev box | The RTK hook rewrites it; use `rtk proxy grep …` |
+| Hosted `Godot full` or `Godot multiplayer` fails in `test_gate_*_multiplayer` after the suite printed PASS, on `Node not found: "…/Players/<peer>/MultiplayerSynchronizer"` | Pre-existing teardown race on `main` (hosted runs 43819943281 on #61 and 43818024196 on CO-1, 16 November 2026), not caused by asset work. Re-run the job once, say so in the PR, and do not chase it inside an asset PR |
 | CC BY credit missing from a shipped build | `credits/` is outside `client/` and there is no credits screen yet; flag it before any build is distributed |
 
 ## 10. Working in parallel
