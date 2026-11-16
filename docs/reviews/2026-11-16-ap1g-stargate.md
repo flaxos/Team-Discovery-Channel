@@ -50,3 +50,7 @@ The ordinary SGC close view is partially blocked by existing architecture, for b
 | ![Offworld](ap1g-captures/offworld-inactive.png) | ![SGC occlusion](ap1g-captures/sgc-ordinary-occlusion.png) |
 
 [Active horizon, isolated SGC art view](ap1g-captures/sgc-active-isolated.png).
+
+## Combined local preview
+
+The owner checkout is on `preview/community-asset-imports`, combining the SAW and this gate preview without publishing the gate branch. Eight targeted suites plus project import pass together: SAW, Stargate, M9, P90, crate, gate lifecycle/modes, outbound multiplayer travel and return multiplayer travel. Both visuals also load together from a clean Linux release PCK. The earlier full profiles remain separate branch runs; no combined full-profile claim is made.
