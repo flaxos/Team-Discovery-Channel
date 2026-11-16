@@ -2,6 +2,7 @@
 [ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/props/ArmoryArmorStation.tscn" id="ArmoryArmorStation"]
+[ext_resource type="PackedScene" path="res://scenes/props/ArmoryResupplyStation.tscn" id="ArmoryResupplyStation"]
 [sub_resource type="Resource" id="a0"]
 script = ExtResource("2")
 id = &"console"
@@ -42,10 +43,13 @@ placeholder_size = Vector3(1,1.8,0.5)
 bounds = AABB(-0.5,0,-0.25,1,1.8,0.5)
 [sub_resource type="Resource" id="a5"]
 script = ExtResource("2")
-id = &"inventory"
-component = &"interaction"
+id = &"resupply_station"
+component = &"equipment"
 local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.6,0,2.6)
-approach = Vector3(0,0,0)
+approach = Vector3(1.2,0,-1.2)
+scene = ExtResource("ArmoryResupplyStation")
+blocks_movement = true
+bounds = AABB(-0.8,0,-0.6,1.6,1.0,1.2)
 references = PackedStringArray("inventory.storage")
 [resource]
 script = ExtResource("1")

@@ -15,7 +15,7 @@ Module groups used below:
 |---|---|---|---|
 | `jaffa_barracks` | Chambers | Two beds, weapon rack, console, three squad markers, patrol entry/exit | Implemented |
 | `security_checkpoint` | Chambers | Two cover props, guard marker, console, door-control/alarm references, patrol markers | Implemented |
-| `armoury` | Chambers | Existing armour station, weapon rack, inventory marker, console/patrol markers | Implemented |
+| `armoury` | Chambers | Existing armour station, munitions resupply crate / weapon rack, inventory marker, console/patrol markers | Implemented |
 | `detention` | Chambers | Cot, prisoner and guard markers, access-control reference, extraction marker | Implemented |
 | `generator` | Long chambers | Machinery volume, console, power/repair/sabotage objective approach | Implemented |
 | `cargo` | Chambers | Three crates, console, cover and cargo-interaction markers, patrol markers | Implemented |
@@ -30,7 +30,7 @@ Module groups used below:
 | `ceremonial` | room13, room16 | Low dais/throne placeholders, guard markers, side approaches, character objective | Implemented |
 | `observation_communications` | Chambers | Communications/display prop, console, staff/intelligence markers | Implemented |
 
-Existing shared assets are referenced at their original paths: `res://scenes/props/{TransportRings,Stargate,DHDConsole,ArmoryArmorStation}.tscn`. Missing assets use the single reusable `res://scenes/level/RoomPlaceholder.tscn` or named Marker3D nodes. Markers do not spawn actors or start objectives. System references such as `doors.access`, `systems.power` and `objective.extraction` are stable integration labels, not new gameplay systems.
+Existing shared assets are referenced at their original paths: `res://scenes/props/{TransportRings,Stargate,DHDConsole,ArmoryArmorStation,ArmoryResupplyStation}.tscn`. Missing assets use the single reusable `res://scenes/level/RoomPlaceholder.tscn` or named Marker3D nodes. Markers do not spawn actors or start objectives. System references such as `doors.access`, `systems.power` and `objective.extraction` are stable integration labels, not new gameplay systems.
 
 ## Typed authoring contract
 

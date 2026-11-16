@@ -40,7 +40,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Mission restart | Verified | Acknowledged restart (`prepare_mission_restart` / `acknowledge_mission_restart`); `test_mission_restart_cleanup`, two-process retry in `test_modular_extraction_multiplayer` |
 | Combat, weapons, damage | Verified | `WeaponBase` plus six weapons, server-validated fire, Zat stun/kill/vaporise; balance never human-accepted |
 | Downing, bleed-out, revive | Verified | `HealthComponent` (20 s bleed-out, revive to 40%); hold-to-revive in `PlayerController3D`; airmen auto-revive |
-| Inventory, ammunition, resupply | Partial | Per-weapon ammunition and reserve, armoury resupply and armour stations in the SGC only. No sharing between players; no resupply on modular levels |
+| Inventory, ammunition, resupply | Verified (SGC & Offworld CO-1) | Per-weapon ammunition and reserve. SGC and offworld compound armoury (`ArmoryArmorStation` and `ArmoryResupplyStation` in `armoury.tres`) provide server-validated tactical plate repair (+150 ballistic ammo reserve up to 300) and munitions/equipment resupply with cooldowns, reach validation, late-join sync, and retry reset (`test_offworld_resupply`, `test_offworld_resupply_multiplayer`). No sharing between players |
 | Success, failure, debrief | Partial | Shared result RPC, debrief panel and retry. Modular missions set their own banner and debrief text once (EX-1), including whether the alarm was raised (EV-1). The panel layout is still the SGC one |
 
 ### Tactical gameplay
@@ -327,8 +327,10 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 
 ### H — Expanded co-op mechanics
 
-**CO-1 — Co-op kit on modular missions** · M · Codex
-- Resupply and armoury as room attachments, a rule for solo play (open question 5), revive under the new perception rules. Check `ArmoryResupplyStation` and `ArmoryArmorStation` before writing anything new: both exist and work in the SGC.
+**CO-1 — Co-op kit on modular missions** · M · Codex/Antigravity · **built 16 November 2026 (`test_offworld_resupply`, `test_offworld_resupply_multiplayer`)**
+- Functional offworld armoury resupply using existing authored stations: `ArmoryArmorStation` (tactical plate repair + full health, +150 ballistic reserve ammo up to 300) and `ArmoryResupplyStation` (full munitions reserve replenish, tactical gear restock: claymores, C4, deployable shields, smoke).
+- Integrated into `armoury.tres` preset within `GoauldInfiltrationMission` (`Room04Chamber`) preserving room footprints, navigation/collision envelopes, objectives, and patrol markers.
+- Server-authoritative validation (`ServerInteraction.resolve`), reach validation ($\le 3.5$ m), late-join cooldown/state snapshots, and state reset on coordinated retry. Retains existing solo failure-on-down rules and SGC station behaviors.
 
 **CO-2 — Roles and sharing** · M · design first
 - Ammunition sharing, medic revive speed or heal, deployable cover offworld. Bring the lobby class descriptions and the code into agreement in either direction. Do not add perks merely because the description lists them.

@@ -137,4 +137,41 @@ Record each session in a copy of the [playtest template](../reviews/infiltration
 - **The Stargate does nothing:** insertion is a spawn in the gate room and extraction is walking back to it. Gate travel is GT-2.
 - **Rings are idle** and are not a walking link for players or AI.
 - **Everything is untuned.** Patrol timings, notice times, noise radii, raise time, reinforcement delays and cover choice were checked automatically, not played. GI-2's tuning step is waiting for the human runs.
-- **No resupply** on the compound (CO-1 does not exist yet).
+- **Offworld resupply available (CO-1):** The compound armoury (`Room04Chamber`) contains an operational SGC tactical armour station and munitions resupply crate.
+
+## Offworld armoury & resupply (CO-1)
+
+The offworld compound features an operational armoury (`armoury.tres` in `Room04Chamber` at coordinates `(-16, 48)` on Deck 0), accessible via the barracks doorway. It provides critical replenishment for prolonged firefights and high-alert extraction sequences.
+
+### Equipment & Prompt Flows
+
+1. **SGC Tactical Armor Rack (`ArmoryArmorStation`)**
+   - **Visuals:** Wall-mounted olive rack with green overhead status light at `(-2.8, 0.0, -1.5)` (orientation: $90^\circ$ yaw).
+   - **Approach prompt:** Within 2.0 m, the 3D prompt displays `[E] RE-ARMOR TACTICAL PLATES` (dynamically bound to the configured `interact` key via `KeybindingManager`).
+   - **Interaction:** Press `[E]` to trigger server-authoritative plate replacement (`ServerInteraction.resolve`):
+     - Operative's health is restored to 100% (tactical plate repair).
+     - Ballistic weapon reserve ammo is replenished by +150 rounds, up to the 300 round reserve limit.
+     - Status light shifts to orange; prompt displays `ARMOR REPLACED - COOLDOWN (30s)`.
+   - **Cooldown:** 30.0 s cooldown enforced by the server; subsequent interact attempts while on cooldown are rejected.
+   - **Audio:** Plays SGC tactical reload audio cue (`sfx_p90_reload.wav`).
+
+2. **Tactical Munitions Crate (`ArmoryResupplyStation`)**
+   - **Visuals:** Standalone olive munitions crate with green status indicator light at `(-2.6, 0.0, 2.6)` with solid collision envelope ($1.6 \times 1.0 \times 1.2$ m).
+   - **Approach prompt:** Within 2.0 m, the 3D prompt displays `[E] RESUPPLY MUNITIONS`.
+   - **Interaction:** Press `[E]` to trigger server-authoritative munitions and tactical gear restock:
+     - All equipped weapons have their reserve ammunition replenished to full capacity.
+     - Tactical deployables and ordnance are restocked to maximum loadouts:
+       - Claymore mines: 2
+       - C4 satchel charges: 2
+       - Deployable ballistic shields: 2
+       - Smoke grenades: 2
+     - Status light shifts to orange with an energy pulse (3.5 multiplier decaying over 0.6 s); prompt displays `RESUPPLIED - COOLDOWN (3s)`.
+   - **Cooldown:** 3.0 s anti-spam cooldown enforced by the server.
+   - **Audio:** Plays tactical ammo pickup audio cue (`sfx_resupply.wav`).
+
+### Multiplayer Authority, Snapshots & Mission Reset
+
+- **Reach & Authority Validation:** The dedicated server validates the interacting peer against the owning operative and checks Euclidean distance ($\le 3.5$ m). Downed operatives or remote clients attempting forged interactions outside the room are rejected.
+- **Late-Join Snapshots:** Clients connecting mid-mission request snapshot state via reliable RPC (`request_snapshot`), receiving accurate station cooldown and light status (`sync_snapshot`) without desync.
+- **Coordinated Retry:** When the squad votes to restart or retry after extraction/failure, all station cooldowns and visual prompts reset cleanly to their initial ready states on host and all clients.
+- **SGC Baseline Integrity:** Existing SGC Gate Room stations and interactions remain completely untouched and behave identically.
