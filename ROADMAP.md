@@ -66,8 +66,9 @@ The full classification, with source paths and tests, is the [capability matrix]
 - **Cover on modular levels needs props.** Since TA-1 Jaffa use barricades and crates; rooms without low props still fall back to a room-centre marker.
 - **Ten modules place door headers 0.2 m outside their own cell**, overlapping the neighbouring room's header. Harmless until themed pieces met them; GA-1 works round it (risk R21).
 - **Use this checkout to play.** Check its branch/commit and restart the running game after changes; do not create a separate play checkout. [Commands here](docs/plans/next-work-packages.md#get-a-build-to-play).
+- **A second late join can fail while another client is already present.** An EV-2-1 exploratory run received operative replication before the joining peer had its mission spawner. Sequential late joins are covered; three/four-peer late joining needs a network readiness fix (R24).
 
-All 23 items, each checked against current code, are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register).
+All 24 items are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register), including the new EV-2-1 exploration finding.
 
 ## Direction
 

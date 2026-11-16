@@ -1,10 +1,11 @@
 extends SceneTree
-## Real ENet peer: late join after a release, retry while connected, forged/out-of-reach
+## Real ENet peers: late join while locked and after release, connected retry, forged/out-of-reach
 ## interaction rejection, earned client console release and a second fresh retry.
 const Fixture = preload("res://tests/support/mission_events_fixture.gd")
 const PORT := 19931
 var dedicated_host := false
 var child_pid := -1
+var observer_pid := -1
 var output_dir: String
 var net: SGCNetworkManager
 var main: MainGameCoordinator
@@ -19,8 +20,9 @@ func dedicated() -> bool:
 
 
 func _finalize() -> void:
-	if child_pid > 0 and OS.is_process_running(child_pid):
-		OS.kill(child_pid)
+	for pid: int in [child_pid, observer_pid]:
+		if pid > 0 and OS.is_process_running(pid):
+			OS.kill(pid)
 
 
 func frames(count: int) -> void:
@@ -43,7 +45,9 @@ func marked(name: String) -> bool:
 			return true
 		await frames(1)
 	if not child():
-		print(FileAccess.get_file_as_string(output_dir.path_join("client.log")))
+		for log_name: String in ["client.log", "observer.log"]:
+			if FileAccess.file_exists(output_dir.path_join(log_name)):
+				print(FileAccess.get_file_as_string(output_dir.path_join(log_name)))
 	return false
 
 
@@ -115,19 +119,26 @@ func run_host() -> void:
 	net.request_start_game()
 	var room := await mission()
 	assert(Fixture.door(room).locked and room.events.fired.is_empty())
+	# This peer joins an already locked mission: its own structural bake must still
+	# finish before it applies the host's temporary security state.
+	observer_pid = spawn_peer(true)
+	assert(observer_pid > 0 and await marked("locked_late"))
 	if dedicated_host:
-		assert(room.players_container.get_child_count() == 0, "Dedicated host has no operative")
+		assert(not room.players_container.has_node("1"), "Dedicated host has no operative")
 		# Establish the completed-objective late-join fixture on the host controller.
 		# After retry, the remote operative earns the release through the real console.
 		assert(room.objectives.complete_interaction(room.definition.objectives[0]))
 	else:
 		await use_generator(room, room.players_container.get_node("1") as PlayerController3D)
 	assert(room.events.fired.size() == 1 and not Fixture.door(room).locked)
-	child_pid = OS.create_process(OS.get_executable_path(), [
-		"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
-		"--log-file", output_dir.path_join("client.log"), "--script", "res://tests/test_mission_events_multiplayer.gd",
-		"--", "--events-child", "--result-dir", output_dir
-	])
+	assert(await marked("observer_released"))
+	mark("observer_leave")
+	for i in range(1800):
+		if net.multiplayer.get_peers().is_empty():
+			break
+		await frames(1)
+	assert(net.multiplayer.get_peers().is_empty(), "First late peer leaves before the next join")
+	child_pid = spawn_peer(false)
 	assert(child_pid > 0)
 	assert(await marked("late"), "Late peer receives the released door and trigger snapshot")
 	var previous := room.get_instance_id()
@@ -152,8 +163,21 @@ func run_host() -> void:
 	net.disconnect_game()
 	assert(await marked("disconnected"))
 	await frames(30)
-	var log := FileAccess.get_file_as_string(output_dir.path_join("client.log"))
-	assert(not log.contains("ERROR:") and not log.contains("ObjectDB"), log)
+	for name: String in ["client.log", "observer.log"]:
+		var log := FileAccess.get_file_as_string(output_dir.path_join(name))
+		assert(not log.contains("ERROR:") and not log.contains("ObjectDB"), log)
+
+
+func spawn_peer(observer: bool) -> int:
+	var args := PackedStringArray([
+		"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
+		"--log-file", output_dir.path_join("observer.log" if observer else "client.log"),
+		"--script", "res://tests/test_mission_events_multiplayer.gd",
+		"--", "--events-child", "--result-dir", output_dir
+	])
+	if observer:
+		args.append("--locked-observer")
+	return OS.create_process(OS.get_executable_path(), args)
 
 
 func run_client() -> void:
@@ -161,6 +185,17 @@ func run_client() -> void:
 	net.selected_class_id = SGCNetworkManager.CLASS_CARTER_TECH
 	assert(net.join_game("127.0.0.1", PORT) == OK)
 	var room := await mission()
+	if OS.get_cmdline_user_args().has("--locked-observer"):
+		await fresh_snapshot(room)
+		mark("locked_late")
+		for i in range(1800):
+			if room.events.fired.has(Fixture.ID) and not Fixture.door(room).locked:
+				break
+			await frames(1)
+		assert(room.events.fired.has(Fixture.ID) and not Fixture.door(room).locked)
+		mark("observer_released")
+		assert(await marked("observer_leave"))
+		return
 	for i in range(1800):
 		await frames(1)
 		if room.events.fired.has(Fixture.ID) and not Fixture.door(room).locked and room.objectives.index == 1:

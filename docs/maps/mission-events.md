@@ -25,7 +25,7 @@ Validation checks references, duplicates and the sequence's walking connectivity
 
 Only the host executes actions. Clients can use an objective console through its existing identity/reach/health/order validation; there is no client event-completion RPC. Live releases use readiness-gated mission RPCs. The fired-ID snapshot is monotonic, ignores unknown IDs and does not replay old notices. Doors send their own authoritative state.
 
-A client can finish its navigation bake before the host. Snapshot requests received before host initialization wait until locks have been applied; that response refreshes the target door state as well as event progress. Snapshot responses never re-run door actions or overwrite authoritative state from a reconstructed trigger list. This also covers retries while peers remain connected.
+A client can finish its navigation bake before the host. Snapshot requests received before host initialization wait until locks have been applied; that response refreshes the target door state as well as event progress. Conversely, a late client can receive an initialized lock during its own bake: doors retain the newest authoritative open/lock state until `navigation_ready`, so structural checks use the authored layout. Snapshot responses never re-run door actions or overwrite authoritative state from a reconstructed trigger list. This also covers retries while peers remain connected.
 
 A final mission result stops actions. Restart creates a fresh world, objective index, event list and initial locks. SGC Defense keeps `WaveManager` and has no event director.
 
@@ -34,7 +34,7 @@ A final mission result stops actions. Restart creates a fresh world, objective i
 This is the first EV-2 chunk, not the full milestone. Alert/room/timer conditions, countdown failure, objective enabling, optional/parallel objectives and power visuals are not added. Add each only alongside a mission definition that needs it (D-003).
 
 - `test_mission_events`: definition validation, unearnable-stage rejection, real generator interaction, reach/downed rejection, TA-3 blocked/released navigation, one-shot behavior, result freeze and retry.
-- `test_mission_events_multiplayer`: real ENet late join after release, stale snapshot monotonicity, no stale notice, connected retry, rejected client event/door calls and forged/out-of-reach console identities, a real client console release and a second reset.
+- `test_mission_events_multiplayer`: real ENet late join while locked and after release, stale snapshot monotonicity, no stale notice, connected retry, rejected client event/door calls and forged/out-of-reach console identities, a real client console release and a second reset.
 - `test_mission_events_dedicated`: the same network contract with a pawnless host. The first completed objective is a server-controller fixture for late join; after retry the remote operative earns the release through the real console.
 
 [Review and captures](../reviews/2026-11-17-ev2-1-objective-doors.md).

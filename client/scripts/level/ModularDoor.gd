@@ -12,6 +12,9 @@ var is_open := false
 var prompt: Label3D
 var _ai_auto_close_timer: float = 0.0
 var _last_ai_actor: Node3D = null
+var _waiting_navigation := false
+var _pending_open := false
+var _pending_locked := false
 
 
 func _ready() -> void:
@@ -39,7 +42,7 @@ func _ready() -> void:
 	prompt.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	prompt.font_size = 20
 	add_child(prompt)
-	sync_open(false)
+	_apply_open(false)
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_snapshot.rpc_id(1)
 
@@ -146,9 +149,11 @@ func set_locked(value: bool) -> bool:
 
 @rpc("authority", "call_local", "reliable")
 func sync_security_state(open: bool, value: bool) -> void:
+	if _defer_security_state(open, value):
+		return
 	var changed := locked != value
 	locked = value
-	sync_open(open)
+	_apply_open(open)
 	if changed:
 		access_changed.emit(security_id, locked)
 
@@ -175,6 +180,34 @@ func request_snapshot() -> void:
 
 @rpc("authority", "call_local", "reliable")
 func sync_open(open: bool) -> void:
+	if _defer_security_state(open, _pending_locked if _waiting_navigation else locked):
+		return
+	_apply_open(open)
+
+
+## A late peer validates the authored layout before adopting live mission locks. Keep
+## only the newest authoritative state until its LevelAssembly finishes the bake.
+## Use the assembly's signal protocol here to avoid a circular script dependency.
+func _defer_security_state(open: bool, value: bool) -> bool:
+	if not is_inside_tree() or multiplayer.is_server():
+		return false
+	var assembly := get_parent()
+	if not assembly.has_signal("navigation_ready") or bool(assembly.get("ready_for_navigation")):
+		return false
+	_pending_open = open
+	_pending_locked = value
+	if not _waiting_navigation:
+		_waiting_navigation = true
+		assembly.connect("navigation_ready", _apply_pending_security, CONNECT_ONE_SHOT)
+	return true
+
+
+func _apply_pending_security() -> void:
+	_waiting_navigation = false
+	sync_security_state(_pending_open, _pending_locked)
+
+
+func _apply_open(open: bool) -> void:
 	if locked and open:
 		return
 	is_open = open

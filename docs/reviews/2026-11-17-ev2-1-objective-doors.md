@@ -18,13 +18,15 @@ Command-room security now starts locked in Goa'uld Infiltration and its travel-m
 
 The validator checks IDs, exactly one target security door, non-extraction objective, duplicate bindings, and sequential reachability while unreleased mission gates are locked. A console behind its own release gate is rejected. Host locks are applied after structural navigation validation and before patrol startup; putting a permanent lock in the layout would correctly fail its all-regions-reachable contract.
 
-Event progress is a monotonic fired-ID snapshot. Only live updates show notices. Target doors retain their own state snapshot RPC. Early requests wait for host initialization and receive initialized door/event state: the two-process tests verify initialized state after each peer’s independent navigation bake. Result finalization stops actions; repeat initialization cannot relock an already released stage.
+Event progress is a monotonic fired-ID snapshot. Only live updates show notices. Target doors retain their own state snapshot RPC. Early requests wait for host initialization and receive initialized door/event state. A late client's doors defer live open/lock state until its own structural bake is complete. Real ENet tests cover late join both while locked and after release, plus connected retries. Result finalization stops actions; repeat initialization cannot relock an already released stage.
+
+The two late-join fixtures run sequentially. An exploratory three-peer run exposed a separate loading/replication problem: a second late join received an existing operative's spawn before its `GateRoom/MultiplayerSpawner` existed. That run failed strictly; it is not counted as acceptance. Simultaneous three/four-peer late joining remains an open network follow-up, outside this objective-door chunk.
 
 An unfinished broader prototype was inspected read-only in the old `pilotfish` checkout. The original prototype, theme edits and body-drag edits remain untouched there. Stable security IDs and real listen/dedicated peer tests define the recovered chunk’s contract. This chunk implements only the next roadmap boundary with a production mission consumer and real listen/dedicated peer tests.
 
 ## Validation
 
-- New single-process and two-process listen/dedicated suites pass.
+- New single-process and multi-process listen/dedicated suites pass.
 - Existing quiet and loud infiltration playthroughs pass unchanged.
 - Python tools: 47 tests pass.
 - Full regression and hosted checks are reported in the PR after completion; no unrun human co-op or art acceptance is claimed.
