@@ -1,0 +1,122 @@
+{
+  "ok": true,
+  "file": "client/assets/weapons/beretta_m9.glb",
+  "bytes": 1070592,
+  "sha256": "17ce228acc90eb3a25dd43158c44db7a3b08ead5ef9dab3f1c865cf7be97436a",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Godot Engine v4.4.1.stable.official@49a5bc7b616bd04689a2c89e89bda41f50241464",
+  "declared_triangles_unique_meshes": 10185,
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 1522,
+          "declared_triangles": 1576,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "TEXCOORD_1"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.0271247290074825,
+              -0.00974659901112318,
+              -0.0526465140283108
+            ],
+            "max": [
+              0.0271247290074825,
+              0.00974659901112318,
+              0.0526465140283108
+            ],
+            "size": [
+              0.054249458014965,
+              0.01949319802224636,
+              0.1052930280566216
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "mesh_1",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 8275,
+          "declared_triangles": 8609,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "TEXCOORD_1"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.108607321977615,
+              -0.016004741191864,
+              -0.070897750556469
+            ],
+            "max": [
+              0.108607314527035,
+              0.016004741191864,
+              0.070897750556469
+            ],
+            "size": [
+              0.21721463650465,
+              0.032009482383728,
+              0.141795501112938
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "BerettaM9",
+    "Magazine",
+    "Gun"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "BerettaM92",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ]
+}

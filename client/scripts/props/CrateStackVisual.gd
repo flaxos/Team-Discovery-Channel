@@ -81,21 +81,7 @@ static func prepared_material(source: StandardMaterial3D, tint: Color) -> Standa
 	material.ao_enabled = true
 	material.ao_texture = material.roughness_texture
 	material.ao_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
-	# Runtime glTF images arrive without mipmaps, which shimmer on a stack at range.
-	var mipmapped := {}
-	for property: StringName in [&"albedo_texture", &"normal_texture", &"roughness_texture",
-			&"metallic_texture", &"ao_texture"]:
-		var texture := material.get(property) as Texture2D
-		if texture == null:
-			continue
-		if not mipmapped.has(texture):
-			var image := texture.get_image()
-			if image != null and not image.has_mipmaps():
-				image.generate_mipmaps()
-				mipmapped[texture] = ImageTexture.create_from_image(image)
-			else:
-				mipmapped[texture] = texture
-		material.set(property, mipmapped[texture])
+	RuntimeGLB.add_mipmaps(material)
 	return material
 
 
