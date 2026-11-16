@@ -56,6 +56,7 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 | `test_jaffa_perception` | Sentry perception on the integrated fixture with fresh sentries: nothing seen through walls or floors (where the assault rule would acquire), nothing outside the cone, suspicious before alerted no sooner than the notice time, forgetting, smoke, closed and open doors, damage alert, one-hop spread, search of the last seen position and resumption of the route at the same waypoint. |
 | `test_stealth_takedowns_and_weapons` | Stealth takedowns from behind on unalerted sentries, rejection of frontal or alerted takedowns, quiet Zat stun/kill/vaporize without alerting target or nearby sentries or raising `MissionAlert`, dragging Zat-stunned and taken-down Jaffa bodies, and AP-1a `.glb` weapon ingestion (`p90_smg.glb`, `mp5_silenced.glb`) with D-015 `metallic = 0.0` material sanitization and provenance checks. |
 | `test_imported_crate_visual` | AP-1c: the Poly Haven crate loads from `res://` bytes at its measured size and triangle count; runtime material changes leave the source material untouched; both SGC armoury ammo crates are dressed inside their unchanged collision boxes, with no collision in the visual and one shared mesh; a ray still stops at the original box face; weapon racks are untouched; a missing model, a box too small for whole crates and the opt-out flag all leave the box as it was. `test_multiplayer_mission_join` also checks the dressed crate on a late joiner and after retry. See the [review record](reviews/2026-11-16-ap1c-plastic-crate.md). |
+| `test_imported_m9_visual` | AP-1d: the M9 keeps its id, stats and `MuzzlePoint`; its bore lies within 3 mm of the `MuzzlePoint`; real size, nothing in front of the muzzle, 10,185 triangles, no collision, metallic 0 and mipmapped textures; a second copy shares the parsed model; credits and CC BY 4.0 text present. See the [review record](reviews/2026-11-16-ap1d-beretta-m9.md). |
 | `test_buffer_lockout_hud` | Denied dialing and upload/cancel/snapshot updates leave no orphan panel; approved dialing can open and dismiss its panel. |
 
 The full inventory also covers gate lifecycle/difficulty, combat authority, native multiplayer joins/state/retry, inventory, controls/remapping, camera and objectives. Use `--list` for exact names rather than maintaining a second hand-written inventory.
@@ -80,6 +81,12 @@ AP-1c crate captures and render cost, on a display (writes `build/asset-review/p
 
 ```sh
 godot --path client --script res://tests/support/crate_visual_review.gd
+```
+
+Weapon captures held by a real operative, on a display (AP-1d; writes `build/asset-review/<weapon>/`; run once per mission and weapon, e.g. `sgc_uat` and `goauld_infiltration`):
+
+```sh
+godot --path client --script res://tests/support/weapon_visual_review.gd -- --mission sgc_uat --weapon m9
 ```
 
 Frame cost of a mission, on a display (prints one `WORLD_COST` line; compare `sgc_uat` with `two_worlds_dev`):
