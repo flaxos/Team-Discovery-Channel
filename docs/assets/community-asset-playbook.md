@@ -2,7 +2,7 @@
 
 For any agent (Codex, Gemini/Antigravity, Claude) putting a community 3D asset into the game. Written 16 November 2026 from the first two integrations: the CC0 Poly Haven crate ([AP-1c](../reviews/2026-11-16-ap1c-plastic-crate.md)) and the CC BY 4.0 Beretta M9 ([AP-1d](../reviews/2026-11-16-ap1d-beretta-m9.md)). The [import pipeline guide](../plans/asset-import-pipeline.md) holds the contracts; the [shortlists](README.md) hold the researched candidates. This page is the fast route through both.
 
-**The rule that keeps it fast:** one asset, one cosmetic wrapper, one draft PR. Never change gameplay collision, sockets, stats, authority or navigation to fit art; fit the art to them.
+**The rule that keeps it fast:** keep each asset in a cosmetic wrapper with its own evidence. Use the existing checkout, following [AGENTS.md](../../AGENTS.md). Group delivery when the owner requests it. Never change gameplay collision, sockets, stats, authority or navigation to fit art; fit the art to them.
 
 ## 1. Pick the route by what the asset replaces
 
@@ -22,7 +22,7 @@ For any agent (Codex, Gemini/Antigravity, Claude) putting a community 3D asset i
 | CC BY 3.0/4.0 with the creator's own statement that they made it | Listings that say "rip", "extracted", "from game X", or contradict their own badge |
 | Owner-downloaded archives whose listing proves the licence | Raw Mixamo or other service content in the public repo |
 
-Record the exact listing and licence version. Sketchfab: `https://api.sketchfab.com/v3/models/<uid>` gives `license.slug`, `isDownloadable` and counts. Licences from modellers never cover manufacturers' trademarks (the M9 carries Beretta's markings); note any and leave the call to the owner.
+Record the exact listing and licence version. If the owner explicitly accepts a documented evidence gap, record the asset, date and decision; this does not establish missing authorship or underlying rights. On 17 November 2026 the owner authorized committing and merging the Stargate SG1 integration with its existing uploader-authorship gap recorded. Sketchfab: `https://api.sketchfab.com/v3/models/<uid>` gives `license.slug`, `isDownloadable` and counts. Licences from modellers never cover manufacturers' trademarks (the M9 carries Beretta's markings); note any and leave the call to the owner.
 
 **Downloads behind an account** (all Sketchfab downloads, HTTP 401 without a session): an agent cannot fetch them. Ask the owner to download the original archive and drop it at the repository root or in `~/Downloads`. Do not move, rename or delete the owner's copy, and never commit it.
 
@@ -50,7 +50,7 @@ Treat the archive as untrusted data: extract into a new empty folder, refuse abs
 Recipe: copy [`intake/beretta_m9/recipe.json`](intake/beretta_m9/recipe.json) to `docs/assets/intake/<id>/recipe.json`. Set `source`, `output` (relative to the recipe), `keep_nodes`, `max_texture_size` (1024 for weapons and props), and per-material maps (`"*"` for all). Then:
 
 ```sh
-godot --headless --path client --import          # once per worktree; refreshes class names
+godot --headless --path client --import          # refreshes class names in the existing checkout
 godot --headless --path client --script res://scripts/assets/pack_model_glb.gd -- docs/assets/intake/<id>/recipe.json
 ```
 
@@ -92,14 +92,15 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
 ## 7. Prove it
 
 1. **Suite.** One new `client/tests/test_imported_<id>_visual.gd` covering: unchanged gameplay values and anchors, measured fit (socket within 3 mm, bounds inside the envelope), no collision in the visual, the fallback, credits present. Then a **negative check**: break the transform or the hook, confirm the suite fails, restore it.
-2. **Captures** (display needed, Forward+): `weapon_visual_review.gd -- --mission sgc_uat --weapon <id>` and `--mission goauld_infiltration`, or `crate_visual_review.gd` for props. Capture the original too: run the same helper in a worktree without your change. Commit 4–5 PNGs to `docs/reviews/<milestone>-captures/`.
+2. **Captures** (display needed, Forward+): `weapon_visual_review.gd -- --mission sgc_uat --weapon <id>` and `--mission goauld_infiltration`, or `crate_visual_review.gd` for props. Capture the original too: use the helper’s fallback/original-view mode in the same checkout; do not create another worktree. Commit 4–5 PNGs to `docs/reviews/<milestone>-captures/`.
 3. **Cost.** Print the first-load and repeat-load time, and the triangles added in a typical view (`CRATE_COST` shows how). Do not try runtime `ImporterMesh.generate_lods`; it did not finish on a 5,840-triangle mesh in 4.4.1.
-4. **Exported build.** No preset is committed, so do not add one to the repository. Copy `client/` to `/tmp/<work>/project` without `.godot`, add the throwaway preset below and a small `export_smoke.gd` that builds your wrapper and prints the result, then:
+4. **Exported build.** Work in the existing checkout; do not make another project copy. Save any existing `client/export_presets.cfg`, temporarily install the preset below and a small `client/tests/support/export_smoke.gd` that builds your wrapper and checks the result. Write outputs under ignored `build/asset-review/export-smoke/`. Restore the exact previous preset (or remove only the temporary one) and remove the temporary smoke script in a `finally` block. Never commit either temporary file. Then:
 
    ```sh
-   godot --headless --path . --import && godot --headless --path . --export-pack LinuxSmoke ../out/x.pck
-   cp ~/.local/share/godot/export_templates/4.4.1.stable/linux_release.x86_64 ../out/x.x86_64
-   ../out/x.x86_64 --headless --main-pack ../out/x.pck -s res://export_smoke.gd
+   godot --headless --path client --import
+   godot --headless --path client --export-pack LinuxSmoke ../build/asset-review/export-smoke/x.pck
+   cp ~/.local/share/godot/export_templates/4.4.1.stable/linux_release.x86_64 build/asset-review/export-smoke/x.x86_64
+   build/asset-review/export-smoke/x.x86_64 --headless --main-pack build/asset-review/export-smoke/x.pck -s res://tests/support/export_smoke.gd
    ```
 
    `export_presets.cfg` used for AP-1c and AP-1d:
@@ -112,7 +113,7 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
    export_filter="all_resources"
    include_filter=""
    exclude_filter=""
-   export_path="../out/x.x86_64"
+   export_path="../build/asset-review/export-smoke/x.x86_64"
 
    [preset.0.options]
    binary_format/embed_pck=false
@@ -128,7 +129,7 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
 - `docs/assets/intake/<id>.json` from the [template](intake-record.template.json), plus `docs/assets/intake/<id>/` holding the recipe, intake report and validator report.
 - `docs/reviews/<date>-<milestone>-<id>.md`: what changed, measurements, captures, cost, export output, tests, and what is not established.
 - Update [README](README.md) queue status, the [pipeline guide](../plans/asset-import-pipeline.md) if code changed, `ROADMAP.md`, `docs/TESTING.md` for the new suite, the capability matrix, and `docs/DECISIONS.md` for any non-obvious choice.
-- Draft PR, never merged by the agent. Report local and hosted results separately (`gh pr checks <n>`).
+- Open a draft PR when review is requested. When the owner explicitly asks to commit and merge, finish the merge after checks without another confirmation, then update the existing checkout to `main`. Report local and hosted results separately (`gh pr checks <n>`).
 
 ## 9. Pitfalls already paid for
 
@@ -150,9 +151,9 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
 | Work vanishes after a conflict was resolved on GitHub | The #63 merge on top of CO-1 dropped the crate hook from `ArmoryResupplyStation.gd`. After any merge that needed conflict resolution, run the asset's suite on the new `main` |
 | CC BY credit missing from a shipped build | `credits/` is outside `client/` and there is no credits screen yet; flag it before any build is distributed |
 
-## 10. Working in parallel
+## 10. Workspace and concurrent work
 
-One asset per agent, each in its own worktree from `origin/main`. Avoid stacking asset PRs; if one must build on another unmerged branch, say so in the PR and see the stacked-PR pitfall above. Share `/tmp/tdc-godot-network-tests.lock` for full runs and anything that hosts a game. Stage under `/tmp/tdc-asset-intake/<id>/`. Leave the owner's checkout and downloads untouched.
+Use the user's existing checkout. Do not create additional worktrees, clones, sibling project directories or project copies without an explicit request. Keep per-asset code and evidence separate inside the repository; stage raw intake under the established `/tmp/tdc-asset-intake/<id>/` area. Reuse ignored `build/` for generated review artifacts. Share `/tmp/tdc-godot-network-tests.lock` for full runs and anything that hosts a game. Preserve the owner's downloads and unrelated existing edits. [AGENTS.md](../../AGENTS.md) governs delivery and overrides older worktree/draft-only handoff text.
 
 ## 11. Next in the queue
 
@@ -161,4 +162,4 @@ One asset per agent, each in its own worktree from `origin/main`. Avoid stacking
 | [P90 — Rotuma](https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b) | Weapon, replaces the Kenney `p90_smg.glb` | **Integrated in AP-1e** | 38,083 triangles, 1024² maps, bore aligned to `(0, 0.02, -0.30)`, opaque magazine ([record](../reviews/2026-11-16-ap1e-p90.md)) |
 | [M249 — AK](https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244) | Weapon `m249` (procedural today) | **Integrated in AP-1f** | 13,328 triangles; nested COLLADA route; fused extended bipod retained; measured bore aligned ([record](../reviews/2026-11-16-ap1f-m249.md)) |
 | [Metal Plate — Poly Haven](https://polyhaven.com/a/metal_plate) | Material on SGC map slots | none (CC0, public) | Texture route of `SGCMap` slots; measure repeat scale |
-| [Stargate SG1 — rossrobotics](https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165) | Rigid shell over `StargateRing` | **Local AP-1g preview; authorship decision pending** | Imported glyph ring/seven anchored inserts; source body cannot fit aperture and envelope together. [Record](../reviews/2026-11-16-ap1g-stargate.md). Articulation remains separate |
+| [Stargate SG1 — rossrobotics](https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165) | Rigid shell over `StargateRing` | **Integrated AP-1g; owner authorized 17 November 2026** | Imported glyph ring/seven anchored inserts; source body cannot fit aperture and envelope together. [Record](../reviews/2026-11-16-ap1g-stargate.md). Articulation remains separate |

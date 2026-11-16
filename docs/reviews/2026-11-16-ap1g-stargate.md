@@ -1,6 +1,6 @@
 # AP-1g: community Stargate glyph ring and seven anchored chevrons
 
-16 November 2026, baseline `8366ccc`, branch `feat/ap1g-stargate`. **Local preview; public redistribution pending an authorship-evidence decision.** The listing says CC BY 4.0 but has no description, and the archive has no licence/readme. Neither establishes that rossrobotics modelled the asset. The repository playbook explicitly requires that additional evidence; the owner has been asked whether to accept the listing with the gap recorded. No public draft PR or human art acceptance is claimed.
+16 November 2026, baseline `8366ccc`, branch `feat/ap1g-stargate`. **Owner authorized inclusion on 17 November 2026.** After the authorship gap was disclosed, the owner requested committing everything and merging to main. The CC BY 4.0 listing has no description, and the archive has no licence/readme; independent uploader authorship remains unestablished. The owner accepted inclusion with that gap documented. This records authorization, not new authorship evidence or human art acceptance.
 
 ## Result and fit
 
@@ -29,13 +29,13 @@ The 1,206,304-byte GLB holds five template meshes, 6,297 triangles. Runtime repe
 - Missing-file check in an isolated copy: remove the GLB; original torus and seven boxes stay visible, with all areas and anchors unchanged. Restore the file afterward.
 - Linux 4.4.1 release PCK with a throwaway preset outside the repository: `STARGATE_EXPORT imported=true anchors=7 lights=14 snapshot=5 horizon=true`; checks use explicit failure exits in the release template.
 - Cost: first attachment 79.776 ms; repeat 1.616 ms; 12,057 triangles per visible gate. Session cache shares parsed meshes and materials.
-- Full Godot profile: 92 suites plus project import pass (521.6 s); Python tools: 47 tests pass. Local logs are under `build/test-results/gate-full/`. No hosted gate run: this preview has not been published.
+- Full Godot profile: 92 suites plus project import pass (521.6 s); Python tools: 47 tests pass. Local logs are under `build/test-results/gate-full/`. These are the original local results; hosted delivery checks are recorded in the integration PR.
 - Repeated packing produces the same SHA-256 `46f1b660ea0d77fc117907a48701b7be504e46f3570584aea7704841628baf64`.
 - Combined Linux release smoke with the SAW also passes: `COMBINED_EXPORT saw=true stargate=true`.
 
 ## Limits
 
-Authorship evidence and owner art review remain unresolved. This is a community fan model; a listing licence does not grant franchise rights. The imported ring has a narrower rim than the torus placeholder, while preserving the opening and envelope. Detailed outer housing, original nine-chevron placement, motion and iris art are deliberately outside this measured proof. The repository still has no in-game credits screen; distribution needs the attribution bundled separately.
+Independent authorship evidence and owner art review remain unestablished; the owner has authorized inclusion with the evidence gap recorded. This is a community fan model; a listing licence does not grant franchise rights. The imported ring has a narrower rim than the torus placeholder, while preserving the opening and envelope. Detailed outer housing, original nine-chevron placement, motion and iris art are deliberately outside this measured proof. The repository still has no in-game credits screen; distribution needs the attribution bundled separately.
 
 ## Mission captures
 
@@ -53,4 +53,8 @@ The ordinary SGC close view is partially blocked by existing architecture, for b
 
 ## Combined local preview
 
-The owner checkout is on `preview/community-asset-imports`, combining the SAW and this gate preview without publishing the gate branch. Eight targeted suites plus project import pass together: SAW, Stargate, M9, P90, crate, gate lifecycle/modes, outbound multiplayer travel and return multiplayer travel. Both visuals also load together from a clean Linux release PCK. The earlier full profiles remain separate branch runs; no combined full-profile claim is made.
+The original combined check used `preview/community-asset-imports`. On 17 November 2026 the owner requested merging this work to main in the existing checkout. Eight targeted suites plus project import pass together: SAW, Stargate, M9, P90, crate, gate lifecycle/modes, outbound multiplayer travel and return multiplayer travel. Both visuals also load together from a clean Linux release PCK. The earlier full profiles remain separate branch runs; no combined full-profile claim is made.
+
+## Delivery authorization, 17 November 2026
+
+The owner instructed: “commit everything and merge to main” and asked for instructions to stop additional project directories. The integration includes the prepared Stargate, attribution/intake records and workflow updates; the authorship gap above remains factual. The SAW already landed through PR #68. The extra clean Stargate checkout created for this task is removed after its committed work is consolidated. Other older checkouts and unrelated unfinished mission/theme work are preserved. Raw owner-download archives remain local and ignored, while prepared GLBs and provenance are tracked.

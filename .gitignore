@@ -31,3 +31,9 @@ __pycache__/
 # Visual modular editor generated preview
 /client/scenes/level/EditorPreview.tscn
 /client/resources/levels/editor_preview_navigation.res
+
+# Owner-downloaded community asset source archives (prepared GLBs and provenance are tracked)
+/beretta-m9.zip
+/m249-light-machine-gun*.zip
+/p90.zip
+/stargate.zip
