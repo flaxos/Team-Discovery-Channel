@@ -75,10 +75,19 @@ func _setup_audio() -> void:
 
 
 const GLB_MODELS := {
-	"p90": "res://assets/weapons/p90_smg.glb",
+	"p90": "res://assets/weapons/p90.glb",
 	"mp5": "res://assets/weapons/mp5_silenced.glb",
 	"m9": "res://assets/weapons/beretta_m9.glb",
 }
+## AP-1e: measured bore centre and scale of p90.glb in its own space (muzzle faces -Z).
+## The wrapper applies the measured scale and puts this point on the unchanged MuzzlePoint.
+const P90_MODEL_MUZZLE := Vector3(-0.002205, -0.448702, -8.765554)
+const P90_MODEL_SCALE := 0.02847984
+const P90_MODEL_BASIS := Basis(
+	Vector3(P90_MODEL_SCALE, 0, 0),
+	Vector3(0, P90_MODEL_SCALE, 0),
+	Vector3(0, 0, P90_MODEL_SCALE)
+)
 ## AP-1d: measured bore centre of beretta_m9.glb in its own space (muzzle faces model -X).
 ## The wrapper turns it to face -Z and puts this point on the unchanged MuzzlePoint.
 const M9_MODEL_MUZZLE := Vector3(-0.1255, 0.1303, 0.0)
@@ -158,9 +167,13 @@ func _build_weapon_visual_mesh() -> void:
 
 	match weapon_id:
 		"p90":
+			muzzle_offset = Vector3(0, 0.02, -0.30)
 			var glb_p90 := load_glb_model(GLB_MODELS["p90"])
 			if glb_p90 != null:
-				glb_p90.position = Vector3(0, -0.10, 0)
+				# AP-1e: CC BY 4.0 model by Rotuma (credits/ATTRIBUTIONS.md), real size.
+				glb_p90.transform = Transform3D(
+					P90_MODEL_BASIS, muzzle_offset - P90_MODEL_BASIS * P90_MODEL_MUZZLE
+				)
 				model_root.add_child(glb_p90)
 			else:
 				# Compact bullpup frame fallback
@@ -184,8 +197,6 @@ func _build_weapon_visual_mesh() -> void:
 				mag.material_override = mmat
 				mag.position = Vector3(0, 0.08, 0.02)
 				model_root.add_child(mag)
-
-			muzzle_offset = Vector3(0, 0.02, -0.30)
 
 		"m249":
 			# Heavy machine gun receiver + box drum

@@ -157,7 +157,7 @@ One asset per agent, each in its own worktree from `origin/main`. Avoid stacking
 
 | Asset | Route | Needs from the owner | Notes |
 |---|---|---|---|
-| [P90 — Rotuma](https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b) | Weapon, replaces the Kenney `p90_smg.glb` | Sketchfab download | 38,083 triangles in the listing, so check `keep_nodes` and consider 1024² maps; measure the bore; magazine is translucent in reality, keep it opaque |
-| [M249 — AK](https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244) | Weapon `m249` (procedural today) | Sketchfab download | Long barrel: check camera clipping; fold or drop the bipod via `keep_nodes` if it is separate |
+| [P90 — Rotuma](https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b) | Weapon, replaces the Kenney `p90_smg.glb` | **Integrated in AP-1e** | 38,083 triangles, 1024² maps, bore aligned to `(0, 0.02, -0.30)`, opaque magazine ([record](../reviews/2026-11-16-ap1e-p90.md)) |
+| [M249 — AK](https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244) | Weapon `m249` (procedural today) | Downloaded (`~/Downloads/m249-light-machine-gun.zip`) | Long barrel: check camera clipping; fold or drop the bipod via `keep_nodes` if it is separate |
 | [Metal Plate — Poly Haven](https://polyhaven.com/a/metal_plate) | Material on SGC map slots | none (CC0, public) | Texture route of `SGCMap` slots; measure repeat scale |
-| [Stargate SG1 — rossrobotics](https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165) | Rigid shell over `StargateRing` | Sketchfab download | Keep the seven chevrons, horizon, kawoosh and iris nodes; articulation is a later proof |
+| [Stargate SG1 — rossrobotics](https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165) | Rigid shell over `StargateRing` | Downloaded (`~/Downloads/stargate.zip`) | Keep the seven chevrons, horizon, kawoosh and iris nodes; articulation is a later proof |

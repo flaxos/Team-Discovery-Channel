@@ -1,0 +1,18 @@
+{
+  "source": "/tmp/tdc-asset-intake/p90/extracted/source/P90.fbx",
+  "output": "../../../../client/assets/weapons/p90.glb",
+  "root_name": "P90",
+  "keep_nodes": ["P90"],
+  "max_texture_size": 1024,
+  "image_format": "JPEG",
+  "lossy_quality": 0.9,
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/p90/extracted/textures/Low2_low2_BaseColor.png",
+      "normal": "/tmp/tdc-asset-intake/p90/extracted/textures/Low2_low2_Normal.png",
+      "normal_convention": "opengl",
+      "roughness": "/tmp/tdc-asset-intake/p90/extracted/textures/Low2_low2_Roughness.png",
+      "metallic": "/tmp/tdc-asset-intake/p90/extracted/textures/Low2_low2_Metallic.png"
+    }
+  }
+}

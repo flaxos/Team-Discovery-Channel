@@ -36,6 +36,16 @@ Every external 3D model, texture, material, or animation imported into **Team Di
 - **Modifications:** Converted from FBX to GLB with `client/scripts/assets/pack_model_glb.gd` and the recipe in `docs/assets/intake/beretta_m9/`. Kept the gun and its seated magazine, dropped the spare magazine laid beside it and the empty animation take. Bound the five maps (the FBX names none), downscaled them from 4096² to 1024², packed occlusion, roughness and metallic into one ORM image, and stored all three images as JPEG (quality 0.9). Geometry, UVs and units are the creator's. At runtime the game sets metallic to 0 (D-015) and generates mipmaps.
 - **Trademarks:** The model reproduces Beretta's grip medallion and slide markings. The CC BY grant covers the modeller's copyright, not the manufacturer's trademarks.
 
+| Asset File | Title & Description | Creator | Source URL | License | Dimensions & Attachment | Difficulty |
+|---|---|---|---|---|---|---|
+| `client/assets/weapons/p90.glb` | "P90" — realistic textured FN P90 bullpup personal defense weapon | **Rotuma** (https://sketchfab.com/Rotuma) | https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b | [CC BY 4.0](licenses/CC-BY-4.0.txt) (https://creativecommons.org/licenses/by/4.0/) | `0.068m × 0.212m × 0.500m`, real size; faces `-Z` under `WeaponModel/ImportedGLB` with bore aligned to unchanged `MuzzlePoint` `(0, 0.02, -0.30)`; D-015 `metallic = 0.0` at runtime | `S` |
+
+### Provenance & Technical Verification (AP-1e)
+- **Attribution (CC BY 4.0):** "P90" by Rotuma, https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b, licensed under CC BY 4.0. Modified as described below.
+- **Source and rights:** The creator's description details Maya modeling, Substance Painter texturing, and Krita graphics; the Sketchfab API confirmed `license.slug = "by"` (CC BY 4.0), `isDownloadable: true`, and 38,083 triangles on 16 November 2026. The archive (`p90.zip`, sha256 `4f80c77614e744e57c6fde9d5dcc06fa23aeed673979ada7855d43002aea96a9`) was downloaded by the owner through their Sketchfab account and contains `source/P90.fbx` and five 4096² maps plus opacity map. Intake record: [`docs/assets/intake/p90.json`](../docs/assets/intake/p90.json).
+- **Modifications:** Converted from FBX to GLB with `client/scripts/assets/pack_model_glb.gd` and the recipe in `docs/assets/intake/p90/`. Kept the single `P90` mesh (38,083 triangles), bound albedo, normal (OpenGL), roughness, and metallic maps downscaled to 1024², packed roughness and metallic into glTF ORM, and exported as JPEG (quality 0.9). Kept the magazine opaque at runtime as instructed. Scaled by 0.02847984 in the game wrapper to match real-world dimensions (500.5 mm length). At runtime the game sets metallic to 0 (D-015) and generates mipmaps.
+- **Trademarks:** The model reproduces FN Herstal P90 form factor and weapon markings. The CC BY grant covers the modeller's copyright, not the manufacturer's trademarks.
+
 ---
 
 ## 2. Community Stargate Props & Faction Assets
