@@ -1,0 +1,14 @@
+{
+  "archive.zip": "b017692a13a1670318d52d9164c52a12d91e143920e334f610c87d1bed942b39",
+  "extracted/source/model.zip": "1831ad3dc53767f24b6998958e1f7a3eddb3dad4291acf12ee279431aacf64b1",
+  "extracted/textures/M249_001_albedo.jpeg": "eb4fe1c7458d7372a412efb36fcec6bc81ecdae43ac1c25ec554b50490b3a89c",
+  "extracted/textures/M249_001_metallic.jpeg": "30ded5009d5c1d71422b51b28db23dd8a846c94b24bc79846232f19a75818fc0",
+  "extracted/textures/M249_001_normal.png": "1dd2da3a34eedba8aa91fe8910d08033cbda7714fa59bed0368be6959d6c3891",
+  "extracted/textures/M249_001_roughness.jpeg": "f4d2aed78b14592034ca16db6d6d3590d958b40309a420a6cad07a2fdff8e92f",
+  "model/model/model.dae": "a3faaa1078b99c0e74ea5c3b9369e918d73c105559dc2f203036a64b8ec99435",
+  "model/model/textures/M249.001_AO.jpg": "71709009aef90754041bbeef439139b0ca837ba75f165fbaa38ce34013da6031",
+  "model/model/textures/M249.001_albedo.jpg": "67ebeca14c4073b14a3b92572a2cc36a9fcf5140e86659fe484edc07e34a5c2c",
+  "model/model/textures/M249.001_metallic.jpg": "5c636a1b0ff5fe8eb0c5e7640978399934385551182f46a177976fb992ab2aaf",
+  "model/model/textures/M249.001_roughness.jpg": "d84d67a4dd84f4a2fa3c1c0913e62c84caa53af33d76e5049ce05ebd11fb9b1c",
+  "model/model/textures/M249.001_normal.png": "b087dcf7b467577bf1be83a5cf1253deb262a4ac7208d7a6916db79dbf0b112c"
+}

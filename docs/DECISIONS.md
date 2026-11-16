@@ -195,3 +195,7 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 **Sharing.** Each weapon GLB is parsed once per session and kept as a `PackedScene` on the tree root. Every operative's copy shares meshes and materials, so drawing a sidearm no longer decodes textures on every peer.
 
 **Consequences.** Credits must reach players before a build is distributed, because CC BY assets now ship. Realistic models may carry manufacturers' markings; licences from modellers do not cover trademarks.
+
+## D-019 — SAW COLLADA staging and source vertex colours (AP-1f)
+
+16 November 2026. The downloaded M249 contains a nested COLLADA scene. Import it in an isolated Godot staging project outside `client/`, then use the existing recipe-driven packer. Keep its geometry and UVs, including the fused extended bipod, and align the measured barrel crown to the existing gameplay muzzle. Do not invent folding or reload articulation. The source has vivid per-part vertex colours; only this weapon disables vertex-colour albedo multiplication in the runtime material, preserving source data in the GLB. The review camera frames measured bounds so long weapons remain fully visible. [Evidence](reviews/2026-11-16-ap1f-m249.md).

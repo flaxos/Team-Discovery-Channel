@@ -78,7 +78,11 @@ const GLB_MODELS := {
 	"p90": "res://assets/weapons/p90.glb",
 	"mp5": "res://assets/weapons/mp5_silenced.glb",
 	"m9": "res://assets/weapons/beretta_m9.glb",
+	"m249": "res://assets/weapons/m249.glb",
 }
+## AP-1f: COLLADA conversion faces -X; measured crown centre, scaled to metres.
+const M249_MODEL_MUZZLE := Vector3(-481.81909, 113.9233, 0.00441)
+const M249_MODEL_BASIS := Basis(Vector3(0, 0, 0.001), Vector3(0, 0.001, 0), Vector3(-0.001, 0, 0))
 ## AP-1e: measured bore centre and scale of p90.glb in its own space (muzzle faces -Z).
 ## The wrapper applies the measured scale and puts this point on the unchanged MuzzlePoint.
 const P90_MODEL_MUZZLE := Vector3(-0.002205, -0.448702, -8.765554)
@@ -125,7 +129,7 @@ static func _parse_glb_model(res_path: String) -> PackedScene:
 	var imported := doc.generate_scene(state) as Node3D
 	if imported == null:
 		return null
-	_sanitize_glb_materials(imported)
+	_sanitize_glb_materials(imported, res_path == GLB_MODELS["m249"])
 	for node: Node in imported.find_children("*", "", true, false):
 		node.owner = imported
 	var template := PackedScene.new()
@@ -134,12 +138,14 @@ static func _parse_glb_model(res_path: String) -> PackedScene:
 	return template if packed == OK else null
 
 
-static func _sanitize_glb_materials(root_node: Node) -> void:
+static func _sanitize_glb_materials(root_node: Node, ignore_vertex_colors: bool = false) -> void:
 	if root_node is MeshInstance3D:
 		var mi := root_node as MeshInstance3D
 		if mi.material_override is BaseMaterial3D:
 			var mat := (mi.material_override as BaseMaterial3D).duplicate() as BaseMaterial3D
 			mat.metallic = 0.0
+			if ignore_vertex_colors:
+				mat.vertex_color_use_as_albedo = false
 			mi.material_override = mat
 		if mi.mesh != null:
 			for s in range(mi.mesh.get_surface_count()):
@@ -149,10 +155,13 @@ static func _sanitize_glb_materials(root_node: Node) -> void:
 				if smat != null:
 					var clean := smat.duplicate() as BaseMaterial3D
 					clean.metallic = 0.0
+					if ignore_vertex_colors:
+						# The SAW's COLLADA contains part-ID colours, not an albedo tint.
+						clean.vertex_color_use_as_albedo = false
 					RuntimeGLB.add_mipmaps(clean)
 					mi.set_surface_override_material(s, clean)
 	for child in root_node.get_children():
-		_sanitize_glb_materials(child)
+		_sanitize_glb_materials(child, ignore_vertex_colors)
 
 
 func _build_weapon_visual_mesh() -> void:
@@ -199,41 +208,48 @@ func _build_weapon_visual_mesh() -> void:
 				model_root.add_child(mag)
 
 		"m249":
-			# Heavy machine gun receiver + box drum
-			var receiver := MeshInstance3D.new()
-			var rm := BoxMesh.new()
-			rm.size = Vector3(0.10, 0.16, 0.62)
-			receiver.mesh = rm
-			var rmat := StandardMaterial3D.new()
-			rmat.albedo_color = Color(0.24, 0.26, 0.28)
-			rmat.metallic = 0.8
-			receiver.material_override = rmat
-			model_root.add_child(receiver)
-
-			var drum := MeshInstance3D.new()
-			var dm := BoxMesh.new()
-			dm.size = Vector3(0.12, 0.14, 0.16)
-			drum.mesh = dm
-			var dmat := StandardMaterial3D.new()
-			dmat.albedo_color = Color(0.22, 0.30, 0.18)
-			drum.material_override = dmat
-			drum.position = Vector3(0, -0.12, 0.04)
-			model_root.add_child(drum)
-
-			var barrel := MeshInstance3D.new()
-			var bm := CylinderMesh.new()
-			bm.top_radius = 0.02
-			bm.bottom_radius = 0.02
-			bm.height = 0.35
-			barrel.mesh = bm
-			var bmat := StandardMaterial3D.new()
-			bmat.albedo_color = Color(0.15, 0.15, 0.15)
-			bmat.metallic = 0.9
-			barrel.material_override = bmat
-			barrel.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0.03, -0.42))
-			model_root.add_child(barrel)
-
 			muzzle_offset = Vector3(0, 0.03, -0.62)
+			var glb_m249 := load_glb_model(GLB_MODELS["m249"])
+			if glb_m249 != null:
+				# AP-1f: CC BY 4.0 model by AK / skaf13; keep all gameplay anchors.
+				glb_m249.transform = Transform3D(
+					M249_MODEL_BASIS, muzzle_offset - M249_MODEL_BASIS * M249_MODEL_MUZZLE
+				)
+				model_root.add_child(glb_m249)
+			else:
+				# Heavy machine gun receiver + box drum
+				var receiver := MeshInstance3D.new()
+				var rm := BoxMesh.new()
+				rm.size = Vector3(0.10, 0.16, 0.62)
+				receiver.mesh = rm
+				var rmat := StandardMaterial3D.new()
+				rmat.albedo_color = Color(0.24, 0.26, 0.28)
+				rmat.metallic = 0.8
+				receiver.material_override = rmat
+				model_root.add_child(receiver)
+
+				var drum := MeshInstance3D.new()
+				var dm := BoxMesh.new()
+				dm.size = Vector3(0.12, 0.14, 0.16)
+				drum.mesh = dm
+				var dmat := StandardMaterial3D.new()
+				dmat.albedo_color = Color(0.22, 0.30, 0.18)
+				drum.material_override = dmat
+				drum.position = Vector3(0, -0.12, 0.04)
+				model_root.add_child(drum)
+
+				var barrel := MeshInstance3D.new()
+				var bm := CylinderMesh.new()
+				bm.top_radius = 0.02
+				bm.bottom_radius = 0.02
+				bm.height = 0.35
+				barrel.mesh = bm
+				var bmat := StandardMaterial3D.new()
+				bmat.albedo_color = Color(0.15, 0.15, 0.15)
+				bmat.metallic = 0.9
+				barrel.material_override = bmat
+				barrel.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0.03, -0.42))
+				model_root.add_child(barrel)
 
 		"mp5":
 			var glb_mp5 := load_glb_model(GLB_MODELS["mp5"])

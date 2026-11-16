@@ -69,8 +69,17 @@ func run() -> void:
 	var close := Camera3D.new()
 	close.fov = 40.0
 	gun.add_child(close)
-	close.position = Vector3(0.36, 0.08, -0.30)
-	close.look_at(gun.to_global(Vector3(0.0, -0.03, -0.07)))
+	# Frame the full visual, including long weapons and the SAW's extended bipod.
+	var bounds := AABB()
+	var first := true
+	for node: Node in gun.get_node("WeaponModel").find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		var placed := gun.global_transform.affine_inverse() * mi.global_transform
+		bounds = placed * mi.get_aabb() if first else bounds.merge(placed * mi.get_aabb())
+		first = false
+	var centre := bounds.get_center()
+	close.position = centre + Vector3(0.9, 0.4, -0.65).normalized() * maxf(0.4, bounds.size.length() * 1.8)
+	close.look_at(gun.to_global(centre))
 	close.current = true
 	await capture(prefix + "-close.png")
 	for node: Node in gun.find_children("*", "MeshInstance3D", true, false):

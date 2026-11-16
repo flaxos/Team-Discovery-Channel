@@ -1,0 +1,61 @@
+{
+  "status": "integrated_pending_owner_art_review",
+  "title": "M249 light machine gun",
+  "creator": "AK / skaf13",
+  "canonical_source_url": "https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244",
+  "category": "generic",
+  "checked_on": "2026-11-16",
+  "download": {
+    "availability": "Owner-downloaded Sketchfab archive already available",
+    "archive_sha256": "b017692a13a1670318d52d9164c52a12d91e143920e334f610c87d1bed942b39",
+    "model_sha256": "d5e6a807aba10cb621293b18246ef60e8bbc0fec7c048487323764dc8311a0c7",
+    "staging_path": "/tmp/tdc-asset-intake/m249",
+    "route": "Copied ~/Downloads/m249-light-machine-gun.zip to staging; original and duplicate download preserved",
+    "archive_contents": "See m249/source-hashes.json: outer ZIP plus nested COLLADA model.zip and all maps; no licence/readme, no traversal or symlinks"
+  },
+  "licence": {
+    "id": "CC-BY-4.0",
+    "version": "4.0",
+    "evidence_url": "https://api.sketchfab.com/v3/models/75cacc16a52640c7adb100d7294da244",
+    "bundled_text_path": "credits/licenses/CC-BY-4.0.txt",
+    "redistribution_status": "cleared with attribution and statement of changes",
+    "required_attribution": "M249 light machine gun by AK (skaf13), canonical source, CC BY 4.0; modified",
+    "creator_or_archive_conflicts": "No conflicting archive terms; manufacturer trademarks not covered by model licence",
+    "evidence_summary": "Captured listing-evidence.json: CC BY 4.0; creator states made in Blender, textured in Substance Painter following Darrin Lile course"
+  },
+  "integration": {
+    "target_scene_or_script": "WeaponBase.gd, m249: WeaponModel/ImportedGLB",
+    "source_forward_axis": "-X in converted model",
+    "source_units": "COLLADA declares metres but its imported node transforms yield 962.854 units length; wrapper uses 0.001 per unit for 0.963 m length; no claim of certified manufacturer dimensions",
+    "wrapper_transform": "Basis columns (0,0,.001), (0,.001,0), (-.001,0,0); translate measured crown (-481.81909,113.9233,.00441) to unchanged muzzle (0,.03,-.62)",
+    "world_bounds_metres": [
+      0.467035,
+      0.500543,
+      0.962854
+    ],
+    "required_sockets": [
+      "MuzzlePoint (0,0.03,-0.62), unchanged"
+    ],
+    "material_modifications": [
+      "Bind albedo, normal (OpenGL), roughness, metallic, AO; downscale maps 2048 to 1024; pack ORM; JPEG quality .9",
+      "Ignore source part-ID vertex colours at runtime; D-015 metallic 0 and generated mipmaps"
+    ],
+    "effort": "S",
+    "modifications": "Single 13,328-triangle M249_low mesh; imported COLLADA in an isolated Godot project, recipe-packed to GLB; source UVs/geometry retained, including extended fused bipod. No magazine or bipod articulation."
+  },
+  "evidence": {
+    "intake_report": "docs/assets/intake/m249/intake-report.json",
+    "gltf_validation_report": "docs/assets/intake/m249/gltf-validator.json: 0 errors, 0 warnings",
+    "godot_import_log": "Godot 4.4.1; test_imported_m249_visual; pack.log",
+    "mission_capture": "docs/reviews/ap1f-captures/",
+    "export_smoke_log": "Linux release 4.4.1 PCK: imported true, triangles 13328, muzzle (0,.03,-.62); review record has exact output",
+    "behaviour_tests": [
+      "test_imported_m249_visual",
+      "negative 25 mm crown transform detected in isolated copy",
+      "missing-file fallback in isolated copy",
+      "full Godot profile",
+      "Python tools suite"
+    ],
+    "reviewer": ""
+  }
+}

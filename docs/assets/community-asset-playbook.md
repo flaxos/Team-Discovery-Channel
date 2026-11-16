@@ -44,6 +44,7 @@ Treat the archive as untrusted data: extract into a new empty folder, refuse abs
 |---|---|
 | `.gltf` + `.bin` + images whose materials are already bound (Poly Haven) | `python3 tools/gltf_to_glb.py <in>.gltf <out>.glb`: container only, bytes unchanged |
 | `.fbx`, or any model whose maps are loose files, or 2K–8K maps | `client/scripts/assets/pack_model_glb.gd` with a recipe |
+| `.dae` (COLLADA), including nested archives | Import in a minimal Godot staging project outside `client/`, then run the same packer from that project with an absolute recipe path; see [M249](../reviews/2026-11-16-ap1f-m249.md) |
 | A clean self-contained `.glb` already | use it; still run the checks below |
 
 Recipe: copy [`intake/beretta_m9/recipe.json`](intake/beretta_m9/recipe.json) to `docs/assets/intake/<id>/recipe.json`. Set `source`, `output` (relative to the recipe), `keep_nodes`, `max_texture_size` (1024 for weapons and props), and per-material maps (`"*"` for all). Then:
@@ -158,6 +159,6 @@ One asset per agent, each in its own worktree from `origin/main`. Avoid stacking
 | Asset | Route | Needs from the owner | Notes |
 |---|---|---|---|
 | [P90 — Rotuma](https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b) | Weapon, replaces the Kenney `p90_smg.glb` | **Integrated in AP-1e** | 38,083 triangles, 1024² maps, bore aligned to `(0, 0.02, -0.30)`, opaque magazine ([record](../reviews/2026-11-16-ap1e-p90.md)) |
-| [M249 — AK](https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244) | Weapon `m249` (procedural today) | Downloaded (`~/Downloads/m249-light-machine-gun.zip`) | Long barrel: check camera clipping; fold or drop the bipod via `keep_nodes` if it is separate |
+| [M249 — AK](https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244) | Weapon `m249` (procedural today) | **Integrated in AP-1f** | 13,328 triangles; nested COLLADA route; fused extended bipod retained; measured bore aligned ([record](../reviews/2026-11-16-ap1f-m249.md)) |
 | [Metal Plate — Poly Haven](https://polyhaven.com/a/metal_plate) | Material on SGC map slots | none (CC0, public) | Texture route of `SGCMap` slots; measure repeat scale |
 | [Stargate SG1 — rossrobotics](https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165) | Rigid shell over `StargateRing` | Downloaded (`~/Downloads/stargate.zip`) | Keep the seven chevrons, horizon, kawoosh and iris nodes; articulation is a later proof |

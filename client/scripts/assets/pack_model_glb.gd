@@ -16,7 +16,7 @@ extends SceneTree
 ## It prints one PACK_RESULT JSON line describing the output for the intake record.
 ##
 ## Recipe keys (paths are relative to the recipe's folder unless absolute):
-##   source            model file (.fbx, .gltf, .glb)
+##   source            model file (.fbx, .gltf, .glb, or .dae imported in a staging project)
 ##   output            output .glb (relative paths resolve against the recipe folder)
 ##   root_name         name of the output scene root
 ##   keep_nodes        source mesh node names to keep (all mesh nodes when omitted)
@@ -140,6 +140,14 @@ func run() -> void:
 			fail("cannot parse " + source)
 			return
 		scene = fbx.generate_scene(state)
+	elif source.get_extension().to_lower() == "dae":
+		# COLLADA uses the editor's scene importer. Import it in an isolated staging
+		# project outside client/ first, then run this packer from that project.
+		var packed := ResourceLoader.load(source) as PackedScene
+		if packed == null:
+			fail("cannot load COLLADA scene; run --import in its staging project: " + source)
+			return
+		scene = packed.instantiate()
 	else:
 		var gltf := GLTFDocument.new()
 		state = GLTFState.new()

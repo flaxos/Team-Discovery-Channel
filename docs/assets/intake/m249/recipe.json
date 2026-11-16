@@ -1,0 +1,21 @@
+{
+  "source": "/tmp/tdc-asset-intake/m249/convert/model.dae",
+  "output": "../../../../client/assets/weapons/m249.glb",
+  "root_name": "M249",
+  "keep_nodes": [
+    "M249_low"
+  ],
+  "max_texture_size": 1024,
+  "image_format": "JPEG",
+  "lossy_quality": 0.9,
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/m249/extracted/textures/M249_001_albedo.jpeg",
+      "normal": "/tmp/tdc-asset-intake/m249/extracted/textures/M249_001_normal.png",
+      "normal_convention": "opengl",
+      "roughness": "/tmp/tdc-asset-intake/m249/extracted/textures/M249_001_roughness.jpeg",
+      "metallic": "/tmp/tdc-asset-intake/m249/extracted/textures/M249_001_metallic.jpeg",
+      "ao": "/tmp/tdc-asset-intake/m249/model/model/textures/M249.001_AO.jpg"
+    }
+  }
+}

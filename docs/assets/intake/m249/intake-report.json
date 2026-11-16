@@ -1,0 +1,86 @@
+{
+  "ok": true,
+  "file": "client/assets/weapons/m249.glb",
+  "bytes": 1835876,
+  "sha256": "d5e6a807aba10cb621293b18246ef60e8bbc0fec7c048487323764dc8311a0c7",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Godot Engine v4.4.1.stable.official@49a5bc7b616bd04689a2c89e89bda41f50241464",
+  "declared_triangles_unique_meshes": 13328,
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 14365,
+          "declared_triangles": 13328,
+          "attributes": [
+            "COLOR_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -4.81819105148315,
+              -2.33517694473267,
+              -2.57884192466736
+            ],
+            "max": [
+              4.81034708023071,
+              2.33517694473267,
+              2.42658925056458
+            ],
+            "size": [
+              9.62853813171386,
+              4.67035388946534,
+              5.005431175231941
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "M249",
+    "M249_low"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "M249_001",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ]
+}
