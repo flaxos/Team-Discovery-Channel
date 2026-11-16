@@ -50,6 +50,15 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Visual modular editor](maps/modular-editor.md) | Native top-down GUI, Undo/Redo, save/build/preview and manual UAT. |
 | [Authoring briefs](maps/briefs/) | Brief text and route requirements for the demonstration maps. |
 
+## Art and community assets
+
+| Document | Purpose |
+| --- | --- |
+| [Community asset handoff](assets/README.md) | Ranked first insertion queue, verified sourcing, outstanding acquisition/rig/licence gaps and a ready-to-run intake workflow. |
+| [Static asset shortlist](assets/community-static-shortlist.md) | Specific tactical weapons, Stargate props, industrial dressing and PBR material candidates with primary evidence. |
+| [Characters and animation shortlist](assets/community-characters-animation-shortlist.md) | Specific rig/motion candidates, raw redistribution constraints, current controller contracts and first Airman visual proof. |
+| [Asset import pipeline](plans/asset-import-pipeline.md) | What is actually implemented, GLB inspection tool, source/credit records, wrapper/socket rules and insertion acceptance. |
+
 ## Plans and records
 
 | Document | Purpose |

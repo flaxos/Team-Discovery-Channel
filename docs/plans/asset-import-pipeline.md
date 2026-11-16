@@ -1,162 +1,77 @@
-# Community Asset Ingestion & 3D Art Pipeline
+# Community asset intake and integration
 
-**Document Status:** Approved Architecture Plan  
-**Target Engine:** Godot 4.4+  
-**Context:** Stargate: Operation Jiaolong — Visual Evolution from Greybox/CSG to Production 3D Assets
+Status checked **16 November 2026**, against `origin/main` at `f45e909` (TA-3). This is an implementation guide and the boundary between research, staging and game integration. A catalogue entry is not an imported or accepted asset.
 
----
+The research and ranked candidates are in the [asset handoff](../assets/README.md), [static shortlist](../assets/community-static-shortlist.md) and [characters/animation shortlist](../assets/community-characters-animation-shortlist.md). Keep exact creator pages and observed licence evidence with each candidate; generic marketplace search links do not establish permission or quality.
 
-## 1. Executive Summary & Rationale
+## What is implemented
 
-Currently, all characters, weapons, props (Stargate ring, DHD, blast doors), and compound rooms rely on CSG primitives and geometric box placeholders (`CSGBox3D`, `CylinderMesh`, basic `StandardMaterial3D` blocks). While effective for rapid greybox level validation, tactical perception tuning (ST-1/ST-2), and multiplayer netcode hardening (GT-1/GT-2), full immersion requires moving to production 3D assets without rebuilding meshes, rigs, and animations from scratch by hand.
+| Part | Current code and limitation |
+|---|---|
+| External weapons (AP-1a) | `WeaponBase.GLB_MODELS` contains only `p90` and `mp5`. These are generic, stylized Kenney models, not high-fidelity or exact reproductions of those firearms. Their names are game weapon IDs; [attribution](../../credits/ATTRIBUTIONS.md) identifies the actual source models. |
+| Runtime GLB loading | `WeaponBase.load_glb_model` uses `GLTFDocument` and `GLTFState`. The two files use `importer="keep"` to avoid the editor thumbnail failure observed in headless CI. This bypasses the editor import pipeline, so do not assume editor-generated LODs, import scripts or retargeting settings apply. |
+| Material treatment | The current weapon loader duplicates imported materials and sets `metallic = 0.0`. D-015 arose because metallic Jaffa became dark without a sky or reflection probes. It does not mean all PBR assets are production-lit or that source textures should be permanently flattened. Keep originals and test wrapper overrides in mission lighting. |
+| Player and NPCs | `Player.tscn`, `SGCAirman.tscn`, `JaffaGuard.tscn` and `JaffaShockGuard.tscn` still use procedural meshes. No shared humanoid skeleton, animation library or character retargeting adapter exists. |
+| Gate and DHD | `scenes/props/Stargate.tscn` has seven controlled chevrons (`StargateRing.max_chevrons = 7`); its event horizon, extraction and kawoosh are gameplay nodes. `DHDConsole.tscn` has box meshes and an interaction area. No contract for nine articulated chevrons, inner-ring spinning or a generic `iris_open_ratio` exists. |
+| Modular art | Theme replacements are cosmetic and must preserve D-010: collision, sockets, footprints and navigation. Use the [authoring CLI](../maps/ai-level-authoring.md) for layout inspection/changes; imported meshes do not redefine native `LevelLayout` resources. |
 
-The gaming community has vast libraries of high-quality Creative Commons (CC0, CC-BY 3.0/4.0), public domain, and royalty-free assets specifically suited for Stargate and modern tactical sci-fi games:
-- **Canonical Props:** Stargates with chevrons, DHD pedestal dials, iris plates, MALP probes.
-- **USAF Operatives & Allies:** Tactical Air Force airmen, SG-1 combat fatigues, vests, helmets, goggles.
-- **Goa'uld Factions:** Serpent Guard / Horus Guard Jaffa armor, ornate headdresses, Ma'Tok staff weapons, Zat'nik'tels.
-- **Ballistic Weapons:** FN P90 personal defense weapons, MP5 submachine guns, M249 SAWs, Beretta M9 sidearms.
-- **Tactical Humanoid Animations:** Mixamo mocap suites (tactical walks, jogs, sprints, crouch-walks, ADS tracking, reloads, downs, revives).
+The former SW-1 branch has additional committed AP-1b weapons and GA-2 work outside `main`, plus uncommitted mission/theme work. Inspect it before starting a replacement milestone; preserve its working files.
 
----
+## Intake before inserting a model
 
-## 2. Ingestion Sources & Asset Catalog
+1. **Research:** record title, creator, exact source page, licence version and evidence, download conditions and intended scene. Inspect creator restrictions as well as the platform badge. Mark missing evidence explicitly.
+2. **Stage:** obtain an authorized archive outside `client/`, for example `/tmp/tdc-asset-intake/<candidate>/`. Preserve its README and licence. Record archive and model SHA-256 hashes; verify that the archive agrees with the public page. Do not install downloaded scripts or add-ons to inspect a mesh.
+3. **Inspect:** run the offline tool below, then a full glTF validator and Godot import. Measure transformed bounds and orientation in the engine. Counts, materials and rig names alone do not establish fidelity or fitness.
+4. **Prepare one cosmetic wrapper:** retain the existing actor/prop root, authority, collision, interaction areas, combat origins and navigation. Normalize the visual child’s scale and facing, then place explicit visual sockets. Preserve source material data and record modifications.
+5. **Verify:** capture the asset in actual SGC and offworld lighting, test the relevant interactions and multiplayer snapshot/late join, and smoke-test an exported build. Only after that add production binaries, complete credits/licence files and the review evidence in the same milestone PR.
 
-### 2.1 Stargate, DHD & Dialing Hardware
-| Asset Target | Source & Format | License | Ingestion Strategy |
-|---|---|---|---|
-| **Stargate Ring & Chevrons** | Sketchfab (e.g. *Stargate SG-1 Canonical Ring* by community modelers) in `.glb` / `.gltf` | CC-BY | Direct drop-in replacing `StargateRing` CSG hierarchy. Separate mesh nodes for inner spinning ring and 9 chevrons for emissive material overrides. |
-| **DHD Pedestal Console** | Sketchfab / OpenGameArt `.glb` | CC-BY / CC0 | Replaces `DHDDialer` cylinder mesh. Retains collision shapes and interactive action prompt coordinates. |
-| **Iris Mechanical Blades** | Mechanical iris model or 20-blade fan rig | CC-BY / CC0 | Rigged mesh with blend shapes or pivot animations hooked to `iris_open_ratio`. |
+Use the [intake record template](../assets/intake-record.template.json). It is an editable handoff form, not an automatically enforced licence schema. Its initial `research_only` status deliberately leaves measurements and acceptance evidence blank.
 
-### 2.2 Character Rigs & Retargeting (Operatives & Enemies)
-| Character Target | Base Mesh & Textures | Skeleton / Rig | Ingestion Strategy |
-|---|---|---|---|
-| **USAF SG-1 Operatives** (O'Neill, Carter, Marine) | Mixamo SWAT / Military Operator / Hazmat meshes; Kenney CC0 Characters; Sketchfab Tactical Soldiers | Mixamo Humanoid Skeleton | Standardized Godot 4 `BoneMap` retargeting. Uniform bone names (`Hips`, `Spine`, `Head`, `LeftArm`, `RightArm`, `LeftLeg`, `RightLeg`). |
-| **SG-3 Heavy Support** | Heavy ballistic armor with backpack and tactical vest | Mixamo Humanoid | Scaled variant with deployable shield and weapon sling sockets. |
-| **Jaffa Guards & Shock Troops** | Serpent Guard / Horus Guard armor models (Sketchfab CC-BY Stargate collections) | Mixamo / Rigify Humanoid | Retargeted to same humanoid animation library with customized crest and eye emissive shaders. |
+### Offline inspection
 
-### 2.3 Firearms & Weapon Models
-| Weapon | Description & Poly Target | Source | Notes |
-|---|---|---|---|
-| **FN P90** | Bullpup PDW, translucent 50-round top magazine, integrated optical sight (5k–10k tris) | Sketchfab / OpenGameArt CC-BY | Separate magazine node for reload animations; muzzle bone for muzzle flash and tracer spawns. |
-| **MP5 Navy** | 9mm SMG with flashlight and suppressor | Sketchfab / Kenney CC0 | Standard CQB primary. |
-| **M249 SAW** | 5.56mm light machine gun with box mag and bipod | Sketchfab CC-BY | Primary for SG-3 Heavy. |
-| **Zat'nik'tel** | Goa'uld energy pistol with closed / open coiled states | Sketchfab CC-BY Stargate community | 2-stage animated mesh or blend shape for open/close state. |
-| **Ma'Tok Staff Weapon** | Jaffa energy staff with opening firing petals | Sketchfab CC-BY Stargate community | Animated firing tip mesh, rear buttstrike collision. |
-
-### 2.4 Animations (Tactical Locomotion & Combat)
-Mixamo provides hundreds of high-grade optical motion capture sequences under royalty-free game license:
-- **Locomotion:** Rifle Idle, Walk Forward/Strafe/Backward, Run/Jog Forward/Strafe, Crouch Idle, Crouch Walk.
-- **Tactical:** Aim Down Sights (ADS) turn/pitch blend trees, Sprint Dodge Roll, Take Cover (Low / High wall).
-- **Interactions:** Reload P90 / MP5 / LMG, Dial DHD button press, Plant C4 / Claymore, Body Dragging.
-- **Reactions:** Bullet Impact Flinch, Knockdown, Downed Crawl, Bleedout Idle, Revive Treatment, Death.
-
----
-
-## 3. Godot 4.4 Ingestion Technical Pipeline
-
-### 3.1 File Formats: Native glTF 2.0 & uFBX
-1. **glTF 2.0 (`.glb`) is Primary:**
-   - Standard binary `.glb` carries geometry, PBR textures, skeletons, skinning, and animations in one self-contained, lightweight file.
-   - Godot 4.4 features native high-performance glTF import with automatic LOD generation and shadow mesh stripping.
-2. **FBX Support via Native uFBX:**
-   - Godot 4.3+ ships with native **uFBX** integration, allowing direct import of Mixamo FBX files without needing external FBX2glTF conversion binaries.
-
-### 3.2 Humanoid Skeleton Retargeting via `BoneMap`
-Godot 4 introduces standard humanoid retargeting:
-```
-Mixamo / Community FBX 
-        │
-        ▼ (Godot Import Dock)
-Select: "Animation Library" or "Rigged Model"
-        │
-        ▼
-Skeleton3D Profile -> Set to "SkeletonProfileHumanoid"
-        │
-        ▼ (Automatic bone mapping)
-Mixamo 'mixamorig:Hips'      -> Humanoid 'Root / Hips'
-Mixamo 'mixamorig:Spine'     -> Humanoid 'Spine'
-Mixamo 'mixamorig:Head'      -> Humanoid 'Head'
-Mixamo 'mixamorig:RightHand' -> Humanoid 'RightHand'
-        │
-        ▼
-Export as shared .res AnimationLibrary usable across ANY character!
-```
-**Outcome:** One tactical locomotion animation library (`tactical_rifle_anims.res`) drives SG-1 operatives, USAF Airmen AI, and Jaffa Guard AI without needing separate animation files per model!
-
-### 3.3 Socket System for Props and Weapons
-Each character rig defines BoneAttachment3D sockets:
-- `RightHandSocket` (for active weapon trigger hand).
-- `LeftHandSocket` (for two-handed rifle foregrip IK target).
-- `BackHolsterSocket` (for secondary weapon stowed on back).
-- `ChestVestSocket` (for GDO, radio, patch ROM).
-
-### 3.4 PBR Material Standards & Lighting Fidelity (Decision D-015 Compliance)
-- As proven in Decision D-015 during GA-1 visual validation, high-metallic PBR surfaces wash out under intense ambient environment lights unless roughness and albedo are carefully balanced.
-- Standard PBR pipeline:
-  - `albedo_texture`: 1K or 2K sRGB albedo.
-  - `orm_texture` or individual maps: Red = Occlusion, Green = Roughness, Blue = Metallic.
-  - `normal_texture`: OpenGL format (+Y) tangent-space normal maps.
-  - `emission_texture`: For chevrons, Zat energy conduits, visor glow, and Jaffa armor eyes.
-
----
-
-## 4. Phased Implementation Roadmap
-
-```mermaid
-flowchart TD
-    subgraph Phase1["AP-1: Weapons & Dialing Props"]
-        W1[Curate CC-BY P90, MP5, M249, Zat, Staff]
-        W2[Ingest Stargate Ring & DHD glTF]
-        W3[Attach muzzle sockets and flash particles]
-    end
-
-    subgraph Phase2["AP-2: Humanoid Rigs & Retargeting"]
-        R1[Ingest USAF Airman & Tactical Operative glB]
-        R2[Build Godot 4 BoneMap Humanoid Profile]
-        R3[Ingest Mixamo Tactical Locomotion Library]
-        R4[Drive PlayerController3D & SGCAirmanAI]
-    end
-
-    subgraph Phase3["AP-3: Jaffa Faction & Theme Kit Polish"]
-        J1[Ingest Jaffa Guard Armor & Helmet Rigs]
-        J2[Retarget JaffaAI locomotion & staff combat]
-        J3[Apply PBR trim sheets to GA-1/GA-2 modular rooms]
-    end
-
-    Phase1 --> Phase2
-    Phase2 --> Phase3
+```sh
+python3 tools/asset_intake.py /tmp/tdc-asset-intake/candidate/model.glb --output build/asset-intake/candidate.json
+python3 tools/asset_intake.py client/assets/weapons/p90_smg.glb
+python3 -m unittest discover -s tools/tests -v
 ```
 
-### Milestone AP-1: Weapons & Dialing Props
-- Replace greybox weapon boxes with textured glTF weapon meshes.
-- Place bone/marker sockets for muzzle flare, shell ejection, and optical sights.
-- Replace CSG Stargate ring and DHD with detailed community model while keeping existing collision cylinders and event horizon shaders intact.
+The standard-library tool does not import or rewrite the source. It reports SHA-256, size, declared unique-mesh triangle counts, attributes, mesh-local declared bounds, node/joint/animation names, material factors, declared image embedding and required extensions. It rejects malformed GLB framing, bad basic references/counts/bounds, and external URI dependencies; data URIs are self-contained. Its JSON chunk limit is 32 MiB. A report path cannot alias the source, including via a hard link.
 
-### Milestone AP-2: Humanoid Rigs & Tactical Animations
-- Establish standard `SkeletonProfileHumanoid` in Godot.
-- Ingest Mixamo tactical animations into a shared `AnimationLibrary`.
-- Replace `PlayerController3D` and `SGCAirmanAI` capsule meshes with rigged humanoid characters using `AnimationTree` (State Machine + 2D blend spaces for strafing/running/aiming).
+`ok: true` means this limited inventory completed. It is **not** full glTF validation, licence clearance, a triangle/frame budget, scene-space dimensions, texture resolution verification, skeleton compatibility or engine/export acceptance. Instanced meshes, transforms, skin deformation and animation may change actual bounds and rendering cost. It never follows an external URI or certifies a metadata claim against decoded vertex/image bytes. Use the [Khronos glTF Validator](https://github.com/KhronosGroup/glTF-Validator) for full format validation. The GLB framing/declaration basis is the [glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html).
 
-### Milestone AP-3: Jaffa Faction & Modular Theme Textures
-- Ingest Jaffa Guard models and staff combat animations.
-- Supply high-resolution PBR trim sheets and decal textures for the Goa'uld theme kit (GA-1 / GA-2).
+## Engine and gameplay attachment contracts
 
----
+Godot 4.4 recommends glTF 2.0 and supports FBX through ufbx. Its editor import path can generate LODs and configure scenes; its runtime GLTFDocument path generates a scene without those editor steps. Choose and test a path per asset. Self-contained GLB is the preferred repository deliverable, not a claim that any FBX/Blend download is already converted. See [Godot formats](https://docs.godotengine.org/en/4.4/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html) and [import configuration](https://docs.godotengine.org/en/4.4/tutorials/assets_pipeline/importing_3d_scenes/import_configuration.html).
 
-## 5. Licensing, Attribution & Compliance
+| Target | Preserve and prove |
+|---|---|
+| Weapon | `WeaponModel/ImportedGLB` is visual. Keep the weapon ID, stats and authoritative fire logic. Measure the receiver and barrel against `MuzzlePoint`; the current game’s weapon convention fires toward local `-Z`. Check muzzle flash/tracer, ADS, camera clipping, crouch and carried state through gate travel. |
+| Gate | Keep `StargateRing`, the seven existing controlled chevrons, event horizon shader, extraction trigger, authorization and kawoosh area. Map imported subparts explicitly; a generic multi-mesh model will not animate itself. Check inbound/outbound, iris interaction, return travel and late-join gate state. |
+| DHD/console | Replace visible meshes while retaining `DHDDialer`, interaction radius, prompt/console connections and server validation. Confirm the prompt and the visual operating surface coincide. |
+| Character | Preserve the `CharacterBody3D`, collision, `HealthComponent`, `WeaponHolder`, camera, nameplate and synchronizer. Add a visual rig adapter under `Visuals`; map animation state from existing replicated movement/combat flags. Do not drive authoritative movement from unvalidated root motion. |
+| Theme/prop | Place only cosmetic meshes/materials in existing slots or visual wrappers. Match measured slab/attachment dimensions. Run theme collision/navigation parity and enclosure checks; avoid imported collision/navigation generators or import-name suffixes that silently create gameplay nodes. |
 
-Every third-party community model or animation imported into the repository must pass a mandatory 7-point provenance and technical check before commit:
+Godot’s oriented-asset convention uses **+Z as model front**, while this game’s weapon and procedural actor visuals use **-Z**. Measure and rotate the wrapper rather than mirroring physics or changing AI facing. Apply/record scale and rest pose; do not treat mesh-local accessor bounds as world dimensions. [Godot model conventions](https://docs.godotengine.org/en/4.4/tutorials/assets_pipeline/importing_3d_scenes/model_export_considerations.html).
 
-1. **Exact Asset URL & Creator:** Recorded in `credits/ATTRIBUTIONS.md` with asset title, creator handle/name, and canonical source URL.
-2. **Verified Licence & Attribution Obligations:** License type (`CC0 1.0`, `CC-BY 3.0`, `CC-BY 4.0`, `MIT`) verified, attribution text recorded in `credits/ATTRIBUTIONS.md`, and full license text bundled in `credits/licenses/`.
-3. **Uploader Rights Confirmation:** Verification that the uploader is the original modeler/creator (not an unverified game-rip repost). Community CC0 / CC-BY models on Sketchfab, OpenGameArt, Kenney, Quaternius, and Poly Haven — including community-modeled CC-BY Stargate props (Stargate rings, DHDs, Zat'nik'tel, Ma'Tok staff, Jaffa helmets) — are permitted by product owner decision (15 Nov 2026) provided creator attribution and CC-BY terms are honoured. Distinguish generic tactical assets from community Stargate fan models in `credits/ATTRIBUTIONS.md`.
-4. **Godot 4.4.1 Compatibility:** Clean headless and Forward+ `.glb` / `.gltf` 2.0 import in Godot 4.4.1 with zero engine errors, OpenGL (`+Y`) normal maps, and Decision D-015 material compliance (`metallic = 0.0` in scenes without reflection probes/sky so albedo remains readable).
-5. **Import Format & Skeleton Requirements:** Static props as self-contained binary `.glb`; rigged characters mapped to `SkeletonProfileHumanoid` (`BoneMap`) with `BoneAttachment3D` sockets (`RightHandSocket`, `LeftHandSocket`, `BackHolsterSocket`).
-6. **Dimensions & Scene Attachment Points:** Exact metric bounding box matching gameplay collision/weapon conventions and explicit `Marker3D` sockets (e.g. `MuzzlePoint` for weapon tracers and muzzle flash).
-7. **Estimated Integration Difficulty:** Tagged `S` (static mesh swap), `M` (multi-part/articulated prop), or `L` (rigged humanoid + `AnimationTree`).
-8. **No Commercial Exclusives:** No proprietary non-distributable assets that would compromise repository openness or hosted CI builds.
+For characters, `SkeletonProfileHumanoid`, a tested `BoneMap` and explicit hand/back sockets are future work. One animation library does not automatically suit every mesh: verify rest pose, bone mapping, proportions, weapon grip, feet, root motion and down/revive/body-drag transitions on each rig. Choose a small locomotion proof before a full player swap.
 
-### Milestone AP-1a Proof of Concept — **Implemented 15 November 2026**
-- **Delivered:** Ingested two CC0 1.0 weapon `.glb` models from Kenney's Weapon Pack (`client/assets/weapons/p90_smg.glb` and `client/assets/weapons/mp5_silenced.glb`), recorded full provenance in `credits/ATTRIBUTIONS.md` and `credits/licenses/CC0-1.0.txt`, wired `WeaponBase.load_glb_model()` with D-015 `metallic = 0.0` material sanitization and verified `MuzzlePoint` sockets, and added automated verification in `test_stealth_takedowns_and_weapons.gd`.
-- **Headless CI note:** `.glb.import` files use `importer="keep"` and `GLTFDocument` runtime loading so `godot --headless --editor --import` does not trigger Dummy renderer `texture_2d_get` thumbnail errors in CI.
+The current runtime GLB workaround has a separate export question: prove raw files are included in the export and `FileAccess`/runtime loading finds them from a clean exported build. A headless editor-import pass alone does not prove packaging. No export preset is committed at this baseline.
+
+## Provenance and redistribution
+
+Record exact creator/source, licence text/version, required attribution, modifications, archive licence evidence and local file hashes. Bundle the applicable full licence text under `credits/licenses/` and list committed assets in `credits/ATTRIBUTIONS.md`. Research-only candidates belong in the shortlists, not in the manifest of shipped assets.
+
+The owner’s existing authorization permits creator-modelled CC0/CC-BY community Stargate fan models with attribution. It does not turn an NC/ND or contradictory licence into CC-BY, establish an uploader’s rights, or grant underlying franchise rights. Keep generic assets and community fan models identified separately. Do not present a platform badge as sufficient when creator terms conflict.
+
+Mixamo and other download services may permit game use while restricting raw asset redistribution; a public source repository must satisfy both. Use the [rig shortlist](../assets/community-characters-animation-shortlist.md) for current primary-source findings. Paid purchases, account-only downloads, unclear archive licences and unverified texture/rig details remain explicit handoff items, not completed imports.
+
+## Next insertion milestones
+
+| Milestone | Concrete boundary and completion evidence |
+|---|---|
+| AP-1b recovery | Review the four committed follow-up weapon models and their provenance before duplicating that work. They are stylized stand-ins, not the high-fidelity shortlist. |
+| AP-1c static high-fidelity proof | One cleared, measured weapon or console in a cosmetic wrapper, exact sockets and credited archive; headless import, Forward+ mission captures, behavior/late-join checks and clean exported-build loading. No character-system changes. |
+| AP-2a rig proof | One redistributable rig plus a legally redistributable idle/walk set in a preview scene; tested rest pose, `BoneMap`, facing/units and hand socket. Then wire one NPC visual adapter; keep player and Jaffa controllers authoritative. |
+| AP-3 faction/scene polish | After the static and rig proofs: articulated Stargate parts, Jaffa armor and theme PBR surfaces, each retaining the existing gameplay contract. |
+
+Publish one milestone per draft PR, report local and hosted results separately, and leave merging and human art acceptance to the owner.

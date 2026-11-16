@@ -97,10 +97,11 @@ Record commit, mission, difficulty, peer roles, route/action, expected/actual re
 
 ## Other repository checks
 
-`tools/tests` holds the runner's failure contract, a static check that no script searches the whole game for its surroundings (`test_world_scoping.py`: use `MissionWorld`), and the Goa'uld kit's geometry and palette rules (`test_theme_kit.py`: the committed kit matches its generator, each piece fills its slab, nothing can be seen through, gold stays above door height). They need no engine.
+`tools/tests` holds the runner's failure contract, a static check that no script searches the whole game for its surroundings (`test_world_scoping.py`: use `MissionWorld`), and the Goa'uld kit's geometry and palette rules (`test_theme_kit.py`: the committed kit matches its generator, each piece fills its slab, nothing can be seen through, gold stays above door height). They need no engine. `test_asset_intake.py` also checks source preservation, GLB declarations, external dependency reporting, malformed input and the existing embedded weapon files; a passing inspection is not engine or licence acceptance.
 
 ```sh
 python3 -m unittest discover -s tools/tests -v
+python3 tools/asset_intake.py client/assets/weapons/p90_smg.glb --output build/asset-intake/p90.json
 npm ci --prefix alignment-app
 node --test alignment-app/server/*.test.js
 npm run build

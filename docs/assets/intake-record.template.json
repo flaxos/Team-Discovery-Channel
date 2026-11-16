@@ -1,0 +1,22 @@
+{
+  "status": "research_only",
+  "title": "",
+  "creator": "",
+  "canonical_source_url": "",
+  "category": "generic_or_community_fan_model",
+  "checked_on": "",
+  "download": {"availability": "unverified", "archive_sha256": "", "model_sha256": "", "staging_path": ""},
+  "licence": {
+    "id": "", "version": "", "evidence_url": "", "bundled_text_path": "",
+    "redistribution_status": "unresolved", "required_attribution": "", "creator_or_archive_conflicts": ""
+  },
+  "integration": {
+    "target_scene_or_script": "", "source_forward_axis": "unverified", "source_units": "unverified",
+    "wrapper_transform": "unmeasured", "world_bounds_metres": null, "required_sockets": [],
+    "material_modifications": [], "effort": "unestimated", "modifications": ""
+  },
+  "evidence": {
+    "intake_report": "", "gltf_validation_report": "", "godot_import_log": "",
+    "mission_capture": "", "export_smoke_log": "", "behaviour_tests": [], "reviewer": ""
+  }
+}
