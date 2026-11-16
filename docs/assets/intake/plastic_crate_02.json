@@ -1,0 +1,62 @@
+{
+  "status": "integrated_pending_owner_art_review",
+  "title": "Plastic Crate 02",
+  "creator": "Fabi_G (Poly Haven)",
+  "canonical_source_url": "https://polyhaven.com/a/plastic_crate_02",
+  "category": "generic",
+  "checked_on": "2026-11-16",
+  "download": {
+    "availability": "public, no account or payment; Poly Haven API listing https://api.polyhaven.com/files/plastic_crate_02 -> gltf/1k",
+    "route": "dl.polyhaven.org direct file links named by the listing; every file matched the listing's md5 and size",
+    "archive_sha256": "n/a: the 1k glTF is published as separate files, not an archive; per-file hashes below",
+    "source_files": {
+      "plastic_crate_02_1k.gltf": {"md5": "ab133a1d655e004fa2f22f039e24efbe", "sha256": "531f7ba7d4b501759b04fb704db1948bcaab34d8342e71e3f5877d9f0340dba7", "size": 2947},
+      "plastic_crate_02.bin": {"md5": "a91c131589eae7242c162782cff0290a", "sha256": "f51696aa04643b5c1948da88be8ce1d4e92596ae4908b0132cd690f8fb8e0b63", "size": 186848},
+      "textures/plastic_crate_02_diff_1k.jpg": {"md5": "55ddafcf50ffebdb2806e6b863e9b254", "sha256": "f153478d5f44f39ab27a967850caac27b35ee8f04185d0d4eaf7ad501742fb15", "size": 492862},
+      "textures/plastic_crate_02_nor_gl_1k.jpg": {"md5": "3fd1bb590ead064e6b7cf6eb3cd46fa6", "sha256": "492b4cb03b043fb30a21b5de1cdf91dfbcd9bb7d080957af69a333d622050f30", "size": 558561},
+      "textures/plastic_crate_02_arm_1k.jpg": {"md5": "032b8738359d2423f7bf8dd0aa6f3e5b", "sha256": "f0c667358c7afd46be37b40c30435b63ae3dba8432b45c507f3298fc6f163418", "size": 597561}
+    },
+    "inspected_not_used": {
+      "plastic_crate_02_opacity_1k.png": {"md5": "1b087615419b81cc55241fa7cdbe36f7", "note": "vent cut-outs; the published 1k glTF does not reference it and paints the vents dark in the base colour instead"}
+    },
+    "model_sha256": "0cbc8be3cca9589411a08c937d204b6fb7dbc13828b7f2338553bf906c2033b0",
+    "staging_path": "/tmp/tdc-asset-intake/plastic_crate_02/ (outside client/; not committed)"
+  },
+  "licence": {
+    "id": "CC0-1.0",
+    "version": "1.0",
+    "evidence_url": "https://polyhaven.com/license",
+    "evidence_summary": "Poly Haven license page (fetched 2026-11-16): all assets are the original work of Poly Haven staff or artists who directly donate/sell their work to Poly Haven, and are licensed CC0; no attribution required. Asset info API lists authors {\"Fabi_G\": \"All\"}, donated: true.",
+    "bundled_text_path": "credits/licenses/CC0-1.0.txt",
+    "redistribution_status": "cleared (CC0)",
+    "required_attribution": "none; credited anyway in credits/ATTRIBUTIONS.md",
+    "creator_or_archive_conflicts": "none found: asset page, info API and license page agree"
+  },
+  "integration": {
+    "target_scene_or_script": "scenes/main/GateRoom.tscn Level28Complex/ArmorySector/AmmoCrate1 and AmmoCrate2 (ArmoryResupplyStation, AMMO_CRATE) via scripts/props/CrateStackVisual.gd",
+    "source_forward_axis": "symmetric crate; no facing requirement. Stack alternates 180 degree turns",
+    "source_units": "metres; measured in Godot 4.4.1 at 0.5055 x 0.2541 x 0.4055 m, origin at bottom centre, single mesh at identity",
+    "wrapper_transform": "3 x 3 x 4 stack, uniform scale 0.98391, centred in x/z, bottoms on the box floor; the 3 hidden core crates are skipped (33 drawn)",
+    "world_bounds_metres": [1.4921, 1.0, 1.1969],
+    "gameplay_envelope_metres": [1.6, 1.0, 1.2],
+    "required_sockets": [],
+    "material_modifications": [
+      "runtime only, GLB unchanged: alphaMode BLEND drawn opaque (JPEG base colour carries no alpha)",
+      "runtime only: base colour factor orange (1, 0.408, 0 linear) replaced by olive tint Color(0.36, 0.42, 0.26)",
+      "runtime only: ARM red channel wired as ambient occlusion (present in the source map, not referenced by the source glTF)",
+      "runtime only: mipmaps generated for the embedded 1k textures",
+      "metallic left at the source value 0.0 (already D-015 compliant)"
+    ],
+    "effort": "S",
+    "modifications": "Container only: tools/gltf_to_glb.py packed the .gltf, .bin and three JPEGs into one GLB. Vertex, index, material and image bytes are unchanged (per-file sha256 above match the embedded bytes)."
+  },
+  "evidence": {
+    "intake_report": "docs/assets/intake/plastic_crate_02/intake-report.json (ok: true, 5840 declared triangles, no external dependencies)",
+    "gltf_validation_report": "docs/assets/intake/plastic_crate_02/gltf-validator.json (Khronos glTF-Validator 2.0.0-dev.3.10: 0 errors, 1 warning MESH_PRIMITIVE_GENERATED_TANGENT_SPACE)",
+    "godot_import_log": "runtime GLTFDocument load, importer=\"keep\"; measured by tests/test_imported_crate_visual.gd",
+    "mission_capture": "docs/reviews/ap1c-captures/ (Forward+, RTX 3060); record docs/reviews/2026-11-16-ap1c-plastic-crate.md",
+    "export_smoke_log": "Linux release template 4.4.1 with a throwaway preset outside the repo: crate loaded from the .pck and both ammo crates dressed; see the review record",
+    "behaviour_tests": ["test_imported_crate_visual", "test_multiplayer_mission_join", "test_sprint9_interactives_climax", "test_gate_travel", "test_gate_return"],
+    "reviewer": ""
+  }
+}

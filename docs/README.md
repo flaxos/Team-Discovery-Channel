@@ -58,6 +58,7 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Static asset shortlist](assets/community-static-shortlist.md) | Specific tactical weapons, Stargate props, industrial dressing and PBR material candidates with primary evidence. |
 | [Characters and animation shortlist](assets/community-characters-animation-shortlist.md) | Specific rig/motion candidates, raw redistribution constraints, current controller contracts and first Airman visual proof. |
 | [Asset import pipeline](plans/asset-import-pipeline.md) | What is actually implemented, GLB inspection tool, source/credit records, wrapper/socket rules and insertion acceptance. |
+| [AP-1c crate record](reviews/2026-11-16-ap1c-plastic-crate.md) | The first community asset in the game: acquisition, licence, measurements, placement, captures, render cost and the exported-build check. |
 
 ## Plans and records
 

@@ -48,6 +48,8 @@ Four official **1024 × 576** creator thumbnails were actually viewed on 16 Nove
 
 ## Recommended first insertion sequence
 
+**Status, 16 November 2026 (AP-1c).** The M9 could not be acquired: Sketchfab's download endpoint answered HTTP 401 without an account session. Plastic Crate 02 was acquired, measured and integrated as the fallback proof ([record](../reviews/2026-11-16-ap1c-plastic-crate.md)). Its 1k glTF does not reference the opacity map; the vents are painted dark in the base colour, so it renders as a solid-looking crate. The sequence below is otherwise unchanged.
+
 1. **M9 rigid visual pilot:** obtain the exact creator archive through the normal download path, preserve its license evidence, record a hash and measured bounds, and use the existing `WeaponModel`/`MuzzlePoint` wrapper. Verify the held first-person and third-person pose before adding reload articulation. This is a recommendation inferred from the described part structure and existing weapon loader, not a passed import result.
 2. **P90, then M249:** use the same proof with their real shapes and PBR material sets; check the P90 magazine/optic and the M249 long muzzle. Keep the current fallback available until clean headless import, Forward+ screenshots and gameplay anchor checks pass.
 3. **One Poly Haven prop and one small Metal Plate surface sample:** establish repeat scale, GL normals and material readability in a real mission without changing navigation, cover or authored room dimensions. Use the [shared authoring guide](../maps/ai-level-authoring.md) and live catalogue before choosing an attachment/module.

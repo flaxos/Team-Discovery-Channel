@@ -1,6 +1,6 @@
 # Community asset intake and integration
 
-Status checked **16 November 2026**, against `origin/main` at `f45e909` (TA-3). This is an implementation guide and the boundary between research, staging and game integration. A catalogue entry is not an imported or accepted asset.
+Status checked **16 November 2026**, against `origin/main` at `f45e909` (TA-3); AP-1c rows updated the same day from `1a5146a`. This is an implementation guide and the boundary between research, staging and game integration. A catalogue entry is not an imported or accepted asset.
 
 The research and ranked candidates are in the [asset handoff](../assets/README.md), [static shortlist](../assets/community-static-shortlist.md) and [characters/animation shortlist](../assets/community-characters-animation-shortlist.md). Keep exact creator pages and observed licence evidence with each candidate; generic marketplace search links do not establish permission or quality.
 
@@ -10,6 +10,8 @@ The research and ranked candidates are in the [asset handoff](../assets/README.m
 |---|---|
 | External weapons (AP-1a) | `WeaponBase.GLB_MODELS` contains only `p90` and `mp5`. These are generic, stylized Kenney models, not high-fidelity or exact reproductions of those firearms. Their names are game weapon IDs; [attribution](../../credits/ATTRIBUTIONS.md) identifies the actual source models. |
 | Runtime GLB loading | `WeaponBase.load_glb_model` uses `GLTFDocument` and `GLTFState`. The two files use `importer="keep"` to avoid the editor thumbnail failure observed in headless CI. This bypasses the editor import pipeline, so do not assume editor-generated LODs, import scripts or retargeting settings apply. |
+| Runtime GLB loading for props (AP-1c) | `RuntimeGLB.load_scene` reads the `res://` bytes and calls `GLTFDocument.append_from_buffer`, so it does not depend on `globalize_path`. Checked from a Linux release export. The same `importer="keep"` rule applies |
+| Prop wrapper (AP-1c) | `CrateStackVisual.dress_box` fills a `CSGBox3D` with whole crates at a uniform scale (0.9 to 1.1), validates the result against the box with the same 0.02 m allowance as `SGCMap.replace_asset_visual`, adds no collision, and only then stops drawing the box. Runtime material changes leave the GLB untouched. Used by the SGC armoury ammo crates ([record](../reviews/2026-11-16-ap1c-plastic-crate.md), D-018) |
 | Material treatment | The current weapon loader duplicates imported materials and sets `metallic = 0.0`. D-015 arose because metallic Jaffa became dark without a sky or reflection probes. It does not mean all PBR assets are production-lit or that source textures should be permanently flattened. Keep originals and test wrapper overrides in mission lighting. |
 | Player and NPCs | `Player.tscn`, `SGCAirman.tscn`, `JaffaGuard.tscn` and `JaffaShockGuard.tscn` still use procedural meshes. No shared humanoid skeleton, animation library or character retargeting adapter exists. |
 | Gate and DHD | `scenes/props/Stargate.tscn` has seven controlled chevrons (`StargateRing.max_chevrons = 7`); its event horizon, extraction and kawoosh are gameplay nodes. `DHDConsole.tscn` has box meshes and an interaction area. No contract for nine articulated chevrons, inner-ring spinning or a generic `iris_open_ratio` exists. |
@@ -32,6 +34,7 @@ Use the [intake record template](../assets/intake-record.template.json). It is a
 ```sh
 python3 tools/asset_intake.py /tmp/tdc-asset-intake/candidate/model.glb --output build/asset-intake/candidate.json
 python3 tools/asset_intake.py client/assets/weapons/p90_smg.glb
+python3 tools/gltf_to_glb.py /tmp/tdc-asset-intake/candidate/model.gltf /tmp/tdc-asset-intake/candidate/model.glb
 python3 -m unittest discover -s tools/tests -v
 ```
 
@@ -55,7 +58,9 @@ Godotâ€™s oriented-asset convention uses **+Z as model front**, while this gameâ
 
 For characters, `SkeletonProfileHumanoid`, a tested `BoneMap` and explicit hand/back sockets are future work. One animation library does not automatically suit every mesh: verify rest pose, bone mapping, proportions, weapon grip, feet, root motion and down/revive/body-drag transitions on each rig. Choose a small locomotion proof before a full player swap.
 
-The current runtime GLB workaround has a separate export question: prove raw files are included in the export and `FileAccess`/runtime loading finds them from a clean exported build. A headless editor-import pass alone does not prove packaging. No export preset is committed at this baseline.
+The runtime GLB workaround raised a separate export question: are raw files included in the export, and does runtime loading find them in a clean exported build? AP-1c answered it for 4.4.1 on Linux with a throwaway preset in a copy of `client/` outside the repository. The raw `.glb` files are packed, `RuntimeGLB` loads the crate from the pack, and `WeaponBase.load_glb_model` also loads the P90, because `globalize_path` returns a relative path there that `FileAccess` resolves through the pack. A headless editor-import pass alone does not prove packaging, and still **no export preset is committed**. Repeat the check when one is added or the engine changes.
+
+`tools/gltf_to_glb.py` packs a staged `.gltf` with separate `.bin` and image files into one GLB. It changes only the container: buffer and image bytes are copied unchanged, and URIs outside the source folder, network URIs and data URIs are refused. Record that packing in the intake record as a modification.
 
 ## Provenance and redistribution
 
@@ -70,7 +75,7 @@ Mixamo and other download services may permit game use while restricting raw ass
 | Milestone | Concrete boundary and completion evidence |
 |---|---|
 | AP-1b recovery | Review the four committed follow-up weapon models and their provenance before duplicating that work. They are stylized stand-ins, not the high-fidelity shortlist. |
-| AP-1c static high-fidelity proof | One cleared, measured weapon or console in a cosmetic wrapper, exact sockets and credited archive; headless import, Forward+ mission captures, behavior/late-join checks and clean exported-build loading. No character-system changes. |
+| AP-1c static high-fidelity proof | **Done on `feat/ap1c-crate-cosmetic-proof`; owner art review pending.** The M9 was blocked on a Sketchfab account download, so the documented fallback was used: the CC0 Poly Haven crate dressing the SGC armoury ammo crates, with intake, validator, captures, late-join/retry checks and a clean exported build ([record](../reviews/2026-11-16-ap1c-plastic-crate.md)). A weapon proof (M9, then P90/M249) is still next once an account download is available. No character-system changes. |
 | AP-2a rig proof | One redistributable rig plus a legally redistributable idle/walk set in a preview scene; tested rest pose, `BoneMap`, facing/units and hand socket. Then wire one NPC visual adapter; keep player and Jaffa controllers authoritative. |
 | AP-3 faction/scene polish | After the static and rig proofs: articulated Stargate parts, Jaffa armor and theme PBR surfaces, each retaining the existing gameplay contract. |
 

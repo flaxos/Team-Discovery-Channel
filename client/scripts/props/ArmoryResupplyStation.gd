@@ -18,6 +18,7 @@ enum StationType { AMMO_CRATE, WEAPON_RACK }
 var current_cooldown: float = 0.0
 var rack_index: int = 0
 var status_light: OmniLight3D = null
+var crate_visual: CrateStackVisual = null
 
 @onready var interact_area: Area3D = $InteractArea if has_node("InteractArea") else null
 @onready var prompt_label: Label3D = $PromptLabel if has_node("PromptLabel") else null

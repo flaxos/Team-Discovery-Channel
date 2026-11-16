@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "file": "/tmp/tdc-asset-intake/plastic_crate_02/plastic_crate_02_1k.glb (byte-identical to client/assets/props/plastic_crate_02_1k.glb)",
+  "bytes": 1837700,
+  "sha256": "0cbc8be3cca9589411a08c937d204b6fb7dbc13828b7f2338553bf906c2033b0",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Khronos glTF Blender I/O v5.1.20",
+  "declared_triangles_unique_meshes": 5840,
+  "meshes": [
+    {
+      "name": "Cube.002",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 4744,
+          "declared_triangles": 5840,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.2527506947517395,
+              -1.595914363861084e-05,
+              -0.20275069773197174
+            ],
+            "max": [
+              0.2527506947517395,
+              0.25407320261001587,
+              0.20275069773197174
+            ],
+            "size": [
+              0.505501389503479,
+              0.2540891617536545,
+              0.4055013954639435
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "plastic_crate_02"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "plastic_crate_02_nor_gl",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "plastic_crate_02_diff-plastic_crate_02_opacity",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    },
+    {
+      "name": "plastic_crate_02_rough",
+      "mime_type": "image/jpeg",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "plastic_crate_02",
+      "metallic_factor": 0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "BLEND"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ]
+}
