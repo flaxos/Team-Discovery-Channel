@@ -199,3 +199,7 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 ## D-019 — SAW COLLADA staging and source vertex colours (AP-1f)
 
 16 November 2026. The downloaded M249 contains a nested COLLADA scene. Import it in an isolated Godot staging project outside `client/`, then use the existing recipe-driven packer. Keep its geometry and UVs, including the fused extended bipod, and align the measured barrel crown to the existing gameplay muzzle. Do not invent folding or reload articulation. The source has vivid per-part vertex colours; only this weapon disables vertex-colour albedo multiplication in the runtime material, preserving source data in the GLB. The review camera frames measured bounds so long weapons remain fully visible. [Evidence](reviews/2026-11-16-ap1f-m249.md).
+
+## D-020 — Fit imported gate parts to the seven existing anchors (AP-1g preview)
+
+16 November 2026. The downloaded gate has nine chevrons and a body whose rim/opening ratio cannot match both current bounds under uniform scaling. Use its glyph ring plus front/back chevron/light inserts on the seven unchanged controls; omit the incompatible body and frames. Preserve the original horizon, collision, navigation, areas, iris and DHD. Read the existing replicated chevron count in the visual adapter so snapshot and reset paths remain covered without changing authority or RPCs. Retain original visual fallback. Authorship evidence is unresolved, so public redistribution awaits an owner decision. [Measurements and evidence](reviews/2026-11-16-ap1g-stargate.md).

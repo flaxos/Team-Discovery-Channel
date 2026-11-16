@@ -1,0 +1,17 @@
+{
+  "archive.zip": "6f4a191709c8209ab40d5e9b34ee485ed17502b9dda99055af0ef9340bb2024b",
+  "extracted/source/stargate.fbx": "1f00ef04cd5fab6c95a2c59ef4942e6da681e4e0775db3793c8beca70b299f03",
+  "extracted/textures/chevron_albedo.png": "c1c5afe455acea84a4b5b216d77979bb0d3f0af76805064b46c27ff312ba25c3",
+  "extracted/textures/chevron_albedo_unlit.png": "1da3d902123a678c8ee8f6c5e4b46bb498e1473276c64fbf71b0914d65a4f4ce",
+  "extracted/textures/chevron_bump.png": "d08f37d28b7dde9ac534c275afe26f4a4f025405eed798ae8c00637a3a032979",
+  "extracted/textures/chevron_illumination.png": "4eedd9975af93135869cc1e5717cffc83f09e4d84d824a0818e0defd4b81de45",
+  "extracted/textures/chevron_metalness.png": "b5a495860e893784b4952d4fad424e30b7a1e788bb0f03fe5e502da867b3dd7a",
+  "extracted/textures/chevron_roughness.png": "872a7b89d350b3df9c1fcb465d5769aad068b4168d3868214770b26048ec6d40",
+  "extracted/textures/gate_albedo.png": "9848540cb2a28294faf73ab32b946c63940a459bc26abdd26ad6f34b7f4fcd9a",
+  "extracted/textures/gate_bump.png": "aa661fdf7df0bc309e023fc58ff05bfc40bf78f33a4347a36cb7dd0b9773532b",
+  "extracted/textures/gate_metalness.png": "1d9675fd8dfa2799a09d769cf659ac2e8f6621cb7a523fe68f2b2e87b910c013",
+  "extracted/textures/gate_roughness.png": "cfe23ffb11454dae652c218c375661140c9dcc9901edfd45a5252b729abda757",
+  "extracted/textures/ring_albedo.png": "58b414a28e3ce54eb6602121b575e52aec827320ee2fb3732b73b9fde64ee1eb",
+  "extracted/textures/ring_bump.png": "a0447e7424d0d71a4877c17cea72685127a33554e563832ecd343b4eb2806460",
+  "extracted/textures/ring_metalness.png": "998abaa4e308cd035b64cef80cbb0352b4d674b9f1943c7d80e45f2bc096f1ca"
+}

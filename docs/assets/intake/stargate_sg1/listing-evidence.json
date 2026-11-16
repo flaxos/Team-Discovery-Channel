@@ -1,0 +1,24 @@
+{
+  "uid": "e2d6167c932e4c16b293d3bb8b6a3165",
+  "name": "Stargate SG1",
+  "description": "",
+  "license": {
+    "uri": "https://api.sketchfab.com/v3/licenses/322a749bcfa841b29dff1e8a1bb74b0b",
+    "label": "CC Attribution",
+    "fullName": "Creative Commons Attribution",
+    "requirements": "Author must be credited. Commercial use is allowed.",
+    "url": "http://creativecommons.org/licenses/by/4.0/",
+    "slug": "by"
+  },
+  "isDownloadable": true,
+  "faceCount": 22658,
+  "vertexCount": 11329,
+  "publishedAt": "2021-09-05T17:37:18.518301",
+  "uploader": {
+    "uid": "8030f512a3b34051858e56e5211b00f0",
+    "displayName": "rossrobotics",
+    "username": "rossrobotics",
+    "profileUrl": "https://sketchfab.com/rossrobotics"
+  },
+  "authorship_status": "No description or creator-authorship statement in listing, archive or public profile; unresolved repository-playbook gate"
+}

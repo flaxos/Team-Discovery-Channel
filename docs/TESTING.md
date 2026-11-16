@@ -133,3 +133,7 @@ The separate [modular kit guide](maps/modular-levels.md) documents the Phase 1 b
 ## Human acceptance still outstanding
 
 No mission has a signed human run. The written checklists are: the route above for the SGC, the eleven steps in the [extraction mission guide](maps/modular-extraction-mission.md#human-uat-checklist-pending-sign-off), the six steps in the [NPC navigation guide](maps/modular-npc-navigation.md), and the editor checklists in the modular guides. Record completed runs under `docs/reviews/` with commit, roles and results. The [roadmap](../ROADMAP.md#near-term-acceptance-gates) lists the gates that depend on them.
+
+## Community gate preview (AP-1g)
+
+`test_imported_stargate_visual` verifies unchanged gate shapes, transforms, masks and seven anchors; aperture/envelope; source mesh sharing; visual-only geometry and mipmaps; snapshot, seven-chevron dialing, kawoosh, active horizon, reset and closure. Isolated negative-scale and missing-file fallback checks, Linux release export and mission captures are described in [the review](reviews/2026-11-16-ap1g-stargate.md). On a display: `flock /tmp/tdc-godot-network-tests.lock godot --path client --script res://tests/support/stargate_visual_review.gd -- sgc_uat` (also `goauld_infiltration`).

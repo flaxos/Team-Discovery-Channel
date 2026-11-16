@@ -34,6 +34,7 @@ var locked_chevrons_count: int = 0
 
 
 func _ready() -> void:
+	StargateVisual.attach(self)
 	if kawoosh_area != null:
 		kawoosh_area.monitoring = false
 		kawoosh_area.body_entered.connect(_on_kawoosh_hit_body)

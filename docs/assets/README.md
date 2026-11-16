@@ -12,6 +12,8 @@ Use the [static shortlist](community-static-shortlist.md) for twelve model/mater
 
 **AP-1f status (16 November 2026).** The owner-downloaded M249 SAW by AK / skaf13 now replaces the procedural heavy weapon. Its nested COLLADA archive is converted through an isolated Godot staging project; the bore, weapon values and fallback are preserved. [Review](../reviews/2026-11-16-ap1f-m249.md), [intake](intake/m249.json). The fused bipod remains extended; owner art review is pending.
 
+**AP-1g local preview (16 November 2026).** Imported glyph ring and seven source chevron inserts now fit the existing gate aperture and anchors. The original body/nine-chevron layout is omitted to preserve the current envelope. Public redistribution is pending a decision on missing uploader-authorship evidence; this is not a cleared import. [Review](../reviews/2026-11-16-ap1g-stargate.md), [intake](intake/stargate_sg1.json).
+
 ## First insertion queue
 
 | Order | Candidate | Why this next | Remaining before repository insertion |
@@ -21,7 +23,7 @@ Use the [static shortlist](community-static-shortlist.md) for twelve model/mater
 | 3 | [P90 — Rotuma](https://sketchfab.com/3d-models/p90-82d8b9f1e02b48f9b012698dcfa3352b) | Primary tactical weapon upgrade; textured real-weapon form | **Integrated in AP-1e, owner art review pending.** Owner-downloaded archive, CC BY 4.0, 38,083 triangles, bore aligned to unchanged `MuzzlePoint`, SGC and offworld captures, exported build checked ([record](../reviews/2026-11-16-ap1e-p90.md)) |
 | 3b | [M249 — AK](https://sketchfab.com/3d-models/m249-light-machine-gun-75cacc16a52640c7adb100d7294da244) | Heavy machine gun upgrade (currently procedural) | **Integrated in AP-1f, owner art review pending.** 13,328 triangles, 1024² maps, measured bore aligned to unchanged muzzle; extended fused bipod ([record](../reviews/2026-11-16-ap1f-m249.md)) |
 | 4 | [American Soldier Rigged — RedVeil studio](https://sketchfab.com/3d-models/american-soldier-rigged-5b1967e7f83547be8a1c3ae656ab1ad4) | Best first realistic Airman rig to inspect; metadata lists 9,710 triangles and one clip | Archive/bones/rest pose/maps, redistributable idle/walk clips, measured visual adapter and grip; no complete tactical set is cleared |
-| 5 | [Stargate SG1 — rossrobotics](https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165) | High-visibility faction prop after a simple import succeeds | Archive detail and hierarchy unknown; preserve seven-chevron gameplay, horizon/areas/iris. Articulation is a separate proof |
+| 5 | [Stargate SG1 — rossrobotics](https://sketchfab.com/3d-models/stargate-sg1-e2d6167c932e4c16b293d3bb8b6a3165) | High-visibility faction prop after a simple import succeeds | **Local AP-1g preview; authorship decision pending.** Measured glyph ring and seven copied chevron inserts fit existing anchors; source body/nine-chevron arrangement omitted. Gameplay, horizon/areas/iris preserved. [Record](../reviews/2026-11-16-ap1g-stargate.md) |
 
 These are ranked research recommendations, not assets approved by an import or human visual test. Source/license evidence and current details are in the companion documents.
 
