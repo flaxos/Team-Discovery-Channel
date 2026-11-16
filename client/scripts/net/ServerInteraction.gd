@@ -7,7 +7,8 @@ static func resolve(station: Node3D, player_path: NodePath, radius: float = 3.5)
 	var sender: int = station.multiplayer.get_remote_sender_id() if station.multiplayer.has_multiplayer_peer() else 0
 	if player == null or (sender != 0 and player.get_multiplayer_authority() != sender):
 		return null
-	if sender != 0 and player.global_position.distance_to(station.global_position) > radius:
+	var enforce_reach: bool = (sender != 0) or (station != null and station.has_node("InteractArea"))
+	if enforce_reach and player.global_position.distance_to(station.global_position) > radius:
 		return null
 	var health: HealthComponent = player.health_component
 	if health != null and (health.is_dead or health.is_downed or health.is_stunned):

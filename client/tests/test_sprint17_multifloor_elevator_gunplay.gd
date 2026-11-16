@@ -130,6 +130,7 @@ func _process(delta: float) -> bool:
 		var armor_station: ArmoryArmorStation = gateroom.get_node_or_null("Level28Complex/ArmorySector/ArmoryArmorStation") as ArmoryArmorStation
 		assert(armor_station != null, "ArmoryArmorStation must be instanced in ArmorySector")
 		
+		player.global_position = armor_station.global_position + Vector3(0.5, 0.0, 0.5)
 		player.health_component.current_health = 40.0
 		armor_station.interact(player)
 		assert(player.health_component.current_health == player.health_component.max_health, "Operative health must be restored to 100 HP")

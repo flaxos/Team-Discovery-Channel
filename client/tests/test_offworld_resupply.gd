@@ -80,7 +80,7 @@ func run_test() -> void:
 	assert(armor_station.station_light != null, "ArmoryArmorStation must have visual indicator light")
 	assert(armor_station.current_cooldown == 0.0, "Initial armor cooldown must be 0")
 
-	var resupply_station := armoury_module.get_node_or_null("Attachments/RoomContent/resupply_station") as ArmoryResupplyStation
+	var resupply_station := armoury_module.get_node_or_null("Attachments/RoomContent/inventory") as ArmoryResupplyStation
 	assert(resupply_station != null, "ArmoryResupplyStation must be instanced in armoury room")
 	assert(resupply_station.is_in_group("interactable"), "ArmoryResupplyStation must be in 'interactable' group")
 	assert(resupply_station.has_node("RoomCollision"), "ArmoryResupplyStation must have physical RoomCollision")
@@ -97,6 +97,18 @@ func run_test() -> void:
 	# Damage operative and deplete reserve ammo
 	player.health_component.current_health = 35
 	wb.reserve_ammo = 100
+
+	# Host out-of-range rejection regression: operative is far away at gate spawn
+	assert(player.global_position.distance_to(armor_station.global_position) > 10.0, "Operative must be far from armor station")
+	armor_station.interact(player)
+	assert(player.health_component.current_health == 35, "Armor station interact must reject out-of-range host operative")
+	resupply_station.interact(player)
+	assert(wb.reserve_ammo == 100, "Resupply station interact must reject out-of-range host operative")
+	armor_station.request_interact(armor_station.get_path_to(player))
+	assert(player.health_component.current_health == 35, "Armor station request_interact must reject out-of-range host operative via ServerInteraction")
+	resupply_station.request_interact(resupply_station.get_path_to(player))
+	assert(wb.reserve_ammo == 100, "Resupply station request_interact must reject out-of-range host operative via ServerInteraction")
+	print("✓ Host out-of-range interact rejection verified.")
 
 	# Move operative to armor station approach
 	place(player, armor_station.global_position + Vector3(0.5, 0.0, 0.5))
@@ -212,6 +224,25 @@ func run_test() -> void:
 	assert(resupply_station.status_light.light_color == Color(0.2, 0.9, 0.3), "Resupply station light must be munitions green after reset")
 	assert(resupply_station.prompt_label.text.contains("RESUPPLY"), "Resupply station prompt must be restored after reset")
 	print("✓ Station reset on retry verified.")
+
+	# --- TEST 6: SGC Legacy Resupply Compatibility (zero-duration cooldown) ---
+	print("[CO-1 TEST 6] Testing SGC legacy resupply compatibility...")
+	var legacy_crate := ArmoryResupplyStation.new()
+	assert(legacy_crate.cooldown_time == 0.0, "Shared ArmoryResupplyStation default cooldown must be 0.0 for SGC")
+	var dummy_label := Label3D.new()
+	legacy_crate.prompt_label = dummy_label
+	legacy_crate.sync_feedback(0.0)
+	assert(legacy_crate.current_cooldown == 0.0, "Zero-duration feedback must not enter cooldown")
+	assert(dummy_label.text.contains("RESUPPLY"), "Zero-duration feedback must restore ready prompt, not leave COOLDOWN0")
+	assert(not dummy_label.text.contains("COOLDOWN"), "Prompt must not contain COOLDOWN on zero duration")
+	dummy_label.free()
+	legacy_crate.free()
+
+	# Keep existing ArmoryArmorStation default 3.0 unchanged
+	var legacy_armor := ArmoryArmorStation.new()
+	assert(legacy_armor.cooldown_time == 3.0, "Shared ArmoryArmorStation default cooldown must remain 3.0")
+	legacy_armor.free()
+	print("✓ SGC legacy zero-cooldown compatibility verified.")
 
 	print("\n========================================================")
 	print("  CO-1 OFFWORLD RESUPPLY & ARMOURY TEST PASSED!        ")

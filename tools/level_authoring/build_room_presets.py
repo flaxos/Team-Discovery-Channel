@@ -40,7 +40,7 @@ PRESETS = [
  ('armoury','Armoury',ROOMS,common()+[
      dict(id='armour_station',position=(2.6,0,2.6),scene='ArmoryArmorStation',bounds=(-.7,0,-.35,1.4,2.1,.7),approach=(-1.2,0,-1.2),component='equipment'),
      prop('weapon_rack',(-2.6,0,-2.6),(1,1.8,.5),(1.2,0,1.2)),
-     dict(id='resupply_station',position=(-2.6,0,2.6),scene='ArmoryResupplyStation',bounds=(-.8,0,-.6,1.6,1.0,1.2),approach=(1.2,0,-1.2),component='equipment',refs=['inventory.storage'])],['inventory.storage']),
+     dict(id='inventory',position=(-2.6,0,2.6),scene='ArmoryResupplyStation',bounds=(-.8,0,-.6,1.6,1.0,1.2),approach=(1.2,0,-1.2),component='equipment',refs=['inventory.storage'])],['inventory.storage']),
  ('detention','Detention / holding',ROOMS,common()+[
      prop('cot',(-2.7,0,2.5),(1.3,.5,1.8),(1.3,0,-1.1)),
      marker('prisoner',(2.6,0,2.6),'objective'),marker('guard',(0,0,0),'spawn'),

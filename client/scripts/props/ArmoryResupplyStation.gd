@@ -13,7 +13,7 @@ enum StationType { AMMO_CRATE, WEAPON_RACK }
 @export var station_type: StationType = StationType.AMMO_CRATE
 @export var rack_weapons: Array[String] = ["p90", "m249", "mp5", "zat"]
 @export var station_name: String = "Armory Munitions Crate"
-@export var cooldown_time: float = 3.0
+@export var cooldown_time: float = 0.0
 
 var current_cooldown: float = 0.0
 var rack_index: int = 0
@@ -46,6 +46,8 @@ func _process(delta: float) -> void:
 
 
 func _format_prompt(text: String) -> String:
+	if not is_inside_tree():
+		return text
 	var bindings := get_node_or_null("/root/KeybindingManager")
 	return bindings.format_prompt(text) if bindings != null and bindings.has_method("format_prompt") else text
 
@@ -78,7 +80,9 @@ func _setup_visual_indicator() -> void:
 
 
 func interact(player: PlayerController3D) -> void:
-	if player == null:
+	if current_cooldown > 0.0 or player == null:
+		return
+	if has_node("InteractArea") and global_position.distance_to(player.global_position) > 3.5:
 		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_interact.rpc_id(1, get_path_to(player))
@@ -115,12 +119,6 @@ func _perform_ammo_resupply(player: PlayerController3D) -> void:
 	_pulse_indicator(Color(0.1, 1.0, 0.4))
 	_play_resupply_sfx()
 
-	if cooldown_time > 0.0:
-		if multiplayer.has_multiplayer_peer():
-			sync_feedback.rpc(cooldown_time)
-		else:
-			sync_feedback(cooldown_time)
-
 	print("ArmoryResupplyStation: Operative %d resupplied ammo, Claymores (%d), C4 (%d), Shields (%d), and Smoke (%d)!" % [
 		player.peer_id,
 		player.claymore_charges,
@@ -128,8 +126,12 @@ func _perform_ammo_resupply(player: PlayerController3D) -> void:
 		player.deployable_shields_count,
 		player.smoke_grenades_count
 	])
-	if multiplayer.has_multiplayer_peer():
-		sync_inventory.rpc(get_path_to(player), player.primary_weapon_id, false)
+	sync_feedback(cooldown_time)
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		SGCNetworkManager.mission_rpc(self, &"sync_feedback", [cooldown_time])
+		SGCNetworkManager.mission_rpc(
+			self, &"sync_inventory", [get_path_to(player), player.primary_weapon_id, false], player.health_component
+		)
 	if player.has_method("_broadcast_weapon_state"):
 		player.call("_broadcast_weapon_state")
 	resupplied.emit(player)
@@ -153,8 +155,10 @@ func _perform_weapon_swap(player: PlayerController3D) -> void:
 		player.peer_id,
 		new_weapon_id
 	])
-	if multiplayer.has_multiplayer_peer():
-		sync_inventory.rpc(get_path_to(player), new_weapon_id, true)
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		SGCNetworkManager.mission_rpc(
+			self, &"sync_inventory", [get_path_to(player), new_weapon_id, true], player.health_component
+		)
 	if player.has_method("_broadcast_weapon_state"):
 		player.call("_broadcast_weapon_state")
 	weapon_swapped.emit(player, new_weapon_id)
@@ -181,12 +185,20 @@ func _play_resupply_sfx() -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func sync_feedback(duration: float = 3.0) -> void:
-	current_cooldown = duration
-	if prompt_label != null:
-		prompt_label.text = "RESUPPLIED - COOLDOWN (%.0fs)" % duration
-	if status_light != null:
-		status_light.light_color = Color(0.9, 0.6, 0.1)
+func sync_feedback(duration: float = 0.0) -> void:
+	if duration > 0.0:
+		current_cooldown = duration
+		if prompt_label != null:
+			prompt_label.text = "RESUPPLIED - COOLDOWN (%.0fs)" % duration
+		if status_light != null:
+			status_light.light_color = Color(0.9, 0.6, 0.1)
+	else:
+		current_cooldown = 0.0
+		_update_prompt_ready()
+		if status_light != null:
+			status_light.light_color = (
+				Color(0.2, 0.9, 0.3) if station_type == StationType.AMMO_CRATE else Color(0.3, 0.6, 1.0)
+			)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -198,13 +210,13 @@ func request_snapshot() -> void:
 @rpc("authority", "call_local", "reliable")
 func sync_snapshot(cooldown_remaining: float, remote_rack_index: int) -> void:
 	rack_index = remote_rack_index
-	if cooldown_remaining > 0.0:
+	if cooldown_remaining > current_cooldown:
 		current_cooldown = cooldown_remaining
 		if prompt_label != null:
 			prompt_label.text = "RESUPPLIED - COOLDOWN (%.0fs)" % current_cooldown
 		if status_light != null:
 			status_light.light_color = Color(0.9, 0.6, 0.1)
-	else:
+	elif current_cooldown <= 0.0 and cooldown_remaining <= 0.0:
 		current_cooldown = 0.0
 		_update_prompt_ready()
 		if status_light != null:

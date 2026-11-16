@@ -36,7 +36,9 @@ func _process(delta: float) -> void:
 
 
 func interact(player: PlayerController3D) -> void:
-	if player == null:
+	if current_cooldown > 0.0 or player == null:
+		return
+	if has_node("InteractArea") and global_position.distance_to(player.global_position) > 3.5:
 		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_interact.rpc_id(1, get_path_to(player))
@@ -70,10 +72,9 @@ func _apply_interaction(player: PlayerController3D) -> void:
 
 	if player.has_method("_broadcast_weapon_state"):
 		player.call("_broadcast_weapon_state")
-	if multiplayer.has_multiplayer_peer():
-		sync_feedback.rpc()
-	else:
-		sync_feedback()
+	sync_feedback()
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		SGCNetworkManager.mission_rpc(self, &"sync_feedback", [])
 	rearmored.emit(player)
 
 
@@ -97,13 +98,13 @@ func request_snapshot() -> void:
 
 @rpc("authority", "call_local", "reliable")
 func sync_snapshot(cooldown_remaining: float) -> void:
-	if cooldown_remaining > 0.0:
+	if cooldown_remaining > current_cooldown:
 		current_cooldown = cooldown_remaining
 		if prompt_label != null:
 			prompt_label.text = "ARMOR REPLACED - COOLDOWN (%.0fs)" % current_cooldown
 		if station_light != null:
 			station_light.light_color = Color(0.9, 0.6, 0.1, 1.0)
-	else:
+	elif current_cooldown <= 0.0 and cooldown_remaining <= 0.0:
 		current_cooldown = 0.0
 		if prompt_label != null:
 			prompt_label.text = _format_prompt("[E] RE-ARMOR TACTICAL PLATES")
@@ -145,9 +146,13 @@ func _play_sfx(path: String, max_dist: float) -> void:
 
 
 func _format_prompt(text: String) -> String:
+	if not is_inside_tree():
+		return text
 	var bindings := get_node_or_null("/root/KeybindingManager")
 	return bindings.format_prompt(text) if bindings != null and bindings.has_method("format_prompt") else text
 
 
 func _bindings() -> Node:
+	if not is_inside_tree():
+		return null
 	return get_node_or_null("/root/KeybindingManager")
