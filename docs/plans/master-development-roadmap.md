@@ -328,9 +328,9 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 ### H — Expanded co-op mechanics
 
 **CO-1 — Co-op kit on modular missions** · M · Codex/Antigravity · **built 16 November 2026 (`test_offworld_resupply`, `test_offworld_resupply_multiplayer`)**
-- Functional offworld armoury resupply using existing authored stations: `ArmoryArmorStation` (tactical plate repair + full health, +150 ballistic reserve ammo up to 300) and `ArmoryResupplyStation` (full munitions reserve replenish, tactical gear restock: claymores, C4, deployable shields, smoke).
+- Functional offworld armoury resupply using existing authored stations: `ArmoryArmorStation` (tactical plate repair + full health, +150 ballistic reserve ammo up to 300, 3.0 s cooldown) and `ArmoryResupplyStation` (active weapon reserve capacity replenishment via `WeaponBase.resupply()`, tactical gear restock: 2 claymores, 2 C4, 1 deployable shield [`MAX_DEPLOYABLE_SHIELDS`], 2 smoke grenades, 3.0 s export override cooldown).
 - Integrated into `armoury.tres` preset within `GoauldInfiltrationMission` (`Room04Chamber`) preserving room footprints, navigation/collision envelopes, objectives, and patrol markers.
-- Server-authoritative validation (`ServerInteraction.resolve`), reach validation ($\le 3.5$ m), late-join cooldown/state snapshots, and state reset on coordinated retry. Retains existing solo failure-on-down rules and SGC station behaviors.
+- Server-authoritative validation (`ServerInteraction.resolve`), reach validation ($\le 3.5$ m) across remote and host entry paths, late-join cooldown/state snapshots, and state reset on coordinated retry. Preserves legacy SGC zero-cooldown crate behavior, solo failure-on-down rules, and existing station behaviors.
 
 **CO-2 — Roles and sharing** · M · design first
 - Ammunition sharing, medic revive speed or heal, deployable cover offworld. Bring the lobby class descriptions and the code into agreement in either direction. Do not add perks merely because the description lists them.

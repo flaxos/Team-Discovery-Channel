@@ -151,27 +151,27 @@ The offworld compound features an operational armoury (`armoury.tres` in `Room04
    - **Interaction:** Press `[E]` to trigger server-authoritative plate replacement (`ServerInteraction.resolve`):
      - Operative's health is restored to 100% (tactical plate repair).
      - Ballistic weapon reserve ammo is replenished by +150 rounds, up to the 300 round reserve limit.
-     - Status light shifts to orange; prompt displays `ARMOR REPLACED - COOLDOWN (30s)`.
-   - **Cooldown:** 30.0 s cooldown enforced by the server; subsequent interact attempts while on cooldown are rejected.
+     - Status light shifts to orange; prompt displays `ARMOR REPLACED - COOLDOWN (3s)`.
+   - **Cooldown:** 3.0 s anti-spam cooldown enforced by the server; subsequent interact attempts while on cooldown are rejected.
    - **Audio:** Plays SGC tactical reload audio cue (`sfx_p90_reload.wav`).
 
 2. **Tactical Munitions Crate (`ArmoryResupplyStation`)**
    - **Visuals:** Standalone olive munitions crate with green status indicator light at `(-2.6, 0.0, 2.6)` with solid collision envelope ($1.6 \times 1.0 \times 1.2$ m).
    - **Approach prompt:** Within 2.0 m, the 3D prompt displays `[E] RESUPPLY MUNITIONS`.
    - **Interaction:** Press `[E]` to trigger server-authoritative munitions and tactical gear restock:
-     - All equipped weapons have their reserve ammunition replenished to full capacity.
+     - The operative's active weapon (`current_weapon`) has its reserve ammunition replenished to full capacity (`reserve_ammo = reserve_capacity` via `WeaponBase.resupply()`, preserving magazine chamber count and broadcasting weapon state replication).
      - Tactical deployables and ordnance are restocked to maximum loadouts:
-       - Claymore mines: 2
-       - C4 satchel charges: 2
-       - Deployable ballistic shields: 2
-       - Smoke grenades: 2
+       - Claymore mines: 2 (`MAX_CLAYMORE_CHARGES`)
+       - C4 satchel charges: 2 (`MAX_C4_CHARGES`)
+       - Deployable ballistic shields: 1 (`MAX_DEPLOYABLE_SHIELDS`)
+       - Smoke grenades: 2 (`MAX_SMOKE_GRENADES`)
      - Status light shifts to orange with an energy pulse (3.5 multiplier decaying over 0.6 s); prompt displays `RESUPPLIED - COOLDOWN (3s)`.
-   - **Cooldown:** 3.0 s anti-spam cooldown enforced by the server.
+   - **Cooldown:** 3.0 s anti-spam cooldown enforced by the server (configured via `@export var cooldown_time: float = 3.0` override on `ArmoryResupplyStation.tscn`).
    - **Audio:** Plays tactical ammo pickup audio cue (`sfx_resupply.wav`).
 
 ### Multiplayer Authority, Snapshots & Mission Reset
 
-- **Reach & Authority Validation:** The dedicated server validates the interacting peer against the owning operative and checks Euclidean distance ($\le 3.5$ m). Downed operatives or remote clients attempting forged interactions outside the room are rejected.
-- **Late-Join Snapshots:** Clients connecting mid-mission request snapshot state via reliable RPC (`request_snapshot`), receiving accurate station cooldown and light status (`sync_snapshot`) without desync.
-- **Coordinated Retry:** When the squad votes to restart or retry after extraction/failure, all station cooldowns and visual prompts reset cleanly to their initial ready states on host and all clients.
-- **SGC Baseline Integrity:** Existing SGC Gate Room stations and interactions remain completely untouched and behave identically.
+- **Reach & Authority Validation:** The dedicated server validates the interacting peer against the owning operative and checks Euclidean distance ($\le 3.5$ m) across remote RPCs and local host entry paths. Downed operatives or remote clients attempting forged interactions outside the room are rejected.
+- **Late-Join Snapshots:** Clients connecting mid-mission request snapshot state via reliable RPC (`request_snapshot`), receiving accurate station cooldown and light status (`sync_snapshot`) without desync, with monotonic guards preventing older snapshots from overriding active cooldowns.
+- **Coordinated Retry:** When the host triggers a mission restart or retry following extraction or failure (`request_restart_game` / `prepare_mission_restart`), all station cooldowns and visual prompts reset cleanly to their initial ready states across host and connected clients.
+- **SGC Baseline Integrity & Compatibility:** Restock quantities and legacy zero-cooldown behavior (default `0.0` s cooldown on shared `ArmoryResupplyStation`, preventing false `COOLDOWN (0s)` prompts) are preserved for SGC ammo crates and weapon racks, while shared station scripts gained server reach validation ($\le 3.5$ m), readiness-aware `SGCNetworkManager.mission_rpc` broadcasts, and late-join snapshot state tracking.
