@@ -18,11 +18,15 @@ Or pick **Goa'uld Infiltration — Greybox** in the lobby and press **Launch Inf
 
 | Step | HUD text | Completes when |
 |---|---|---|
-| 1 | Sabotage the generator controls | An operative within 3.5 m uses the generator room's console |
+| 1 | Sabotage the generator controls | An operative within 3.5 m uses the generator console; command-room security releases (EV-2-1) |
 | 2 | Download the command records on the upper deck | An operative uses the command room's main console |
 | 3 | Return to the Stargate — all standing operatives | Every standing operative is within 4 m of the gate room's entry marker |
 
 Extraction and result rules are the same as the extraction mission's: downed operatives neither block extraction nor are required, nobody standing is a failure, and the first result is final.
+
+## Generator-controlled command security (EV-2-1)
+
+The existing command-room security door starts locked. Generator sabotage releases it for the squad and late joiners; the door is opened normally afterward. Retry restores the lock. Both routes to the generator remain available, and native layout geometry is unchanged. [Mission-event contract](mission-events.md), [review and captures](../reviews/2026-11-17-ev2-1-objective-doors.md).
 
 ## The compound
 
