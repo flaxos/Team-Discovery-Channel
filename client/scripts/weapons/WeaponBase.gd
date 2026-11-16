@@ -77,10 +77,35 @@ func _setup_audio() -> void:
 const GLB_MODELS := {
 	"p90": "res://assets/weapons/p90_smg.glb",
 	"mp5": "res://assets/weapons/mp5_silenced.glb",
+	"m9": "res://assets/weapons/beretta_m9.glb",
 }
+## AP-1d: measured bore centre of beretta_m9.glb in its own space (muzzle faces model -X).
+## The wrapper turns it to face -Z and puts this point on the unchanged MuzzlePoint.
+const M9_MODEL_MUZZLE := Vector3(-0.1255, 0.1303, 0.0)
+const M9_MODEL_BASIS := Basis(Vector3.UP, -PI / 2.0)
+## Parsed and sanitized weapon models, kept on the tree root for the session so that every
+## operative's copy shares one set of meshes and textures. Decoding the M9's textures takes
+## about 55 ms; without this every peer paid it when each operative first drew a sidearm.
+const GLB_CACHE_META := &"weapon_glb_cache"
 
 
 static func load_glb_model(res_path: String) -> Node3D:
+	var tree := Engine.get_main_loop() as SceneTree
+	var cache: Dictionary = tree.root.get_meta(GLB_CACHE_META, {}) if tree != null else {}
+	var template := cache.get(res_path) as PackedScene
+	if template == null:
+		template = _parse_glb_model(res_path)
+		if template == null:
+			return null
+		if tree != null:
+			cache[res_path] = template
+			tree.root.set_meta(GLB_CACHE_META, cache)
+	var imported := template.instantiate() as Node3D
+	imported.name = "ImportedGLB"
+	return imported
+
+
+static func _parse_glb_model(res_path: String) -> PackedScene:
 	var global_path := ProjectSettings.globalize_path(res_path)
 	if not FileAccess.file_exists(global_path):
 		return null
@@ -91,9 +116,13 @@ static func load_glb_model(res_path: String) -> Node3D:
 	var imported := doc.generate_scene(state) as Node3D
 	if imported == null:
 		return null
-	imported.name = "ImportedGLB"
 	_sanitize_glb_materials(imported)
-	return imported
+	for node: Node in imported.find_children("*", "", true, false):
+		node.owner = imported
+	var template := PackedScene.new()
+	var packed := template.pack(imported)
+	imported.free()
+	return template if packed == OK else null
 
 
 static func _sanitize_glb_materials(root_node: Node) -> void:
@@ -111,6 +140,7 @@ static func _sanitize_glb_materials(root_node: Node) -> void:
 				if smat != null:
 					var clean := smat.duplicate() as BaseMaterial3D
 					clean.metallic = 0.0
+					RuntimeGLB.add_mipmaps(clean)
 					mi.set_surface_override_material(s, clean)
 	for child in root_node.get_children():
 		_sanitize_glb_materials(child)
@@ -283,29 +313,36 @@ func _build_weapon_visual_mesh() -> void:
 			muzzle_offset = Vector3(0, 0.05, -0.20)
 
 		"m9":
-			# Sleek black 9mm handgun
-			var slide := MeshInstance3D.new()
-			var sm := BoxMesh.new()
-			sm.size = Vector3(0.05, 0.07, 0.20)
-			slide.mesh = sm
-			var smat := StandardMaterial3D.new()
-			smat.albedo_color = Color(0.12, 0.12, 0.14)
-			smat.metallic = 0.7
-			slide.material_override = smat
-			model_root.add_child(slide)
-
-			var grip := MeshInstance3D.new()
-			var gm := BoxMesh.new()
-			gm.size = Vector3(0.05, 0.10, 0.06)
-			grip.mesh = gm
-			var gmat := StandardMaterial3D.new()
-			gmat.albedo_color = Color(0.08, 0.08, 0.08)
-			grip.material_override = gmat
-			grip.position = Vector3(0, -0.06, 0.06)
-			grip.rotation_degrees.x = 12.0
-			model_root.add_child(grip)
-
 			muzzle_offset = Vector3(0, 0.02, -0.18)
+			var glb_m9 := load_glb_model(GLB_MODELS["m9"])
+			if glb_m9 != null:
+				# AP-1d: CC BY 4.0 model by emran.bayati (credits/ATTRIBUTIONS.md), real size.
+				glb_m9.transform = Transform3D(
+					M9_MODEL_BASIS, muzzle_offset - M9_MODEL_BASIS * M9_MODEL_MUZZLE
+				)
+				model_root.add_child(glb_m9)
+			else:
+				# Sleek black 9mm handgun fallback
+				var slide := MeshInstance3D.new()
+				var sm := BoxMesh.new()
+				sm.size = Vector3(0.05, 0.07, 0.20)
+				slide.mesh = sm
+				var smat := StandardMaterial3D.new()
+				smat.albedo_color = Color(0.12, 0.12, 0.14)
+				smat.metallic = 0.7
+				slide.material_override = smat
+				model_root.add_child(slide)
+
+				var grip := MeshInstance3D.new()
+				var gm := BoxMesh.new()
+				gm.size = Vector3(0.05, 0.10, 0.06)
+				grip.mesh = gm
+				var gmat := StandardMaterial3D.new()
+				gmat.albedo_color = Color(0.08, 0.08, 0.08)
+				grip.material_override = gmat
+				grip.position = Vector3(0, -0.06, 0.06)
+				grip.rotation_degrees.x = 12.0
+				model_root.add_child(grip)
 
 	if muzzle_point == null:
 		var mp := Marker3D.new()

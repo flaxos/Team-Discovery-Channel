@@ -1,0 +1,58 @@
+{
+  "status": "integrated_pending_owner_art_review",
+  "title": "Beretta M9",
+  "creator": "emran.bayati",
+  "canonical_source_url": "https://sketchfab.com/3d-models/beretta-m9-d1200d9aa28f466484f7d3fdd7724e76",
+  "category": "generic",
+  "checked_on": "2026-11-16",
+  "download": {
+    "availability": "free download behind a Sketchfab account (the API download endpoint answers HTTP 401 without a session)",
+    "route": "downloaded by the owner through their Sketchfab account (original format) and placed at the repository root as beretta-m9.zip; staged by copy, the owner's file left in place",
+    "archive_sha256": "17c2fc995a51946d352dec36cda230ee1c5f37729f8ef6248b03b1bb4704b1ee",
+    "archive_contents": {
+      "source/Beretta M9 Sketchfab.fbx": "17991fc01f48ddd8676987c7ff699f9285bd3fd4351b9b1d509e18d7efde77cf",
+      "textures/BerettaM9_albedo.jpeg": "ccfd623f1874ded0298b15b74e3a83569a8ac348f1f32113607f52fa932b0d0c",
+      "textures/BerettaM9_normal.png": "86c696fe228050a49bcc36eb1d726d0f99afc166c3a737a8a2ca183793b7a66b",
+      "textures/BerettaM9_roughness.jpeg": "f5f9535cdb9ad04970c1a78af3e8829187cc578f4308392a2003814c4006f054",
+      "textures/BerettaM9_metallic.jpeg": "bf93cc7b5007b0c85b15de9e599251dc2198a6c37e10d4a75f3d169dccc0a331",
+      "textures/BerettaM9_AO.jpeg": "ba620bcdeb7e29e2c51c39c34c91e32d5fc4e6524bfe0fac8d3232bb7c86f6e0"
+    },
+    "archive_notes": "All entries dated 2020-04-23, the model's publication date. Maps are 4096 x 4096. No licence or readme file in the archive; no path traversal.",
+    "model_sha256": "17ce228acc90eb3a25dd43158c44db7a3b08ead5ef9dab3f1c865cf7be97436a",
+    "staging_path": "/tmp/tdc-asset-intake/beretta_m9/ (outside client/; not committed)"
+  },
+  "licence": {
+    "id": "CC-BY-4.0",
+    "version": "4.0",
+    "evidence_url": "https://api.sketchfab.com/v3/models/d1200d9aa28f466484f7d3fdd7724e76",
+    "evidence_summary": "API on 2026-11-16: license.slug \"by\", url http://creativecommons.org/licenses/by/4.0/, isDownloadable true, faceCount 11761, animationCount 0. Creator's description: they created and textured it and share it for free download.",
+    "bundled_text_path": "credits/licenses/CC-BY-4.0.txt",
+    "redistribution_status": "cleared (CC BY 4.0 with attribution and a statement of changes)",
+    "required_attribution": "\"Beretta M9\" by emran.bayati, https://sketchfab.com/3d-models/beretta-m9-d1200d9aa28f466484f7d3fdd7724e76, CC BY 4.0; modified",
+    "creator_or_archive_conflicts": "none found. Trademarks: the model reproduces Beretta's grip medallion and slide markings; CC BY covers the modeller's copyright only"
+  },
+  "integration": {
+    "target_scene_or_script": "scripts/weapons/WeaponBase.gd weapon id m9 (WeaponM9): WeaponModel/ImportedGLB",
+    "source_forward_axis": "muzzle toward model -X (FBX Z-up converted to Y-up by Godot's ufbx loader)",
+    "source_units": "metres: gun 0.2172 x 0.1418 x 0.0320 m, matching the real pistol",
+    "wrapper_transform": "yaw -90 degrees (model -X to game -Z), then translate so the measured bore centre (-0.1255, 0.1303, 0.0) lands on MuzzlePoint (0, 0.02, -0.18)",
+    "world_bounds_metres": [0.032, 0.1418, 0.2172],
+    "required_sockets": ["MuzzlePoint (0, 0.02, -0.18), unchanged"],
+    "material_modifications": [
+      "five maps bound by recipe (the FBX binds none); normal map OpenGL convention, checked against engraved slide markings under a top light",
+      "maps downscaled 4096 -> 1024 (Lanczos); occlusion, roughness and metallic packed into one ORM image; images stored as JPEG quality 0.9",
+      "runtime: metallic set to 0 by the existing weapon sanitizer (D-015); mipmaps generated"
+    ],
+    "effort": "S",
+    "modifications": "Kept nodes Gun (8,609 triangles) and Magazine (1,576, seated in the grip). Dropped Gun001, a second magazine laid beside the pistol (1,576), and the empty animation take. Geometry, UVs and node transforms unchanged. Recipe: docs/assets/intake/beretta_m9/recipe.json; packer: client/scripts/assets/pack_model_glb.gd (reproducible: same sha256 on repeat runs)."
+  },
+  "evidence": {
+    "intake_report": "docs/assets/intake/beretta_m9/intake-report.json (ok: true, 10,185 triangles, three embedded images, no external dependencies)",
+    "gltf_validation_report": "docs/assets/intake/beretta_m9/gltf-validator.json (Khronos glTF-Validator 2.0.0-dev.3.10: 0 errors, 0 warnings, 3 infos: GODOT_single_root extension used, unused second UV set)",
+    "godot_import_log": "runtime GLTFDocument load, importer=\"keep\"; measured by tests/test_imported_m9_visual.gd",
+    "mission_capture": "docs/reviews/ap1d-captures/ (SGC UAT and Goa'uld infiltration, Forward+, RTX 3060); record docs/reviews/2026-11-16-ap1d-beretta-m9.md",
+    "export_smoke_log": "Linux release template 4.4.1, throwaway preset outside the repo: WeaponM9 builds ImportedGLB from the .pck with 10,185 triangles, mipmapped textures and the unchanged MuzzlePoint",
+    "behaviour_tests": ["test_imported_m9_visual", "test_stealth_takedowns_and_weapons", "full profile"],
+    "reviewer": ""
+  }
+}

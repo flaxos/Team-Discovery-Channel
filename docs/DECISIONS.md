@@ -183,3 +183,15 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 **Material.** The source asks for glTF `BLEND` but its JPEG base colour has no alpha, so it is drawn opaque. The source orange is tinted olive to sit with the armoury, its ARM occlusion channel is wired, and mipmaps are generated. All of this happens at runtime; the committed GLB keeps the source material.
 
 **Consequences.** About 385,000 more triangles when both stacks are in view (+0.2 to +0.5 ms GPU on an RTX 3060), because runtime LOD generation did not complete on this mesh. The third-person camera does not fade a stack that hides the player, as it fades the invisible box instead. Owners may change the tint (`CrateStackVisual.DEFAULT_TINT`) or turn the dressing off per station (`imported_crate_visual`).
+
+## D-019 — Realistic weapons: conversion, finish and sharing
+
+**Recommended (AP-1d, 16 November 2026; owner art review pending).** Record: [AP-1d review](reviews/2026-11-16-ap1d-beretta-m9.md).
+
+**Conversion in the engine.** Community weapons arrive as FBX or glTF with loose texture maps. They are converted by `client/scripts/assets/pack_model_glb.gd` from a recipe kept beside the intake record, not by hand in Blender. The recipe makes the conversion repeatable and reviewable, needs no tool beyond Godot 4.4.1, and keeps the creator's geometry, UVs and units; orientation and sockets stay in the game wrapper. Textures are downscaled to 1024² for weapons held at arm's length.
+
+**Finish.** The AP-1a rule stays: imported weapons have metallic 0 at runtime (D-015), while the GLB keeps the creator's metallic map. The M9 reads as grey rather than blued steel; captures of both are in the record for the owner to choose.
+
+**Sharing.** Each weapon GLB is parsed once per session and kept as a `PackedScene` on the tree root. Every operative's copy shares meshes and materials, so drawing a sidearm no longer decodes textures on every peer.
+
+**Consequences.** Credits must reach players before a build is distributed, because CC BY assets now ship. Realistic models may carry manufacturers' markings; licences from modellers do not cover trademarks.
