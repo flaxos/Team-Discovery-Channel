@@ -33,6 +33,8 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 
 ## Coverage contracts
 
+Sprint 7 infrastructure adds `test_asset_credits` (real lobby open/select/close, every packaged model, exact full official CC0/CC BY texts; also runnable from a clean release PCK) and `test_asset_packer_maps` (real opaque PNG packing, normal flip and ORM reference channels). Python tests exercise work-order rejection/readiness/path/LOD/intake budgets and credit coverage/staleness. Install the pinned `tools/requirements.txt` dependency in a build-area environment before running the tooling suite. `python3 tools/sync_asset_credits.py --check` is a CI gate. See the [Sprint 7 review](reviews/2026-11-18-sprint7-mp5-intake.md); these checks do not establish acceptance of the still-unacquired MP5SD.
+
 Sprint 6 extends `test_goauld_theme` and `tools/tests/test_theme_kit.py` for all nine
 corridor/compact-chamber definitions, four rotations, connected narrow/wide gallery
 interfaces, neutral/themed physical and navigation equality, continuous floor

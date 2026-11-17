@@ -23,7 +23,15 @@ func frames(count: int) -> void:
 
 
 func mark(label: String, text: String = "ok") -> void:
-	FileAccess.open(output_dir.path_join(label), FileAccess.WRITE).store_string(text)
+	# Another process can observe file_exists between open() and store_string(). Publish
+	# only a closed, complete value; the runner marker carries data, not just a signal.
+	var destination := output_dir.path_join(label)
+	var staged := destination + ".pending"
+	var file := FileAccess.open(staged, FileAccess.WRITE)
+	assert(file != null)
+	file.store_string(text)
+	file.close()
+	assert(DirAccess.rename_absolute(staged, destination) == OK)
 
 
 func marked(label: String, limit: int = 3600) -> bool:

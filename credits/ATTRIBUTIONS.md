@@ -2,6 +2,8 @@
 
 Every external 3D model, texture, material, or animation imported into **Team Discovery Channel** is recorded here in accordance with the 7-point provenance and technical gate in [`docs/plans/asset-import-pipeline.md`](../docs/plans/asset-import-pipeline.md).
 
+The lobby’s **Community Credits & Licences** window displays an exportable resource generated from this manifest and `credits/licenses/`. After a change, run `python3 tools/sync_asset_credits.py`; CI checks it with `--check`. Keep this file and the original licence texts authoritative; do not hand-edit `client/resources/asset_credits.tres`. Sprint 7 restored the complete official [CC0 legal text](https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt), including its formerly omitted definitions and limitations.
+
 ---
 
 ## 1. Generic Tactical & Architectural Assets

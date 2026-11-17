@@ -82,6 +82,7 @@ Mixamo and other download services may permit game use while restricting raw ass
 | AP-1c–f rigid proofs | Crate, M9, P90 and M249 integrated and merged; owner art review remains separate. Worked reviews and recipes are indexed in the shared workflow. M249 fused bipod and repeated crate scene cost remain explicit defects. |
 | AP-1g gate | Glyph ring/seven inserts integrated; source body omitted; recorded owner exception and missing authorship evidence remain visible. |
 | Rig/animation | No production humanoid adapter or complete tactical set yet. Sprint 19 proves the route in a live Airman encounter; a preview is only an intermediate check. |
+| Sprint 7 infrastructure | `asset_work_order.py` and `asset_intake.py --work-order` validate ready requests and declared budgets. Generated `asset_credits.tres` supplies lobby credits/full licence text in the export from the maintained manifest. Selected MP5SD still awaits archive and measured integration; [review](../reviews/2026-11-18-sprint7-mp5-intake.md). |
 | Next programme | [Sprints 7–35](asset-vertical-slices.md): weapons/kit → SGC → characters → offworld → bounded mothership → integrated acceptance. The programme is planned, not shipped. |
 
 Keep source, implementation, evidence and credits together. Report local and hosted results separately and track human art acceptance. Follow AGENTS.md for workspace and delivery; an explicit commit-and-merge request authorizes completing that merge after checks without another confirmation.

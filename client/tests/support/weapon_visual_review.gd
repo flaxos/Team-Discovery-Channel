@@ -31,6 +31,10 @@ func run() -> void:
 	var net := root.get_node("NetworkManager") as SGCNetworkManager
 	var mission := option("--mission", SGCNetworkManager.MISSION_SGC_UAT)
 	var weapon_id := option("--weapon", "m9")
+	# The MP5 slice uses Carter's actual loadout, including the existing gadget/HUD.
+	if weapon_id == "mp5":
+		net.selected_class_id = SGCNetworkManager.CLASS_CARTER_TECH
+		net.player_name = "Carter"
 	net.selected_mission_id = mission
 	var main := (load("res://scenes/main/Main.tscn") as PackedScene).instantiate() as MainGameCoordinator
 	root.add_child(main)
@@ -78,6 +82,11 @@ func run() -> void:
 		bounds = placed * mi.get_aabb() if first else bounds.merge(placed * mi.get_aabb())
 		first = false
 	var centre := bounds.get_center()
+	var muzzle := gun.muzzle_point.position
+	print("WEAPON_REVIEW_MEASUREMENTS ", JSON.stringify({"weapon": weapon_id,
+		"class": net.selected_class_id, "visual_bounds_min": [bounds.position.x, bounds.position.y, bounds.position.z],
+		"visual_bounds_max": [bounds.end.x, bounds.end.y, bounds.end.z],
+		"muzzle": [muzzle.x, muzzle.y, muzzle.z], "frame": "weapon local; WeaponModel is identity"}))
 	close.position = centre + Vector3(0.9, 0.4, -0.65).normalized() * maxf(0.4, bounds.size.length() * 1.8)
 	close.look_at(gun.to_global(centre))
 	close.current = true

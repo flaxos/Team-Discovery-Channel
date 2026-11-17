@@ -1,6 +1,6 @@
 # Community-first asset sprints: 7–35
 
-Owner-requested programme, **18 November 2026**, based on merged main `7982e2b` / [PR #77](https://github.com/flaxos/Team-Discovery-Channel/pull/77). Sprints [1–6](next-six-sprints.md) are merged; their remaining human checks still apply. All sprints below are **planned**, not implemented or artistically accepted. “Horse” means **Horus Jaffa**; “mother assets” means a **Goa’uld mothership**. No delivery dates or guaranteed source acquisitions are implied.
+Owner-requested programme, **18 November 2026**, based on merged main `7982e2b` / [PR #77](https://github.com/flaxos/Team-Discovery-Channel/pull/77). Sprints [1–6](next-six-sprints.md) are merged; their remaining human checks still apply. Unless its state is explicitly updated below, each sprint is **planned**, not implemented or artistically accepted. Sprint 7 is in progress with acquisition outstanding. “Horse” means **Horus Jaffa**; “mother assets” means a **Goa’uld mothership**. No delivery dates or guaranteed source acquisitions are implied.
 
 Prefer available high-fidelity community assets, including normal owner/account downloads. Generate only documented gaps under the [shared AI workflow](../assets/ai-asset-workflow.md), [texture contract](../assets/texture-import-contract.md) and [strict work-order schema](../assets/asset-work-order.schema.json). Start with the [dated sourcing register](../assets/asset-program-sourcing.md); a promising listing is not an approved or acquired model.
 
@@ -14,7 +14,7 @@ If a prerequisite is unfinished, report it and finish only the prerequisite work
 
 | Sprint | Playable result | State | Exact trigger |
 |---|---|---|---|
-| 7 | Faithful MP5SD in SGC/offworld; reproducible shared intake and distributed credits | Planned | `Start sprint 7 from docs/plans/asset-vertical-slices.md` |
+| 7 | Faithful MP5SD in SGC/offworld; reproducible shared intake and distributed credits | In progress: intake/credits implemented; selected MP5SD archive required ([review](../reviews/2026-11-18-sprint7-mp5-intake.md)) | `Start sprint 7 from docs/plans/asset-vertical-slices.md` |
 | 8 | Staff weapon in player and Jaffa combat | Planned | `Start sprint 8 from docs/plans/asset-vertical-slices.md` |
 | 9 | Zat in quiet incapacitation/combat | Planned | `Start sprint 9 from docs/plans/asset-vertical-slices.md` |
 | 10 | Six held-weapon meshes/materials ready for character grips | Planned | `Start sprint 10 from docs/plans/asset-vertical-slices.md` |

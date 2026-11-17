@@ -2,6 +2,8 @@
 
 **Current execution plan (18 November 2026):** [Sprints 7–35](../plans/asset-vertical-slices.md), the [shared Codex/Antigravity workflow](ai-asset-workflow.md), [texture contract](texture-import-contract.md), [generation work-order schema](asset-work-order.schema.json) and [updated sourcing register](asset-program-sourcing.md). The dated research below is historical; M9, P90, M249 and gate visuals are integrated, with owner art acceptance still recorded separately. Sprint 6 corridor work is merged in #77. No new assets are implemented by this plan.
 
+**Sprint 7 in progress:** [intake/credits implementation and acquisition card](../reviews/2026-11-18-sprint7-mp5-intake.md). WillyG99 MP5SD selected, archive still required; generic Kenney MP5 remains active. Shared work-order validation and clean exported credits are implemented; no MP5SD art acceptance claimed.
+
 Prepared **16 November 2026**, from gameplay baseline `f45e909`. Three parallel agents covered mission features, static asset sourcing and character/animation sourcing; this handoff is the art track. The sourcing agents inspected creator pages and public metadata, without downloading third-party binaries or signing into services. No new community model is inserted into gameplay by this change.
 
 **AP-1c historical status (16 November 2026, superseded by AP-1d below).** The first insertion is the Poly Haven crate, now dressing the SGC armoury ammo crates: [review record](../reviews/2026-11-16-ap1c-plastic-crate.md), [intake record](intake/plastic_crate_02.json). The M9 was not acquired: Sketchfab's download endpoint answered HTTP 401 without an account session, so an authorised account download is the remaining blocker for it.
