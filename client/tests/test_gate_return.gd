@@ -112,6 +112,12 @@ func run() -> void:
 	home._spawn_player(42, SGCNetworkManager.CLASS_CARTER_TECH, (home.spawns_container.get_child(0) as Node3D).global_position)
 	await frames(3)
 	var op42_home := home.players_container.get_node("42") as PlayerController3D
+	session.travel_player(op42_home, home)
+	await frames(2)
+	assert(home.players_container.has_node("42"), "An absent owner cannot bypass the transfer acknowledgment")
+	# This solo fixture owns the synthetic guest; real remote acknowledgments are
+	# exercised by test_gate_return_multiplayer and the four-operative suites.
+	op42_home.set_multiplayer_authority(1)
 	sgc_gate._on_extraction_entered(op42_home)
 	await frames(5)
 	var op42_site := site.players_container.get_node_or_null("42") as PlayerController3D
