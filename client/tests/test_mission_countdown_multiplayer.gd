@@ -11,6 +11,14 @@ func client_script() -> String:
 	return "res://tests/test_mission_countdown_multiplayer.gd"
 
 
+func mission_id() -> String:
+	return SGCNetworkManager.MISSION_TIMED_EXTRACTION
+
+
+func park_hostiles(room: ModularMission) -> void:
+	Fixture.stand_down(room)
+
+
 func frames(count: int) -> void:
 	for i in range(count):
 		if is_instance_valid(main):
@@ -19,7 +27,7 @@ func frames(count: int) -> void:
 				if mine != null:
 					mine.set_physics_process(false)
 				if net.is_server and world is ModularMission and (world as ModularMission).is_started:
-					Fixture.stand_down(world as ModularMission)
+					park_hostiles(world as ModularMission)
 		OS.delay_msec(1)
 		await process_frame
 
@@ -122,7 +130,7 @@ func run() -> void:
 func run_host() -> void:
 	net.is_dedicated_server = is_dedicated
 	require(net.host_game(port()) == OK)
-	require(net.set_mission(SGCNetworkManager.MISSION_TIMED_EXTRACTION))
+	require(net.set_mission(mission_id()))
 	net.request_start_game()
 	var room := await mission()
 	await fresh(room)

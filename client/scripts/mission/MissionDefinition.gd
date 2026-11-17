@@ -10,7 +10,7 @@ extends Resource
 @export var alarms: Array[MissionAlarm] = []
 ## Jaffa that arrive after the alarm. Needs at least one alarm console.
 @export var reinforcements: Array[MissionReinforcement] = []
-## One-shot objective completions that release security doors or start extraction time.
+## One-shot objective/alarm conditions that release security doors or start extraction time.
 @export var triggers: Array[MissionTrigger] = []
 
 
@@ -74,7 +74,16 @@ func validate() -> PackedStringArray:
 		if str(trigger.id).strip_edges().is_empty() or trigger_ids.has(trigger.id):
 			errors.append("Duplicate/empty mission trigger id: %s" % trigger.id)
 		trigger_ids[trigger.id] = true
-		if not ids.has(trigger.objective_id):
+		if trigger.condition == "alarm_raised":
+			if trigger.objective_id != &"":
+				errors.append("Alarm trigger cannot also name an objective: %s" % trigger.id)
+			if alarms.is_empty():
+				errors.append("Alarm trigger needs an alarm console: %s" % trigger.id)
+			if trigger.action != "start_timer":
+				errors.append("Alarm trigger supports start_timer only: %s" % trigger.id)
+		elif trigger.condition != "objective_completed":
+			errors.append("Unknown mission condition: %s/%s" % [trigger.id, trigger.condition])
+		elif not ids.has(trigger.objective_id):
 			errors.append("Unknown trigger objective: %s/%s" % [trigger.id, trigger.objective_id])
 		else:
 			for objective in objectives:
@@ -116,7 +125,7 @@ func validate() -> PackedStringArray:
 			if LevelTopology.path(links, previous, str(objective.room), [], true).is_empty():
 				errors.append("Mission doors block objective: %s" % objective.id)
 			for trigger in triggers:
-				if trigger.action == "release_door" and trigger.objective_id == objective.id:
+				if trigger.condition == "objective_completed" and trigger.action == "release_door" and trigger.objective_id == objective.id:
 					for edges: Array in links.values():
 						for edge: Dictionary in edges:
 							if edge.security_id == str(trigger.security_id):

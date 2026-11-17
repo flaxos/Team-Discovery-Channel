@@ -46,7 +46,7 @@ func _ready() -> void:
 	alert.runner_changed.connect(_on_alarm_runner)
 	alert.console_disabled.connect(_on_alarm_disabled)
 	if setup_errors.is_empty():
-		events.setup(definition, level, objectives)
+		events.setup(definition, level, objectives, alert)
 		events.notice_shown.connect(_on_event_notice)
 		events.countdown_changed.connect(_on_countdown_changed)
 		events.timer_expired.connect(_on_timer_expired)

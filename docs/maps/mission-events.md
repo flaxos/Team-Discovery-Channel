@@ -1,4 +1,4 @@
-# Mission events — EV-2 chunks 1 and 2
+# Mission events — EV-2 chunks 1 to 3
 
 An objective can now release a named security door. In Goa'uld Infiltration (including the travel mission's offworld site), command-room security starts locked. Sabotaging the generator releases it and shows `GENERATOR SABOTAGED — COMMAND SECURITY RELEASED`. The player then opens the door normally. Retry restores the lock and clears event progress.
 
@@ -15,7 +15,7 @@ security_id = &"cmd_command"
 notice = "GENERATOR SABOTAGED — COMMAND SECURITY RELEASED"
 ```
 
-`id` is unique within the mission, `objective_id` names an existing non-extraction objective, and `security_id` resolves to exactly one native layout connection whose state is `security_door`. Generated node names such as `Door_002`, room names and paths are not accepted. There is one release per target door in this chunk. An empty trigger array preserves the old mission behavior.
+`condition` defaults to `objective_completed`. For that condition, `id` is unique within the mission, `objective_id` names an existing non-extraction objective, and a door action's `security_id` resolves to exactly one native layout connection whose state is `security_door`. Generated node names such as `Door_002`, room names and paths are not accepted. There is one release per target door in this chunk. An empty trigger array preserves the old mission behavior.
 
 Validation checks references, duplicates and the sequence's walking connectivity with all mission gates initially locked. It rejects an objective behind the very door it must unlock. The native `LevelLayout` remains authoritative and unchanged; the mission defines temporary runtime gates rather than new geometry or permanently inaccessible regions. Use the [authoring CLI](ai-level-authoring.md) for structural changes.
 
@@ -44,6 +44,27 @@ Timer snapshots carry a revision, known trigger ID, state and remaining seconds.
 
 The top-right `MM:SS` panel rounds remaining seconds upward and turns red at 30 seconds. Mission notices sit below the objective banner. Retry replaces the world and all countdown state; disconnect frees it without a scheduled timeout callback.
 
+## Alarm Escape consumer (sprint 3)
+
+**Goa'uld Infiltration — Alarm Escape** (`goauld_alarm_escape`) consumes one new condition with the existing timer action. The [brief](briefs/alarm-escape.md) keeps the original compound and all objectives: if an alarm runner raises **ALARM**, a provisional three-minute extraction window starts immediately, including when generator sabotage or the records download remains unfinished. Searching alone starts no clock. Preventing the alarm allows an untimed escape; records download alone starts no timer in this variant.
+
+```ini
+[sub_resource type="Resource" id="extraction_window"]
+script = ExtResource("trigger_script")
+id = &"alarm_starts_extraction_window"
+condition = "alarm_raised"
+action = "start_timer"
+duration_seconds = 180.0
+timer_label = "EXTRACTION"
+notice = "ALARM RAISED — FINISH OBJECTIVES AND EXTRACT"
+```
+
+An alarm trigger has no `objective_id`, requires at least one valid alarm console and supports only `start_timer`. Validation rejects unknown conditions, mixed alarm/objective bindings and alarm-driven door releases. Door topology proof still uses objective-driven releases only. The one-timer limit remains; there are no extra actions or generalized condition expressions.
+
+`ModularMission` passes its existing `MissionAlert` to `MissionEvents`. The host consumes its actual raised state, not a client report or a SEARCHING transition. Initialization also checks a previously raised alarm. The same one-shot action path handles objective and alarm events. Later alert signals and objective completions cannot restart or extend the timer. Event execution stops at the final result.
+
+On clients, an alert snapshot can refresh presentation but cannot run actions. Timer/fired-ID snapshots retain the existing revision, remaining-time, terminal-state and live-only notice rules. A late join during or after the deadline receives current state; it never reconstructs a new deadline from the alarm state. Retry creates a calm compound, working consoles and an idle timer. [Review and captures](../reviews/2026-11-17-sprint3-alarm-escape.md).
+
 ## Multiplayer and lifecycle
 
 Only the host executes actions. Clients can use an objective console through its existing identity/reach/health/order validation; there is no client event-completion RPC. Live releases use readiness-gated mission RPCs. The fired-ID snapshot is monotonic, ignores unknown IDs and does not replay old notices. Doors send their own authoritative state.
@@ -54,7 +75,7 @@ A final mission result stops actions. Restart creates a fresh world, objective i
 
 ## Scope and verification
 
-EV-2 remains incremental. Alert/room conditions, objective enabling, optional/parallel objectives and power visuals remain future work. Add each only alongside a mission definition that needs it (D-003).
+EV-2 remains incremental. Other alert levels, room conditions, objective enabling, optional/parallel objectives and power visuals remain future work. Add each only alongside a mission definition that needs it (D-003).
 
 - `test_mission_events`: definition validation, unearnable-stage rejection, real generator interaction, reach/downed rejection, TA-3 blocked/released navigation, one-shot behavior, result freeze and retry.
 - `test_mission_events_multiplayer`: real ENet late join while locked and after release, stale snapshot monotonicity, no stale notice, connected retry, rejected client event/door calls and forged/out-of-reach console identities, a real client console release and a second reset.
@@ -66,3 +87,6 @@ EV-2 remains incremental. Alert/room conditions, objective enabling, optional/pa
 - `test_mission_countdown_multiplayer`, `test_mission_countdown_dedicated`: four operatives on listen/pawnless dedicated servers; real client console RPCs, late joins during the clock, loopback estimate agreement, rejected stale/invalid snapshots and client timer execution, shared success/expiry, terminal late join in the same process, two full-team retries and disconnect during an active clock.
 
 [Sprint 2 review and captures](../reviews/2026-11-17-sprint2-timed-extraction.md).
+
+- `test_alarm_escape`: definition rejection cases, real sentry detection and runner start before objectives, searching without a timer, repeat/init one-shot behavior, consuming a preexisting real alarm on initialization, disabled-console prevention, quiet success, alarm after records, pause expiry, result freeze and fresh retries.
+- `test_alarm_escape_multiplayer`, `test_alarm_escape_dedicated`: reuse the four-operative countdown contract with real server alarm runners triggered by a remote operative's sighting. Cover running and terminal late joins, estimates, authority, records progression without retiming, shared results, two retries and active-clock host disconnect. The original countdown suites keep their original objective-driven start.
