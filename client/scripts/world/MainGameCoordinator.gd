@@ -32,8 +32,8 @@ func _ready() -> void:
 			net.mission_restart_preparing.connect(_on_mission_restart_preparing)
 		if not net.mission_restart_released.is_connected(_on_mission_restart_released):
 			net.mission_restart_released.connect(_on_mission_restart_released)
-		if not net.server_disconnected.is_connected(_on_server_disconnected):
-			net.server_disconnected.connect(_on_server_disconnected)
+		if not net.session_ended.is_connected(_on_session_ended):
+			net.session_ended.connect(_on_session_ended)
 
 		# Dedicated server mode bypasses lobby UI and initializes GateRoom arena immediately
 		if net.is_dedicated_server:
@@ -135,11 +135,20 @@ func _clear_gate_room() -> void:
 	session = null
 
 
-## The server has gone: leave the dead world for the lobby instead of running it without a peer.
-func _on_server_disconnected() -> void:
+## Intentional leave and connection loss retire gameplay through the same path.
+func _on_session_ended() -> void:
 	if is_instance_valid(current_gate_room):
+		get_tree().paused = false
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		_load_lobby()
+
+
+func return_to_lobby() -> void:
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null:
+		net.disconnect_game()
+	# Also support a locally previewed world without an ENet session.
+	_on_session_ended()
 
 
 func _on_mission_restart_preparing() -> void:

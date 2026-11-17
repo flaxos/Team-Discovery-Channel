@@ -37,7 +37,7 @@ The original main code failed the new delayed-load fixture with missing spawners
 - One remote leaving, a replacement late joining after retry while an existing operative travels, then a second full-team retry.
 - Graceful departures, one peer at a time, with logs checked for engine/script errors and leaks.
 
-Focused listen/dedicated, gate travel/return, combat, replication, event and retry suites were run while developing. Final full local and hosted results belong to the PR. No human co-op, simultaneous connection-loss burst or WAN-latency acceptance is claimed. An exploratory simultaneous teardown produced ENet closed-channel diagnostics; the regression fixtures deliberately verify completed departures sequentially rather than treating that burst as passing.
+Focused listen/dedicated, gate travel/return, combat, replication, event and retry suites were run while developing. Final full local and hosted results belong to the PR. No human co-op, simultaneous connection-loss burst or WAN-latency acceptance is claimed. An exploratory simultaneous teardown produced ENet closed-channel diagnostics; the regression fixtures deliberately verify completed departures sequentially rather than treating that burst as passing. The subsequent [sprint 1 lifecycle review](2026-11-17-sprint1-session-lifecycle.md) records the burst-loss and shutdown fix.
 
 ## Human follow-up
 

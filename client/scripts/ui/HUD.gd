@@ -294,6 +294,12 @@ func _on_return_pressed() -> void:
 		get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	is_mission_ended = false
+	var coordinator := get_parent()
+	while coordinator != null:
+		if coordinator.has_method("return_to_lobby"):
+			coordinator.call("return_to_lobby")
+			return
+		coordinator = coordinator.get_parent()
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null:
 		net.disconnect_game()

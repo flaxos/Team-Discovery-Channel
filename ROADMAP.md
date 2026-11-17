@@ -1,6 +1,6 @@
 # Roadmap — Stargate SG Extraction
 
-**This is the authoritative roadmap.** Audited 12 November 2026 against `main` at `bf56743` (PR #40); resume status updated 17 November 2026 against `main` at `7c8786a` (PR #70). Godot **4.4.1**, typed GDScript, native ENet multiplayer.
+**This is the authoritative roadmap.** Audited 12 November 2026 against `main` at `bf56743` (PR #40); resume status updated 17 November 2026 against `main` at `2cb9719` (PR #71). Godot **4.4.1**, typed GDScript, native ENet multiplayer.
 
 The game: a Stargate-inspired, four-player tactical co-op shooter about reconnaissance, infiltration, combat, objectives and extraction. Design intent is in the [GDD](GDD.md). Evidence, milestone detail and agent work packages are in the [master development plan](docs/plans/master-development-roadmap.md). Architectural choices are in the [decision log](docs/DECISIONS.md).
 
@@ -8,7 +8,7 @@ Sizes below are relative effort, not dates. Nothing in this file is a delivery c
 
 ## Start here
 
-**Resume state on 17 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. Gate travel and SW-1 are now merged through PR #58. TA-3 and its post-combat hardening, CO-1 resupply, and the community weapon/gate imports are merged through #69. EV-2 chunk 1 is merged in #70. The R24 four-operative joining/travel fix is implemented on `fix/four-player-join-order` for review. The earlier GT-1 local baseline was **80/80**.
+**Resume state on 17 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. Gate travel and SW-1 are now merged through PR #58. TA-3 and its post-combat hardening, CO-1 resupply, and the community weapon/gate imports are merged through #69. EV-2 chunk 1 is merged in #70. The R24 four-operative joining/travel fix is merged in #71. Sprint 1 session cleanup is implemented on `fix/session-disconnect-lifecycle` for review; the [six-sprint sequence](docs/plans/next-six-sprints.md) tracks what follows. The earlier GT-1 local baseline was **80/80**.
 
 Two owner decisions on 14 November shape what follows: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)). The design that followed is written: [gate travel with a split team](docs/plans/gate-travel-split-worlds.md), with the owners' four rules for a split team in [D-017](docs/DECISIONS.md). A third, matte Jaffa armour ([D-015](docs/DECISIONS.md)), came out of building the art.
 
@@ -17,7 +17,7 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 | Option | What | Who | Detail |
 |---|---|---|---|
 | **A. Review GA-1, then GA-2 part 1** | GA-1 is built: the palette on all 20 rooms of the compound and pieces on 8. **A person has not looked at it yet.** Jaffa armour became matte gold in the same change so that they stand out from the dark walls ([D-015](docs/DECISIONS.md)). Then extend the kit to the T-junction, corners, wide corridor and adapter | An owner to review; then a Fable-class agent | [Kit guide: human review](docs/maps/goauld-theme-kit.md#human-review-pending); order of rooms in the [brief](docs/maps/goauld-visual-brief.md#42-by-module-which-is-the-order-art-should-follow) |
-| **B. R24 four-operative joining** | Correct server-owned spawn visibility, ordered host movement relay and acknowledged gate handoffs. Real full-team listen/dedicated tests cover delayed late joins, travel, a replacement peer and two retries. Then continue EV-2 timers/actions only with a designed mission consumer | Agent implementation; owner co-op/latency review | [Joining review](docs/reviews/2026-11-17-r24-four-player-joining.md); [mission-event contract](docs/maps/mission-events.md) |
+| **B. Sprint 1 session cleanup, then timed missions** | R24 is merged. Sprint 1 covers burst losses, authoritative rosters, paused HUD return, rejoining, retries, server shutdown, same-port rehosting and cancellation of stale reconnect/handoff callbacks. Sprint 2 adds a designed timed-mission consumer | Agent implementation; owner co-op/latency review | [Sprint 1 review](docs/reviews/2026-11-17-sprint1-session-lifecycle.md); [next six sprints](docs/plans/next-six-sprints.md) |
 | **C. Two-player sessions** *(deferred by the owner)* | The co-op checklist items no human has run: late join, shared extraction, revive, mixed quiet and loud play | Two humans | [Next work, part A](docs/plans/next-work-packages.md#a-human-play-sessions) |
 | **D. Community asset insertion** | AP-1c (CC0 crates), AP-1d (CC BY Beretta M9) and AP-1e (Rotuma P90) are merged. AP-1f adds the CC BY M249 SAW by AK / skaf13 in [merged #68](https://github.com/flaxos/Team-Discovery-Channel/pull/68), with measured muzzle, fallback, mission captures and release export checked. AP-1g adds the Stargate glyph ring/seven-chevron visual; on 17 November 2026 the owner authorized inclusion with the uploader-authorship gap documented. Owner art review is pending. The first Airman rig experiment remains separate | Owner art review; asset integration agents (Claude, Codex, Gemini) | [Playbook](docs/assets/community-asset-playbook.md); [SAW review](docs/reviews/2026-11-16-ap1f-m249.md); [gate preview](docs/reviews/2026-11-16-ap1g-stargate.md) |
 
@@ -66,9 +66,9 @@ The full classification, with source paths and tests, is the [capability matrix]
 - **Cover on modular levels needs props.** Since TA-1 Jaffa use barricades and crates; rooms without low props still fall back to a room-centre marker.
 - **Ten modules place door headers 0.2 m outside their own cell**, overlapping the neighbouring room's header. Harmless until themed pieces met them; GA-1 works round it (risk R21).
 - **Use this checkout to play.** Check its branch/commit and restart the running game after changes; do not create a separate play checkout. [Commands here](docs/plans/next-work-packages.md#get-a-build-to-play).
-- **R24 joining and travel fix is in review.** Four-operative listen/dedicated fixtures now cover delayed late joins, split-world travel, a replacement peer and two retries. The host orders spawns and observed movement; WAN responsiveness and simultaneous connection-loss bursts remain outside automated acceptance. [Review](docs/reviews/2026-11-17-r24-four-player-joining.md).
+- **R24 joining/travel is merged; sprint 1 session cleanup is in review.** New full-team lifecycle fixtures cover simultaneous losses and server shutdown, including a survivor, rejoining, retries and pending callbacks. WAN responsiveness remains a human check. [Review](docs/reviews/2026-11-17-sprint1-session-lifecycle.md).
 
-All 24 items are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register), including the new EV-2-1 exploration finding.
+All 25 items are in the [risk register](docs/plans/master-development-roadmap.md#7-risk-and-defect-register), including the session-lifecycle follow-up.
 
 ## Direction
 

@@ -10,6 +10,7 @@ signal peer_disconnected_event(peer_id: int)
 signal connection_succeeded()
 signal connection_failed()
 signal server_disconnected()
+signal session_ended()
 signal reconnecting_tick(attempt: int, max_attempts: int)
 signal auto_reconnect_failed()
 signal player_list_updated()
@@ -19,6 +20,7 @@ signal mission_settings_changed(difficulty: int)
 signal mission_restart_preparing()
 signal mission_restart_released()
 signal mission_selection_changed(mission_id: String)
+signal _player_transfer_changed()
 
 const DEFAULT_PORT: int = 7777
 const MAX_PLAYERS: int = 4
@@ -119,6 +121,7 @@ var mission_ready_peers: Dictionary = {}
 var _restart_acks: Dictionary = {}
 var _player_pauses: Dictionary = {}
 var _paused_actors: Dictionary = {}
+var _session_generation := 0
 
 var _peer: ENetMultiplayerPeer
 
@@ -128,6 +131,7 @@ func is_in_active_session() -> bool:
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -139,6 +143,19 @@ func _ready() -> void:
 	if parsed.get("dedicated", false) or parsed.get("server", false):
 		is_dedicated_server = true
 		start_dedicated_server(server_port)
+
+
+func _process(_delta: float) -> void:
+	if _player_pauses.is_empty():
+		return
+	var expired := false
+	var now := Time.get_ticks_msec()
+	for state: Dictionary in _player_pauses.values():
+		if not state.acked and not state.timed_out and now >= int(state.deadline):
+			state.timed_out = true
+			expired = true
+	if expired:
+		_player_transfer_changed.emit()
 
 
 ## Retrieves combined list of OS command-line arguments and user arguments.
@@ -236,6 +253,7 @@ func host_game(port: int = DEFAULT_PORT) -> Error:
 		push_error("NetworkManager: Failed to create server on port %d (Error %d)" % [port, err])
 		return err
 	if is_inside_tree() and multiplayer != null:
+		(multiplayer as SceneMultiplayer).server_relay = false
 		multiplayer.multiplayer_peer = _peer
 	is_server = true
 	server_port = port
@@ -269,6 +287,7 @@ func join_game(address: String = "127.0.0.1", port: int = DEFAULT_PORT) -> Error
 		push_error("NetworkManager: Failed to create client to %s:%d (Error %d)" % [address, port, err])
 		return err
 	if is_inside_tree() and multiplayer != null:
+		(multiplayer as SceneMultiplayer).server_relay = false
 		multiplayer.multiplayer_peer = _peer
 	is_server = false
 	auto_connect_address = address
@@ -279,15 +298,22 @@ func join_game(address: String = "127.0.0.1", port: int = DEFAULT_PORT) -> Error
 
 ## Closes existing connection or server.
 func disconnect_game(reset_settings: bool = true) -> void:
-	if _peer != null:
-		_peer.close()
-		_peer = null
+	_session_generation += 1
+	var previous := _peer
+	_peer = null
+	# Resolve suspended session callers before session_ended retires their worlds.
+	_player_transfer_changed.emit()
+	# Detach the transport before closing sockets or retiring RPC targets. Gameplay
+	# callbacks retain a valid local API while the coordinator removes both worlds.
 	if is_inside_tree() and multiplayer != null:
-		multiplayer.multiplayer_peer = null
+		multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	if previous != null:
+		previous.close()
 	peers.clear()
 	mission_ready_peers.clear()
 	_player_pauses.clear()
 	_paused_actors.clear()
+	_restart_acks.clear()
 	is_server = false
 	local_peer_id = 1
 	mission_started = false
@@ -297,6 +323,8 @@ func disconnect_game(reset_settings: bool = true) -> void:
 		selected_mission_id = MISSION_SGC_DEFENSE
 		mission_selection_changed.emit(selected_mission_id)
 	mission_settings_changed.emit(mission_difficulty)
+	if previous != null:
+		session_ended.emit()
 
 
 ## Offline operatives and the host can select a mode; connected clients follow the host.
@@ -353,6 +381,7 @@ func request_restart_game() -> bool:
 	if not is_server or not mission_started or restart_pending:
 		return false
 	restart_pending = true
+	_player_transfer_changed.emit()
 	_complete_mission_restart.call_deferred()
 	return true
 
@@ -443,6 +472,9 @@ func register_player(p_name: String, p_class_id: String) -> void:
 	player_list_updated.emit()
 	# If server, sync full roster to new peer
 	if is_server:
+		# Transport is a star: the host owns roster announcements, not a client's
+		# broadcast arriving before other clients know that peer exists.
+		sync_peer_info.rpc(sender_id, p_name, p_class_id)
 		if multiplayer.has_multiplayer_peer() and sender_id != multiplayer.get_unique_id():
 			sync_mission_settings.rpc_id(sender_id, mission_difficulty)
 			sync_mission_selection.rpc_id(sender_id, selected_mission_id)
@@ -472,6 +504,26 @@ func _on_peer_disconnected(id: int) -> void:
 	print("NetworkManager: Peer disconnected with ID: %d" % id)
 	peers.erase(id)
 	mission_ready_peers.erase(id)
+	_restart_acks.erase(id)
+	player_list_updated.emit()
+	peer_disconnected_event.emit(id)
+	_player_transfer_changed.emit()
+	if is_server:
+		_broadcast_departure.call_deferred(id, _session_generation)
+
+
+func _broadcast_departure(id: int, generation: int) -> void:
+	if generation != _session_generation or not is_server or not is_in_active_session() or peers.has(id):
+		return
+	# ENet must finish draining a loss burst before we send to its survivors.
+	sync_peer_removed.rpc(id)
+	sync_mission_readiness.rpc(mission_ready_peers.keys())
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_peer_removed(id: int) -> void:
+	peers.erase(id)
+	mission_ready_peers.erase(id)
 	player_list_updated.emit()
 	peer_disconnected_event.emit(id)
 
@@ -492,11 +544,15 @@ func _on_connection_failed() -> void:
 
 
 func _on_server_disconnected() -> void:
-	push_warning("NetworkManager: Server disconnected")
+	if _peer == null:
+		return
+	var was_server := is_server
+	print("NetworkManager: Server disconnected")
 	disconnect_game()
+	var generation := _session_generation
 	server_disconnected.emit()
 
-	if auto_reconnect and not is_server:
+	if auto_reconnect and not was_server and generation == _session_generation:
 		if reconnect_attempts < MAX_RECONNECT_ATTEMPTS:
 			reconnect_attempts += 1
 			print("NetworkManager: Auto-reconnecting attempt %d/%d to %s:%d..." % [
@@ -505,10 +561,12 @@ func _on_server_disconnected() -> void:
 			reconnecting_tick.emit(reconnect_attempts, MAX_RECONNECT_ATTEMPTS)
 			var tree := get_tree()
 			if tree != null:
+				var address := auto_connect_address
+				var port := server_port
 				var timer := tree.create_timer(1.5)
 				timer.timeout.connect(func() -> void:
-					if not is_in_active_session():
-						join_game(auto_connect_address, server_port)
+					if generation == _session_generation and auto_reconnect and not is_in_active_session():
+						join_game(address, port)
 				)
 		else:
 			print("NetworkManager: Auto-reconnect aborted after reaching maximum attempts.")
@@ -589,13 +647,12 @@ func pause_player_for_transfer(actor: Node) -> bool:
 		return false
 	var actor_path := actor.get_path()
 	var session_peer := _peer
-	_player_pauses[token] = {"owner": owner, "acked": false}
+	_player_pauses[token] = {"owner": owner, "acked": false, "timed_out": false, "deadline": Time.get_ticks_msec() + 5000}
 	prepare_player_transfer.rpc_id(owner, actor_path, token)
-	var deadline := Time.get_ticks_msec() + 5000
-	while session_peer == _peer and not restart_pending and owner in multiplayer.get_peers() and Time.get_ticks_msec() < deadline:
-		if _player_pauses.get(token, {}).get("acked", false):
+	while session_peer == _peer and not restart_pending and owner in multiplayer.get_peers():
+		if _player_pauses[token].acked or _player_pauses[token].timed_out:
 			break
-		await get_tree().process_frame
+		await _player_transfer_changed
 	var acknowledged: bool = _player_pauses.get(token, {}).get("acked", false)
 	_player_pauses.erase(token)
 	if session_peer != _peer or restart_pending:
@@ -621,6 +678,7 @@ func prepare_player_transfer(actor_path: NodePath, token: int) -> void:
 func acknowledge_player_transfer(token: int) -> void:
 	if is_server and _player_pauses.has(token) and _player_pauses[token].owner == multiplayer.get_remote_sender_id():
 		_player_pauses[token].acked = true
+		_player_transfer_changed.emit()
 
 
 @rpc("authority", "call_remote", "reliable")
