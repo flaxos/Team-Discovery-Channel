@@ -2,6 +2,8 @@
 
 For modular level creation, inspection, themes or repair, first read [the shared AI authoring guide](docs/maps/ai-level-authoring.md). Use `python3 tools/level_authoring.py`; discover capabilities before selecting IDs. Native LevelLayout `.tres` resources are authoritative. Preserve user-authored work and report unsupported requirements instead of inventing gameplay or geometry.
 
+For visual-asset sprints, use the [shared AI asset workflow](docs/assets/ai-asset-workflow.md) and [Sprint 7–35 programme](docs/plans/asset-vertical-slices.md). Learn from the recorded weapon integrations, prefer high-fidelity community sources, and use the [work-order schema](docs/assets/asset-work-order.schema.json) for documented generation gaps. The rigid packer does not preserve character rigs; follow the separate rig/texture contracts before importing characters.
+
 For community 3D assets (weapons, props, materials), follow [the community asset integration playbook](docs/assets/community-asset-playbook.md): licence gate, staging outside `client/`, the recipe-driven packer, cosmetic wrappers that leave gameplay anchors untouched, and the evidence a draft PR needs.
 
 ## Workspace and delivery

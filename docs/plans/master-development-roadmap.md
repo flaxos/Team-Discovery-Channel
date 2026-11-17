@@ -307,7 +307,7 @@ See section 6 for sequencing.
 
 **GA-2 — Kit expansion** · XL · split per room group, ordered by the rooms the first mission uses: remaining corridors and junctions, large chambers, ramp and tall rooms, functional props (consoles, generator, crates), lighting and atmosphere.
 
-Sprint 6 implements the first corridor group for review: `room01`–`room09`, 14 native compound rooms with pieces. It recovers unfinished work, completes junction variants and preserves production physical geometry; [evidence](../reviews/2026-11-18-sprint6-goauld-corridors.md). Owner art acceptance remains pending before larger chambers.
+Sprint 6 is merged in PR #77 and implements the first corridor group for owner review: `room01`–`room09`, 14 native compound rooms with pieces. It recovers unfinished work, completes junction variants and preserves production physical geometry; [evidence](../reviews/2026-11-18-sprint6-goauld-corridors.md). Owner art acceptance remains pending before larger chambers. The owner-requested next art sequence is [community-first vertical slices, Sprints 7–35](asset-vertical-slices.md), with a shared Codex/Antigravity workflow, weapons and SGC first, then rigged characters, offworld and bounded mothership art. All future slices remain planned.
 
 ### G — Stargate world transitions
 
