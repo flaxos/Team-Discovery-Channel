@@ -45,6 +45,7 @@ const MISSION_TWO_WORLDS_DEV: String = "two_worlds_dev"
 ## Outbound gate travel mission (roadmap GT-2). Gear up in SGC, dial out, step through the
 ## gate into the Goa'uld infiltration compound.
 const MISSION_TRAVEL_INFILTRATION: String = "travel_infiltration"
+const MISSION_TIMED_EXTRACTION: String = "goauld_timed_extraction"
 ## "scene" is the mission's world. "site" adds a second world beside it (see
 ## MainGameCoordinator). "hidden" keeps an entry out of the lobby.
 const MISSIONS: Dictionary = {
@@ -53,7 +54,8 @@ const MISSIONS: Dictionary = {
 	MISSION_MODULAR_EXTRACTION: {"name": "Modular Extraction UAT — Development", "description": "Development slice on the modular test facility: reach the command room, download data from the main console and return to the insertion point. Jaffa patrols are active.", "scene": "res://scenes/mission/ModularExtractionMission.tscn"},
 	MISSION_GOAULD_INFILTRATION: {"name": "Goa'uld Infiltration — Greybox", "description": "Greybox stealth mission in a two-deck Goa'uld compound: sabotage the generator, download the command records upstairs and return to the Stargate. Sentries see by sight and raise suspicion before an alert; take the guarded checkpoint or the quiet service route.", "scene": "res://scenes/mission/GoauldInfiltrationMission.tscn"},
 	MISSION_TWO_WORLDS_DEV: {"name": "Two worlds — development", "description": "Development only: the quiet SGC and the Goa'uld compound running side by side. There is no gate travel yet, so operatives stay in the SGC.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldInfiltrationMission.tscn", "hidden": true},
-	MISSION_TRAVEL_INFILTRATION: {"name": "Operation Infiltration — SGC to Offworld", "description": "Travel mission: Gear up in SGC Sublevel 28, dial the Stargate to the Goa'uld compound, and deploy the away team. Complete objectives offworld.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldInfiltrationMission.tscn"}
+	MISSION_TRAVEL_INFILTRATION: {"name": "Operation Infiltration — SGC to Offworld", "description": "Travel mission: Gear up in SGC Sublevel 28, dial the Stargate to the Goa'uld compound, and deploy the away team. Complete objectives offworld.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldInfiltrationMission.tscn"},
+	MISSION_TIMED_EXTRACTION: {"name": "Goa'uld Infiltration — Timed Extraction", "description": "Sabotage the generator, then download the command records. Downloading starts a three-minute extraction window: get every standing operative back to the Stargate before it expires. The countdown continues while menus are open.", "scene": "res://scenes/mission/TimedExtractionMission.tscn"}
 }
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"

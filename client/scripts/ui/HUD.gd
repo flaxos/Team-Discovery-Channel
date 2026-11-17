@@ -34,6 +34,8 @@ class CrosshairControl extends Control:
 @onready var wave_label: Label = $TopBanner/VBox/WaveLabel
 @onready var enemies_label: Label = $TopBanner/VBox/EnemiesLabel
 @onready var objective_label: Label = $TopBanner/VBox/ObjectiveLabel
+@onready var mission_countdown_panel: PanelContainer = $MissionCountdown if has_node("MissionCountdown") else null
+@onready var mission_countdown_label: Label = $MissionCountdown/Label if has_node("MissionCountdown/Label") else null
 
 @onready var dhd_panel: PanelContainer = $DHDPanel
 @onready var dhd_title: Label = $DHDPanel/VBox/DHDTitle
@@ -330,8 +332,9 @@ func _create_squad_toast_ui() -> void:
 	panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	panel.offset_left = -320.0
 	panel.offset_right = 320.0
-	panel.offset_top = 64.0
-	panel.offset_bottom = 104.0
+	# Keep live mission notices below the objective banner.
+	panel.offset_top = 128.0
+	panel.offset_bottom = 168.0
 	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -927,6 +930,17 @@ func update_objective(text: String, color: Color = Color.WHITE) -> void:
 		objective_label.add_theme_color_override("font_color", color)
 
 
+func update_mission_countdown(label: String, remaining: float, running: bool) -> void:
+	if mission_countdown_panel == null:
+		return
+	mission_countdown_panel.visible = running and not is_mission_ended
+	if not mission_countdown_panel.visible:
+		return
+	var seconds := ceili(maxf(0.0, remaining))
+	mission_countdown_label.text = "%s\n%02d:%02d" % [label, seconds / 60, seconds % 60]
+	mission_countdown_label.modulate = Color(1.0, 0.3, 0.25) if seconds <= 30 else Color(1.0, 0.8, 0.25)
+
+
 func on_lab_patch_objective_started() -> void:
 	if wave_label != null:
 		wave_label.text = "DIALING BUFFER LOCKED!"
@@ -1125,6 +1139,8 @@ func set_debrief(text: Dictionary) -> void:
 
 func show_victory() -> void:
 	is_mission_ended = true
+	if mission_countdown_panel != null:
+		mission_countdown_panel.hide()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
@@ -1146,6 +1162,8 @@ func show_victory() -> void:
 
 func show_defeat() -> void:
 	is_mission_ended = true
+	if mission_countdown_panel != null:
+		mission_countdown_panel.hide()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if pause_menu != null:
 		pause_menu.visible = false
