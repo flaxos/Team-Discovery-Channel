@@ -56,7 +56,7 @@ func run() -> void:
 
 	# --- 1. Lobby selection and verification
 	var lobby := main.current_lobby as LobbyUI
-	assert(lobby.mission_option_button.item_count == 5, "Travel mission offered when selected by CLI")
+	assert(lobby.mission_option_button.item_count == 6, "Travel mission offered when selected by CLI")
 	assert(lobby.mission_option_button.get_item_metadata(4) == MISSION)
 	assert(lobby.mission_option_button.selected == 4)
 	assert(lobby.start_game_button.text == "LAUNCH TRAVEL MISSION")

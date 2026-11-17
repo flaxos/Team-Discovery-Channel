@@ -11,6 +11,8 @@ var players: Node
 var index := 0
 var beacon: MeshInstance3D
 var beacon_label: Label3D
+## Optional mission-owned admission check, evaluated before accepting a completion.
+var advancement_allowed: Callable
 
 
 func setup(mission: MissionDefinition, assembly: LevelAssembly, players_container: Node) -> void:
@@ -96,6 +98,8 @@ func complete_interaction(objective: MissionObjective) -> bool:
 
 func _advance(expected: int) -> bool:
 	if not multiplayer.is_server() or expected != index or is_complete():
+		return false
+	if advancement_allowed.is_valid() and not advancement_allowed.call():
 		return false
 	var next := index + 1
 	SGCNetworkManager.mission_rpc(self, &"sync_state", [next])

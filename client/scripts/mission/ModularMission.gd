@@ -35,6 +35,7 @@ func _ready() -> void:
 			entry.global_transform * Vector3((i % 2 - 0.5) * 1.2, 0.05, (i / 2 - 0.5) * 1.6)
 		)
 	enemies.child_entered_tree.connect(_on_hostile_entered)
+	players_container.child_entered_tree.connect(_on_operative_entered)
 	enemies.child_exiting_tree.connect(func(_node: Node) -> void: _show_hostiles.call_deferred())
 	objectives.setup(definition, level, players_container)
 	objectives.objective_changed.connect(_show_objective)
@@ -47,6 +48,9 @@ func _ready() -> void:
 	if setup_errors.is_empty():
 		events.setup(definition, level, objectives)
 		events.notice_shown.connect(_on_event_notice)
+		events.countdown_changed.connect(_on_countdown_changed)
+		events.timer_expired.connect(_on_timer_expired)
+		objectives.advancement_allowed = events.allow_progress
 	super._ready()
 	if DisplayServer.get_name() != "headless":
 		_add_presentation()
@@ -74,11 +78,28 @@ func _on_event_notice(text: String) -> void:
 		hud.show_squad_order_toast(text, 5.0)
 
 
+func _on_timer_expired(_id: StringName) -> void:
+	if multiplayer.is_server() and mission_result < 0:
+		conclude(false)
+
+
+func _on_countdown_changed(label: String, seconds: float, running: bool) -> void:
+	if hud != null:
+		hud.update_mission_countdown(label, seconds, running)
+		if mission_result >= 0:
+			_show_debrief(mission_result == 1)
+
+
 func _on_hostile_entered(node: Node) -> void:
 	var health := node.get_node_or_null("HealthComponent") as HealthComponent
 	if health != null:
 		health.died.connect(_show_hostiles)
 	_show_hostiles.call_deferred()
+
+
+func _on_operative_entered(node: Node) -> void:
+	if mission_result >= 0 and node is PlayerController3D:
+		(node.get_node("HealthComponent") as HealthComponent).frozen = true
 
 
 func hostiles_alive() -> int:
@@ -169,6 +190,8 @@ func _show_objective(index: int) -> void:
 
 
 func _on_objectives_completed() -> void:
+	if mission_result >= 0:
+		return
 	if session != null:
 		if hud != null:
 			hud.update_objective(
@@ -219,7 +242,6 @@ func _finish_mission(victory: bool) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func sync_mission_result(victory: bool) -> void:
-	var standing := objectives.standing().size()
 	if hud != null:
 		hud.total_kills = hostiles_eliminated_count()
 	super.sync_mission_result(victory)
@@ -234,6 +256,13 @@ func sync_mission_result(victory: bool) -> void:
 		var health := player.get_node_or_null("HealthComponent") as HealthComponent
 		if health != null:
 			health.frozen = true
+	_show_debrief(victory)
+
+
+func _show_debrief(victory: bool) -> void:
+	var expired := events.timer_state == MissionEvents.TimerState.EXPIRED
+	if expired:
+		get_tree().paused = false
 	if hud != null:
 		hud.set_debrief(
 			{
@@ -241,14 +270,14 @@ func sync_mission_result(victory: bool) -> void:
 				"subtitle": (
 					"OBJECTIVE COMPLETE — STANDING OPERATIVES EXTRACTED"
 					if victory
-					else "ALL OPERATIVES DOWN — MISSION ABORTED"
+					else ("EXTRACTION WINDOW EXPIRED" if expired else "ALL OPERATIVES DOWN — MISSION ABORTED")
 				),
 				"objectives": "OBJECTIVES COMPLETE: %d / %d" % [
 					objectives.index, definition.objectives.size()
 				],
-				"squad": "OPERATIVES STANDING: %d" % standing,
+				"squad": "OPERATIVES STANDING: %d" % objectives.standing().size(),
 				"status": "STATUS: %s — %s" % [
-					"STANDING OPERATIVES EXTRACTED" if victory else "SQUAD COMPROMISED",
+					"STANDING OPERATIVES EXTRACTED" if victory else ("EXTRACTION WINDOW EXPIRED" if expired else "SQUAD COMPROMISED"),
 					alert_summary()
 				],
 				"leave": "LEAVE MISSION"

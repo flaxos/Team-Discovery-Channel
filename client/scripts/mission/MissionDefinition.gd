@@ -10,7 +10,7 @@ extends Resource
 @export var alarms: Array[MissionAlarm] = []
 ## Jaffa that arrive after the alarm. Needs at least one alarm console.
 @export var reinforcements: Array[MissionReinforcement] = []
-## One-shot objective completions that release mission security doors (EV-2 chunk 1).
+## One-shot objective completions that release security doors or start extraction time.
 @export var triggers: Array[MissionTrigger] = []
 
 
@@ -66,6 +66,7 @@ func validate() -> PackedStringArray:
 		errors.append("Reinforcements need at least one alarm console")
 	var trigger_ids := {}
 	var door_ids := {}
+	var timer_count := 0
 	for trigger in triggers:
 		if trigger == null:
 			errors.append("Null mission trigger")
@@ -78,7 +79,19 @@ func validate() -> PackedStringArray:
 		else:
 			for objective in objectives:
 				if objective != null and objective.id == trigger.objective_id and objective.kind == "extract":
-					errors.append("Door release must precede extraction: %s" % trigger.id)
+					errors.append("Mission action must precede extraction: %s" % trigger.id)
+		if trigger.action == "start_timer":
+			timer_count += 1
+			if not is_finite(trigger.duration_seconds) or trigger.duration_seconds <= 0.0 or trigger.duration_seconds > 86400.0:
+				errors.append("Timer duration must be finite and within (0, 86400]: %s" % trigger.id)
+			if trigger.timer_label.strip_edges().is_empty():
+				errors.append("Timer needs a label: %s" % trigger.id)
+			if trigger.security_id != &"":
+				errors.append("Timer cannot also target a security door: %s" % trigger.id)
+			continue
+		if trigger.action != "release_door":
+			errors.append("Unknown mission action: %s/%s" % [trigger.id, trigger.action])
+			continue
 		var matches := 0
 		for connection in layout.connections:
 			if connection.state == "security_door" and connection.security_id == trigger.security_id:
@@ -88,6 +101,8 @@ func validate() -> PackedStringArray:
 		if door_ids.has(trigger.security_id):
 			errors.append("Security door has multiple release triggers: %s" % trigger.security_id)
 		door_ids[trigger.security_id] = true
+	if timer_count > 1:
+		errors.append("Mission supports one extraction timer")
 	if errors.is_empty() and not triggers.is_empty():
 		# Prove the authored sequence can earn each release. In particular, a console
 		# cannot be placed behind the door that only that console can unlock.
@@ -101,7 +116,7 @@ func validate() -> PackedStringArray:
 			if LevelTopology.path(links, previous, str(objective.room), [], true).is_empty():
 				errors.append("Mission doors block objective: %s" % objective.id)
 			for trigger in triggers:
-				if trigger.objective_id == objective.id:
+				if trigger.action == "release_door" and trigger.objective_id == objective.id:
 					for edges: Array in links.values():
 						for edge: Dictionary in edges:
 							if edge.security_id == str(trigger.security_id):
