@@ -19,6 +19,8 @@ A sixth entry, **Goa'uld Infiltration — Timed Extraction** (`--mission goauld_
 
 A seventh entry, **Goa'uld Infiltration — Alarm Escape** (`--mission goauld_alarm_escape`), starts its three-minute clock when a guard actually raises the alarm. Finish generator sabotage and the command-record download, then return all standing operatives to the Stargate before expiry. Searching does not start it; preventing the alarm through console disables or stopping runners preserves an untimed run. Records download alone does not start a clock in this variant. The duration is provisional. See the [brief](maps/briefs/alarm-escape.md).
 
+Modular-mission Jaffa can now send a trailing guard around another entrance while an earlier rank engages you. Locked security doors can stop that route; ordinary closed doors can still be opened by guards. If there is no usable alternate, they keep their ordinary combat/cover behavior. [Behavior and limits](maps/modular-flanking.md).
+
 A hidden development mission, **Two worlds** (`--mission two_worlds_dev`), loads the quiet SGC and the Goa'uld compound side by side without gate travel for coexistence tests and frame-cost measurement ([architecture](ARCHITECTURE.md#worlds-and-the-session)).
 
 UAT inherits the Defense map, including props, friendly personnel, stairs and the lift. It disables automatic hostile gate activations and enemy waves; it is an exploration/test mode rather than an extraction run. Difficulty is disabled. The host owns mission/difficulty selection; clients receive it, including on joining and retry.

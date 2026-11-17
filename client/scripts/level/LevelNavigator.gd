@@ -25,6 +25,9 @@ var last_position := Vector3.INF
 var stall_time := 0.0
 var retry_time := 0.0
 var replans := 0
+## A committed tactical route never replans through the direct approach it avoided.
+var flank_rooms := PackedStringArray()
+var _fixed_connections: Array[int] = []
 
 
 func _init(body: CharacterBody3D, assembly: LevelAssembly) -> void:
@@ -165,6 +168,8 @@ static func prop_cover(
 
 
 func reset() -> void:
+	flank_rooms.clear()
+	_fixed_connections.clear()
 	points.clear()
 	doors.clear()
 	index = 0
@@ -173,6 +178,103 @@ func reset() -> void:
 	replans = 0
 	stall_time = 0.0
 	status = "idle"
+
+
+## Select another entrance to the last-seen threat room, using live locks and real navmesh
+## legs. The endpoint is inside that entrance, not the unseen operative's current position.
+## Empty means keep normal combat/cover. No geometry or door state is changed here.
+func plan_flank(known: Vector3, max_walk: float = 80.0) -> PackedStringArray:
+	reset()
+	if not actor.multiplayer.is_server() or not is_instance_valid(level) or not level.ready_for_navigation or not known.is_finite():
+		return flank_rooms
+	var from_room := _room_at(actor.global_position)
+	var to_room := _room_at(known)
+	if from_room == to_room or not _inside_room(from_room, actor.global_position) or not _inside_room(to_room, known):
+		return flank_rooms
+	var links := _walking_graph()
+	var direct := LevelTopology.path(links, str(from_room), str(to_room))
+	if direct.size() < 2:
+		return flank_rooms
+	var avoided := _connection_between(direct[-2], direct[-1])
+	var alternate := LevelTopology.path(_walking_graph(avoided), str(from_room), str(to_room))
+	if alternate.size() < 3:
+		return flank_rooms
+	var last := _connection_between(alternate[-2], alternate[-1])
+	var approach := _connection_approach_points(last, alternate[-2])[-1]
+	var ordinary := _connection_approach_points(avoided, direct[-2])[-1]
+	var a := Vector2(approach.x - known.x, approach.z - known.z)
+	var b := Vector2(ordinary.x - known.x, ordinary.z - known.z)
+	if a.length() < 2.7 or b.length() < 0.5 or absf(a.angle_to(b)) < PI / 4.0:
+		return flank_rooms
+	var waypoints: Array[Vector3] = [actor.global_position]
+	var connections: Array[int] = []
+	for i in range(alternate.size() - 1):
+		var edge := _connection_between(alternate[i], alternate[i + 1])
+		connections.append(edge)
+		waypoints.append_array(_connection_approach_points(edge, alternate[i]))
+	var stitched := _stitch_waypoints(waypoints)
+	var distance := 0.0
+	for i in range(stitched.size() - 1):
+		distance += stitched[i].distance_to(stitched[i + 1])
+		for edge in range(level.layout.connections.size()):
+			if edge not in connections and _crosses_connection(edge, stitched[i], stitched[i + 1]):
+				return flank_rooms  # Reject shortcuts through a connection outside the chosen route.
+	if stitched.is_empty() or distance > max_walk:
+		return flank_rooms
+	var candidates := MissionWorld.in_group(actor, &"modular_door")
+	var crossed := _doors_along(stitched, candidates)
+	if _has_locked_door(crossed):
+		return flank_rooms
+	points = stitched
+	doors = crossed
+	destination = approach
+	_fixed_connections = connections
+	flank_rooms = PackedStringArray(alternate)
+	status = "moving"
+	return flank_rooms
+
+
+func _inside_room(id: StringName, pos: Vector3) -> bool:
+	var room := level.get_node_or_null(str(id)) as Node3D
+	var item := level.layout.instance(id)
+	return room != null and item != null and item.module.occupied.grow(0.3).has_point(room.to_local(pos))
+
+
+func _connection_between(a: StringName, b: StringName) -> int:
+	for i in range(level.layout.connections.size()):
+		var edge := level.layout.connections[i]
+		if (edge.from_instance == a and edge.to_instance == b) or (edge.from_instance == b and edge.to_instance == a):
+			return i
+	return -1
+
+
+func _walking_graph(excluded: int = -1) -> Dictionary:
+	var links := {}
+	for item in level.layout.instances:
+		links[str(item.id)] = []
+	for i in range(level.layout.connections.size()):
+		if i == excluded or _is_connection_locked(i):
+			continue
+		var edge := level.layout.connections[i]
+		var a := str(edge.from_instance)
+		var b := str(edge.to_instance)
+		links[a].append({"to": b, "connection": i})
+		links[b].append({"to": a, "connection": i})
+	return links
+
+
+## Native socket plane, including open passages without a runtime door node.
+func _crosses_connection(index: int, start: Vector3, end: Vector3) -> bool:
+	var edge := level.layout.connections[index]
+	var room := level.get_node(str(edge.from_instance)) as Node3D
+	var socket := level.layout.instance(edge.from_instance).module.socket(edge.from_socket)
+	var inverse := (room.global_transform * socket.local_transform).affine_inverse()
+	var a := inverse * start
+	var b := inverse * end
+	if a.z * b.z > 0.0 or is_equal_approx(a.z, b.z):
+		return false
+	var hit := a.lerp(b, a.z / (a.z - b.z))
+	return absf(hit.x) <= socket.width / 2 + 0.3 and hit.y > -1.0 and hit.y < socket.height + 1.0
 
 
 func _plan(goal: Vector3) -> void:
@@ -250,17 +352,7 @@ func _reroute_around_locked_doors(goal: Vector3, candidates: Array[Node]) -> boo
 	if from_room == &"" or to_room == &"" or from_room == to_room:
 		return false
 	# Use the authored walking graph with current door locks, never mutate the layout.
-	var links := {}
-	for item in level.layout.instances:
-		links[str(item.id)] = []
-	for i in range(level.layout.connections.size()):
-		if _is_connection_locked(i):
-			continue
-		var edge := level.layout.connections[i]
-		var a := str(edge.from_instance)
-		var b := str(edge.to_instance)
-		links[a].append({"to": b, "connection": i})
-		links[b].append({"to": a, "connection": i})
+	var links := _walking_graph()
 	var room_seq := LevelTopology.path(links, str(from_room), str(to_room))
 	if room_seq.is_empty():
 		return false
@@ -466,6 +558,16 @@ func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
 	if not is_instance_valid(level) or not level.ready_for_navigation:
 		status = "waiting_for_navigation"
 		return here
+	if not flank_rooms.is_empty():
+		if destination.distance_to(goal) > 0.5:
+			status = "unreachable"
+			return here
+		for connection in _fixed_connections:
+			if _is_connection_locked(connection):
+				status = "blocked_door"
+				return here
+		if status in ["unreachable", "blocked_door", "stuck"]:
+			return here
 	if destination == Vector3.INF or destination.distance_to(goal) > 0.5:
 		replans = 0
 		_plan(goal)
@@ -491,6 +593,9 @@ func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
 		else:
 			stall_time += delta
 		if stall_time > STALL_SECONDS:
+			if not flank_rooms.is_empty():
+				status = "stuck"
+				return here
 			replans += 1
 			if replans > MAX_REPLANS:
 				status = "stuck"
@@ -509,6 +614,8 @@ func next_position(goal: Vector3, delta: float = 1.0 / 60.0) -> Vector3:
 	while not doors.is_empty() and index > int(doors[0]["segment"]) + 1:
 		doors.pop_front()
 	if _locked_ahead():
+		if not flank_rooms.is_empty():
+			return here
 		_plan(goal)
 		if status != "moving":
 			return here

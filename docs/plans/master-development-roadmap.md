@@ -51,7 +51,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Friendly NPC navigation | Awaiting human | Airmen navigate modular levels through `SGCNavigator` → `LevelNavigator` (PR #38). Tactical anchors, leapfrog and suppression still read SGC sectors |
 | Jaffa patrols and navigation | Awaiting human | `JaffaAI.start_patrol`; `test_modular_npc_navigation`, `test_modular_npc_multiplayer` |
 | Enemy detection | Awaiting human (patrols); defect (gate waves) | Patrols use sentry perception (ST-1): view cone, line of sight, suspicious before alerted, search; `test_jaffa_perception`. Gate waves and columns keep the assault rule, which acquires any operative within 22 m through walls (`_find_nearest_target`) |
-| Cover and flanking | Partial | SGC: sandbag cover and corridor flank from literal coordinates. Modular (TA-1): Jaffa crouch behind solid low cover props, stand to fire over them and move when flanked (`test_jaffa_prop_cover`); rooms without props fall back to the room-centre `cover` marker. No flanking manoeuvres on modular levels |
+| Cover and flanking | Partial | SGC: sandbag cover and corridor flank from literal coordinates. Modular (TA-1): Jaffa crouch behind solid low cover props, stand to fire over them and move when flanked (`test_jaffa_prop_cover`); rooms without props fall back to the room-centre `cover` marker. TA-2 chunk 1 adds bounded server-owned alternate-entrance flanking for review (sprint 4); suppression and friendly squad tactics remain future work |
 | Suppression and firefights | Partial | Lead rank halts and fires, others relocate; airman cover fire in SGC. No suppression effect on the target |
 | Door interaction | Verified | `ModularDoor` open/close, server-validated, snapshots; AI opens doors with `open_for`; TA-3 closes AI-opened doors after clearance, respects occupied doorways and preserves manual openings (`test_modular_navigation_ta3_multiplayer` covers late-join snapshot and closure) |
 | Level-wide alert and alarm | Awaiting human | `MissionAlert` (EV-1): calm, alerted and alarm levels; a runner must reach an alarm console; operatives can disable consoles; reinforcement budget; `test_mission_alert`, `test_mission_alert_multiplayer` |
@@ -258,7 +258,8 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 - **Complexity:** M · Fable · conflicts with ST-1 on `JaffaAI.gd`; run after it.
 
 **TA-2 — Flanking, suppression and squad tactics on modular levels** · L · Fable
-- Jaffa choose a second route to the threat using the room graph; airmen get anchors from room markers instead of SGC sectors. Prerequisites: TA-1, TA-3. Split before starting.
+- **Chunk 1 implemented for review in sprint 4:** Jaffa choose a second entrance using the live room graph, socket/navmesh route and a bounded last sighting. Locked/missing routes retain cover/combat; incapacitation and mission end cancel. Four-operative listen/dedicated traversal, late join and retry fixtures. [Contract](../maps/modular-flanking.md), [review](../reviews/2026-11-18-sprint4-modular-flanking.md).
+- **Remaining chunks:** suppression and friendly squad tactics; airman anchors from room markers instead of SGC sectors. Prerequisites: TA-1, TA-3. Human readability/tuning remains open.
 
 **TA-3 — Navigation follow-ups: rerouting, avoidance, door closing** · **implemented 16 November 2026 on this branch; human check pending**
 - **Experience:** patrols walk round a locked door, do not jam in corridors, and close doors behind them.
