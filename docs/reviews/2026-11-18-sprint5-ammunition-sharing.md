@@ -34,6 +34,11 @@ both owner and host. Stopping physics alone leaves key handlers active, so this
 guard prevents a post-ack request from the pawn being retired. The final targeted
 run also exercises the existing listen/dedicated session lifecycle contracts.
 
+Hosted fast validation caught an older remapping fixture that assumed B was
+unbound. It now checks modified-B overlap with sharing explicitly, then uses the
+unassigned J key for independent modifier persistence. Conflict handling itself
+retains its plain-key overlap protection.
+
 ## Verification
 
 - `test_ammunition_sharing`: genuine weapon instances and aimed/remapped input
