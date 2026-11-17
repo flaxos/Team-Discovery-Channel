@@ -29,6 +29,11 @@ has a 500 ms cooldown. Clients do not predict transfers. Existing weapon snapsho
 and `MissionSession` inventory capture carry the accepted result. No new inventory
 manager, map, gameplay geometry or external asset was introduced.
 
+Key-event input explicitly consults the existing NetworkManager transfer pause on
+both owner and host. Stopping physics alone leaves key handlers active, so this
+guard prevents a post-ack request from the pawn being retired. The final targeted
+run also exercises the existing listen/dedicated session lifecycle contracts.
+
 ## Verification
 
 - `test_ammunition_sharing`: genuine weapon instances and aimed/remapped input

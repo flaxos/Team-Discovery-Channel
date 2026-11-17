@@ -118,6 +118,15 @@ func run() -> void:
 	var press := InputEventKey.new()
 	press.physical_keycode = KEY_J
 	press.pressed = true
+	var sequence := donor._ammo_share_sequence
+	# Physics is paused before the transfer ack, but key events still dispatch.
+	net._paused_actors[123] = {"actor": donor}
+	donor._unhandled_input(press)
+	require(donor._ammo_share_sequence == sequence and donor.ammo_share_prompt().is_empty(), "Paused owner cannot queue post-ack ammunition intent")
+	net._paused_actors.erase(123)
+	net._player_pauses[donor.get_instance_id()] = {"owner": 1}
+	blocked(donor, receiver)
+	net._player_pauses.erase(donor.get_instance_id())
 	donor._unhandled_input(press)
 	require(dw.reserve_ammo == 30 and rw.reserve_ammo == 133, "The production input path gives ammunition: %d/%d seq=%d/%d" % [dw.reserve_ammo, rw.reserve_ammo, donor._ammo_share_sequence, donor._last_ammo_share_sequence])
 	bindings.reset_defaults(false)

@@ -2202,7 +2202,7 @@ func _ammo_share_available() -> bool:
 	if world.session != null and (world.session.result >= 0 or world.session._traveling.has(peer_id)):
 		return false
 	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-	return net == null or not net.restart_pending
+	return net == null or (not net.restart_pending and not net.is_player_paused_for_transfer(self))
 
 
 func ammo_share_offer(target: PlayerController3D) -> Dictionary:
