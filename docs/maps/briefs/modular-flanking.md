@@ -1,0 +1,9 @@
+# Sprint 4 — modular Jaffa flanking brief
+
+Add TA-2 chunk 1 to existing modular missions. A visible threat can prompt one nearby trailing sentry to use another entrance to its last-seen room when an earlier rank is already engaged. Leads keep their existing combat/cover behavior. This consumes native room connections, current door locks, socket approaches and the existing navigation mesh; no map edits or new mission mode are needed.
+
+The alternate entrance must differ from the approach using the fewest room connections and offer at least a 45-degree change in approach angle, with its floor point at least 2.7 m from the last sighting. The planned walk is at most 80 m and the maneuver at most 20 seconds, followed by an eight-second cooldown. These values are provisional. The compound's long loop is about a 14-second run in the controlled fixture; routing through socket approaches avoids an unnecessary detour to the hangar insertion marker.
+
+Only the host selects and executes a route. It follows a committed path rather than replanning through the direct entrance. No locked door is opened or bypassed. A new lock, blocked/stalled route, substantial newly seen movement, visible melee threat, timeout, unavailable target, alarm errand, incapacitation or mission end cancels the flank. Normal combat/cover or investigation resumes. Losing sight permits only the bounded walk to the remembered position; hidden target motion cannot retarget it. A guard does not fire while executing this movement.
+
+Clients receive the existing pose/combat state plus the flank flag, including on late join. They do not receive or run the authoritative path planner. Retry replaces all route state. Suppression mechanics, friendly squad tactics, additional levels and the SGC's literal-coordinate flank behavior remain separate work. Human co-op readability and timing remain unaccepted until played.

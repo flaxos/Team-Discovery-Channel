@@ -101,6 +101,15 @@ var flank_route_target: Vector3 = Vector3.ZERO
 var tactical_cover_position: Vector3 = Vector3.ZERO
 ## Modular levels: the cover prop this Jaffa is fighting from (LevelNavigator.prop_cover), if any.
 var cover_prop: Node3D = null
+## Modular flanks use a committed alternate entrance to a last-seen position, on the host.
+const FLANK_LIMIT := 20.0
+const FLANK_COOLDOWN := 8.0
+var _flank_navigation: LevelNavigator
+var _flank_known := Vector3.INF
+var _flank_time := 0.0
+var _flank_cooldown := 0.0
+var _flank_subject: WeakRef
+var flank_status := "idle"
 ## Staff height while standing to fire over a cover prop, above the tallest low cover.
 const OVER_COVER_STAFF_HEIGHT := 1.35
 ## Seconds left standing up to fire over cover, and until the cover is re-checked.
@@ -175,6 +184,7 @@ func start_column_march(march_target_pos: Vector3) -> void:
 
 ## Walks the waypoints in order through the shared navigator; resumes after combat.
 func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
+	_clear_modular_flank()
 	patrol_points = points.duplicate()
 	patrol_index = 0
 	patrol_laps = 0
@@ -187,6 +197,7 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 
 ## Mission over: stop fighting and moving for good. Safe on replicas.
 func stand_down() -> void:
+	_clear_modular_flank()
 	current_target = null
 	velocity = Vector3.ZERO
 	investigating = false
@@ -216,7 +227,11 @@ func _update_perception(delta: float) -> void:
 		"alerted":
 			_engage(perception.target, true)
 		"lost":
-			_start_investigation()
+			if _flank_navigation == null:
+				_start_investigation()
+			else:
+				# Continue only the bounded plan to the last sighting, never chase hidden motion.
+				current_target = null
 	if perception.level == JaffaPerception.Level.ALERTED and perception.target != null:
 		current_target = perception.target
 	_publish_awareness()
@@ -260,6 +275,7 @@ func investigate_at(at: Vector3) -> void:
 ## Server: run to `spot` and stand there facing `look`, ignoring combat, until end_run().
 ## Perception keeps running, so the Jaffa still notices and reports what it sees.
 func run_to(spot: Vector3, look: Vector3) -> void:
+	_clear_modular_flank()
 	errand = spot
 	_errand_look = look
 	_set_crouching(false)
@@ -298,6 +314,7 @@ func _process_errand(delta: float) -> void:
 
 
 func _start_investigation() -> void:
+	_clear_modular_flank()
 	perception.investigate()
 	investigating = true
 	current_target = null
@@ -455,10 +472,12 @@ func _physics_process(delta: float) -> void:
 		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
+	_flank_cooldown = maxf(0.0, _flank_cooldown - delta)
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
 	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
+		_clear_modular_flank()
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 		move_and_slide()
@@ -520,9 +539,13 @@ func _process_marching_formation(delta: float) -> void:
 
 ## Triggers tactical reaction when column formation is engaged.
 func break_formation_and_engage() -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
 	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
 		return
 
+	if _try_modular_flank():
+		return
 	if profile == Profile.SENTRY and _take_prop_cover(10.0):
 		# Modular levels: a sentry with low cover close by fights from behind it.
 		current_state = State.COVER
@@ -588,6 +611,112 @@ func _alert_nearby_formation_jaffa() -> void:
 				if other.current_target == null and current_target != null:
 					other.current_target = current_target
 				other.break_formation_and_engage()
+
+
+## One nearby trailing sentry can leave an engaged lead's firing position. This only
+## consumes perception's last sighting; it never asks an unseen target where it moved.
+func _try_modular_flank() -> bool:
+	if not multiplayer.is_server() or profile != Profile.SENTRY or formation_rank < 1 or is_front_rank or _flank_cooldown > 0.0:
+		return false
+	if not is_instance_valid(current_target) or perception == null or not perception.can_see(current_target):
+		return false
+	if global_position.distance_to(perception.stimulus) <= melee_range + 1.0:
+		return false
+	var level := LevelNavigator.find_level(self)
+	if level == null or errand != Vector3.INF:
+		return false
+	var health := current_target.get_node_or_null("HealthComponent") as HealthComponent
+	if health != null and (health.is_dead or health.is_downed):
+		return false
+	var supported := false
+	for child in get_parent().get_children():
+		var other := child as JaffaAI
+		if other == null or other == self or not other.is_physics_processing() or other.global_position.distance_to(global_position) > combat_range:
+			continue
+		if other._flank_navigation != null:
+			return false
+		if other.formation_rank < formation_rank and other.current_state in [State.COMBAT, State.COVER, State.ATTACK]:
+			supported = supported or (other.profile == Profile.SENTRY and other.current_target == current_target)
+	if not supported:
+		return false
+	var route := LevelNavigator.new(self, level)
+	if route.plan_flank(perception.stimulus).is_empty():
+		return false
+	_flank_navigation = route
+	_flank_known = perception.stimulus
+	_flank_subject = weakref(current_target)
+	_flank_time = 0.0
+	_flank_cooldown = FLANK_COOLDOWN
+	flank_status = "moving"
+	is_tactical_flanking = true
+	cover_prop = null
+	flank_route_target = route.destination
+	tactical_destination = flank_route_target
+	current_state = State.COVER
+	_set_crouching(false)
+	return true
+
+
+func _clear_modular_flank() -> void:
+	if _flank_navigation != null:
+		_flank_cooldown = FLANK_COOLDOWN
+		if flank_status == "moving":
+			flank_status = "cancelled"
+		_flank_navigation.reset()
+	_flank_navigation = null
+	_flank_subject = null
+	is_tactical_flanking = false
+
+
+func _end_modular_flank(reason: String) -> void:
+	flank_status = reason
+	_clear_modular_flank()
+	_flank_cooldown = FLANK_COOLDOWN
+	velocity.x = 0.0
+	velocity.z = 0.0
+	if perception.target == null or not is_instance_valid(perception.target):
+		_start_investigation()
+		return
+	current_target = perception.target
+	if _take_prop_cover(20.0):
+		current_state = State.COVER
+	else:
+		current_state = State.COMBAT
+	_set_crouching(false)
+
+
+func _process_modular_flank(delta: float) -> void:
+	if not multiplayer.is_server() or _flank_navigation == null:
+		return
+	_flank_time += delta
+	var subject := _flank_subject.get_ref() as Node3D if _flank_subject != null else null
+	var health := subject.get_node_or_null("HealthComponent") as HealthComponent if is_instance_valid(subject) else null
+	if not is_instance_valid(subject) or not subject.is_inside_tree() or (health != null and (health.is_dead or health.is_downed)):
+		_end_modular_flank("target_gone")
+		return
+	if _flank_time >= FLANK_LIMIT:
+		_end_modular_flank("timeout")
+		return
+	if perception.target != null and global_position.distance_to(perception.stimulus) <= melee_range:
+		_end_modular_flank("close_threat")
+		return
+	if perception.target != null and perception.stimulus.distance_to(_flank_known) > 4.0:
+		_end_modular_flank("target_changed")
+		return
+	var point := _flank_navigation.next_position(flank_route_target, delta)
+	if _flank_navigation.status in ["blocked_door", "unreachable", "stuck"]:
+		_end_modular_flank(_flank_navigation.status)
+		return
+	if _flank_navigation.status == "arrived":
+		_end_modular_flank("arrived")
+		return
+	var heading := point - global_position
+	heading.y = 0.0
+	var direction := heading.normalized()
+	velocity.x = move_toward(velocity.x, direction.x * combat_run_speed, 20.0 * delta)
+	velocity.z = move_toward(velocity.z, direction.z * combat_run_speed, 20.0 * delta)
+	if direction.length_squared() > 0.01:
+		rotation.y = atan2(-direction.x, -direction.z)
 
 
 func _assign_tactical_role() -> void:
@@ -699,6 +828,9 @@ func _find_nearest_cover(is_west: bool) -> Vector3:
 
 
 func _process_cover(delta: float) -> void:
+	if _flank_navigation != null:
+		_process_modular_flank(delta)
+		return
 	_find_nearest_target()
 
 	if current_target == null and not patrol_points.is_empty():
@@ -1287,6 +1419,7 @@ func play_staff_fire_fx(origin_pos: Vector3) -> void:
 
 
 func _on_stunned(duration: float) -> void:
+	_clear_modular_flank()
 	current_state = State.STUNNED
 	current_target = null
 	investigating = false
@@ -1311,6 +1444,7 @@ func _on_recovered_from_stun() -> void:
 
 
 func _on_died() -> void:
+	_clear_modular_flank()
 	if navigator != null: navigator.reset()
 	if _death_notified:
 		return
