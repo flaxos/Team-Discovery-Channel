@@ -83,6 +83,7 @@ var mission_seconds: float = 0.0
 var total_kills: int = 0
 var is_mission_ended: bool = false
 var toast_tween: Tween = null
+var ammo_share_label: Label
 
 # Crosshair and Heat Gauge Variables
 var crosshair_override_pos: Vector2 = Vector2.ZERO
@@ -134,6 +135,7 @@ func _ready() -> void:
 	# Squad Order Military Toast Banner initialization
 	if squad_toast_panel == null:
 		_create_squad_toast_ui()
+	_create_ammo_share_ui()
 
 	objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
@@ -367,6 +369,23 @@ func _create_squad_toast_ui() -> void:
 	panel.modulate = Color(1.0, 1.0, 1.0, 0.0)
 
 
+func _create_ammo_share_ui() -> void:
+	ammo_share_label = Label.new()
+	ammo_share_label.name = "AmmoSharePrompt"
+	ammo_share_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	ammo_share_label.offset_left = -360
+	ammo_share_label.offset_right = 360
+	ammo_share_label.offset_top = -176
+	ammo_share_label.offset_bottom = -144
+	ammo_share_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ammo_share_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ammo_share_label.add_theme_font_size_override("font_size", 17)
+	ammo_share_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.8))
+	ammo_share_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	ammo_share_label.add_theme_constant_override("shadow_outline_size", 6)
+	add_child(ammo_share_label)
+
+
 func show_squad_order_toast(text: String, duration: float = 3.5) -> void:
 	if squad_toast_panel == null or squad_toast_label == null:
 		_create_squad_toast_ui()
@@ -474,6 +493,9 @@ func bind_local_player(player: PlayerController3D) -> void:
 
 
 func _process(delta: float) -> void:
+	if ammo_share_label != null:
+		ammo_share_label.text = local_player.ammo_share_prompt() if is_instance_valid(local_player) and not is_mission_ended else ""
+		ammo_share_label.visible = not ammo_share_label.text.is_empty()
 	if not is_mission_ended:
 		mission_seconds += delta
 	heat_pulse_time += delta * 6.0

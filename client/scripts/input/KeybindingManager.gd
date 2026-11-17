@@ -26,6 +26,7 @@ const ACTIONS: Dictionary = {
 	"interact": {"label": "Interact / revive / repair (hold)", "category": MOVEMENT, "keys": [KEY_E], "hold": true},
 	"squad_command": {"label": "Squad wheel (hold) / context ping (tap)", "category": SQUAD, "keys": [KEY_Q], "mouse": [MOUSE_BUTTON_XBUTTON1], "hold": true},
 	"squad_ping": {"label": "Quick squad context ping", "category": SQUAD, "mouse": [MOUSE_BUTTON_MIDDLE]},
+	"share_ammo": {"label": "Give ammunition to aimed teammate", "category": SQUAD, "keys": [KEY_B]},
 	"zoom_in": {"label": "Zoom in", "category": SQUAD, "mouse": [MOUSE_BUTTON_WHEEL_UP]},
 	"zoom_out": {"label": "Zoom out", "category": SQUAD, "mouse": [MOUSE_BUTTON_WHEEL_DOWN]},
 	"toggle_pause": {"label": "Field manual / pause (ESC always available)", "category": SQUAD, "keys": [KEY_F1]},

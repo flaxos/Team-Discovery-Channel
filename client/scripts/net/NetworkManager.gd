@@ -638,6 +638,16 @@ func _movement_observer_visible(id: int, owner: int) -> bool:
 	return id != owner
 
 
+## Key-event actions also consult the pause; stopping physics alone does not stop input.
+func is_player_paused_for_transfer(actor: Node) -> bool:
+	if _player_pauses.has(actor.get_instance_id()):
+		return true
+	for saved: Dictionary in _paused_actors.values():
+		if saved.actor == actor:
+			return true
+	return false
+
+
 ## Drain the owner's reliable movement stream before removing its old world node.
 ## A unique host instance token prevents a stale acknowledgement from pausing a retry.
 func pause_player_for_transfer(actor: Node) -> bool:

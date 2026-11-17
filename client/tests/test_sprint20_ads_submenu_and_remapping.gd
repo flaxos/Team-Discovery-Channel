@@ -43,13 +43,16 @@ func run_tests() -> void:
 	assert(press(KEY_R).is_action_pressed("interact"), "Swap must retain both actions")
 	assert(manager.rebind("reload", press(KEY_UP), "replace"), "Replace may remove an alternate")
 	assert(press(KEY_W).is_action_pressed("move_up"), "Remaining alternate must survive")
-	var modified: InputEventKey = press(KEY_B)
+	var share_overlap: InputEventKey = press(KEY_B)
+	share_overlap.ctrl_pressed = true
+	assert(manager.conflicts_for("reload", share_overlap).has("share_ammo"), "Modified B must warn about the ammunition action")
+	var modified: InputEventKey = press(KEY_J)
 	modified.ctrl_pressed = true
 	modified.shift_pressed = true
 	assert(manager.rebind("reload", modified), "Modifiers must be supported")
 	assert(manager.load_bindings_from_config(), "Modifier config must load")
 	var decoded: InputEventKey = InputMap.action_get_events("reload")[0] as InputEventKey
-	assert(decoded.physical_keycode == KEY_B and decoded.ctrl_pressed and decoded.shift_pressed, "Physical code and modifiers must persist")
+	assert(decoded.physical_keycode == KEY_J and decoded.ctrl_pressed and decoded.shift_pressed, "Physical code and modifiers must persist")
 	assert(not manager.save_bindings_to_config("user://missing/folder/bindings.cfg"), "Write failures must be reported")
 
 	var corrupt := ConfigFile.new()

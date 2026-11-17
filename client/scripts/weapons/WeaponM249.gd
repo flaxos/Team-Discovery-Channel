@@ -6,6 +6,7 @@ extends WeaponBase
 
 func _init() -> void:
 	weapon_id = "m249"
+	ammo_type = "5.56x45"
 	display_name = "M249 SAW Squad Automatic Weapon"
 	damage = 34.0
 	fire_rate_rpm = 750.0

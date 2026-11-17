@@ -6,6 +6,7 @@ extends WeaponBase
 
 func _init() -> void:
 	weapon_id = "m9"
+	ammo_type = "9x19"
 	display_name = "Beretta M9 9mm Pistol"
 	damage = 28.0
 	fire_rate_rpm = 400.0

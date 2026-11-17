@@ -55,6 +55,7 @@ Bindings can be changed in **TACTICAL CONTROLS & FIELD MANUAL** in the lobby or 
 | Move / sprint / crouch | WASD or arrows / Shift / C or Ctrl |
 | Fire / aim down sights / reload | Left mouse / hold right mouse / R |
 | Interact; hold for revive or repair | E |
+| Give reserve ammunition to aimed teammate | B |
 | Primary / secondary | 1 / 2 |
 | Claymore / ballistic shield / smoke | 3 / 4 / 5 |
 | Class gadget or nearby-body drag / dedicated drag toggle | G / H |
@@ -63,6 +64,16 @@ Bindings can be changed in **TACTICAL CONTROLS & FIELD MANUAL** in the lobby or 
 | Zoom | Mouse wheel |
 
 While holding ADS, hold Q/M4, move the mouse to a squad-wheel slice, then release Q/M4 to issue the order without releasing ADS. The center deadzone cancels. Rebinding conflicts offer Swap, Replace or Cancel. ESC cancels input capture; RESET DEFAULTS restores defaults. Held actions reject mouse-wheel pulses. Settings persist in Godot's `user://keybindings.cfg`.
+
+To share ammunition, aim at a standing teammate within **3 metres** and press **B**.
+Both active weapons must use the same ammunition: MP5/M9 share 9×19 mm, P90 uses
+5.7×28 mm, and M249 uses 5.56×45 mm. Staff and Zat energy weapons cannot share.
+Each press gives up to one recipient magazine from your reserve, capped by your
+stock and their reserve capacity; loaded magazines stay intact. The aimed prompt
+shows the amount or a reason such as incompatible ammunition, full reserve or a
+reload. Walls block transfers. Both participants receive confirmation after the
+server accepts it. Sharing is unavailable while incapacitated, traveling or after
+the mission result. The binding follows remapping in the field manual.
 
 ## Floors, stairs and shutters
 

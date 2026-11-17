@@ -33,6 +33,14 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 
 ## Coverage contracts
 
+Sprint 5's `test_ammunition_sharing`, `test_ammunition_sharing_multiplayer`,
+`test_ammunition_sharing_dedicated` and `test_ammunition_sharing_travel` cover finite
+calibres, atomic conservation/caps, health/reload/reach/wall/result guards, default
+and remapped aiming/input, authenticated remote intent, forged/replayed requests,
+competing donors, four-operative listen/dedicated late snapshots, retry,
+disconnect and real gate handoff with carried reserves and retired incarnations.
+See the [contract](plans/ammunition-sharing.md) and [review](reviews/2026-11-18-sprint5-ammunition-sharing.md).
+
 | Suite | Required behavior |
 | --- | --- |
 | `test_sgc_enclosure` | Closed room/shaft boundaries; deliberate placement gap, portal crack, removed floor/ceiling/casing fail; closure with lift on another floor; invalid floor rejected. |

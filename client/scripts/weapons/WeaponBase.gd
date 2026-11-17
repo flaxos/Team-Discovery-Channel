@@ -14,6 +14,8 @@ signal ammo_changed(current: int, reserve: int)
 @export var fire_rate_rpm: float = 900.0
 @export var mag_capacity: int = 50
 @export var reserve_capacity: int = 250
+## Empty for energy/unknown weapons. Compatibility is authored, never supplied by a client.
+@export var ammo_type: String = ""
 @export var reload_time_s: float = 2.0
 @export var base_spread_deg: float = 2.0
 @export var bloom_per_shot_deg: float = 0.45

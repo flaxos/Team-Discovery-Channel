@@ -6,6 +6,7 @@ extends WeaponBase
 
 func _init() -> void:
 	weapon_id = "p90"
+	ammo_type = "5.7x28"
 	display_name = "FN P90 Tactical PDW"
 	damage = 22.0
 	fire_rate_rpm = 900.0
