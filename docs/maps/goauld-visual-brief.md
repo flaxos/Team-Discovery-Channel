@@ -4,6 +4,8 @@ Written 14 November 2026 against `main` at `ce9ad71` as the target for the first
 
 **GA-1 has since been built to it.** What exists, how to regenerate it, and readability measured from captures are in the [Goa'uld theme kit guide](goauld-theme-kit.md). Building it corrected this brief in five places, each marked *As built* below. The audit in section 3 describes the code before GA-1; gaps G-1, G-6 and G-7 are closed.
 
+**GA-2 part 1 is implemented for review in Sprint 6.** The corridor family now has pieces (`room01`–`room09`, including the existing compact chamber). Current coverage, join finishing, captures and the remaining owner acceptance are in the [Sprint 6 review](../reviews/2026-11-18-sprint6-goauld-corridors.md). The original module ordering below remains the design sequence.
+
 **Art method (decided 14 November 2026, [D-012](../DECISIONS.md)):** pieces are built in the engine by agents, from primitive meshes and materials, behind the existing theme slots. Section 6 keeps the alternatives for the record.
 
 All designs are original and only inspired by the setting. No production asset, screenshot or texture is copied. Line references are to `ce9ad71`.

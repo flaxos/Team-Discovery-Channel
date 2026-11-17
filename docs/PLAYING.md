@@ -21,6 +21,11 @@ A seventh entry, **Goa'uld Infiltration — Alarm Escape** (`--mission goauld_al
 
 Modular-mission Jaffa can now send a trailing guard around another entrance while an earlier rank engages you. Locked security doors can stop that route; ordinary closed doors can still be opened by guards. If there is no usable alternate, they keep their ordinary combat/cover behavior. [Behavior and limits](maps/modular-flanking.md).
 
+The Goa'uld corridor kit now covers corners, junctions, wide passages and width
+adapters: 14 of the compound's 20 rooms have built pieces. Floor runners continue
+through branches; physical room sizes, doors and routes retain their existing
+rules. See the [visual review and gallery](reviews/2026-11-18-sprint6-goauld-corridors.md).
+
 A hidden development mission, **Two worlds** (`--mission two_worlds_dev`), loads the quiet SGC and the Goa'uld compound side by side without gate travel for coexistence tests and frame-cost measurement ([architecture](ARCHITECTURE.md#worlds-and-the-session)).
 
 UAT inherits the Defense map, including props, friendly personnel, stairs and the lift. It disables automatic hostile gate activations and enemy waves; it is an exploration/test mode rather than an extraction run. Difficulty is disabled. The host owns mission/difficulty selection; clients receive it, including on joining and retry.
