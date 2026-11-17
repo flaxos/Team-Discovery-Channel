@@ -150,7 +150,19 @@ func _enter_tree() -> void:
 		$MultiplayerSynchronizer.set_multiplayer_authority(peer_id)
 		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 		if net != null:
-			net.configure_mission_sync($MultiplayerSynchronizer)
+			net.configure_player_movement($MultiplayerSynchronizer)
+	# The spawner belongs to the host. Godot ignores client-owned synchronizers when
+	# that host computes spawn visibility, so movement authority cannot gate spawns.
+	if has_node("SpawnVisibility"):
+		$SpawnVisibility.set_multiplayer_authority(1)
+		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+		if net != null:
+			net.configure_mission_sync($SpawnVisibility)
+	if has_node("MovementRelay"):
+		$MovementRelay.set_multiplayer_authority(1)
+		var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+		if net != null:
+			net.configure_player_relay($MovementRelay, peer_id)
 
 
 func _notification(what: int) -> void:

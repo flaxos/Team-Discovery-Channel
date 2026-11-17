@@ -23,6 +23,7 @@ var result: int = -1
 var presented: Node = null
 const SHADOW_SETTLE_S := 1.5
 var _settling := false
+var _traveling: Dictionary = {}
 
 
 func _ready() -> void:
@@ -329,6 +330,15 @@ func travel_player(player: PlayerController3D, from_world: Node = null) -> void:
 	if from_world != home() and to_world == home():
 		var site_objectives: Variant = from_world.get(&"objectives")
 		if site_objectives != null and not bool(site_objectives.call(&"is_complete")):
+			return
+	if _traveling.has(peer_id):
+		return
+	var net: Node = get_node_or_null("/root/NetworkManager")
+	if net != null and net.is_in_active_session() and multiplayer == net.multiplayer:
+		_traveling[peer_id] = true
+		var paused: bool = await net.pause_player_for_transfer(player)
+		_traveling.erase(peer_id)
+		if not paused or not is_instance_valid(player) or result >= 0:
 			return
 	if not participants.has(peer_id):
 		var label: String = player.player_callsign
