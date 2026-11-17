@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="MissionDefinition" load_steps=19 format=3]
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
 [ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
@@ -6,6 +6,15 @@
 [ext_resource type="Resource" path="res://resources/levels/goauld_infiltration_01.tres" id="4_layout"]
 [ext_resource type="Script" path="res://scripts/mission/MissionAlarm.gd" id="5_alarm"]
 [ext_resource type="Script" path="res://scripts/mission/MissionReinforcement.gd" id="6_reinforcement"]
+
+[ext_resource type="Script" path="res://scripts/mission/MissionTrigger.gd" id="7_trigger"]
+
+[sub_resource type="Resource" id="release_command"]
+script = ExtResource("7_trigger")
+id = &"generator_releases_command"
+objective_id = &"sabotage_generator"
+security_id = &"cmd_command"
+notice = "GENERATOR SABOTAGED — COMMAND SECURITY RELEASED"
 
 [sub_resource type="Resource" id="sabotage"]
 script = ExtResource("2_objective")
@@ -92,3 +101,4 @@ objectives = Array[ExtResource("2_objective")]([SubResource("sabotage"), SubReso
 patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_checkpoint"), SubResource("patrol_generator"), SubResource("patrol_stores"), SubResource("patrol_upper"), SubResource("patrol_command")])
 alarms = Array[ExtResource("5_alarm")]([SubResource("alarm_checkpoint"), SubResource("alarm_observation")])
 reinforcements = Array[ExtResource("6_reinforcement")]([SubResource("reinforce_first"), SubResource("reinforce_second")])
+triggers = Array[ExtResource("7_trigger")]([SubResource("release_command")])

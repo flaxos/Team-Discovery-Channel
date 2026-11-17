@@ -27,6 +27,7 @@ MULTIPLAYER = (
     'test_gate_client_authority', 'test_difficulty_menu_and_sync',
     'test_elevator_replication', 'test_netcode_smoke', 'test_sprint5_dedicated_smoke',
     'test_modular_security', 'test_modular_extraction_dedicated',
+    'test_mission_events_dedicated',
 )
 FATAL = re.compile(r'(?:SCRIPT ERROR:|(?:^|\n)ERROR:|Assertion failed|WARNING: ObjectDB|AddressSanitizer|Segmentation fault)', re.MULTILINE)
 ANSI = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')

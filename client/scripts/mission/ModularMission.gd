@@ -13,6 +13,7 @@ var setup_errors := PackedStringArray()
 @onready var objectives: MissionObjectives = $Objectives
 @onready var enemies: Node3D = $Enemies
 @onready var alert: MissionAlert = $Alert
+@onready var events: MissionEvents = $Events
 
 
 func _enter_tree() -> void:
@@ -43,11 +44,16 @@ func _ready() -> void:
 	alert.level_changed.connect(_on_alert_changed)
 	alert.runner_changed.connect(_on_alarm_runner)
 	alert.console_disabled.connect(_on_alarm_disabled)
+	if setup_errors.is_empty():
+		events.setup(definition, level, objectives)
+		events.notice_shown.connect(_on_event_notice)
 	super._ready()
 	if DisplayServer.get_name() != "headless":
 		_add_presentation()
 	if not level.ready_for_navigation:
 		await level.navigation_ready
+	if setup_errors.is_empty() and mission_result < 0:
+		setup_errors.append_array(events.start())
 	if multiplayer.is_server():
 		for point: Node3D in spawns_container.get_children():
 			var floor_point := NavigationServer3D.map_get_closest_point(
@@ -61,6 +67,11 @@ func _ready() -> void:
 			_spawn_patrols()
 	is_started = true
 	started.emit()
+
+
+func _on_event_notice(text: String) -> void:
+	if hud != null and not hud.is_mission_ended and not text.is_empty():
+		hud.show_squad_order_toast(text, 5.0)
 
 
 func _on_hostile_entered(node: Node) -> void:
@@ -215,6 +226,7 @@ func sync_mission_result(victory: bool) -> void:
 	# The result is final: hostiles stand down and nothing further happens to the squad.
 	objectives.set_physics_process(false)
 	alert.set_physics_process(false)
+	events.stop()
 	for enemy in enemies.get_children():
 		if enemy is JaffaAI:
 			(enemy as JaffaAI).stand_down()

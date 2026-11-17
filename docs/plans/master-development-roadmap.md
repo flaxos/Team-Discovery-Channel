@@ -55,7 +55,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Suppression and firefights | Partial | Lead rank halts and fires, others relocate; airman cover fire in SGC. No suppression effect on the target |
 | Door interaction | Verified | `ModularDoor` open/close, server-validated, snapshots; AI opens doors with `open_for`; TA-3 closes AI-opened doors after clearance, respects occupied doorways and preserves manual openings (`test_modular_navigation_ta3_multiplayer` covers late-join snapshot and closure) |
 | Level-wide alert and alarm | Awaiting human | `MissionAlert` (EV-1): calm, alerted and alarm levels; a runner must reach an alarm console; operatives can disable consoles; reinforcement budget; `test_mission_alert`, `test_mission_alert_multiplayer` |
-| Locked doors and access control | Partial | Security doors lock, replicate and block AI. Nothing in a mission can lock or unlock one: `set_locked` is only called by `ModularNpcDemo.gd` |
+| Locked doors and access control | EV-2-1 implemented; human review pending | `MissionTrigger`/`MissionEvents` lock command security at mission startup and release it when generator sabotage completes; existing door authority/snapshots and TA-3 navigation remain in charge. Single-process, real listen/dedicated peers and retry: `test_mission_events*`. [Contract](../maps/mission-events.md) |
 | NPC avoidance and rerouting | Awaiting human (TA-3) | `LevelNavigator` uses the room graph with live locks and navmesh legs, and steers nearby NPCs to their right. `blocked_door` holds only when no alternate route can be built. `test_modular_navigation_ta3` |
 | Mounted weapons | Verified (SGC) | Fixed .50 cal turrets and the Heavy tripod; airmen can crew them. Not available as a modular attachment |
 | Deployable equipment | Verified (SGC) | Claymore, C4, ballistic shield, smoke; smoke blocks AI sight |
@@ -228,6 +228,9 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 - **Complexity:** M · Fable · independent of F, J.
 
 **EV-2 — Stages, triggers and door or power actions**
+
+**Chunk 1 implemented (17 November 2026):** generator-objective completion releases the existing command security door, with validated typed data, a host-owned one-shot action, initialized late-join snapshots and connected retry. See [contract](../maps/mission-events.md) and [review](../reviews/2026-11-17-ev2-1-objective-doors.md). The remaining trigger/action types below are not implemented by this chunk.
+
 - **Experience:** missions with a middle: cut the power to open a door, a timed escape after sabotage.
 - **Baseline:** sequential objectives of three kinds (`reach`, `interact`, `extract`).
 - **New:** triggers (objective complete, alert level, room entered, timer) and actions (lock or unlock a security door by `security_id`, start a timer, enable an objective, show a notice). Optional and parallel objectives only if a designed mission needs them.
@@ -410,7 +413,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R12 | Gate travel and mission-state ownership | Fixed (GT-1 to GT-3) | `MissionSession` coordinates two-world coexistence, outbound/return Stargate travel, carried state, D-017 split-team outcome evaluation, and SGC debrief (`test_gate_travel`, `test_gate_return`) | Fixed in GT-1, GT-2, GT-3 |
 | R13 | Human two-player testing | Outstanding | No signed checklist for any mission | EX-2 |
 | R14 | Jaffa keep attacking downed operatives | Changed in EX-1 to the default of open question 3 | A downed operative is only chosen when no standing one is in perception. Applies to all Jaffa, SGC included | Revisit if question 3 is answered differently |
-| R15 | Security doors cannot be operated in a mission | New, confirmed | `set_locked` has no caller outside the demo scene | EV-2 |
+| R15 | Security doors had no mission action | Addressed by EV-2-1 | Generator sabotage now releases named command security through the existing server API, with real peer snapshots/retry coverage | Human pacing review; remaining EV-2 chunks separate |
 | R16 | Ring transport is not mission-ready | New, confirmed | No trigger on modular levels; the teleport moves operatives on each peer without server validation | Review before any mothership work |
 | R17 | Per-tick tree searches in AI | Fixed for sentries (ST-1); assault unchanged | Sentry perception runs at 10 Hz and caches the operative containers. The assault rule still searches the tree and casts rays every physics tick per Jaffa | Revisit if SGC Defense frame time suffers |
 | R18 | Class descriptions promise absent kit | New, confirmed | See the class row in section 2 | CO-2 |
@@ -419,6 +422,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R21 | Module headers outside their own cell | New, confirmed (GA-1) | The north and south headers of `Room05` to `Room13`, `Room15` and `Room16` are centred 0.1 m beyond the cell edge and overlap the adjoining room's header. Invisible with one material; flickers against a themed lintel. GA-1 stands lintel gold 5 mm proud | A structural pass on those ten modules, with collision and enclosure re-verified; before GA-2 reaches them |
 | R22 | Jaffa armour rendered dark | Fixed (GA-1, D-015) | `JaffaGuard.tscn` and `JaffaShockGuard.tscn` used metallic 0.85 to 0.95. No mission has a sky or reflection probe, so the armour rendered dark olive: 1.1 to 1.3 : 1 against Goa'uld walls. Now matte, about 5 : 1. Measured in the [kit guide](../maps/goauld-theme-kit.md#readability-measured) | Reconsider a small metallic term if the lighting pass adds reflections |
 | R23 | Whole-game lookups assume one world | Fixed (GT-1) | 48 lookups such as `get_tree().root.find_child("Players", true, false)` return the first match in the game. With the SGC and the compound loaded together, a sentry did not notice an operative 3 m away | Fixed: lookups go through `MissionWorld`; `tools/tests/test_world_scoping.py` fails on a new one |
+| R24 | Second late join with another client already present | Reproduced during EV-2-1 exploration | The second late client received an existing operative's spawn before `GateRoom/MultiplayerSpawner` existed, then failed startup on both listen and dedicated hosts. Sequential late joins pass; the failed three-peer run is excluded from acceptance ([review](../reviews/2026-11-17-ev2-1-objective-doors.md)) | Network readiness/spawn follow-up before claiming three/four-peer late-join acceptance |
 
 Items verified as **no longer open**: server-owned actors invisible to clients (fixed in PR #39, `configure_mission_sync`), the retry race on client operatives (fixed in PR #39), and "client late join mid-patrol untested" from the navigation guide (now covered).
 

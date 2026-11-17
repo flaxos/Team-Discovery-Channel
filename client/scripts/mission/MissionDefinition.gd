@@ -10,6 +10,8 @@ extends Resource
 @export var alarms: Array[MissionAlarm] = []
 ## Jaffa that arrive after the alarm. Needs at least one alarm console.
 @export var reinforcements: Array[MissionReinforcement] = []
+## One-shot objective completions that release mission security doors (EV-2 chunk 1).
+@export var triggers: Array[MissionTrigger] = []
 
 
 func validate() -> PackedStringArray:
@@ -62,6 +64,49 @@ func validate() -> PackedStringArray:
 			)
 	if not reinforcements.is_empty() and alarms.is_empty():
 		errors.append("Reinforcements need at least one alarm console")
+	var trigger_ids := {}
+	var door_ids := {}
+	for trigger in triggers:
+		if trigger == null:
+			errors.append("Null mission trigger")
+			continue
+		if str(trigger.id).strip_edges().is_empty() or trigger_ids.has(trigger.id):
+			errors.append("Duplicate/empty mission trigger id: %s" % trigger.id)
+		trigger_ids[trigger.id] = true
+		if not ids.has(trigger.objective_id):
+			errors.append("Unknown trigger objective: %s/%s" % [trigger.id, trigger.objective_id])
+		else:
+			for objective in objectives:
+				if objective != null and objective.id == trigger.objective_id and objective.kind == "extract":
+					errors.append("Door release must precede extraction: %s" % trigger.id)
+		var matches := 0
+		for connection in layout.connections:
+			if connection.state == "security_door" and connection.security_id == trigger.security_id:
+				matches += 1
+		if str(trigger.security_id).strip_edges().is_empty() or matches != 1:
+			errors.append("Trigger needs one named security door: %s/%s" % [trigger.id, trigger.security_id])
+		if door_ids.has(trigger.security_id):
+			errors.append("Security door has multiple release triggers: %s" % trigger.security_id)
+		door_ids[trigger.security_id] = true
+	if errors.is_empty() and not triggers.is_empty():
+		# Prove the authored sequence can earn each release. In particular, a console
+		# cannot be placed behind the door that only that console can unlock.
+		var links := LevelTopology.graph(layout)
+		for edges: Array in links.values():
+			for edge: Dictionary in edges:
+				if door_ids.has(StringName(edge.security_id)):
+					edge.locked = true
+		var previous := str(layout.entry_instance)
+		for objective in objectives:
+			if LevelTopology.path(links, previous, str(objective.room), [], true).is_empty():
+				errors.append("Mission doors block objective: %s" % objective.id)
+			for trigger in triggers:
+				if trigger.objective_id == objective.id:
+					for edges: Array in links.values():
+						for edge: Dictionary in edges:
+							if edge.security_id == str(trigger.security_id):
+								edge.locked = false
+			previous = str(objective.room)
 	return errors
 
 
