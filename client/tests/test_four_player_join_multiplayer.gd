@@ -57,7 +57,12 @@ func frames(count: int) -> void:
 
 
 func mark(label: String, value: Variant = true) -> void:
-	FileAccess.open(output_dir.path_join(label), FileAccess.WRITE).store_string(JSON.stringify(value))
+	var target := output_dir.path_join(label)
+	var temporary := target + ".tmp." + str(OS.get_process_id())
+	var file := FileAccess.open(temporary, FileAccess.WRITE)
+	file.store_string(JSON.stringify(value))
+	file.close()
+	DirAccess.rename_absolute(temporary, target)
 
 
 func exists(label: String) -> bool:
@@ -109,7 +114,7 @@ func spawn_child(index: int) -> int:
 	var args := PackedStringArray([
 		"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
 		"--log-file", output_dir.path_join("client_%d.log" % index),
-		"--script", "res://tests/test_four_player_join_multiplayer.gd",
+		"--script", client_script(),
 		"--", "--roster-child", str(index), "--result-dir", output_dir
 	])
 	if is_dedicated:
@@ -118,6 +123,10 @@ func spawn_child(index: int) -> int:
 	require(pid > 0)
 	children.append(pid)
 	return pid
+
+
+func client_script() -> String:
+	return "res://tests/test_four_player_join_multiplayer.gd"
 
 
 func travel(id: int) -> void:
@@ -141,7 +150,7 @@ func travel(id: int) -> void:
 	require(main.current_site.get_node("Players").has_node(str(id)))
 
 
-func snapshot(label: String, active_slots: Array[int]) -> void:
+func snapshot(label: String, active_slots: Array[int], expected_count: int = 4) -> void:
 	# Server expectations are read by clients, but never applied to their replicas.
 	var expected: Dictionary = {}
 	for w in range(2):
@@ -150,7 +159,7 @@ func snapshot(label: String, active_slots: Array[int]) -> void:
 			expected[str(actor.peer_id)] = {"world": w, "class": actor.class_id,
 				"position": [actor.position.x, actor.position.y, actor.position.z],
 				"health": actor.health_component.current_health, "crouching": actor.is_crouching}
-	require(expected.size() == 4, "Exactly four operative identities across both worlds")
+	require(expected.size() == expected_count, "Exactly the expected operative identities across both worlds")
 	require(not is_dedicated or not expected.has("1"), "Dedicated host remains pawnless")
 	mark("snapshot_" + label, expected)
 	for index in active_slots:

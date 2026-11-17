@@ -218,7 +218,7 @@ func _ready() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	# If host / server in an active game session, spawn all registered players and start waves
 	if net != null and net.is_server:
-		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected, CONNECT_DEFERRED)
 		net.mission_peer_ready.connect(_on_peer_connected_during_mission)
 		_spawn_all_players()
 
