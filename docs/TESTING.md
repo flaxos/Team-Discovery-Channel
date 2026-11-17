@@ -33,6 +33,12 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 
 ## Coverage contracts
 
+Sprint 6 extends `test_goauld_theme` and `tools/tests/test_theme_kit.py` for all nine
+corridor/compact-chamber definitions, four rotations, connected narrow/wide gallery
+interfaces, neutral/themed physical and navigation equality, continuous floor
+runners, finished corner ends and both lintel faces. The [review](reviews/2026-11-18-sprint6-goauld-corridors.md)
+contains the recovery record and reproducible render evidence.
+
 Sprint 5's `test_ammunition_sharing`, `test_ammunition_sharing_multiplayer`,
 `test_ammunition_sharing_dedicated` and `test_ammunition_sharing_travel` cover finite
 calibres, atomic conservation/caps, health/reload/reach/wall/result guards, default

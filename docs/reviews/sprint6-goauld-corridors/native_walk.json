@@ -1,0 +1,21 @@
+{
+	"arrived": [
+		1.62083494663239,
+		-0.000269533018581569,
+		56.0
+	],
+	"camera": "production TPS before/after; held ADS while walking",
+	"distance_m": 2.62083387374878,
+	"geometry_hidden": false,
+	"hostiles": "stood down and parked in barracks for controlled visual review",
+	"room": "inner",
+	"start": [
+		-0.99999862909317,
+		0.000999998301267624,
+		56.0
+	],
+	"viewport": [
+		1440,
+		1000
+	]
+}

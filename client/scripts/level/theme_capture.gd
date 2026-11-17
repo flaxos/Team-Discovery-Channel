@@ -5,8 +5,9 @@ extends SceneTree
 ##   godot --path client --script res://scripts/level/theme_capture.gd -- \
 ##       --layout res://resources/levels/goauld_infiltration_01.tres --output /tmp/captures
 ##
-## Optional: --theme neutral forces another theme for a side-by-side; --shots a,b limits the
-## set; --jaffa stands an alerted guard in the chamber and corridor. Each shot is a room, a camera position and a target, both in the room's own frame.
+## Optional: --theme neutral forces another theme; --baseline-ga1 limits pieces to GA-1;
+## --shots a,b limits the set; --jaffa adds stationary alerted guards for readability.
+## Each shot is a room, a camera position and a target, both in the room's own frame.
 const SHOTS := {
 	"corridor": [&"approach", Vector3(0, 1.7, 3.6), Vector3(0, 1.5, -4.0)],
 	"corridor_wall": [&"approach", Vector3(1.1, 1.6, 1.5), Vector3(-1.5, 1.6, -1.0)],
@@ -16,6 +17,22 @@ const SHOTS := {
 	"chamber_corner": [&"barracks", Vector3(1.0, 1.7, 1.0), Vector3(-3.8, 1.5, -3.8)],
 	"cover": [&"stores", Vector3(-3.0, 1.9, -3.0), Vector3(1.0, 0.6, 1.0)],
 	"palette_only": [&"inner", Vector3(-3.4, 1.7, 0.0), Vector3(4.0, 1.5, 0.0)],
+	"narrow_corner": [&"maint", Vector3(0, 1.7, -3.6), Vector3(2.8, 1.2, 0)],
+	"t_junction": [&"inner", Vector3(-3.6, 1.7, 0), Vector3(3.8, 1.3, -0.8)],
+	"wide_corner": [&"service", Vector3(0, 1.7, -3.6), Vector3(3.4, 1.3, 0.5)],
+	"adapter": [&"svc_adapter", Vector3(0, 1.7, 3.6), Vector3(0, 1.3, -4)],
+	"wide_straight": [&"wide", Vector3(0, 1.7, 3.6), Vector3(0, 1.3, -4)],
+	"cross_junction": [&"cross", Vector3(-3.6, 1.7, 0), Vector3(3.8, 1.3, -0.8)],
+	"wide_junction": [&"wide_cross", Vector3(-3.6, 1.7, 0), Vector3(3.8, 1.3, -0.8)],
+	"narrow_join": [&"cross", Vector3(0, 1.7, -1.0), Vector3(0, 2.9, -4.0)],
+	"wide_join": [&"wide", Vector3(0, 1.7, -1.0), Vector3(0, 2.9, -4.0)],
+}
+const GUARDS := {
+	&"checkpoint": Vector3(1.2, 0.05, -1.5), &"approach": Vector3(0.4, 0.05, -1.5),
+	&"maint": Vector3(1, 0.05, 0), &"inner": Vector3(1.5, 0.05, 0),
+	&"service": Vector3(1, 0.05, 0), &"svc_adapter": Vector3(0.4, 0.05, -1.5),
+	&"wide": Vector3(0.4, 0.05, -1.5), &"cross": Vector3(1.5, 0.05, 0),
+	&"wide_cross": Vector3(1.5, 0.05, 0),
 }
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
 
@@ -42,6 +59,16 @@ func run() -> void:
 	if not forced.is_empty():
 		layout = layout.duplicate(true) as LevelLayout
 		layout.default_theme = StringName(forced)
+	if "--baseline-ga1" in OS.get_cmdline_user_args():
+		layout = layout.duplicate(true) as LevelLayout
+		var baseline := (LevelThemeResolver.registry()[&"goauld"] as LevelVisualTheme).duplicate(true) as LevelVisualTheme
+		var original: Array[LevelThemeVariant] = []
+		for variant in baseline.variants:
+			if "room01" in variant.module_ids or "room04" in variant.module_ids:
+				original.append(variant)
+		baseline.variants = original
+		for item in layout.instances:
+			item.theme = baseline
 	DirAccess.make_dir_recursive_absolute(output)
 	root.size = Vector2i(1280, 720)
 	var level := LevelAssembly.new()
@@ -75,19 +102,21 @@ func run() -> void:
 	root.add_child(camera)
 	camera.make_current()
 	var suffix := "" if forced.is_empty() else "_" + forced
+	if "--baseline-ga1" in OS.get_cmdline_user_args():
+		suffix += "_ga1"
 	if "--jaffa" in OS.get_cmdline_user_args():
 		suffix += "_jaffa"
-	# --jaffa: an alerted guard in the chamber and corridor shots, to judge whether he and
+	# --jaffa: an alerted guard in the review rooms, to judge whether he and
 	# his marker stand out from the walls. He is a prop here: his own processing is off.
 	if "--jaffa" in OS.get_cmdline_user_args():
-		for place: Array in [[&"checkpoint", Vector3(1.2, 0.05, -1.5)], [&"approach", Vector3(0.4, 0.05, -1.5)]]:
-			var room := level.get_node_or_null(str(place[0])) as Node3D
+		for id: StringName in GUARDS:
+			var room := level.get_node_or_null(str(id)) as Node3D
 			if room == null:
 				continue
 			var guard := (load(JAFFA) as PackedScene).instantiate() as JaffaAI
 			root.add_child(guard)
 			guard.set_physics_process(false)
-			guard.global_position = room.global_transform * (place[1] as Vector3)
+			guard.global_position = room.global_transform * (GUARDS[id] as Vector3)
 			guard.awareness_level = JaffaPerception.Level.ALERTED
 	for shot: String in SHOTS:
 		if not wanted.is_empty() and not shot in wanted.split(","):

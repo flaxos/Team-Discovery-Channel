@@ -1,0 +1,36 @@
+{
+  "baseline_main": "08aed270d3fadaa8d057748dd3475cbbd2ea2634",
+  "recovered_commit": "e72ff28cbd11380ad2e15d9509b3eb250fe5fee7",
+  "historical_branch": "feat/sw1-stealth-takedowns-and-ap1a",
+  "selected_committed_paths": [
+    "tools/theme_kit.py",
+    "tools/tests/test_theme_kit.py",
+    "client/tests/test_goauld_theme.gd"
+  ],
+  "unfinished_extension_reused": "room05/room08 module entries; later chamber/tall-room and mission work excluded",
+  "unfinished_paths_verified_unchanged": 46,
+  "source_checkout_modified": false,
+  "production_structural_sources_modified": false,
+  "piece_modules": [
+    "room01",
+    "room02",
+    "room03",
+    "room04",
+    "room05",
+    "room06",
+    "room07",
+    "room08",
+    "room09"
+  ],
+  "variant_count": 106,
+  "piece_scene_count": 41,
+  "compound_coverage": {
+    "pieces": 14,
+    "palette": 6
+  },
+  "gallery_coverage": {
+    "pieces": 9,
+    "palette": 0
+  },
+  "art_acceptance": "pending owner review"
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the Goa'uld cosmetic kit (roadmap GA-1) from the module scenes.
+"""Generate the Goa'uld cosmetic kit (GA-1 and GA-2 corridor family) from module scenes.
 
 Every piece replaces one structural slab and fills exactly that slab's box, so
 collision, sockets and navigation are untouched (decision D-010). Relief is cut
@@ -31,7 +31,17 @@ MATERIAL_DIR = CLIENT / "resources/level_themes/goauld"
 SCENE_DIR = CLIENT / "scenes/level/themes/goauld"
 
 # Modules that receive built pieces. Every other module gets the palette only.
-MODULES = {"room01": "Room01Straight.tscn", "room04": "Room04Chamber.tscn"}
+MODULES = {
+    "room01": "Room01Straight.tscn",
+    "room02": "Room02Corner.tscn",
+    "room03": "Room03TJunction.tscn",
+    "room04": "Room04Chamber.tscn",
+    "room05": "Room05XJunction.tscn",
+    "room06": "Room06WideStraight.tscn",
+    "room07": "Room07WideCorner.tscn",
+    "room08": "Room08WideJunction.tscn",
+    "room09": "Room09WidthAdapter.tscn",
+}
 
 # name: (albedo, metallic, roughness). Values and contrast checks: brief, section 2.3.
 # Nothing is metallic: a mission has no sky or reflection probe, so a metallic surface
@@ -69,6 +79,7 @@ LINTEL_RELIEF = 0.04
 # the adjoining room's lintel occupies (brief, gap G-9). The lintel's gold therefore stands
 # 5 mm proud of the slab, inside the resolver's 1 cm tolerance, so it is drawn in front of
 # such a header instead of flickering against it, and stops 2 cm short of the soffit.
+# Finish both faces: a neighbouring offset header can expose its back to this room.
 PROUD = 0.005
 SOFFIT_GAP = 0.02
 RUNNER = 1.6  # width of a corridor's floor runner
@@ -162,6 +173,10 @@ def overlaps(a: Slab, b: Slab) -> bool:
     return all(al < bh - EPS and bl < ah - EPS for al, ah, bl, bh in zip(a.low(), a.high(), b.low(), b.high()))
 
 
+def touches(a: Slab, b: Slab) -> bool:
+    return all(al <= bh + EPS and bl <= ah + EPS for al, ah, bl, bh in zip(a.low(), a.high(), b.low(), b.high()))
+
+
 # --- Orientation ------------------------------------------------------------------------
 # Walls and lintels are authored once, facing +X with their length along Z, and turned
 # about Y to face the room. turn is in quarter-turns; ROTATIONS holds the basis rows as
@@ -195,34 +210,35 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
     floor = -height / 2  # the slab stands on the floor
     half = length / 2
     centre = slab.position[axis]
-
     def local(module_coordinate: float) -> float:
         return sign * (module_coordinate - centre)
 
     # What each end of the slab meets, in the piece's own -Z / +Z order.
     ends = {}
+    pier_widths = {}
     for end in (-1, 1):
         module_end = centre + sign * end * half
         kind = "jamb"
         for other in walls:
             other_thin = 0 if other.size[0] < other.size[2] else 2
-            if other is not slab and other_thin != thin and overlaps(slab, other):
+            if other is not slab and other_thin != thin and touches(slab, other):
                 reach = (other.low()[axis], other.high()[axis])
                 if reach[0] - EPS <= module_end <= reach[1] + EPS:
                     kind = "corner"
+                    pier_widths[end] = RIB + (slab.size[thin] if overlaps(slab, other) else 0.0)
         if kind == "jamb" and abs(abs(module_end) - extent[0 if axis == 0 else 1]) < 0.01:
             kind = "edge"
         ends[end] = kind
 
     # Ribs: a jamb beside an opening, a pier in a corner (0.2 m of it is inside the other
-    # wall), and the 2 m grid wherever a full rib fits with a panel either side.
+    # wall when they overlap), and the 2 m grid wherever a full rib fits with a panel either side.
     ribs: list[tuple[float, float, str]] = []
     free_low, free_high = -half, half
     for end, kind in ends.items():
         if kind == "jamb":
             ribs.append((end * half - (RIB if end > 0 else 0), end * half + (RIB if end < 0 else 0), "Jamb"))
         elif kind == "corner":
-            width = RIB + slab.size[thin]
+            width = pier_widths[end]
             ribs.append((end * half - (width if end > 0 else 0), end * half + (width if end < 0 else 0), "Pier"))
         else:
             continue
@@ -242,16 +258,20 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
     plinth = (floor, floor + PLINTH_TOP)
     panel = (floor + PLINTH_TOP, floor + FRIEZE_BASE)
     boxes: list[Box] = []
-    # Back of the slab: stone behind the panels, bronze where a jamb's reveal shows.
+    # Wrap the finish around a jamb/corner end. Perpendicular source slabs can
+    # overlap or butt together: a basalt end cap over a bronze/gold front flickers
+    # at their shared face. Equal finishes at the join keep that face consistent.
     cursor = -half
     index = 0
     for low, high, kind in ribs:
-        if kind != "Jamb":
+        if kind not in ("Jamb", "Pier"):
             continue
         if low > cursor + EPS:
             boxes.append(span("Back%d" % index, "basalt", back, (floor, floor + height), (cursor, low)))
             index += 1
-        boxes.append(span("Reveal%d" % index, "bronze", back, (floor, floor + height), (low, high)))
+        boxes.append(span("Reveal%d" % index, "bronze", back, (floor, floor + BAND[0]), (low, high)))
+        boxes.append(span("RevealBand%d" % index, "gold", back, (floor + BAND[0], floor + BAND[1]), (low, high)))
+        boxes.append(span("RevealUpper%d" % index, "bronze", back, (floor + BAND[1], floor + height), (low, high)))
         index += 1
         cursor = high
     if cursor < half - EPS:
@@ -278,6 +298,7 @@ def lintel_piece(slab: Slab) -> tuple[list[Box], int]:
     base = slab.position[1] - height / 2  # metres above the floor
     back = (-depth / 2, depth / 2 - LINTEL_RELIEF)
     front = (depth / 2 - LINTEL_RELIEF, depth / 2 + PROUD)
+    reverse = (-depth / 2 - PROUD, -depth / 2)
     band = (BAND[0] - base - height / 2, BAND[1] - base - height / 2)
     key = CARTOUCHE / 2
     return (
@@ -286,23 +307,88 @@ def lintel_piece(slab: Slab) -> tuple[list[Box], int]:
             span("Cartouche", "gold", front, (-height / 2 + SOFFIT_GAP, height / 2), (-key, key)),
             span("BandA", "gold", front, band, (-half, -key)),
             span("BandB", "gold", front, band, (key, half)),
+            span("CartoucheBack", "gold", reverse, (-height / 2 + SOFFIT_GAP, height / 2), (-key, key)),
+            span("BandBackA", "gold", reverse, band, (-half, -key)),
+            span("BandBackB", "gold", reverse, band, (key, half)),
         ],
         turn,
     )
 
 
 def is_passage(slab: Slab) -> bool:
-    """A floor or ceiling of a corridor (3 m wide) rather than of a room."""
-    return min(slab.size[0], slab.size[2]) <= 3.0 + EPS
+    """A floor or ceiling of a corridor (3 m or 6 m wide) rather than of a room."""
+    return min(slab.size[0], slab.size[2]) <= 6.0 + EPS
 
 
-def floor_piece(slab: Slab) -> list[Box]:
+def passage_along_z(slab: Slab) -> bool:
+    """Whether a passage floor or ceiling slab runs along the module's Z axis."""
+    return abs(slab.position[0]) < EPS and slab.size[0] in (3.0, 6.0)
+
+
+def corridor_floor(slab: Slab, openings: list[Slab]) -> list[Box]:
+    """Clip connected runner arms to this floor slab, then tile without overlapping faces.
+
+    The headers supply the real branch directions. A short north/south branch must
+    continue into an east/west centre slab; choosing a runner from each slab's long
+    axis alone leaves a dark break at a corner or junction.
+    """
+    r = RUNNER / 2
+    runners = [(-r, r, -r, r)]
+    for opening in openings:
+        if opening.size[0] < opening.size[2]:
+            x, z = opening.position[0], opening.position[2]
+            reach = x + (opening.size[0] / 2 if x > 0 else -opening.size[0] / 2)
+            runners.append((min(0.0, reach), max(0.0, reach), z - r, z + r))
+        else:
+            x, z = opening.position[0], opening.position[2]
+            reach = z + (opening.size[2] / 2 if z > 0 else -opening.size[2] / 2)
+            runners.append((x - r, x + r, min(0.0, reach), max(0.0, reach)))
+    x0, _, z0 = slab.low()
+    x1, _, z1 = slab.high()
+    xs = sorted({x0, x1} | {v for rect in runners for v in rect[:2] if x0 < v < x1})
+    zs = sorted({z0, z1} | {v for rect in runners for v in rect[2:] if z0 < v < z1})
+    # Merge equal neighbouring cells, first along rows, then across rows. The result
+    # stays a small set of disjoint boxes, including at a four-way crossing.
+    rectangles: list[tuple[float, float, float, float, str]] = []
+    active: dict[tuple[float, float, str], int] = {}
+    for za, zb in zip(zs, zs[1:]):
+        row: list[tuple[float, float, str]] = []
+        for xa, xb in zip(xs, xs[1:]):
+            cx, cz = (xa + xb) / 2, (za + zb) / 2
+            material = "floor_runner" if any(a <= cx <= b and c <= cz <= d for a, b, c, d in runners) else "floor_margin"
+            if row and row[-1][2] == material:
+                row[-1] = (row[-1][0], xb, material)
+            else:
+                row.append((xa, xb, material))
+        next_active = {}
+        for xa, xb, material in row:
+            key = (xa, xb, material)
+            if key in active:
+                index = active[key]
+                previous = rectangles[index]
+                rectangles[index] = (xa, xb, previous[2], zb, material)
+            else:
+                index = len(rectangles)
+                rectangles.append((xa, xb, za, zb, material))
+            next_active[key] = index
+        active = next_active
+    return [
+        span(("Runner" if material == "floor_runner" else "Margin") + str(index), material,
+             (xa - slab.position[0], xb - slab.position[0]), (-slab.size[1] / 2, slab.size[1] / 2),
+             (za - slab.position[2], zb - slab.position[2]))
+        for index, (xa, xb, za, zb, material) in enumerate(rectangles)
+    ]
+
+
+def floor_piece(slab: Slab, openings: list[Slab] | None = None) -> list[Box]:
     """Colour only: every box is the full slab thickness, so the walking surface is flat."""
     x, t, z = (s / 2 for s in slab.size)
     full = (-t, t)
+    if openings is not None:
+        return corridor_floor(slab, openings)
     if is_passage(slab):
         r = RUNNER / 2
-        if slab.size[2] >= slab.size[0]:
+        if passage_along_z(slab):
             return [
                 span("MarginA", "floor_margin", (-x, -r), full, (-z, z)),
                 span("Runner", "floor_runner", (-r, r), full, (-z, z)),
@@ -343,13 +429,19 @@ def ceiling_piece(slab: Slab, jambs: list[float]) -> list[Box]:
     ]
     inner_x, inner_z = x - edge, z - edge
     if passage:
-        along_z = slab.size[2] >= slab.size[0]
-        for index, grid in enumerate(GRID):
-            low, high = grid - RIB / 2, grid + RIB / 2
-            if along_z:
-                boxes.append(span("Beam%d" % index, "bronze", (-inner_x, inner_x), beam, (low, high)))
-            else:
-                boxes.append(span("Beam%d" % index, "bronze", (low, high), beam, (-inner_z, inner_z)))
+        along_z = passage_along_z(slab)
+        axis = 2 if along_z else 0
+        limit = inner_z if along_z else inner_x
+        centre = slab.position[axis]
+        index = 0
+        for grid in GRID:
+            low, high = grid - centre - RIB / 2, grid - centre + RIB / 2
+            if low >= -limit + CLEARANCE - EPS and high <= limit - CLEARANCE + EPS:
+                if along_z:
+                    boxes.append(span("Beam%d" % index, "bronze", (-inner_x, inner_x), beam, (low, high)))
+                else:
+                    boxes.append(span("Beam%d" % index, "bronze", (low, high), beam, (-inner_z, inner_z)))
+                index += 1
         return boxes
     # A room: beams spring from the door jambs in both directions. Those along X run
     # through; those along Z are cut where they cross, so no two boxes share a volume.
@@ -467,9 +559,10 @@ def build() -> tuple[dict[Path, str], list[dict], dict[str, tuple[Slab, list[Box
     for module_id, scene_file in MODULES.items():
         slabs = read_slabs(MODULE_SCENES / scene_file)
         walls = [slab for slab in slabs if slab.slot == "wall"]
+        openings = [slab for slab in slabs if slab.slot == "door_frame"]
         extent = (
-            max(abs(v) for slab in slabs for v in (slab.low()[0], slab.high()[0])),
-            max(abs(v) for slab in slabs for v in (slab.low()[2], slab.high()[2])),
+            max(abs(v) for slab in walls for v in (slab.low()[0], slab.high()[0])),
+            max(abs(v) for slab in walls for v in (slab.low()[2], slab.high()[2])),
         )
         # Door jamb lines, from the lintels: where the room's ceiling beams spring.
         jambs = sorted(
@@ -489,11 +582,14 @@ def build() -> tuple[dict[Path, str], list[dict], dict[str, tuple[Slab, list[Box
                 boxes, turn = lintel_piece(slab)
                 kind = "lintel"
             elif slab.slot == "floor":
-                boxes, kind = floor_piece(slab), "floor"
+                boxes = floor_piece(slab, openings if module_id not in ("room01", "room04") else None)
+                kind = "floor"
             elif slab.slot == "ceiling":
                 boxes, kind = ceiling_piece(slab, jambs), "ceiling"
             else:
                 continue  # sealed openings take the palette only
+            if any(min(box.size) <= EPS for box in boxes):
+                raise ValueError("Nonpositive cosmetic box in %s/%s" % (module_id, slab.name))
             size = slab.size if turn % 2 == 0 else (slab.size[2], slab.size[1], slab.size[0])
             stem = "%s_%s" % (kind, "x".join(str(round(v * 100)) for v in size))
             if kind == "wall":

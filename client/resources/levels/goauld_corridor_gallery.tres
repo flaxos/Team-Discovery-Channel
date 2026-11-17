@@ -1,0 +1,265 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=33 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_qrlcf"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_tc8ma"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="3_udai0"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="4_r4qox"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="5_bnsgr"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="6_n2knv"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room02Corner.tres" id="7_txkqi"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room03TJunction.tres" id="8_bnuyl"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room05XJunction.tres" id="9_etom3"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room09WidthAdapter.tres" id="10_lfqps"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room06WideStraight.tres" id="11_1d28s"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room07WideCorner.tres" id="12_6hb50"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room08WideJunction.tres" id="13_lkcdu"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="14_cdsny"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="15_tl2ts"]
+
+[sub_resource type="Resource" id="Resource_1kpug"]
+script = ExtResource("1_qrlcf")
+from_instance = &"entry"
+from_socket = &"north"
+to_instance = &"straight"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_vpcj5"]
+script = ExtResource("1_qrlcf")
+from_instance = &"straight"
+from_socket = &"south"
+to_instance = &"corner"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_y1eyq"]
+script = ExtResource("1_qrlcf")
+from_instance = &"corner"
+from_socket = &"east"
+to_instance = &"tee"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_6s40n"]
+script = ExtResource("1_qrlcf")
+from_instance = &"tee"
+from_socket = &"east"
+to_instance = &"cross"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_6gvo6"]
+script = ExtResource("1_qrlcf")
+from_instance = &"cross"
+from_socket = &"south"
+to_instance = &"adapter"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_yss5p"]
+script = ExtResource("1_qrlcf")
+from_instance = &"adapter"
+from_socket = &"south"
+to_instance = &"wide"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="Resource_sp8tc"]
+script = ExtResource("1_qrlcf")
+from_instance = &"wide"
+from_socket = &"south"
+to_instance = &"wide_corner"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_vogq3"]
+script = ExtResource("1_qrlcf")
+from_instance = &"wide_corner"
+from_socket = &"east"
+to_instance = &"wide_cross"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="Resource_i34y6"]
+script = ExtResource("2_tc8ma")
+id = &"entry"
+module = ExtResource("4_r4qox")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_sqmds"]
+script = ExtResource("2_tc8ma")
+id = &"straight"
+module = ExtResource("6_n2knv")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-3.49691e-07, -8)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_lfnvf"]
+script = ExtResource("2_tc8ma")
+id = &"corner"
+module = ExtResource("7_txkqi")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-1.39876e-06, -16)
+quarter_turn = 2
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_ug0q4"]
+script = ExtResource("2_tc8ma")
+id = &"tee"
+module = ExtResource("8_bnuyl")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-8, -16)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_8bnwk"]
+script = ExtResource("2_tc8ma")
+id = &"cross"
+module = ExtResource("9_etom3")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-8, -8)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_g2hb2"]
+script = ExtResource("2_tc8ma")
+id = &"adapter"
+module = ExtResource("10_lfqps")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-8, 9.53674e-07)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_x1gs7"]
+script = ExtResource("2_tc8ma")
+id = &"wide"
+module = ExtResource("11_1d28s")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-8, 8)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_iwvys"]
+script = ExtResource("2_tc8ma")
+id = &"wide_corner"
+module = ExtResource("12_6hb50")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-8, 16)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[sub_resource type="Resource" id="Resource_e1vdf"]
+script = ExtResource("2_tc8ma")
+id = &"wide_cross"
+module = ExtResource("13_lkcdu")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("5_bnsgr")]([])
+socket_decks = {}
+position = Vector2(-1.90735e-06, 16)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("3_udai0")]([])
+theme_id = &""
+theme_zone = &""
+role = &""
+
+[resource]
+script = ExtResource("14_cdsny")
+schema_version = 1
+decks = {
+"deck0": 0.0
+}
+default_theme = &"goauld"
+theme_zones = Array[ExtResource("15_tl2ts")]([])
+instances = Array[ExtResource("2_tc8ma")]([SubResource("Resource_i34y6"), SubResource("Resource_sqmds"), SubResource("Resource_lfnvf"), SubResource("Resource_ug0q4"), SubResource("Resource_8bnwk"), SubResource("Resource_g2hb2"), SubResource("Resource_x1gs7"), SubResource("Resource_iwvys"), SubResource("Resource_e1vdf")])
+connections = Array[ExtResource("1_qrlcf")]([SubResource("Resource_1kpug"), SubResource("Resource_vpcj5"), SubResource("Resource_y1eyq"), SubResource("Resource_6s40n"), SubResource("Resource_6gvo6"), SubResource("Resource_yss5p"), SubResource("Resource_sp8tc"), SubResource("Resource_vogq3")])
+entry_instance = &"entry"
+entry_marker = &"entry"
+destination_instance = &"wide_cross"
+destination_marker = &"destination"

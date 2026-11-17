@@ -1,0 +1,173 @@
+{
+  "method": "Per-channel median RGB in the listed pixel rectangles; standard sRGB relative-luminance contrast. Samples are controlled wall/pier patches, not a worst-case or human combat acceptance measure.",
+  "samples": [
+    {
+      "image": "narrow_corner_jaffa.png",
+      "regions_xyxy": {
+        "armour": [
+          810,
+          440,
+          850,
+          470
+        ],
+        "wall": [
+          1000,
+          300,
+          1040,
+          340
+        ],
+        "bronze": [
+          590,
+          300,
+          620,
+          340
+        ]
+      },
+      "median_rgb": {
+        "armour": [
+          157.0,
+          120.0,
+          50.0
+        ],
+        "wall": [
+          36.0,
+          29.0,
+          24.0
+        ],
+        "bronze": [
+          68.0,
+          50.0,
+          29.0
+        ]
+      },
+      "armour_to_wall": 4.09,
+      "armour_to_bronze": 3.0
+    },
+    {
+      "image": "t_junction_jaffa.png",
+      "regions_xyxy": {
+        "armour": [
+          678,
+          400,
+          708,
+          430
+        ],
+        "wall": [
+          890,
+          320,
+          920,
+          350
+        ],
+        "bronze": [
+          515,
+          280,
+          535,
+          320
+        ]
+      },
+      "median_rgb": {
+        "armour": [
+          179.0,
+          137.0,
+          58.5
+        ],
+        "wall": [
+          36.0,
+          29.0,
+          24.0
+        ],
+        "bronze": [
+          79.0,
+          59.0,
+          36.0
+        ]
+      },
+      "armour_to_wall": 5.19,
+      "armour_to_bronze": 3.31
+    },
+    {
+      "image": "wide_corner_jaffa.png",
+      "regions_xyxy": {
+        "armour": [
+          830,
+          440,
+          870,
+          480
+        ],
+        "wall": [
+          1000,
+          330,
+          1040,
+          365
+        ],
+        "bronze": [
+          80,
+          340,
+          120,
+          380
+        ]
+      },
+      "median_rgb": {
+        "armour": [
+          157.0,
+          120.0,
+          50.0
+        ],
+        "wall": [
+          36.0,
+          29.0,
+          24.0
+        ],
+        "bronze": [
+          80.0,
+          59.0,
+          37.0
+        ]
+      },
+      "armour_to_wall": 4.09,
+      "armour_to_bronze": 2.59
+    },
+    {
+      "image": "adapter_jaffa.png",
+      "regions_xyxy": {
+        "armour": [
+          665,
+          390,
+          695,
+          430
+        ],
+        "wall": [
+          990,
+          310,
+          1030,
+          350
+        ],
+        "bronze": [
+          510,
+          350,
+          530,
+          380
+        ]
+      },
+      "median_rgb": {
+        "armour": [
+          157.0,
+          120.0,
+          50.0
+        ],
+        "wall": [
+          36.0,
+          29.0,
+          24.0
+        ],
+        "bronze": [
+          68.0,
+          50.0,
+          29.0
+        ]
+      },
+      "armour_to_wall": 4.09,
+      "armour_to_bronze": 3.0
+    }
+  ]
+}

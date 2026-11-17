@@ -67,7 +67,7 @@ class GoauldKit(unittest.TestCase):
             wanted = {slab.name for slab in kit.read_slabs(kit.MODULE_SCENES / scene) if slab.slot != 'portal'}
             got = {variant['slot'] for variant in self.variants if variant['module'] == module_id}
             self.assertEqual(got, wanted, module_id)
-        self.assertEqual(len(self.variants), 20)
+        self.assertEqual(len(self.variants), 106)
         self.assertEqual(len({variant['id'] for variant in self.variants}), len(self.variants))
 
     def test_each_piece_fills_exactly_its_slab(self):
@@ -78,7 +78,7 @@ class GoauldKit(unittest.TestCase):
             size = local_size(slab, turn)
             for axis in range(3):
                 proud = kit.PROUD if slab.slot == 'door_frame' and axis == 0 else 0.0
-                self.assertAlmostEqual(min(box.low()[axis] for box in boxes), -size[axis] / 2, 6, name)
+                self.assertAlmostEqual(min(box.low()[axis] for box in boxes), -size[axis] / 2 - proud, 6, name)
                 self.assertAlmostEqual(max(box.high()[axis] for box in boxes), size[axis] / 2 + proud, 6, name)
         self.assertLess(kit.PROUD, 0.01, 'Inside the tolerance LevelThemeResolver.apply allows')
 
@@ -120,6 +120,62 @@ class GoauldKit(unittest.TestCase):
                 self.assertAlmostEqual(box.size[1], slab.size[1], 6, name)
                 self.assertAlmostEqual(box.centre[1], 0.0, 6, name)
 
+    def test_every_box_has_positive_dimensions(self):
+        for name, (_slab, boxes, _turn) in self.pieces.items():
+            for box in boxes:
+                self.assertTrue(all(size > 0 for size in box.size), '%s/%s' % (name, box.name))
+
+    def test_corner_and_jamb_end_caps_match_the_front_finish(self):
+        for name, (slab, boxes, turn) in self.of_slot('wall').items():
+            for rib in boxes:
+                if not rib.name.startswith(('Pier', 'Jamb')):
+                    continue
+                for height, expected in ((1.7, 'bronze'), (3.1, 'gold')):
+                    point = (-local_size(slab, turn)[0] / 4, height - slab.position[1], rib.centre[2])
+                    found = [box.material for box in boxes if all(lo < v < hi for lo, v, hi in zip(box.low(), point, box.high()))]
+                    self.assertEqual(found, [expected], '%s/%s end at %s' % (name, rib.name, height))
+
+    def test_lintels_have_gold_on_both_faces(self):
+        # Offset source headers can hide a neighbour's front with their reverse face.
+        for name, (slab, boxes, turn) in self.of_slot('door_frame').items():
+            size = local_size(slab, turn)
+            for side in (-1, 1):
+                for z in (0, -size[2] / 3, size[2] / 3):
+                    point = (side * (size[0] / 2 + kit.PROUD / 2), 3.1 - slab.position[1], z)
+                    found = [box.material for box in boxes if all(lo < v < hi for lo, v, hi in zip(box.low(), point, box.high()))]
+                    self.assertEqual(found, ['gold'], '%s face %d at %s' % (name, side, z))
+
+    def test_corridor_runner_connects_every_branch(self):
+        # Explicit walking lines from the discovered corridor family, independently of
+        # how a room happens to split its floor into meshes. Check the full 1.6 m band.
+        branches = {
+            'room01': [(0, -4), (0, 4)],
+            'room02': [(0, -4), (4, 0)],
+            'room03': [(0, -4), (-4, 0), (4, 0)],
+            'room05': [(0, -4), (0, 4), (-4, 0), (4, 0)],
+            'room06': [(0, -4), (0, 4)],
+            'room07': [(0, -4), (4, 0)],
+            'room08': [(0, -4), (0, 4), (-4, 0), (4, 0)],
+            'room09': [(0, -4), (0, 4)],
+        }
+        for module, endpoints in branches.items():
+            regions = []
+            for name, (slab, boxes, _turn) in self.of_slot('floor').items():
+                if name.startswith(module + '_'):
+                    for box in boxes:
+                        if box.material == 'floor_runner':
+                            regions.append((slab.position[0] + box.low()[0], slab.position[0] + box.high()[0],
+                                            slab.position[2] + box.low()[2], slab.position[2] + box.high()[2]))
+            for end_x, end_z in endpoints:
+                for step in range(41):
+                    along = step / 40
+                    for across in (-0.79, 0.0, 0.79):
+                        x = end_x * along + (across if end_z else 0)
+                        z = end_z * along + (across if end_x else 0)
+                        self.assertTrue(any(a - 1e-6 <= x <= b + 1e-6 and c - 1e-6 <= z <= d + 1e-6
+                                            for a, b, c, d in regions),
+                                        '%s runner breaks at %s' % (module, (x, z)))
+
     def test_relief_stays_inside_the_slab_and_leaves_a_back(self):
         for name, (slab, boxes, turn) in self.of_slot('wall').items():
             depth = local_size(slab, turn)[0]
@@ -143,13 +199,27 @@ class GoauldKit(unittest.TestCase):
             self.assertGreater(gold, 0, name)
 
     def test_wall_rhythm(self):
-        slab, boxes, _turn = self.pieces['room01_Wall2']
-        ribs = sorted(box.centre[2] for box in boxes if box.name.startswith('Rib'))
-        self.assertEqual(ribs, [-3.0, -1.0, 1.0, 3.0], 'A 2 m grid from the module centre')
+        for name in ('room01_Wall2', 'room03_Wall8', 'room06_Wall2'):
+            _slab, boxes, _turn = self.pieces[name]
+            ribs = sorted(box.centre[2] for box in boxes if box.name.startswith('Rib'))
+            self.assertEqual(ribs, [-3.0, -1.0, 1.0, 3.0], 'A 2 m grid from the module centre: ' + name)
         for name in ('room04_Wall2', 'room04_Wall7'):
             kinds = sorted(box.name.rstrip('0123456789') for box in self.pieces[name][1]
                            if box.name.startswith(('Rib', 'Pier', 'Jamb')))
             self.assertEqual(kinds, ['Jamb', 'Pier'], name)
+        for name, expected in (
+            ('room02_Wall4', ['Pier', 'Rib', 'Rib']),
+            ('room02_Wall5', ['Pier', 'Rib']),
+            ('room03_Wall4', ['Pier', 'Rib']),
+            ('room07_Wall4', ['Pier', 'Rib', 'Rib', 'Rib']),
+            ('room07_Wall5', ['Pier']),
+            ('room09_Wall4', ['Pier', 'Rib', 'Rib', 'Rib']),
+            ('room09_Wall5', ['Pier']),
+            ('room09_Wall10', ['Pier', 'Pier']),
+        ):
+            kinds = sorted(box.name.rstrip('0123456789') for box in self.pieces[name][1]
+                           if box.name.startswith(('Rib', 'Pier', 'Jamb')))
+            self.assertEqual(kinds, expected, name)
 
     def test_palette_keeps_play_readable(self):
         colour = {name: values[0] for name, values in kit.PALETTE.items()}
