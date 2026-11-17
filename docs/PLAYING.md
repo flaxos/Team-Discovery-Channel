@@ -17,6 +17,8 @@ A fourth entry, **Goa'uld Infiltration — Greybox** (`--mission goauld_infiltra
 
 A sixth entry, **Goa'uld Infiltration — Timed Extraction** (`--mission goauld_timed_extraction`), adds a countdown to the standalone compound mission. Sabotage the generator, then download the command records to start a three-minute extraction window. All standing operatives must reach the Stargate extraction marker before it expires. The top-right clock turns red at 30 seconds and continues while menus are open. Expiry shows **EXTRACTION WINDOW EXPIRED**; retry resets the mission and timer. The three-minute duration is provisional pending playtesting. The ordinary infiltration and SGC travel missions remain untimed. See the [brief](maps/briefs/timed-extraction.md).
 
+A seventh entry, **Goa'uld Infiltration — Alarm Escape** (`--mission goauld_alarm_escape`), starts its three-minute clock when a guard actually raises the alarm. Finish generator sabotage and the command-record download, then return all standing operatives to the Stargate before expiry. Searching does not start it; preventing the alarm through console disables or stopping runners preserves an untimed run. Records download alone does not start a clock in this variant. The duration is provisional. See the [brief](maps/briefs/alarm-escape.md).
+
 A hidden development mission, **Two worlds** (`--mission two_worlds_dev`), loads the quiet SGC and the Goa'uld compound side by side without gate travel for coexistence tests and frame-cost measurement ([architecture](ARCHITECTURE.md#worlds-and-the-session)).
 
 UAT inherits the Defense map, including props, friendly personnel, stairs and the lift. It disables automatic hostile gate activations and enemy waves; it is an exploration/test mode rather than an extraction run. Difficulty is disabled. The host owns mission/difficulty selection; clients receive it, including on joining and retry.
@@ -40,7 +42,7 @@ godot --headless --path client -- --server --port 7777 --mission sgc_defense --d
 godot --path client -- --connect 127.0.0.1 --port 7777 --name Carter --class carter_tech
 ```
 
-For a quiet dedicated server, replace the server mission with `--mission sgc_uat`; for the modular mission, use `--mission modular_extraction_uat`; for Timed Extraction, use `--mission goauld_timed_extraction`. A dedicated server has no host operative, so on the modular mission any connected operative's **Retry mission** restarts it for everyone. If the server stops, clients return to the lobby. Replace `127.0.0.1` with the server's address for another machine. The dedicated server bypasses the lobby; a normal client does not. Keep peers on compatible code. Selecting `--mission` on a joining client does not override the server.
+For a quiet dedicated server, replace the server mission with `--mission sgc_uat`; for the modular mission, use `--mission modular_extraction_uat`; for Timed Extraction, use `--mission goauld_timed_extraction`; for Alarm Escape, use `--mission goauld_alarm_escape`. A dedicated server has no host operative, so on the modular mission any connected operative's **Retry mission** restarts it for everyone. If the server stops, clients return to the lobby. Replace `127.0.0.1` with the server's address for another machine. The dedicated server bypasses the lobby; a normal client does not. Keep peers on compatible code. Selecting `--mission` on a joining client does not override the server.
 
 ## Default controls
 

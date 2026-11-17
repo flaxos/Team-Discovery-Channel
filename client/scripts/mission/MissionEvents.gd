@@ -1,6 +1,6 @@
 class_name MissionEvents
 extends Node
-## Host-owned, one-shot objective actions: security releases and an extraction timer.
+## Host-owned, one-shot mission actions: objective security releases and objective/alarm time.
 ## Doors retain collision, occupied-door protection and their own late-join snapshots.
 signal trigger_fired(id: StringName)
 signal notice_shown(text: String)
@@ -10,6 +10,7 @@ enum TimerState { IDLE, RUNNING, STOPPED, EXPIRED }
 
 var definition: MissionDefinition
 var objectives: MissionObjectives
+var alert: MissionAlert
 var fired := PackedStringArray()
 var active := false
 var _doors: Dictionary = {}
@@ -28,9 +29,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
-func setup(mission: MissionDefinition, level: LevelAssembly, progress: MissionObjectives) -> void:
+func setup(mission: MissionDefinition, level: LevelAssembly, progress: MissionObjectives, compound_alert: MissionAlert) -> void:
 	definition = mission
 	objectives = progress
+	alert = compound_alert
 	for trigger in definition.triggers:
 		if trigger.action != "release_door":
 			continue
@@ -39,6 +41,7 @@ func setup(mission: MissionDefinition, level: LevelAssembly, progress: MissionOb
 			if door != null and door.is_security and door.security_id == trigger.security_id:
 				_doors[trigger.id] = door
 	objectives.objective_changed.connect(_on_objective_changed)
+	alert.level_changed.connect(_on_alert_changed)
 	if not definition.triggers.is_empty() and multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_snapshot.rpc_id(1)
 
@@ -61,6 +64,7 @@ func start() -> PackedStringArray:
 			if trigger.action == "release_door" and not (_doors[trigger.id] as ModularDoor).set_locked(true):
 				errors.append("Could not initialize mission door: %s" % trigger.security_id)
 		_on_objective_changed(objectives.index)
+		_on_alert_changed(alert.alert_level)
 		for peer: int in _waiting_peers:
 			_send_snapshot(peer)
 		_waiting_peers.clear()
@@ -166,27 +170,41 @@ func _on_objective_changed(index: int) -> void:
 	if not active or not multiplayer.is_server():
 		return
 	for trigger in definition.triggers:
-		if fired.has(str(trigger.id)):
+		if trigger.condition != "objective_completed":
 			continue
 		for i in range(mini(index, objectives.index)):
 			if definition.objectives[i].id != trigger.objective_id:
 				continue
-			var applied := false
-			if trigger.action == "release_door":
-				applied = (_doors[trigger.id] as ModularDoor).set_locked(false)
-			elif trigger.action == "start_timer" and timer_state == TimerState.IDLE:
-				timer_id = trigger.id
-				timer_state = TimerState.RUNNING
-				_deadline_msec = Time.get_ticks_msec() + int(trigger.duration_seconds * 1000.0)
-				_publish_timer()
-				_show_timer()
-				applied = true
-			if applied:
-				fired.append(str(trigger.id))
-				trigger_fired.emit(trigger.id)
-				notice_shown.emit(trigger.notice)
-				SGCNetworkManager.mission_rpc(self, &"sync_fired", [fired, str(trigger.id)])
+			_apply(trigger)
 			break
+
+
+func _on_alert_changed(value: int) -> void:
+	if not active or not multiplayer.is_server() or value != MissionAlert.Level.ALARM or not alert.is_raised():
+		return
+	for trigger in definition.triggers:
+		if trigger.condition == "alarm_raised":
+			_apply(trigger)
+
+
+func _apply(trigger: MissionTrigger) -> void:
+	if not active or not multiplayer.is_server() or fired.has(str(trigger.id)):
+		return
+	var applied := false
+	if trigger.action == "release_door":
+		applied = (_doors[trigger.id] as ModularDoor).set_locked(false)
+	elif trigger.action == "start_timer" and timer_state == TimerState.IDLE:
+		timer_id = trigger.id
+		timer_state = TimerState.RUNNING
+		_deadline_msec = Time.get_ticks_msec() + int(trigger.duration_seconds * 1000.0)
+		_publish_timer()
+		_show_timer()
+		applied = true
+	if applied:
+		fired.append(str(trigger.id))
+		trigger_fired.emit(trigger.id)
+		notice_shown.emit(trigger.notice)
+		SGCNetworkManager.mission_rpc(self, &"sync_fired", [fired, str(trigger.id)])
 
 
 @rpc("authority", "call_remote", "reliable")

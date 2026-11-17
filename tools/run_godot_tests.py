@@ -31,6 +31,7 @@ MULTIPLAYER = (
     'test_four_player_join_dedicated',
     'test_session_lifecycle_dedicated',
     'test_mission_countdown_dedicated',
+    'test_alarm_escape_dedicated',
 )
 FATAL = re.compile(r'(?:SCRIPT ERROR:|(?:^|\n)ERROR:|Assertion failed|WARNING: ObjectDB|AddressSanitizer|Segmentation fault)', re.MULTILINE)
 ANSI = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')

@@ -68,3 +68,7 @@ Part of the [infiltration mission checklist](goauld-infiltration-mission.md#huma
 - **No door lockdown or ring-delivered reinforcements** (EV-2 and later).
 - **A runner on another deck** may take a long route; nothing stops it except operatives.
 - **Reinforcement Jaffa have no patrol route of their own** beyond their sweep.
+
+## Alarm Escape variant
+
+Sprint 3's **Goa'uld Infiltration — Alarm Escape** consumes the existing raised-alarm state through `MissionEvents` to start one provisional three-minute extraction window. Searching remains untimed and the squad can prevent the alarm with the existing runner/console rules. It changes neither this alert director nor the original infiltration/travel missions. See the [brief](briefs/alarm-escape.md) and [event contract](mission-events.md).
