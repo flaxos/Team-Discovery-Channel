@@ -150,7 +150,9 @@ func run_host() -> void:
 	var client_id: int = client_node.peer_id
 
 	sgc_gate._on_extraction_entered(client_node)
-	await frames(10)
+	var arrival_deadline := Time.get_ticks_msec() + 15000
+	while not site.players_container.has_node(str(client_id)) and Time.get_ticks_msec() < arrival_deadline:
+		await frames(1)
 
 	assert(home.players_container.get_node_or_null(str(client_id)) == null, "Client despawned from SGC")
 	assert(site.players_container.get_node_or_null(str(client_id)) != null, "Client spawned in offworld compound")

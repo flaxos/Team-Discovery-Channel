@@ -154,6 +154,8 @@ func run() -> void:
 	assert(site.squad_state() == Vector2i(1, 1), "Site has 1 standing operative")
 
 	# Late joiner can also travel through the gate to join the away team
+	# Peer 42 is a locally simulated identity, not a connected ENet owner.
+	op42.set_multiplayer_authority(1)
 	sgc_gate._on_extraction_entered(op42)
 	await frames(5)
 	assert(home.players_container.get_node_or_null("42") == null)

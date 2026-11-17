@@ -77,10 +77,8 @@ func reserve_connection(incoming: bool) -> bool:
 	if not multiplayer.is_server() or current_state != GateState.INACTIVE or direction != GateDirection.NONE:
 		return false
 	var connection: int = GateDirection.INBOUND if incoming else GateDirection.OUTBOUND
-	if multiplayer.has_multiplayer_peer():
-		sync_reserve_connection.rpc(connection)
-	else:
-		sync_reserve_connection(connection)
+	SGCNetworkManager.mission_rpc(self, &"sync_reserve_connection", [connection])
+	sync_reserve_connection(connection)
 	return true
 
 
@@ -96,10 +94,8 @@ func sync_reserve_connection(connection: int) -> void:
 func authorize_extraction() -> void:
 	if not multiplayer.is_server() or direction != GateDirection.OUTBOUND:
 		return
-	if multiplayer.has_multiplayer_peer():
-		sync_authorize_extraction.rpc()
-	else:
-		sync_authorize_extraction()
+	SGCNetworkManager.mission_rpc(self, &"sync_authorize_extraction")
+	sync_authorize_extraction()
 
 
 @rpc("authority", "call_local", "reliable")
@@ -115,20 +111,16 @@ func lock_chevron(chevron_idx: int) -> void:
 		return
 	if current_state != GateState.DIALING:
 		return
-	if multiplayer.has_multiplayer_peer():
-		sync_lock_chevron.rpc(chevron_idx)
-	else:
-		sync_lock_chevron(chevron_idx)
+	SGCNetworkManager.mission_rpc(self, &"sync_lock_chevron", [chevron_idx])
+	sync_lock_chevron(chevron_idx)
 
 
 ## Resets all chevrons on dialing sequence failure
 func reset_chevrons() -> void:
 	if not multiplayer.is_server():
 		return
-	if multiplayer.has_multiplayer_peer():
-		sync_reset_chevrons.rpc()
-	else:
-		sync_reset_chevrons()
+	SGCNetworkManager.mission_rpc(self, &"sync_reset_chevrons")
+	sync_reset_chevrons()
 
 
 @rpc("authority", "call_local", "reliable")
@@ -175,10 +167,8 @@ func sync_lock_chevron(chevron_idx: int) -> void:
 func trigger_kawoosh() -> void:
 	if not multiplayer.is_server():
 		return
-	if multiplayer.has_multiplayer_peer():
-		sync_trigger_kawoosh.rpc()
-	else:
-		sync_trigger_kawoosh()
+	SGCNetworkManager.mission_rpc(self, &"sync_trigger_kawoosh")
+	sync_trigger_kawoosh()
 
 
 @rpc("authority", "call_local", "reliable")
@@ -234,7 +224,7 @@ func _stabilize_wormhole() -> void:
 		event_horizon_mesh.visible = true
 	current_state = GateState.ACTIVE
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
-		sync_stabilized.rpc()
+		SGCNetworkManager.mission_rpc(self, &"sync_stabilized")
 	wormhole_opened.emit()
 	print("Stargate: Wormhole stabilized! Extraction aperture open.")
 	if gate_light != null:
@@ -273,10 +263,8 @@ func _on_kawoosh_hit_body(body: Node) -> void:
 func close_wormhole() -> void:
 	if not multiplayer.is_server():
 		return
-	if multiplayer.has_multiplayer_peer():
-		sync_close_wormhole.rpc()
-	else:
-		sync_close_wormhole()
+	SGCNetworkManager.mission_rpc(self, &"sync_close_wormhole")
+	sync_close_wormhole()
 
 
 @rpc("authority", "call_local", "reliable")

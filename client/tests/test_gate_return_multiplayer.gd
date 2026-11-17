@@ -170,7 +170,9 @@ func run_host() -> void:
 	mark("host_traveled")
 	assert(await marked("client_saw_host_travel"))
 	sgc_gate._on_extraction_entered(client_home)
-	await frames(10)
+	var arrival_deadline := Time.get_ticks_msec() + 15000
+	while not site.players_container.has_node(str(client_id)) and Time.get_ticks_msec() < arrival_deadline:
+		await frames(1)
 
 	var host_site := site.players_container.get_node_or_null("1") as PlayerController3D
 	var client_site := site.players_container.get_node_or_null(str(client_id)) as PlayerController3D

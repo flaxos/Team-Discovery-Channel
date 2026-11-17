@@ -117,6 +117,8 @@ var peers: Dictionary = {}
 
 var mission_ready_peers: Dictionary = {}
 var _restart_acks: Dictionary = {}
+var _player_pauses: Dictionary = {}
+var _paused_actors: Dictionary = {}
 
 var _peer: ENetMultiplayerPeer
 
@@ -284,6 +286,8 @@ func disconnect_game(reset_settings: bool = true) -> void:
 		multiplayer.multiplayer_peer = null
 	peers.clear()
 	mission_ready_peers.clear()
+	_player_pauses.clear()
+	_paused_actors.clear()
 	is_server = false
 	local_peer_id = 1
 	mission_started = false
@@ -410,7 +414,11 @@ func acknowledge_mission_restart() -> void:
 func restart_game(tier: int, mission_id: String = "") -> void:
 	if mission_id != "" and not MISSIONS.has(mission_id): return
 	restart_pending = false
-	if not mission_started or tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD:
+	if tier < DIFFICULTY_EASY or tier > DIFFICULTY_HARD:
+		return
+	# A peer registered during preparation stays in the lobby until this new world.
+	if not mission_started:
+		start_game(tier, mission_id)
 		return
 	if mission_id != "": selected_mission_id = mission_id
 	mission_selection_changed.emit(selected_mission_id)
@@ -441,7 +449,7 @@ func register_player(p_name: String, p_class_id: String) -> void:
 		for id: int in peers:
 			if id != sender_id:
 				sync_peer_info.rpc_id(sender_id, id, peers[id]["name"], peers[id]["class_id"])
-		if mission_started and sender_id != 1:
+		if mission_started and not restart_pending and sender_id != 1:
 			start_game.rpc_id(sender_id, mission_difficulty, selected_mission_id)
 
 
@@ -509,7 +517,7 @@ func _on_server_disconnected() -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func report_mission_ready() -> void:
-	if not is_server or not mission_started:
+	if not is_server or not mission_started or restart_pending:
 		return
 	var sender: int = multiplayer.get_remote_sender_id()
 	if sender in multiplayer.get_peers() and peers.has(sender) and not mission_ready_peers.has(sender):
@@ -536,6 +544,93 @@ func configure_mission_sync(sync: MultiplayerSynchronizer) -> void:
 
 func _mission_peer_visible(id: int) -> bool:
 	return id == 1 or mission_ready_peers.has(id)
+
+
+## The owner publishes movement only to the host, which already has its operative.
+## Peer-to-peer publication races the host's spawn/despawn stream on other clients.
+func configure_player_movement(sync: MultiplayerSynchronizer) -> void:
+	if not is_in_active_session() or sync.get_parent().multiplayer != multiplayer:
+		return
+	sync.add_visibility_filter(_movement_server_visible)
+	sync.update_visibility()
+
+
+func _movement_server_visible(id: int) -> bool:
+	return id == 1
+
+
+## Host-owned observers use the same ordered sender as the authoritative spawner.
+## Never echo a delayed pose to the operative who is controlling it.
+func configure_player_relay(sync: MultiplayerSynchronizer, owner: int) -> void:
+	# Independent MultiplayerAPI fixtures retain their direct synchronization path.
+	sync.public_visibility = false
+	if not is_in_active_session() or sync.get_parent().multiplayer != multiplayer:
+		return
+	sync.public_visibility = true
+	configure_mission_sync(sync)
+	sync.add_visibility_filter(_movement_observer_visible.bind(owner))
+	sync.update_visibility()
+
+
+func _movement_observer_visible(id: int, owner: int) -> bool:
+	return id != owner
+
+
+## Drain the owner's reliable movement stream before removing its old world node.
+## A unique host instance token prevents a stale acknowledgement from pausing a retry.
+func pause_player_for_transfer(actor: Node) -> bool:
+	var owner := actor.get_multiplayer_authority()
+	if owner == 1:
+		return true
+	if not is_server or restart_pending or owner not in multiplayer.get_peers():
+		return false
+	var token := actor.get_instance_id()
+	if _player_pauses.has(token):
+		return false
+	var actor_path := actor.get_path()
+	var session_peer := _peer
+	_player_pauses[token] = {"owner": owner, "acked": false}
+	prepare_player_transfer.rpc_id(owner, actor_path, token)
+	var deadline := Time.get_ticks_msec() + 5000
+	while session_peer == _peer and not restart_pending and owner in multiplayer.get_peers() and Time.get_ticks_msec() < deadline:
+		if _player_pauses.get(token, {}).get("acked", false):
+			break
+		await get_tree().process_frame
+	var acknowledged: bool = _player_pauses.get(token, {}).get("acked", false)
+	_player_pauses.erase(token)
+	if session_peer != _peer or restart_pending:
+		return false
+	if not acknowledged and owner in multiplayer.get_peers():
+		resume_player_transfer.rpc_id(owner, token)
+	return acknowledged and is_instance_valid(actor) and not actor.is_queued_for_deletion() and owner in multiplayer.get_peers()
+
+
+@rpc("authority", "call_remote", "reliable")
+func prepare_player_transfer(actor_path: NodePath, token: int) -> void:
+	var actor := get_node_or_null(actor_path)
+	if actor != null and actor.get_multiplayer_authority() == multiplayer.get_unique_id():
+		var sync := actor.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer
+		_paused_actors[token] = {"actor": actor, "physics": actor.is_physics_processing(), "visible": sync.public_visibility}
+		actor.tree_exited.connect(func() -> void: _paused_actors.erase(token), CONNECT_ONE_SHOT)
+		actor.set_physics_process(false)
+		sync.public_visibility = false
+	acknowledge_player_transfer.rpc_id(1, token)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func acknowledge_player_transfer(token: int) -> void:
+	if is_server and _player_pauses.has(token) and _player_pauses[token].owner == multiplayer.get_remote_sender_id():
+		_player_pauses[token].acked = true
+
+
+@rpc("authority", "call_remote", "reliable")
+func resume_player_transfer(token: int) -> void:
+	var saved: Dictionary = _paused_actors.get(token, {})
+	if not saved.is_empty() and is_instance_valid(saved.actor):
+		var actor: Node = saved.actor
+		actor.set_physics_process(saved.physics)
+		(actor.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer).public_visibility = saved.visible
+	_paused_actors.erase(token)
 
 
 ## Sends a mission RPC to every peer that has the receiving node. A peer that is still loading
