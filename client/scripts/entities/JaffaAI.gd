@@ -659,6 +659,7 @@ func _try_modular_flank() -> bool:
 
 func _clear_modular_flank() -> void:
 	if _flank_navigation != null:
+		_flank_cooldown = FLANK_COOLDOWN
 		if flank_status == "moving":
 			flank_status = "cancelled"
 		_flank_navigation.reset()
