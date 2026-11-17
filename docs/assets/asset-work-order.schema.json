@@ -356,7 +356,7 @@
           }
         ]
       },
-      "minItems": 1
+      "minItems": 0
     },
     "budgets": {
       "type": "object",
@@ -364,7 +364,7 @@
       "properties": {
         "max_unique_texture_mib": {
           "type": "number",
-          "exclusiveMinimum": 0
+          "minimum": 0
         },
         "measurement_plan": {
           "type": "string",
@@ -449,9 +449,6 @@
         "properties": {
           "rig": {
             "$ref": "#/$defs/rig"
-          },
-          "geometry": {
-            "$ref": "#/$defs/geometry"
           }
         }
       },
@@ -467,7 +464,10 @@
       "if": {
         "properties": {
           "kind": {
-            "const": "material_set"
+            "enum": [
+              "material_set",
+              "animation_set"
+            ]
           }
         }
       },
@@ -604,6 +604,29 @@
             }
           }
         ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "animation_set"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "materials": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "materials": {
+            "minItems": 1
+          }
+        }
       }
     }
   ],

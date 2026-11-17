@@ -12,7 +12,7 @@
 
 ## Validation performed
 
-Draft 2020-12 schema checked with the locally available Python `jsonschema` package; both draft examples passed, two synthetic ready controls passed, and 17 malformed requests were rejected. Cases cover unknown fields, wrong normal/ORM/data conventions, premature ready state, missing rig, unsupported sprint, alpha cutoff, duplicate invariants, incompatible geometry kind, malformed URL, path traversal, wrong coordinate frame and missing generation tool. Synthetic controls contain invented example measurements for validation only; they are not asset evidence.
+Draft 2020-12 schema checked with the locally available Python `jsonschema` package; both draft examples passed, two synthetic ready controls and an animation-only request passed, and 18 malformed requests were rejected. Cases cover unknown fields, wrong normal/ORM/data conventions, premature ready state, missing rig, unsupported sprint, alpha cutoff, duplicate invariants, incompatible geometry kind, malformed URL, path traversal, wrong coordinate frame missing generation tool and mesh geometry in an animation-only request. Synthetic controls contain invented example measurements for validation only; they are not asset evidence.
 
 All 29 table rows, detailed sprint entries and exact trigger prompts agree and remain planned. Relative link targets in changed Markdown and new-document fragment links were checked. Both draft target resources exist. `git diff --check` passed. The shared workflow includes a reproducible schema/example validation snippet; these planning checks do not install `jsonschema` as a game dependency.
 
