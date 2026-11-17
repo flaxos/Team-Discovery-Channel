@@ -15,7 +15,7 @@ The game is the Godot project in `client/`. Multiplayer uses native Godot high-l
 | [`SGCMapDefinition`](../client/scripts/map/SGCMapDefinition.gd), [`SGCMap`](../client/scripts/map/SGCMap.gd) | Region/connection data, floor offsets, ceilings, geometry, art slots and baked navigation. |
 | [`SGCNavigator`](../client/scripts/map/SGCNavigator.gd) | Shared friendly/hostile routing, local paths, physical stair following, passage reservation and lift actions. |
 | [`SGCEnclosureValidator`](../client/scripts/map/SGCEnclosureValidator.gd) | Physical exterior-shell checks used by map baking and automated acceptance. |
-| [`PlayerController3D`](../client/scripts/entities/PlayerController3D.gd), [`HUD`](../client/scripts/ui/HUD.gd) | Local input/camera, aimed interaction, lift picker, squad wheel, controls UI and observable mission status. |
+| [`PlayerController3D`](../client/scripts/entities/PlayerController3D.gd), [`HUD`](../client/scripts/ui/HUD.gd) | Local input/camera, aimed interaction, lift picker, squad wheel, controls UI and observable mission status. Server-authenticated ammunition sharing atomically exchanges compatible active reserves; existing weapon snapshots and travel capture carry the result ([contract](plans/ammunition-sharing.md)). |
 
 ## Modular missions and levels
 

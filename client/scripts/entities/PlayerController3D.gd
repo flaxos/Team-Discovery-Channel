@@ -31,6 +31,7 @@ signal class_configured(class_id: String)
 		if is_inside_tree() and weapon_holder != null:
 			_apply_class_profile(val)
 @export var player_callsign: String = "OPERATIVE"
+@export var ammo_share_incarnation: String = ""
 @export var base_speed: float = 6.0
 @export var sprint_multiplier: float = 1.35
 @export var crouch_multiplier: float = 0.55
@@ -50,6 +51,11 @@ var _server_class_id: String = ""
 var _applying_weapon_state: bool = false
 var _shot_request_id: int = 0
 var _last_shot_request: int = 0
+const AMMO_SHARE_REACH: float = 3.0
+const AMMO_SHARE_COOLDOWN_MS: int = 500
+var _ammo_share_sequence: int = 0
+var _last_ammo_share_sequence: int = 0
+var _next_ammo_share_ms: int = 0
 var _revive_lease: float = 0.0
 var _server_revive_target: NodePath = NodePath()
 var _server_revive_time: float = 0.0
@@ -141,6 +147,8 @@ var locked_target_world_pos: Vector3 = Vector3.ZERO
 
 
 func _enter_tree() -> void:
+	if multiplayer.is_server():
+		ammo_share_incarnation = str(get_instance_id())
 	# Parse peer ID from node name (Godot Multiplayer convention: node name is string of peer_id)
 	if name.is_valid_int():
 		peer_id = name.to_int()
@@ -302,6 +310,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_command_input_released()
 	elif event.is_action_pressed("squad_ping"):
 		_try_issue_squad_ping()
+	elif event.is_action_pressed("share_ammo"):
+		request_ammo_share(aimed_ammo_recipient())
 	elif event.is_action_pressed("crouch"):
 		is_crouch_toggled = not is_crouch_toggled
 	elif event.is_action_pressed("c4_mode"):
@@ -2178,6 +2188,131 @@ func clear_cctv_camera() -> void:
 
 func _bindings() -> Node:
 	return get_node("/root/KeybindingManager")
+
+
+## Sharing uses active reserves only, so normal weapon snapshots and travel capture suffice.
+func _ammo_share_available() -> bool:
+	if not is_inside_tree() or is_queued_for_deletion() or health_component == null:
+		return false
+	if health_component.is_dead or health_component.is_downed or health_component.is_stunned or health_component.frozen:
+		return false
+	var world := MissionWorld.of(self) as GateRoom
+	if world == null or world.mission_result >= 0:
+		return false
+	if world.session != null and (world.session.result >= 0 or world.session._traveling.has(peer_id)):
+		return false
+	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	return net == null or not net.restart_pending
+
+
+func ammo_share_offer(target: PlayerController3D) -> Dictionary:
+	var unavailable := {"amount": 0, "reason": "TEAMMATE UNAVAILABLE"}
+	if target == null or target == self or not _ammo_share_available() or not target._ammo_share_available():
+		return unavailable
+	if get_parent() != target.get_parent() or MissionWorld.of(self) != MissionWorld.of(target):
+		return unavailable
+	if global_position.distance_to(target.global_position) > AMMO_SHARE_REACH:
+		return {"amount": 0, "reason": "MOVE CLOSER (3 m)"}
+	# Layer 128 contains SGC ceiling/shaft caps, which also block a handoff.
+	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP, target.global_position + Vector3.UP, 1 | 128, [get_rid(), target.get_rid()])
+	if not get_world_3d().direct_space_state.intersect_ray(query).is_empty():
+		return {"amount": 0, "reason": "PATH BLOCKED"}
+	var donor := current_weapon
+	var receiver := target.current_weapon
+	if donor == null or receiver == null or donor.uses_heat or receiver.uses_heat or donor.ammo_type.is_empty() or receiver.ammo_type.is_empty():
+		return {"amount": 0, "reason": "ENERGY WEAPONS CANNOT SHARE"}
+	if donor.ammo_type != receiver.ammo_type:
+		return {"amount": 0, "reason": "INCOMPATIBLE AMMUNITION"}
+	if donor.is_reloading or receiver.is_reloading:
+		return {"amount": 0, "reason": "WAIT FOR RELOAD"}
+	if donor.reserve_ammo <= 0:
+		return {"amount": 0, "reason": "NO RESERVE AMMUNITION"}
+	var capacity := maxi(0, receiver.reserve_capacity - receiver.reserve_ammo)
+	if capacity == 0:
+		return {"amount": 0, "reason": "TEAMMATE RESERVE FULL"}
+	return {"amount": mini(donor.reserve_ammo, mini(receiver.mag_capacity, capacity)), "reason": "", "type": donor.ammo_type}
+
+
+func aimed_ammo_recipient() -> PlayerController3D:
+	if camera == null:
+		return null
+	var from := camera.global_position
+	var query := PhysicsRayQueryParameters3D.create(from, from - camera.global_basis.z * 80.0, 1 | 2 | 128, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	var target := hit.get("collider") as PlayerController3D
+	return target if target != null and global_position.distance_to(target.global_position) <= AMMO_SHARE_REACH + 1.0 else null
+
+
+func ammo_share_prompt() -> String:
+	if not is_window_focused or _is_ui_modal_open() or is_command_wheel_open or is_in_cctv_mode or not _ammo_share_available():
+		return ""
+	var target := aimed_ammo_recipient()
+	if target == null:
+		return ""
+	var offer := ammo_share_offer(target)
+	if int(offer.amount) == 0:
+		return "%s — %s" % [target.player_callsign, offer.reason]
+	return "[%s] GIVE %d × %s mm TO %s" % [_bindings().binding_text("share_ammo"), int(offer.amount), offer.type, target.player_callsign]
+
+
+func request_ammo_share(target: PlayerController3D) -> void:
+	if not is_local_authority or target == null or is_command_wheel_open or is_in_cctv_mode or not is_window_focused or _is_ui_modal_open() or not _ammo_share_available():
+		return
+	if current_weapon == null or target.current_weapon == null:
+		return
+	_ammo_share_sequence += 1
+	if multiplayer.is_server():
+		server_request_ammo_share(_ammo_share_sequence, ammo_share_incarnation, str(target.name), target.ammo_share_incarnation, current_weapon.weapon_id, target.current_weapon.weapon_id)
+	else:
+		server_request_ammo_share.rpc_id(1, _ammo_share_sequence, ammo_share_incarnation, str(target.name), target.ammo_share_incarnation, current_weapon.weapon_id, target.current_weapon.weapon_id)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_ammo_share(sequence: int, incarnation: String, recipient: String, recipient_incarnation: String, donor_weapon: String, receiver_weapon: String) -> void:
+	if not _valid_combat_sender() or incarnation != ammo_share_incarnation or sequence <= _last_ammo_share_sequence:
+		return
+	_last_ammo_share_sequence = sequence
+	if Time.get_ticks_msec() < _next_ammo_share_ms or not recipient.is_valid_int():
+		return
+	var target := get_parent().get_node_or_null(NodePath(recipient)) as PlayerController3D
+	if target == null or target.ammo_share_incarnation != recipient_incarnation or current_weapon == null or target.current_weapon == null:
+		return
+	if current_weapon.weapon_id != donor_weapon or target.current_weapon.weapon_id != receiver_weapon:
+		return
+	var offer := ammo_share_offer(target)
+	var amount: int = int(offer.amount)
+	if amount <= 0:
+		_ammo_share_feedback(str(offer.reason))
+		return
+	# No signals, RPCs or awaits between the two writes: observers always see a conserved total.
+	current_weapon.reserve_ammo -= amount
+	target.current_weapon.reserve_ammo += amount
+	_next_ammo_share_ms = Time.get_ticks_msec() + AMMO_SHARE_COOLDOWN_MS
+	current_weapon.ammo_changed.emit(current_weapon.current_ammo, current_weapon.reserve_ammo)
+	target.current_weapon.ammo_changed.emit(target.current_weapon.current_ammo, target.current_weapon.reserve_ammo)
+	_broadcast_weapon_state()
+	target._broadcast_weapon_state()
+	_ammo_share_feedback("GAVE %d × %s mm TO %s" % [amount, offer.type, target.player_callsign])
+	target._ammo_share_feedback("RECEIVED %d × %s mm FROM %s" % [amount, offer.type, player_callsign])
+
+
+func _ammo_share_feedback(message: String) -> void:
+	if is_local_authority:
+		_show_ammo_share_feedback(message)
+	elif multiplayer.has_multiplayer_peer() and peer_id in multiplayer.get_peers():
+		sync_ammo_share_feedback.rpc_id(peer_id, message)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func sync_ammo_share_feedback(message: String) -> void:
+	if multiplayer.get_remote_sender_id() == 1 and is_local_authority:
+		_show_ammo_share_feedback(message)
+
+
+func _show_ammo_share_feedback(message: String) -> void:
+	var hud := _get_tactical_hud()
+	if hud != null:
+		hud.show_squad_order_toast(message)
 
 
 # Combat requests carry intent only. The server chooses weapon statistics, spread, ray hits and damage.
