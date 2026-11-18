@@ -1,0 +1,45 @@
+{
+  "engine": "4.4.1",
+  "renderer": "Forward+",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "vsync": "disabled",
+  "scope": "60-frame steady view samples; scene variation prevents a causal FPS claim; cold parse measured separately",
+  "samples": [
+    {
+      "log": "build/mp5-sgc-review.log",
+      "draw_calls": 432,
+      "median_ms": 3.276,
+      "original": false,
+      "p95_ms": 10.968,
+      "resolution": [
+        1440,
+        900
+      ],
+      "weapon": "mp5"
+    },
+    {
+      "log": "build/mp5-original-review.log",
+      "draw_calls": 438,
+      "median_ms": 3.253,
+      "original": true,
+      "p95_ms": 12.776,
+      "resolution": [
+        1440,
+        900
+      ],
+      "weapon": "mp5"
+    },
+    {
+      "log": "build/mp5-offworld-review.log",
+      "draw_calls": 28,
+      "median_ms": 1.413,
+      "original": false,
+      "p95_ms": 8.873,
+      "resolution": [
+        1440,
+        900
+      ],
+      "weapon": "mp5"
+    }
+  ]
+}

@@ -16,6 +16,8 @@ func capture(filename: String) -> void:
 
 
 func run() -> void:
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = 0
 	root.size = Vector2i(1280, 720)
 	root.gui_embed_subwindows = true
 	var lobby := (load("res://scenes/main/Lobby.tscn") as PackedScene).instantiate()
@@ -24,6 +26,11 @@ func run() -> void:
 	(lobby.get_node("%AssetCreditsButton") as Button).pressed.emit()
 	await capture("credits.png")
 	var dialog := lobby.get_node("AssetCreditsDialog") as AssetCreditsDialog
+	var index := dialog.content.text.find("MP5SD (Silenced MP5)")
+	if index >= 0:
+		dialog.content.set_caret_line(dialog.content.text.substr(0, index).count("\n"))
+		dialog.content.center_viewport_to_caret()
+		await capture("mp5-credit.png")
 	dialog.selector.select(1)
 	dialog.selector.item_selected.emit(1)
 	await capture("licence.png")

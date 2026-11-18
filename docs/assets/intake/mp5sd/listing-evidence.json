@@ -19,7 +19,11 @@
     "result": "HTTP 401 without an authorized account session",
     "browser_route": "Browser access host unavailable"
   },
-  "archive_acquired": false,
-  "technical_acceptance": false,
-  "owner_art_acceptance": "pending"
+  "archive_acquired": true,
+  "technical_acceptance": true,
+  "owner_art_acceptance": "pending",
+  "owner_archive": "~/Downloads/mp5sd-silenced-mp5.zip",
+  "archive_sha256": "a598f3e5149e744ff4c1147ebb85c472c255f77b296318c7403aff6dc379c8f1",
+  "archive_terms": "FBX and texture files only; no README, licence or contrary grant; public creator listing remains the licence evidence",
+  "technical_evidence": "docs/assets/intake/mp5sd/verification.json"
 }

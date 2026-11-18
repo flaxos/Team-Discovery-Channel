@@ -78,10 +78,14 @@ func _setup_audio() -> void:
 
 const GLB_MODELS := {
 	"p90": "res://assets/weapons/p90.glb",
-	"mp5": "res://assets/weapons/mp5_silenced.glb",
+	"mp5": "res://assets/weapons/mp5sd.glb",
 	"m9": "res://assets/weapons/beretta_m9.glb",
 	"m249": "res://assets/weapons/m249.glb",
 }
+## Sprint 7: source +X faces the suppressor crown; measured centre in packed FBX units.
+## The wrapper uses a measured centimetre scale, keeping the gameplay muzzle unchanged.
+const MP5_MODEL_MUZZLE := Vector3(32.410175, -4.766182, 0.012022)
+const MP5_MODEL_BASIS := Basis(Vector3(0, 0, -0.01), Vector3(0, 0.01, 0), Vector3(0.01, 0, 0))
 ## AP-1f: COLLADA conversion faces -X; measured crown centre, scaled to metres.
 const M249_MODEL_MUZZLE := Vector3(-481.81909, 113.9233, 0.00441)
 const M249_MODEL_BASIS := Basis(Vector3(0, 0, 0.001), Vector3(0, 0.001, 0), Vector3(-0.001, 0, 0))
@@ -254,9 +258,13 @@ func _build_weapon_visual_mesh() -> void:
 				model_root.add_child(barrel)
 
 		"mp5":
+			muzzle_offset = Vector3(0, 0.01, -0.36)
 			var glb_mp5 := load_glb_model(GLB_MODELS["mp5"])
 			if glb_mp5 != null:
-				glb_mp5.position = Vector3(0, -0.12, 0)
+				# WillyG99 CC BY 4.0 MP5SD body; optional source optic is omitted.
+				glb_mp5.transform = Transform3D(
+					MP5_MODEL_BASIS, muzzle_offset - MP5_MODEL_BASIS * MP5_MODEL_MUZZLE
+				)
 				model_root.add_child(glb_mp5)
 			else:
 				# SMG frame + curved magazine fallback

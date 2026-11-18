@@ -12,7 +12,7 @@ Sizes below are relative effort, not dates. Nothing in this file is a delivery c
 
 Two owner decisions on 14 November shape what follows: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)). The design that followed is written: [gate travel with a split team](docs/plans/gate-travel-split-worlds.md), with the owners' four rules for a split team in [D-017](docs/DECISIONS.md). A third, matte Jaffa armour ([D-015](docs/DECISIONS.md)), came out of building the art.
 
-**Sprint 7 is in progress:** shared work-order intake and distributed credits are implemented; the selected WillyG99 MP5SD archive is still required before replacing the Kenney stand-in. [Review and download card](docs/reviews/2026-11-18-sprint7-mp5-intake.md). The [asset workflow](docs/assets/ai-asset-workflow.md) governs measured integration, export and separate owner art acceptance. Sprints 8–35 remain planned.
+**Sprint 7 is implemented for review:** WillyG99’s textured MP5SD replaces the Kenney stand-in with measured muzzle alignment, shared work-order intake and distributed credits. Owner art acceptance remains pending. [Review and evidence](docs/reviews/2026-11-18-sprint7-mp5-intake.md). The [asset workflow](docs/assets/ai-asset-workflow.md) governs measured integration, export and separate owner art acceptance. Sprints 8–35 remain planned.
 
 ### Pick up here
 

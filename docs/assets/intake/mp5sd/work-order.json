@@ -2,23 +2,38 @@
   "schema_version": "1.0",
   "sprint_id": "AS07",
   "asset_id": "mp5sd_willyg99",
-  "status": "draft",
+  "status": "ready_for_intake",
   "kind": "rigid_model",
-  "purpose": "Sprint 7 faithful MP5SD for Carter; selected source awaits the owner account download and measured engine intake. This draft does not approve or claim an imported asset.",
+  "purpose": "Sprint 7 community MP5SD gun body for Carter. Measured factory-local wrapper under Player/WeaponHolder; gameplay muzzle, stats, suppression and authority unchanged.",
   "target": {
     "scene": "res://scenes/entities/Player.tscn",
-    "visual_branch": "WeaponHolder/<active MP5>/WeaponModel/ImportedGLB; resolve live instance before intake",
-    "measurement_status": "unmeasured",
-    "measurement_evidence": null,
+    "visual_branch": "WeaponModel/ImportedGLB",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/assets/intake/mp5sd/measurements.json",
     "units": "metres",
     "up": "+Y",
     "game_forward": "-Z",
-    "bounds_m": null,
+    "bounds_m": {
+      "min_m": [
+        -0.04,
+        -0.2,
+        -0.365
+      ],
+      "max_m": [
+        0.04,
+        0.1,
+        0.35
+      ]
+    },
     "anchors": [
       {
         "name": "MuzzlePoint",
-        "position_m": null,
-        "purpose": "Read the current weapon muzzle; do not copy another weapon offset."
+        "position_m": [
+          0,
+          0.01,
+          -0.36
+        ],
+        "purpose": "Existing gameplay MuzzlePoint in the active WeaponMP5 local frame; measured crown aligned by cosmetic wrapper."
       }
     ],
     "coordinate_space": "visual_parent_local"
@@ -66,25 +81,23 @@
       "page": "https://sketchfab.com/3d-models/mp5sd-silenced-mp5-2b96ccb2dc51496e93f41734663bcadf",
       "creator": "WillyG99",
       "licence": "CC BY 4.0",
-      "archive_terms_status": "unverified",
-      "intake_record": null
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/mp5sd.json"
     },
     "generation": null
   },
   "geometry": {
     "max_lod0_triangles": 60000,
-    "max_materials": 4,
+    "max_materials": 2,
     "lod_triangle_limits": [
-      60000,
-      20000,
-      5000
+      60000
     ],
     "uv_required": true
   },
   "rig": null,
   "materials": [
     {
-      "id": "weapon_surface",
+      "id": "receiver_and_stock",
       "resolution": 2048,
       "albedo_space": "srgb",
       "data_space": "linear",
@@ -102,12 +115,33 @@
         "#303438",
         "#1A1C1D"
       ],
-      "surface_notes": "Reference source paint, metal and polymer; preserve source PBR and compare actual mission lighting."
+      "surface_notes": "Material.002 uses Material.001 maps: selected by actual UV/render correspondence; DirectX normals flipped, source PBR retained and D-015 runtime override compared. Opaque source alpha is uniformly 255."
+    },
+    {
+      "id": "suppressor_and_parts",
+      "resolution": 2048,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#303438",
+        "#1A1C1D"
+      ],
+      "surface_notes": "Material.001 uses Material maps; DirectX normals flipped. No separate verified AO map for this set; white AO factor. Opaque."
     }
   ],
   "budgets": {
-    "max_unique_texture_mib": 64,
-    "measurement_plan": "Measure decoded textures, cache reuse and frame/load time on the same SGC/offworld route and recorded hardware."
+    "max_unique_texture_mib": 128,
+    "measurement_plan": "Measured 117.33 MiB decoded shared images including mipmaps; 399 ms cold headless parse, 0.048 ms cached build. Budget exception preserves two 2K sets; compare GPU frame costs and record cold-load cost. All operatives/worlds share cached materials."
   },
   "preserve_gameplay": [
     "collision",

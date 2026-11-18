@@ -9,7 +9,7 @@ func _init() -> void:
 func run() -> void:
 	var data := preload("res://resources/asset_credits.tres")
 	var credits := str(data.get_meta("attributions", ""))
-	for creator: String in ["Kenney", "Fabi_G", "emran.bayati", "Rotuma", "skaf13", "rossrobotics"]:
+	for creator: String in ["Kenney", "Fabi_G", "emran.bayati", "Rotuma", "skaf13", "rossrobotics", "WillyG99"]:
 		assert(credits.contains(creator), "Distributed attribution for " + creator)
 	assert(credits.contains("Modifications:") and credits.contains("Changes:"), "Modification notices retained")
 	var licenses: Dictionary = data.get_meta("licenses", {})

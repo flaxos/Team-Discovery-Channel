@@ -124,7 +124,8 @@ func run_test() -> void:
 
 
 func run_host() -> void:
-	net.player_name = "Host O'Neill"
+	net.player_name = "Host Carter"
+	net.selected_class_id = SGCNetworkManager.CLASS_CARTER_TECH
 	assert(net.host_game(PORT) == OK)
 	assert(net.set_mission(MISSION))
 	(main.current_lobby as LobbyUI)._on_start_game_pressed()
@@ -219,6 +220,8 @@ func run_host() -> void:
 	await frames(10)
 	var host_returned := home.players_container.get_node_or_null("1") as PlayerController3D
 	assert(host_returned != null and host_returned.global_position.y > 1.8)
+	assert(host_returned.current_weapon is WeaponMP5)
+	assert(host_returned.current_weapon.has_node("WeaponModel/ImportedGLB/MP5SD_Obj"), "MP5SD rebuilt on SGC return")
 	assert(session.presented == home)
 	assert(session.result == -1, "Mission waits for client still standing offworld")
 	mark("host_returned")
@@ -237,7 +240,7 @@ func run_host() -> void:
 	assert(home.hud.debrief_title.text == "EXTRACTION SUCCESSFUL")
 	assert(home.hud.stat_kills.text == "HOSTILES ELIMINATED: 2", home.hud.stat_kills.text)
 	assert(home.hud.stat_waves.text == "OBJECTIVES COMPLETE: 3 / 3", home.hud.stat_waves.text)
-	assert("Host O'Neill" in home.hud.stat_chevrons.text and "Return Carter" in home.hud.stat_chevrons.text, home.hud.stat_chevrons.text)
+	assert("Host Carter" in home.hud.stat_chevrons.text and "Return Carter" in home.hud.stat_chevrons.text, home.hud.stat_chevrons.text)
 
 	mark("mission_finished")
 	assert(await marked("client_saw_debrief"))
@@ -302,6 +305,8 @@ func run_client() -> void:
 	await frames(15)
 	assert(session.presented == site, "Client remains presented offworld while standing there")
 	assert(site.mission_result == -1)
+	var returned := home.players_container.get_node("1") as PlayerController3D
+	assert(returned.current_weapon is WeaponMP5 and returned.current_weapon.has_node("WeaponModel/ImportedGLB/MP5SD_Obj"), "Client sees returned MP5SD")
 	mark("client_saw_host_return")
 
 	assert(await marked("mission_finished"))
@@ -313,7 +318,7 @@ func run_client() -> void:
 	assert(home.hud.is_mission_ended and home.hud.debrief_title.text == "EXTRACTION SUCCESSFUL")
 	assert(home.hud.stat_kills.text == "HOSTILES ELIMINATED: 2", home.hud.stat_kills.text)
 	assert(home.hud.stat_waves.text == "OBJECTIVES COMPLETE: 3 / 3", home.hud.stat_waves.text)
-	assert("Host O'Neill" in home.hud.stat_chevrons.text and "Return Carter" in home.hud.stat_chevrons.text, home.hud.stat_chevrons.text)
+	assert("Host Carter" in home.hud.stat_chevrons.text and "Return Carter" in home.hud.stat_chevrons.text, home.hud.stat_chevrons.text)
 	mark("client_saw_debrief")
 
 	var old_home := home.get_instance_id()

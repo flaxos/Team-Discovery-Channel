@@ -1,0 +1,76 @@
+{
+  "status": "integrated_for_review",
+  "title": "MP5SD (Silenced MP5)",
+  "creator": "WillyG99",
+  "canonical_source_url": "https://sketchfab.com/3d-models/mp5sd-silenced-mp5-2b96ccb2dc51496e93f41734663bcadf",
+  "category": "generic",
+  "checked_on": "2026-11-18",
+  "download": {
+    "availability": "owner_archive_acquired",
+    "archive_sha256": "a598f3e5149e744ff4c1147ebb85c472c255f77b296318c7403aff6dc379c8f1",
+    "model_sha256": "96214c25a3f56284af74d5c22acd847f7f81a57fd871f5fd033aa8afb0756b80",
+    "staging_path": "/tmp/tdc-asset-intake/mp5sd/"
+  },
+  "licence": {
+    "id": "CC-BY",
+    "version": "4.0",
+    "evidence_url": "https://api.sketchfab.com/v3/models/2b96ccb2dc51496e93f41734663bcadf",
+    "bundled_text_path": "credits/licenses/CC-BY-4.0.txt",
+    "redistribution_status": "CC BY 4.0 listing and creator authorship statement; no contrary terms in inspected archive",
+    "required_attribution": "MP5SD (Silenced MP5) by WillyG99, source URL, CC BY 4.0, modification notice",
+    "creator_or_archive_conflicts": "No separate archive licence/readme; grant evidenced by creator listing/API, consistent with earlier weapon intakes."
+  },
+  "integration": {
+    "target_scene_or_script": "client/scripts/weapons/WeaponBase.gd: mp5 cosmetic wrapper",
+    "source_forward_axis": "+X",
+    "source_units": "measured visual scale 0.01; no manufacturer-dimension certification",
+    "wrapper_transform": "MP5_MODEL_BASIS maps source +X to game -Z; translation MUZZLE - BASIS * (32.410175,-4.766182,0.012022)",
+    "world_bounds_metres": {
+      "min": [
+        -0.0261229295283556,
+        -0.174633592367172,
+        -0.360004812479019
+      ],
+      "max": [
+        0.0245962031185627,
+        0.0699018388986588,
+        0.331958919763565
+      ],
+      "size": [
+        0.0507191326469183,
+        0.244535431265831,
+        0.691963732242584
+      ]
+    },
+    "required_sockets": [
+      "MuzzlePoint (0,0.01,-0.36)"
+    ],
+    "material_modifications": [
+      "Two 4K source material sets reduced to 2K; correct material-to-map pairing established by UV/render comparison",
+      "Labelled DirectX normals converted to OpenGL; lossless PNG and ORM packing",
+      "Opaque alpha uniformly 255; source PBR retained, existing D-015 metallic=0 and mipmaps runtime only"
+    ],
+    "effort": "one rigid weapon slice",
+    "modifications": "Kept 10,669-triangle MP5SD_Obj; omitted optional 1,416-triangle red-dot sight. Geometry/UVs preserved; two materials/six shared texture images. No rig, reload animation or gameplay change."
+  },
+  "evidence": {
+    "intake_report": "docs/assets/intake/mp5sd/intake-report.json",
+    "gltf_validation_report": "docs/assets/intake/mp5sd/gltf-validator.json",
+    "godot_import_log": "build/test-results/sprint7-mp5-targeted/project-import.log",
+    "mission_capture": [
+      "docs/reviews/sprint7-captures/sgc-close.png",
+      "docs/reviews/sprint7-captures/sgc-aim.png",
+      "docs/reviews/sprint7-captures/offworld-close.png"
+    ],
+    "export_smoke_log": "build/asset-review/sprint7-mp5-export/test_imported_mp5_visual.log",
+    "behaviour_tests": [
+      "test_imported_mp5_visual",
+      "test_asset_credits",
+      "test_four_player_join_multiplayer",
+      "test_four_player_join_dedicated",
+      "test_gate_return_multiplayer"
+    ],
+    "reviewer": "Agent local technical checks passed; owner art/grip acceptance pending; hosted results reported separately on PR #79",
+    "validation_summary": "docs/assets/intake/mp5sd/verification.json"
+  }
+}

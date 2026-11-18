@@ -1,0 +1,106 @@
+{
+  "archive_sha256": "a598f3e5149e744ff4c1147ebb85c472c255f77b296318c7403aff6dc379c8f1",
+  "archive_bytes": 57847502,
+  "files": [
+    {
+      "file": "source/MP5SD.fbx",
+      "bytes": 463996,
+      "sha256": "0f2ae6192a6b97c35089c5c1baf2433ab4445af35262a12a91894588d09a7882"
+    },
+    {
+      "file": "textures/MP5SD_AO.png",
+      "bytes": 2818465,
+      "sha256": "b200d707b8f1017256787d538eca2fd82bed2bfa9486f9dd1ffd6bec9326499f"
+    },
+    {
+      "file": "textures/Material.001_Base_Color.png",
+      "bytes": 11376916,
+      "sha256": "6f573683137a3b60adda6b2357ecfd5b7f0c6f56b5bcf3766eb2d1602c8b6dcb"
+    },
+    {
+      "file": "textures/Material.001_Metallic.png",
+      "bytes": 3202608,
+      "sha256": "2422fcf0086d297e6af2fde685b45173c430f53341a65222f071fd881c08d676"
+    },
+    {
+      "file": "textures/Material.001_Normal_DirectX.png",
+      "bytes": 1886977,
+      "sha256": "07ccfa4a51ec4a0ca8f5a3f53ed411b3ec585b34eedbfc8dabf90d5cef53bcce"
+    },
+    {
+      "file": "textures/Material.001_Roughness.png",
+      "bytes": 3562679,
+      "sha256": "8ac910cd4deec3dca2d302034508ecd5f37f69185b5e7a1776b037b8895a3689"
+    },
+    {
+      "file": "textures/Material_Base_Color.png",
+      "bytes": 3242862,
+      "sha256": "028fb28ae962744b88b4466a2ff5ae5ac8369d017e1f86e94a5460eaec8572a1"
+    },
+    {
+      "file": "textures/Material_Metallic.png",
+      "bytes": 1909301,
+      "sha256": "298a6cd49ca9c0e8556ae0ca63841b9987230347bcfd4702173e1d89a2ab1635"
+    },
+    {
+      "file": "textures/Material_Normal_DirectX.png",
+      "bytes": 4459073,
+      "sha256": "a47ea4ad30cac34f5e4ec8f143434a741a6a1cd920a141b3d769dffcfa6b29d4"
+    },
+    {
+      "file": "textures/Material_Roughness.png",
+      "bytes": 2124655,
+      "sha256": "dc52b12c852ec96eaf166b8715ff2ac7a01e741bb93c1875175bbcfd3b6bea15"
+    },
+    {
+      "file": "textures/RedDot1.png",
+      "bytes": 535,
+      "sha256": "62b65a0eeffe6ac6526c6fcd056205d3bcb39ea92baab056e77c6b192f0d8a03"
+    },
+    {
+      "file": "textures/RedDotSight1Extras_Mat_Base_Color.png",
+      "bytes": 869083,
+      "sha256": "aff989ca4a23176dd0b12bea8581902dc8b1b47ea47f7318b0f30cf25e7f9c1e"
+    },
+    {
+      "file": "textures/RedDotSight1Extras_Mat_Metallic.png",
+      "bytes": 9881,
+      "sha256": "2e3d777c35060f082f54dbd0f315febac4fefc4eeaba0fc4a64b1b6d01e01da0"
+    },
+    {
+      "file": "textures/RedDotSight1Extras_Mat_Normal_DirectX.png",
+      "bytes": 2554489,
+      "sha256": "aafa513c56918b26f83c4f60dd966b9cac28fdd343b7378bf39285d43d6830b5"
+    },
+    {
+      "file": "textures/RedDotSight1Extras_Mat_Roughness.png",
+      "bytes": 992251,
+      "sha256": "522cfe9585b5afd40264fe6a84621a1a1354d9df2aeb8d2d08f5412e9f27c702"
+    },
+    {
+      "file": "textures/RedDotSight1_AO.png",
+      "bytes": 1349564,
+      "sha256": "4934fbe97d049c949795a4935b08b4d082c4f1267df6fe850714576c5d443501"
+    },
+    {
+      "file": "textures/RedDotSight1_Mat_Base_Color.png",
+      "bytes": 4174256,
+      "sha256": "e5b6dc53436b3bbe1ee6e6754a388797c1129df4f43d0d2227cc74a57597a272"
+    },
+    {
+      "file": "textures/RedDotSight1_Mat_Metallic.png",
+      "bytes": 9881,
+      "sha256": "2e3d777c35060f082f54dbd0f315febac4fefc4eeaba0fc4a64b1b6d01e01da0"
+    },
+    {
+      "file": "textures/RedDotSight1_Mat_Normal_DirectX.png",
+      "bytes": 7175684,
+      "sha256": "f97d0eb84d506ebdbf2f658c23ff90be409524563b03093ab928b977c418d888"
+    },
+    {
+      "file": "textures/RedDotSight1_Mat_Roughness.png",
+      "bytes": 5661394,
+      "sha256": "042c7e6603ee4c794d1ee18f519dc4f1dccf52ae371904a2b3ca211ec0348ed0"
+    }
+  ]
+}

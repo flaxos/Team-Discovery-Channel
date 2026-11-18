@@ -1,0 +1,80 @@
+{
+  "bounds_max": [
+    0.0245962031185627,
+    0.0699018388986588,
+    0.331958919763565
+  ],
+  "bounds_min": [
+    -0.0261229295283556,
+    -0.174633592367172,
+    -0.360004812479019
+  ],
+  "bounds_size": [
+    0.0507191326469183,
+    0.244535431265831,
+    0.691963732242584
+  ],
+  "cached_ms": 0.048,
+  "cold_ms": 399.202,
+  "muzzle": [
+    0.0,
+    0.00999999977648258,
+    -0.360000014305115
+  ],
+  "textures": [
+    {
+      "bytes": 16777215,
+      "format": 4,
+      "height": 2048,
+      "mipmaps": true,
+      "width": 2048
+    },
+    {
+      "bytes": 22369620,
+      "format": 5,
+      "height": 2048,
+      "mipmaps": true,
+      "width": 2048
+    },
+    {
+      "bytes": 22369620,
+      "format": 5,
+      "height": 2048,
+      "mipmaps": true,
+      "width": 2048
+    },
+    {
+      "bytes": 16777215,
+      "format": 4,
+      "height": 2048,
+      "mipmaps": true,
+      "width": 2048
+    },
+    {
+      "bytes": 22369620,
+      "format": 5,
+      "height": 2048,
+      "mipmaps": true,
+      "width": 2048
+    },
+    {
+      "bytes": 22369620,
+      "format": 5,
+      "height": 2048,
+      "mipmaps": true,
+      "width": 2048
+    }
+  ],
+  "triangles": 10669,
+  "coordinate_space": "weapon local; WeaponModel parent is identity",
+  "source_forward": "+X",
+  "wrapper_scale": 0.01,
+  "source_crown_centre": [
+    32.410175,
+    -4.766182,
+    0.012022
+  ],
+  "visual_branch": "WeaponModel/ImportedGLB",
+  "runtime_factory": "WeaponMP5 under Player/WeaponHolder",
+  "memory_exception": "Two shared 2K material sets retain source detail: 117.33 MiB decoded mipmapped images, capped at 128 MiB; source 4K originals retained locally. Later Sprint 10 owns LOD/general weapon optimization."
+}
