@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS07",
+  "asset_id": "mp5sd_willyg99",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Sprint 7 community MP5SD gun body for Carter. Measured factory-local wrapper under Player/WeaponHolder; gameplay muzzle, stats, suppression and authority unchanged.",
+  "target": {
+    "scene": "res://scenes/entities/Player.tscn",
+    "visual_branch": "WeaponModel/ImportedGLB",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/assets/intake/mp5sd/measurements.json",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.04,
+        -0.2,
+        -0.365
+      ],
+      "max_m": [
+        0.04,
+        0.1,
+        0.35
+      ]
+    },
+    "anchors": [
+      {
+        "name": "MuzzlePoint",
+        "position_m": [
+          0,
+          0.01,
+          -0.36
+        ],
+        "purpose": "Existing gameplay MuzzlePoint in the active WeaponMP5 local frame; measured crown aligned by cosmetic wrapper."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/mp5sd-silenced-mp5-2b96ccb2dc51496e93f41734663bcadf",
+        "decision": "selected",
+        "reason": "12,085-face detailed MP5SD; creator describes own modelling/texturing and 4K maps; public metadata grants CC BY 4.0. Archive and engine fidelity remain uninspected."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/mp5sd-d92ca60709c04b19acbfc6e00d079ebd",
+        "decision": "rejected",
+        "reason": "Eligible CC BY alternative, 12,955 faces and two texture sets. WillyG99 has stronger explicit authorship/texture evidence; keep as alternate if archive inspection fails."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/mp5sd-b91cd6acaf4d44a888f9ce7288263013",
+        "decision": "rejected",
+        "reason": "Eligible CC BY alternative, 9,307 faces. Preview less detailed than selected candidate; retain as alternate."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/mp5sd-submachine-gun-weapon-mp5-smg-a4df666e89ac4d029ee1ec51357374db",
+        "decision": "unavailable",
+        "reason": "Not downloadable; public API returns no licence. Portfolio reference only."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/free-modular-mp5-kit-d381a0438a8b45c2bac6f59120fbb52f",
+        "decision": "rejected",
+        "reason": "Free Standard licence rather than the playbook CC0/CC BY route; standalone model redistribution is not established for this public source repository."
+      },
+      {
+        "page": "https://wheezy-media.itch.io/mp5",
+        "decision": "rejected",
+        "reason": "Paid source explicitly prohibits distributing model/texture files by themselves; incompatible with committing those assets here."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/mp5sd-1bffc4389ef5491bb367a462095d6e25",
+        "decision": "rejected",
+        "reason": "2,210-face low-poly lead; no close-up/archive evidence establishing the requested fidelity."
+      }
+    ],
+    "selected_source": {
+      "page": "https://sketchfab.com/3d-models/mp5sd-silenced-mp5-2b96ccb2dc51496e93f41734663bcadf",
+      "creator": "WillyG99",
+      "licence": "CC BY 4.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/mp5sd.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 60000,
+    "max_materials": 2,
+    "lod_triangle_limits": [
+      60000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "receiver_and_stock",
+      "resolution": 2048,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#303438",
+        "#1A1C1D"
+      ],
+      "surface_notes": "Material.002 uses Material.001 maps: selected by actual UV/render correspondence; DirectX normals flipped, source PBR retained and D-015 runtime override compared. Opaque source alpha is uniformly 255."
+    },
+    {
+      "id": "suppressor_and_parts",
+      "resolution": 2048,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#303438",
+        "#1A1C1D"
+      ],
+      "surface_notes": "Material.001 uses Material maps; DirectX normals flipped. No separate verified AO map for this set; white AO factor. Opaque."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 128,
+    "measurement_plan": "Measured 117.33 MiB decoded shared images including mipmaps; 399 ms cold headless parse, 0.048 ms cached build. Budget exception preserves two 2K sets; compare GPU frame costs and record cold-load cost. All operatives/worlds share cached materials."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Existing Carter MP5 loadout: aim/fire/reload in SGC and offworld; four players on listen/dedicated, relevant late join/travel/retry and clean export. Owner fidelity review remains separate."
+}

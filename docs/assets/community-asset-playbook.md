@@ -66,6 +66,8 @@ Add `client/assets/<kind>/<id>.glb.import` containing `[remap]`, a blank line an
 
 ## 5. Check it
 
+For Sprint 7 onward, validate the [work order](ai-asset-workflow.md#generation-fallback-with-a-tight-work-order) and pass `--work-order docs/assets/intake/<id>/work-order.json` to `asset_intake.py`. It requires ready measurements/references, records the request/schema hashes and enforces declared mesh/material budgets. Install `tools/requirements.txt` in an environment under ignored `build/` as documented in the shared workflow. Historical imports remain historical; a draft request cannot authorize a new GLB intake.
+
 ```sh
 python3 tools/asset_intake.py client/assets/<kind>/<id>.glb --output docs/assets/intake/<id>/intake-report.json
 mkdir -p /tmp/gltf-validator && (cd /tmp/gltf-validator && npm init -y >/dev/null && npm install gltf-validator@2.0.0-dev.3.10)
@@ -153,7 +155,7 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
 | Hosted `Godot full` or `Godot multiplayer` fails in `test_gate_*_multiplayer` after the suite printed PASS, on `Node not found: "…/Players/<peer>/MultiplayerSynchronizer"` | Pre-existing teardown race on `main` (hosted runs 43819943281 on #61 and 43818024196 on CO-1, 16 November 2026), not caused by asset work. Re-run the job once, say so in the PR, and do not chase it inside an asset PR |
 | A stacked PR shows as merged but its work is not on `main` | A PR merges into its base branch. GitHub retargets it to `main` only after the base PR merges **and** its branch is deleted. Merge the base PR, check the stacked PR's base says `main` (or change it), then merge. This happened to #64 |
 | Work vanishes after a conflict was resolved on GitHub | The #63 merge on top of CO-1 dropped the crate hook from `ArmoryResupplyStation.gd`. After any merge that needed conflict resolution, run the asset's suite on the new `main` |
-| CC BY credit missing from a shipped build | `credits/` is outside `client/` and there is no credits screen yet; flag it before any build is distributed |
+| CC BY credit missing from a shipped build | Sprint 7 adds generated `client/resources/asset_credits.tres` and the lobby credit/licence reader. Run `python3 tools/sync_asset_credits.py` after changing the maintained manifest/licences and `--check` before export; repeat the clean PCK credit test. Model acquisition/art acceptance is separate |
 
 ## 10. Workspace and concurrent work
 

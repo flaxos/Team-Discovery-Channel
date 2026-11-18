@@ -156,6 +156,7 @@ func snapshot(label: String, active_slots: Array[int], expected_count: int = 4) 
 	for w in range(2):
 		var world := main.worlds()[w] as GateRoom
 		for actor: PlayerController3D in world.players_container.get_children():
+			check_mp5_visual(actor)
 			expected[str(actor.peer_id)] = {"world": w, "class": actor.class_id,
 				"position": [actor.position.x, actor.position.y, actor.position.z],
 				"health": actor.health_component.current_health, "crouching": actor.is_crouching}
@@ -192,10 +193,27 @@ func see_snapshot(label: String) -> void:
 			break
 		await frames(1)
 	require(correct, "Roster/class/health/motion mismatch: " + label)
+	for world: GateRoom in main.worlds():
+		for actor: PlayerController3D in world.players_container.get_children():
+			check_mp5_visual(actor)
 	var own_world := int(expected[str(net.local_peer_id)].world)
 	require(main.session.presented == main.worlds()[own_world], "Each operative presents its own world")
 	require((main.current_site as ModularMission).events.fired.is_empty())
 	mark("seen_%s_%d" % [label, slot])
+
+
+func check_mp5_visual(actor: PlayerController3D) -> void:
+	if actor.class_id != SGCNetworkManager.CLASS_CARTER_TECH:
+		return
+	var gun := actor.current_weapon as WeaponMP5
+	require(gun != null and gun.muzzle_point.position.is_equal_approx(Vector3(0, 0.01, -0.36)), "Carter keeps MP5 and muzzle")
+	var imported := gun.get_node_or_null("WeaponModel/ImportedGLB")
+	require(imported != null and imported.has_node("MP5SD_Obj"), "Imported MP5SD survives " + str(actor.get_path()))
+	var mesh := imported.get_node("MP5SD_Obj") as MeshInstance3D
+	var triangles := 0
+	for surface in range(mesh.mesh.get_surface_count()):
+		triangles += (mesh.mesh.surface_get_arrays(surface)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+	require(triangles == 10669, "Real MP5SD body on each Carter replica")
 
 
 func run() -> void:

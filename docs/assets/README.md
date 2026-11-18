@@ -2,6 +2,8 @@
 
 **Current execution plan (18 November 2026):** [Sprints 7–35](../plans/asset-vertical-slices.md), the [shared Codex/Antigravity workflow](ai-asset-workflow.md), [texture contract](texture-import-contract.md), [generation work-order schema](asset-work-order.schema.json) and [updated sourcing register](asset-program-sourcing.md). The dated research below is historical; M9, P90, M249 and gate visuals are integrated, with owner art acceptance still recorded separately. Sprint 6 corridor work is merged in #77. No new assets are implemented by this plan.
 
+**Sprint 7 implemented for review:** [community MP5SD, intake and distributed credits](../reviews/2026-11-18-sprint7-mp5-intake.md). Owner-downloaded WillyG99 MP5SD now replaces the generic Uzi stand-in on Carter. Measured cosmetic placement, lossless 2K maps, shared cache and exported attribution; owner art acceptance remains pending.
+
 Prepared **16 November 2026**, from gameplay baseline `f45e909`. Three parallel agents covered mission features, static asset sourcing and character/animation sourcing; this handoff is the art track. The sourcing agents inspected creator pages and public metadata, without downloading third-party binaries or signing into services. No new community model is inserted into gameplay by this change.
 
 **AP-1c historical status (16 November 2026, superseded by AP-1d below).** The first insertion is the Poly Haven crate, now dressing the SGC armoury ammo crates: [review record](../reviews/2026-11-16-ap1c-plastic-crate.md), [intake record](intake/plastic_crate_02.json). The M9 was not acquired: Sketchfab's download endpoint answered HTTP 401 without an account session, so an authorised account download is the remaining blocker for it.
@@ -35,7 +37,7 @@ No complete high-fidelity Jaffa body/rig, high-fidelity Zat, verified retracting
 
 Raw Mixamo redistribution and contradictory Quaternius archive/website licences need explicit acquisition-level evidence. A source may permit game use while preventing raw public-repository distribution. The shortlists state the exact evidence and uncertainty; do not replace those findings with a blanket “royalty-free” claim.
 
-The retained Kenney source files are stylized, textureless stand-ins: the inspector reports **486** and **838** declared unique-mesh triangles for the game-labelled P90 and MP5 respectively, with no embedded images. The active P90 is now the realistic AP-1e import; MP5 still uses the generic Kenney stand-in. The former SW-1 branch's additional stylized weapon models are a separate recovery item. Preserve their actual attribution instead of renaming them as faithful high-fidelity firearms.
+The retained Kenney source files are stylized, textureless stand-ins: the inspector reports **486** and **838** declared unique-mesh triangles for the game-labelled P90 and MP5 respectively, with no embedded images. The active P90 is now the realistic AP-1e import; MP5 now uses the Sprint 7 WillyG99 MP5SD; the Kenney file remains retained and credited. The former SW-1 branch's additional stylized weapon models are a separate recovery item. Preserve their actual attribution instead of renaming them as faithful high-fidelity firearms.
 
 ## Ready-to-run handoff
 

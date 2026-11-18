@@ -56,28 +56,23 @@ Inspect archive members for unsafe paths before extraction into a new staging fo
 
 ## Generation fallback with a tight work order
 
-If the community search leaves a documented gap, Gemini/Antigravity can author the missing material, decal, trim or model using a work order conforming to [asset-work-order.schema.json](asset-work-order.schema.json). [Rigid example](asset-work-order-rigid.example.json) and [material example](asset-work-order-material.example.json) are **draft requests**, not shipped assets. The schema constrains requests; it does not certify copyright, image quality, geometry or engine acceptance. The current intake CLI does not enforce it yet; Sprint 7 introduces that integration in a real weapon slice.
+If the community search leaves a documented gap, Gemini/Antigravity can author the missing material, decal, trim or model using a work order conforming to [asset-work-order.schema.json](asset-work-order.schema.json). [Rigid example](asset-work-order-rigid.example.json) and [material example](asset-work-order-material.example.json) are **draft requests**, not shipped assets. The schema constrains requests; it does not certify copyright, image quality, geometry or engine acceptance. Sprint 7 adds `tools/asset_work_order.py` and `asset_intake.py --work-order` for this validation. The acquired MP5SD now consumes a ready request through this path; technical checks and owner art acceptance remain distinct. See the [Sprint 7 review](../reviews/2026-11-18-sprint7-mp5-intake.md).
 
 Record generator/tool/version and the full prompt, reference provenance, output hashes and post-processing. Set the measured target frame, bounds, anchors, maps, resolution, palette, repeat scale, geometry/rig budget and deliverables **before generation**. Do not invent dimensions or a skeleton to satisfy the form. A draft may name unresolved measurements; `ready_for_intake` requires those requests to be resolved and the generation tool identified for a generated gap.
 
 The work order uses metres and the target visual parent’s local frame for bounds and anchors. Schema checks reject unknown fields, incompatible asset kinds, wrong runtime channels/conventions, unresolved ready requests and path traversal. Also verify the real scene/branch exists, bounds min/max and anchor positions are physically correct, LOD limits decrease, texture/triangle budgets fit the scene, profile/rest-pose files resolve and required clips actually play. JSON structure cannot prove those facts. A ready request starts intake; it never approves an asset.
 
-For local schema checks where Python `jsonschema` is installed (not yet a declared game/tooling dependency):
+Install the pinned tooling dependency in the existing ignored build area, then use the shared CLI:
 
 ```sh
-python3 - <<'PYTHON'
-import json
-from pathlib import Path
-from jsonschema import Draft202012Validator, FormatChecker
-assets = Path("docs/assets")
-schema = json.loads((assets / "asset-work-order.schema.json").read_text())
-Draft202012Validator.check_schema(schema)
-validator = Draft202012Validator(schema, format_checker=FormatChecker())
-for filename in ("asset-work-order-rigid.example.json", "asset-work-order-material.example.json"):
-    validator.validate(json.loads((assets / filename).read_text()))
-print("Schema and draft examples valid")
-PYTHON
+python3 -m venv build/asset-tools-venv
+build/asset-tools-venv/bin/python -m pip install -r tools/requirements.txt
+build/asset-tools-venv/bin/python tools/asset_work_order.py docs/assets/intake/<id>/work-order.json
+build/asset-tools-venv/bin/python tools/asset_work_order.py docs/assets/intake/<id>/work-order.json --require-ready
+build/asset-tools-venv/bin/python tools/asset_intake.py <prepared.glb> --work-order docs/assets/intake/<id>/work-order.json --output build/asset-intake/<id>.json
 ```
+
+Draft validation permits unresolved measurements; actual GLB intake requires a ready request and records its hash. Passing it is still not licence or engine/art acceptance. Runtime triangle counts, material references and measured transforms require their separate checks. Legacy intake without this flag retains its original inspection behavior.
 
 Use Gemini image generation for actual image outputs: concept sheets, masks, decals or albedo candidates. Google documents an [image generation interface](https://ai.google.dev/gemini-api/docs/image-generation); an image response is not a rigged GLB. A generated concept requires a separate modelling/retopology/UV/rig/bake step through tools actually available. If Antigravity authors a Blender script, run it in an isolated data-processing session with the same schema and validate the resulting file. Never claim a generated picture supplies measured normals, roughness or watertight geometry.
 

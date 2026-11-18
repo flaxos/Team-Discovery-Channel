@@ -1,0 +1,27 @@
+{
+  "source": "/tmp/tdc-asset-intake/mp5sd/extracted/source/MP5SD.fbx",
+  "output": "../../../../client/assets/weapons/mp5sd.glb",
+  "root_name": "MP5SD",
+  "keep_nodes": [
+    "MP5SD_Obj"
+  ],
+  "max_texture_size": 2048,
+  "image_format": "PNG",
+  "materials": {
+    "Material.002": {
+      "albedo": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material.001_Base_Color.png",
+      "normal": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material.001_Normal_DirectX.png",
+      "roughness": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material.001_Roughness.png",
+      "metallic": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material.001_Metallic.png",
+      "normal_convention": "directx",
+      "ao": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/MP5SD_AO.png"
+    },
+    "Material.001": {
+      "albedo": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material_Base_Color.png",
+      "normal": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material_Normal_DirectX.png",
+      "roughness": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material_Roughness.png",
+      "metallic": "/tmp/tdc-asset-intake/mp5sd/extracted/textures/Material_Metallic.png",
+      "normal_convention": "directx"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "uid": "2b96ccb2dc51496e93f41734663bcadf",
+  "name": "MP5SD (Silenced MP5)",
+  "creator": "WillyG99",
+  "url": "https://sketchfab.com/3d-models/mp5sd-silenced-mp5-2b96ccb2dc51496e93f41734663bcadf",
+  "licence": {
+    "uri": "https://api.sketchfab.com/v3/licenses/322a749bcfa841b29dff1e8a1bb74b0b",
+    "label": "CC Attribution",
+    "fullName": "Creative Commons Attribution",
+    "requirements": "Author must be credited. Commercial use is allowed.",
+    "url": "http://creativecommons.org/licenses/by/4.0/",
+    "slug": "by"
+  },
+  "description": "Low poly MP5SD                                                                                                             \n\n4K textures                                                                                                                        \n\nNot rigged                                                                                                                          \n                                                                                                                                    Red dot sight is a seperate object                                                                                              \n                                                                                                                   \n\nMade with Blender, Gimp, Substance Designer & Substance Painter.                       \n\nThese take a lot of time to make, please consider leaving a like <3\n                           \nI love seeing my stuff come to use, so feel free sharing your work :)",
+  "faces": 12085,
+  "observed_date": "2026-11-18",
+  "download_attempt": {
+    "endpoint": "https://api.sketchfab.com/v3/models/2b96ccb2dc51496e93f41734663bcadf/download",
+    "result": "HTTP 401 without an authorized account session",
+    "browser_route": "Browser access host unavailable"
+  },
+  "archive_acquired": true,
+  "technical_acceptance": true,
+  "owner_art_acceptance": "pending",
+  "owner_archive": "~/Downloads/mp5sd-silenced-mp5.zip",
+  "archive_sha256": "a598f3e5149e744ff4c1147ebb85c472c255f77b296318c7403aff6dc379c8f1",
+  "archive_terms": "FBX and texture files only; no README, licence or contrary grant; public creator listing remains the licence evidence",
+  "technical_evidence": "docs/assets/intake/mp5sd/verification.json"
+}

@@ -2,6 +2,8 @@
 
 Every external 3D model, texture, material, or animation imported into **Team Discovery Channel** is recorded here in accordance with the 7-point provenance and technical gate in [`docs/plans/asset-import-pipeline.md`](../docs/plans/asset-import-pipeline.md).
 
+The lobby’s **Community Credits & Licences** window displays an exportable resource generated from this manifest and `credits/licenses/`. After a change, run `python3 tools/sync_asset_credits.py`; CI checks it with `--check`. Keep this file and the original licence texts authoritative; do not hand-edit `client/resources/asset_credits.tres`. Sprint 7 restored the complete official [CC0 legal text](https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt), including its formerly omitted definitions and limitations.
+
 ---
 
 ## 1. Generic Tactical & Architectural Assets
@@ -57,6 +59,17 @@ Every external 3D model, texture, material, or animation imported into **Team Di
 - **Trademarks:** The licence covers the artist's model, not manufacturer trademarks.
 
 ---
+
+### MP5SD — Sprint 7
+
+| Asset File | Title & Description | Creator | Source URL | License | Dimensions & Attachment | Difficulty |
+|---|---|---|---|---|---|---|
+| `client/assets/weapons/mp5sd.glb` | MP5SD (Silenced MP5), iron-sight gun body | **WillyG99** | https://sketchfab.com/3d-models/mp5sd-silenced-mp5-2b96ccb2dc51496e93f41734663bcadf | [CC BY 4.0](licenses/CC-BY-4.0.txt) | Measured visual size about `0.051 × 0.245 × 0.692 m`; source +X rotated to game -Z, crown on unchanged `MuzzlePoint (0, 0.01, -0.36)` | `S` |
+
+- **Attribution:** "MP5SD (Silenced MP5)" by WillyG99, source above, CC BY 4.0.
+- **Source and rights:** Creator describes their Blender/Gimp/Substance modelling and texturing workflow. Sketchfab metadata confirms CC BY 4.0 and downloadable status. Owner supplied `mp5sd-silenced-mp5.zip`; original retained in Downloads. Archive contains FBX and maps, no separate licence or contradictory terms. [Source hashes and intake](../docs/assets/intake/mp5sd/source-hashes.json).
+- **Modifications:** Recipe-packed the 10,669-triangle gun body from FBX, omitting the separate optional red-dot sight (1,416 triangles). Rebound the two source material sets by inspected UV/render correspondence, reduced 4K maps to 2K, converted labelled DirectX normals to OpenGL, and packed AO/roughness/metallic into ORM. All embedded maps use lossless PNG; unused opaque alpha discarded. Geometry and UVs retained. Runtime wrapper uses measured scale/orientation/crown alignment, mipmaps and the existing D-015 metallic-zero override. No reload or optic animation added. The older Kenney file remains packaged and credited.
+- **Trademarks:** The artist’s licence covers the model; manufacturer markings are retained as source art.
 
 ## 2. Community Stargate Props & Faction Assets
 

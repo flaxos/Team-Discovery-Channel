@@ -212,13 +212,33 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('file', type=Path, help='Staged binary glTF 2.0; never modified')
     parser.add_argument('--output', type=Path, help='Write the same JSON report to this path')
+    parser.add_argument('--work-order', type=Path, help='Validate a ready request before inspecting this GLB')
     args = parser.parse_args(argv)
-    if args.output and (args.output.resolve() == args.file.resolve() or (
-        args.output.exists() and args.file.exists() and args.output.samefile(args.file)
-    )):
-        parser.error('Report path must differ from the source asset')
+    for source in [args.file, args.work_order]:
+        if source and args.output and (args.output.resolve() == source.resolve() or (
+            args.output.exists() and source.exists() and args.output.samefile(source)
+        )):
+            parser.error('Report path must differ from the source asset and work order')
     try:
+        order_report = None
+        if args.work_order:
+            from asset_work_order import validate_work_order, read_json
+            order_report = validate_work_order(args.work_order, require_ready=True)
+            if not order_report['ok']:
+                raise IntakeError('; '.join(order_report['errors']))
         report = inspect_glb(args.file)
+        if order_report:
+            report['work_order'] = order_report
+            order = read_json(args.work_order)
+            geometry = order['geometry']
+            if geometry:
+                if report['declared_triangles_unique_meshes'] > geometry['max_lod0_triangles']:
+                    report['errors'].append('Declared unique mesh triangles exceed the work-order LOD0 budget')
+                if len(report['materials']) > geometry['max_materials']:
+                    report['errors'].append('Material count exceeds the work-order budget')
+            if order['kind'] in ('rigid_model', 'material_set') and (report['skins'] or report['animation_names']):
+                report['errors'].append('Rigid/material request cannot silently consume a rig or animation')
+            report['ok'] = not report['errors']
         rendered = json.dumps(report, indent=2, allow_nan=False) + '\n'
     except (OSError, ValueError, TypeError, KeyError, AttributeError,
             OverflowError, RecursionError, struct.error) as error:
