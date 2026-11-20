@@ -28,12 +28,28 @@
   },
   "negative_alignment": "build/mp5-negative-alignment.log (expected assertion; exact source restored)",
   "fallback": "build/mp5-fallback.log (PASS; exact model restored)",
-  "hosted": "Reported separately on the actual head of PR #79; local results do not establish hosted acceptance",
+  "hosted": {
+    "head_sha": "a778fb4b055d73fbef12e421189e5d76bf1715ed",
+    "run_url": "https://github.com/flaxos/Team-Discovery-Channel/actions/runs/44223594937",
+    "conclusion": "success",
+    "successful_jobs": 5,
+    "full_checks": 117,
+    "scope": "Recorded implementation run; not a new run for later documentation edits"
+  },
   "owner_art": "pending",
   "limitations": [
     "Placeholder character body has no hand/grip/reload animation; Sprint 23",
     "128 MiB shared-texture work-order exception; measured 117.33 MiB decoded, roughly 399 ms cold parse",
     "No LODs; broader weapon audit Sprint 10",
     "Four-player listen/dedicated travel/retry/replacement join coverage; explicit authorised return fixture uses two peers; no human multiplayer acceptance claimed"
-  ]
+  ],
+  "delivery": {
+    "status_checked_on": "2026-11-21",
+    "main_commit": "1f634d1b15bcbdd6b30fdd4ebd7bf9db3d67f34c",
+    "main_tree_matches_tested_implementation": true,
+    "pr_79": "Merged 2026-11-18 into docs/asset-vertical-slice-program",
+    "pr_78": "Merged 2026-11-20 into main",
+    "owner_art": "pending",
+    "next_sprint": 8
+  }
 }

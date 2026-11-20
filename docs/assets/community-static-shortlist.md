@@ -1,5 +1,7 @@
 # Community static asset shortlist
 
+**Status update, 21 November 2026:** this is historical sourcing research. M9, P90, M249 and selected gate parts were subsequently integrated; Sprint 7 also integrated WillyG99’s MP5SD and exported credits. See the [current asset handoff](README.md) and [sprint programme](../plans/asset-vertical-slices.md). **Sprint 8 staff weapon is next**; the old first-insertion recommendations below are not the current execution queue. Remaining listings have not been rechecked by this documentation update.
+
 Checked **16 November 2026**, against game source at `f45e909`. This is a sourcing and integration queue, not an imported-asset manifest. No 3D model or texture archive was downloaded or added. Four public creator thumbnails were fetched to temporary storage for the visual observations below; no preview files are committed. The creator pages and public metadata below were inspected; actual archive contents, visual quality in Godot, source-file rights notices and performance remain to be checked during ingestion.
 
 The goal is realistic tactical weapons, recognisable Stargate hardware and detailed industrial surfaces. Triangle count alone does not establish fidelity. The current Kenney assets are useful stylized substitutes; the file names `p90_smg.glb` and `mp5_silenced.glb` do not make their source models accurate P90/MP5 replicas. Their existing provenance must remain intact in [ATTRIBUTIONS.md](../../credits/ATTRIBUTIONS.md).

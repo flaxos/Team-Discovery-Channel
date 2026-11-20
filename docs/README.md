@@ -1,13 +1,14 @@
 # Documentation index
 
-Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026) unless a document states its own baseline. Consult GitHub for merge and CI status and your local checkout for the code actually running.
+Resume status checked **21 November 2026** against `main` at `1f634d1` (planning PR #78 includes Sprint 7 / PR #79). Sprint 7 is merged with technical evidence and owner art review pending; **Sprint 8, staff weapon, is next**. Historical documents retain their stated baselines. Consult GitHub for merge and CI status and your local checkout for the code actually running.
 
 ## Start here
 
 | Document | Purpose |
 | --- | --- |
 | [Roadmap](../ROADMAP.md) | **Authoritative.** What exists, what is next, milestone sequence, dependencies and acceptance gates. |
-| [Next work](plans/next-work-packages.md) | **Where to resume.** Human play sessions with run instructions and tuning table, then the next two agent packages (GA-0, GT-1) with handoff prompts, and how to merge dependent PRs. |
+| [Asset sprint programme](plans/asset-vertical-slices.md) | **Current agent sequence.** Sprint 8 staff weapon, then weapons/kit, SGC, characters, offworld and mothership through Sprint 35; exact prompts and acceptance boundaries. |
+| [Human sessions and earlier packages](plans/next-work-packages.md) | Deferred human play sessions, tuning and dependent-PR guidance; the GA-0/GT-1 package prompts are historical completed work. |
 | [Master development plan](plans/master-development-roadmap.md) | Capability matrix with evidence, dependency graph, every milestone, the art and content track, the risk register and three agent-ready work packages. |
 | [Decision log](DECISIONS.md) | Architectural and direction decisions, with status and open questions. |
 | [Gate travel with a split team](plans/gate-travel-split-worlds.md) | The design for travelling between the SGC and an offworld site when players need not travel together: the owners' rules, what the code does today, the experiment, the strategy, edge cases and milestones GT-1 to GT-3. |
@@ -54,6 +55,9 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 
 | Document | Purpose |
 | --- | --- |
+| [Shared AI asset workflow](assets/ai-asset-workflow.md) | Community-first acquisition, learning from prior imports, strict work orders, packaging and evidence for each playable slice. |
+| [Texture import contract](assets/texture-import-contract.md) | PBR channels, normals, alpha, theme scale, provisional budgets and measured exceptions. |
+| [Asset sourcing register](assets/asset-program-sourcing.md) | Integrated MP5SD and dated source leads for later sprints, with acquisition and licence gaps kept explicit. |
 | [Community asset integration playbook](assets/community-asset-playbook.md) | Start here to put a community model in the game: routes by target, licence gate, staging, the packer, wrappers, proof and records, with pitfalls from AP-1c and AP-1d. |
 | [Community asset handoff](assets/README.md) | Ranked first insertion queue, verified sourcing, outstanding acquisition/rig/licence gaps and a ready-to-run intake workflow. |
 | [Static asset shortlist](assets/community-static-shortlist.md) | Specific tactical weapons, Stargate props, industrial dressing and PBR material candidates with primary evidence. |
@@ -61,6 +65,7 @@ Maintained documentation describes `main` at `6af561b` (PR #49, 13 November 2026
 | [Asset import pipeline](plans/asset-import-pipeline.md) | What is actually implemented, GLB inspection tool, source/credit records, wrapper/socket rules and insertion acceptance. |
 | [AP-1c crate record](reviews/2026-11-16-ap1c-plastic-crate.md) | The first community asset in the game: acquisition, licence, measurements, placement, captures, render cost and the exported-build check. |
 | [AP-1d M9 record](reviews/2026-11-16-ap1d-beretta-m9.md) | The first realistic weapon: owner-downloaded CC BY archive, FBX conversion by recipe, bore alignment, finish comparison, sharing and the exported-build check. |
+| [Sprint 7 MP5SD record](reviews/2026-11-18-sprint7-mp5-intake.md) | Imported Carter MP5SD, shared intake validation, distributed credits/full licences, captures, costs, local/hosted checks and remaining owner acceptance. |
 
 ## Plans and records
 
