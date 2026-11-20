@@ -1,0 +1,160 @@
+{
+  "ok": true,
+  "file": "client/assets/weapons/mp5sd.glb",
+  "bytes": 14130088,
+  "sha256": "96214c25a3f56284af74d5c22acd847f7f81a57fd871f5fd033aa8afb0756b80",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Godot Engine v4.4.1.stable.official@49a5bc7b616bd04689a2c89e89bda41f50241464",
+  "declared_triangles_unique_meshes": 10669,
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 9140,
+          "declared_triangles": 9480,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "TEXCOORD_1",
+            "TEXCOORD_2",
+            "TEXCOORD_3",
+            "TEXCOORD_4",
+            "TEXCOORD_5",
+            "TEXCOORD_6",
+            "TEXCOORD_7"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.0394353903830051,
+              -0.00343467225320637,
+              -0.0216753203421831
+            ],
+            "max": [
+              0.0414875075221062,
+              0.00309699890203774,
+              0.0177482310682535
+            ],
+            "size": [
+              0.0809228979051113,
+              0.00653167115524411,
+              0.0394235514104366
+            ]
+          },
+          "morph_targets": 0
+        },
+        {
+          "mode": 4,
+          "declared_vertices": 896,
+          "declared_triangles": 1189,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "TEXCOORD_1",
+            "TEXCOORD_2",
+            "TEXCOORD_3",
+            "TEXCOORD_4",
+            "TEXCOORD_5",
+            "TEXCOORD_6",
+            "TEXCOORD_7"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.0462766550481319,
+              -0.00339156156405807,
+              -0.0287164952605963
+            ],
+            "max": [
+              0.0271056797355413,
+              0.0033619049936533,
+              0.0128478268161416
+            ],
+            "size": [
+              0.0733823347836732,
+              0.00675346655771137,
+              0.0415643220767379
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "MP5SD",
+    "MP5SD_Obj"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "Material_002",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "Material_001",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ],
+  "work_order": {
+    "ok": true,
+    "scope": "Request validation only; no licence or engine/art approval",
+    "asset_id": "mp5sd_willyg99",
+    "status": "ready_for_intake",
+    "work_order_sha256": "9d26e4428a85e3e426f2f1d9af7be7cd8c6626ef8f67d8f5c1fe5bdcf79c8309",
+    "schema_sha256": "c12d756075cf9c2b098e064204eab5b6cb1ab755832309bebe9445265e5f89fc",
+    "errors": []
+  }
+}

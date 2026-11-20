@@ -22,6 +22,7 @@ extends Control
 
 
 var _network_manager: SGCNetworkManager = null
+var _asset_credits: AssetCreditsDialog = null
 
 
 func _ready() -> void:
@@ -44,6 +45,10 @@ func _ready() -> void:
 		keybindings_button.pressed.connect(_on_keybindings_pressed)
 	if keybindings_modal != null:
 		keybindings_modal.visible = false
+	_asset_credits = AssetCreditsDialog.new()
+	_asset_credits.name = "AssetCreditsDialog"
+	add_child(_asset_credits)
+	%AssetCreditsButton.pressed.connect(_asset_credits.open)
 
 
 func _setup_class_options() -> void:

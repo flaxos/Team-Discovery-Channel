@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS07",
+  "asset_id": "mp5sd_request",
+  "status": "draft",
+  "kind": "rigid_model",
+  "purpose": "Request for a faithful community MP5SD; no archive selected or imported by this example. Measure live scene before promoting this request.",
+  "target": {
+    "scene": "res://scenes/entities/Player.tscn",
+    "visual_branch": "WeaponHolder/<active MP5>/WeaponModel/ImportedGLB; resolve live instance before intake",
+    "measurement_status": "unmeasured",
+    "measurement_evidence": null,
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": null,
+    "anchors": [
+      {
+        "name": "MuzzlePoint",
+        "position_m": null,
+        "purpose": "Read the current weapon muzzle; do not copy another weapon offset."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/mp5sd-1bffc4389ef5491bb367a462095d6e25",
+        "decision": "rejected",
+        "reason": "Not selected at planning: low-poly metadata alone does not establish requested close-up fidelity; downloadable archive remains uninspected."
+      }
+    ],
+    "selected_source": null,
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 60000,
+    "max_materials": 4,
+    "lod_triangle_limits": [
+      60000,
+      20000,
+      5000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "weapon_surface",
+      "resolution": 2048,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#303438",
+        "#1A1C1D"
+      ],
+      "surface_notes": "Reference source paint, metal and polymer; preserve source PBR and compare actual mission lighting."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 64,
+    "measurement_plan": "Measure decoded textures, cache reuse and frame/load time on the same SGC/offworld route and recorded hardware."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Existing Carter MP5 loadout: aim/fire/reload in SGC and offworld; four players on listen/dedicated, relevant late join/travel/retry and clean export. Owner fidelity review remains separate."
+}

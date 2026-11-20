@@ -4,6 +4,8 @@ For any agent (Codex, Gemini/Antigravity, Claude) putting a community 3D asset i
 
 **The rule that keeps it fast:** keep each asset in a cosmetic wrapper with its own evidence. Use the existing checkout, following [AGENTS.md](../../AGENTS.md). Group delivery when the owner requests it. Never change gameplay collision, sockets, stats, authority or navigation to fit art; fit the art to them.
 
+For the next asset programme, also read the [shared workflow](ai-asset-workflow.md), [texture contract](texture-import-contract.md) and [sprint sequence](../plans/asset-vertical-slices.md). Historical timing estimates below are examples, not sprint commitments.
+
 ## 1. Pick the route by what the asset replaces
 
 | The asset becomes | Route | Worked example | Rough estimate with these tools |
@@ -24,7 +26,7 @@ For any agent (Codex, Gemini/Antigravity, Claude) putting a community 3D asset i
 
 Record the exact listing and licence version. If the owner explicitly accepts a documented evidence gap, record the asset, date and decision; this does not establish missing authorship or underlying rights. On 17 November 2026 the owner authorized committing and merging the Stargate SG1 integration with its existing uploader-authorship gap recorded. Sketchfab: `https://api.sketchfab.com/v3/models/<uid>` gives `license.slug`, `isDownloadable` and counts. Licences from modellers never cover manufacturers' trademarks (the M9 carries Beretta's markings); note any and leave the call to the owner.
 
-**Downloads behind an account** (all Sketchfab downloads, HTTP 401 without a session): an agent cannot fetch them. Ask the owner to download the original archive and drop it at the repository root or in `~/Downloads`. Do not move, rename or delete the owner's copy, and never commit it.
+**Authorized acquisition:** agents may download permitted public assets or use an available authorized account route supported by their tools. An HTTP 401 without a session identifies that route's account requirement, not a universal agent restriction. If owner action is actually needed, provide the [download card](ai-asset-workflow.md#owner-download-card) with the exact asset, format, terms and location. Prefer `~/Downloads` for the original; stage a copy outside `client/`. Do not move, rename, delete or commit the owner's original archive, bypass access controls or purchase without a purchase instruction.
 
 ## 3. Stage and inspect
 
@@ -44,15 +46,17 @@ Treat the archive as untrusted data: extract into a new empty folder, refuse abs
 |---|---|
 | `.gltf` + `.bin` + images whose materials are already bound (Poly Haven) | `python3 tools/gltf_to_glb.py <in>.gltf <out>.glb`: container only, bytes unchanged |
 | `.fbx`, or any model whose maps are loose files, or 2K–8K maps | `client/scripts/assets/pack_model_glb.gd` with a recipe |
-| `.dae` (COLLADA), including nested archives | Import in a minimal Godot staging project outside `client/`, then run the same packer from that project with an absolute recipe path; see [M249](../reviews/2026-11-16-ap1f-m249.md) |
+| `.dae` (COLLADA), including nested archives | The original [M249 proof](../reviews/2026-11-16-ap1f-m249.md) used a separate staging project. For new work, use a supported converter over external intake data and the existing checkout; do not copy the game project. If an engine import cannot meet those workspace/staging boundaries, report the specific conversion blocker before changing the workflow |
 | A clean self-contained `.glb` already | use it; still run the checks below |
 
-Recipe: copy [`intake/beretta_m9/recipe.json`](intake/beretta_m9/recipe.json) to `docs/assets/intake/<id>/recipe.json`. Set `source`, `output` (relative to the recipe), `keep_nodes`, `max_texture_size` (1024 for weapons and props), and per-material maps (`"*"` for all). Then:
+Recipe: copy [`intake/beretta_m9/recipe.json`](intake/beretta_m9/recipe.json) to `docs/assets/intake/<id>/recipe.json`. Set `source`, `output` (relative to the recipe), `keep_nodes`, `max_texture_size` (1024 in the original proofs; choose the production resolution using the [texture contract](texture-import-contract.md)), and per-material maps (`"*"` for all). Then:
 
 ```sh
 godot --headless --path client --import          # refreshes class names in the existing checkout
 godot --headless --path client --script res://scripts/assets/pack_model_glb.gd -- docs/assets/intake/<id>/recipe.json
 ```
+
+**Rigid opaque assets only:** this packer rebuilds static mesh nodes and does not preserve skins, skeletons or animation. Map decoding currently converts to RGB8, so alpha is lost. Add and test a suitable path before skin/hair/cutouts; see the texture contract.
 
 It prints one `PACK_RESULT` line with every kept mesh, its triangles and bounds. Run it first without `keep_nodes` and an output in `/tmp` to see what the source contains. Packing is deterministic, so the same recipe gives the same sha256.
 
@@ -61,6 +65,8 @@ It prints one `PACK_RESULT` line with every kept mesh, its triangles and bounds.
 Add `client/assets/<kind>/<id>.glb.import` containing `[remap]`, a blank line and `importer="keep"` (as for every GLB here), so CI's headless editor import does not try to build thumbnails.
 
 ## 5. Check it
+
+For Sprint 7 onward, validate the [work order](ai-asset-workflow.md#generation-fallback-with-a-tight-work-order) and pass `--work-order docs/assets/intake/<id>/work-order.json` to `asset_intake.py`. It requires ready measurements/references, records the request/schema hashes and enforces declared mesh/material budgets. Install `tools/requirements.txt` in an environment under ignored `build/` as documented in the shared workflow. Historical imports remain historical; a draft request cannot authorize a new GLB intake.
 
 ```sh
 python3 tools/asset_intake.py client/assets/<kind>/<id>.glb --output docs/assets/intake/<id>/intake-report.json
@@ -149,7 +155,7 @@ Do not edit the GLB to fix looks. Tint, opacity, occlusion wiring and similar ch
 | Hosted `Godot full` or `Godot multiplayer` fails in `test_gate_*_multiplayer` after the suite printed PASS, on `Node not found: "…/Players/<peer>/MultiplayerSynchronizer"` | Pre-existing teardown race on `main` (hosted runs 43819943281 on #61 and 43818024196 on CO-1, 16 November 2026), not caused by asset work. Re-run the job once, say so in the PR, and do not chase it inside an asset PR |
 | A stacked PR shows as merged but its work is not on `main` | A PR merges into its base branch. GitHub retargets it to `main` only after the base PR merges **and** its branch is deleted. Merge the base PR, check the stacked PR's base says `main` (or change it), then merge. This happened to #64 |
 | Work vanishes after a conflict was resolved on GitHub | The #63 merge on top of CO-1 dropped the crate hook from `ArmoryResupplyStation.gd`. After any merge that needed conflict resolution, run the asset's suite on the new `main` |
-| CC BY credit missing from a shipped build | `credits/` is outside `client/` and there is no credits screen yet; flag it before any build is distributed |
+| CC BY credit missing from a shipped build | Sprint 7 adds generated `client/resources/asset_credits.tres` and the lobby credit/licence reader. Run `python3 tools/sync_asset_credits.py` after changing the maintained manifest/licences and `--check` before export; repeat the clean PCK credit test. Model acquisition/art acceptance is separate |
 
 ## 10. Workspace and concurrent work
 

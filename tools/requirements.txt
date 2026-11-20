@@ -1,0 +1,2 @@
+# Asset work-order validation (Draft 2020-12).
+jsonschema==4.23.0

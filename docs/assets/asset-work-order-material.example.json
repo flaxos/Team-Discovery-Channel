@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS28",
+  "asset_id": "goauld_engineering_trim_request",
+  "status": "draft",
+  "kind": "material_set",
+  "purpose": "Draft request for a missing engineering trim family, not a generated or approved material. Discover target slots, search further and record the actual generator before use.",
+  "target": {
+    "scene": "res://resources/levels/goauld_infiltration_01.tres",
+    "visual_branch": "Discover actual theme attachment/slot; this is not a resolved node path.",
+    "measurement_status": "unmeasured",
+    "measurement_evidence": null,
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": null,
+    "anchors": [
+      {
+        "name": "trim_origin",
+        "position_m": null,
+        "purpose": "Measure on the actual generator room visual slot after catalogue discovery."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_first_generated_gap",
+    "search_record": [
+      {
+        "page": "https://polyhaven.com/a/metal_plate",
+        "decision": "rejected",
+        "reason": "Industrial metal lead does not supply the requested Goauld relief/trim layout; continue searching exact creator sources before generation."
+      }
+    ],
+    "selected_source": null,
+    "generation": null
+  },
+  "geometry": null,
+  "rig": null,
+  "materials": [
+    {
+      "id": "engineering_trim",
+      "resolution": 2048,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#9C7838",
+        "#342C21",
+        "#277A80"
+      ],
+      "surface_notes": "Measure band widths and repeat scale first. Neutral albedo, separate authored/baked relief normals and coherent ORM; no baked light or invented text. Palette is a proposed art target."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 64,
+    "measurement_plan": "Measure decoded textures, cache reuse and frame/load time on the same SGC/offworld route and recorded hardware."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "material_resources",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Existing generator objective room: test repeat, corner/lintel seams, scale and normal/alarm lighting; preserve collision/nav/anchors; verify clean exported material binding."
+}

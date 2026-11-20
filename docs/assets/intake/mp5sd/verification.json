@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-18",
+  "engine": "4.4.1.stable.official.49a5bc7b6",
+  "model_sha256": "96214c25a3f56284af74d5c22acd847f7f81a57fd871f5fd033aa8afb0756b80",
+  "godot": {
+    "command": "flock /tmp/tdc-godot-network-tests.lock python3 tools/run_godot_tests.py --timeout 180 --output build/test-results/sprint7-mp5-full-final",
+    "passed": true,
+    "checks": 117,
+    "summary": "build/test-results/sprint7-mp5-full-final/summary.json"
+  },
+  "python": {
+    "command": "build/asset-tools-venv/bin/python -m unittest discover -s tools/tests -v",
+    "passed": true,
+    "tests": 60,
+    "log": "build/sprint7-mp5-python-tests.log"
+  },
+  "export": {
+    "release_template": "4.4.1.stable/linux_release.x86_64",
+    "pck_bytes": 25100832,
+    "pck_sha256": "783405490b0041a66ad6924594630998b50ce527184285582554113f11b77329",
+    "run_directory": "build/asset-review/sprint7-mp5-export",
+    "tests": [
+      "test_asset_credits: PASS models=8 licences=2",
+      "test_imported_mp5_visual: PASS triangles=10669 bore=(0.0, 0.01, -0.36)"
+    ],
+    "errors_or_leaks": false,
+    "preset_restored": true
+  },
+  "negative_alignment": "build/mp5-negative-alignment.log (expected assertion; exact source restored)",
+  "fallback": "build/mp5-fallback.log (PASS; exact model restored)",
+  "hosted": "Reported separately on the actual head of PR #79; local results do not establish hosted acceptance",
+  "owner_art": "pending",
+  "limitations": [
+    "Placeholder character body has no hand/grip/reload animation; Sprint 23",
+    "128 MiB shared-texture work-order exception; measured 117.33 MiB decoded, roughly 399 ms cold parse",
+    "No LODs; broader weapon audit Sprint 10",
+    "Four-player listen/dedicated travel/retry/replacement join coverage; explicit authorised return fixture uses two peers; no human multiplayer acceptance claimed"
+  ]
+}

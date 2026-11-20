@@ -100,7 +100,10 @@ func verify_ap1a_weapon_models() -> void:
 		assert(not meshes.is_empty(), "ImportedGLB contains MeshInstance3D children for " + expected_id)
 		for node in meshes:
 			var mi := node as MeshInstance3D
-			assert(mi.mesh != null and mi.mesh.get_aabb().size.length() > 0.1, "Valid mesh AABB for " + expected_id)
+			assert(mi.mesh != null, "Imported mesh exists for " + expected_id)
+			var placed := gun.global_transform.affine_inverse() * mi.global_transform
+			assert((placed * mi.mesh.get_aabb()).size.length() > 0.1,
+				"Valid weapon-space bounds in metres for " + expected_id)
 			for s in range(mi.mesh.get_surface_count()):
 				var mat := mi.get_surface_override_material(s) as BaseMaterial3D
 				if mat == null:

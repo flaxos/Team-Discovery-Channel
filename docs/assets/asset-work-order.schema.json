@@ -1,0 +1,839 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Team Discovery Channel asset work order v1",
+  "description": "A request contract, not a licence, art approval, geometry validator or implemented runtime API.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "sprint_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^AS(0[7-9]|[12][0-9]|3[0-5])$"
+    },
+    "asset_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "ready_for_intake"
+      ]
+    },
+    "kind": {
+      "enum": [
+        "rigid_model",
+        "rigged_character",
+        "animation_set",
+        "material_set"
+      ]
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scene": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!.*(?:^|/)\\.\\.(?:/|$))(?:docs/|client/|build/|res://)[^\\s]+$"
+        },
+        "visual_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurement_status": {
+          "enum": [
+            "unmeasured",
+            "measured"
+          ]
+        },
+        "measurement_evidence": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!.*(?:^|/)\\.\\.(?:/|$))(?:docs/|client/|build/|res://)[^\\s]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "units": {
+          "const": "metres"
+        },
+        "up": {
+          "const": "+Y"
+        },
+        "game_forward": {
+          "const": "-Z"
+        },
+        "bounds_m": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/bounds"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "position_m": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "name",
+              "position_m",
+              "purpose"
+            ]
+          },
+          "minItems": 1
+        },
+        "coordinate_space": {
+          "const": "visual_parent_local"
+        }
+      },
+      "required": [
+        "scene",
+        "visual_branch",
+        "measurement_status",
+        "measurement_evidence",
+        "units",
+        "up",
+        "game_forward",
+        "bounds_m",
+        "anchors",
+        "coordinate_space"
+      ]
+    },
+    "acquisition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "enum": [
+            "community_only",
+            "community_first_generated_gap"
+          ]
+        },
+        "search_record": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "page": {
+                "type": "string",
+                "minLength": 1,
+                "format": "uri",
+                "pattern": "^https?://[^\\s]+$"
+              },
+              "decision": {
+                "enum": [
+                  "selected",
+                  "rejected",
+                  "unavailable"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "page",
+              "decision",
+              "reason"
+            ]
+          },
+          "minItems": 1
+        },
+        "selected_source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "generation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/generation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "policy",
+        "search_record",
+        "selected_source",
+        "generation"
+      ]
+    },
+    "geometry": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/geometry"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rig": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/rig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "resolution": {
+            "enum": [
+              512,
+              1024,
+              2048,
+              4096
+            ]
+          },
+          "albedo_space": {
+            "const": "srgb"
+          },
+          "data_space": {
+            "const": "linear"
+          },
+          "normal_convention": {
+            "const": "opengl"
+          },
+          "orm_layout": {
+            "const": {
+              "r": "ao",
+              "g": "roughness",
+              "b": "metallic"
+            }
+          },
+          "data_encoding": {
+            "const": "lossless_png"
+          },
+          "alpha": {
+            "enum": [
+              "opaque",
+              "mask",
+              "blend"
+            ]
+          },
+          "alpha_cutoff": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metres_per_tile": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "palette": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "minItems": 1,
+            "maxItems": 8
+          },
+          "surface_notes": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "resolution",
+          "albedo_space",
+          "data_space",
+          "normal_convention",
+          "orm_layout",
+          "data_encoding",
+          "alpha",
+          "alpha_cutoff",
+          "metres_per_tile",
+          "palette",
+          "surface_notes"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "alpha": {
+                  "const": "mask"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "alpha_cutoff": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "alpha_cutoff": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 0
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_unique_texture_mib": {
+          "type": "number",
+          "minimum": 0
+        },
+        "measurement_plan": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "max_unique_texture_mib",
+        "measurement_plan"
+      ]
+    },
+    "preserve_gameplay": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "collision",
+          "navigation",
+          "sockets",
+          "muzzle_and_interaction_anchors",
+          "stats_and_timing",
+          "network_authority",
+          "native_layout"
+        ]
+      },
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true
+    },
+    "deliverables": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "self_contained_glb",
+          "material_resources",
+          "lossless_maps",
+          "recipe_or_export_settings",
+          "source_and_generation_provenance",
+          "intake_and_validator_reports",
+          "gameplay_wrapper",
+          "gpu_captures",
+          "export_proof"
+        ]
+      },
+      "minItems": 6,
+      "uniqueItems": true
+    },
+    "acceptance_scenario": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "sprint_id",
+    "asset_id",
+    "status",
+    "kind",
+    "purpose",
+    "target",
+    "acquisition",
+    "geometry",
+    "rig",
+    "materials",
+    "budgets",
+    "preserve_gameplay",
+    "deliverables",
+    "acceptance_scenario"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "rigged_character",
+              "animation_set"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "rig": {
+            "$ref": "#/$defs/rig"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "rig": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "material_set",
+              "animation_set"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "geometry": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "geometry": {
+            "$ref": "#/$defs/geometry"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "acquisition": {
+            "properties": {
+              "policy": {
+                "const": "community_only"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "acquisition": {
+            "properties": {
+              "generation": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ready_for_intake"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "properties": {
+              "measurement_status": {
+                "const": "measured"
+              },
+              "measurement_evidence": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!.*(?:^|/)\\.\\.(?:/|$))(?:docs/|client/|build/|res://)[^\\s]+$"
+              },
+              "bounds_m": {
+                "$ref": "#/$defs/bounds"
+              },
+              "anchors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "position_m": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "purpose": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "position_m",
+                    "purpose"
+                  ]
+                },
+                "minItems": 1
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "acquisition": {
+                  "properties": {
+                    "policy": {
+                      "const": "community_only"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "acquisition": {
+                  "properties": {
+                    "selected_source": {
+                      "$ref": "#/$defs/source"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "acquisition": {
+                  "properties": {
+                    "generation": {
+                      "$ref": "#/$defs/generation"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "animation_set"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "materials": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "materials": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_lod0_triangles": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_materials": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "lod_triangle_limits": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "uv_required": {
+          "const": true
+        }
+      },
+      "required": [
+        "max_lod0_triangles",
+        "max_materials",
+        "lod_triangle_limits",
+        "uv_required"
+      ]
+    },
+    "rig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!.*(?:^|/)\\.\\.(?:/|$))(?:docs/|client/|build/|res://)[^\\s]+$"
+        },
+        "rest_pose_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!.*(?:^|/)\\.\\.(?:/|$))(?:docs/|client/|build/|res://)[^\\s]+$"
+        },
+        "max_weights_per_vertex": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "root_motion": {
+          "const": "in_place_only"
+        },
+        "required_clips": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "hand_anchors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "profile_ref",
+        "rest_pose_ref",
+        "max_weights_per_vertex",
+        "root_motion",
+        "required_clips",
+        "hand_anchors"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uri",
+          "pattern": "^https?://[^\\s]+$"
+        },
+        "creator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "licence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "archive_terms_status": {
+          "enum": [
+            "unverified",
+            "recorded_in_intake"
+          ]
+        },
+        "intake_record": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!.*(?:^|/)\\.\\.(?:/|$))(?:docs/|client/|build/|res://)[^\\s]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "page",
+        "creator",
+        "licence",
+        "archive_terms_status",
+        "intake_record"
+      ]
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "uri": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rights_note": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "uri",
+              "rights_note"
+            ]
+          }
+        },
+        "processing_plan": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "tool",
+        "version",
+        "prompt",
+        "references",
+        "processing_plan"
+      ]
+    },
+    "bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "max_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "min_m",
+        "max_m"
+      ]
+    }
+  }
+}
