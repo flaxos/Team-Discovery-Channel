@@ -1,8 +1,8 @@
 # Community asset handoff
 
-**Current execution plan (18 November 2026):** [Sprints 7–35](../plans/asset-vertical-slices.md), the [shared Codex/Antigravity workflow](ai-asset-workflow.md), [texture contract](texture-import-contract.md), [generation work-order schema](asset-work-order.schema.json) and [updated sourcing register](asset-program-sourcing.md). The dated research below is historical; M9, P90, M249 and gate visuals are integrated, with owner art acceptance still recorded separately. Sprint 6 corridor work is merged in #77. No new assets are implemented by this plan.
+**Current execution plan (21 November 2026):** [Sprints 7–35](../plans/asset-vertical-slices.md), the [shared Codex/Antigravity workflow](ai-asset-workflow.md), [texture contract](texture-import-contract.md), [generation work-order schema](asset-work-order.schema.json) and [updated sourcing register](asset-program-sourcing.md). **Next is Sprint 8, staff weapon**; audit old AP-1b work and compare sources before intake. Sprints 8–35 remain planned. The original first-insertion queue below is dated research, not today's execution order; the Airman rig is Sprint 19.
 
-**Sprint 7 implemented for review:** [community MP5SD, intake and distributed credits](../reviews/2026-11-18-sprint7-mp5-intake.md). Owner-downloaded WillyG99 MP5SD now replaces the generic Uzi stand-in on Carter. Measured cosmetic placement, lossless 2K maps, shared cache and exported attribution; owner art acceptance remains pending.
+**Sprint 7 merged to main via #79/#78:** [community MP5SD, intake and distributed credits](../reviews/2026-11-18-sprint7-mp5-intake.md). Owner-downloaded WillyG99 MP5SD now replaces the generic Uzi stand-in on Carter. Measured cosmetic placement, lossless 2K maps, shared cache and exported attribution; 117 local/hosted full checks, 60 Python tests and clean release export passed on implementation `a778fb4`. Owner art acceptance remains pending.
 
 Prepared **16 November 2026**, from gameplay baseline `f45e909`. Three parallel agents covered mission features, static asset sourcing and character/animation sourcing; this handoff is the art track. The sourcing agents inspected creator pages and public metadata, without downloading third-party binaries or signing into services. No new community model is inserted into gameplay by this change.
 
@@ -42,7 +42,7 @@ The retained Kenney source files are stylized, textureless stand-ins: the inspec
 ## Ready-to-run handoff
 
 1. Pick **one** candidate and copy `intake-record.template.json`. Fill the exact source, creator and licence evidence from its row. Obtain the archive through its normal authorized route and keep the original outside `client/`.
-2. Run `python3 tools/asset_intake.py /tmp/tdc-asset-intake/<candidate>/model.glb --output build/asset-intake/<candidate>.json`. Record its hash. The report identifies declarations and self-contained data, not legal or engine acceptance.
+2. Prepare a measured ready work order under `docs/assets/intake/<candidate>/work-order.json`. Use the pinned tooling environment described in the shared workflow, then run `build/asset-tools-venv/bin/python tools/asset_intake.py /tmp/tdc-asset-intake/<candidate>/model.glb --work-order docs/assets/intake/<candidate>/work-order.json --output build/asset-intake/<candidate>.json`. Record its hash. The report identifies declarations, request readiness/budgets and self-contained data, not legal or engine acceptance.
 3. Run full format validation and measure the model in Godot 4.4.1. Complete the target-specific wrapper contract in the guide. Record what was changed and which source files/maps were used.
 4. Commit one cosmetic proof, its credits/licence and evidence together. Verify unchanged gameplay collision, sockets and authority, clean exported loading, mission lighting, multiplayer/late join and the required test profile. Open a draft PR for owner art review.
 

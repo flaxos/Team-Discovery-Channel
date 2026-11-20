@@ -1,5 +1,7 @@
 # AP-1g: community Stargate glyph ring and seven anchored chevrons
 
+**Follow-up, 21 November 2026:** the distributed-credit gap recorded below is resolved by [Sprint 7’s generated offline credits/full-licence reader and clean export proof](2026-11-18-sprint7-mp5-intake.md). The recorded authorship-evidence exception and owner-art limitations are unchanged. Further control/gate/iris presentation belongs to [Sprint 14](../plans/asset-vertical-slices.md).
+
 16 November 2026, baseline `8366ccc`, branch `feat/ap1g-stargate`. **Owner authorized inclusion on 17 November 2026.** After the authorship gap was disclosed, the owner requested committing everything and merging to main. The CC BY 4.0 listing has no description, and the archive has no licence/readme; independent uploader authorship remains unestablished. The owner accepted inclusion with that gap documented. This records authorization, not new authorship evidence or human art acceptance.
 
 ## Result and fit

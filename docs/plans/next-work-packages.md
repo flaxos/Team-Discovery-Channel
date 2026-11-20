@@ -1,5 +1,7 @@
 # Next work: human sessions and the next two agent packages
 
+**Current resume pointer, 21 November 2026:** use the [asset sprint programme](asset-vertical-slices.md), starting with **Sprint 8, staff weapon**. Sprint 7 is merged to main via #79/#78; owner art review remains pending. GA-0 and GT-1–GT-3 below have already been implemented, and Sprints 1–6 are also merged. Their old sequencing and implementation prompts are historical, not instructions to redo them. The deferred human sessions and merge guidance remain useful.
+
 Written 13 November 2026, after phase 3 landed on `main` (PRs #45, #46 and #49). It continues section 8 of the [master plan](master-development-roadmap.md#8-the-first-three-work-packages), whose three packages (EX-1, ST-1, GI-1) are done. [ROADMAP.md](../../ROADMAP.md) says which of these to pick up; this file holds the detail.
 
 **Update, 14 November 2026.** An owner played both new missions alone and accepted phases 1 to 3 ([record](../reviews/2026-11-14-owner-solo-uat.md), [D-014](../DECISIONS.md)); the two-player sessions in part A are deferred, not cancelled. Package 4 (GA-0) is done: see the [Goa'uld visual brief](../maps/goauld-visual-brief.md). Package 5 (GT-1) was paused when the owners decided players may be in different worlds ([D-013](../DECISIONS.md)); the [split-world design](gate-travel-split-worlds.md) (GT-0) is now written and the package is rewritten from it. [ROADMAP.md](../../ROADMAP.md#pick-up-here) has the current list.

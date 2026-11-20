@@ -2,6 +2,23 @@
 
 Owner-requested programme, **18 November 2026**, based on merged main `7982e2b` / [PR #77](https://github.com/flaxos/Team-Discovery-Channel/pull/77). Sprints [1–6](next-six-sprints.md) are merged; their remaining human checks still apply. Unless its state is explicitly updated below, each sprint is **planned**, not implemented or artistically accepted. Sprint 7 is implemented for owner art review; later slices remain planned. “Horse” means **Horus Jaffa**; “mother assets” means a **Goa’uld mothership**. No delivery dates or guaranteed source acquisitions are implied.
 
+**Resume status, 21 November 2026:** Sprint 7 reached `main` at `1f634d1` through [PR #79](https://github.com/flaxos/Team-Discovery-Channel/pull/79) into the planning branch, then [PR #78](https://github.com/flaxos/Team-Discovery-Channel/pull/78) into `main`. Its local and hosted full runs passed 117 checks, 60 Python tests passed, and the clean release export passed. Those results belong to implementation `a778fb4`; they are not new test runs for later documentation edits. Owner art acceptance is pending. **Next: Sprint 8, staff weapon. Sprints 8–35 have not started.**
+
+## Roadmap at a glance
+
+| Sprints | Visible outcome |
+|---|---|
+| 8–12 | Staff → Zat → all six held-weapon mesh/material audit → M2 → C4/claymore/smoke/shield |
+| 13–18 | SGC embarkation → control/gate/iris → armoury → lab/medical support → briefing/command → remaining authored base areas |
+| 19–21 | Rigged Airman and shared animation path → Serpent Jaffa → Horus Jaffa |
+| 22–25 | O’Neill → Carter → Teal’c → SG3 Heavy, completing class-specific weapon handling |
+| 26 | Laboratory, medical and administration civilians, initially noncombat presentation |
+| 27–31 | Offworld gate/DHD → generator → command/records → tall chambers/ramps → outpost/background vista |
+| 32–34 | Mothership boarding/interior → bridge/engineering objective → exterior silhouette/vista |
+| 35 | Four-player SGC → selected offworld site → SGC acceptance run |
+
+Weapon meshes and field-kit visuals are addressed through Sprint 12; **complete animated grips/handling remain open through Sprint 25**. SGC dressing does not add new base levels, and mothership art does not add flight or space combat. Each slice remains subject to its detailed scope and separate owner art review below.
+
 Prefer available high-fidelity community assets, including normal owner/account downloads. Generate only documented gaps under the [shared AI workflow](../assets/ai-asset-workflow.md), [texture contract](../assets/texture-import-contract.md) and [strict work-order schema](../assets/asset-work-order.schema.json). Start with the [dated sourcing register](../assets/asset-program-sourcing.md); a promising listing is not an approved or acquired model.
 
 ## Prompt one sprint at a time
@@ -14,7 +31,7 @@ If a prerequisite is unfinished, report it and finish only the prerequisite work
 
 | Sprint | Playable result | State | Exact trigger |
 |---|---|---|---|
-| 7 | Faithful MP5SD in SGC/offworld; reproducible shared intake and distributed credits | Implemented for review: community MP5SD, intake and distributed credits ([review](../reviews/2026-11-18-sprint7-mp5-intake.md)) | `Start sprint 7 from docs/plans/asset-vertical-slices.md` |
+| 7 | Faithful MP5SD in SGC/offworld; reproducible shared intake and distributed credits | Merged to main via #79/#78; technical checks passed, owner art pending ([review](../reviews/2026-11-18-sprint7-mp5-intake.md)) | `Start sprint 7 from docs/plans/asset-vertical-slices.md` |
 | 8 | Staff weapon in player and Jaffa combat | Planned | `Start sprint 8 from docs/plans/asset-vertical-slices.md` |
 | 9 | Zat in quiet incapacitation/combat | Planned | `Start sprint 9 from docs/plans/asset-vertical-slices.md` |
 | 10 | Six held-weapon meshes/materials ready for character grips | Planned | `Start sprint 10 from docs/plans/asset-vertical-slices.md` |
@@ -57,6 +74,8 @@ For changed gameplay-visible content, exercise four operatives on **listen and d
 **Sprint 7 — MP5SD and repeatable acquisition.** Depends on merged Sprint 6; read the M9/P90/M249 golden examples first. Deliver **one** faithful textured suppressed MP5SD on the existing Carter loadout, usable in the existing SGC UAT base and an offworld encounter. Compare sources rather than relabeling the current Kenney `uziLongSilencer`. Consume the strict work-order validation in this intake path, preserve lossless data maps where needed, record the baseline material override and make required credits/full licences reachable in the exported build from a maintained source. Validate muzzle/aim/suppression/reload, shared cache, fallback, export and four-player state. Block on a missing suitable model rather than calling the 2,210-face lead high fidelity without inspection. No rig replacement yet.
 
 **Sprint 8 — Staff weapon.** Depends on 7’s intake/credit path. Deliver **one** staff model used by the player and current Jaffa, with measured staff length, two-hand contact targets, existing muzzle and effect alignment. Audit old AP-1b work before sourcing. Separate tip parts only if required by an existing visual state; a static source does not magically supply opening animation. Show firing/idle, close-up and distant silhouette, existing projectile/damage and late state. Keep NPC `StaffMount` and fire origin authoritative. Final animated grips remain assigned to 20/24.
+
+**Next trigger:** `Start sprint 8 from docs/plans/asset-vertical-slices.md`. Start by inspecting the existing staff implementation and recovered-asset evidence, then compare community sources. No staff archive has yet passed intake for this sprint; the sourcing register's lead is not an acquired or accepted replacement. This slice changes presentation around existing combat, not damage, AI or class mechanics.
 
 **Sprint 9 — Zat.** Depends on 7; consumes 8’s anchor lessons. Deliver **one** Zat with readable shape/PBR and presentation of existing fire/incapacitation states. Test quiet takedown/stun and subsequent existing hit consequences, late join/retry and travel inventory. Source/grant or generated-gap modelling is required; the Biggs portfolio model is not downloadable/licensed intake. Art cannot change stun duration or the existing vaporization rules. Do not promise open/closed mechanisms unless the actual gameplay state and separable parts support them. Final grips are assigned to 23/24.
 

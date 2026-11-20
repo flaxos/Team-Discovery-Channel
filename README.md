@@ -4,6 +4,8 @@ Stargate: SG Extraction is a Godot 4.4.1 co-op tactical shooter. The main playab
 
 **What to build next:** see the [roadmap](ROADMAP.md).
 
+**Asset programme status, 21 November 2026:** Sprint 7's community MP5SD, repeatable intake and in-game credits/full licences are merged to `main` via #79/#78; owner art review remains pending. **Next is Sprint 8: the staff weapon**, followed by Zat, the weapon audit and field kit, SGC areas, rigged characters, offworld locations and mothership art. See the [Sprint 8–35 sequence and prompts](docs/plans/asset-vertical-slices.md).
+
 ## Play locally
 
 From the checkout you want to test:
@@ -39,7 +41,7 @@ The [map authoring contract](docs/maps/sgc.md) covers layout references, schema,
 python3 tools/run_godot_tests.py --profile full --timeout 240
 ```
 
-The full profile discovers every `client/tests/test_*.gd`. The last recorded local result is **80/80 checks** on the GT-1 branch (project import, 78 suites and a persistence reader process); hosted CI was green on PR #49, the last merged code change ([testing](docs/TESTING.md#current-baseline)). Neither result is a claim of human multiplayer acceptance. See [testing and UAT](docs/TESTING.md) for profiles, reports, visual captures and the manual acceptance route.
+The full profile discovers every `client/tests/test_*.gd`. Sprint 7 implementation `a778fb4` passed **117/117 checks locally and on hosted full CI**, **60 Python tests**, and clean release-export MP5SD/credit checks. All five hosted jobs passed in [run 44223594937](https://github.com/flaxos/Team-Discovery-Channel/actions/runs/44223594937). These are recorded implementation results, not fresh runs for subsequent documentation edits or human multiplayer/art acceptance. See [testing and UAT](docs/TESTING.md#current-baseline) for evidence and the manual acceptance route.
 
 ## Alignment & Voting app
 

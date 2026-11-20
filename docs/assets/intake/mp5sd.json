@@ -70,7 +70,7 @@
       "test_four_player_join_dedicated",
       "test_gate_return_multiplayer"
     ],
-    "reviewer": "Agent local technical checks passed; owner art/grip acceptance pending; hosted results reported separately on PR #79",
+    "reviewer": "Agent local and hosted technical checks passed on a778fb4; merged to main via #79/#78; owner art/grip acceptance pending",
     "validation_summary": "docs/assets/intake/mp5sd/verification.json"
   }
 }

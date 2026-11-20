@@ -48,16 +48,18 @@ A 2K RGBA8 texture with a full mip chain is about 21.3 MiB **before GPU compress
 
 Keep high-resolution originals in local intake. Do not upscale poor sources and call them high fidelity. Allow justified 4K near-camera hero maps after measurements; the old 1024 recipe setting is not a permanent fidelity ceiling. Prefer LODs, correct UV density and sharing before destroying visible detail. The current runtime GLB route bypasses editor-generated LOD/compression settings, so validate the **delivered** LODs and memory in the exported game ([Godot scene formats/import routes](https://docs.godotengine.org/en/4.4/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html)).
 
+**Recorded Sprint 7 exception:** the MP5SD's two shared 2K sets use **117.33 MiB decoded including mipmaps**, under an explicit **128 MiB** work-order cap. Its cold parse is about 399 ms; cached construction about 0.048 ms. This is a measured asset-specific exception, not a higher default. Source PBR and metallic comparison captures are retained; D-015 remains at runtime. See [measurements](intake/mp5sd/measurements.json) and [review](../reviews/2026-11-18-sprint7-mp5-intake.md). Sprint 10 owns broader LOD/loading review.
+
 ## Current gaps and consuming slices
 
 | Gap at baseline `7982e2b` | Required resolution |
 |---|---|
 | Packer rebuilds rigid MeshInstance3D nodes; skin/animation lost | Sprint 19 adds and proves a separate rig-preserving path. Do not send characters through the opaque rigid recipe. |
-| `load_map` converts images to RGB8; recipe can use lossy encoding for data | First consuming slice must preserve alpha and use lossless data maps, with reference pixel/channel checks; required before uniform hair/cards, decals or foliage. |
+| `load_map` converts images to RGB8; recipe can use lossy encoding for data | Sprint 7 proves lossless opaque PNG/normal/ORM delivery and reference channel checks. Alpha preservation remains unresolved and must be added/proved before hair/cards, cutout decals or foliage. MP5SD source alpha was uniformly opaque; it does not prove alpha support. |
 | Weapon loader uses the D-015 `metallic = 0` workaround | Sprint 7 records the current appearance; Sprint 13 tests proper light/reflection treatment in a bounded SGC area. Keep source PBR, compare old/new, then adopt reviewed overrides deliberately. Never flatten all source metallic maps to compensate for darkness. |
 | Runtime load has a cache/mipmap solution, but no general LOD authoring contract | Sprint 10 audits all held weapons; Sprint 15 checks the repeated armoury props. Measure sharing and total scene cost, not just file size. |
 | No complete PBR material-set binding in SGC’s single-texture slot | Sprint 13 adds the minimum reusable binding consumed by the embarkation area, preserving slot bounds, fade and fallback. |
-| Credits live outside `client/` | Sprint 7 makes attribution/full required licences reachable in the distributed build from the maintained credit source. Test clean export; adding a file under repository `credits/` alone is insufficient. |
+| Credits live outside `client/` | **Resolved in Sprint 7:** generated `asset_credits.tres` and the lobby reader deliver attribution and both full required licences. Clean release export verifies eight model files and exact legal texts. Maintain source/credit synchronization and repeat export proof after relevant changes. |
 
 ## Material acceptance checklist
 

@@ -1,5 +1,7 @@
 # AP-1d: Beretta M9 sidearm from a community model
 
+**Follow-up, 21 November 2026:** the distributed-credit gap recorded below is resolved by [Sprint 7’s generated offline credits/full-licence reader and clean export proof](2026-11-18-sprint7-mp5-intake.md). Original M9 measurements, captures and other remaining art/handling findings retain their stated baseline; owner art acceptance is still pending.
+
 Recorded 16 November 2026 on branch `feat/ap1d-m9-weapon-visual`, stacked on AP-1c. Its PR (#64) merged into the AP-1c branch instead of `main`, so the same commits were replayed onto `main` after #63 and CO-1 (#62) in `feat/ap1d-m9-onto-main`, which also restores the AP-1c crate hook that the #63 merge dropped. Godot 4.4.1, Forward+, NVIDIA GeForce RTX 3060. Evidence for owner art review, not acceptance.
 
 ## What changed

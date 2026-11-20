@@ -6,6 +6,8 @@ For any agent (Codex, Gemini/Antigravity, Claude) putting a community 3D asset i
 
 For the next asset programme, also read the [shared workflow](ai-asset-workflow.md), [texture contract](texture-import-contract.md) and [sprint sequence](../plans/asset-vertical-slices.md). Historical timing estimates below are examples, not sprint commitments.
 
+**Resume status, 21 November 2026:** Sprint 7's MP5SD and shared intake/exported-credit path are merged to main via #79/#78. [Its review](../reviews/2026-11-18-sprint7-mp5-intake.md) is the latest rigid-weapon worked example: measured +X crown, UV/material pairing, actual work-order intake, lossless maps, memory exception and clean export. Owner art review remains pending. **Next is Sprint 8, staff weapon**, shared by the player and current Jaffa; final animated grips belong to 20/24. The queue below includes historical integrations, not a replacement sprint order.
+
 ## 1. Pick the route by what the asset replaces
 
 | The asset becomes | Route | Worked example | Rough estimate with these tools |

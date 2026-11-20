@@ -1,6 +1,6 @@
 # Sprint 7: community MP5SD and distributed credits
 
-18 November 2026, `feat/sprint7-mp5-intake`, [PR #79](https://github.com/flaxos/Team-Discovery-Channel/pull/79), based on planning PR #78 and merged Sprint 6. **The MP5SD is integrated for review. Owner art acceptance remains pending.** The account-download blocker is resolved; Sprint 8 is not started automatically.
+Implementation recorded 18 November 2026 on `feat/sprint7-mp5-intake`; delivery status checked 21 November. [PR #79](https://github.com/flaxos/Team-Discovery-Channel/pull/79) merged into the planning branch on 18 November, then [PR #78](https://github.com/flaxos/Team-Discovery-Channel/pull/78) brought the combined work to main `1f634d1` on 20 November. Main’s source tree matches tested implementation `a778fb4`. **The MP5SD is integrated for review. Owner art acceptance remains pending.** The account-download blocker is resolved; Sprint 8 is not started automatically.
 
 ## Result
 
@@ -49,7 +49,7 @@ These short scene samples are not causal FPS claims or a target-hardware guarant
 
 ## Intake and credits delivered in this slice
 
-`asset_work_order.py` and `asset_intake.py --work-order` validate the shared request, reject unresolved intake, record request/schema hashes and enforce declared geometry/material budgets. The **actual prepared MP5SD** consumes its ready request. `tools/requirements.txt` pins the validation dependency; CI installs it.
+`asset_work_order.py` and `asset_intake.py --work-order` validate the shared request, reject unresolved intake, record request/schema hashes and enforce declared geometry/material budgets. The **actual prepared MP5SD** consumes its ready request. Its hashed search record preserves selection-time observations; final archive and engine results are in the intake/verification records. `tools/requirements.txt` pins the validation dependency; CI installs it.
 
 `sync_asset_credits.py` builds `asset_credits.tres` from the maintained manifest/licence texts. CI rejects stale output, missing model coverage or modification/licence notices. All **eight** shipped models are covered, including legacy files. The lobby’s offline reader exposes credits and complete CC BY/CC0 texts inside resource exports. The previous CC0 text was truncated; it is now the exact [official full text](https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt), hash `a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499`. CC BY matches the [official text](https://creativecommons.org/licenses/by/4.0/legalcode.txt), hash `9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411`.
 
@@ -64,7 +64,7 @@ Gemini’s entry point follows the shared workflow/AGENTS.md instead of its stal
 - Return fixture additionally uses Carter for the returning host and checks the rebuilt MP5SD on the server and client. The final full run passes this server/client return and retry scenario.
 - Strict full local regression: **117/117 checks pass** (`build/test-results/sprint7-mp5-full-final/summary.json`). **60 Python tests pass** under the pinned tooling environment. Credits freshness and `git diff --check` pass. The first full run exposed an old mesh-local bounds assertion; it now checks metres in weapon space. A focused return run caught the stale host callsign expectation; both corrections pass in this final full run.
 - Clean Linux release **25,100,832-byte PCK**, run from its export directory: `test_asset_credits: PASS models=8 licences=2`; `test_imported_mp5_visual: PASS`, 10,669 triangles, bore `(0,0.01,-0.36)`, real firing/reload and shared cache. No engine errors/leaks; temporary export preset removed in `finally`. Logs under `build/asset-review/sprint7-mp5-export/`. [Verification summary and PCK hash](../assets/intake/mp5sd/verification.json).
-- Hosted checks are reported separately on [PR #79’s actual head](https://github.com/flaxos/Team-Discovery-Channel/pull/79/checks). The earlier infrastructure head’s green run is not evidence for this model.
+- Hosted implementation validation: **all five jobs pass** on `a778fb4b055d73fbef12e421189e5d76bf1715ed` in [run 44223594937](https://github.com/flaxos/Team-Discovery-Channel/actions/runs/44223594937), including **117/117 hosted full checks** and the multiplayer profile. The earlier infrastructure head’s green run is not reused. These recorded results do not certify later documentation edits.
 
 ## Coverage ledger and remaining acceptance
 

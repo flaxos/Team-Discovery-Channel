@@ -4,6 +4,8 @@ Audited 12 November 2026 against `main` at `bf56743` (PR #40 merged); status of 
 
 [ROADMAP.md](../../ROADMAP.md) is the authoritative summary and says what to do next. This document holds the evidence and the detail: the capability matrix, dependency graph, milestone definitions, the art and content track, the risk register and three agent-ready work packages. Architectural choices are recorded in the [decision log](../DECISIONS.md). Game intent is in the [GDD](../../GDD.md).
 
+**Resume update, 21 November 2026:** Sprint 7 is merged into main `1f634d1` through #79/#78; owner art review remains pending. Next is **Sprint 8, staff weapon**, in the [asset sprint programme](asset-vertical-slices.md). Sprints 8–35 remain planned. The original audit below is historical except where later milestone updates are identified.
+
 Sections 3 onward are the plan. [ROADMAP.md](../../ROADMAP.md) records which milestones have been implemented since; the capability matrix below is updated as they land, with the milestone named.
 
 ## 1. How to read status
@@ -40,7 +42,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Mission restart | Verified | Acknowledged restart (`prepare_mission_restart` / `acknowledge_mission_restart`); `test_mission_restart_cleanup`, two-process retry in `test_modular_extraction_multiplayer` |
 | Combat, weapons, damage | Verified | `WeaponBase` plus six weapons, server-validated fire, Zat stun/kill/vaporise; balance never human-accepted |
 | Downing, bleed-out, revive | Verified | `HealthComponent` (20 s bleed-out, revive to 40%); hold-to-revive in `PlayerController3D`; airmen auto-revive |
-| Inventory, ammunition, resupply | Verified (SGC & Offworld CO-1) | Per-weapon ammunition and reserve. SGC and offworld compound armoury (`ArmoryArmorStation` and `ArmoryResupplyStation` in `armoury.tres`) provide server-validated tactical plate repair (+150 ballistic ammo reserve up to 300) and munitions/equipment resupply with cooldowns, reach validation, late-join sync, and retry reset (`test_offworld_resupply`, `test_offworld_resupply_multiplayer`). No sharing between players |
+| Inventory, ammunition, resupply | Verified (SGC & Offworld CO-1) | Per-weapon ammunition and reserve. SGC and offworld compound armoury (`ArmoryArmorStation` and `ArmoryResupplyStation` in `armoury.tres`) provide server-validated tactical plate repair (+150 ballistic ammo reserve up to 300) and munitions/equipment resupply with cooldowns, reach validation, late-join sync, and retry reset (`test_offworld_resupply`, `test_offworld_resupply_multiplayer`). Sprint 5 adds host-validated sharing of compatible active reserves with conserved transfers, aimed HUD interaction, retry and travel coverage (`test_ammunition_sharing*`). |
 | Success, failure, debrief | Partial | Shared result RPC, debrief panel and retry. Modular missions set their own banner and debrief text once (EX-1), including whether the alarm was raised (EV-1). The panel layout is still the SGC one |
 
 ### Tactical gameplay
@@ -59,7 +61,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | NPC avoidance and rerouting | Awaiting human (TA-3) | `LevelNavigator` uses the room graph with live locks and navmesh legs, and steers nearby NPCs to their right. `blocked_door` holds only when no alternate route can be built. `test_modular_navigation_ta3` |
 | Mounted weapons | Verified (SGC) | Fixed .50 cal turrets and the Heavy tripod; airmen can crew them. Not available as a modular attachment |
 | Deployable equipment | Verified (SGC) | Claymore, C4, ballistic shield, smoke; smoke blocks AI sight |
-| Stealth interactions, takedowns | Partial | Body dragging exists. Weapon noise with a suppressed MP5 and sentry hearing and search (ST-2, `test_jaffa_hearing`). No takedown, knife or body discovery |
+| Stealth interactions, takedowns | Partial | Body dragging exists. Weapon noise with a suppressed MP5 and sentry hearing and search (ST-2, `test_jaffa_hearing`). SW-1 adds rear takedowns on unaware sentries and quiet Zat incapacitation (`test_stealth_takedowns_and_weapons`). Knife combat and body discovery remain unimplemented. |
 
 ### Stargate systems
 
@@ -307,7 +309,7 @@ See section 6 for sequencing.
 
 **GA-2 — Kit expansion** · XL · split per room group, ordered by the rooms the first mission uses: remaining corridors and junctions, large chambers, ramp and tall rooms, functional props (consoles, generator, crates), lighting and atmosphere.
 
-Sprint 6 is merged in PR #77 and implements the first corridor group for owner review: `room01`–`room09`, 14 native compound rooms with pieces. It recovers unfinished work, completes junction variants and preserves production physical geometry; [evidence](../reviews/2026-11-18-sprint6-goauld-corridors.md). Owner art acceptance remains pending before larger chambers. The owner-requested next art sequence is [community-first vertical slices, Sprints 7–35](asset-vertical-slices.md), with a shared Codex/Antigravity workflow, weapons and SGC first, then rigged characters, offworld and bounded mothership art. All future slices remain planned.
+Sprint 6 is merged in PR #77 and implements the first corridor group for owner review: `room01`–`room09`, 14 native compound rooms with pieces. It recovers unfinished work, completes junction variants and preserves production physical geometry; [evidence](../reviews/2026-11-18-sprint6-goauld-corridors.md). Owner art acceptance remains pending before larger chambers. The owner-requested next art sequence is [community-first vertical slices, Sprints 7–35](asset-vertical-slices.md), with a shared Codex/Antigravity workflow, weapons and SGC first, then rigged characters, offworld and bounded mothership art. Sprint 7 is merged via #79/#78 with its community MP5SD, intake and distributed credits; owner art acceptance remains pending. Sprint 8 staff weapon is next; Sprints 8–35 remain planned.
 
 ### G — Stargate world transitions
 

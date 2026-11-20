@@ -1,5 +1,7 @@
 # AP-1c cosmetic proof: Poly Haven plastic crate in the SGC armoury
 
+**Follow-up, 21 November 2026:** the M9 acquisition blocker described below was resolved in [AP-1d](2026-11-16-ap1d-beretta-m9.md). Sprint 7 subsequently delivered [distributed credits/full licences and the MP5SD](2026-11-18-sprint7-mp5-intake.md). The account-error and original queue statements below record this proof’s historical baseline. Current execution resumes at [Sprint 8, staff weapon](../plans/asset-vertical-slices.md); owner art acceptance remains separate.
+
 Recorded 16 November 2026 on branch `feat/ap1c-crate-cosmetic-proof` from `origin/main` at `1a5146a`. Godot 4.4.1, Forward+, NVIDIA GeForce RTX 3060. This is evidence for owner art review, not acceptance.
 
 ## Why the crate and not the M9

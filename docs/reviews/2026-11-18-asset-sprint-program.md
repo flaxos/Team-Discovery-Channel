@@ -1,5 +1,7 @@
 # Asset programme planning review
 
+**Implementation follow-up, 21 November 2026:** the planning record below retains its original baseline. [Sprint 7](2026-11-18-sprint7-mp5-intake.md) subsequently delivered the MP5SD, consumed work-order validation and distributed credits/full licences, with 117 local/hosted full checks, 60 Python tests and clean export proof. #79 merged into the planning branch on 18 November, then #78 brought the combined work to main `1f634d1` on 20 November. Owner art review is pending. **Sprint 8 staff weapon is next; Sprints 8–35 remain planned.** The original “all planned” and outstanding MP5/credit statements below describe planning time, not current status.
+
 18 November 2026. Documentation baseline: merged main `7982e2b` / PR #77. The owner confirmed Horus Jaffa and a Goa’uld mothership. This change plans future implementation; it adds no game asset, controller, mission or runtime dependency.
 
 ## Deliverables

@@ -1,5 +1,7 @@
 # Community characters and animation shortlist
 
+**Resume update, 21 November 2026:** these remain dated rig/animation leads, not acquired or accepted characters. The [current programme](../plans/asset-vertical-slices.md) starts next with Sprint 8 staff weapon. Sprint 19 establishes the production rig path through a complete Airman patrol/combat/recovery slice; an idle/walk/crouch preview below is an intermediate proof, not completion. Serpent/Horus follow in 20/21, playable roles in 22–25 and civilians in 26.
+
 Checked **16 November 2026**, against gameplay source at `origin/main` `f45e909` (TA-3). This is research and an insertion plan, not an imported-asset manifest or visual acceptance. No third-party model/animation files were downloaded. Geometry counts below are source metadata; downloaded formats, bone lists, skinning quality, material maps and playable clips remain unverified unless stated otherwise.
 
 The first realistic candidate to inspect is **RedVeil studio's American Soldier Rigged**. For an openly redistributable animation foundation, **Quaternius Universal Animation Library** is promising but has conflicting current license statements that must be resolved for the actual archive. **Mixamo is an optional private acquisition workflow, not a source of raw files to commit to this public repository.** A Jaffa helmet can be a separate cosmetic attachment; no complete, production-ready Jaffa humanoid rig was verified in this research.
@@ -8,7 +10,7 @@ The first realistic candidate to inspect is **RedVeil studio's American Soldier 
 
 Sketchfab model pages returned HTTP 403 to the research browser. Their anonymous, official public metadata API was accessible; its `license.url`, creator, `isDownloadable`, `faceCount` and `animationCount` fields were read directly. Each Sketchfab row links that primary evidence. A downloadable flag means the publisher currently offers downloads, not that the archive was obtained or inspected. Sketchfab's [download API documentation](https://sketchfab.com/developers/download-api/downloading-models) requires a signed-in account and an authenticated request; do not scrape viewer mesh buffers as a substitute. Available source/download formats must be checked through that authorized workflow. No login, purchase, acceptance of terms or creator contact was performed.
 
-An uploader's display name and a CC license record identify the offered grant; they do not by themselves prove chain of authorship or clear a depicted franchise/likeness. Record creator statements and bundled license evidence when obtaining the archive. The owner's permission for community-created Stargate fan art in the [pipeline](../plans/asset-import-pipeline.md#5-licensing-attribution--compliance) does not turn an NC license into a commercial grant or establish underlying franchise rights.
+An uploader's display name and a CC license record identify the offered grant; they do not by themselves prove chain of authorship or clear a depicted franchise/likeness. Record creator statements and bundled license evidence when obtaining the archive. The owner's permission for community-created Stargate fan art in the [pipeline](../plans/asset-import-pipeline.md#provenance-and-redistribution) does not turn an NC license into a commercial grant or establish underlying franchise rights.
 
 ## Candidate register
 
