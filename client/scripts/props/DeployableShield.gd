@@ -8,11 +8,17 @@ signal shield_deployed(shield: DeployableShield)
 signal shield_damaged(current_hp: float, max_hp: float)
 signal shield_destroyed(shield: DeployableShield)
 
+const KitNetwork := preload("res://scripts/world/FieldKitNetwork.gd")
+
 @export var max_durability: float = 600.0
 @export var is_deployed: bool = true
 
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
 @onready var shield_mesh: Node3D = $Visuals/ShieldMesh if has_node("Visuals/ShieldMesh") else null
+
+
+func _enter_tree() -> void:
+	KitNetwork.configure(self, ["max_durability"])
 
 
 func _ready() -> void:
@@ -50,4 +56,5 @@ func _on_destroyed() -> void:
 	if shield_mesh != null:
 		tween.tween_property(shield_mesh, "scale", Vector3(1.0, 0.05, 1.0), 0.2)
 		tween.tween_property(shield_mesh, "position:y", -0.4, 0.15)
-	tween.tween_callback(queue_free)
+	if not KitNetwork.is_replica(self):
+		tween.tween_callback(queue_free)

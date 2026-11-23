@@ -5,7 +5,9 @@ extends RigidBody3D
 
 signal exploded(origin: Vector3)
 ## Metres the blast or shot is heard by patrolling sentries (JaffaAI.hear).
+const KitNetwork := preload("res://scripts/world/FieldKitNetwork.gd")
 const NOISE_RADIUS := 45.0
+const KitVisual := preload("res://scripts/assets/FieldKitVisual.gd")
 
 enum C4Mode { REMOTE, TIMER_5S, TIMER_10S, TIMER_30S }
 
@@ -14,11 +16,16 @@ enum C4Mode { REMOTE, TIMER_5S, TIMER_10S, TIMER_30S }
 @export var mode: C4Mode = C4Mode.REMOTE
 @export var countdown_seconds: float = 0.0
 
-var is_armed: bool = false
+var is_armed: bool = false:
+	set(value):
+		is_armed = value
+		if is_node_ready():
+			_update_arming_visual()
 var is_detonated: bool = false
 var timer_remaining: float = 0.0
 var planter: Node = null
 var last_beep_second: int = 999
+var _replica := false
 
 @onready var led_light: OmniLight3D = $LEDLight if has_node("LEDLight") else null
 
@@ -34,7 +41,23 @@ func set_timer_mode(seconds: float) -> void:
 	timer_remaining = seconds
 
 
+func _enter_tree() -> void:
+	KitNetwork.configure(self, ["is_armed", "mode"], ["timer_remaining"])
+
+
+func _update_arming_visual() -> void:
+	if led_light != null:
+		led_light.visible = is_armed
+
+
 func _ready() -> void:
+	KitVisual.fit(get_node_or_null("MeshInstance3D") as MeshInstance3D, "res://assets/props/field_kit_c4.glb")
+	_update_arming_visual()
+	_replica = KitNetwork.is_replica(self)
+	if _replica:
+		freeze = true
+		last_beep_second = int(ceilf(timer_remaining))
+		return
 	if mode != C4Mode.REMOTE and countdown_seconds > 0.0:
 		timer_remaining = countdown_seconds
 		last_beep_second = int(ceilf(timer_remaining))
@@ -43,14 +66,13 @@ func _ready() -> void:
 	var timer := get_tree().create_timer(0.5)
 	timer.timeout.connect(func() -> void:
 		is_armed = true
-		if led_light != null:
-			led_light.visible = true
 	)
 
 
 func _process(delta: float) -> void:
 	if is_armed and mode != C4Mode.REMOTE and not is_detonated:
-		timer_remaining -= delta
+		if not _replica:
+			timer_remaining -= delta
 		var current_sec := int(ceilf(timer_remaining))
 		if current_sec != last_beep_second and current_sec >= 0:
 			last_beep_second = current_sec
@@ -60,7 +82,7 @@ func _process(delta: float) -> void:
 				var tween := create_tween()
 				tween.tween_property(led_light, "light_energy", 1.0, 0.2)
 
-		if timer_remaining <= 0.0:
+		if not _replica and timer_remaining <= 0.0:
 			detonate()
 
 
@@ -76,7 +98,7 @@ func _play_beep_sfx() -> void:
 
 
 func detonate() -> void:
-	if is_detonated or not is_armed:
+	if KitNetwork.is_replica(self) or is_detonated or not is_armed:
 		return
 	is_detonated = true
 	exploded.emit(global_position)
@@ -108,12 +130,20 @@ func detonate() -> void:
 
 
 func _spawn_explosion_fx() -> void:
+	var world := MissionWorld.of(self)
+	var context := world if world != null else get_parent()
+	show_burst(context, global_position)
+	if world is GateRoom:
+		SGCNetworkManager.mission_rpc(world, &"play_field_kit_burst", [global_position, true])
+
+
+static func show_burst(context: Node, origin: Vector3) -> void:
 	# Screen shake for nearby operatives
-	var players := MissionWorld.find(self, "Players")
+	var players := MissionWorld.find(context, "Players")
 	if players != null:
 		for p in players.get_children():
 			if p is PlayerController3D:
-				var d := global_position.distance_to(p.global_position)
+				var d := origin.distance_to(p.global_position)
 				var falloff := clampf(1.0 - (d / 35.0), 0.1, 1.0)
 				p.add_screen_shake(0.85 * falloff)
 
@@ -127,21 +157,21 @@ func _spawn_explosion_fx() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_color = Color(1.0, 0.6, 0.1, 0.9)
 	blast_mesh.material_override = mat
-	get_tree().root.add_child(blast_mesh)
-	blast_mesh.global_position = global_position
+	context.add_child(blast_mesh)
+	blast_mesh.global_position = origin
 
 	var tween := blast_mesh.create_tween()
 	tween.tween_property(blast_mesh, "scale", Vector3(2.5, 2.5, 2.5), 0.15)
 	tween.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.15)
 	tween.tween_callback(blast_mesh.queue_free)
 
-	if ResourceLoader.exists("res://audio/sfx_explosion.wav"):
+	if DisplayServer.get_name() != "headless" and ResourceLoader.exists("res://audio/sfx_explosion.wav"):
 		var audio := AudioStreamPlayer3D.new()
 		audio.stream = load("res://audio/sfx_explosion.wav")
 		audio.bus = &"SFX"
 		audio.max_distance = 60.0
 		audio.unit_size = 15.0
-		get_tree().root.add_child(audio)
-		audio.global_position = global_position
+		context.add_child(audio)
+		audio.global_position = origin
 		audio.finished.connect(audio.queue_free)
 		audio.play()

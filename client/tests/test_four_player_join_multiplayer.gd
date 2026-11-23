@@ -110,13 +110,18 @@ func worlds(previous: int = 0) -> void:
 	require(false, "Two worlds and own operative did not start")
 
 
+func child_display_args(_index: int) -> PackedStringArray:
+	return PackedStringArray(["--headless"])
+
+
 func spawn_child(index: int) -> int:
-	var args := PackedStringArray([
-		"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
+	var args := child_display_args(index)
+	args.append_array(PackedStringArray([
+		"--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
 		"--log-file", output_dir.path_join("client_%d.log" % index),
 		"--script", client_script(),
 		"--", "--roster-child", str(index), "--result-dir", output_dir
-	])
+	]))
 	if is_dedicated:
 		args.append("--pawnless-fixture")
 	var pid := OS.create_process(OS.get_executable_path(), args)

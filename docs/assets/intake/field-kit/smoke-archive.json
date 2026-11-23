@@ -1,0 +1,66 @@
+{
+  "licence": "CC BY 4.0",
+  "authority": "Creator listing and Sketchfab metadata. The owner supplied the original archive. Neither archive contains separate terms.",
+  "files": [
+    {
+      "path": "smoke-grenade.zip",
+      "bytes": 37720428,
+      "sha256": "03475e56d3d080dcba4675c23288d082f500e8b33ad20fb5c109778d2c2e1ac6"
+    },
+    {
+      "path": "extracted/source/Smoke_Grenade.rar",
+      "bytes": 26479188,
+      "sha256": "5a9c4a18deabdc041a3a4fea9c69be4fd528d438875d06d24259556b36afae29"
+    },
+    {
+      "path": "decoded/Granade_Base_color.png",
+      "bytes": 3518939,
+      "sha256": "ccce854bfe34597d087099fc81f12181e173c3eb6570f6c0b6c2c17af8ca078d"
+    },
+    {
+      "path": "decoded/Granade_Height.png",
+      "bytes": 2779462,
+      "sha256": "54244251d0bc9b2447a1f75927f0bfc5e484a2e3beec16c05853e8dbf651ed8c"
+    },
+    {
+      "path": "decoded/Granade_Metallic.png",
+      "bytes": 303151,
+      "sha256": "da56804fefefd533717540b5f0b12ad84724417b4376f53df1357701f48f2bcc"
+    },
+    {
+      "path": "decoded/Granade_Mixed_AO.png",
+      "bytes": 1205323,
+      "sha256": "8e225e9a28c796a8954d31b5d3e863ceae21804cc597e4490362f8a6a44d5aab"
+    },
+    {
+      "path": "decoded/Granade_Normal.png",
+      "bytes": 4034887,
+      "sha256": "1e136d0e8f110bfcf4d0d97653ee0a269f3ca52eab14b2fc3346dd260904b3eb"
+    },
+    {
+      "path": "decoded/Granade_Normal_DirectX.png",
+      "bytes": 12386277,
+      "sha256": "b99583c635c35a06589682c18b6e03ed7f1bad942b83ab63caa05120e03823fa"
+    },
+    {
+      "path": "decoded/Granade_Roughness.png",
+      "bytes": 2185302,
+      "sha256": "15516fd7283d168c9ebee0cc767c4eb6b6561ac01a2285467faedf8fc8d1629e"
+    },
+    {
+      "path": "decoded/model/Smoke_Grenade.fbx",
+      "bytes": 91776,
+      "sha256": "8c2fb6c37a8240673f7d6eac446573ff4de33b5635e272c8437faa2370528805"
+    },
+    {
+      "path": "decoded/model/Smoke_Grenade.mtl",
+      "bytes": 82,
+      "sha256": "3a6f78bc76de4bec61866d59b10f8b8922c6d6bedae535a7f60bd0e7a76aaf65"
+    },
+    {
+      "path": "decoded/model/Smoke_Grenade.obj",
+      "bytes": 134039,
+      "sha256": "aa74c7e1041f3dda38f92446d299496746aad27fa538abfca2cfe3413e86053e"
+    }
+  ]
+}

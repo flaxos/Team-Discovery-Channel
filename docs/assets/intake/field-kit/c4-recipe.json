@@ -1,0 +1,19 @@
+{
+  "source": "/tmp/tdc-asset-intake/field-kit-c4/decoded/c4-ready.glb",
+  "output": "../../../../client/assets/props/field_kit_c4.glb",
+  "root_name": "FieldKitC4",
+  "keep_nodes": [
+    "C4Housing"
+  ],
+  "max_texture_size": 1024,
+  "image_format": "PNG",
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/field-kit-c4/decoded/Simple Old C4/materials/Diffuse.png",
+      "normal": "/tmp/tdc-asset-intake/field-kit-c4/decoded/Simple Old C4/materials/Diffuse_Normal.png",
+      "normal_convention": "opengl",
+      "roughness": "/tmp/tdc-asset-intake/field-kit-c4/decoded/Simple Old C4/materials/Diffuse_Roughness.png",
+      "ao": "/tmp/tdc-asset-intake/field-kit-c4/decoded/Simple Old C4/materials/Diffuse_AO.png"
+    }
+  }
+}

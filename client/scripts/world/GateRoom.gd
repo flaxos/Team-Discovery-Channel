@@ -148,6 +148,19 @@ func _ready() -> void:
 	turret_spawner.add_spawnable_scene("res://scenes/props/DeployableTurret.tscn")
 	add_child(turret_spawner)
 
+	var field_kit := Node3D.new()
+	field_kit.name = "FieldKitDeployments"
+	add_child(field_kit)
+	var gadget_spawner := MultiplayerSpawner.new()
+	gadget_spawner.name = "GadgetSpawner"
+	gadget_spawner.spawn_path = NodePath("../FieldKitDeployments")
+	for gadget_scene: String in [
+		"res://scenes/props/C4Satchel.tscn", "res://scenes/props/ClaymoreMine.tscn",
+		"res://scenes/weapons/SmokeGrenade.tscn", "res://scenes/props/DeployableShield.tscn",
+	]:
+		gadget_spawner.add_spawnable_scene(gadget_scene)
+	add_child(gadget_spawner)
+
 	# Connect players container to bind HUD
 	if players_container != null:
 		players_container.child_entered_tree.connect(_on_player_child_entered)
@@ -978,6 +991,14 @@ func play_turret_fx(origin: Vector3, hit_point: Vector3, operator_id: int) -> vo
 		var actor := players_container.get_node_or_null(str(operator_id)) as PlayerController3D
 		if actor != null:
 			actor.add_screen_shake(0.20)
+
+
+@rpc("authority", "call_remote", "reliable")
+func play_field_kit_burst(origin: Vector3, satchel: bool) -> void:
+	if satchel:
+		C4Satchel.show_burst(self, origin)
+	else:
+		ClaymoreMine.show_burst(self, origin)
 
 
 @rpc("any_peer", "call_remote", "reliable")

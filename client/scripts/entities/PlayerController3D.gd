@@ -1120,6 +1120,64 @@ func _confirm_turret_deployment() -> void:
 		turret_cooldown = TURRET_COOLDOWN_S
 
 
+enum FieldKitAction { SATCHEL, CLAYMORE, SMOKE, SHIELD }
+
+
+func _field_kit_parent() -> Node:
+	var world := MissionWorld.of(self)
+	var deployments := world.get_node_or_null("FieldKitDeployments") if world != null else null
+	if deployments != null:
+		return deployments
+	return get_parent() if get_parent() != null else get_tree().root
+
+
+func _use_field_kit(action: FieldKitAction, mode: int = 0) -> void:
+	if multiplayer.is_server():
+		_use_field_kit_on_server(action, mode)
+	elif is_local_authority:
+		_request_field_kit.rpc_id(1, action, mode)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _request_field_kit(action: int, mode: int) -> void:
+	var world := MissionWorld.of(self) as GateRoom
+	if not multiplayer.is_server() or world == null or world.mission_result >= 0 \
+			or health_component == null or health_component.is_dead or health_component.is_downed \
+			or health_component.is_stunned or mode < 0 or mode > 3:
+		return
+	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if net != null and (net.restart_pending or net.is_player_paused_for_transfer(self)):
+		return
+	_use_field_kit_on_server(action, mode)
+	_send_field_kit_inventory()
+
+
+func _send_field_kit_inventory() -> void:
+	_confirm_field_kit.rpc_id(peer_id, claymore_charges, c4_charges_remaining, smoke_grenades_count, deployable_shields_count)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _confirm_field_kit(claymore: int, satchel: int, smoke: int, shield: int) -> void:
+	if is_local_authority and multiplayer.get_remote_sender_id() == 1:
+		claymore_charges = claymore
+		c4_charges_remaining = satchel
+		smoke_grenades_count = smoke
+		deployable_shields_count = shield
+
+
+func _use_field_kit_on_server(action: int, mode: int) -> void:
+	match action:
+		FieldKitAction.SATCHEL:
+			if class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
+				_use_satchel(mode)
+		FieldKitAction.CLAYMORE:
+			_place_claymore()
+		FieldKitAction.SMOKE:
+			_spawn_smoke_grenade()
+		FieldKitAction.SHIELD:
+			_spawn_shield()
+
+
 func _deploy_tactical_gadget() -> void:
 	if class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
 		if multiplayer.is_server():
@@ -1127,34 +1185,34 @@ func _deploy_tactical_gadget() -> void:
 		elif turret_cooldown <= 0.0:
 			_request_turret_deployment.rpc_id(1)
 	elif class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
-		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed and active_c4.mode == C4Satchel.C4Mode.REMOTE:
-			active_c4.detonate()
-			active_c4 = null
-			print("Player %d detonated C4 Satchel!" % peer_id)
-		else:
-			if c4_charges_remaining <= 0:
-				print("Player %d: No C4 satchels remaining!" % peer_id)
-				return
-			var c4_scene := load("res://scenes/props/C4Satchel.tscn") as PackedScene
-			if c4_scene != null:
-				var c4 := c4_scene.instantiate() as C4Satchel
-				c4.position = MissionWorld.local(get_parent(), global_position + Vector3(0, 1.0, 0))
-				c4.planter = self
-				if active_c4_timer_mode == 1:
-					c4.set_timer_mode(5.0)
-				elif active_c4_timer_mode == 2:
-					c4.set_timer_mode(10.0)
-				elif active_c4_timer_mode == 3:
-					c4.set_timer_mode(30.0)
-				get_parent().add_child(c4)
-				c4.apply_central_impulse(-global_transform.basis.z * 10.0 + Vector3.UP * 3.0)
-				if c4.mode == C4Satchel.C4Mode.REMOTE:
-					active_c4 = c4
-				c4_charges_remaining -= 1
-				print("Player %d threw C4 Satchel Charge (Mode: %d)! (%d charges left)" % [peer_id, active_c4_timer_mode, c4_charges_remaining])
+		_use_field_kit(FieldKitAction.SATCHEL, active_c4_timer_mode)
+
+
+func _use_satchel(mode: int) -> void:
+	if is_instance_valid(active_c4) and active_c4.is_armed and active_c4.mode == C4Satchel.C4Mode.REMOTE:
+		active_c4.detonate()
+		active_c4 = null
+		return
+	if c4_charges_remaining <= 0:
+		return
+	var c4 := (load("res://scenes/props/C4Satchel.tscn") as PackedScene).instantiate() as C4Satchel
+	var parent := _field_kit_parent()
+	c4.position = MissionWorld.local(parent, global_position + Vector3.UP)
+	c4.planter = self
+	if mode > 0:
+		c4.set_timer_mode(float([0.0, 5.0, 10.0, 30.0][mode]))
+	parent.add_child(c4, true)
+	c4.apply_central_impulse(-global_basis.z * 10.0 + Vector3.UP * 3.0)
+	if c4.mode == C4Satchel.C4Mode.REMOTE:
+		active_c4 = c4
+	c4_charges_remaining -= 1
 
 
 func _plant_claymore() -> void:
+	_use_field_kit(FieldKitAction.CLAYMORE)
+
+
+func _place_claymore() -> void:
 	if claymore_charges <= 0:
 		print("Player %d: Out of M18A1 Claymore mines!" % peer_id)
 		return
@@ -1162,10 +1220,11 @@ func _plant_claymore() -> void:
 	var claymore_scene := load("res://scenes/props/ClaymoreMine.tscn") as PackedScene
 	if claymore_scene != null:
 		var claymore := claymore_scene.instantiate() as Node3D
-		claymore.position = MissionWorld.local(get_parent(), global_position - global_transform.basis.z * 1.2 + Vector3(0, 0.05, 0))
+		var parent := _field_kit_parent()
+		claymore.position = MissionWorld.local(parent, global_position - global_transform.basis.z * 1.2 + Vector3(0, 0.05, 0))
 		claymore.rotation.y = rotation.y
 		claymore.set("planter", self)
-		get_parent().add_child(claymore)
+		parent.add_child(claymore, true)
 		claymore_charges -= 1
 		print("Player %d planted M18A1 Claymore! (%d charges left)" % [peer_id, claymore_charges])
 
@@ -1947,43 +2006,45 @@ func _spawn_command_ping_fx(pos: Vector3, color: Color) -> void:
 
 
 func deploy_shield() -> void:
+	_use_field_kit(FieldKitAction.SHIELD)
+
+
+func _spawn_shield() -> void:
 	if deployable_shields_count <= 0:
 		print("Player %d: No Deployable Ballistic Shields remaining!" % peer_id)
 		return
 	deployable_shields_count -= 1
 
+	var parent := _field_kit_parent()
 	var shield := (load(DEPLOYABLE_SHIELD_PATH) as PackedScene).instantiate() as DeployableShieldScript
 	var spawn_pos := global_position - global_transform.basis.z * 1.3
 	spawn_pos.y = global_position.y
-	shield.position = MissionWorld.local(get_parent(), spawn_pos)
+	shield.position = MissionWorld.local(parent, spawn_pos)
 	shield.rotation.y = rotation.y
 
-	var parent := get_parent()
-	if parent != null:
-		parent.add_child(shield, true)
-	else:
-		get_tree().root.add_child(shield, true)
+	parent.add_child(shield, true)
 
 	print("Player %d deployed Ballistic Shield at %s (Remaining: %d)" % [peer_id, str(spawn_pos), deployable_shields_count])
 
 
 func throw_smoke_grenade() -> void:
+	_use_field_kit(FieldKitAction.SMOKE)
+
+
+func _spawn_smoke_grenade() -> void:
 	if smoke_grenades_count <= 0:
 		print("Player %d: No M18 Smoke Grenades remaining!" % peer_id)
 		return
 	smoke_grenades_count -= 1
 
+	var parent := _field_kit_parent()
 	var grenade := (load(SMOKE_GRENADE_PATH) as PackedScene).instantiate() as SmokeGrenadeScript
 	var spawn_pos := global_position + Vector3(0, 1.4, 0) - global_transform.basis.z * 0.8
-	grenade.position = MissionWorld.local(get_parent(), spawn_pos)
+	grenade.position = MissionWorld.local(parent, spawn_pos)
 	var throw_vel := (-global_transform.basis.z * 12.0) + Vector3(0, 3.5, 0)
 	grenade.linear_velocity = throw_vel
 
-	var parent := get_parent()
-	if parent != null:
-		parent.add_child(grenade, true)
-	else:
-		get_tree().root.add_child(grenade, true)
+	parent.add_child(grenade, true)
 
 	print("Player %d threw M18 Smoke Grenade! (Remaining: %d)" % [peer_id, smoke_grenades_count])
 
@@ -2405,8 +2466,11 @@ func server_request_reload() -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func request_weapon_snapshot() -> void:
-	if multiplayer.is_server() and multiplayer.get_remote_sender_id() in multiplayer.get_peers():
-		_broadcast_weapon_state(multiplayer.get_remote_sender_id())
+	var sender := multiplayer.get_remote_sender_id()
+	if multiplayer.is_server() and sender in multiplayer.get_peers():
+		_broadcast_weapon_state(sender)
+		if sender == peer_id:
+			_send_field_kit_inventory()
 
 
 func _broadcast_weapon_state(peer: int = 0) -> void:

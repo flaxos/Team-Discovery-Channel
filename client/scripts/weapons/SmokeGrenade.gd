@@ -7,24 +7,72 @@ extends RigidBody3D
 signal detonated(cloud_position: Vector3)
 signal dissipated()
 
+const KitNetwork := preload("res://scripts/world/FieldKitNetwork.gd")
+const KitVisual := preload("res://scripts/assets/FieldKitVisual.gd")
+
 @export var fuse_time_s: float = 1.0
 @export var cloud_duration_s: float = 12.0
 @export var cloud_radius: float = 4.5
 
 var is_detonated: bool = false
 var cloud_area: Area3D = null
+var cloud_remaining: float = -1.0:
+	set(value):
+		cloud_remaining = value
+		if is_node_ready():
+			_update_cloud()
+
+var _smoke_mat: StandardMaterial3D
+var _puff_container: Node3D
+
+
+func _enter_tree() -> void:
+	KitNetwork.configure(self, ["cloud_radius", "cloud_duration_s"], ["cloud_remaining"])
 
 
 func _ready() -> void:
 	add_to_group("smoke_grenade")
+	KitVisual.fit(get_node_or_null("CanisterMesh") as MeshInstance3D, "res://assets/props/field_kit_smoke.glb")
+	if KitNetwork.is_replica(self):
+		freeze = true
+		set_process(false)
+		_update_cloud()
+		return
 	# Arm fuse timer
 	var timer := get_tree().create_timer(fuse_time_s)
 	timer.timeout.connect(_detonate)
 
 
 func _detonate() -> void:
-	if is_detonated:
+	if is_detonated or KitNetwork.is_replica(self):
 		return
+	cloud_remaining = cloud_duration_s
+	detonated.emit(global_position)
+	print("SmokeGrenade: Cloud deployed for %.1fs." % cloud_duration_s)
+
+
+func _process(delta: float) -> void:
+	if not is_detonated:
+		return
+	cloud_remaining = maxf(0.0, cloud_remaining - delta)
+	if cloud_remaining <= 0.0:
+		dissipated.emit()
+		queue_free()
+
+
+func _update_cloud() -> void:
+	if cloud_remaining < 0.0:
+		return
+	if not is_detonated:
+		_show_cloud()
+	var expansion := clampf((cloud_duration_s - cloud_remaining) / 0.8, 0.0, 1.0)
+	var puff_scale := lerpf(0.1, 1.0, 1.0 - (1.0 - expansion) ** 2)
+	for puff: MeshInstance3D in _puff_container.get_children():
+		puff.scale = Vector3.ONE * puff_scale
+	_smoke_mat.albedo_color.a = 0.55 * clampf(cloud_remaining / 2.0, 0.0, 1.0)
+
+
+func _show_cloud() -> void:
 	is_detonated = true
 	freeze = true
 	gravity_scale = 0.0
@@ -49,9 +97,9 @@ func _detonate() -> void:
 	cloud_area.add_child(shape)
 
 	# Procedural visual smoke puffs
-	var puff_container := Node3D.new()
-	puff_container.name = "SmokePuffs"
-	cloud_area.add_child(puff_container)
+	_puff_container = Node3D.new()
+	_puff_container.name = "SmokePuffs"
+	cloud_area.add_child(_puff_container)
 
 	var puff_offsets: Array[Vector3] = [
 		Vector3(0, 0.8, 0),
@@ -62,10 +110,10 @@ func _detonate() -> void:
 		Vector3(0, 1.6, 0)
 	]
 
-	var smoke_mat := StandardMaterial3D.new()
-	smoke_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	smoke_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	smoke_mat.albedo_color = Color(0.85, 0.88, 0.85, 0.55)
+	_smoke_mat = StandardMaterial3D.new()
+	_smoke_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_smoke_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_smoke_mat.albedo_color = Color(0.85, 0.88, 0.85, 0.55)
 
 	for off: Vector3 in puff_offsets:
 		var puff := MeshInstance3D.new()
@@ -73,27 +121,7 @@ func _detonate() -> void:
 		p_mesh.radius = cloud_radius * 0.55
 		p_mesh.height = cloud_radius * 1.0
 		puff.mesh = p_mesh
-		puff.material_override = smoke_mat
+		puff.material_override = _smoke_mat
 		puff.position = off
 		puff.scale = Vector3(0.1, 0.1, 0.1)
-		puff_container.add_child(puff)
-
-		# Expansion tween
-		var t := puff.create_tween()
-		t.tween_property(puff, "scale", Vector3(1.0, 1.0, 1.0), 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-
-	detonated.emit(global_position)
-	print("SmokeGrenade: Detonated! 4.5m smoke cloud deployed for %.1fs." % cloud_duration_s)
-
-	# Fade out before cleanup
-	var life_timer := get_tree().create_timer(cloud_duration_s - 2.0)
-	life_timer.timeout.connect(func() -> void:
-		if not is_instance_valid(smoke_mat):
-			return
-		var fade_tween := create_tween()
-		fade_tween.tween_property(smoke_mat, "albedo_color:a", 0.0, 2.0)
-		fade_tween.tween_callback(func() -> void:
-			dissipated.emit()
-			queue_free()
-		)
-	)
+		_puff_container.add_child(puff)

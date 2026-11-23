@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS12",
+  "asset_id": "field_kit_smoke",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Fit the Sprint 12 smoke exterior to its existing visual branch.",
+  "target": {
+    "scene": "res://scenes/weapons/SmokeGrenade.tscn",
+    "visual_branch": "CanisterMesh",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/assets/intake/field-kit/baseline.json",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.08,
+        -0.11,
+        -0.08
+      ],
+      "max_m": [
+        0.08,
+        0.11,
+        0.08
+      ]
+    },
+    "anchors": [
+      {
+        "name": "Cloud origin",
+        "position_m": [
+          0,
+          0,
+          0
+        ],
+        "purpose": "Existing scene anchor for the stock effect or visual parent."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/smoke-grenade-d61768fbc7494143bb87852c36d1beaa",
+        "decision": "selected",
+        "reason": "Owner-downloaded original archive inspected. Verified creator attribution, rigid exterior FBX and lossless source maps."
+      }
+    ],
+    "selected_source": {
+      "page": "https://sketchfab.com/3d-models/smoke-grenade-d61768fbc7494143bb87852c36d1beaa",
+      "creator": "Roman Berezyak",
+      "licence": "CC BY 4.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/field-kit/smoke-archive.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 18000,
+    "max_materials": 5,
+    "lod_triangle_limits": [
+      18000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "smoke_exterior",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#303438",
+        "#1A1C1D"
+      ],
+      "surface_notes": "Pair source colour, normal and packed ORM to the intact exterior."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 32,
+    "measurement_plan": "Measure fitted visual bounds and shared resource usage. Verify inclusion from an exported Linux pack."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Compare the original and fitted prop in SGC at its existing placement and immediately after its actual in-game state transition. Confirm travel and retry with the established four-operative fixtures."
+}

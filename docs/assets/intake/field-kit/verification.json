@@ -1,0 +1,109 @@
+{
+  "linux_release": {
+    "bytes": 44734752,
+    "sha256": "fcbc8786c1a6aa5592b57dfef4c578563dfaa0c570aad13ae66d079b6ac384e4",
+    "checks": [
+      "test_asset_credits",
+      "test_field_kit_visuals"
+    ],
+    "result": "pass"
+  },
+  "fallback_linux_release": {
+    "bytes": 39108128,
+    "sha256": "631caddf218b48c9c874940c63d943d998bdf0f3775431232fd30079a51f07e0",
+    "checks": [
+      "test_field_kit_visuals -- --expect-fallback"
+    ],
+    "result": "pass"
+  },
+  "pre_fix_late_join_probe": {
+    "listen": {
+      "result": "Fails deployed-state delivery to a deliberately delayed replacement peer.",
+      "server_items": [
+        "claymore",
+        "satchel",
+        "shield",
+        "smoke"
+      ],
+      "replacement_items": [],
+      "server_after_retry": [],
+      "replacement_after_retry": [],
+      "first_error": "GadgetSpawner path absent when spawn data reached the replacement peer."
+    },
+    "dedicated": {
+      "result": "Fails deployed-state delivery to a deliberately delayed replacement peer.",
+      "server_items": [
+        "claymore",
+        "satchel",
+        "shield",
+        "smoke"
+      ],
+      "replacement_items": [],
+      "server_after_retry": [],
+      "replacement_after_retry": [],
+      "first_error": "GadgetSpawner path absent when spawn data reached the replacement peer."
+    }
+  },
+  "pre_fix_local_checks": [
+    "project-import",
+    "test_field_kit_visuals",
+    "test_asset_credits",
+    "test_sprint2_tactics_smoke",
+    "test_jaffa_hearing",
+    "test_jaffa_perception",
+    "test_gate_travel",
+    "test_four_player_join_multiplayer",
+    "test_four_player_join_dedicated"
+  ],
+  "deployment_regression": {
+    "gameplay_scope": "Remote Recon places each item. Real peers load in separate Godot processes, with a replacement held during gate travel and clean retry.",
+    "listen_suite": "test_field_kit_join_multiplayer",
+    "dedicated_suite": "test_field_kit_join_dedicated",
+    "operative_count": 4,
+    "replicated_on_join": [
+      "armed claymore",
+      "armed satchel",
+      "active smoke cloud",
+      "shield at 475/600 HP"
+    ],
+    "travel": {
+      "owner_remaining_stock": {
+        "claymore": 1,
+        "satchel": 1,
+        "smoke": 1,
+        "shield": 0
+      },
+      "deployments_remaining_in_original_world": 4
+    },
+    "retry": {
+      "deployments_in_each_world": 0,
+      "owner_remaining_stock": {
+        "claymore": 2,
+        "satchel": 2,
+        "smoke": 2,
+        "shield": 1
+      }
+    },
+    "capture": {
+      "resolution": [
+        1280,
+        800
+      ],
+      "client": "graphical replacement peer",
+      "camera": "diagnostic",
+      "smoke_duration_seconds_for_fixed_step_fixture": 90,
+      "files": {
+        "listen-rejoined.png": "e452aa007da8eaa7e315d4ab6d03a205ada1a537b6572a723f2aac428b44206f",
+        "listen-retry.png": "18c7aa31135d55cb5ad3477ac0aa96c7ea536e18e66e1a0da08f522df2bda1ae",
+        "dedicated-rejoined.png": "ac8c6201c6514a45e7a4563dda6207f44af79be1014276573ed6918863b0c4db",
+        "dedicated-retry.png": "7eae4f043c63cf9678fed628f65e183241d6bc8ae1e60fd6ab4eb23111993d4a"
+      }
+    },
+    "listen_result": "Deployment and retry assertions passed.",
+    "dedicated_result": "Deployment and retry assertions passed. Final graphical run had no engine errors or leak warnings."
+  },
+  "python_checks": {
+    "result": "pass",
+    "tests": 60
+  }
+}
