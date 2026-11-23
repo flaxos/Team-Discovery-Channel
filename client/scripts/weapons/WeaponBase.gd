@@ -81,6 +81,7 @@ const GLB_MODELS := {
 	"mp5": "res://assets/weapons/mp5sd.glb",
 	"m9": "res://assets/weapons/beretta_m9.glb",
 	"m249": "res://assets/weapons/m249.glb",
+	"staff_weapon": "res://assets/weapons/tri_vane_staff.glb",
 }
 ## Sprint 7: source +X faces the suppressor crown; measured centre in packed FBX units.
 ## The wrapper uses a measured centimetre scale, keeping the gameplay muzzle unchanged.
@@ -106,6 +107,20 @@ const M9_MODEL_BASIS := Basis(Vector3.UP, -PI / 2.0)
 ## operative's copy shares one set of meshes and textures. Decoding the M9's textures takes
 ## about 55 ms; without this every peer paid it when each operative first drew a sidearm.
 const GLB_CACHE_META := &"weapon_glb_cache"
+## Measured centre of the staff's circular nose lip in the authored mesh.
+const STAFF_MODEL_EMITTER := Vector3(0.0, 0.0, -1.05)
+## Keeps the 1.907 m NPC visual within its 2 m procedural envelope.
+const JAFFA_STAFF_VISUAL_SCALE := 1.16
+
+
+static func attach_staff_visual(parent: Node3D, muzzle: Vector3, visual_scale: float = 1.0) -> bool:
+	var model := load_glb_model(GLB_MODELS["staff_weapon"])
+	if model == null:
+		return false
+	var basis := Basis.from_scale(Vector3.ONE * visual_scale)
+	model.transform = Transform3D(basis, muzzle - basis * STAFF_MODEL_EMITTER)
+	parent.add_child(model)
+	return true
 
 
 static func load_glb_model(res_path: String) -> Node3D:
@@ -291,35 +306,36 @@ func _build_weapon_visual_mesh() -> void:
 			muzzle_offset = Vector3(0, 0.01, -0.36)
 
 		"staff_weapon":
-			# Long Goa'uld Naquadah bronze polearm with flared plasma head
-			var shaft := MeshInstance3D.new()
-			var sm := CylinderMesh.new()
-			sm.top_radius = 0.025
-			sm.bottom_radius = 0.025
-			sm.height = 1.6
-			shaft.mesh = sm
-			var smat := StandardMaterial3D.new()
-			smat.albedo_color = Color(0.68, 0.50, 0.20)
-			smat.metallic = 0.85
-			smat.roughness = 0.3
-			shaft.material_override = smat
-			shaft.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0, -0.2))
-			model_root.add_child(shaft)
-
-			var head := MeshInstance3D.new()
-			var hm := BoxMesh.new()
-			hm.size = Vector3(0.09, 0.14, 0.24)
-			head.mesh = hm
-			var hmat := StandardMaterial3D.new()
-			hmat.albedo_color = Color(0.9, 0.6, 0.15)
-			hmat.emission_enabled = true
-			hmat.emission = Color(1.0, 0.55, 0.1)
-			hmat.emission_energy_multiplier = 1.2
-			head.material_override = hmat
-			head.position = Vector3(0, 0, -0.95)
-			model_root.add_child(head)
-
 			muzzle_offset = Vector3(0, 0, -1.05)
+			var staff_muzzle := muzzle_point.position if muzzle_point != null else muzzle_offset
+			if not attach_staff_visual(model_root, staff_muzzle):
+				# Long Goa'uld Naquadah bronze polearm with flared plasma head
+				var shaft := MeshInstance3D.new()
+				var sm := CylinderMesh.new()
+				sm.top_radius = 0.025
+				sm.bottom_radius = 0.025
+				sm.height = 1.6
+				shaft.mesh = sm
+				var smat := StandardMaterial3D.new()
+				smat.albedo_color = Color(0.68, 0.50, 0.20)
+				smat.metallic = 0.85
+				smat.roughness = 0.3
+				shaft.material_override = smat
+				shaft.transform = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90)), Vector3(0, 0, -0.2))
+				model_root.add_child(shaft)
+
+				var head := MeshInstance3D.new()
+				var hm := BoxMesh.new()
+				hm.size = Vector3(0.09, 0.14, 0.24)
+				head.mesh = hm
+				var hmat := StandardMaterial3D.new()
+				hmat.albedo_color = Color(0.9, 0.6, 0.15)
+				hmat.emission_enabled = true
+				hmat.emission = Color(1.0, 0.55, 0.1)
+				hmat.emission_energy_multiplier = 1.2
+				head.material_override = hmat
+				head.position = Vector3(0, 0, -0.95)
+				model_root.add_child(head)
 
 		"zat":
 			# Serpentine curved Goa'uld sidearm with glowing blue arc emitter

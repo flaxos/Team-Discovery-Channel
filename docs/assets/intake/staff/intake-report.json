@@ -1,0 +1,98 @@
+{
+  "ok": true,
+  "file": "client/assets/weapons/tri_vane_staff.glb",
+  "bytes": 2656000,
+  "sha256": "181a8a01aff016a61e11ade180fee79ad126eb4d1cb56a790e542a848e89696d",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Team Discovery Channel staff visual authoring tool",
+  "declared_triangles_unique_meshes": 9216,
+  "meshes": [
+    {
+      "name": "Tri-vane plasma staff",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 4850,
+          "declared_triangles": 9216,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.031392812728881836,
+              -0.04117557778954506,
+              -1.0499999523162842
+            ],
+            "max": [
+              0.04500000178813934,
+              0.04117557778954506,
+              0.593999981880188
+            ],
+            "size": [
+              0.07639281451702118,
+              0.08235115557909012,
+              1.6439999341964722
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "StaffBody"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "Bronze and inset grip",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ],
+  "work_order": {
+    "ok": true,
+    "scope": "Request validation only; no licence or engine/art approval",
+    "asset_id": "tri_vane_staff",
+    "status": "ready_for_intake",
+    "work_order_sha256": "cfcebc7ee84ccaa6bb96dcfc12e12c453f489dd9632cfdb10cad34b255e15fa4",
+    "schema_sha256": "c12d756075cf9c2b098e064204eab5b6cb1ab755832309bebe9445265e5f89fc",
+    "errors": []
+  }
+}

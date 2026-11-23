@@ -82,3 +82,11 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 - **Acquisition:** Existing owner download `~/Downloads/stargate.zip`, copied to staging outside `client/`, original preserved. Full hashes and listing evidence: [intake](../docs/assets/intake/stargate_sg1.json).
 - **Changes:** Recipe-packed FBX into a GLB with the glyph ring and one front/back chevron/light insert. Albedo and metallic maps downscaled 4096² to 1024², chevron roughness bound, ORM packed, JPEG quality 0.9. Bump maps are height maps, not verified tangent-space normals, and are omitted. The runtime wrapper fits the ring to the existing 2.75 m opening, repeats the insert at the seven existing anchors, uses unlit albedo for housings, drives front/back emissive inserts from existing replicated chevron count, generates mipmaps and draws opaque with metallic 0. Source body, frames and nine-chevron arrangement are omitted because they cannot fit both existing aperture and envelope unchanged. No ring spinning, chevron movement or iris art added.
 - **Underlying rights:** This is a community fan model; the listing licence does not grant Stargate franchise rights.
+
+### Tri-vane plasma staff — Sprint 8
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/weapons/tri_vane_staff.glb` | Tri-vane plasma staff | Team Discovery Channel project | [Staff visual authoring tool](https://github.com/flaxos/Team-Discovery-Channel/blob/main/tools/author_staff_visual.py) | Original project asset | Shared by Teal’c, Jaffa Guard and Jaffa Shock Guard using the existing muzzle anchors | M |
+
+- **Changes:** Original geometry and four baked maps authored from the project's runtime envelope, with no downloaded model or texture inputs. Cached copies use the existing weapon finish and mipmap handling.

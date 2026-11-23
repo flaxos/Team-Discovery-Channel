@@ -1017,6 +1017,10 @@ func _setup_staff_visual() -> void:
 	var visual_root: Node3D = Node3D.new()
 	visual_root.name = "StaffVisual"
 	staff_mount.add_child(visual_root)
+	if muzzle_point != null and WeaponBase.attach_staff_visual(
+		visual_root, muzzle_point.position, WeaponBase.JAFFA_STAFF_VISUAL_SCALE
+	):
+		return
 
 	var shaft: MeshInstance3D = MeshInstance3D.new()
 	var cyl: CylinderMesh = CylinderMesh.new()

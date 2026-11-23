@@ -1,0 +1,121 @@
+{
+  "measured_on": "2026-11-23",
+  "main_commit": "af83a5c1f4aa0b7d7647f81063b239c7ec2cb8ea",
+  "engine": "4.4.1.stable.official.49a5bc7b6",
+  "units": "metres",
+  "up": "+Y",
+  "game_forward": "-Z",
+  "method": "Instantiate WeaponStaff, JaffaGuard and JaffaShockGuard in running Godot. After ready, merge each procedural leaf mesh AABB transformed into its weapon or StaffMount local frame. Read the live MuzzlePoint marker. Round to a millimetre.",
+  "scope": "Procedural baseline and provisional intake envelopes. Envelopes keep the old rear extent and add small cross section allowances; they are not a clearance proof for a new model. Front extents use each existing muzzle and 3 mm tolerance. Validate the actual imported geometry and motion in missions.",
+  "consumers": [
+    {
+      "bounds_max": [
+        0.045,
+        0.07,
+        0.6
+      ],
+      "bounds_min": [
+        -0.045,
+        -0.07,
+        -1.07
+      ],
+      "branch": "WeaponModel",
+      "consumer": "player",
+      "frame": "WeaponStaff",
+      "muzzle": [
+        0.0,
+        0.0,
+        -1.05
+      ],
+      "length_m": 1.67,
+      "proposed_fit_envelope_m": {
+        "min_m": [
+          -0.055,
+          -0.08,
+          -1.053
+        ],
+        "max_m": [
+          0.055,
+          0.08,
+          0.6
+        ]
+      }
+    },
+    {
+      "bounds_max": [
+        0.04,
+        0.04,
+        0.85
+      ],
+      "bounds_min": [
+        -0.04,
+        -0.04,
+        -1.15
+      ],
+      "branch": "StaffVisual",
+      "consumer": "JaffaGuard",
+      "frame": "StaffMount",
+      "muzzle": [
+        0.0,
+        0.0,
+        -1.1
+      ],
+      "length_m": 2.0,
+      "proposed_fit_envelope_m": {
+        "min_m": [
+          -0.055,
+          -0.055,
+          -1.103
+        ],
+        "max_m": [
+          0.055,
+          0.055,
+          0.85
+        ]
+      }
+    },
+    {
+      "bounds_max": [
+        0.04,
+        0.04,
+        0.85
+      ],
+      "bounds_min": [
+        -0.04,
+        -0.04,
+        -1.15
+      ],
+      "branch": "StaffVisual",
+      "consumer": "JaffaShockGuard",
+      "frame": "StaffMount",
+      "muzzle": [
+        0.0,
+        0.0,
+        -1.1
+      ],
+      "length_m": 2.0,
+      "proposed_fit_envelope_m": {
+        "min_m": [
+          -0.055,
+          -0.055,
+          -1.103
+        ],
+        "max_m": [
+          0.055,
+          0.055,
+          0.85
+        ]
+      }
+    }
+  ],
+  "historical_ap1b": {
+    "commit": "e72ff28cbd11380ad2e15d9509b3eb250fe5fee7",
+    "path": "client/assets/weapons/staff_weapon.glb",
+    "bytes": 27112,
+    "sha256": "adfc09da601259b570281e415af5db3756676e7fd766370297ecec56a0994437",
+    "declared_triangles": 384,
+    "embedded_images": 0,
+    "materials": 3,
+    "integration": "Player WeaponBase branch only; historical JaffaAI does not reference this GLB"
+  }
+}

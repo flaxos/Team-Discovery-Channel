@@ -33,6 +33,8 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 
 ## Coverage contracts
 
+Sprint 8 adds `test_imported_staff_visual` for player and both Jaffa meshes, independent emitter alignment, decoded texture cost and sharing, old procedural fallback, and player/NPC plasma origins. It runs from the Linux release pack alongside `test_asset_credits`. The four-player listen and dedicated fixtures travel Teal’c and check the staff on replicas through join and retry. [Sprint 8 review](reviews/2026-11-23-sprint8-staff-intake.md).
+
 Sprint 7 infrastructure adds `test_asset_credits` (real lobby open/select/close, every packaged model, exact full official CC0/CC BY texts; also runnable from a clean release PCK) and `test_asset_packer_maps` (real opaque PNG packing, normal flip and ORM reference channels). Python tests exercise work-order rejection/readiness/path/LOD/intake budgets and credit coverage/staleness. Install the pinned `tools/requirements.txt` dependency in a build-area environment before running the tooling suite. `python3 tools/sync_asset_credits.py --check` is a CI gate. See the [Sprint 7 review](reviews/2026-11-18-sprint7-mp5-intake.md); `test_imported_mp5_visual` checks its independently measured crown, immutable handling, cache, lossless-map delivery and fallback. Four-operative listen/dedicated snapshots also check each Carter replica; the gate-return fixture checks Carter’s returned model. Owner art acceptance remains separate.
 
 Sprint 6 extends `test_goauld_theme` and `tools/tests/test_theme_kit.py` for all nine

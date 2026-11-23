@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS08",
+  "asset_id": "tri_vane_staff",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "One detailed rigid, textured science-fiction staff visual for the actual Teal'c loadout and the two current Jaffa scenes. Keep their independent authoritative projectile origins and procedural fallback.",
+  "target": {
+    "scene": "res://scenes/entities/Player.tscn",
+    "visual_branch": "WeaponModel/ImportedGLB",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/assets/intake/staff/baseline.json",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.055,
+        -0.08,
+        -1.053
+      ],
+      "max_m": [
+        0.055,
+        0.08,
+        0.6
+      ]
+    },
+    "anchors": [
+      {
+        "name": "MuzzlePoint",
+        "position_m": [
+          0,
+          0,
+          -1.05
+        ],
+        "purpose": "Existing player projectile origin. Fit the emitting centre to within 3 mm in weapon space. The runtime branch is on the active WeaponStaff child of the Player WeaponHolder."
+      },
+      {
+        "name": "RearHandTarget",
+        "position_m": [
+          0.02,
+          0.0,
+          0.04
+        ],
+        "purpose": "Right side of rear grip sleeve measured on the weapon-local −0.059 to +0.153 m shaft span. Cosmetic target for Sprint 24."
+      },
+      {
+        "name": "FrontHandTarget",
+        "position_m": [
+          0.019,
+          0.0,
+          -0.34
+        ],
+        "purpose": "Right side of front grip sleeve measured on the weapon-local −0.442 to −0.238 m shaft span. Transform through the same mount fitting for Jaffa."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_first_generated_gap",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/sg-staff-weapon-c11ccfdb79874c748a14bfef83d643d2",
+        "decision": "rejected",
+        "reason": "Original owner-download archive inspected. It contains one binary STL with 2,210 faces and no UVs, textures or author statement. The listing shows CC BY 4.0, but authorship is unverified and the source fails the textured fidelity brief."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/inspired-by-stargate-sg-1-goa-uld-staff-weapon-973f843c19ca4496b8a38106f2a96414",
+        "decision": "rejected",
+        "reason": "Ska-Ara, 24,676 faces and five textures. CC BY-NC-SA 4.0 is outside the project's intake rules."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/plasma-staff-omsx-03502d16564e40e3ac45a26ca55f407f",
+        "decision": "unavailable",
+        "reason": "omassyx, editorial, download disabled, 1.82M faces and no textures."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/plasma-staff-6ee00886152b4c23a6c8534a4f05c5f6",
+        "decision": "rejected",
+        "reason": "Shadow_Ghost, CC BY 4.0 listing, 6,480 faces and eight textures; the thumbnail shows a blue fantasy orb and hooked head, a different silhouette and visual language. Separate concept artist is also credited."
+      },
+      {
+        "page": "https://pinshape.com/items/47879-3d-printed-stargate-sg1-jaffa-staff",
+        "decision": "rejected",
+        "reason": "3D-COLLECTION lists personal use, no modifications and no commercial use in the description, which directly conflicts with the CC0 badge. STL only."
+      }
+    ],
+    "selected_source": null,
+    "generation": {
+      "tool": "Repository Python staff authoring tool, tools/author_staff_visual.py",
+      "version": "Python 3.12.3, NumPy 2.4.3, Pillow 12.1.1",
+      "prompt": "Design an original rigid bronze plasma staff for the existing Teal’c and Jaffa roles. Use a recessed circular aperture surrounded by three rounded lobes, interrupted amber vents, ribbed neck bands, two dark inset grip sleeves and a capped fluted tail. Bake visually distinct bronze, normal, ORM and emissive maps. Fit the existing visual envelopes and projectile origins.",
+      "references": [
+        {
+          "uri": "docs/assets/intake/staff/baseline.json",
+          "rights_note": "Project-authored bounds and markers only. Community candidates were evaluated for availability and fitness and contribute no model or image data."
+        }
+      ],
+      "processing_plan": "Shape one indexed profile mesh with UVs and tangent-space normals. Bake four original lossless RGB maps. Use tools/gltf_to_glb.py to pack the generated glTF, buffer and maps without re-encoding. Reuse the cosmetic weapon cache for each fitting."
+    }
+  },
+  "geometry": {
+    "max_lod0_triangles": 60000,
+    "max_materials": 1,
+    "lod_triangle_limits": [
+      60000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "staff_body",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#3B3629",
+        "#796143",
+        "#B6935B",
+        "#D88A35"
+      ],
+      "surface_notes": "One opaque 1K bronze, normal, ORM and emission material. Bands and flutes vary the surface; two darker knurled sleeves define contact zones."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 64,
+    "measurement_plan": "At most 64 MiB decoded including mipmaps across shared images. Measure the first parse and cached copies, scene triangles/draw calls and frame time with one player staff and multiple Jaffa in the existing offworld encounter. Keep the baseline renderer/camera settings."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Real Teal'c loadout in SGC UAT and Goa'uld Infiltration with current Jaffa Guard and Shock Guard. Verify each origin and visual-only bounds separately using baseline.json, shared cache, idle/aim/fire silhouette and plasma path, no new attack rules, retained fallbacks, exported credits and multiplayer state over late join/travel/retry. Animated grips remain in Sprints 20 and 24."
+}
