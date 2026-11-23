@@ -187,6 +187,7 @@ def main():
         parser.error("output must end in .glb")
     args.staging.mkdir(parents=True, exist_ok=True)
     glb, embedded = pack(write_source(args.staging))
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_bytes(glb)
     print(json.dumps({"bytes": len(glb), "sha256": hashlib.sha256(glb).hexdigest(), "embedded": embedded}, indent=2))
 
