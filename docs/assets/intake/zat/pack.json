@@ -1,0 +1,31 @@
+{
+  "bytes": 2767800,
+  "sha256": "97d50315c176f6a0d9dbae076cbb20f4bad762fa1fb40bf9ca719eddec2ec753",
+  "embedded": [
+    {
+      "uri": "zat.bin",
+      "size": 272448,
+      "sha256": "7c611ff4b6f293fd54a38f76efb87cd6c8a9cc743925792171e11bb410324ddd"
+    },
+    {
+      "uri": "bronze.png",
+      "size": 756475,
+      "sha256": "0c61fb39af3a6478206b3e6b43b60b48bd4f8ccab36f0e430e8af473c812b83e"
+    },
+    {
+      "uri": "normal.png",
+      "size": 1581441,
+      "sha256": "846767f146c760ed8a3abb36607e76485f75b70776c47da57f3ae008f26c2eb8"
+    },
+    {
+      "uri": "orm.png",
+      "size": 151772,
+      "sha256": "f78b852affd27c7138e9f9502c67e202cc23a3e5c664b162a8c605444cfd3d21"
+    },
+    {
+      "uri": "emission.png",
+      "size": 3585,
+      "sha256": "8740f70b6f644456e1de4fa9135f07a6ababadbc90aeba2da2b0dfc0365f47db"
+    }
+  ]
+}

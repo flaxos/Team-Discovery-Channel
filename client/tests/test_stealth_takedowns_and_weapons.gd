@@ -201,6 +201,7 @@ func run() -> void:
 	mp5_check.free()
 	zat.position = Vector3(0, 1.25, 0)
 	player.add_child(zat)
+	assert(zat.has_node("WeaponModel/ImportedGLB/ZatBody"), "Quiet hit sequence uses the new Zat visual")
 	await frames(1)
 
 	var target_sentry := sentry(open.at, open.facing)

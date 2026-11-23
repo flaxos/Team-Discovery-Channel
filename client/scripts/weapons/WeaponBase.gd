@@ -82,6 +82,7 @@ const GLB_MODELS := {
 	"m9": "res://assets/weapons/beretta_m9.glb",
 	"m249": "res://assets/weapons/m249.glb",
 	"staff_weapon": "res://assets/weapons/tri_vane_staff.glb",
+	"zat": "res://assets/weapons/loop_frame_zat.glb",
 }
 ## Sprint 7: source +X faces the suppressor crown; measured centre in packed FBX units.
 ## The wrapper uses a measured centimetre scale, keeping the gameplay muzzle unchanged.
@@ -111,6 +112,8 @@ const GLB_CACHE_META := &"weapon_glb_cache"
 const STAFF_MODEL_EMITTER := Vector3(0.0, 0.0, -1.05)
 ## Keeps the 1.907 m NPC visual within its 2 m procedural envelope.
 const JAFFA_STAFF_VISUAL_SCALE := 1.16
+## Measured aperture centre in the authored sidearm's -Z weapon space.
+const ZAT_MODEL_EMITTER := Vector3(0, 0.05, -0.20)
 
 
 static func attach_staff_visual(parent: Node3D, muzzle: Vector3, visual_scale: float = 1.0) -> bool:
@@ -338,32 +341,37 @@ func _build_weapon_visual_mesh() -> void:
 				model_root.add_child(head)
 
 		"zat":
-			# Serpentine curved Goa'uld sidearm with glowing blue arc emitter
-			var body := MeshInstance3D.new()
-			var bm := BoxMesh.new()
-			bm.size = Vector3(0.06, 0.14, 0.24)
-			body.mesh = bm
-			var bmat := StandardMaterial3D.new()
-			bmat.albedo_color = Color(0.60, 0.45, 0.20)
-			bmat.metallic = 0.85
-			body.material_override = bmat
-			model_root.add_child(body)
-
-			var arc := MeshInstance3D.new()
-			var am := SphereMesh.new()
-			am.radius = 0.035
-			am.height = 0.07
-			arc.mesh = am
-			var amat := StandardMaterial3D.new()
-			amat.albedo_color = Color(0.2, 0.65, 1.0)
-			amat.emission_enabled = true
-			amat.emission = Color(0.2, 0.65, 1.0)
-			amat.emission_energy_multiplier = 1.5
-			arc.material_override = amat
-			arc.position = Vector3(0, 0.05, -0.14)
-			model_root.add_child(arc)
-
 			muzzle_offset = Vector3(0, 0.05, -0.20)
+			var zat_visual := load_glb_model(GLB_MODELS["zat"])
+			if zat_visual != null:
+				var zat_muzzle := muzzle_point.position if muzzle_point != null else muzzle_offset
+				zat_visual.position = zat_muzzle - ZAT_MODEL_EMITTER
+				model_root.add_child(zat_visual)
+			else:
+				# Serpentine curved Goa'uld sidearm with glowing blue arc emitter
+				var body := MeshInstance3D.new()
+				var bm := BoxMesh.new()
+				bm.size = Vector3(0.06, 0.14, 0.24)
+				body.mesh = bm
+				var bmat := StandardMaterial3D.new()
+				bmat.albedo_color = Color(0.60, 0.45, 0.20)
+				bmat.metallic = 0.85
+				body.material_override = bmat
+				model_root.add_child(body)
+
+				var arc := MeshInstance3D.new()
+				var am := SphereMesh.new()
+				am.radius = 0.035
+				am.height = 0.07
+				arc.mesh = am
+				var amat := StandardMaterial3D.new()
+				amat.albedo_color = Color(0.2, 0.65, 1.0)
+				amat.emission_enabled = true
+				amat.emission = Color(0.2, 0.65, 1.0)
+				amat.emission_energy_multiplier = 1.5
+				arc.material_override = amat
+				arc.position = Vector3(0, 0.05, -0.14)
+				model_root.add_child(arc)
 
 		"m9":
 			muzzle_offset = Vector3(0, 0.02, -0.18)

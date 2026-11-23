@@ -1,0 +1,29 @@
+{
+  "observations": [
+    {
+      "uploader": "biggs",
+      "uid": "43d8bb5cdf6b4d05b564a0efea4fb672",
+      "observed_date": "2026-11-23",
+      "api": "https://api.sketchfab.com/v3/models/43d8bb5cdf6b4d05b564a0efea4fb672",
+      "vertices": 8286,
+      "faces": 16402,
+      "materials": 1,
+      "textures": 4,
+      "downloadable": false,
+      "listed_licence": null
+    },
+    {
+      "uploader": "fraeric123",
+      "uid": "a03581004d8040d7873e0335aaf09f52",
+      "observed_date": "2026-11-23",
+      "api": "https://api.sketchfab.com/v3/models/a03581004d8040d7873e0335aaf09f52",
+      "vertices": 8286,
+      "faces": 16402,
+      "materials": 1,
+      "textures": 1,
+      "downloadable": true,
+      "listed_licence": "CC BY 4.0"
+    }
+  ],
+  "decision": "No community source was acquired. The two creator previews show the same distinctive silhouette, surface lines and purple grip end despite different camera angle and lighting. Face, vertex and material counts are identical. The older uploader describes their modelling and texturing and disables downloads. The newer listing gives no statement of authorship or upstream grant. The association is inferred from the matching evidence; authorship of the newer listing remains unverified, so it was not used."
+}

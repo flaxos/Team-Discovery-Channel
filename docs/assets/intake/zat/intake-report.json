@@ -1,0 +1,98 @@
+{
+  "ok": true,
+  "file": "client/assets/weapons/loop_frame_zat.glb",
+  "bytes": 2767800,
+  "sha256": "97d50315c176f6a0d9dbae076cbb20f4bad762fa1fb40bf9ca719eddec2ec753",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Team Discovery Channel Zat visual authoring tool",
+  "declared_triangles_unique_meshes": 8448,
+  "meshes": [
+    {
+      "name": "Loop-frame ion sidearm",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 4620,
+          "declared_triangles": 8448,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.03210640698671341,
+              -0.07208685576915741,
+              -0.20000000298023224
+            ],
+            "max": [
+              0.03210640698671341,
+              0.07364827394485474,
+              0.1134059801697731
+            ],
+            "size": [
+              0.06421281397342682,
+              0.14573512971401215,
+              0.31340598315000534
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "ZatBody"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "Bronze with cyan dielectric channels",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ],
+  "work_order": {
+    "ok": true,
+    "scope": "Request validation only; no licence or engine/art approval",
+    "asset_id": "loop_frame_zat",
+    "status": "ready_for_intake",
+    "work_order_sha256": "e1e7a44025a3d22b8ac5744a1c0df40cab9bbcb9322cc4e27676003a57cbb083",
+    "schema_sha256": "c12d756075cf9c2b098e064204eab5b6cb1ab755832309bebe9445265e5f89fc",
+    "errors": []
+  }
+}

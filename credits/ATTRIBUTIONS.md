@@ -90,3 +90,11 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 | `client/assets/weapons/tri_vane_staff.glb` | Tri-vane plasma staff | Team Discovery Channel project | [Staff visual authoring tool](https://github.com/flaxos/Team-Discovery-Channel/blob/main/tools/author_staff_visual.py) | Original project asset | Shared by Teal’c, Jaffa Guard and Jaffa Shock Guard using the existing muzzle anchors | M |
 
 - **Changes:** Original geometry and four baked maps authored from the project's runtime envelope, with no downloaded model or texture inputs. Cached copies use the existing weapon finish and mipmap handling.
+
+### Loop-frame ion sidearm — Sprint 9
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/weapons/loop_frame_zat.glb` | Loop-frame ion sidearm | Team Discovery Channel project | [Sidearm visual authoring tool](https://github.com/flaxos/Team-Discovery-Channel/blob/main/tools/author_zat_visual.py) | Original project asset | Zat visual for Carter and Teal’c, aligned to the existing emitter and effects | M |
+
+- **Changes:** Original swept frame, paired dielectric rails and four lossless maps. The game uses its existing material finish, mipmapped textures and shared visual cache.
