@@ -2,7 +2,7 @@
 
 Owner-requested programme, **18 November 2026**, based on merged main `7982e2b` / [PR #77](https://github.com/flaxos/Team-Discovery-Channel/pull/77). Sprints [1–6](next-six-sprints.md) are merged; their remaining human checks still apply. Unless its state is explicitly updated below, each sprint is **planned**, not implemented or artistically accepted. Sprint 7 is implemented for owner art review; later slices remain planned. “Horse” means **Horus Jaffa**; “mother assets” means a **Goa’uld mothership**. No delivery dates or guaranteed source acquisitions are implied.
 
-**Resume status, 21 November 2026:** Sprint 7 reached `main` at `1f634d1` through [PR #79](https://github.com/flaxos/Team-Discovery-Channel/pull/79) into the planning branch, then [PR #78](https://github.com/flaxos/Team-Discovery-Channel/pull/78) into `main`. Its local and hosted full runs passed 117 checks, 60 Python tests passed, and the clean release export passed. Those results belong to implementation `a778fb4`; they are not new test runs for later documentation edits. Owner art acceptance is pending. **Next: Sprint 8, staff weapon. Sprints 8–35 have not started.**
+**Resume status, 21 November 2026:** Sprint 7 reached `main` at `1f634d1` through [PR #79](https://github.com/flaxos/Team-Discovery-Channel/pull/79) into the planning branch, then [PR #78](https://github.com/flaxos/Team-Discovery-Channel/pull/78) into `main`. Its local and hosted full runs passed 117 checks, 60 Python tests passed, and the clean release export passed. Those results belong to implementation `a778fb4`; they are not new test runs for later documentation edits. Owner art acceptance is pending. Sprint 8 integrates the original shared staff for art review on its feature branch. **Sprint 9, Zat, is the next planned slice.**
 
 ## Roadmap at a glance
 
@@ -32,7 +32,7 @@ If a prerequisite is unfinished, report it and finish only the prerequisite work
 | Sprint | Playable result | State | Exact trigger |
 |---|---|---|---|
 | 7 | Faithful MP5SD in SGC/offworld; reproducible shared intake and distributed credits | Merged to main via #79/#78; technical checks passed, owner art pending ([review](../reviews/2026-11-18-sprint7-mp5-intake.md)) | `Start sprint 7 from docs/plans/asset-vertical-slices.md` |
-| 8 | Staff weapon in player and Jaffa combat | Planned | `Start sprint 8 from docs/plans/asset-vertical-slices.md` |
+| 8 | Staff weapon in player and Jaffa combat | Implemented for review. Original textured staff for Teal’c and both Jaffa variants. [Review and verification](../reviews/2026-11-23-sprint8-staff-intake.md). | `Start sprint 8 from docs/plans/asset-vertical-slices.md` |
 | 9 | Zat in quiet incapacitation/combat | Planned | `Start sprint 9 from docs/plans/asset-vertical-slices.md` |
 | 10 | Six held-weapon meshes/materials ready for character grips | Planned | `Start sprint 10 from docs/plans/asset-vertical-slices.md` |
 | 11 | Mounted/deployable M2 in a live defensive encounter | Planned | `Start sprint 11 from docs/plans/asset-vertical-slices.md` |
@@ -75,7 +75,7 @@ For changed gameplay-visible content, exercise four operatives on **listen and d
 
 **Sprint 8 — Staff weapon.** Depends on 7’s intake/credit path. Deliver **one** staff model used by the player and current Jaffa, with measured staff length, two-hand contact targets, existing muzzle and effect alignment. Audit old AP-1b work before sourcing. Separate tip parts only if required by an existing visual state; a static source does not magically supply opening animation. Show firing/idle, close-up and distant silhouette, existing projectile/damage and late state. Keep NPC `StaffMount` and fire origin authoritative. Final animated grips remain assigned to 20/24.
 
-**Next trigger:** `Start sprint 8 from docs/plans/asset-vertical-slices.md`. Start by inspecting the existing staff implementation and recovered-asset evidence, then compare community sources. No staff archive has yet passed intake for this sprint; the sourcing register's lead is not an acquired or accepted replacement. This slice changes presentation around existing combat, not damage, AI or class mechanics.
+**23 November update:** the owner-downloaded source contained an untextured STL and no creator evidence. The [ready work order](../assets/intake/staff/work-order.json) records the original geometry and material fallback. [Sprint 8 review](../reviews/2026-11-23-sprint8-staff-intake.md) records placement, runtime captures and outstanding art acceptance. The next trigger is `Start sprint 9 from docs/plans/asset-vertical-slices.md`.
 
 **Sprint 9 — Zat.** Depends on 7; consumes 8’s anchor lessons. Deliver **one** Zat with readable shape/PBR and presentation of existing fire/incapacitation states. Test quiet takedown/stun and subsequent existing hit consequences, late join/retry and travel inventory. Source/grant or generated-gap modelling is required; the Biggs portfolio model is not downloadable/licensed intake. Art cannot change stun duration or the existing vaporization rules. Do not promise open/closed mechanisms unless the actual gameplay state and separable parts support them. Final grips are assigned to 23/24.
 

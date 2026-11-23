@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-23",
+  "engine": "4.4.1.stable.official.49a5bc7b6",
+  "model_sha256": "181a8a01aff016a61e11ade180fee79ad126eb4d1cb56a790e542a848e89696d",
+  "original_rebuild_byte_match": true,
+  "targeted_network": {
+    "passed": true,
+    "fixtures": [
+      "test_four_player_join_multiplayer",
+      "test_four_player_join_dedicated"
+    ],
+    "results": "build/test-results/sprint8-staff-network"
+  },
+  "python": {
+    "passed": true,
+    "checks": 60
+  },
+  "negative_alignment": "10 mm shift failed the independent emitter centre assertion",
+  "fallback": "Absent GLB produced all three procedural visuals; player and NPC plasma checks passed",
+  "export": {
+    "pck_bytes": 27764144,
+    "pck_sha256": "98abd08d26d457b2336292ca69d0d829b0a0cfbd9cca4c0ddc5d8f6b5e3a7e3a",
+    "staff_visual_test_passed": true,
+    "credits_test_passed": true,
+    "credited_model_files": 9,
+    "complete_licence_texts": 2,
+    "decoded_mipmapped_bytes": 16777212,
+    "cold_ms": 59.87,
+    "cached_ms": 0.001
+  },
+  "full": "See sprint PR for local and hosted validation on its implementation head",
+  "owner_art": "pending"
+}

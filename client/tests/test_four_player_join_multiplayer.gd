@@ -156,7 +156,7 @@ func snapshot(label: String, active_slots: Array[int], expected_count: int = 4) 
 	for w in range(2):
 		var world := main.worlds()[w] as GateRoom
 		for actor: PlayerController3D in world.players_container.get_children():
-			check_mp5_visual(actor)
+			check_imported_loadout(actor)
 			expected[str(actor.peer_id)] = {"world": w, "class": actor.class_id,
 				"position": [actor.position.x, actor.position.y, actor.position.z],
 				"health": actor.health_component.current_health, "crouching": actor.is_crouching}
@@ -195,14 +195,20 @@ func see_snapshot(label: String) -> void:
 	require(correct, "Roster/class/health/motion mismatch: " + label)
 	for world: GateRoom in main.worlds():
 		for actor: PlayerController3D in world.players_container.get_children():
-			check_mp5_visual(actor)
+			check_imported_loadout(actor)
 	var own_world := int(expected[str(net.local_peer_id)].world)
 	require(main.session.presented == main.worlds()[own_world], "Each operative presents its own world")
 	require((main.current_site as ModularMission).events.fired.is_empty())
 	mark("seen_%s_%d" % [label, slot])
 
 
-func check_mp5_visual(actor: PlayerController3D) -> void:
+func check_imported_loadout(actor: PlayerController3D) -> void:
+	if actor.class_id == SGCNetworkManager.CLASS_TEALC_JAFFA:
+		var staff := actor.current_weapon as WeaponStaff
+		require(staff != null and staff.muzzle_point.position.is_equal_approx(Vector3(0, 0, -1.05)),
+			"Teal'c keeps the staff and muzzle through replica builds")
+		require(staff.has_node("WeaponModel/ImportedGLB/StaffBody"), "Original staff mesh on Teal'c replica")
+		return
 	if actor.class_id != SGCNetworkManager.CLASS_CARTER_TECH:
 		return
 	var gun := actor.current_weapon as WeaponMP5
@@ -272,6 +278,7 @@ func run_host() -> void:
 			actor.health_component.take_damage(13.0)
 			actor.health_component.frozen = true
 		active.append(index)
+	await travel(ids[2]) # Prove Teal'c builds the same staff visual at the destination.
 	await frames(30)
 	await snapshot("split", active)
 	# Client-owned movement must still replicate to the server and every other client.

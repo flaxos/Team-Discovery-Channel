@@ -1,0 +1,19 @@
+{
+  "listed_title": "SG Staff Weapon",
+  "uploader": "rossrobotics",
+  "listing": "https://sketchfab.com/3d-models/sg-staff-weapon-c11ccfdb79874c748a14bfef83d643d2",
+  "listing_metadata": "https://api.sketchfab.com/v3/models/c11ccfdb79874c748a14bfef83d643d2",
+  "listed_licence": "CC BY 4.0",
+  "archive_path": "~/Downloads/sg-staff-weapon.zip",
+  "archive_bytes": 110734,
+  "archive_sha256": "25fbff2844b006a3cb6eb619a7321618b8c54704e333d33f859e89db7873a9f9",
+  "member": "source/SG_Staff_Weapon.stl",
+  "member_bytes": 110584,
+  "member_sha256": "5c187f300796cca966bad3ef0d86cd1e53cec52685c060e4a1500b3611ec8b28",
+  "binary_stl_triangles": 2210,
+  "uvs": false,
+  "texture_files": 0,
+  "archive_licence_or_readme": false,
+  "authorship_evidence": "Listing description empty. Archive adds no creator statement or ownership evidence.",
+  "decision": "Rejected for runtime use. Authorship remains unverified and the source provides no UVs or textures. No geometry, pixels or other archive data are inputs to the original staff authoring tool."
+}

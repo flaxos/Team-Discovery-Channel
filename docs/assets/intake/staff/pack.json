@@ -1,0 +1,31 @@
+{
+  "bytes": 2656000,
+  "sha256": "181a8a01aff016a61e11ade180fee79ad126eb4d1cb56a790e542a848e89696d",
+  "embedded": [
+    {
+      "uri": "staff.bin",
+      "size": 288096,
+      "sha256": "ab41c1d99956dd5c7c51d1f0888062a7d85d5ac8f6883f3bc8ea2e48851f3a41"
+    },
+    {
+      "uri": "bronze.png",
+      "size": 983880,
+      "sha256": "55e1df698772c5eb8e44998a30a36ed5d4ed946224849e22212ef6a1ecd85518"
+    },
+    {
+      "uri": "normal.png",
+      "size": 1208810,
+      "sha256": "0dec04c3aa9c2398921152eff158bd2416dabf4818842bac5709300dcbbf08bb"
+    },
+    {
+      "uri": "orm.png",
+      "size": 160969,
+      "sha256": "18ae4e936d3df45045e89f344ee2d3214b69ca14862dd8e5071f6c8068d7f0e7"
+    },
+    {
+      "uri": "emission.png",
+      "size": 12178,
+      "sha256": "7487c8611db09bd879b1862c80117b5b3fe43148a973d680f61579b2dc731931"
+    }
+  ]
+}
