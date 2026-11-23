@@ -1,13 +1,13 @@
 # Documentation index
 
-Resume status checked **23 November 2026**, with Sprint 7 merged and Sprint 8’s original shared staff implemented for art review. **Sprint 9, Zat, is next.** Historical documents retain their stated baselines. Consult GitHub for merge and CI status and your local checkout for the code actually running.
+Resume status checked **23 November 2026**, with Sprint 8’s shared staff merged and Sprint 9’s original Zat integrated for review. **Sprint 10, the six-weapon audit, is next.** Historical documents retain their stated baselines. Consult GitHub for merge and CI status and your local checkout for the code actually running.
 
 ## Start here
 
 | Document | Purpose |
 | --- | --- |
 | [Roadmap](../ROADMAP.md) | **Authoritative.** What exists, what is next, milestone sequence, dependencies and acceptance gates. |
-| [Asset sprint programme](plans/asset-vertical-slices.md) | **Current agent sequence.** Sprint 9 Zat, then the weapon audit and kit, SGC, characters, offworld and mothership through Sprint 35; exact prompts and acceptance boundaries. |
+| [Asset sprint programme](plans/asset-vertical-slices.md) | **Current agent sequence.** Sprint 10 weapon audit, then field kit, SGC, characters, offworld and mothership through Sprint 35; exact prompts and acceptance boundaries. |
 | [Human sessions and earlier packages](plans/next-work-packages.md) | Deferred human play sessions, tuning and dependent-PR guidance; the GA-0/GT-1 package prompts are historical completed work. |
 | [Master development plan](plans/master-development-roadmap.md) | Capability matrix with evidence, dependency graph, every milestone, the art and content track, the risk register and three agent-ready work packages. |
 | [Decision log](DECISIONS.md) | Architectural and direction decisions, with status and open questions. |
@@ -67,6 +67,7 @@ Resume status checked **23 November 2026**, with Sprint 7 merged and Sprint 8’
 | [AP-1d M9 record](reviews/2026-11-16-ap1d-beretta-m9.md) | The first realistic weapon: owner-downloaded CC BY archive, FBX conversion by recipe, bore alignment, finish comparison, sharing and the exported-build check. |
 | [Sprint 7 MP5SD record](reviews/2026-11-18-sprint7-mp5-intake.md) | Imported Carter MP5SD, shared intake validation, distributed credits/full licences, captures, costs, local/hosted checks and remaining owner acceptance. |
 | [Sprint 8 shared staff](reviews/2026-11-23-sprint8-staff-intake.md) | Archive assessment, original textured visual shared by the player and Jaffa, fit, tests and captures. |
+| [Sprint 9 Zat](reviews/2026-11-23-sprint9-zat-visual.md) | Source comparison, original sidearm, fit, quiet hit states, travel and release evidence. |
 
 ## Plans and records
 

@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS09",
+  "asset_id": "loop_frame_zat",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Original opaque Zat presentation on Carter and Teal’c’s active secondary, retaining quiet stun, kill, vaporization, projectile/effect origin and travel behavior.",
+  "target": {
+    "scene": "res://scenes/entities/Player.tscn",
+    "visual_branch": "WeaponModel/ImportedGLB",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/assets/intake/zat/baseline.json",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.035,
+        -0.08,
+        -0.203
+      ],
+      "max_m": [
+        0.035,
+        0.085,
+        0.12
+      ]
+    },
+    "anchors": [
+      {
+        "name": "MuzzlePoint",
+        "position_m": [
+          0,
+          0.05,
+          -0.2
+        ],
+        "purpose": "Existing Zat shot and cyan tracer origin. Independently fit the actual emitting rim."
+      },
+      {
+        "name": "GripTarget",
+        "position_m": [
+          0.024,
+          -0.052,
+          0.032
+        ],
+        "purpose": "Right side of the dark lower grip. Visual contact reference only; animated hand alignment in Sprints 23 and 24."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_first_generated_gap",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/zat-nik-tel-43d8bb5cdf6b4d05b564a0efea4fb672",
+        "decision": "unavailable",
+        "reason": "BiggsProductions original portfolio. Creator describes texturing it; downloads disabled and no listed licence."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/stargate-zatniktel-a03581004d8040d7873e0335aaf09f52",
+        "decision": "rejected",
+        "reason": "Matching distinctive details and identical 8286 vertices and 16402 faces to the older portfolio listing. The newer downloadable CC BY label lacks creator or upstream grant evidence."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/inspired-by-stargate-sg-1-goa-uld-zat-chest-03a6c365637a4780b0006bec78e70f14",
+        "decision": "rejected",
+        "reason": "Ska-Ara chest is a container, not the sidearm, and uses CC BY-NC-SA 4.0."
+      },
+      {
+        "page": "https://cults3d.com/en/3d-model/fashion/stargate-zat-gun-prop-zat-nik-tel",
+        "decision": "rejected",
+        "reason": "Cosplay STL set. No redistributable textured runtime source established."
+      }
+    ],
+    "selected_source": null,
+    "generation": {
+      "tool": "Repository script tools/author_zat_visual.py",
+      "version": "Python 3.12.3, NumPy 2.4.3, Pillow 12.1.1",
+      "prompt": "Design an original energy sidearm with an open loop frame, curved upper bronze housing, dark lowered grip and two ribbed cyan dielectric rails. Keep the fixed emitting tip at the existing Zat muzzle. Use the project measurement envelope and bake one lossless colour, tangent normal, ORM and emission set.",
+      "references": [
+        {
+          "uri": "docs/assets/intake/zat/baseline.json",
+          "rights_note": "Only project fit and muzzle measurements informed construction. No downloaded model, texture or portfolio reference images were used as geometry or texture inputs."
+        }
+      ],
+      "processing_plan": "Sweep authored profiles with UVs and tangents. Bake four RGB8 material maps into one shared material. Package through tools/gltf_to_glb.py without re-encoding; fit in the existing weapon cache path."
+    }
+  },
+  "geometry": {
+    "max_lod0_triangles": 20000,
+    "max_materials": 1,
+    "lod_triangle_limits": [
+      20000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "loop_frame",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#5E492A",
+        "#AA834E",
+        "#283030",
+        "#22BADC"
+      ],
+      "surface_notes": "Worn bronze upper shell, charcoal inset grip, cyan emissive ports and rails. 1K lossless colour, OpenGL normal, ORM and emission. Runtime D-015 remains matte."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 64,
+    "measurement_plan": "Decode the four 1K mip chains and measure cold runtime parse, cached reuse and representative SGC/offworld frames."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Carter and Teal’c select their existing Zat secondary. Run quiet three-hit state progression, fit and firing checks, four-player travel with the active slot, late join and retry, fallback and clean release export. Owner art approval remains separate."
+}

@@ -1,6 +1,6 @@
 # Shared AI asset workflow
 
-Planning baseline: **18 November 2026, main `7982e2b` (Sprint 6 / PR #77)**. Resume update **21 November 2026**: Sprint 7 is merged to main `1f634d1` via #79/#78, with technical evidence and owner art review pending. Sprint 8 subsequently integrated an original shared staff for review. **Next is Sprint 9, Zat.** Applies equally to Codex, Claude and Gemini/Antigravity. The owner confirmed **Horus Jaffa** and a **Goa’uld mothership**.
+Planning baseline: **18 November 2026, main `7982e2b` (Sprint 6 / PR #77)**. Resume update **21 November 2026**: Sprint 7 is merged to main `1f634d1` via #79/#78, with technical evidence and owner art review pending. Sprint 8 subsequently integrated an original shared staff for review. Sprint 9 adds the original Zat for art review. **Next is Sprint 10, held-weapon audit.** Applies equally to Codex, Claude and Gemini/Antigravity. The owner confirmed **Horus Jaffa** and a **Goa’uld mothership**.
 
 Use the [vertical-slice sprint programme](../plans/asset-vertical-slices.md) to execute one slice at a time. Follow [AGENTS.md](../../AGENTS.md), the [integration playbook](community-asset-playbook.md) and [texture contract](texture-import-contract.md). Work in the supplied checkout. Raw intake goes under `/tmp/tdc-asset-intake/<id>/`; generated captures and reports go under ignored `build/`. Do not create a worktree, clone or project copy. Keep the owner’s downloads intact.
 

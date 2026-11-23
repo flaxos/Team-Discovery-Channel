@@ -157,7 +157,7 @@ func snapshot(label: String, active_slots: Array[int], expected_count: int = 4) 
 		var world := main.worlds()[w] as GateRoom
 		for actor: PlayerController3D in world.players_container.get_children():
 			check_imported_loadout(actor)
-			expected[str(actor.peer_id)] = {"world": w, "class": actor.class_id,
+			expected[str(actor.peer_id)] = {"world": w, "class": actor.class_id, "slot": actor.active_slot,
 				"position": [actor.position.x, actor.position.y, actor.position.z],
 				"health": actor.health_component.current_health, "crouching": actor.is_crouching}
 	require(expected.size() == expected_count, "Exactly the expected operative identities across both worlds")
@@ -185,6 +185,7 @@ func see_snapshot(label: String) -> void:
 					continue
 				var xyz: Array = item.position
 				correct = correct and int(item.world) == w and item["class"] == actor.class_id
+				correct = correct and int(item.slot) == actor.active_slot
 				correct = correct and actor.position.distance_to(Vector3(xyz[0], xyz[1], xyz[2])) < 0.1
 				correct = correct and is_equal_approx(float(item.health), actor.health_component.current_health)
 				correct = correct and bool(item.crouching) == actor.is_crouching
@@ -203,6 +204,14 @@ func see_snapshot(label: String) -> void:
 
 
 func check_imported_loadout(actor: PlayerController3D) -> void:
+	if actor.active_slot == 2 and actor.class_id in [
+		SGCNetworkManager.CLASS_CARTER_TECH, SGCNetworkManager.CLASS_TEALC_JAFFA
+	]:
+		var zat := actor.current_weapon as WeaponZat
+		require(zat != null and zat.muzzle_point.position.is_equal_approx(Vector3(0, 0.05, -0.20)),
+			"Zat secondary keeps its emitter and slot on each replica")
+		require(zat.has_node("WeaponModel/ImportedGLB/ZatBody"), "Original Zat mesh on secondary")
+		return
 	if actor.class_id == SGCNetworkManager.CLASS_TEALC_JAFFA:
 		var staff := actor.current_weapon as WeaponStaff
 		require(staff != null and staff.muzzle_point.position.is_equal_approx(Vector3(0, 0, -1.05)),
@@ -292,6 +301,9 @@ func run_host() -> void:
 			break
 		await frames(1)
 	require(moving.is_crouching and moving.position.distance_to(Vector3(target[0], target[1], target[2])) < 0.05)
+	moving.switch_slot(2)
+	var tealc := (main.current_site as GateRoom).players_container.get_node(str(ids[2])) as PlayerController3D
+	tealc.switch_slot(2)
 	await snapshot("motion", active)
 	var previous := main.current_gate_room.get_instance_id()
 	require(net.request_restart_game())
@@ -302,6 +314,8 @@ func run_host() -> void:
 		require(await marked("ready_%d_2" % index))
 	await worlds(previous)
 	await frames(30)
+	var carter := (main.current_gate_room as GateRoom).players_container.get_node(str(ids[0])) as PlayerController3D
+	require(carter.active_slot == 1 and carter.current_weapon is WeaponMP5, "Retry rebuilds the primary loadout")
 	await snapshot("retry", active)
 	# Free one operative slot, then late join after retry while an existing player travels.
 	mark("leave_%d" % count)
@@ -315,7 +329,10 @@ func run_host() -> void:
 	var replacement := count + 1
 	spawn_child(replacement)
 	require(await marked("loading_%d_1" % replacement))
+	carter.switch_slot(2)
 	await travel(ids[0])
+	var traveled := (main.current_site as GateRoom).players_container.get_node(str(ids[0])) as PlayerController3D
+	require(traveled.active_slot == 2 and traveled.current_weapon is WeaponZat, "Travel carries the Zat secondary")
 	mark("load_%d_1" % replacement)
 	require(await marked("ready_%d_1" % replacement))
 	active.append(replacement)

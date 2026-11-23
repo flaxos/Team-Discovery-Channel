@@ -1,0 +1,22 @@
+{
+  "engine": "4.4.1.stable.official.49a5bc7b6",
+  "authored_glb_sha256": "97d50315c176f6a0d9dbae076cbb20f4bad762fa1fb40bf9ca719eddec2ec753",
+  "rebuild_byte_match": true,
+  "targeted": "build/test-results/sprint9-zat-targeted",
+  "targeted_passed": true,
+  "python_tests_passed": 60,
+  "missing_glb": "Procedural fallback and shot passed",
+  "negative_emitter": "10 mm shift failed independent source geometry assertion",
+  "export": {
+    "passed": true,
+    "pck_bytes": 30537920,
+    "pck_sha256": "fcadc68de0ab5ad1db3733b4873f579d3319e665eb1a8b999e58ce73fe2fcdf9",
+    "credited_model_files": 10,
+    "full_licences": 2,
+    "headless_cold_ms": 60.322,
+    "headless_cached_ms": 0.139,
+    "texture_bytes": 16777212
+  },
+  "full": "Local and hosted results are tracked on the sprint delivery PR",
+  "owner_art": "pending"
+}

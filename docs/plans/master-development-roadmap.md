@@ -4,7 +4,7 @@ Audited 12 November 2026 against `main` at `bf56743` (PR #40 merged); status of 
 
 [ROADMAP.md](../../ROADMAP.md) is the authoritative summary and says what to do next. This document holds the evidence and the detail: the capability matrix, dependency graph, milestone definitions, the art and content track, the risk register and three agent-ready work packages. Architectural choices are recorded in the [decision log](../DECISIONS.md). Game intent is in the [GDD](../../GDD.md).
 
-**Resume update, 21 November 2026:** Sprint 7 is merged into main `1f634d1` through #79/#78; owner art review remains pending. Sprint 8 adds the original shared staff for art review. Next is **Sprint 9, Zat**, in the [asset sprint programme](asset-vertical-slices.md). Sprints 9–35 remain planned. The original audit below is historical except where later milestone updates are identified.
+**Resume update, 21 November 2026:** Sprint 7 is merged into main `1f634d1` through #79/#78; owner art review remains pending. Sprint 8 adds the original shared staff for art review. Sprint 9 adds the original Zat for review. Next is **Sprint 10, the held-weapon audit**, in the [asset sprint programme](asset-vertical-slices.md). Sprints 10–35 remain planned. The original audit below is historical except where later milestone updates are identified.
 
 Sections 3 onward are the plan. [ROADMAP.md](../../ROADMAP.md) records which milestones have been implemented since; the capability matrix below is updated as they land, with the milestone named.
 
@@ -309,7 +309,7 @@ See section 6 for sequencing.
 
 **GA-2 — Kit expansion** · XL · split per room group, ordered by the rooms the first mission uses: remaining corridors and junctions, large chambers, ramp and tall rooms, functional props (consoles, generator, crates), lighting and atmosphere.
 
-Sprint 6 is merged in PR #77 and implements the first corridor group for owner review: `room01`–`room09`, 14 native compound rooms with pieces. It recovers unfinished work, completes junction variants and preserves production physical geometry; [evidence](../reviews/2026-11-18-sprint6-goauld-corridors.md). Owner art acceptance remains pending before larger chambers. The owner-requested next art sequence is [community-first vertical slices, Sprints 7–35](asset-vertical-slices.md), with a shared Codex/Antigravity workflow, weapons and SGC first, then rigged characters, offworld and bounded mothership art. Sprint 7 is merged via #79/#78 with its community MP5SD, intake and distributed credits; owner art acceptance remains pending. Sprint 8 integrates the original shared staff for review. Sprint 9 Zat is next.
+Sprint 6 is merged in PR #77 and implements the first corridor group for owner review: `room01`–`room09`, 14 native compound rooms with pieces. It recovers unfinished work, completes junction variants and preserves production physical geometry; [evidence](../reviews/2026-11-18-sprint6-goauld-corridors.md). Owner art acceptance remains pending before larger chambers. The owner-requested next art sequence is [community-first vertical slices, Sprints 7–35](asset-vertical-slices.md), with a shared Codex/Antigravity workflow, weapons and SGC first, then rigged characters, offworld and bounded mothership art. Sprint 7 is merged via #79/#78 with its community MP5SD, intake and distributed credits; owner art acceptance remains pending. Sprint 8 integrates the original shared staff for review. Sprint 9 integrates the original Zat for review. Sprint 10 is next.
 
 ### G — Stargate world transitions
 
