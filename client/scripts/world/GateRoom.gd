@@ -138,6 +138,16 @@ func _ready() -> void:
 		if spawner.get_spawnable_scene_count() == 0:
 			spawner.add_spawnable_scene(PLAYER_SCENE_PATH)
 
+	# Deployed turrets have server-owned state and use the same readiness gate as the roster.
+	var deployments := Node3D.new()
+	deployments.name = "TurretDeployments"
+	add_child(deployments)
+	var turret_spawner := MultiplayerSpawner.new()
+	turret_spawner.name = "TurretSpawner"
+	turret_spawner.spawn_path = NodePath("../TurretDeployments")
+	turret_spawner.add_spawnable_scene("res://scenes/props/DeployableTurret.tscn")
+	add_child(turret_spawner)
+
 	# Connect players container to bind HUD
 	if players_container != null:
 		players_container.child_entered_tree.connect(_on_player_child_entered)
@@ -959,6 +969,15 @@ func _on_peer_disconnected(peer_id: int) -> void:
 		players_container.remove_child(player_node)
 		player_node.queue_free()
 	call_deferred("_check_squad_status")
+
+
+@rpc("authority", "call_remote", "unreliable")
+func play_turret_fx(origin: Vector3, hit_point: Vector3, operator_id: int) -> void:
+	DeployableTurret.show_turret_fx(self, origin, hit_point)
+	if not multiplayer.is_server() and operator_id == multiplayer.get_unique_id():
+		var actor := players_container.get_node_or_null(str(operator_id)) as PlayerController3D
+		if actor != null:
+			actor.add_screen_shake(0.20)
 
 
 @rpc("any_peer", "call_remote", "reliable")

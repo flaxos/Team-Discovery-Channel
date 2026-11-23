@@ -1,0 +1,45 @@
+{
+  "checked": "2026-11-23",
+  "baseline_commit": "e86195032a41aa931f838970c09b3c231a791d1b",
+  "preferred_original_format": {
+    "listing": "https://sketchfab.com/3d-models/browning-m2-381c0f1939e843ceae232500e24e7231",
+    "metadata": "https://api.sketchfab.com/v3/models/381c0f1939e843ceae232500e24e7231",
+    "creator": "emran.bayati",
+    "licence": "CC BY 4.0",
+    "listed_downloadable": true,
+    "anonymous_download_endpoint_http": 401,
+    "reported_faces": 207207,
+    "reported_texture_count": 15,
+    "creator_evidence": "The artist states they authored the model in 3ds Max and Substance Painter. The listing labels separate gun and tripod/ammo box texture sets.",
+    "reported_source_resolution": "8K gun set and 4K tripod/ammo box set",
+    "archive_status": "Owner download inspected. See archive-evidence.json for original FBX, maps and hashes."
+  },
+  "alternates": [
+    {
+      "listing": "https://sketchfab.com/3d-models/browning-m2-90ba9929d1ff415f8257415176d39104",
+      "metadata": "https://api.sketchfab.com/v3/models/90ba9929d1ff415f8257415176d39104",
+      "creator": "Amapsis",
+      "licence": "CC BY 4.0",
+      "reported_faces": 70840,
+      "reported_texture_count": 29,
+      "anonymous_download_endpoint_http": 401,
+      "decision": "Secondary candidate. Gun and tripod advertised with six 4K specular/glossiness sets. Confirm authorship and surface conversion before use."
+    },
+    {
+      "listing": "https://sketchfab.com/3d-models/m2-browning-low-poly-b3ccf9641d474e7fa928cce6dcfc30ae",
+      "metadata": "https://api.sketchfab.com/v3/models/b3ccf9641d474e7fa928cce6dcfc30ae",
+      "creator": "GoldbergR",
+      "licence": "CC BY 4.0",
+      "reported_texture_count": 0,
+      "anonymous_download_endpoint_http": 401,
+      "decision": "No maps declared, and detailed authorship and separate tripod evidence are missing."
+    },
+    {
+      "listing": "https://sketchfab.com/3d-models/m2-50cal-machinegun-cc0-cbd897c1e1554fae9a5302a79ed59640",
+      "creator": "britdawgmasterfunk",
+      "decision": "Textured, lower-poly gun candidate if a separately authored mount becomes necessary. The creator states CC0 while Sketchfab shows CC Attribution. Source archive and mount coverage are unverified.",
+      "alternate_listing": "https://blendswap.com/blend/30289",
+      "alternate_listing_http": 403
+    }
+  ]
+}

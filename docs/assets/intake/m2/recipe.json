@@ -1,0 +1,38 @@
+{
+  "source": "/tmp/tdc-asset-intake/m2/extracted/source/Browning M2_marmoset.fbx",
+  "output": "/tmp/tdc-asset-intake/m2/inspect-materials.glb",
+  "root_name": "BrowningM2",
+  "keep_nodes": [
+    "base_low",
+    "Main_low001",
+    "box_low003"
+  ],
+  "max_texture_size": 1024,
+  "image_format": "PNG",
+  "materials": {
+    "T_BrowningM2_01": {
+      "albedo": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_01_albedo.jpeg",
+      "normal": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_01_normal.jpeg",
+      "roughness": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_01_roughness.jpeg",
+      "metallic": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_01_metallic.jpeg",
+      "ao": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_01_AO.jpeg",
+      "normal_convention": "directx"
+    },
+    "T_BrowningM2_02": {
+      "albedo": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_02_albedo.jpeg",
+      "normal": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_02_normal.png",
+      "roughness": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_02_roughness.jpeg",
+      "metallic": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_02_metallic.jpeg",
+      "ao": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_02_AO.jpeg",
+      "normal_convention": "directx"
+    },
+    "T_BrowningM2_03": {
+      "albedo": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_03_albedo.jpeg",
+      "normal": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_03_normal.png",
+      "roughness": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_03_roughness.jpeg",
+      "metallic": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_03_metallic.jpeg",
+      "ao": "/tmp/tdc-asset-intake/m2/extracted/textures/T_BrowningM2_03_AO.jpeg",
+      "normal_convention": "directx"
+    }
+  }
+}

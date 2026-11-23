@@ -366,9 +366,13 @@ func run_host() -> void:
 			require(not log.contains("ERROR:") and not log.contains("ObjectDB"), log)
 
 
+func class_for_slot(index: int) -> String:
+	return CLASSES[(index - 1) % CLASSES.size()]
+
+
 func run_client() -> void:
 	net.player_name = "Roster %d" % slot
-	net.selected_class_id = CLASSES[(slot - 1) % CLASSES.size()]
+	net.selected_class_id = class_for_slot(slot)
 	require(net.join_game("127.0.0.1", port()) == OK)
 	await worlds()
 	mark("ready_%d_1" % slot)

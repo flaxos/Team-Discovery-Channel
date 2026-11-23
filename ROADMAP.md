@@ -16,7 +16,7 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 ### Pick up here
 
-**23 November 2026.** Sprint 8’s shared staff and Sprint 9’s original Zat are merged via #81 and #82. Sprint 10 audited all six held weapons in SGC and offworld and verified the clean release pack. Owner mesh and material review remains open, including the M249’s extended bipod. **Next planned slice is Sprint 11, the M2 defensive position.** Use `Start sprint 11 from docs/plans/asset-vertical-slices.md`. [Sprint 10 review](docs/reviews/2026-11-23-sprint10-held-weapon-audit.md).
+**23 November 2026.** Sprint 8’s shared staff and Sprint 9’s original Zat are merged via #81 and #82. Sprint 10 audited all six held weapons in SGC and offworld and verified the clean release pack. Owner mesh and material review remains open, including the M249’s extended bipod. **Sprint 11’s M2 integration is ready for review.** The community gun and tripod are fitted to the existing turret. Sprint 12 covers field kit. [Sprint 11 review](docs/reviews/2026-11-23-sprint11-m2-intake.md) · [Sprint 10 review](docs/reviews/2026-11-23-sprint10-held-weapon-audit.md).
 
 | Option | What | Who | Detail |
 |---|---|---|---|

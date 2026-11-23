@@ -71,6 +71,15 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 - **Modifications:** Recipe-packed the 10,669-triangle gun body from FBX, omitting the separate optional red-dot sight (1,416 triangles). Rebound the two source material sets by inspected UV/render correspondence, reduced 4K maps to 2K, converted labelled DirectX normals to OpenGL, and packed AO/roughness/metallic into ORM. All embedded maps use lossless PNG; unused opaque alpha discarded. Geometry and UVs retained. Runtime wrapper uses measured scale/orientation/crown alignment, mipmaps and the existing D-015 metallic-zero override. No reload or optic animation added. The older Kenney file remains packaged and credited.
 - **Trademarks:** The artist’s licence covers the model; manufacturer markings are retained as source art.
 
+### Deployable Browning M2
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/weapons/browning_m2.glb` | Browning M2 | **emran.bayati** | https://sketchfab.com/3d-models/browning-m2-381c0f1939e843ceae232500e24e7231 | [CC BY 4.0](licenses/CC-BY-4.0.txt) | Gun and stationary tripod fitted to DeployableTurret | M |
+
+- **Modifications:** Excluded the presentation plinth and loose ammo props. Separated the tripod by connected mesh parts, fitted both visual branches to the game scene, downsized maps to 1K, flipped normal green, and packed AO, roughness and metallic. The game applies its matte treatment. The split shield is original project art.
+- **Source evidence:** [Archive hashes and creator licence evidence](../docs/assets/intake/m2/archive-evidence.json).
+
 ## 2. Community Stargate Props & Faction Assets
 
 | Asset file | Title | Uploader | Source | Licence | Use |

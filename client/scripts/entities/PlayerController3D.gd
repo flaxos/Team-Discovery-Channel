@@ -564,6 +564,8 @@ func _physics_process(delta: float) -> void:
 		_server_revive_tick(delta)
 	# Non-authorities rely on MultiplayerSynchronizer replication for position/rotation
 	if not is_local_authority:
+		if multiplayer.is_server() and turret_cooldown > 0.0 and not is_instance_valid(mounted_turret):
+			turret_cooldown = maxf(0.0, turret_cooldown - delta)
 		move_and_slide()
 		return
 
@@ -654,11 +656,8 @@ func _physics_process(delta: float) -> void:
 	if mounted_turret != null and is_instance_valid(mounted_turret):
 		velocity = Vector3.ZERO
 		global_position = mounted_turret.global_position + mounted_turret.global_transform.basis.z * 0.75
-		if Input.is_action_pressed("fire"):
-			var aim_dir := (current_aim_target - mounted_turret.turret_head.global_position).normalized()
-			if aim_dir != Vector3.ZERO:
-				if mounted_turret.try_manual_fire(aim_dir):
-					add_screen_shake(0.20)
+		if mounted_turret.receive_player_input(current_aim_target, Input.is_action_pressed("fire")):
+			add_screen_shake(0.20)
 		_update_camera_and_occlusion(delta)
 		return
 
@@ -1088,24 +1087,45 @@ func _process_combat() -> void:
 		current_weapon.try_fire(spread_mult)
 
 
+@rpc("authority", "call_remote", "reliable")
+func _request_turret_deployment() -> void:
+	if multiplayer.is_server() and _server_class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
+		_deploy_turret_on_server()
+
+
+func _deploy_turret_on_server() -> void:
+	if turret_cooldown > 0.0 or health_component == null or health_component.is_dead \
+			or health_component.is_downed or health_component.is_stunned:
+		return
+	var world := MissionWorld.of(self) as GateRoom
+	if world == null or world.mission_result >= 0:
+		return
+	var parent := world.get_node("TurretDeployments") as Node3D
+	if is_instance_valid(active_turret):
+		active_turret.queue_free()
+	var turret := (load("res://scenes/props/DeployableTurret.tscn") as PackedScene).instantiate() as DeployableTurret
+	turret.name = "DeployedM2_" + str(peer_id)
+	turret.position = MissionWorld.local(parent, global_position - global_basis.z * 1.6)
+	parent.add_child(turret, true)
+	active_turret = turret
+	turret_cooldown = TURRET_COOLDOWN_S
+	if not is_local_authority:
+		_confirm_turret_deployment.rpc_id(peer_id)
+	print("Player %d deployed .50 Cal Tripod Turret! Cooldown started (%.0fs)." % [peer_id, TURRET_COOLDOWN_S])
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _confirm_turret_deployment() -> void:
+	if is_local_authority and multiplayer.get_remote_sender_id() == 1:
+		turret_cooldown = TURRET_COOLDOWN_S
+
+
 func _deploy_tactical_gadget() -> void:
 	if class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
-		if turret_cooldown > 0.0:
-			print("Player %d: Tripod Turret on cooldown (%.1fs remaining)!" % [peer_id, turret_cooldown])
-			return
-		# Free previous active turret if any
-		if active_turret != null and is_instance_valid(active_turret):
-			active_turret.queue_free()
-			active_turret = null
-
-		var turret_scene := load("res://scenes/props/DeployableTurret.tscn") as PackedScene
-		if turret_scene != null:
-			var turret := turret_scene.instantiate() as DeployableTurret
-			turret.position = MissionWorld.local(get_parent(), global_position - global_transform.basis.z * 1.6)
-			get_parent().add_child(turret)
-			active_turret = turret
-			turret_cooldown = TURRET_COOLDOWN_S
-			print("Player %d deployed .50 Cal Tripod Turret! Cooldown started (%.0fs)." % [peer_id, TURRET_COOLDOWN_S])
+		if multiplayer.is_server():
+			_deploy_turret_on_server()
+		elif turret_cooldown <= 0.0:
+			_request_turret_deployment.rpc_id(1)
 	elif class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
 		if active_c4 != null and is_instance_valid(active_c4) and active_c4.is_armed and active_c4.mode == C4Satchel.C4Mode.REMOTE:
 			active_c4.detonate()
@@ -2061,7 +2081,7 @@ func _try_interact() -> void:
 
 	# 2. Check for nearby DeployableTurret to mount
 	var nearest_turret: DeployableTurret = null
-	var min_turret_dist: float = 2.4
+	var min_turret_dist := DeployableTurret.MOUNT_REACH
 	for node in MissionWorld.of(self).find_children("", "DeployableTurret", true, false):
 		var t := node as DeployableTurret
 		if t != null and t.mounted_player == null:
@@ -2071,8 +2091,7 @@ func _try_interact() -> void:
 				nearest_turret = t
 
 	if nearest_turret != null:
-		mounted_turret = nearest_turret
-		nearest_turret.mount(self)
+		nearest_turret.request_mount(self)
 		return
 
 	# Aim at a specific control before using the proximity fallback.

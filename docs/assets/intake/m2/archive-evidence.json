@@ -1,0 +1,93 @@
+{
+  "archive": "browning-m2.zip",
+  "archive_sha256": "a3468d77cd166b87b2305f371971e64eb78206b2cb18c4d1fed70ed9046922b9",
+  "licence": "CC BY 4.0",
+  "licence_evidence": "Creator listing and API metadata. The owner downloaded the original archive, which contains one FBX and texture files with no separate licence or other terms.",
+  "files": [
+    {
+      "path": "source/Browning M2_marmoset.fbx",
+      "bytes": 6332624,
+      "sha256": "ae488cd5c2b286c2b975ea6cc62b8d1200f2f544ba8d3cb8706f2c8ecf4e42a7"
+    },
+    {
+      "path": "textures/T_BrowningM2_01_AO.jpeg",
+      "bytes": 5038020,
+      "sha256": "f73c5c28f2a5e3dc4e2798ff07b3c90c88edb2a44de39fe156f09fc1bea699b4"
+    },
+    {
+      "path": "textures/T_BrowningM2_01_albedo.jpeg",
+      "bytes": 17570600,
+      "sha256": "01d7582b7b77e87cc099ddc7c81b9eddde3d4aed37978c851b437a9367349a70"
+    },
+    {
+      "path": "textures/T_BrowningM2_01_metallic.jpeg",
+      "bytes": 297679,
+      "sha256": "97253b047d23a3dcba2bfad5a915780e80e6568a4b837e93c7348057af18d461"
+    },
+    {
+      "path": "textures/T_BrowningM2_01_normal.jpeg",
+      "bytes": 64290182,
+      "sha256": "8398ba63a67b6b4a02ceb36a6b3a3b3af3626aa5915280c62fa27fe79f2ab175"
+    },
+    {
+      "path": "textures/T_BrowningM2_01_roughness.jpeg",
+      "bytes": 20957839,
+      "sha256": "c034791af2f2ca1987dd7494cb17fc121ede4afc41cfa71e84a22f6c83d574b2"
+    },
+    {
+      "path": "textures/T_BrowningM2_02_AO.jpeg",
+      "bytes": 1670695,
+      "sha256": "8b0811d896fa287c816484f2aa79678569cfce61738b389447de0437af0b5efd"
+    },
+    {
+      "path": "textures/T_BrowningM2_02_albedo.jpeg",
+      "bytes": 3619210,
+      "sha256": "aaa360f47b536869d2e59c8b2ce82a49d9e2d62780bcd9bbff866e1c27e6df5e"
+    },
+    {
+      "path": "textures/T_BrowningM2_02_metallic.jpeg",
+      "bytes": 227413,
+      "sha256": "024d325e36a0b69dbbb64916d77073599f4ebe7b05fe4f9c4a9976fbc3d376f0"
+    },
+    {
+      "path": "textures/T_BrowningM2_02_normal.png",
+      "bytes": 15552681,
+      "sha256": "d7440e877346f443974f5f96e5d1543f0cd57ccbe16196598e06b83e81c3ca4c"
+    },
+    {
+      "path": "textures/T_BrowningM2_02_roughness.jpeg",
+      "bytes": 5183753,
+      "sha256": "a64f4503b0c64ffe61e9cddf4947d9ccfc437c0d7b551ee7b21a97843513c151"
+    },
+    {
+      "path": "textures/T_BrowningM2_03_AO.jpeg",
+      "bytes": 6234268,
+      "sha256": "99017693818833e8803ecc00c0fc8a5aedb85b512155e651ff357a7c297b2835"
+    },
+    {
+      "path": "textures/T_BrowningM2_03_albedo.jpeg",
+      "bytes": 5018274,
+      "sha256": "a329a867d49fcd3d388afb976cf6f7d2625734524f1262068f65fb9ab10e421d"
+    },
+    {
+      "path": "textures/T_BrowningM2_03_metallic.jpeg",
+      "bytes": 900221,
+      "sha256": "58ccca904916c57490cf78c1ea0b05b06db443f3ab8681b41bedc01b03fdf98c"
+    },
+    {
+      "path": "textures/T_BrowningM2_03_normal.png",
+      "bytes": 24519971,
+      "sha256": "4e18a4db175b50af96e04279e05e9eeefd81da4a65602225f051013f61bf1796"
+    },
+    {
+      "path": "textures/T_BrowningM2_03_roughness.jpeg",
+      "bytes": 5439618,
+      "sha256": "3d616807e0c15fe31ffcaea7ace54c57be9d9d5c84f09e3d40773abf80e7ca40"
+    },
+    {
+      "path": "textures/internal_ground_ao_texture.jpeg",
+      "bytes": 10021,
+      "sha256": "4b1489f1be7b166949fcb0ed5b793e2748b688b1d585389a3d9b944c6c1ea442"
+    }
+  ]
+}

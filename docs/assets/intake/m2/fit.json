@@ -1,0 +1,44 @@
+{
+  "authored_nodes": [
+    "TurretWest",
+    "TurretEast"
+  ],
+  "interaction_height": 2.0,
+  "interaction_radius": 1.79999995231628,
+  "muzzle_in_head": [
+    0.0,
+    0.0,
+    -1.20000004768372
+  ],
+  "pivot_in_base": [
+    0.0,
+    0.75,
+    0.0
+  ],
+  "visual_bounds_max": [
+    0.46110263466835,
+    1.12000000476837,
+    0.746683359146118
+  ],
+  "visual_bounds_min": [
+    -0.461102575063705,
+    9.5367431640625e-07,
+    -1.20000314712524
+  ],
+  "gpu": "NVIDIA GeForce RTX 3060, Forward+ Vulkan, 1440x900",
+  "runtime_mesh_triangles": {
+    "gun": 42313,
+    "tripod": 7276
+  },
+  "decoded_texture_bytes": 30758222,
+  "headless_cold_ms_sample": 159.267,
+  "headless_cached_ms_sample": 0.068,
+  "release_pack": {
+    "bytes": 39071616,
+    "sha256": "6acb0100d9f82897e5213cf54ecc67a6525ffadd232e562838702d2f863d6649",
+    "checks": [
+      "test_imported_m2_visual",
+      "test_asset_credits"
+    ]
+  }
+}
