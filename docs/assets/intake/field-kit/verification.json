@@ -1,7 +1,7 @@
 {
   "linux_release": {
-    "bytes": 44734752,
-    "sha256": "fcbc8786c1a6aa5592b57dfef4c578563dfaa0c570aad13ae66d079b6ac384e4",
+    "bytes": 44734800,
+    "sha256": "6cf1104594111b373b79d7fe0729232aef461b2234f8307f6dbaef02b4a89d4c",
     "checks": [
       "test_asset_credits",
       "test_field_kit_visuals"
@@ -9,8 +9,8 @@
     "result": "pass"
   },
   "fallback_linux_release": {
-    "bytes": 39108128,
-    "sha256": "631caddf218b48c9c874940c63d943d998bdf0f3775431232fd30079a51f07e0",
+    "bytes": 39108176,
+    "sha256": "69c4efcf8aa5acebe59b3a4319ce7e33fdf9eb2a4617a4e9e72e531953783670",
     "checks": [
       "test_field_kit_visuals -- --expect-fallback"
     ],

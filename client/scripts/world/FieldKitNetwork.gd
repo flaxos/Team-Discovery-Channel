@@ -7,6 +7,10 @@ static func configure(prop: Node3D, state: Array[String], streamed: Array[String
 	var sync := prop.get_node_or_null("FieldKitSync") as MultiplayerSynchronizer
 	if sync == null:
 		return
+	# Only the deployment spawner creates this node on remote peers.
+	if prop.get_parent().name != CONTAINER:
+		sync.public_visibility = false
+		return
 	var config := SceneReplicationConfig.new()
 	var transform_path := NodePath(".:transform")
 	config.add_property(transform_path)
