@@ -1,0 +1,914 @@
+{
+  "date": "2026-11-23",
+  "gameplay_baseline": "0cba597034493b1adc8f7a9ea351cc5b7c121593",
+  "engine": "Godot 4.4.1.stable.official.49a5bc7b6",
+  "renderer": "Vulkan Forward+ / NVIDIA GeForce RTX 3060",
+  "audit_method": "Headless measurements from live mesh surfaces and decoded mip chains. Cold and cached timings are one add_child sample each, within one process. Map slots are grouped by texture RID.",
+  "frame_method": "60 frame intervals at the stock game camera, with scene-wide counters sampled at the end of each interval series.",
+  "weapons": [
+    {
+      "cached_ms": 0.064,
+      "cold_ms": 60.871,
+      "glb_bytes": 1070592,
+      "lod_surfaces": 0,
+      "maps": [
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture",
+            "ao_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture",
+            "ao_texture"
+          ],
+          "width": 1024
+        }
+      ],
+      "materials": 2,
+      "surfaces": 2,
+      "texture_bytes": 25165818,
+      "triangles": 10185,
+      "weapon": "m9"
+    },
+    {
+      "cached_ms": 0.037,
+      "cold_ms": 72.29,
+      "glb_bytes": 2006024,
+      "lod_surfaces": 0,
+      "maps": [
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture"
+          ],
+          "width": 1024
+        }
+      ],
+      "materials": 1,
+      "surfaces": 1,
+      "texture_bytes": 12582909,
+      "triangles": 38083,
+      "weapon": "p90"
+    },
+    {
+      "cached_ms": 0.038,
+      "cold_ms": 415.05,
+      "glb_bytes": 14130088,
+      "lod_surfaces": 0,
+      "maps": [
+        {
+          "bytes": 16777215,
+          "height": 2048,
+          "image_format": 4,
+          "mip_levels": 12,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 2048
+        },
+        {
+          "bytes": 22369620,
+          "height": 2048,
+          "image_format": 5,
+          "mip_levels": 12,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 2048
+        },
+        {
+          "bytes": 22369620,
+          "height": 2048,
+          "image_format": 5,
+          "mip_levels": 12,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture",
+            "ao_texture"
+          ],
+          "width": 2048
+        },
+        {
+          "bytes": 16777215,
+          "height": 2048,
+          "image_format": 4,
+          "mip_levels": 12,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 2048
+        },
+        {
+          "bytes": 22369620,
+          "height": 2048,
+          "image_format": 5,
+          "mip_levels": 12,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 2048
+        },
+        {
+          "bytes": 22369620,
+          "height": 2048,
+          "image_format": 5,
+          "mip_levels": 12,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture"
+          ],
+          "width": 2048
+        }
+      ],
+      "materials": 2,
+      "surfaces": 2,
+      "texture_bytes": 123032910,
+      "triangles": 10669,
+      "weapon": "mp5"
+    },
+    {
+      "cached_ms": 0.048,
+      "cold_ms": 56.338,
+      "glb_bytes": 1835876,
+      "lod_surfaces": 0,
+      "maps": [
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture",
+            "ao_texture"
+          ],
+          "width": 1024
+        }
+      ],
+      "materials": 1,
+      "surfaces": 1,
+      "texture_bytes": 12582909,
+      "triangles": 13328,
+      "weapon": "m249"
+    },
+    {
+      "cached_ms": 0.05,
+      "cold_ms": 57.535,
+      "glb_bytes": 2656000,
+      "lod_surfaces": 0,
+      "maps": [
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture",
+            "ao_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "emission_texture"
+          ],
+          "width": 1024
+        }
+      ],
+      "materials": 1,
+      "surfaces": 1,
+      "texture_bytes": 16777212,
+      "triangles": 9216,
+      "weapon": "staff_weapon"
+    },
+    {
+      "cached_ms": 0.038,
+      "cold_ms": 52.097,
+      "glb_bytes": 2767800,
+      "lod_surfaces": 0,
+      "maps": [
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "albedo_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "normal_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "roughness_texture",
+            "metallic_texture",
+            "ao_texture"
+          ],
+          "width": 1024
+        },
+        {
+          "bytes": 4194303,
+          "height": 1024,
+          "image_format": 4,
+          "mip_levels": 11,
+          "slots": [
+            "emission_texture"
+          ],
+          "width": 1024
+        }
+      ],
+      "materials": 1,
+      "surfaces": 1,
+      "texture_bytes": 16777212,
+      "triangles": 8448,
+      "weapon": "zat"
+    }
+  ],
+  "decoded_texture_bytes": 206918970,
+  "mission_views": [
+    {
+      "mission": "sgc_uat",
+      "class": "oneill_recon",
+      "weapon": "m9",
+      "frame": {
+        "draw_calls": 2710,
+        "median_ms": 6.545,
+        "original": false,
+        "p95_ms": 15.87,
+        "primitives": 1093627,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "m9"
+      },
+      "fit": {
+        "class": "oneill_recon",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0199999995529652,
+          -0.180000007152557
+        ],
+        "visual_bounds_max": [
+          0.0159589629620314,
+          0.0316454768180847,
+          0.0371695011854172
+        ],
+        "visual_bounds_min": [
+          -0.0160505194216967,
+          -0.110150039196014,
+          -0.180045172572136
+        ],
+        "weapon": "m9"
+      },
+      "downed_sidearm": null,
+      "captures": {
+        "aim": "sgc-m9-aim.png"
+      }
+    },
+    {
+      "mission": "sgc_uat",
+      "class": "oneill_recon",
+      "weapon": "p90",
+      "frame": {
+        "draw_calls": 2708,
+        "median_ms": 8.469,
+        "original": false,
+        "p95_ms": 14.428,
+        "primitives": 1149421,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "p90"
+      },
+      "fit": {
+        "class": "oneill_recon",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0199999995529652,
+          -0.300000011920929
+        ],
+        "visual_bounds_max": [
+          0.0342974029481411,
+          0.138914972543716,
+          0.199888229370117
+        ],
+        "visual_bounds_min": [
+          -0.0341753326356411,
+          -0.0733414515852928,
+          -0.300602316856384
+        ],
+        "weapon": "p90"
+      },
+      "downed_sidearm": "m9",
+      "captures": {
+        "aim": "sgc-p90-aim.png",
+        "downed": "sgc-oneill-recon-downed.png"
+      }
+    },
+    {
+      "mission": "sgc_uat",
+      "class": "carter_tech",
+      "weapon": "mp5",
+      "frame": {
+        "draw_calls": 2715,
+        "median_ms": 9.371,
+        "original": false,
+        "p95_ms": 14.513,
+        "primitives": 1107586,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "mp5"
+      },
+      "fit": {
+        "class": "carter_tech",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.00999999977648258,
+          -0.360000014305115
+        ],
+        "visual_bounds_max": [
+          0.0245936177670956,
+          0.0699020177125931,
+          0.331958532333374
+        ],
+        "visual_bounds_min": [
+          -0.0261255167424679,
+          -0.174633413553238,
+          -0.36000519990921
+        ],
+        "weapon": "mp5"
+      },
+      "downed_sidearm": "zat",
+      "captures": {
+        "aim": "sgc-mp5-aim.png",
+        "downed": "sgc-carter-tech-downed.png"
+      }
+    },
+    {
+      "mission": "sgc_uat",
+      "class": "sg3_heavy",
+      "weapon": "m249",
+      "frame": {
+        "draw_calls": 2709,
+        "median_ms": 8.67,
+        "original": false,
+        "p95_ms": 16.668,
+        "primitives": 1113265,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "m249"
+      },
+      "fit": {
+        "class": "sg3_heavy",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0299999993294477,
+          -0.620000004768372
+        ],
+        "visual_bounds_max": [
+          0.233521476387978,
+          0.158735662698746,
+          0.342858850955963
+        ],
+        "visual_bounds_min": [
+          -0.233513906598091,
+          -0.341807633638382,
+          -0.619995176792145
+        ],
+        "weapon": "m249"
+      },
+      "downed_sidearm": "m9",
+      "captures": {
+        "aim": "sgc-m249-aim.png",
+        "close": "sgc-m249-close.png",
+        "downed": "sgc-sg3-heavy-downed.png"
+      }
+    },
+    {
+      "mission": "sgc_uat",
+      "class": "tealc_jaffa",
+      "weapon": "staff_weapon",
+      "frame": {
+        "draw_calls": 2711,
+        "median_ms": 9.413,
+        "original": false,
+        "p95_ms": 17.412,
+        "primitives": 1101039,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "staff_weapon"
+      },
+      "fit": {
+        "class": "tealc_jaffa",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0,
+          -1.04999995231628
+        ],
+        "visual_bounds_max": [
+          0.0450000017881393,
+          0.0411755740642548,
+          0.593999981880188
+        ],
+        "visual_bounds_min": [
+          -0.0313928127288818,
+          -0.041175588965416,
+          -1.05000007152557
+        ],
+        "weapon": "staff_weapon"
+      },
+      "downed_sidearm": "zat",
+      "captures": {
+        "aim": "sgc-staff_weapon-aim.png",
+        "downed": "sgc-tealc-jaffa-downed.png"
+      }
+    },
+    {
+      "mission": "sgc_uat",
+      "class": "carter_tech",
+      "weapon": "zat",
+      "frame": {
+        "draw_calls": 2713,
+        "median_ms": 10.806,
+        "original": false,
+        "p95_ms": 15.711,
+        "primitives": 1092579,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "zat"
+      },
+      "fit": {
+        "class": "carter_tech",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0500000007450581,
+          -0.200000002980232
+        ],
+        "visual_bounds_max": [
+          0.0321064069867134,
+          0.0736482813954353,
+          0.113406017422676
+        ],
+        "visual_bounds_min": [
+          -0.0321064069867134,
+          -0.072086863219738,
+          -0.200000032782555
+        ],
+        "weapon": "zat"
+      },
+      "downed_sidearm": null,
+      "captures": {
+        "aim": "sgc-zat-aim.png"
+      }
+    },
+    {
+      "mission": "goauld_infiltration",
+      "class": "oneill_recon",
+      "weapon": "m9",
+      "frame": {
+        "draw_calls": 27,
+        "median_ms": 1.613,
+        "original": false,
+        "p95_ms": 12.208,
+        "primitives": 15415,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "m9"
+      },
+      "fit": {
+        "class": "oneill_recon",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0199999995529652,
+          -0.180000007152557
+        ],
+        "visual_bounds_max": [
+          0.0159585233777761,
+          0.0316454768180847,
+          0.0371705740690231
+        ],
+        "visual_bounds_min": [
+          -0.0160509590059519,
+          -0.110150039196014,
+          -0.18004409968853
+        ],
+        "weapon": "m9"
+      },
+      "downed_sidearm": null,
+      "captures": {
+        "aim": "offworld-m9-aim.png"
+      }
+    },
+    {
+      "mission": "goauld_infiltration",
+      "class": "oneill_recon",
+      "weapon": "p90",
+      "frame": {
+        "draw_calls": 26,
+        "median_ms": 1.81,
+        "original": false,
+        "p95_ms": 11.135,
+        "primitives": 43311,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "p90"
+      },
+      "fit": {
+        "class": "oneill_recon",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0199999995529652,
+          -0.300000011920929
+        ],
+        "visual_bounds_max": [
+          0.0342991650104523,
+          0.138915091753006,
+          0.199889540672302
+        ],
+        "visual_bounds_min": [
+          -0.0341735705733299,
+          -0.0733413323760033,
+          -0.300601005554199
+        ],
+        "weapon": "p90"
+      },
+      "downed_sidearm": "m9",
+      "captures": {
+        "aim": "offworld-p90-aim.png",
+        "downed": "offworld-oneill-recon-downed.png"
+      }
+    },
+    {
+      "mission": "goauld_infiltration",
+      "class": "carter_tech",
+      "weapon": "mp5",
+      "frame": {
+        "draw_calls": 28,
+        "median_ms": 2.026,
+        "original": false,
+        "p95_ms": 11.321,
+        "primitives": 16685,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "mp5"
+      },
+      "fit": {
+        "class": "carter_tech",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.00999999977648258,
+          -0.360000014305115
+        ],
+        "visual_bounds_max": [
+          0.0245962049812078,
+          0.0699020177125931,
+          0.331958889961243
+        ],
+        "visual_bounds_min": [
+          -0.0261229295283556,
+          -0.174633428454399,
+          -0.360004842281342
+        ],
+        "weapon": "mp5"
+      },
+      "downed_sidearm": "zat",
+      "captures": {
+        "aim": "offworld-mp5-aim.png",
+        "downed": "offworld-carter-tech-downed.png"
+      }
+    },
+    {
+      "mission": "goauld_infiltration",
+      "class": "sg3_heavy",
+      "weapon": "m249",
+      "frame": {
+        "draw_calls": 26,
+        "median_ms": 2.304,
+        "original": false,
+        "p95_ms": 9.852,
+        "primitives": 18582,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "m249"
+      },
+      "fit": {
+        "class": "sg3_heavy",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0299999993294477,
+          -0.620000004768372
+        ],
+        "visual_bounds_max": [
+          0.233522072434425,
+          0.158735722303391,
+          0.342853903770447
+        ],
+        "visual_bounds_min": [
+          -0.233513310551643,
+          -0.341807454824448,
+          -0.620000004768372
+        ],
+        "weapon": "m249"
+      },
+      "downed_sidearm": "m9",
+      "captures": {
+        "aim": "offworld-m249-aim.png",
+        "close": "offworld-m249-close.png",
+        "downed": "offworld-sg3-heavy-downed.png"
+      }
+    },
+    {
+      "mission": "goauld_infiltration",
+      "class": "tealc_jaffa",
+      "weapon": "staff_weapon",
+      "frame": {
+        "draw_calls": 28,
+        "median_ms": 2.23,
+        "original": false,
+        "p95_ms": 11.173,
+        "primitives": 14580,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "staff_weapon"
+      },
+      "fit": {
+        "class": "tealc_jaffa",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0,
+          -1.04999995231628
+        ],
+        "visual_bounds_max": [
+          0.0450000017881393,
+          0.0411755815148354,
+          0.593999981880188
+        ],
+        "visual_bounds_min": [
+          -0.0313928127288818,
+          -0.0411755815148354,
+          -1.05000007152557
+        ],
+        "weapon": "staff_weapon"
+      },
+      "downed_sidearm": "zat",
+      "captures": {
+        "aim": "offworld-staff_weapon-aim.png",
+        "downed": "offworld-tealc-jaffa-downed.png"
+      }
+    },
+    {
+      "mission": "goauld_infiltration",
+      "class": "carter_tech",
+      "weapon": "zat",
+      "frame": {
+        "draw_calls": 29,
+        "median_ms": 2.027,
+        "original": false,
+        "p95_ms": 11.272,
+        "primitives": 14568,
+        "resolution": [
+          1440,
+          900
+        ],
+        "weapon": "zat"
+      },
+      "fit": {
+        "class": "carter_tech",
+        "frame": "weapon local; WeaponModel is identity",
+        "muzzle": [
+          0.0,
+          0.0500000007450581,
+          -0.200000002980232
+        ],
+        "visual_bounds_max": [
+          0.0321064069867134,
+          0.0736482813954353,
+          0.113406017422676
+        ],
+        "visual_bounds_min": [
+          -0.0321064069867134,
+          -0.072086863219738,
+          -0.200000032782555
+        ],
+        "weapon": "zat"
+      },
+      "downed_sidearm": null,
+      "captures": {
+        "aim": "offworld-zat-aim.png"
+      }
+    }
+  ],
+  "linux_release": {
+    "pck_bytes": 30543616,
+    "pck_sha256": "7abd819a2852c43bfb0a0e0abfb765b08763ca28ffc8c8edf7dc74adf73c0868",
+    "checks_passed": [
+      "test_asset_credits",
+      "held_weapon_audit",
+      "test_imported_m9_visual",
+      "test_imported_p90_visual",
+      "test_imported_mp5_visual",
+      "test_imported_m249_visual",
+      "test_imported_staff_visual",
+      "test_imported_zat_visual"
+    ],
+    "weapons": [
+      {
+        "weapon": "m9",
+        "cold_ms": 56.971,
+        "cached_ms": 0.081
+      },
+      {
+        "weapon": "p90",
+        "cold_ms": 61.963,
+        "cached_ms": 0.03
+      },
+      {
+        "weapon": "mp5",
+        "cold_ms": 401.822,
+        "cached_ms": 0.033
+      },
+      {
+        "weapon": "m249",
+        "cold_ms": 58.668,
+        "cached_ms": 0.031
+      },
+      {
+        "weapon": "staff_weapon",
+        "cold_ms": 54.479,
+        "cached_ms": 0.034
+      },
+      {
+        "weapon": "zat",
+        "cold_ms": 51.527,
+        "cached_ms": 0.032
+      }
+    ],
+    "packaged_metrics_match_source_checkout": true
+  }
+}

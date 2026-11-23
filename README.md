@@ -4,7 +4,7 @@ Stargate: SG Extraction is a Godot 4.4.1 co-op tactical shooter. The main playab
 
 **What to build next:** see the [roadmap](ROADMAP.md).
 
-**Asset programme status, 23 November 2026:** Sprint 7’s MP5SD, repeatable intake and in-game credits are on `main`. Sprint 8’s shared staff is merged and Sprint 9 integrates the original loop-frame Zat for art review. **Sprint 10, the six-weapon audit, is next**, followed by field kit, SGC areas, characters, offworld and mothership art. [Sprint sequence and prompts](docs/plans/asset-vertical-slices.md).
+**Asset programme status, 23 November 2026.** The MP5SD, shared staff and original Zat from Sprints 7–9 are on `main`. Sprint 10 audited all six held weapons in SGC and offworld. Owner mesh and material review is pending. **Next planned slice is Sprint 11, the M2 defensive position**, followed by field kit, SGC areas, characters, offworld and mothership art. [Sprint 10 review](docs/reviews/2026-11-23-sprint10-held-weapon-audit.md) · [Sprint sequence and prompts](docs/plans/asset-vertical-slices.md).
 
 ## Play locally
 

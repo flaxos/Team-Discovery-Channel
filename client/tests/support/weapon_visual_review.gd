@@ -8,6 +8,17 @@ extends SceneTree
 ## Writes build/asset-review/<weapon>/<mission>-*.png: the game camera, aiming down sights, a
 ## close view with the D-015 matte finish the game uses, and the same view with metallic 1 to
 ## show the source metallic map. Evidence for owner art review, not acceptance.
+## --audit uses the real owner class/slot and separates output by class and mission.
+## --downed adds the in-game downed view after a normal damage event in the review fixture.
+
+const WEAPON_CLASSES := {
+	"m9": SGCNetworkManager.CLASS_ONEILL_RECON,
+	"p90": SGCNetworkManager.CLASS_ONEILL_RECON,
+	"mp5": SGCNetworkManager.CLASS_CARTER_TECH,
+	"m249": SGCNetworkManager.CLASS_SG3_HEAVY,
+	"staff_weapon": SGCNetworkManager.CLASS_TEALC_JAFFA,
+	"zat": SGCNetworkManager.CLASS_CARTER_TECH,
+}
 
 
 func _init() -> void:
@@ -34,8 +45,20 @@ func run() -> void:
 	var net := root.get_node("NetworkManager") as SGCNetworkManager
 	var mission := option("--mission", SGCNetworkManager.MISSION_SGC_UAT)
 	var weapon_id := option("--weapon", "m9")
+	var arguments := OS.get_cmdline_user_args()
+	var audit := arguments.has("--audit")
+	var expected_sidearm := ""
 	# The MP5 slice uses Carter's actual loadout, including the existing gadget/HUD.
-	if weapon_id == "mp5":
+	if audit:
+		net.selected_class_id = option("--class", WEAPON_CLASSES.get(weapon_id, ""))
+		var profile: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(net.selected_class_id, {})
+		if weapon_id not in [profile.get("primary"), profile.get("secondary")]:
+			push_error("Audit weapon is not part of the selected class loadout: " + weapon_id)
+			quit(1)
+			return
+		net.player_name = str(profile["name"])
+		expected_sidearm = str(profile["secondary"])
+	elif weapon_id == "mp5":
 		net.selected_class_id = SGCNetworkManager.CLASS_CARTER_TECH
 		net.player_name = "Carter"
 	net.selected_mission_id = mission
@@ -60,10 +83,20 @@ func run() -> void:
 		quit(1)
 		return
 	root.size = Vector2i(1440, 900)
+	if audit:
+		root.warp_mouse(Vector2(root.size) / 2.0)
 	await create_timer(3.0).timeout
-	player.active_slot = 2 if weapon_id in ["m9", "zat"] else 1
-	player._equip_weapon_by_id(weapon_id)
-	var original := weapon_id == "mp5" and OS.get_cmdline_user_args().has("--original")
+	var slot := 2 if weapon_id in ["m9", "zat"] else 1
+	if audit:
+		player.switch_slot(slot)
+		if player.current_weapon == null or player.current_weapon.weapon_id != weapon_id:
+			push_error("Audit could not equip the actual class loadout")
+			quit(1)
+			return
+	else:
+		player.active_slot = slot
+		player._equip_weapon_by_id(weapon_id)
+	var original := weapon_id == "mp5" and arguments.has("--original")
 	if original:
 		var model := player.current_weapon.get_node("WeaponModel")
 		model.get_node("ImportedGLB").free()
@@ -71,6 +104,9 @@ func run() -> void:
 		legacy.position = Vector3(0, -0.12, 0)
 		model.add_child(legacy)
 	var output := ProjectSettings.globalize_path("res://../build/asset-review").path_join(weapon_id)
+	if audit:
+		output = ProjectSettings.globalize_path("res://../build/asset-review/sprint10").path_join(
+			net.selected_class_id).path_join(weapon_id)
 	DirAccess.make_dir_recursive_absolute(output)
 	var prefix := output.path_join(mission)
 	if original:
@@ -90,7 +126,8 @@ func run() -> void:
 	samples.sort()
 	print("WEAPON_REVIEW_FRAME_COST ", JSON.stringify({"weapon": weapon_id, "original": original,
 		"median_ms": samples[30], "p95_ms": samples[57], "resolution": [root.size.x, root.size.y],
-		"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)}))
+		"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)}))
 	# Weapons face -Z; frame the held gun from its front right.
 	var gun := player.current_weapon
 	var close := Camera3D.new()
@@ -118,14 +155,33 @@ func run() -> void:
 	close.look_at(gun.to_global(centre))
 	close.current = true
 	await capture(prefix + "-close.png")
+	var metallic_values := {}
 	for node: Node in gun.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
 		for s in range(mi.mesh.get_surface_count()):
 			var material := mi.get_surface_override_material(s) as StandardMaterial3D
-			if material != null:
-				# Shared by every copy of this weapon; this helper quits right after.
+			if material != null and not metallic_values.has(material):
+				metallic_values[material] = material.metallic
 				material.metallic = 1.0
 	await capture(prefix + "-close-source-metallic.png")
+	if audit and arguments.has("--downed"):
+		for material: StandardMaterial3D in metallic_values:
+			material.metallic = metallic_values[material]
+		player.camera.make_current()
+		var room := MissionWorld.of(player) as GateRoom
+		# Leave the real downed handler and HUD active. Delay solo mission failure for the capture.
+		if room != null and player.player_downed.is_connected(room._check_squad_status):
+			player.player_downed.disconnect(room._check_squad_status)
+		player.health_component.frozen = false
+		player.health_component.take_damage(player.health_component.max_health * 4.0)
+		var sidearm := player.current_weapon
+		if not player.health_component.is_downed or player.active_slot != 2 or sidearm == null \
+				or sidearm.weapon_id != expected_sidearm or not sidearm.has_node("WeaponModel/ImportedGLB"):
+			push_error("Audit downed sidearm was not equipped")
+			quit(1)
+			return
+		print("WEAPON_REVIEW_DOWNED ", net.selected_class_id, " ", sidearm.weapon_id)
+		await capture(prefix + "-downed-sidearm.png", 12)
 	print("Weapon review frames: ", output, " weapon=", gun.weapon_id, " imported=",
 		gun.has_node("WeaponModel/ImportedGLB"))
 	main.queue_free()

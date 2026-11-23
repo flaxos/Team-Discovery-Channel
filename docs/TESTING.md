@@ -23,7 +23,7 @@ Reports default to `build/test-results/godot/`: `summary.json`, `junit.xml`, pro
 
 ### Current baseline
 
-**Latest recorded asset implementation: Sprint 7, `a778fb4`, 18 November 2026.** Full local and hosted runs both passed **117/117 checks**; the pinned Python tooling suite passed **60 tests**. All five hosted jobs passed in [run 44223594937](https://github.com/flaxos/Team-Discovery-Channel/actions/runs/44223594937). Clean Linux release export passed the actual MP5SD and offline-credit tests, including eight packaged model files and both full licence texts. See the [review](reviews/2026-11-18-sprint7-mp5-intake.md) and [verification record](assets/intake/mp5sd/verification.json). Sprint 7 reached main through #79/#78; these results do not certify later documentation commits or human acceptance. The earlier GT-1 **80/80** result is historical. Each milestone must record its own local and hosted results.
+**Sprint 7 infrastructure baseline, `a778fb4`, 18 November 2026.** Full local and hosted runs both passed **117/117 checks**; the pinned Python tooling suite passed **60 tests**. All five hosted jobs passed in [run 44223594937](https://github.com/flaxos/Team-Discovery-Channel/actions/runs/44223594937). Clean Linux release export passed the actual MP5SD and offline-credit tests, including eight packaged model files and both full licence texts. See the [review](reviews/2026-11-18-sprint7-mp5-intake.md) and [verification record](assets/intake/mp5sd/verification.json). Sprint 7 reached main through #79/#78; these results do not certify later documentation commits or human acceptance. The earlier GT-1 **80/80** result is historical. Each milestone must record its own local and hosted results.
 
 **Hosted CI:** the `Godot full` job failed on every push to `main` from PR #35 to #41. `test_level_authoring` runs `tools/level_authoring.py`, which looks for `godot` on `PATH` (or the `GODOT` environment variable); the workflow installs the engine elsewhere and passed its path only to the test runner. Since roadmap milestone EX-1 the runner exports the engine it was given as `GODOT` to every suite, and `tools/tests/test_godot_runner.py` checks that. The hosted `Godot full` job passed on PRs #42 and #43 with this change; check each pull request's hosted run for the current state.
 
@@ -32,6 +32,8 @@ Reports default to `build/test-results/godot/`: `summary.json`, `junit.xml`, pro
 Historical baseline: at gameplay commit **`a720594`**, the full profile passed **51/51 local checks**: 49 discovered scripts, an extra persistence reader process and project import. The evidence is a baseline result, not a promise that a later branch or hosted workflow passed. CI status belongs to the corresponding pull request.
 
 ## Coverage contracts
+
+Sprint 10’s `held_weapon_audit.gd` records live mesh, LOD, material, mipmap and cache data for the six modeled weapons. It runs from the checkout and the Linux release pack. The visual helper's `--audit` mode equips the owning classes and `--downed` captures their existing sidearm selection. [Commands and evidence](reviews/2026-11-23-sprint10-held-weapon-audit.md).
 
 Sprint 9 adds `test_imported_zat_visual` for fitted geometry, unchanged handling and shot origin, shared textures and fallback. The quiet combat fixture checks stun, dragging, kill and vaporization with the new visual. Four-player snapshots check Carter and Teal’c’s Zats plus active slot delivery through travel and late join. [Sprint 9 review](reviews/2026-11-23-sprint9-zat-visual.md).
 
