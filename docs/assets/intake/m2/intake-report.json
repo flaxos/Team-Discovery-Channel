@@ -1,0 +1,182 @@
+{
+  "ok": true,
+  "file": "client/assets/weapons/browning_m2.glb",
+  "bytes": 8510696,
+  "sha256": "364611bba23b5cb7ac3b39885a48c79ff6cebc810e991f116a5c7214af650041",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "glTF-Transform v4.3.0",
+  "declared_triangles_unique_meshes": 49589,
+  "meshes": [
+    {
+      "name": "M2Gun",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 27223,
+          "declared_triangles": 29899,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.9258667826652527,
+              -0.15042616426944733,
+              -0.0683811604976654
+            ],
+            "max": [
+              0.9326947927474976,
+              0.07841882109642029,
+              0.2479127049446106
+            ],
+            "size": [
+              1.8585615754127502,
+              0.22884498536586761,
+              0.316293865442276
+            ]
+          },
+          "morph_targets": 0
+        },
+        {
+          "mode": 4,
+          "declared_vertices": 7507,
+          "declared_triangles": 12414,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.8073112964630127,
+              -0.06549393385648727,
+              -0.06424763798713684
+            ],
+            "max": [
+              0.3386504352092743,
+              0.05600244551897049,
+              0.15812461078166962
+            ],
+            "size": [
+              1.145961731672287,
+              0.12149637937545776,
+              0.22237224876880646
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "M2Tripod",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 5866,
+          "declared_triangles": 7276,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.9326948523521423,
+              -0.40156790614128113,
+              -0.2479126900434494
+            ],
+            "max": [
+              0.3140171766281128,
+              0.40156790614128113,
+              0.055433932691812515
+            ],
+            "size": [
+              1.2467120289802551,
+              0.8031358122825623,
+              0.3033466227352619
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "M2Gun",
+    "M2GunMesh",
+    "M2Tripod",
+    "M2TripodMesh"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "T_BrowningM2_01",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "T_BrowningM2_02",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ],
+  "work_order": {
+    "ok": true,
+    "scope": "Request validation only; no licence or engine/art approval",
+    "asset_id": "m2_defensive_position",
+    "status": "ready_for_intake",
+    "work_order_sha256": "a684722bab94324154afe38da8cabc18cb47668bb91d9942c02cdbbf61c1fd75",
+    "schema_sha256": "c12d756075cf9c2b098e064204eab5b6cb1ab755832309bebe9445265e5f89fc",
+    "errors": []
+  }
+}

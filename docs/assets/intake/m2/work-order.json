@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS11",
+  "asset_id": "m2_defensive_position",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Fit one textured M2 game visual set to the existing DeployableTurret, with a moving gun and shield and a fixed tripod.",
+  "target": {
+    "scene": "res://scenes/props/DeployableTurret.tscn",
+    "visual_branch": "M2Tripod and TurretHead/M2Gun",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/assets/intake/m2/fit.json",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.461102575063705,
+        9.5367431640625e-07,
+        -1.20000314712524
+      ],
+      "max_m": [
+        0.46110263466835,
+        1.12000000476837,
+        0.746683359146118
+      ]
+    },
+    "anchors": [
+      {
+        "name": "TurretHead",
+        "position_m": [
+          0,
+          0.75,
+          0
+        ],
+        "purpose": "Scene-local pivot for the existing head and shield."
+      },
+      {
+        "name": "TurretHead/MuzzlePoint",
+        "position_m": [
+          0,
+          0.75,
+          -1.2
+        ],
+        "purpose": "Scene-local shot marker at rest. Its position relative to the head is (0, 0, -1.2)."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/browning-m2-381c0f1939e843ceae232500e24e7231",
+        "decision": "selected",
+        "reason": "Creator-authored CC BY 4.0 original verified. Main model contains the gun, tripod and two surface sets. Loose props and display plinth were excluded."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/browning-m2-90ba9929d1ff415f8257415176d39104",
+        "decision": "unavailable",
+        "reason": "Secondary gun/tripod lead. Authenticated download and specular/glossiness conversion needed."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/m2-browning-low-poly-b3ccf9641d474e7fa928cce6dcfc30ae",
+        "decision": "rejected",
+        "reason": "No declared textures or confirmed separate mount."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/m2-50cal-machinegun-cc0-cbd897c1e1554fae9a5302a79ed59640",
+        "decision": "unavailable",
+        "reason": "Gun-only fallback lead with conflicting licence labels and no verified archive."
+      }
+    ],
+    "selected_source": {
+      "page": "https://sketchfab.com/3d-models/browning-m2-381c0f1939e843ceae232500e24e7231",
+      "creator": "emran.bayati",
+      "licence": "CC BY 4.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/m2/archive-evidence.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 60000,
+    "max_materials": 4,
+    "lod_triangle_limits": [
+      60000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "gun_mount_and_shield",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#303438",
+        "#1A1C1D"
+      ],
+      "surface_notes": "Keep shared opaque source colour, normal and ORM when supported. Start with 1K runtime maps and compare at mission camera. Record map pairing, normal direction and any resolution exception. The existing shield needs visible representation because mounted protection uses it."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 64,
+    "measurement_plan": "Measure the prepared gun and base together and count unique decoded mip chains across both authored positions and one deployment. Record cold and cached construction and scene render cost."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "In the existing SGC Defense and SG3 Heavy gadget, validate deployment, mounting, aiming, firing and dismount, plus existing Airman interaction. Compare the cameras with the Sprint 11 baseline. Test four-player listen and dedicated while mounted and after retry, and package a clean release export."
+}

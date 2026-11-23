@@ -1,6 +1,6 @@
 # Documentation index
 
-Resume status checked **23 November 2026**. The original shared staff and Zat are merged. [Sprint 10’s six-weapon audit](reviews/2026-11-23-sprint10-held-weapon-audit.md) is ready for owner review. **Sprint 11, the M2 defensive position, is next in the plan.** Historical documents retain their stated baselines. Consult GitHub for merge and CI status and your local checkout for the code actually running.
+Resume status checked **23 November 2026**. The original shared staff and Zat are merged. [Sprint 10’s six-weapon audit](reviews/2026-11-23-sprint10-held-weapon-audit.md) is ready for owner review. **Sprint 11’s M2 integration is ready for review.** [Sprint 11 review](reviews/2026-11-23-sprint11-m2-intake.md). Historical documents retain their stated baselines. Consult GitHub for merge and CI status and your local checkout for the code actually running.
 
 ## Start here
 

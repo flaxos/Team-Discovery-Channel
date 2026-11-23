@@ -4,7 +4,7 @@ Audited 12 November 2026 against `main` at `bf56743` (PR #40 merged); status of 
 
 [ROADMAP.md](../../ROADMAP.md) is the authoritative summary and says what to do next. This document holds the evidence and the detail: the capability matrix, dependency graph, milestone definitions, the art and content track, the risk register and three agent-ready work packages. Architectural choices are recorded in the [decision log](../DECISIONS.md). Game intent is in the [GDD](../../GDD.md).
 
-**Resume update, 23 November 2026.** Sprints 7–9 are merged through #82, with owner art review pending. [Sprint 10’s held-weapon audit](../reviews/2026-11-23-sprint10-held-weapon-audit.md) covers the six weapons' fit, mission appearance, downed views, runtime cost and clean export. **Sprint 11, the M2 defensive position, is next in the [asset sprint programme](asset-vertical-slices.md).** The audit below records the original development baseline and later milestone updates.
+**Resume update, 23 November 2026.** Sprints 7–9 are merged through #82, with owner art review pending. [Sprint 10’s held-weapon audit](../reviews/2026-11-23-sprint10-held-weapon-audit.md) covers the six weapons' fit, mission appearance, downed views, runtime cost and clean export. **Sprint 11’s M2 integration is ready for review** in the [asset sprint programme](asset-vertical-slices.md). [Sprint 11 review](../reviews/2026-11-23-sprint11-m2-intake.md). The audit below records the original development baseline and later milestone updates.
 
 Sections 3 onward are the plan. [ROADMAP.md](../../ROADMAP.md) records which milestones have been implemented since; the capability matrix below is updated as they land, with the milestone named.
 
