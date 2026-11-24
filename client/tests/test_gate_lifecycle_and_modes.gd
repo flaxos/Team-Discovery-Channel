@@ -18,7 +18,27 @@ func run_test() -> void:
 	gate = world.get_node("Stargate") as StargateRing
 	waves = world.get_node("WaveManager") as WaveManager
 	waves.set_physics_process(false)
+	var trim := gate.get_node("SGCGateTrim") as Node3D
+	var iris := trim.get_node("IrisFace") as MeshInstance3D
+	var rim := trim.get_node("Rim") as Node3D
+	await process_frame
+	assert(rim.visible == gate.has_node("CommunityVisual"), "The stock torus stays the fallback")
+	var torus := gate.get_node("GateRingMesh") as MeshInstance3D
+	if OS.get_cmdline_user_args().has("--expect-rim-fallback"):
+		assert(not rim.visible and torus.visible, "A pack without AP-1g retains the original gate")
+	for node: Node in trim.find_children("*", "", true, false):
+		assert(not (node is CollisionObject3D or node is CollisionShape3D or node is NavigationRegion3D))
+	for part: MeshInstance3D in rim.get_children():
+		var points := part.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		for vertex: Vector3 in points:
+			var local := part.transform * vertex
+			var radial := Vector2(local.x, local.y).length()
+			assert(radial >= 3.06 and radial <= 3.351 and absf(local.z) <= 0.3,
+				"Rim geometry must stay outside the opening and within the stock envelope")
+	assert(not iris.visible, "Iris starts clear")
 	dialer = world.dhd_console as SGCDialingConsole
+	var readout := dialer.get_node("CRTScreenCenter/StatusReadout") as Label3D
+	assert(readout.text == "GATE STANDBY")
 	player = load("res://scenes/entities/Player.tscn").instantiate() as PlayerController3D
 	player.name = "1"
 	world.get_node("Players").add_child(player)
@@ -52,6 +72,7 @@ func run_test() -> void:
 	waves.incursion_established = true
 	waves.inbound_wormhole_timer = 38
 	assert(gate.event_horizon_mesh.visible, "Stable incoming horizon stays visible")
+	assert(not iris.visible, "Jammed inbound gate presents an open iris")
 	var extracted: Array[bool] = [false]
 	gate.player_extracted.connect(func(_p: Node) -> void: extracted[0] = true)
 	gate._on_extraction_entered(player)
@@ -61,6 +82,10 @@ func run_test() -> void:
 	for _stage: int in range(3):
 		servo.update_repair(2.6)
 	assert(waves.iris_repaired_under_fire, "Under-fire repair objective must be earned")
+	await process_frame
+	await process_frame
+	assert(iris.visible and gate.event_horizon_mesh.visible, "Secured inbound iris covers the running horizon")
+	assert(not gate.extraction_authorized, "The visual adds no extraction permission")
 	assert(waves.requirements_met(), "Hard needs all cumulative objectives")
 	waves.pending_column_spawns = 6
 	waves.enemies_alive = 6
@@ -76,6 +101,13 @@ func run_test() -> void:
 	dialer.start_dialing(player)
 	assert(dialer.current_phase == DHDDialer.DialPhase.CHEVRONS, "Objectives grant dialing")
 	assert(waves.outbound_reserved and gate.direction == StargateRing.GateDirection.OUTBOUND, "Dial start owns gate atomically")
+	assert(readout.text == "CHEVRONS 0/7")
+	dialer.input_glyph(dialer.chevron_sequence[0])
+	assert(readout.text == "CHEVRONS 1/7")
+	dialer.cancel_dialing()
+	assert(readout.text == "GATE STANDBY")
+	dialer.start_dialing(player)
+	assert(readout.text == "CHEVRONS 0/7")
 	var wave: int = waves.current_wave
 	waves.start_next_wave()
 	assert(waves.current_wave == wave, "Incoming cannot steal an outbound reservation")
@@ -83,9 +115,14 @@ func run_test() -> void:
 		dialer.input_glyph(dialer.chevron_sequence[dialer.current_chevron_index])
 	gate._finish_kawoosh(gate.activation_id)
 	assert(gate.event_horizon_mesh.visible and not gate.extraction_authorized, "Outbound horizon persists while GDO is pending")
+	assert(readout.text == "GDO 0/4")
 	for _beat: int in range(4):
 		dialer.input_glyph(dialer.gdo_sequence[dialer.gdo_index])
 	assert(gate.extraction_authorized, "Successful GDO authorizes extraction")
+	assert(readout.text == "OUTBOUND READY")
+	await process_frame
+	await process_frame
+	assert(not iris.visible, "Previous inbound repair never covers authorized outbound travel")
 	gate._on_extraction_entered(player)
 	assert(extracted[0], "Authorized outbound wormhole can extract")
 	waves.end_mission()
@@ -105,7 +142,12 @@ func run_test() -> void:
 	waves.end_mission()
 	await frames(180)
 	assert(not gate.event_horizon_mesh.visible and world.get_node("Enemies").get_child_count() == before, "Mission end cancels pending sequence and all future spawning")
+	# Retire the operative's area overlaps before freeing the release scene.
+	player.collision_layer = 0
+	await frames(3)
+	player.queue_free()
+	await process_frame
 	world.queue_free()
 	await process_frame
-	print("PASS gate lifecycle, persistent horizon, spawn exclusion, three objective tiers and cancellation")
+	print("test_gate_lifecycle_and_modes: PASS dial, iris, aperture, horizon, authority and cancellation")
 	quit(0)

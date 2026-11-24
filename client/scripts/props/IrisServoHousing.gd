@@ -35,6 +35,8 @@ func _ready() -> void:
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_body_entered)
 		interact_area.body_exited.connect(_on_body_exited)
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		request_repair_snapshot.rpc_id(1)
 
 
 func _room() -> Node:
@@ -44,10 +46,8 @@ func _room() -> Node:
 func reset_for_breach() -> void:
 	if not multiplayer.is_server():
 		return
-	if multiplayer.has_multiplayer_peer():
-		sync_reset_for_breach.rpc()
-	else:
-		sync_reset_for_breach()
+	SGCNetworkManager.mission_rpc(self, &"sync_reset_for_breach")
+	sync_reset_for_breach()
 
 
 @rpc("authority", "call_local", "reliable")
@@ -60,8 +60,10 @@ func sync_reset_for_breach() -> void:
 	repairer_player = null
 	if prompt_label != null:
 		prompt_label.text = "IRIS JAMMED: REPAIR DURING INCOMING BREACH"
+		prompt_label.modulate = Color(1, 0.4, 0.4)
 	if servo_light != null:
 		servo_light.light_color = Color(1.0, 0.3, 0.1)
+		servo_light.light_energy = 1.5
 
 
 func _repair_allowed() -> bool:
@@ -168,15 +170,18 @@ func complete_repair() -> void:
 	iris_repaired.emit()
 	print("IrisServoHousing: TRINIUM IRIS OVERRIDE ENGAGED! Iris snapped SHUT! Gate room secured!")
 
+	_show_repaired()
+	_play_sfx("res://audio/sfx_iris_open.wav", 40.0)
+	_broadcast_repair()
+
+
+func _show_repaired() -> void:
 	if servo_light != null:
 		servo_light.light_color = Color(0.1, 0.9, 0.3)
 		servo_light.light_energy = 3.0
 	if prompt_label != null:
 		prompt_label.text = "IRIS SECURED (CLOSED 100%)"
 		prompt_label.modulate = Color(0.2, 0.95, 0.4)
-
-	_play_sfx("res://audio/sfx_iris_open.wav", 40.0)
-	_broadcast_repair()
 
 
 func _physics_process(delta: float) -> void:
@@ -199,8 +204,21 @@ func _physics_process(delta: float) -> void:
 
 func _broadcast_repair() -> void:
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
-		var path: NodePath = _room().get_path_to(repairer_player) if is_instance_valid(repairer_player) else NodePath()
-		sync_repair.rpc(path, is_repairing, is_repaired, completed_stages, current_stage, stage_repair_time)
+		SGCNetworkManager.mission_rpc(self, &"sync_repair", _repair_snapshot())
+
+
+func _repair_snapshot() -> Array:
+	var repairer := NodePath()
+	if is_instance_valid(repairer_player):
+		repairer = _room().get_path_to(repairer_player)
+	return [repairer, is_repairing, is_repaired, completed_stages, current_stage, stage_repair_time]
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_repair_snapshot() -> void:
+	if multiplayer.is_server():
+		var peer := multiplayer.get_remote_sender_id()
+		callv(&"rpc_id", [peer, &"sync_repair"] + _repair_snapshot())
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -216,6 +234,7 @@ func sync_repair(player_path: NodePath, repairing: bool, repaired: bool, complet
 	if completed > previous:
 		stage_completed.emit(completed, STAGE_NAMES[completed - 1])
 	if repaired and not previously_repaired:
+		_show_repaired()
 		iris_repaired.emit()
 
 

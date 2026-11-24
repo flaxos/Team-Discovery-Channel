@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://c8sgcgateroom01"]
+[gd_scene load_steps=27 format=3 uid="uid://c8sgcgateroom01"]
 
 [ext_resource type="Script" path="res://scripts/map/SGCMap.gd" id="30_map"]
 
@@ -20,6 +20,8 @@
 [ext_resource type="PackedScene" path="res://scenes/props/ArmoryArmorStation.tscn" id="16_armor01"]
 
 [ext_resource type="Material" path="res://resources/materials/sgc/embarkation_steel.tres" id="31_tread"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/SGCGateTrim.tscn" id="32_gate_trim"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Door"]
 albedo_color = Color(0.24, 0.27, 0.3, 1)
@@ -115,6 +117,19 @@ albedo_color = Color(0.15, 0.85, 1, 1)
 emission_enabled = true
 emission = Color(0.15, 0.85, 1, 1)
 emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ControlWindowFrame"]
+albedo_color = Color(0.23, 0.28, 0.31, 1)
+metallic = 0.18
+roughness = 0.64
+
+[sub_resource type="BoxMesh" id="BoxMesh_ControlWindowHead"]
+material = SubResource("Mat_ControlWindowFrame")
+size = Vector3(11.8, 0.075, 0.115)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ControlWindowJamb"]
+material = SubResource("Mat_ControlWindowFrame")
+size = Vector3(0.075, 2.25, 0.115)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_null"]
 
@@ -527,6 +542,22 @@ use_collision = true
 size = Vector3(11.8, 2.4, 0.1)
 material = SubResource("Mat_Glass")
 
+[node name="GlazingHead" type="MeshInstance3D" parent="Level28Complex/ControlRoomMezzanine"]
+position = Vector3(0, 3.0625, 7.7)
+mesh = SubResource("BoxMesh_ControlWindowHead")
+
+[node name="GlazingSill" type="MeshInstance3D" parent="Level28Complex/ControlRoomMezzanine"]
+position = Vector3(0, 0.7375, 7.7)
+mesh = SubResource("BoxMesh_ControlWindowHead")
+
+[node name="GlazingWestJamb" type="MeshInstance3D" parent="Level28Complex/ControlRoomMezzanine"]
+position = Vector3(-5.8625, 1.9, 7.7)
+mesh = SubResource("BoxMesh_ControlWindowJamb")
+
+[node name="GlazingEastJamb" type="MeshInstance3D" parent="Level28Complex/ControlRoomMezzanine"]
+position = Vector3(5.8625, 1.9, 7.7)
+mesh = SubResource("BoxMesh_ControlWindowJamb")
+
 [node name="DialingConsole1" type="CSGBox3D" parent="Level28Complex/ControlRoomMezzanine"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9, 0.5, 18)
 use_collision = true
@@ -554,6 +585,8 @@ modulate = Color(0.9, 0.95, 1, 1)
 
 [node name="Stargate" parent="." instance=ExtResource("3_sg01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, -15)
+
+[node name="SGCGateTrim" parent="Stargate" instance=ExtResource("32_gate_trim")]
 
 [node name="IrisServoHousing" parent="." instance=ExtResource("13_irisservo01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -11.5)

@@ -1,21 +1,19 @@
-[gd_scene load_steps=10 format=3 uid="uid://csgcdialing01"]
+[gd_scene load_steps=14 format=3 uid="uid://csgcdialing01"]
 
 [ext_resource type="Script" path="res://scripts/props/SGCDialingConsole.gd" id="1_sgcdial"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_DeskSteel"]
-albedo_color = Color(0.16, 0.18, 0.22, 1)
-metallic = 0.8
-roughness = 0.4
+albedo_color = Color(0.19, 0.23, 0.27, 1)
+metallic = 0.12
+roughness = 0.62
 
 [sub_resource type="BoxMesh" id="BoxMesh_Desk"]
 material = SubResource("Mat_DeskSteel")
 size = Vector3(2.6, 0.9, 1.2)
 
 [sub_resource type="StandardMaterial3D" id="Mat_CRTGreen"]
-albedo_color = Color(0.05, 0.12, 0.08, 1)
-emission_enabled = true
-emission = Color(0.15, 0.95, 0.35, 1)
-emission_energy_multiplier = 1.6
+shading_mode = 0
+albedo_color = Color(0.018, 0.057, 0.035, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_Screen"]
 material = SubResource("Mat_CRTGreen")
@@ -28,6 +26,23 @@ roughness = 0.6
 [sub_resource type="BoxMesh" id="BoxMesh_Keyboard"]
 material = SubResource("Mat_Keyboard")
 size = Vector3(2.2, 0.08, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ConsoleTrim"]
+albedo_color = Color(0.28, 0.32, 0.34, 1)
+metallic = 0.18
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_DeskTrim"]
+material = SubResource("Mat_ConsoleTrim")
+size = Vector3(2.55, 0.026, 1.15)
+
+[sub_resource type="StandardMaterial3D" id="Mat_CRTBezel"]
+albedo_color = Color(0.10, 0.12, 0.13, 1)
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_Bezel"]
+material = SubResource("Mat_CRTBezel")
+size = Vector3(0.69, 0.54, 0.2)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_Trigger"]
 height = 2.0
@@ -48,13 +63,38 @@ mesh = SubResource("BoxMesh_Keyboard")
 transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, -0.85, 1.18, -0.25)
 mesh = SubResource("BoxMesh_Screen")
 
+[node name="Bezel" type="MeshInstance3D" parent="CRTScreenLeft"]
+position = Vector3(0, 0, -0.025)
+mesh = SubResource("BoxMesh_Bezel")
+
 [node name="CRTScreenCenter" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.3)
 mesh = SubResource("BoxMesh_Screen")
 
+[node name="Bezel" type="MeshInstance3D" parent="CRTScreenCenter"]
+position = Vector3(0, 0, -0.025)
+mesh = SubResource("BoxMesh_Bezel")
+
 [node name="CRTScreenRight" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 0.85, 1.18, -0.25)
 mesh = SubResource("BoxMesh_Screen")
+
+[node name="Bezel" type="MeshInstance3D" parent="CRTScreenRight"]
+position = Vector3(0, 0, -0.025)
+mesh = SubResource("BoxMesh_Bezel")
+
+[node name="DeskEdge" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.901, 0)
+mesh = SubResource("BoxMesh_DeskTrim")
+
+[node name="StatusReadout" type="Label3D" parent="CRTScreenCenter"]
+position = Vector3(0, 0, 0.102)
+text = "GATE STANDBY"
+font_size = 34
+outline_size = 0
+pixel_size = 0.00175
+modulate = Color(0.63, 1, 0.77, 1)
+cast_shadow = 0
 
 [node name="StatusLight" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)

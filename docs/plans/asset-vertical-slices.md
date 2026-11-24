@@ -37,8 +37,8 @@ If a prerequisite is unfinished, report it and finish only the prerequisite work
 | 10 | Six held weapons compared in SGC and offworld | [Audit delivered](../reviews/2026-11-23-sprint10-held-weapon-audit.md). Owner mesh and material review pending, including the M249 bipod silhouette. | `Start sprint 10 from docs/plans/asset-vertical-slices.md` |
 | 11 | Mounted/deployable M2 in a live defensive encounter | Implemented for review. [M2 visual and validation](../reviews/2026-11-23-sprint11-m2-intake.md). | `Start sprint 11 from docs/plans/asset-vertical-slices.md` |
 | 12 | Existing deployable field kit visually finished | Merged via #85. Listen and dedicated checks complete. Owner art review open. [Field-kit evidence](../reviews/2026-11-23-sprint12-field-kit.md). | `Start sprint 12 from docs/plans/asset-vertical-slices.md` |
-| 13 | SGC embarkation area with reusable PBR treatment | Integrated locally. Owner art review open. [Before/after and material evidence](../reviews/2026-11-24-sprint13-sgc-embarkation.md). | `Start sprint 13 from docs/plans/asset-vertical-slices.md` |
-| 14 | SGC control, gate and iris during dialing/travel | Planned | `Start sprint 14 from docs/plans/asset-vertical-slices.md` |
+| 13 | SGC embarkation area with reusable PBR treatment | Merged via #86. Owner art review open. [Before/after and material evidence](../reviews/2026-11-24-sprint13-sgc-embarkation.md). | `Start sprint 13 from docs/plans/asset-vertical-slices.md` |
+| 14 | SGC control, gate and iris during dialing/travel | Ready for PR review. Owner art review open. [Control, gate and iris evidence](../reviews/2026-11-24-sprint14-sgc-control-gate-iris.md). | `Start sprint 14 from docs/plans/asset-vertical-slices.md` |
 | 15 | SGC armoury/ready room with usable gear stations | Planned | `Start sprint 15 from docs/plans/asset-vertical-slices.md` |
 | 16 | SGC lab/support objective with medical dressing | Planned | `Start sprint 16 from docs/plans/asset-vertical-slices.md` |
 | 17 | SGC briefing/command route across observation levels | Planned | `Start sprint 17 from docs/plans/asset-vertical-slices.md` |
