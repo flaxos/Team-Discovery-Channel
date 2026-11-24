@@ -88,7 +88,11 @@ func _box(
 				slot.description = spec.description
 		definition.asset_slots.append(slot)
 	body.set_meta("asset_slot", slot)
-	if slot.texture != null:
+	# The physical box remains the visible mesh so the existing camera fade
+	# can act on its material without changing the collision or slot bounds.
+	if slot.pbr_material != null and slot.pbr_material.albedo_texture != null:
+		mesh.material_override = slot.pbr_material
+	elif slot.texture != null:
 		var material := materials[style].duplicate() as StandardMaterial3D
 		material.albedo_texture = slot.texture
 		mesh.material_override = material

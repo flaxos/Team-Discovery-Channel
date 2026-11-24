@@ -28,7 +28,7 @@ def build_credits(repo=REPO):
     for line in source.splitlines():
         if line.lower().startswith('| asset file |'):
             group = []
-        elif line.startswith('| `client/assets/'):
+        elif line.startswith(('| `client/assets/', '| `client/resources/materials/')):
             cells = [c.strip() for c in line.strip('|').split('|')]
             if len(cells) < 6:
                 raise ValueError('Malformed attribution row: ' + line)
@@ -45,10 +45,12 @@ def build_credits(repo=REPO):
             for entry in group:
                 entry['changes'].append(plain(line.removeprefix('- ')))
     files = [e['file'] for e in entries]
-    binaries = {str(p.relative_to(repo)) for p in (repo / 'client/assets').rglob('*.glb')}
-    if len(files) != len(set(files)) or set(files) != binaries:
-        raise ValueError(f'Credits/binary coverage differs: missing={sorted(binaries-set(files))}, '
-                         f'unknown={sorted(set(files)-binaries)}, duplicates={len(files)-len(set(files))}')
+    asset_types = [('client/assets', '*.glb'), ('client/resources/materials', '*.tres')]
+    packaged = {str(p.relative_to(repo)) for folder, pattern in asset_types for p in (repo / folder).rglob(pattern)}
+    credited = set(files)
+    if len(files) != len(credited) or credited != packaged:
+        raise ValueError(f'Credits coverage differs: missing={sorted(packaged-credited)}, '
+                         f'unknown={sorted(credited-packaged)}, duplicates={len(files)-len(credited)}')
     for entry in entries:
         if 'CC BY' in entry['licence'] and not any(c.startswith(('Modifications:', 'Changes:')) for c in entry['changes']):
             raise ValueError('CC BY entry lacks modification notice: ' + entry['file'])
@@ -87,7 +89,7 @@ def main(argv=None):
                 raise ValueError('Exported credits are stale; run python3 tools/sync_asset_credits.py')
         else:
             output.write_text(resource)
-        print(f'Asset credits: {count} models, full licence texts included; {"current" if args.check else "generated"}')
+        print(f'Asset credits: {count} assets, full licence texts included; {"current" if args.check else "generated"}')
         return 0
     except (OSError, ValueError) as error:
         print(f'Asset credits: {error}', file=sys.stderr)

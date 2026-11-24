@@ -19,6 +19,8 @@
 [ext_resource type="Script" path="res://scripts/props/BlastDoorConsole.gd" id="15_bdconsole"]
 [ext_resource type="PackedScene" path="res://scenes/props/ArmoryArmorStation.tscn" id="16_armor01"]
 
+[ext_resource type="Material" path="res://resources/materials/sgc/embarkation_steel.tres" id="31_tread"]
+
 [sub_resource type="StandardMaterial3D" id="Mat_Door"]
 albedo_color = Color(0.24, 0.27, 0.3, 1)
 metallic = 0.92
@@ -49,11 +51,6 @@ roughness = 0.75
 [sub_resource type="StandardMaterial3D" id="Mat_Wall"]
 albedo_color = Color(0.14, 0.15, 0.17, 1)
 roughness = 0.9
-
-[sub_resource type="StandardMaterial3D" id="Mat_Platform"]
-albedo_color = Color(0.12, 0.13, 0.15, 1)
-metallic = 0.4
-roughness = 0.5
 
 [sub_resource type="StandardMaterial3D" id="Mat_Sandbag"]
 albedo_color = Color(0.42, 0.38, 0.28, 1)
@@ -131,6 +128,16 @@ script = ExtResource("30_map")
 environment = SubResource("Environment_sgc")
 
 [node name="CeilingFloodlights" type="Node3D" parent="."]
+
+[node name="RampWorkLight" type="SpotLight3D" parent="CeilingFloodlights"]
+position = Vector3(0, 7, -4.5)
+rotation_degrees = Vector3(-65, 0, 0)
+light_color = Color(0.82, 0.90, 1.0, 1)
+light_energy = 2.4
+spot_range = 12.0
+spot_attenuation = 0.8
+spot_angle = 40.0
+spot_angle_attenuation = 0.9
 
 [node name="EmergencyLights" type="Node3D" parent="."]
 
@@ -238,13 +245,13 @@ is_automated_sentry = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -14)
 use_collision = true
 size = Vector3(8, 2, 12)
-material = SubResource("Mat_Platform")
+material = ExtResource("31_tread")
 
 [node name="GateRamp" type="CSGBox3D" parent="BunkerGeometry"]
 transform = Transform3D(1, 0, 0, 0, 0.970143, -0.242536, 0, 0.242536, 0.970143, 0, 0.8, -4)
 use_collision = true
 size = Vector3(3.2, 0.4, 8.25)
-material = SubResource("Mat_Platform")
+material = ExtResource("31_tread")
 
 [node name="Barricades" type="Node3D" parent="BunkerGeometry"]
 

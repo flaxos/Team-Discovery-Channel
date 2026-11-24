@@ -125,3 +125,14 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 | `client/assets/weapons/loop_frame_zat.glb` | Loop-frame ion sidearm | Team Discovery Channel project | [Sidearm visual authoring tool](https://github.com/flaxos/Team-Discovery-Channel/blob/main/tools/author_zat_visual.py) | Original project asset | Zat visual for Carter and Teal’c, aligned to the existing emitter and effects | M |
 
 - **Changes:** Original swept frame, paired dielectric rails and four lossless maps. The game uses its existing material finish, mipmapped textures and shared visual cache.
+
+### SGC embarkation materials — Sprint 13
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/resources/materials/sgc/embarkation_wall.tres` | Concrete | Rob Tuytel for Poly Haven | https://polyhaven.com/a/concrete | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Cast wall and panel surfaces with a 4 m repeat | S |
+| `client/resources/materials/sgc/embarkation_floor.tres` | Smooth Concrete Floor | Dimitrios Savva for Poly Haven | https://polyhaven.com/a/smooth_concrete_floor | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Gate chamber and approach floors with a 2 m repeat | S |
+| `client/resources/materials/sgc/embarkation_steel.tres` | Metal Plate | Rob Tuytel for Poly Haven | https://polyhaven.com/a/metal_plate | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Ramp, platform, overhead supports and side stair rails with a 0.5 m repeat | S |
+
+- **Source and rights:** Poly Haven lists the three artist-contributed sets under [CC0](https://polyhaven.com/license). The official file manifest provided the map URLs and checksums. [Source and prepared map hashes](../docs/assets/intake/sgc-embarkation.json).
+- **Changes:** The 1K diffuse JPEGs retain their source bytes. The OpenGL normal and packed AO, roughness and metallic maps use 8-bit lossless PNGs. Native Godot materials add colour tint, normal strength, mipmaps and measured repeat scales.

@@ -1,0 +1,390 @@
+{
+  "acquired": "2026-11-24",
+  "publisher": "Poly Haven",
+  "license": "CC0-1.0",
+  "license_record": "https://polyhaven.com/license",
+  "local_license": "credits/licenses/CC0-1.0.txt",
+  "processing": {
+    "albedo": "Source JPEG copied byte-for-byte",
+    "normal": "Provider OpenGL +Y; quantize RGB to 8 bits, lossless PNG",
+    "orm": "Provider ARM packed R=AO, G=roughness, B=metallic; quantize RGB to 8 bits, lossless PNG",
+    "import": "Godot 4.4.1 native Texture2D lossless import with mipmaps; runtime StandardMaterial3D",
+    "data_map_preparation_tool": "Pillow 12.1.1, Image.convert(\"RGB\").save(..., optimize=True)"
+  },
+  "asset_families": {
+    "wall": {
+      "title": "Concrete",
+      "creator": "Rob Tuytel",
+      "asset_url": "https://polyhaven.com/a/concrete",
+      "official_file_manifest": "https://api.polyhaven.com/files/concrete",
+      "meters_per_tile": 4.0,
+      "base_texels_per_meter": 256.0,
+      "material": "client/resources/materials/sgc/embarkation_wall.tres",
+      "maps": {
+        "albedo": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete/concrete_diff_1k.jpg",
+          "source_md5": "795b1fbb460fb38d29c5859ff2c4b5d4",
+          "source_bytes": 543902,
+          "source_sha256": "046c0e2aebe31e6043a6bc074e779f6a345f1d823d0ca1c69446c5cabadefa8a",
+          "runtime_file": "client/assets/materials/sgc/embarkation_wall_albedo.jpg",
+          "runtime_bytes": 543902,
+          "runtime_sha256": "046c0e2aebe31e6043a6bc074e779f6a345f1d823d0ca1c69446c5cabadefa8a",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              0,
+              176
+            ],
+            [
+              0,
+              170
+            ],
+            [
+              0,
+              155
+            ]
+          ]
+        },
+        "normal": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/concrete/concrete_nor_gl_1k.png",
+          "source_md5": "9f69088e4432862c751bf8584681a6a1",
+          "source_bytes": 5876331,
+          "source_sha256": "d380657a545dd0abad7d502263337530c72967a4d9c124405af657cb2d6cd143",
+          "runtime_file": "client/assets/materials/sgc/embarkation_wall_normal.png",
+          "runtime_bytes": 1487066,
+          "runtime_sha256": "aa5381b0a55533c030674d93d7e93160be72f05e7f9bbfeca71b333a7a997b1c",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              29,
+              228
+            ],
+            [
+              28,
+              223
+            ],
+            [
+              185,
+              255
+            ]
+          ]
+        },
+        "orm": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/concrete/concrete_arm_1k.png",
+          "source_md5": "15ee6752847ff0712df20eeb412f9330",
+          "source_bytes": 1295723,
+          "source_sha256": "e54c0e48597e14ead83d5c7c83e5d41209cbc4451f4d7b2c4840600401858b17",
+          "runtime_file": "client/assets/materials/sgc/embarkation_wall_orm.png",
+          "runtime_bytes": 1293603,
+          "runtime_sha256": "d261a33dddfd99b7af6fa70e95eaf4ff0b83be2c5ee596cfa505bd75f1ced054",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              11,
+              243
+            ],
+            [
+              118,
+              192
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    "floor": {
+      "title": "Smooth Concrete Floor",
+      "creator": "Dimitrios Savva",
+      "asset_url": "https://polyhaven.com/a/smooth_concrete_floor",
+      "official_file_manifest": "https://api.polyhaven.com/files/smooth_concrete_floor",
+      "meters_per_tile": 2.0,
+      "base_texels_per_meter": 512.0,
+      "material": "client/resources/materials/sgc/embarkation_floor.tres",
+      "maps": {
+        "albedo": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/smooth_concrete_floor/smooth_concrete_floor_diff_1k.jpg",
+          "source_md5": "321efe0af2d0809ab958b78a008fa116",
+          "source_bytes": 861674,
+          "source_sha256": "079587ae48fb3e2bfb0d0f9209eb75dc26ee30e213403d96377a30f6f6955092",
+          "runtime_file": "client/assets/materials/sgc/embarkation_floor_albedo.jpg",
+          "runtime_bytes": 861674,
+          "runtime_sha256": "079587ae48fb3e2bfb0d0f9209eb75dc26ee30e213403d96377a30f6f6955092",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              20,
+              152
+            ],
+            [
+              14,
+              138
+            ],
+            [
+              1,
+              116
+            ]
+          ]
+        },
+        "normal": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/smooth_concrete_floor/smooth_concrete_floor_nor_gl_1k.png",
+          "source_md5": "da9344e29599ceb9d992232d766e59be",
+          "source_bytes": 5270878,
+          "source_sha256": "eca8fe3aafab185e12de4f39f98cb7888636fb6bb378fd4f4b692370368fa648",
+          "runtime_file": "client/assets/materials/sgc/embarkation_floor_normal.png",
+          "runtime_bytes": 1442836,
+          "runtime_sha256": "7b8088750df2e005afaa32b46a4ed7fed4792984b187c91bc6b7294c05c602df",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              61,
+              182
+            ],
+            [
+              61,
+              174
+            ],
+            [
+              213,
+              255
+            ]
+          ]
+        },
+        "orm": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/smooth_concrete_floor/smooth_concrete_floor_arm_1k.png",
+          "source_md5": "8fd105a047a5fd6f6fc58a1b0b2a0546",
+          "source_bytes": 4274469,
+          "source_sha256": "5b47138f2490f3a5da87763eafd8a0c085c4a9b905faaeb6aea0be9392032abe",
+          "runtime_file": "client/assets/materials/sgc/embarkation_floor_orm.png",
+          "runtime_bytes": 1381304,
+          "runtime_sha256": "139c93b73c216e5009b75699fe7c4dc8be13bcb5c18070b799d6ef97ee8f4aae",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              123,
+              249
+            ],
+            [
+              148,
+              190
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    "steel": {
+      "title": "Metal Plate",
+      "creator": "Rob Tuytel",
+      "asset_url": "https://polyhaven.com/a/metal_plate",
+      "official_file_manifest": "https://api.polyhaven.com/files/metal_plate",
+      "meters_per_tile": 0.5,
+      "base_texels_per_meter": 2048.0,
+      "material": "client/resources/materials/sgc/embarkation_steel.tres",
+      "maps": {
+        "albedo": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg",
+          "source_md5": "bd9daf4c04046ca392a38b8df955ed26",
+          "source_bytes": 692234,
+          "source_sha256": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5",
+          "runtime_file": "client/assets/materials/sgc/embarkation_steel_albedo.jpg",
+          "runtime_bytes": 692234,
+          "runtime_sha256": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              7,
+              149
+            ],
+            [
+              2,
+              128
+            ],
+            [
+              0,
+              111
+            ]
+          ]
+        },
+        "normal": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/metal_plate/metal_plate_nor_gl_1k.png",
+          "source_md5": "970b1bfeb59ec31a165341e05757dfc3",
+          "source_bytes": 5359071,
+          "source_sha256": "d858021ebc0a2a01ec13e574bc47ed58795e129904cda2868b3fb2dfd02d6741",
+          "runtime_file": "client/assets/materials/sgc/embarkation_steel_normal.png",
+          "runtime_bytes": 1574381,
+          "runtime_sha256": "f7443c8944031079fbab719284331a58f62159315a72c0c270cfca15084d7c20",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              41,
+              224
+            ],
+            [
+              39,
+              222
+            ],
+            [
+              202,
+              255
+            ]
+          ]
+        },
+        "orm": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/metal_plate/metal_plate_arm_1k.png",
+          "source_md5": "e89e239172608a8399fcdaead1731c79",
+          "source_bytes": 5698757,
+          "source_sha256": "d568d7ef7c206b3737b4fa38ba7984037f1ee2afbfd2ef03dd4418e8975eec04",
+          "runtime_file": "client/assets/materials/sgc/embarkation_steel_orm.png",
+          "runtime_bytes": 2040729,
+          "runtime_sha256": "df82772b6e4242850ae53237921624a0e90fd68bbaa2598860b633b39df38841",
+          "size_px": [
+            1024,
+            1024
+          ],
+          "rgb_byte_ranges": [
+            [
+              134,
+              248
+            ],
+            [
+              73,
+              249
+            ],
+            [
+              0,
+              245
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "source_comparison": {
+    "wall": "Concrete supplies restrained formwork seams at a 4 m repeat. Concrete Panels has deeper corrugation and stronger brown weathering.",
+    "floor": "Smooth Concrete Floor fits the existing indoor approach. The painted floor alternative emphasizes dark paint chips.",
+    "steel": "Metal Plate supplies a diamond tread for the ramp. Metal Plate 02 is flat corroded sheet and would lose the tread signal."
+  },
+  "verification": {
+    "engine": "Godot 4.4.1",
+    "baseline": "bf13f40",
+    "gpu": {
+      "renderer": "Forward+",
+      "device": "NVIDIA GeForce RTX 3060",
+      "resolution": [
+        1440,
+        900
+      ],
+      "sample_frames_per_view": 45,
+      "views": {
+        "alarm": {
+          "gpu_ms_median": 1.42799997329712,
+          "objects": 369,
+          "primitives": 115283
+        },
+        "before": {
+          "gpu_ms_median": 1.0900000333786,
+          "objects": 73,
+          "primitives": 111731
+        },
+        "gate-active": {
+          "gpu_ms_median": 1.58299994468689,
+          "objects": 469,
+          "primitives": 228822
+        },
+        "normal": {
+          "gpu_ms_median": 1.25600004196167,
+          "objects": 73,
+          "primitives": 111731
+        },
+        "pbr-original-lighting": {
+          "gpu_ms_median": 1.23500001430511,
+          "objects": 73,
+          "primitives": 111731
+        },
+        "probe-wide": {
+          "gpu_ms_median": 1.47699999809265,
+          "objects": 369,
+          "primitives": 115283
+        },
+        "side-approach": {
+          "gpu_ms_median": 1.4539999961853,
+          "objects": 501,
+          "primitives": 117383
+        },
+        "steel-bounded-probe": {
+          "gpu_ms_median": 2.18099999427795,
+          "objects": 49,
+          "primitives": 12337
+        },
+        "steel-matte": {
+          "gpu_ms_median": 1.09899997711182,
+          "objects": 49,
+          "primitives": 12337
+        },
+        "steel-source": {
+          "gpu_ms_median": 1.09700000286102,
+          "objects": 49,
+          "primitives": 12337
+        }
+      }
+    },
+    "decoded_texture_bytes_with_mips": 37748727,
+    "pack": {
+      "platform": "Linux x86_64",
+      "bytes": 60057424,
+      "sha256": "6eba1528192b609ee99895d6124af2531730372017c753fa9386ada96b2c1c0e",
+      "passed": [
+        "test_asset_credits",
+        "test_sgc_embarkation_materials"
+      ]
+    },
+    "focused_suites": [
+      "project-import",
+      "test_sgc_embarkation_materials",
+      "test_asset_credits",
+      "test_sgc_uat_architecture",
+      "test_camera_occlusion_smoke",
+      "test_gate_travel",
+      "test_gate_return_multiplayer",
+      "test_four_player_join_multiplayer",
+      "test_four_player_join_dedicated"
+    ],
+    "python_unit_tests": 60,
+    "owner_art": "open",
+    "local_full": {
+      "command": "python3 tools/run_godot_tests.py --profile full --timeout 240 --output build/test-results/sprint13-full",
+      "passed": 126,
+      "total": 126
+    }
+  }
+}

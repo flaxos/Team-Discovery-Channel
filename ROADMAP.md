@@ -16,7 +16,9 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 ### Pick up here
 
-**24 November 2026.** Sprint 8’s shared staff and Sprint 9’s original Zat are merged via #81 and #82. Sprint 10 audited all six held weapons in SGC and offworld and verified the clean release pack. Owner mesh and material review remains open, including the M249’s extended bipod. **Sprint 11’s M2 integration is ready for review.** The community gun and tripod are fitted to the existing turret. Sprint 12 has all four field-kit visuals ready for owner review. Four-operative listen and dedicated simulations verify late delivery during gate travel, inventory at destination and clearing deployments on retry. [Sprint 12 review](docs/reviews/2026-11-23-sprint12-field-kit.md). [Sprint 11 review](docs/reviews/2026-11-23-sprint11-m2-intake.md) · [Sprint 10 review](docs/reviews/2026-11-23-sprint10-held-weapon-audit.md).
+**24 November 2026.** Sprint 8’s shared staff and Sprint 9’s original Zat are merged via #81 and #82. Sprint 10 audited all six held weapons in SGC and offworld and verified the clean release pack. Owner mesh and material review remains open, including the M249’s extended bipod. **Sprint 11’s M2 integration is ready for review.** The community gun and tripod are fitted to the existing turret. Sprint 12 merged via #85, with all four field-kit visuals ready for owner review. Four-operative listen and dedicated simulations verify late delivery during gate travel, inventory at destination and clearing deployments on retry. [Sprint 12 review](docs/reviews/2026-11-23-sprint12-field-kit.md). [Sprint 11 review](docs/reviews/2026-11-23-sprint11-m2-intake.md) · [Sprint 10 review](docs/reviews/2026-11-23-sprint10-held-weapon-audit.md).
+
+**Sprint 13 is integrated locally.** The existing SGC embarkation chamber, side approaches and ramp use three shared PBR sets. Captures compare the original and dressed scenes under normal and alarm lighting and record the bounded lighting experiment. Owner art review is open. [Sprint 13 review](docs/reviews/2026-11-24-sprint13-sgc-embarkation.md).
 
 | Option | What | Who | Detail |
 |---|---|---|---|
