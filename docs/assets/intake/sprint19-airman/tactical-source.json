@@ -1,0 +1,44 @@
+{
+  "body": {
+    "creator": "DanlyVostok (1799danly)",
+    "title": "Military tactical suit (LowPolyGameReady)",
+    "licence": "CC BY 4.0",
+    "page": "https://sketchfab.com/3d-models/military-tactical-suit-lowpolygameready-ef698ce36b1545a78ce592dd3db4c7ed",
+    "download": "https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/characters/soldier_tac.glb",
+    "bytes": 4532132,
+    "sha256": "fe02bc307077d7a5a74069d085893988d93751495871c84082256e60bf9bfc9e"
+  },
+  "motion": {
+    "intermediary_creator": "BAMEN",
+    "intermediary_title": "FREE [Military Soldier] RIGGED",
+    "intermediary_licence": "CC BY 4.0",
+    "page": "https://sketchfab.com/3d-models/free-military-soldier-rigged-e9c56308a67d4a3db62e914fafa4d198",
+    "download": "https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/characters/soldier.glb",
+    "bytes": 3094592,
+    "sha256": "6f229176b1ca49ff33605718ebfcca7fcee8f65d6d311ce3c86693df9310d2d7",
+    "animation_credit": "The redistributor attributes the retargeted clips to Quaternius Universal Animation Library 1 and 2 Standard (CC0), with Gonzalo Furnier credited on the library listings. The separately credited mocap_ clips were excluded."
+  },
+  "redistributor": {
+    "repository_commit": "130ac2a5c856401ec36e7d35afcfefe40c5801f4",
+    "credits": "https://github.com/cktang88/3d-fps/blob/130ac2a5c856401ec36e7d35afcfefe40c5801f4/README.md",
+    "bytes": 20239,
+    "sha256": "c784fbe7def1a5cdfa86511a3073b08b9711250816b62082858181ffd600c756"
+  },
+  "library_2_check": {
+    "page": "https://quaternius.itch.io/universal-animation-library-2",
+    "licence": "CC0 1.0 confirmed from the free Standard archive extraction",
+    "bytes": 18735003,
+    "sha256": "4008ea208a604773a2b2177d965f0f5d3195498b5bf838c3f5785d68e95f2a68"
+  },
+  "prepared": {
+    "file": "client/assets/characters/sgc_airman.glb",
+    "bytes": 10049276,
+    "sha256": "a6af0b258f34b2c0a1d87339a65228306220a3bc89e5be2fc6d4ae449c0cdeff"
+  },
+  "changes": [
+    "Re-expressed selected rotational tracks and hip translations in the target rig.",
+    "Normalized oversized source vertex units with compensating inverse-bind transforms.",
+    "Dropped the floating headphones and disconnected source head mesh.",
+    "Converted decoded WebP textures to lossless PNG and retained the prepared skinned hierarchy."
+  ]
+}

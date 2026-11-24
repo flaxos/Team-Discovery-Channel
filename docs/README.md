@@ -67,6 +67,7 @@ Resume status checked **24 November 2026**. The original shared staff and Zat ar
 | [AP-1d M9 record](reviews/2026-11-16-ap1d-beretta-m9.md) | The first realistic weapon: owner-downloaded CC BY archive, FBX conversion by recipe, bore alignment, finish comparison, sharing and the exported-build check. |
 | [Sprint 7 MP5SD record](reviews/2026-11-18-sprint7-mp5-intake.md) | Imported Carter MP5SD, shared intake validation, distributed credits/full licences, captures, costs, local/hosted checks and remaining owner acceptance. |
 | [Sprint 8 shared staff](reviews/2026-11-23-sprint8-staff-intake.md) | Archive assessment, original textured visual shared by the player and Jaffa, fit, tests and captures. |
+| [Sprint 19 Airman and squad rig](reviews/2026-11-25-sprint19-airman-rig.md) | Shared placeholder for all four playable operatives and existing SGC personnel, stationary turns, mounted M2 grips, late-join poses and Linux fallback. |
 | [Sprint 18 SGC coverage](reviews/2026-11-24-sprint18-sgc-coverage.md) | Fitted CCTV monitors, storage and staging props, three-floor route evidence and normal/alarm views. |
 | [Sprint 17 SGC briefing and command](reviews/2026-11-24-sprint17-sgc-briefing-command.md) | Fitted Level 27 furniture, live shutter readout, two-sided glazing captures and stair and lift verification. |
 | [Sprint 16 SGC lab and support](reviews/2026-11-24-sprint16-sgc-lab-support.md) | East bench microscope, live ROM interaction, Level 26 medical cabinet and transport cases. |

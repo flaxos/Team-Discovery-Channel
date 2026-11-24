@@ -176,3 +176,12 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 | `client/assets/props/sprint18_television.glb` | Television 02 | Benny Weimer for Poly Haven | https://polyhaven.com/a/television_02 | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Four displays in the existing Level 27 CCTV bank | S |
 
 - **Changes:** Packed 1K colour, OpenGL normal and ARM channels as RGB PNGs. Godot shares the mipmapped material and mesh across four CRTs, scales them uniformly and turns the glass toward the aisle. The existing console drives the local selected-feed label. [Source and prepared hashes](../docs/assets/intake/sprint18-television/source.json).
+
+### SGC Airman
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/characters/sgc_airman.glb` | Military tactical suit (LowPolyGameReady) with retargeted motion | DanlyVostok (1799danly), Quaternius and Gonzalo Furnier, with the intermediary Mixamo-convention character and clip adaptation credited below | https://sketchfab.com/3d-models/military-tactical-suit-lowpolygameready-ef698ce36b1545a78ce592dd3db4c7ed | [CC BY 4.0](licenses/CC-BY-4.0.txt) for the suit, [CC0 1.0](licenses/CC0-1.0.txt) for the Universal Animation Library source | Skinned SGC Airman model and presentation clips | L |
+
+- **Changes:** Prepared the publicly redistributed suit and selected motion from cktang88’s attributed character files. Dropped the floating headset and disconnected source mesh, re-encoded decoded textures as PNG, compensated normalized vertex units in inverse binds and mapped the selected animation channels onto the suit’s skeleton. The game fits the original Airman scene and uses its existing action cues. [Redistributor credits](https://github.com/cktang88/3d-fps/blob/130ac2a5c856401ec36e7d35afcfefe40c5801f4/README.md).
+- **Changes:** Motion was sourced from the redistributed BAMEN character intermediary with the Universal Animation Library Standard retargeting credited by the redistributor. The production file uses the tactical suit’s mesh and skin. [BAMEN character listing](https://sketchfab.com/3d-models/free-military-soldier-rigged-e9c56308a67d4a3db62e914fafa4d198) · [Universal Animation Library](https://quaternius.itch.io/universal-animation-library) · [Universal Animation Library 2](https://quaternius.itch.io/universal-animation-library-2) · [Source and prepared hashes](../docs/assets/intake/sprint19-airman/tactical-source.json).

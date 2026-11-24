@@ -1,0 +1,948 @@
+{
+  "ok": true,
+  "file": "client/assets/characters/sgc_airman.glb",
+  "bytes": 10049276,
+  "sha256": "a6af0b258f34b2c0a1d87339a65228306220a3bc89e5be2fc6d4ae449c0cdeff",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "glTF-Transform v4.5.1",
+  "declared_triangles_unique_meshes": 31771,
+  "meshes": [
+    {
+      "name": "0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 962,
+          "declared_triangles": 1728,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.0542825546875,
+              -1.9071985,
+              -0.102342171875
+            ],
+            "max": [
+              0.05198880078125,
+              -1.870744375,
+              -0.0784957421875
+            ],
+            "size": [
+              0.10627135546875,
+              0.036454125000000115,
+              0.023846429687500004
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "1",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 1371,
+          "declared_triangles": 2630,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.079167609375,
+              1.8477157499999999,
+              0.06521503515625
+            ],
+            "max": [
+              0.076790734375,
+              1.9474135,
+              0.14143278125
+            ],
+            "size": [
+              0.15595834375,
+              0.09969775000000003,
+              0.07621774609375
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "2",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 945,
+          "declared_triangles": 1570,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.1322878125,
+              1.5498062499999998,
+              -0.13633390625
+            ],
+            "max": [
+              0.1450391875,
+              2.013853625,
+              0.158424640625
+            ],
+            "size": [
+              0.277327,
+              0.46404737500000004,
+              0.294758546875
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5_Pads_Leg_Mil_Suit_Pads__R5_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 2850,
+          "declared_triangles": 3872,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.23643667187499998,
+              0.42879121875,
+              -0.13832403125
+            ],
+            "max": [
+              0.23643667187499998,
+              0.6416713749999999,
+              0.099893609375
+            ],
+            "size": [
+              0.47287334374999995,
+              0.21288015624999995,
+              0.238217640625
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5_Puches_Mil_Suit_R5_Puches_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 1497,
+          "declared_triangles": 2071,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.30845915625,
+              0.7534998749999999,
+              -0.188485921875
+            ],
+            "max": [
+              0.2723821875,
+              1.4520085,
+              0.25558359375
+            ],
+            "size": [
+              0.58084134375,
+              0.6985086250000001,
+              0.44406951562499997
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "3",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 1090,
+          "declared_triangles": 1562,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.23036974999999998,
+              1.2601936249999999,
+              -0.2026404375
+            ],
+            "max": [
+              0.229688375,
+              1.73104025,
+              0.203113765625
+            ],
+            "size": [
+              0.460058125,
+              0.4708466250000001,
+              0.405754203125
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5_Mil_Suit_R5_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 1159,
+          "declared_triangles": 1670,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.546958375,
+              1.082893125,
+              -0.183143125
+            ],
+            "max": [
+              0.54768675,
+              1.7785176249999999,
+              0.18809210937499998
+            ],
+            "size": [
+              1.094645125,
+              0.6956244999999999,
+              0.37123523437499995
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Cap_GreenCap_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 722,
+          "declared_triangles": 1036,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.09720203125,
+              1.844611625,
+              -0.14709562499999998
+            ],
+            "max": [
+              0.09618399999999999,
+              2.026490875,
+              0.20814371874999998
+            ],
+            "size": [
+              0.19338603124999998,
+              0.18187924999999994,
+              0.35523934375
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "4",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 4083,
+          "declared_triangles": 5884,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.15029607812499998,
+              2.014797375,
+              -0.0903093984375
+            ],
+            "max": [
+              0.15406809375,
+              2.282326,
+              0.19277009374999998
+            ],
+            "size": [
+              0.304364171875,
+              0.26752862499999974,
+              0.28307949218749995
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5.001_Mil_Suit_R5_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 940,
+          "declared_triangles": 1506,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.28761490624999997,
+              0.176456640625,
+              -0.192605234375
+            ],
+            "max": [
+              0.28844468749999996,
+              1.1852055,
+              0.15898025
+            ],
+            "size": [
+              0.5760595937499999,
+              1.0087488593749998,
+              0.351585484375
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5_Gloves_Mil_Suit_R5_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 1350,
+          "declared_triangles": 2168,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.5961298125,
+              0.94878175,
+              0.045092144531249996
+            ],
+            "max": [
+              0.5961298125,
+              1.1768969999999999,
+              0.20975071874999998
+            ],
+            "size": [
+              1.192259625,
+              0.22811524999999988,
+              0.16465857421875
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5_Pads_Hands_Mil_Suit_Pads__R5_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 2846,
+          "declared_triangles": 3872,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.47736640625,
+              1.227425125,
+              -0.0966073203125
+            ],
+            "max": [
+              0.47736640625,
+              1.398258875,
+              0.054403246093749996
+            ],
+            "size": [
+              0.9547328125,
+              0.17083375000000012,
+              0.15101056640625
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5_Puches.001_Mil_Suit_R5_Puches_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 700,
+          "declared_triangles": 630,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.20282157812499998,
+              1.0815837499999998,
+              -0.153256390625
+            ],
+            "max": [
+              0.198994609375,
+              1.181574125,
+              0.16387812499999999
+            ],
+            "size": [
+              0.4018161875,
+              0.09999037500000019,
+              0.31713451562499995
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5_Puches.002_Mil_Suit_R5_Puches_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 628,
+          "declared_triangles": 968,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.28053596875,
+              0.9934424374999999,
+              -0.248284828125
+            ],
+            "max": [
+              0.28486584375,
+              1.1915132499999999,
+              0.204524796875
+            ],
+            "size": [
+              0.5654018125,
+              0.19807081249999992,
+              0.452809625
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    },
+    {
+      "name": "Mil_Suit_R5.002_Mil_Suit_R5_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 528,
+          "declared_triangles": 604,
+          "attributes": [
+            "JOINTS_0",
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0",
+            "WEIGHTS_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.27136925,
+              0.004055519287109375,
+              -0.16707403125
+            ],
+            "max": [
+              0.27183834375,
+              0.2567306875,
+              0.195604484375
+            ],
+            "size": [
+              0.54320759375,
+              0.2526751682128906,
+              0.362678515625
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "Sketchfab_model",
+    "Anim_Idle_MIL_R5.fbx",
+    "Object_2",
+    "RootNode",
+    "Armature",
+    "Object_5",
+    "_rootJoint",
+    "mixamorig:Hips_01",
+    "mixamorig:Spine_02",
+    "mixamorig:Spine1_03",
+    "mixamorig:Spine2_04",
+    "mixamorig:Neck_05",
+    "mixamorig:Head_06",
+    "mixamorig:HeadTop_End_07",
+    "Mil_R5_Eye",
+    "0",
+    "mixamorig:RightShoulder_08",
+    "mixamorig:RightArm_09",
+    "mixamorig:RightForeArm_010",
+    "mixamorig:RightHand_011",
+    "mixamorig:RightHandThumb1_012",
+    "mixamorig:RightHandThumb2_013",
+    "mixamorig:RightHandThumb3_014",
+    "mixamorig:RightHandThumb4_015",
+    "mixamorig:RightHandMiddle1_016",
+    "mixamorig:RightHandMiddle2_017",
+    "mixamorig:RightHandMiddle3_018",
+    "mixamorig:RightHandMiddle4_019",
+    "mixamorig:RightHandRing1_020",
+    "mixamorig:RightHandRing2_021",
+    "mixamorig:RightHandRing3_022",
+    "mixamorig:RightHandRing4_00",
+    "mixamorig:RightHandPinky1_023",
+    "mixamorig:RightHandPinky2_024",
+    "mixamorig:RightHandPinky3_025",
+    "mixamorig:RightHandPinky4_026",
+    "mixamorig:RightHandIndex1_027",
+    "mixamorig:RightHandIndex2_028",
+    "mixamorig:RightHandIndex3_029",
+    "mixamorig:RightHandIndex4_030",
+    "Right_Elbow_Pads_031",
+    "mixamorig:LeftShoulder_032",
+    "mixamorig:LeftArm_033",
+    "mixamorig:LeftForeArm_034",
+    "mixamorig:LeftHand_035",
+    "mixamorig:LeftHandThumb1_036",
+    "mixamorig:LeftHandThumb2_037",
+    "mixamorig:LeftHandThumb3_038",
+    "mixamorig:LeftHandThumb4_039",
+    "mixamorig:LeftHandIndex1_040",
+    "mixamorig:LeftHandIndex2_041",
+    "mixamorig:LeftHandIndex3_042",
+    "mixamorig:LeftHandIndex4_043",
+    "mixamorig:LeftHandMiddle1_044",
+    "mixamorig:LeftHandMiddle2_045",
+    "mixamorig:LeftHandMiddle3_046",
+    "mixamorig:LeftHandMiddle4_047",
+    "mixamorig:LeftHandRing1_048",
+    "mixamorig:LeftHandRing2_049",
+    "mixamorig:LeftHandRing3_050",
+    "mixamorig:LeftHandRing4_051",
+    "mixamorig:LeftHandPinky1_052",
+    "mixamorig:LeftHandPinky2_053",
+    "mixamorig:LeftHandPinky3_054",
+    "mixamorig:LeftHandPinky4_055",
+    "Left_Elbow_Pads_056",
+    "mixamorig:RightUpLeg_057",
+    "mixamorig:RightLeg_058",
+    "mixamorig:RightFoot_059",
+    "mixamorig:RightToeBase_060",
+    "mixamorig:RightToe_End_061",
+    "Right_Knee_Pads_062",
+    "mixamorig:LeftUpLeg_063",
+    "mixamorig:LeftLeg_064",
+    "mixamorig:LeftFoot_065",
+    "mixamorig:LeftToeBase_066",
+    "mixamorig:LeftToe_End_067",
+    "Left_Knee_Pads_068",
+    "Front_Big_Pouch.1_069",
+    "Front_Big_Pouch.2_070",
+    "Front_Big_Pouch.3_071",
+    "Left_Pouch.1_072",
+    "Left_Pouch.2_073",
+    "Left_Pouch.3_074",
+    "Back_Small_Pouch2.1_075",
+    "Back_Small_Pouch2.2_076",
+    "Back_Small_Pouch2.3_077",
+    "Back_Small_Pouch.1_078",
+    "Back_Small_Pouch.2_079",
+    "Back_Small_Pouch.3_080",
+    "Back_Big_Pouch.1_081",
+    "Back_Big_Pouch.2_082",
+    "Back_Big_Pouch.3_083",
+    "Right_Pouch.1_084",
+    "Right_Pouch.2_085",
+    "Right_Pouch.3_086",
+    "Object_97",
+    "Object_99",
+    "Object_101",
+    "Object_103",
+    "Object_105",
+    "Object_107",
+    "Object_109",
+    "Object_111",
+    "Object_113",
+    "Object_115",
+    "Object_117",
+    "Object_119",
+    "Object_121",
+    "Object_123"
+  ],
+  "skins": [
+    {
+      "name": "skin_0",
+      "joint_indices": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95
+      ]
+    }
+  ],
+  "animation_names": [
+    "aim_crouch_idle",
+    "aim_crouch_walk",
+    "aim_idle",
+    "aim_walk",
+    "crouch_idle",
+    "crouch_walk",
+    "death",
+    "downed",
+    "idle",
+    "prone_crawl",
+    "ready_idle",
+    "ready_run",
+    "ready_walk",
+    "revive_kneel",
+    "revived",
+    "run",
+    "shoot",
+    "walk"
+  ],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "Mil_Suit_R5_Head",
+      "metallic_factor": 0,
+      "roughness_factor": 0.8152405797808145,
+      "normal_texture": true,
+      "double_sided": true,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "Mil_Suit_Pads__R5",
+      "metallic_factor": 0,
+      "roughness_factor": 0.8152405797808145,
+      "normal_texture": true,
+      "double_sided": true,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "Mil_Suit_R5_Puches",
+      "metallic_factor": 1.0,
+      "roughness_factor": 0.821335836452073,
+      "normal_texture": true,
+      "double_sided": true,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "Mil_Suit_R5__Plate",
+      "metallic_factor": 1.0,
+      "roughness_factor": 0.7420974997257134,
+      "normal_texture": true,
+      "double_sided": true,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "Mil_Suit_R5",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": true,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "GreenCap",
+      "metallic_factor": 0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": true,
+      "alpha_mode": "OPAQUE"
+    },
+    {
+      "name": "HeadphonesT",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": true,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot",
+    "Verify rest pose, retargeting, root motion and raw-asset redistribution terms"
+  ],
+  "work_order": {
+    "ok": true,
+    "scope": "Request validation only; no licence or engine/art approval",
+    "asset_id": "sgc_airman",
+    "status": "ready_for_intake",
+    "work_order_sha256": "6408b18e52891908ff3775fbaf5c4661d9e5bf2b33301dc8e171873c45aac93e",
+    "schema_sha256": "c12d756075cf9c2b098e064204eab5b6cb1ab755832309bebe9445265e5f89fc",
+    "errors": []
+  }
+}

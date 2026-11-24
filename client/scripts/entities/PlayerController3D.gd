@@ -150,6 +150,7 @@ var locked_target_world_pos: Vector3 = Vector3.ZERO
 @onready var body_mesh: Node3D = $Visuals/BodyMesh if has_node("Visuals/BodyMesh") else null
 @onready var visor_mesh: MeshInstance3D = $Visuals/VisorMesh if has_node("Visuals/VisorMesh") else null
 @onready var class_gear: Node3D = $Visuals/ClassGear if has_node("Visuals/ClassGear") else null
+@onready var squad_rig := get_node_or_null(^"Visuals/SquadRig")
 @onready var nameplate: Node3D = $Nameplate3D if has_node("Nameplate3D") else null
 
 
@@ -964,6 +965,8 @@ func _setup_visual_materials() -> void:
 
 func _collect_mesh_instances(parent: Node) -> void:
 	for child: Node in parent.get_children():
+		if child == squad_rig:
+			continue
 		if child is MeshInstance3D:
 			var mi := child as MeshInstance3D
 			var orig: Material = null
@@ -989,6 +992,8 @@ func _update_proximity_fade(delta: float = 1.0) -> void:
 		target_alpha = lerpf(0.15, 1.0, t_fade)
 
 	current_player_alpha = move_toward(current_player_alpha, target_alpha, 8.0 * delta)
+	if squad_rig != null:
+		squad_rig.set_camera_alpha(current_player_alpha)
 
 	var mesh_keys: Array = original_visual_materials.keys()
 	if current_player_alpha >= 0.999:
@@ -1039,6 +1044,8 @@ func _restore_visual_materials() -> void:
 			var orig_mat: Material = original_visual_materials.get(mi, null) as Material
 			mi.material_override = orig_mat
 	current_player_alpha = 1.0
+	if is_instance_valid(squad_rig):
+		squad_rig.set_camera_alpha(1.0)
 
 
 func add_screen_shake(amount: float) -> void:
@@ -1266,6 +1273,8 @@ func play_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = fa
 
 
 func _render_shot_fx(from: Vector3, to: Vector3, is_plasma: bool, is_zat: bool = false) -> void:
+	if squad_rig != null and squad_rig.skin_visual != null:
+		from = squad_rig.show_shot(from, is_plasma, is_zat)
 	if DisplayServer.get_name() == "headless":
 		return
 	# Render lightweight tracer beam
@@ -2131,7 +2140,9 @@ func _on_vaporized() -> void:
 	flash.global_position = global_position + Vector3(0, 0.5, 0)
 
 	var tween := create_tween()
-	if body_mesh != null:
+	if squad_rig != null and squad_rig.skin_visual != null:
+		squad_rig.vaporize(tween)
+	elif body_mesh != null:
 		tween.tween_property(body_mesh, "scale", Vector3(0.01, 0.01, 0.01), 0.25)
 	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
 		tween.tween_callback(queue_free)

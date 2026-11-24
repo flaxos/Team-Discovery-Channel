@@ -1,0 +1,112 @@
+{
+  "source": "https://quaternius.itch.io/universal-animation-library",
+  "creator_page": "https://quaternius.com/packs/universalanimationlibrary.html",
+  "creator": "Quaternius",
+  "animation_collaborator_credited_in_listing": "Gonzalo Furnier",
+  "tier": "Standard",
+  "licence": "CC0 1.0",
+  "licence_evidence": "The exact public tier contains License.txt and README.txt, both identifying CC0 1.0.",
+  "staged_files": {
+    "Universal Animation Library[Standard].zip": {
+      "bytes": 15904933,
+      "sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724"
+    },
+    "UAL1_Standard.glb": {
+      "bytes": 7618436,
+      "sha256": "69591853d817488edaa8fd9bf8fc1d821eaeaf789f8627b3cd23b41c4ed67997"
+    },
+    "License.txt": {
+      "bytes": 332,
+      "sha256": "6d01f55c6e4c49a2c9963e147e561945ae2c83958c8ca667d90a6bffdbfac061"
+    },
+    "README.txt": {
+      "bytes": 702,
+      "sha256": "ccd02718886b5a57f10f0a8911a38cfe10c36880e1d6dfa3445923fba32d2a72"
+    }
+  },
+  "engine": "Godot 4.4.1",
+  "bone_count": 65,
+  "animation_names": [
+    "A_TPose",
+    "Crouch_Fwd_Loop",
+    "Crouch_Idle_Loop",
+    "Dance_Loop",
+    "Death01",
+    "Driving_Loop",
+    "Fixing_Kneeling",
+    "Hit_Chest",
+    "Hit_Head",
+    "Idle_Loop",
+    "Idle_Talking_Loop",
+    "Idle_Torch_Loop",
+    "Interact",
+    "Jog_Fwd_Loop",
+    "Jump_Land",
+    "Jump_Loop",
+    "Jump_Start",
+    "PickUp_Table",
+    "Pistol_Aim_Down",
+    "Pistol_Aim_Neutral",
+    "Pistol_Aim_Up",
+    "Pistol_Idle_Loop",
+    "Pistol_Reload",
+    "Pistol_Shoot",
+    "Punch_Cross",
+    "Punch_Jab",
+    "Push_Loop",
+    "Roll",
+    "Sitting_Enter",
+    "Sitting_Exit",
+    "Sitting_Idle_Loop",
+    "Sitting_Talking_Loop",
+    "Spell_Simple_Enter",
+    "Spell_Simple_Exit",
+    "Spell_Simple_Idle_Loop",
+    "Spell_Simple_Shoot",
+    "Sprint_Loop",
+    "Swim_Fwd_Loop",
+    "Swim_Idle_Loop",
+    "Sword_Attack",
+    "Sword_Idle",
+    "Walk_Formal_Loop",
+    "Walk_Loop"
+  ],
+  "tested_clips": {
+    "Idle_Loop": {
+      "length_seconds": 2.5,
+      "moving_bones_at_sample": 17
+    },
+    "Walk_Loop": {
+      "length_seconds": 1.333,
+      "moving_bones_at_sample": 21
+    },
+    "Jog_Fwd_Loop": {
+      "length_seconds": 0.933,
+      "moving_bones_at_sample": 17
+    },
+    "Crouch_Idle_Loop": {
+      "length_seconds": 2.933,
+      "moving_bones_at_sample": 44
+    },
+    "Crouch_Fwd_Loop": {
+      "length_seconds": 2.0,
+      "moving_bones_at_sample": 17
+    },
+    "Death01": {
+      "length_seconds": 2.4,
+      "moving_bones_at_sample": 50
+    }
+  },
+  "validator": {
+    "errors": 0,
+    "warnings": [
+      {
+        "code": "NODE_SKINNED_MESH_NON_ROOT",
+        "message": "Node with a skinned mesh is not root. Parent transforms will not affect a skinned mesh.",
+        "severity": 1,
+        "pointer": "/nodes/65"
+      }
+    ]
+  },
+  "asset_scope": "Staged animation reference and mannequin. The Airman uniform, two-handed combat and recovery clips are separate intake targets."
+}

@@ -29,6 +29,8 @@ var _remote_fire := false
 @onready var muzzle_point: Marker3D = $TurretHead/MuzzlePoint if has_node("TurretHead/MuzzlePoint") else null
 @onready var turret_head: Node3D = $TurretHead if has_node("TurretHead") else null
 @onready var interact_area: Area3D = $InteractArea if has_node("InteractArea") else null
+@onready var left_grip := get_node_or_null(^"TurretHead/LeftGrip") as Marker3D
+@onready var right_grip := get_node_or_null(^"TurretHead/RightGrip") as Marker3D
 
 
 func _enter_tree() -> void:
@@ -187,9 +189,14 @@ func _set_occupant(actor: CharacterBody3D) -> void:
 		var previous := mounted_player as PlayerController3D
 		if previous != null and previous.mounted_turret == self:
 			previous.mounted_turret = null
+		var previous_airman := mounted_player as SGCAirmanAI
+		if previous_airman != null and previous_airman.mounted_turret == self:
+			previous_airman.mounted_turret = null
 	mounted_player = actor
 	if actor is PlayerController3D:
 		(actor as PlayerController3D).mounted_turret = self
+	elif actor is SGCAirmanAI:
+		(actor as SGCAirmanAI).mounted_turret = self
 
 
 func _place_occupant() -> void:
