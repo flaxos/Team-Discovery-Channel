@@ -33,6 +33,10 @@ func run() -> void:
 		push_error("Level 26 medical props must fit the live slots and keep their original cover colliders")
 		quit(1)
 		return
+	if not check_service_cabinet(map):
+		push_error("Service cabinet must reuse the steel finish and retain its physical cover")
+		quit(1)
+		return
 	if not await check_medical_camera(room, map):
 		push_error("Crouch occlusion must fade the visible medical cabinet and restore its finish")
 		quit(1)
@@ -72,7 +76,19 @@ func run() -> void:
 
 
 func check_medical_cover(map: SGCMap) -> bool:
-	var footprints := {"STAGINGCover": Vector3(1.6, 1, 1), "SupplyRack1": Vector3(1.4, 1.8, 1.5)}
+	var footprints := {
+		"STAGINGCover": Vector3(1.6, 1, 1),
+		"STORAGECover": Vector3(1.6, 1, 1),
+		"SupplyRack0": Vector3(1.4, 1.8, 1.5),
+		"SupplyRack1": Vector3(1.4, 1.8, 1.5),
+		"SupplyRack2": Vector3(1.4, 1.8, 1.5),
+		"SupplyRack3": Vector3(1.4, 1.8, 1.5),
+		"StagingBench0": Vector3(3.5, 0.7, 0.6),
+		"StagingBench1": Vector3(3.5, 0.7, 0.6),
+		"EAST_CORRIDORCover": Vector3(1.6, 1, 1),
+		"WEST_SERVICECover": Vector3(1.6, 1, 1),
+		"WEST_FALLBACKCover": Vector3(1.6, 1, 1),
+	}
 	for id: String in footprints:
 		var body := map.get_node(id) as StaticBody3D
 		var visual := body.get_node_or_null(^"ReplacementVisual") as MeshInstance3D
@@ -84,10 +100,31 @@ func check_medical_cover(map: SGCMap) -> bool:
 		var replacement_bounds := visual.transform * visual.get_aabb()
 		if not AABB(-size / 2.0, size).grow(0.002).encloses(replacement_bounds):
 			return false
-		var query := PhysicsRayQueryParameters3D.create(body.global_position + Vector3(2, 0, 0), body.global_position, 1)
+		var target := body.global_position
+		if id == "SupplyRack0":
+			target.y += 0.4
+		var query := PhysicsRayQueryParameters3D.create(target + Vector3(size.x / 2 + 0.18, 0, 0), target, 1)
 		if body.get_world_3d().direct_space_state.intersect_ray(query).get("collider") != body:
 			return false
 	return true
+
+
+func check_service_cabinet(map: SGCMap) -> bool:
+	var body := map.get_node(^"ServiceCabinet") as StaticBody3D
+	var visual := body.get_child(0) as MeshInstance3D
+	var collision := body.get_child(1) as CollisionShape3D
+	var material := visual.material_override as StandardMaterial3D
+	var shared_steel := preload("res://resources/materials/sgc/embarkation_steel.tres")
+	if not visual.visible or material == null or material.albedo_texture != shared_steel.albedo_texture:
+		return false
+	if material.normal_texture != shared_steel.normal_texture or material.ao_texture != shared_steel.ao_texture:
+		return false
+	if collision.disabled or (collision.shape as BoxShape3D).size != Vector3(1.2, 2, 1.2):
+		return false
+	var query := PhysicsRayQueryParameters3D.create(
+		body.global_position + Vector3(1.0, 0, 0), body.global_position, 1
+	)
+	return body.get_world_3d().direct_space_state.intersect_ray(query).get("collider") == body
 
 
 func check_medical_camera(room: GateRoom, map: SGCMap) -> bool:

@@ -160,3 +160,19 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 | `client/resources/materials/sgc/briefing_wood.tres` | Wood Table 001 | Dimitrios Savva and Rico Cilliers for Poly Haven | https://polyhaven.com/a/wood_table_001 | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Shared varnished wood finish on the briefing table and command desk | S |
 
 - **Changes:** Preserved the provider’s 1K diffuse JPEG and converted the 16-bit OpenGL normal and packed ARM maps to 8-bit RGB PNG. The standard material uses a 1.5 m triplanar repeat, mipmaps and a restrained tint. [Source and prepared hashes](../docs/assets/intake/sprint17-briefing-wood.json).
+
+### SGC service cabinet steel — Sprint 18
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/resources/materials/sgc/service_cabinet_steel.tres` | Metal Plate, matte cabinet finish | Rob Tuytel for Poly Haven | https://polyhaven.com/a/metal_plate | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Existing Level 26 service cabinet mesh | S |
+
+- **Changes:** Reuses Sprint 13's colour, normal and packed surface maps. The cabinet material uses a cooler tint, lower reflectivity and constant matte roughness. [Source and prepared map hashes](../docs/assets/intake/sgc-embarkation.json).
+
+### SGC security CRTs — Sprint 18
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/props/sprint18_television.glb` | Television 02 | Benny Weimer for Poly Haven | https://polyhaven.com/a/television_02 | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Four displays in the existing Level 27 CCTV bank | S |
+
+- **Changes:** Packed 1K colour, OpenGL normal and ARM channels as RGB PNGs. Godot shares the mipmapped material and mesh across four CRTs, scales them uniformly and turns the glass toward the aisle. The existing console drives the local selected-feed label. [Source and prepared hashes](../docs/assets/intake/sprint18-television/source.json).

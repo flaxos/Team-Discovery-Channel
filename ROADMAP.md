@@ -26,7 +26,9 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 16 merged via #89.** The lab has a fitted community microscope, and the hard-mode fixture uses the ROM pickup from the west aisle. Level 26 staging and storage have a fitted medical cabinet and transport cases. [PR #89](https://github.com/flaxos/Team-Discovery-Channel/pull/89) · [Sprint 16 review](docs/reviews/2026-11-24-sprint16-sgc-lab-support.md).
 
-**Sprint 17 is ready for art review.** Level 27 has fitted briefing and command furniture, a live briefing shutter readout and observation captures from both rooms. [Sprint 17 review](docs/reviews/2026-11-24-sprint17-sgc-briefing-command.md).
+**Sprint 17 merged via #90.** Level 27 has fitted briefing and command furniture, a live briefing shutter readout and observation captures from both rooms. [PR #90](https://github.com/flaxos/Team-Discovery-Channel/pull/90) · [Sprint 17 review](docs/reviews/2026-11-24-sprint17-sgc-briefing-command.md).
+
+**Sprint 18 is ready for art review.** The three-floor route has a fitted CCTV bank, storage and staging props, and shared concrete finishes. The review records which ceiling, fixture and stair art remains for a later pass. [Sprint 18 review](docs/reviews/2026-11-24-sprint18-sgc-coverage.md).
 
 | Option | What | Who | Detail |
 |---|---|---|---|

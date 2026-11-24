@@ -1,7 +1,7 @@
 extends MeshInstance3D
 ## These silhouettes fit the original Level 26 staging and storage colliders.
 
-enum Style { CABINET, CASES }
+enum Style { CABINET, CASES, CASES_ABOVE_CABINET, WORKBENCH }
 
 @export var style := Style.CABINET
 
@@ -19,7 +19,11 @@ func _ready() -> void:
 		Style.CABINET:
 			build_cabinet(tool, cube)
 		Style.CASES:
-			build_cases(tool, cube)
+			build_cases(tool, cube, [-0.6, 0.0, 0.6])
+		Style.CASES_ABOVE_CABINET:
+			build_cases(tool, cube, [-0.6, 0.0])
+		Style.WORKBENCH:
+			build_workbench(tool, cube)
 	tool.index()
 	mesh = tool.commit()
 	var finish := StandardMaterial3D.new()
@@ -38,8 +42,8 @@ func build_cabinet(tool: SurfaceTool, cube: Array) -> void:
 		add_panel(tool, cube, Vector3(x - 0.14, 0.29, 0.476), Vector3(0.29, 0.07, 0.012), LABEL)
 
 
-func build_cases(tool: SurfaceTool, cube: Array) -> void:
-	for y: float in [-0.6, 0.0, 0.6]:
+func build_cases(tool: SurfaceTool, cube: Array, tiers: Array[float]) -> void:
+	for y in tiers:
 		for x: float in [-0.375, 0.375]:
 			add_panel(tool, cube, Vector3(x, y, 0), Vector3(0.73, 0.59, 1.36), FRAME)
 			add_panel(tool, cube, Vector3(x, y + 0.23, -0.008), Vector3(0.738, 0.14, 1.384), TEAL)
@@ -49,9 +53,21 @@ func build_cases(tool: SurfaceTool, cube: Array) -> void:
 				add_panel(tool, cube, Vector3(x + offset, y + 0.17, 0.684), Vector3(0.06, 0.11, 0.032), CASING)
 
 
+func build_workbench(tool: SurfaceTool, cube: Array) -> void:
+	add_panel(tool, cube, Vector3(0, 0.31, 0), Vector3(3.5, 0.08, 0.6), CASING)
+	add_panel(tool, cube, Vector3(0, 0.22, -0.025), Vector3(3.35, 0.10, 0.52), FRAME)
+	add_panel(tool, cube, Vector3(0, -0.18, -0.035), Vector3(3.2, 0.052, 0.44), FRAME)
+	for x: float in [-1.58, 1.58]:
+		for z: float in [-0.22, 0.22]:
+			add_panel(tool, cube, Vector3(x, -0.058, z), Vector3(0.10, 0.584, 0.10), FRAME)
+
+
 func add_panel(tool: SurfaceTool, cube: Array, center: Vector3, size: Vector3, tint: Color) -> void:
 	for index: int in cube[Mesh.ARRAY_INDEX]:
 		var vertex: Vector3 = cube[Mesh.ARRAY_VERTEX][index]
+		var point := center + vertex * size
+		if style == Style.CASES_ABOVE_CABINET:
+			point.y = point.y * 0.662 + 0.693
 		tool.set_normal(cube[Mesh.ARRAY_NORMAL][index])
 		tool.set_color(tint)
-		tool.add_vertex(center + vertex * size)
+		tool.add_vertex(point)

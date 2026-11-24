@@ -20,6 +20,8 @@ func run() -> void:
 	root.add_child(room)
 	map = room.get_node("SGCMap") as SGCMap
 	await map.navigation_ready
+	if "--alarm" in OS.get_cmdline_user_args():
+		room.set_emergency_lights(true)
 	check(map.definition.validate().is_empty(), "Invalid map schema")
 	check(map.definition.regions.size() == 26, "All three floors must be defined")
 	for scene_path: String in [

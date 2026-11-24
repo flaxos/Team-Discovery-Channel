@@ -60,6 +60,8 @@ func walk(goal: Vector3) -> bool:
 func run() -> void:
 	room = load("res://scenes/main/GateRoom.tscn").instantiate() as GateRoom
 	root.add_child(room)
+	if "--alarm" in OS.get_cmdline_user_args():
+		room.set_emergency_lights(true)
 	lift = room.get_node("SGCElevator") as SGCElevator
 	pawn = load("res://scenes/entities/Player.tscn").instantiate() as CharacterBody3D
 	room.add_child(pawn)
