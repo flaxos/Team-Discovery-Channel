@@ -1,0 +1,43 @@
+{
+  "asset": "Worn Metal Rack",
+  "creator": "Luca B",
+  "source": "https://polyhaven.com/a/worn_metal_rack",
+  "licence": "CC0-1.0",
+  "licence_evidence": "https://polyhaven.com/license",
+  "source_metadata": "https://api.polyhaven.com/info/worn_metal_rack",
+  "source_files": {
+    "worn_metal_rack_1k.gltf": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/worn_metal_rack/worn_metal_rack_1k.gltf",
+      "md5": "1e6ab13765080f11751b2843e2e4c321",
+      "bytes": 2796,
+      "sha256": "e757448bd448460ecb6c7218e7857c8d071f271e3cdc2bd013ca63d824c0c308"
+    },
+    "textures/worn_metal_rack_nor_gl_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/worn_metal_rack/worn_metal_rack_nor_gl_1k.jpg",
+      "md5": "6e9c6ca272eff7828cc0afd88960adb1",
+      "bytes": 435767,
+      "sha256": "3222c47e6fac0d103afec06b8a53476828777f5282d6703266010ecf587ad49e"
+    },
+    "textures/worn_metal_rack_diff_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/worn_metal_rack/worn_metal_rack_diff_1k.jpg",
+      "md5": "3f69d57964eb7e67899611de63ba6588",
+      "bytes": 604202,
+      "sha256": "295c2d48ad55289fed76b7438513520cadd94516639ab8ffd8790ffe7c903dbb"
+    },
+    "textures/worn_metal_rack_arm_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/worn_metal_rack/worn_metal_rack_arm_1k.jpg",
+      "md5": "32a956dcffe9745b1d95970b0bf58e5a",
+      "bytes": 696941,
+      "sha256": "b3523f947b3ebd960d508361bb323cec5a959d0b7043a8a7118ffab781925a65"
+    },
+    "worn_metal_rack.bin": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/worn_metal_rack/worn_metal_rack.bin",
+      "md5": "d7e62674d4846c5899323efd9c549f55",
+      "bytes": 269400,
+      "sha256": "b8cfa4138b7c0e0e69738c6f24dec7fecdc2f336f524312db48167816776fd13"
+    }
+  },
+  "staging_path": "/tmp/tdc-asset-intake/sprint15-worn-metal-rack",
+  "archive_terms": "Public files, no binary archive and no separate terms. Provider lists Luca B as sole author and donated: true.",
+  "modifications": "Repacked the provider glTF without changing geometry. Split the ARM channels for the recipe. Normal and ARM maps are lossless PNG encodings of the decoded source data. Runtime uses a uniform 0.83 scale, a floor-centred placement and reduced metallic response."
+}

@@ -7,7 +7,11 @@ const Interaction = preload("res://scripts/net/ServerInteraction.gd")
 
 signal rearmored(player: PlayerController3D)
 
+const SHELF_MODEL := "res://assets/props/worn_metal_rack.glb"
+const SHELF_SCALE := 0.83
+
 @export var cooldown_time: float = 3.0
+@export var sgc_shelf_dressing := false
 var current_cooldown: float = 0.0
 
 @onready var interact_area: Area3D = $InteractArea if has_node("InteractArea") else null
@@ -17,11 +21,46 @@ var current_cooldown: float = 0.0
 
 func _ready() -> void:
 	add_to_group("interactable")
+	if sgc_shelf_dressing:
+		_fit_shelf()
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_body_entered)
 		interact_area.body_exited.connect(_on_body_exited)
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_snapshot.rpc_id(1)
+
+
+func _fit_shelf() -> void:
+	var original := $RackMesh as MeshInstance3D
+	var shelf := RuntimeGLB.load_scene(SHELF_MODEL)
+	if shelf == null:
+		return
+	var imported := shelf.get_node_or_null(^"worn_metal_rack") as MeshInstance3D
+	if imported == null or imported.mesh == null or imported.mesh.get_surface_count() != 1:
+		shelf.free()
+		return
+	var material := imported.mesh.surface_get_material(0) as StandardMaterial3D
+	if material == null:
+		shelf.free()
+		return
+	var bounds := imported.transform * imported.get_aabb()
+	var floor_center := Vector3(bounds.get_center().x, bounds.position.y, bounds.get_center().z)
+	var fit := Transform3D(Basis.from_scale(Vector3.ONE * SHELF_SCALE), -floor_center * SHELF_SCALE)
+	if not (original.transform * original.get_aabb()).grow(0.001).encloses(fit * bounds):
+		shelf.free()
+		return
+	# The steel shares the room's matte finish under the existing station light.
+	material.metallic = 0.25
+	RuntimeGLB.add_mipmaps(material)
+	shelf.transform = fit
+	shelf.name = "ImportedShelf"
+	add_child(shelf)
+	original.hide()
+	var plates := $PlatesMesh as MeshInstance3D
+	plates.scale = Vector3(0.54, 0.12, 0.67)
+	plates.position = Vector3(0, 0.815, 0.04)
+	if station_light != null:
+		station_light.light_energy = 0.63
 
 
 func _process(delta: float) -> void:

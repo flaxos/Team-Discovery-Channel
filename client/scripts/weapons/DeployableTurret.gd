@@ -9,6 +9,7 @@ signal player_dismounted(player: Node)
 ## Metres the blast or shot is heard by patrolling sentries (JaffaAI.hear).
 const NOISE_RADIUS := 35.0
 const MOUNT_REACH := 2.4
+const GUNNER_REAR_OFFSET := 1.0
 const TurretVisual := preload("res://scripts/assets/M2TurretVisual.gd")
 
 @export var fire_rate_rpm: float = 500.0
@@ -61,6 +62,7 @@ func _physics_process(delta: float) -> void:
 	if not multiplayer.is_server():
 		var replica := get_node_or_null(mounted_actor_path) as CharacterBody3D if not mounted_actor_path.is_empty() else null
 		_set_occupant(replica)
+		_place_occupant()
 		return
 
 	if fire_cooldown > 0.0:
@@ -76,6 +78,7 @@ func _physics_process(delta: float) -> void:
 		var remote := operative != null and not operative.is_local_authority
 		var target: Vector3 = _remote_aim if remote else mounted_player.get("current_aim_target")
 		_aim_head(target)
+		_place_occupant()
 		if remote and _remote_fire and turret_head != null and target != Vector3.ZERO \
 				and (operative.health_component == null or not operative.health_component.is_stunned):
 			try_manual_fire((target - turret_head.global_position).normalized())
@@ -122,6 +125,7 @@ func receive_player_input(target: Vector3, fire: bool) -> bool:
 		_request_input.rpc_id(1, target, fire)
 		return false
 	_aim_head(target)
+	_place_occupant()
 	return fire and turret_head != null and target != Vector3.ZERO \
 		and try_manual_fire((target - turret_head.global_position).normalized())
 
@@ -167,6 +171,7 @@ func mount(player: CharacterBody3D) -> void:
 		return
 	mounted_actor_path = get_path_to(player)
 	_set_occupant(player)
+	_place_occupant()
 	player_mounted.emit(player)
 	print("DeployableTurret: Operative %s mounted the .50 Cal Browning!" % player.name)
 
@@ -185,6 +190,24 @@ func _set_occupant(actor: CharacterBody3D) -> void:
 	mounted_player = actor
 	if actor is PlayerController3D:
 		(actor as PlayerController3D).mounted_turret = self
+
+
+func _place_occupant() -> void:
+	if not is_instance_valid(mounted_player) or turret_head == null:
+		return
+	var rear := turret_head.global_basis.z
+	rear.y = 0.0
+	rear = rear.normalized()
+	mounted_player.global_position = global_position + rear * GUNNER_REAR_OFFSET
+	mounted_player.velocity = Vector3.ZERO
+	var yaw := atan2(rear.x, rear.z)
+	var operative := mounted_player as PlayerController3D
+	if operative != null:
+		# The camera still follows the operative's input yaw. Only the body faces the receiver.
+		if operative.visuals != null:
+			operative.visuals.global_rotation = Vector3(0, yaw, 0)
+	else:
+		mounted_player.global_rotation = Vector3(0, yaw, 0)
 
 
 func dismount() -> void:

@@ -22,6 +22,7 @@ var current_cooldown: float = 0.0
 var rack_index: int = 0
 var status_light: OmniLight3D = null
 var crate_visual: CrateStackVisual = null
+var occlusion_visual: GeometryInstance3D = null
 
 @onready var interact_area: Area3D = $InteractArea if has_node("InteractArea") else null
 @onready var prompt_label: Label3D = $PromptLabel if has_node("PromptLabel") else null
@@ -34,6 +35,15 @@ func _ready() -> void:
 	var box := get_node(^".") as CSGBox3D
 	if station_type == StationType.AMMO_CRATE and imported_crate_visual and box != null:
 		crate_visual = CrateStackVisual.dress_box(box)
+		if crate_visual != null:
+			occlusion_visual = crate_visual.get_node(^"Crates") as MultiMeshInstance3D
+	elif station_type == StationType.WEAPON_RACK and box != null:
+		var rack := get_node_or_null(^"RackVisual") as MeshInstance3D
+		var envelope := AABB(-box.size * 0.5, box.size).grow(0.001)
+		if rack != null and rack.mesh != null and envelope.encloses(rack.transform * rack.get_aabb()):
+			occlusion_visual = rack
+			box.transparency = 1.0
+			box.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_body_entered)
 		interact_area.body_exited.connect(_on_body_exited)

@@ -25,6 +25,8 @@ The source puts the tripod and some gun fittings in the same material primitive.
 
 The captured stock player camera and the existing procedural operative can obscure parts of the deployed model. The deployed diagnostic view shows the fitted gun, tripod and shield under the same mission lights. [Original baseline measurements](../assets/intake/m2/baseline.json) · [Fitted measurements and pack hash](../assets/intake/m2/fit.json) · [Validator report](../assets/intake/m2/gltf-validator.json).
 
+The Sprint 15 follow-up seats the operator behind the live receiver during traverse and stows the personal weapon while mounted. [Before and after](2026-11-24-sprint15-sgc-armoury.md#m2-operator-positioning-follow-up).
+
 ## Session behavior
 
 Before the change, late joiners saw the authored west turret at rest while the server showed an occupant and aim. The turret scene now replicates the occupant path and aim from the server. SG‑3 deployment uses a mission-owned spawner and the existing ready-peer filter. Player mount and aim requests resolve against the server’s operative and current turret. Hits run on the server through the existing shot marker. Shot effects travel through the ready mission world so a loading player can join even if a deployed turret is firing. Retry creates a fresh deployment container.
