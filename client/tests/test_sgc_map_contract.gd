@@ -1,5 +1,11 @@
 extends SceneTree
 
+const SERVICE_REGIONS: Array[StringName] = [
+	&"WEST_SERVICE", &"WEST_FALLBACK", &"SECURITY_STATION", &"UPPER_ELEVATOR_LOBBY",
+	&"SUPPORT_LOBBY", &"SUPPORT_CORRIDOR", &"STAGING", &"STORAGE", &"SERVICE_ROOM", &"SERVICE_STAIRWELL",
+]
+const SERVICE_STAIR := "SERVICE_STAIRWELL__SERVICE_ROOM"
+
 
 func _init() -> void:
 	call_deferred("run")
@@ -41,6 +47,7 @@ func run() -> void:
 		push_error("Crouch occlusion must fade the visible medical cabinet and restore its finish")
 		quit(1)
 		return
+	check_service_architecture(room, map)
 	# Art replacements must preserve gameplay collision and reject over-sized visuals.
 	var visual := MeshInstance3D.new()
 	var box := BoxMesh.new()
@@ -70,9 +77,71 @@ func run() -> void:
 		"Unknown goals must not produce direct wall-crossing movement"
 	)
 	print(
-		"PASS source provenance, fallback routes, art metadata, visual bounds and unreachable destinations"
+		"PASS source provenance, fallback routes, service architecture, visual bounds and unreachable destinations"
 	)
 	await preload("res://tests/support/finish.gd").success(self)
+
+
+func check_service_architecture(room: GateRoom, map: SGCMap) -> void:
+	for region_id: StringName in SERVICE_REGIONS:
+		var region := map.definition.region(region_id)
+		var fixture := map.get_node(str(region_id) + "LightFixture") as StaticBody3D
+		var conduit := map.get_node(str(region_id) + "ServiceConduit") as StaticBody3D
+		var fixture_slot := fixture.get_meta("asset_slot") as SGCAssetSlot
+		var light := map.get_node(str(region_id) + "Light") as OmniLight3D
+		assert(light.position == region.anchor + Vector3(0, 3.3, 0))
+		assert(is_equal_approx(light.light_energy, region.light_energy))
+		assert(light.light_color.is_equal_approx(region.light_color))
+		var ceiling_height := map.definition.floor_y(region) + region.ceiling_height
+		assert(is_equal_approx(fixture.position.y + fixture_slot.dimensions.y / 2.0, ceiling_height))
+		var housing := fixture.get_node(^"ReplacementVisual") as Node3D
+		assert(not (fixture.get_child(0) as MeshInstance3D).visible)
+		assert(fixture.find_children("*", "CollisionShape3D", true, false).is_empty())
+		var diffuser_is_lit := false
+		for part: MeshInstance3D in housing.find_children("*", "MeshInstance3D", true, false):
+			var envelope := AABB(-fixture_slot.dimensions / 2.0, fixture_slot.dimensions).grow(0.001)
+			assert(envelope.encloses(part.transform * part.get_aabb()))
+			var finish := part.get_active_material(0) as StandardMaterial3D
+			diffuser_is_lit = diffuser_is_lit or finish.emission_enabled
+		assert(diffuser_is_lit)
+		var pipe := conduit.get_node(^"ReplacementVisual") as MeshInstance3D
+		assert(not (conduit.get_child(0) as MeshInstance3D).visible)
+		assert(conduit.find_children("*", "CollisionShape3D", true, false).is_empty())
+		var pipe_slot := conduit.get_meta("asset_slot") as SGCAssetSlot
+		assert(pipe.get_aabb().size.is_equal_approx(pipe_slot.dimensions))
+
+	var ceiling_finish := preload("res://resources/materials/sgc/service_ceiling.tres")
+	var finished_panels := 0
+	for body: StaticBody3D in get_nodes_in_group("sgc_ceiling"):
+		var slot := body.get_meta("asset_slot") as SGCAssetSlot
+		if slot.style_id != &"ceiling" or slot.pbr_material != ceiling_finish:
+			continue
+		assert(body.collision_layer == 128 and body.get_child(1) is CollisionShape3D)
+		assert((body.get_child(0) as MeshInstance3D).material_override == ceiling_finish)
+		finished_panels += 1
+	assert(finished_panels == 12, "The ten rooms include the split ceilings at the service stair")
+
+	var tread_finish := preload("res://resources/materials/sgc/service_tread.tres")
+	var walk := map.get_node(SERVICE_STAIR + "WalkSurface") as StaticBody3D
+	var walk_collider := walk.get_child(1) as CollisionShape3D
+	assert(walk_collider != null and walk_collider.shape is BoxShape3D and not walk_collider.disabled)
+	assert((walk.get_child(0) as MeshInstance3D).material_override == tread_finish)
+	for index in range(35):
+		var tread := map.get_node(SERVICE_STAIR + "Tread" + str(index)) as StaticBody3D
+		assert((tread.get_child(0) as MeshInstance3D).material_override == tread_finish)
+		assert(tread.get_child_count() == 1, "The walk surface owns stair collision")
+	var frame_finish := preload("res://resources/materials/sgc/service_frame.tres")
+	for name: String in [SERVICE_STAIR + "Rail-1.3", SERVICE_STAIR + "Rail1.3", "ServiceHoleNorthGuard"]:
+		var rail := map.get_node(name.validate_node_name()) as StaticBody3D
+		assert(rail.get_child(1) is CollisionShape3D)
+		assert((rail.get_child(0) as MeshInstance3D).material_override == frame_finish)
+
+	var alarm := room.get_node(^"EmergencyLights/SERVICE_ROOMAlarm") as OmniLight3D
+	room.set_emergency_lights(true)
+	room._process(0.30)
+	assert(alarm.light_energy > 0.0)
+	room.set_emergency_lights(false)
+	assert(is_zero_approx(alarm.light_energy))
 
 
 func check_medical_cover(map: SGCMap) -> bool:

@@ -169,6 +169,16 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 
 - **Changes:** Reuses Sprint 13's colour, normal and packed surface maps. The cabinet material uses a cooler tint, lower reflectivity and constant matte roughness. [Source and prepared map hashes](../docs/assets/intake/sgc-embarkation.json).
 
+### SGC architecture finishes — Sprint 18 follow-up
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/resources/materials/sgc/service_ceiling.tres` | Concrete, matte ceiling finish | Rob Tuytel for Poly Haven | https://polyhaven.com/a/concrete | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Continuous 4 m concrete repeat across the selected ceiling panels and service stair caps | S |
+| `client/resources/materials/sgc/service_frame.tres` | Service Frame Charcoal Paint | Team Discovery Channel project | https://github.com/flaxos/Team-Discovery-Channel/blob/main/client/resources/materials/sgc/service_frame.tres | Original project asset | Shared charcoal finish for beams, stair rails and landing guards | S |
+| `client/resources/materials/sgc/service_tread.tres` | Metal Plate, matte stair finish | Rob Tuytel for Poly Haven | https://polyhaven.com/a/metal_plate | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Existing service stair walk surface and treads, with a 0.5 m repeat | S |
+
+- **Changes:** The concrete and tread finishes reuse the original Sprint 13 colour, normal and packed maps. The frame colour ramp, fitted fluorescent housings and conduit meshes are original project art. [Source and prepared map hashes](../docs/assets/intake/sgc-embarkation.json).
+
 ### SGC security CRTs — Sprint 18
 
 | Asset file | Title | Creator | Source | Licence | Integration | Effort |
