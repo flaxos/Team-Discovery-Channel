@@ -1,14 +1,43 @@
-[gd_scene load_steps=6 format=3 uid="uid://cclaymore01"]
+[gd_scene load_steps=12 format=3 uid="uid://cclaymore01"]
 
 [ext_resource type="Script" path="res://scripts/weapons/ClaymoreMine.gd" id="1_cm01"]
+[ext_resource type="ArrayMesh" path="res://assets/props/field_kit_claymore_shell.obj" id="2_shell"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_OliveDrab"]
 albedo_color = Color(0.22, 0.28, 0.18, 1)
 roughness = 0.6
 
-[sub_resource type="BoxMesh" id="BoxMesh_ClaymoreBody"]
-material = SubResource("Mat_OliveDrab")
-size = Vector3(0.5, 0.3, 0.15)
+[sub_resource type="StandardMaterial3D" id="Mat_Support"]
+albedo_color = Color(0.11, 0.13, 0.106, 1)
+roughness = 0.89
+
+[sub_resource type="StandardMaterial3D" id="Mat_Indicator"]
+albedo_color = Color(0.36, 0.78, 0.48, 1)
+emission_enabled = true
+emission = Color(0.16, 0.72, 0.31, 1)
+emission_energy_multiplier = 0.55
+
+[sub_resource type="StandardMaterial3D" id="Mat_ArmedIndicator"]
+albedo_color = Color(0.88, 0.24, 0.16, 1)
+emission_enabled = true
+emission = Color(0.86, 0.15, 0.08, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="BoxMesh" id="Mesh_Foot"]
+material = SubResource("Mat_Support")
+size = Vector3(0.068, 0.06, 0.098)
+
+[sub_resource type="BoxMesh" id="Mesh_Ridge"]
+material = SubResource("Mat_Support")
+size = Vector3(0.35, 0.022, 0.038)
+
+[sub_resource type="BoxMesh" id="Mesh_Indicator"]
+material = SubResource("Mat_Indicator")
+size = Vector3(0.033, 0.009, 0.020)
+
+[sub_resource type="BoxMesh" id="Mesh_ArmedIndicator"]
+material = SubResource("Mat_ArmedIndicator")
+size = Vector3(0.033, 0.009, 0.020)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_Tripwire"]
 points = PackedVector3Array(0, 0, 0, -2.5, 0, -4.5, 2.5, 0, -4.5, -2.5, 1.2, -4.5, 2.5, 1.2, -4.5, 0, 1.2, 0)
@@ -22,7 +51,38 @@ script = ExtResource("1_cm01")
 
 [node name="BodyMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
-mesh = SubResource("BoxMesh_ClaymoreBody")
+mesh = ExtResource("2_shell")
+material_override = SubResource("Mat_OliveDrab")
+
+[node name="LeftFoot" type="MeshInstance3D" parent="BodyMesh"]
+position = Vector3(-0.150, -0.12, 0.011)
+mesh = SubResource("Mesh_Foot")
+
+[node name="RightFoot" type="MeshInstance3D" parent="BodyMesh"]
+position = Vector3(0.150, -0.12, 0.011)
+mesh = SubResource("Mesh_Foot")
+
+[node name="TopRidge" type="MeshInstance3D" parent="BodyMesh"]
+position = Vector3(0, 0.089, 0.006)
+mesh = SubResource("Mesh_Ridge")
+
+[node name="FrontMark" type="Label3D" parent="BodyMesh"]
+position = Vector3(0, -0.007, -0.073)
+rotation = Vector3(0, 3.14159265, 0)
+pixel_size = 0.0009
+modulate = Color(0.84, 0.89, 0.73, 1)
+outline_size = 0
+text = "FRONT"
+font_size = 37
+
+[node name="ArmingLens" type="MeshInstance3D" parent="BodyMesh"]
+position = Vector3(0, 0.101, 0.006)
+mesh = SubResource("Mesh_Indicator")
+
+[node name="ArmedLens" type="MeshInstance3D" parent="BodyMesh"]
+visible = false
+position = Vector3(0, 0.101, 0.006)
+mesh = SubResource("Mesh_ArmedIndicator")
 
 [node name="ArmLight" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
@@ -36,3 +96,5 @@ collision_mask = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="TripwireArea"]
 shape = SubResource("ConvexPolygonShape3D_Tripwire")
+
+[node name="FieldKitSync" type="MultiplayerSynchronizer" parent="."]

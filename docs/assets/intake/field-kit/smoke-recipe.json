@@ -1,0 +1,20 @@
+{
+  "source": "/tmp/tdc-asset-intake/field-kit-smoke/decoded/model/Smoke_Grenade.fbx",
+  "output": "../../../../client/assets/props/field_kit_smoke.glb",
+  "root_name": "FieldKitSmoke",
+  "keep_nodes": [
+    "Granade"
+  ],
+  "max_texture_size": 1024,
+  "image_format": "PNG",
+  "materials": {
+    "aiStandardSurface1": {
+      "albedo": "/tmp/tdc-asset-intake/field-kit-smoke/decoded/Granade_Base_color.png",
+      "normal": "/tmp/tdc-asset-intake/field-kit-smoke/decoded/Granade_Normal.png",
+      "normal_convention": "opengl",
+      "roughness": "/tmp/tdc-asset-intake/field-kit-smoke/decoded/Granade_Roughness.png",
+      "metallic": "/tmp/tdc-asset-intake/field-kit-smoke/decoded/Granade_Metallic.png",
+      "ao": "/tmp/tdc-asset-intake/field-kit-smoke/decoded/Granade_Mixed_AO.png"
+    }
+  }
+}

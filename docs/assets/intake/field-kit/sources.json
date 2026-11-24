@@ -1,0 +1,56 @@
+{
+  "c4": {
+    "listing": "https://sketchfab.com/3d-models/simple-old-c4-43d3b6a933b04aea8006d790627f9555",
+    "metadata": "https://api.sketchfab.com/v3/models/43d3b6a933b04aea8006d790627f9555",
+    "creator": "Blender3D",
+    "licence": "http://creativecommons.org/licenses/by/4.0/",
+    "reported_faces": 4592,
+    "reported_textures": 6,
+    "advertised_downloadable": true,
+    "decision": "Integrated from the verified owner-provided Simple Old C4 archive once the creator and CC BY 4.0 metadata were checked.",
+    "alternate": {
+      "listing": "https://sketchfab.com/3d-models/c4-explosive-device-1136e57481274df78877d323cf7e730a",
+      "metadata": "https://api.sketchfab.com/v3/models/1136e57481274df78877d323cf7e730a",
+      "creator": "Charlie Tinley",
+      "licence": "http://creativecommons.org/licenses/by/4.0/",
+      "reported_faces": 12368,
+      "reported_textures": 9,
+      "advertised_downloadable": true,
+      "decision": "Preferred original-format visual. Creator states that they authored the model and textures. Anonymous download returned HTTP 401. Archive and terms remain pending."
+    }
+  },
+  "smoke": {
+    "listing": "https://sketchfab.com/3d-models/smoke-grenade-d61768fbc7494143bb87852c36d1beaa",
+    "metadata": "https://api.sketchfab.com/v3/models/d61768fbc7494143bb87852c36d1beaa",
+    "creator": "Roman Berezyak",
+    "licence": "http://creativecommons.org/licenses/by/4.0/",
+    "reported_faces": 1394,
+    "reported_textures": 5,
+    "advertised_downloadable": true,
+    "decision": "Integrated from the owner-supplied original archive. The nested RAR supplied one FBX with intact colour, roughness, metallic, AO and distinct OpenGL and DirectX normal maps.",
+    "alternate": {
+      "listing": "https://sketchfab.com/3d-models/m18-smoke-grenade-green-7e7bbd1eb478426dbd9b4f2f5820f7e8",
+      "decision": "The CC BY listing and description use different resale terms. Hold pending clarification."
+    }
+  },
+  "claymore": {
+    "listing": "https://sketchfab.com/3d-models/claymore-mine-m18-m18a1-04019c9f8f4341d8bda1296f286fa6fb",
+    "metadata": "https://api.sketchfab.com/v3/models/04019c9f8f4341d8bda1296f286fa6fb",
+    "creator": "Aleksandr Goncharov",
+    "licence": "http://creativecommons.org/licenses/by-nc/4.0/",
+    "reported_faces": 1712,
+    "reported_textures": 5,
+    "advertised_downloadable": true,
+    "decision": "Excluded because the provider metadata lists a noncommercial licence. The project exterior uses its own game-scene envelope."
+  },
+  "shield": {
+    "listing": "https://sketchfab.com/3d-models/ballistic-shield-0d34ec846da74f9eb33222549ab8d9b9",
+    "metadata": "https://api.sketchfab.com/v3/models/0d34ec846da74f9eb33222549ab8d9b9",
+    "creator": "local.yany",
+    "licence": "http://creativecommons.org/licenses/by/4.0/",
+    "reported_faces": 21764,
+    "reported_textures": 1,
+    "advertised_downloadable": true,
+    "decision": "Rejected for fit. A vertical hand shield would change the silhouette of the existing waist-high cover slab."
+  }
+}

@@ -1,28 +1,49 @@
-[gd_scene load_steps=8 format=3 uid="uid://cdeployshield01"]
+[gd_scene load_steps=13 format=3 uid="uid://cdeployshield01"]
 
 [ext_resource type="Script" path="res://scripts/props/DeployableShield.gd" id="1_shield"]
 [ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
+[ext_resource type="ArrayMesh" path="res://assets/props/field_kit_shield_shell.obj" id="3_shell"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_Shield"]
 size = Vector3(2.2, 0.9, 0.25)
 
 [sub_resource type="StandardMaterial3D" id="Mat_ShieldPlating"]
-albedo_color = Color(0.22, 0.26, 0.22, 1)
-metallic = 0.8
-roughness = 0.35
+albedo_color = Color(0.25, 0.30, 0.25, 1)
+metallic = 0.16
+roughness = 0.65
 
-[sub_resource type="BoxMesh" id="BoxMesh_Plate"]
-material = SubResource("Mat_ShieldPlating")
-size = Vector3(2.2, 0.9, 0.18)
+[sub_resource type="StandardMaterial3D" id="Mat_Edge"]
+albedo_color = Color(0.095, 0.114, 0.102, 1)
+roughness = 0.83
 
-[sub_resource type="StandardMaterial3D" id="Mat_ViewGlass"]
-transparency = 1
-albedo_color = Color(0.2, 0.8, 1, 0.6)
-roughness = 0.1
+[sub_resource type="StandardMaterial3D" id="Mat_ViewSlit"]
+albedo_color = Color(0.16, 0.37, 0.40, 1)
+roughness = 0.25
 
-[sub_resource type="BoxMesh" id="BoxMesh_ViewSlit"]
-material = SubResource("Mat_ViewGlass")
-size = Vector3(0.8, 0.12, 0.22)
+[sub_resource type="StandardMaterial3D" id="Mat_Hardware"]
+albedo_color = Color(0.39, 0.42, 0.40, 1)
+metallic = 0.2
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="Mesh_Rail"]
+material = SubResource("Mat_Edge")
+size = Vector3(1.98, 0.047, 0.185)
+
+[sub_resource type="BoxMesh" id="Mesh_WindowFrame"]
+material = SubResource("Mat_Edge")
+size = Vector3(0.78, 0.16, 0.19)
+
+[sub_resource type="BoxMesh" id="Mesh_WindowInset"]
+material = SubResource("Mat_ViewSlit")
+size = Vector3(0.69, 0.093, 0.012)
+
+[sub_resource type="BoxMesh" id="Mesh_RearStiffener"]
+material = SubResource("Mat_Hardware")
+size = Vector3(0.072, 0.66, 0.044)
+
+[sub_resource type="BoxMesh" id="Mesh_Clip"]
+material = SubResource("Mat_Hardware")
+size = Vector3(0.10, 0.055, 0.023)
 
 [node name="DeployableShield" type="StaticBody3D" groups=["cover", "deployable_shield"]]
 collision_layer = 1
@@ -41,8 +62,52 @@ max_health = 600.0
 
 [node name="ShieldMesh" type="MeshInstance3D" parent="Visuals"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-mesh = SubResource("BoxMesh_Plate")
+mesh = ExtResource("3_shell")
+material_override = SubResource("Mat_ShieldPlating")
+
+[node name="UpperRail" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(0, 0.411, 0)
+mesh = SubResource("Mesh_Rail")
+
+[node name="LowerRail" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(0, -0.418, 0)
+mesh = SubResource("Mesh_Rail")
+
+[node name="WindowFrame" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(0, 0.235, 0)
+mesh = SubResource("Mesh_WindowFrame")
 
 [node name="ViewSlit" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
-mesh = SubResource("BoxMesh_ViewSlit")
+position = Vector3(0, 0.235, -0.100)
+mesh = SubResource("Mesh_WindowInset")
+
+[node name="RearInset" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(0, 0.235, 0.100)
+mesh = SubResource("Mesh_WindowInset")
+
+[node name="RearLeftStiffener" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(-0.59, -0.012, 0.098)
+mesh = SubResource("Mesh_RearStiffener")
+
+[node name="RearRightStiffener" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(0.59, -0.012, 0.098)
+mesh = SubResource("Mesh_RearStiffener")
+
+[node name="LeftClip" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(-0.846, -0.327, -0.086)
+mesh = SubResource("Mesh_Clip")
+
+[node name="RightClip" type="MeshInstance3D" parent="Visuals/ShieldMesh"]
+position = Vector3(0.846, -0.327, -0.086)
+mesh = SubResource("Mesh_Clip")
+
+[node name="EquipmentMark" type="Label3D" parent="Visuals/ShieldMesh"]
+position = Vector3(-0.73, 0.20, -0.084)
+rotation = Vector3(0, 3.14159265, 0)
+pixel_size = 0.0015
+modulate = Color(0.81, 0.83, 0.75, 1)
+outline_size = 0
+text = "SGC"
+font_size = 48
+
+[node name="FieldKitSync" type="MultiplayerSynchronizer" parent="."]

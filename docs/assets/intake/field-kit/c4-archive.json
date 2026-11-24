@@ -1,0 +1,140 @@
+{
+  "listing": "https://sketchfab.com/3d-models/simple-old-c4-43d3b6a933b04aea8006d790627f9555",
+  "metadata": "https://api.sketchfab.com/v3/models/43d3b6a933b04aea8006d790627f9555",
+  "creator": "Blender3D",
+  "licence": "CC BY 4.0",
+  "authority": "The uploader describes authoring this model. The owner supplied the original archive. The archive includes a single rigid mesh and baked maps with no separate terms.",
+  "prepared_content": "Reoriented the visible model and used the baked colour, normal, AO and roughness maps. Source input sheets, specular and emissive files were left in staging.",
+  "files": [
+    {
+      "path": "simple-old-c4.zip",
+      "bytes": 71103727,
+      "sha256": "b20caa8571d7c8875ee58bd7b58eb6cfa505d14b3643a5a6766398e9506dd8b4"
+    },
+    {
+      "path": "extracted/source/Simple Old C4.rar",
+      "bytes": 39334256,
+      "sha256": "5caaa3e4881588724a7645444c686fb65549d3f154171a72f2e65b45e8bb8ac3"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Fabric.png",
+      "bytes": 16330,
+      "sha256": "62f74f29e62165377f083eaa560199d276a61fe4345d2efc61cd6b064ddae56e"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Metal.png",
+      "bytes": 6321,
+      "sha256": "88f092543db544a797383e9890058bcb885b07a70055f4f4917efb551f67f780"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Metal3.png",
+      "bytes": 250008,
+      "sha256": "52fac5edfeba959ab4b1ac85543b577f2c8a59c8ff235049c06158e49438678d"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Numberz.png",
+      "bytes": 342397,
+      "sha256": "5a30e03d985c54fb7b11daf3cc535daaf8058753fecba4c39ac3f2e3478ffd0f"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Plastic.png",
+      "bytes": 202340,
+      "sha256": "c6003775278fd7c724401c8b7521b0a6e46e7e86781f88f087b6223ec357dca6"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Roughness2.png",
+      "bytes": 58178,
+      "sha256": "a4a24db5c5e0e20f3b9bbc4e5459e5f25e4bd769c396bf7061dd7153a35bd8b0"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Roughness3.png",
+      "bytes": 483881,
+      "sha256": "e728f450bea0de509c551be09e0f2d441dd92dfcc9050f4d990a53f79827d167"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Roughness4.png",
+      "bytes": 253481,
+      "sha256": "b88de26e2fdd8ee16759a86e9f965bf20a4877dd363f8b54597828907ec37217"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Roughness5.png",
+      "bytes": 141245,
+      "sha256": "5b4ac8a931d3964b0ef2ba9823066c5af63e32a2528b168eefedd691e739fc12"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Roughness6.png",
+      "bytes": 1077157,
+      "sha256": "398a92296411e8cb5cb7c9b04836acb5cd22497588d73623d31539b4d94a5597"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Roughness7.png",
+      "bytes": 171875,
+      "sha256": "c65056b99cc645f88b9d52be2047ed0dc2cbdf96c5548fb071c442a4f83aecb0"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Screen.png",
+      "bytes": 82224,
+      "sha256": "0b97713744800801520ea893848550e3c921e3bf503345421202aaf4fe0d9987"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/Tape.png",
+      "bytes": 179629,
+      "sha256": "4758773320f4938c5f74adec1c0692cb948178a4f424ae5f97f574d8e6f9fd13"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/metal2.png",
+      "bytes": 192832,
+      "sha256": "3431f7c797acfe6fe9ff6738ba54b6c62cc865ab728679884848f1e0950fa7cf"
+    },
+    {
+      "path": "decoded/Simple Old C4/images used to create/roughness.png",
+      "bytes": 25231,
+      "sha256": "39552d1a3a0d43dee2a1aaf35b12cac27cd6d42147f302ea397becd852ce8668"
+    },
+    {
+      "path": "decoded/Simple Old C4/materials/Diffuse.png",
+      "bytes": 20944432,
+      "sha256": "2ee596100cf71288797b81781054fad773ab2e040611ae60274376cf6ea5f950"
+    },
+    {
+      "path": "decoded/Simple Old C4/materials/Diffuse_AO.png",
+      "bytes": 1373698,
+      "sha256": "a7eecbf6fb60bc4e1db81a7027e9bc7b44789d1047db7114ef425df9f509eda1"
+    },
+    {
+      "path": "decoded/Simple Old C4/materials/Diffuse_Normal.png",
+      "bytes": 4287869,
+      "sha256": "9d7a4c3bd2ebb05188305cfa5f9dba0af4522475d6c09aa2957635c0b9bdf5b4"
+    },
+    {
+      "path": "decoded/Simple Old C4/materials/Diffuse_Roughness.png",
+      "bytes": 7598983,
+      "sha256": "a79c73f9896ae947b1087055a5457da4193fae97a56d6bdfc3b9f37cadbdc028"
+    },
+    {
+      "path": "decoded/Simple Old C4/materials/Diffuse_SPEC.png",
+      "bytes": 2400623,
+      "sha256": "4a9cd972ee9f77e3fec90362c69228b4a2b4c86654d3bfd47c5c9daa2dbd587e"
+    },
+    {
+      "path": "decoded/Simple Old C4/materials/Emmison.png",
+      "bytes": 18902,
+      "sha256": "335198f60499ac6de0de92258e3ca58e3d475427e9ed21086db64a0e41a06d38"
+    },
+    {
+      "path": "decoded/Simple Old C4/model/obj/C4.mtl",
+      "bytes": 141,
+      "sha256": "bb29afbae2b82093515806ecdce950f548e9fce4df7e0d3c5b237a9b2106a915"
+    },
+    {
+      "path": "decoded/Simple Old C4/model/obj/C4.obj",
+      "bytes": 345138,
+      "sha256": "d14d6a60277cfadc92e03eea7e1da03d04ef074b80efff3edb5772dc9f91df39"
+    },
+    {
+      "path": "decoded/c4-geometry.glb",
+      "bytes": 148036,
+      "sha256": "ef6d6c8d01c5ba8d45354e8a530942f2119227bd1617d8b053b42caafda4ff04"
+    }
+  ]
+}

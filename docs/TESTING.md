@@ -33,6 +33,8 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 
 ## Coverage contracts
 
+Sprint 12’s `test_field_kit_visuals` verifies the four exterior fits, C4 and smoke effect origins, arming cues and shield removal. Use `-- --expect-fallback` in an export with both community prop GLBs excluded. The four-operative `test_field_kit_join_multiplayer` and `test_field_kit_join_dedicated` verify remote deployment, readiness-gated delivery during gate travel, spent stock at destination and a clean retry. [Sprint 12 review](reviews/2026-11-23-sprint12-field-kit.md).
+
 Sprint 11 adds `test_imported_m2_visual` for the fitted gun and fixed tripod, original muzzle and interaction volume, shared mipmapped resources and fallback. The four-operative `test_m2_join_multiplayer` and `test_m2_join_dedicated` cases cover remote SG‑3 deployment and mounting, a server shot, a replacement joining during gate travel and a clean retry. [Sprint 11 review](reviews/2026-11-23-sprint11-m2-intake.md).
 
 Sprint 10’s `held_weapon_audit.gd` records live mesh, LOD, material, mipmap and cache data for the six modeled weapons. It runs from the checkout and the Linux release pack. The visual helper's `--audit` mode equips the owning classes and `--downed` captures their existing sidearm selection. [Commands and evidence](reviews/2026-11-23-sprint10-held-weapon-audit.md).

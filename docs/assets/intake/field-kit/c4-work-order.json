@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS12",
+  "asset_id": "field_kit_c4",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Fit the Sprint 12 c4 exterior to its existing visual branch.",
+  "target": {
+    "scene": "res://scenes/props/C4Satchel.tscn",
+    "visual_branch": "MeshInstance3D",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/assets/intake/field-kit/baseline.json",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.2,
+        -0.1,
+        -0.15
+      ],
+      "max_m": [
+        0.2,
+        0.1,
+        0.15
+      ]
+    },
+    "anchors": [
+      {
+        "name": "LEDLight",
+        "position_m": [
+          0,
+          0.15,
+          0
+        ],
+        "purpose": "Existing scene anchor for the stock effect or visual parent."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/simple-old-c4-43d3b6a933b04aea8006d790627f9555",
+        "decision": "selected",
+        "reason": "Integrated from the verified owner-provided Simple Old C4 archive once the creator and CC BY 4.0 metadata were checked."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/c4-explosive-device-1136e57481274df78877d323cf7e730a",
+        "decision": "unavailable",
+        "reason": "Preferred original-format visual. Creator states that they authored the model and textures. Anonymous download returned HTTP 401. Archive and terms remain pending."
+      }
+    ],
+    "selected_source": {
+      "page": "https://sketchfab.com/3d-models/simple-old-c4-43d3b6a933b04aea8006d790627f9555",
+      "creator": "Blender3D",
+      "licence": "CC BY 4.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/field-kit/c4-archive.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 18000,
+    "max_materials": 5,
+    "lod_triangle_limits": [
+      18000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "c4_exterior",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#303438",
+        "#1A1C1D"
+      ],
+      "surface_notes": "Pair source colour, normal and packed ORM to the intact exterior."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 32,
+    "measurement_plan": "Measure fitted visual bounds and shared resource usage. Verify inclusion from an exported Linux pack."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Compare the original and fitted prop in SGC at its existing placement and immediately after its actual in-game state transition. Confirm travel and retry with the established four-operative fixtures."
+}

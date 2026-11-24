@@ -5,6 +5,7 @@ extends Node3D
 
 signal detonated(origin: Vector3)
 ## Metres the blast or shot is heard by patrolling sentries (JaffaAI.hear).
+const KitNetwork := preload("res://scripts/world/FieldKitNetwork.gd")
 const NOISE_RADIUS := 40.0
 
 @export var blast_damage: float = 320.0
@@ -13,26 +14,45 @@ const NOISE_RADIUS := 40.0
 @export var tripwire_range: float = 4.5
 
 var planter: Node = null
-var is_armed: bool = false
+var is_armed: bool = false:
+	set(value):
+		is_armed = value
+		if is_node_ready():
+			_update_arming_visual()
 
 @onready var tripwire_area: Area3D = $TripwireArea if has_node("TripwireArea") else null
 @onready var arm_light: OmniLight3D = $ArmLight if has_node("ArmLight") else null
 
 
+func _enter_tree() -> void:
+	KitNetwork.configure(self, ["is_armed"])
+
+
+func _update_arming_visual() -> void:
+	if arm_light != null and is_armed:
+		arm_light.light_color = Color(1.0, 0.2, 0.2)
+		arm_light.light_energy = 2.0
+	var arming_lens := get_node_or_null("BodyMesh/ArmingLens") as MeshInstance3D
+	var armed_lens := get_node_or_null("BodyMesh/ArmedLens") as MeshInstance3D
+	if arming_lens != null and armed_lens != null:
+		arming_lens.visible = not is_armed
+		armed_lens.visible = is_armed
+
+
 func _ready() -> void:
+	_update_arming_visual()
 	if tripwire_area != null:
 		tripwire_area.monitoring = false
+	if KitNetwork.is_replica(self):
+		return
+	if tripwire_area != null:
 		tripwire_area.body_entered.connect(_on_tripwire_tripped)
 
-	# 1.0s arming timer
 	var timer := get_tree().create_timer(1.0)
 	timer.timeout.connect(func() -> void:
 		is_armed = true
 		if tripwire_area != null:
 			tripwire_area.monitoring = true
-		if arm_light != null:
-			arm_light.light_color = Color(1.0, 0.2, 0.2)
-			arm_light.light_energy = 2.0
 		print("Claymore: ARMED and monitoring directional tripwire.")
 	)
 
@@ -46,6 +66,8 @@ func _on_tripwire_tripped(body: Node) -> void:
 
 
 func detonate() -> void:
+	if KitNetwork.is_replica(self):
+		return
 	is_armed = false
 	detonated.emit(global_position)
 	get_tree().call_group(&"noise_listeners", &"hear", global_position, NOISE_RADIUS, planter)
@@ -74,12 +96,20 @@ func detonate() -> void:
 
 
 func _spawn_blast_fx() -> void:
+	var world := MissionWorld.of(self)
+	var context := world if world != null else get_parent()
+	show_burst(context, global_position)
+	if world is GateRoom:
+		SGCNetworkManager.mission_rpc(world, &"play_field_kit_burst", [global_position, false])
+
+
+static func show_burst(context: Node, origin: Vector3) -> void:
 	# Screen shake for nearby operatives
-	var players := MissionWorld.find(self, "Players")
+	var players := MissionWorld.find(context, "Players")
 	if players != null:
 		for p in players.get_children():
 			if p is PlayerController3D:
-				var d := global_position.distance_to(p.global_position)
+				var d := origin.distance_to(p.global_position)
 				var falloff := clampf(1.0 - (d / 30.0), 0.1, 1.0)
 				p.add_screen_shake(0.70 * falloff)
 
@@ -90,8 +120,8 @@ func _spawn_blast_fx() -> void:
 		audio.bus = &"SFX"
 		audio.max_distance = 60.0
 		audio.unit_size = 15.0
-		get_tree().root.add_child(audio)
-		audio.global_position = global_position
+		context.add_child(audio)
+		audio.global_position = origin
 		audio.finished.connect(audio.queue_free)
 		audio.play()
 
@@ -105,8 +135,8 @@ func _spawn_blast_fx() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.albedo_color = Color(1.0, 0.45, 0.1, 0.95)
 	blast_mesh.material_override = mat
-	get_tree().root.add_child(blast_mesh)
-	blast_mesh.global_position = global_position
+	context.add_child(blast_mesh)
+	blast_mesh.global_position = origin
 
 	var tween := blast_mesh.create_tween()
 	tween.tween_property(blast_mesh, "scale", Vector3(2.5, 2.5, 2.5), 0.15)

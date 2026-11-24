@@ -1,0 +1,93 @@
+{
+  "ok": true,
+  "file": "client/assets/props/field_kit_c4.glb",
+  "bytes": 2826512,
+  "sha256": "0d6779fc3eb00a56536858f205822be10b9a70afbdd8ccb4436b4a3a8c122807",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Godot Engine v4.4.1.stable.official@49a5bc7b616bd04689a2c89e89bda41f50241464",
+  "declared_triangles_unique_meshes": 4592,
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 4555,
+          "declared_triangles": 4592,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -1.61615395545959,
+              -0.489482998847961,
+              -1.03794896602631
+            ],
+            "max": [
+              1.63410294055939,
+              0.616688013076782,
+              1.03794896602631
+            ],
+            "size": [
+              3.25025689601898,
+              1.106171011924743,
+              2.07589793205262
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "FieldKitC4",
+    "C4Housing"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "material_0",
+      "metallic_factor": 0.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ],
+  "work_order": {
+    "ok": true,
+    "scope": "Request validation only; no licence or engine/art approval",
+    "asset_id": "field_kit_c4",
+    "status": "ready_for_intake",
+    "work_order_sha256": "a5a81896b5686242c6b6b22e539f068b30c676c9dbcfb4cff030893dcca1d449",
+    "schema_sha256": "c12d756075cf9c2b098e064204eab5b6cb1ab755832309bebe9445265e5f89fc",
+    "errors": []
+  }
+}

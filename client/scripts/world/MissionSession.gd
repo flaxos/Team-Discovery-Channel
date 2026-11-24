@@ -241,6 +241,8 @@ func capture_state(player: PlayerController3D) -> Dictionary:
 		"turret_cooldown": player.turret_cooldown,
 		"claymore_charges": player.claymore_charges,
 		"c4_charges_remaining": player.c4_charges_remaining,
+		"smoke_grenades_count": player.smoke_grenades_count,
+		"deployable_shields_count": player.deployable_shields_count,
 		"is_carrying_patch_rom": player.is_carrying_patch_rom,
 		"weapons": {}
 	}
@@ -314,6 +316,8 @@ func apply_state(player: PlayerController3D, state: Dictionary) -> void:
 	player.turret_cooldown = state.get("turret_cooldown", 0.0)
 	player.claymore_charges = state.get("claymore_charges", player.claymore_charges)
 	player.c4_charges_remaining = state.get("c4_charges_remaining", player.c4_charges_remaining)
+	player.smoke_grenades_count = state.get("smoke_grenades_count", player.smoke_grenades_count)
+	player.deployable_shields_count = state.get("deployable_shields_count", player.deployable_shields_count)
 	player.is_carrying_patch_rom = state.get("is_carrying_patch_rom", false)
 
 

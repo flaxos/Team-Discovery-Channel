@@ -80,6 +80,24 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 - **Modifications:** Excluded the presentation plinth and loose ammo props. Separated the tripod by connected mesh parts, fitted both visual branches to the game scene, downsized maps to 1K, flipped normal green, and packed AO, roughness and metallic. The game applies its matte treatment. The split shield is original project art.
 - **Source evidence:** [Archive hashes and creator licence evidence](../docs/assets/intake/m2/archive-evidence.json).
 
+### Smoke canister
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/props/field_kit_smoke.glb` | Smoke Grenade | **Roman Berezyak** | https://sketchfab.com/3d-models/smoke-grenade-d61768fbc7494143bb87852c36d1beaa | [CC BY 4.0](licenses/CC-BY-4.0.txt) | Canister visual fitted to the existing smoke prop | S |
+
+- **Modifications:** Packed the exterior FBX with reduced 1K colour and OpenGL normal maps and a packed AO, roughness and metallic image. Fitted the exterior to the original visual anchor and applied the game’s matte finish.
+- **Source evidence:** [Archive and licence evidence](../docs/assets/intake/field-kit/smoke-archive.json).
+
+### C4 satchel exterior
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/props/field_kit_c4.glb` | Simple Old C4 | **Blender3D** | https://sketchfab.com/3d-models/simple-old-c4-43d3b6a933b04aea8006d790627f9555 | [CC BY 4.0](licenses/CC-BY-4.0.txt) | Exterior mesh fitted inside the existing satchel silhouette | S |
+
+- **Modifications:** Reoriented the OBJ exterior and packed the baked 1K colour, normal and AO/roughness maps. The game uses its existing light and anchor. The source specular and emissive maps were omitted.
+- **Source evidence:** [Archive and licence evidence](../docs/assets/intake/field-kit/c4-archive.json).
+
 ## 2. Community Stargate Props & Faction Assets
 
 | Asset file | Title | Uploader | Source | Licence | Use |
