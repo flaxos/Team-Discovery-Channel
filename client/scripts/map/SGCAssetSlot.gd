@@ -6,4 +6,5 @@ extends Resource
 @export var description: String
 @export var visual_scene: PackedScene
 @export var texture: Texture2D
+@export var pbr_material: StandardMaterial3D
 @export var replacement_status: String = "placeholder"

@@ -30,7 +30,7 @@ Determine repeat size from a measured slot/UV layout, not from image resolution.
 
 No baked symbols/text whose orientation or scale changes across joins. Use separate decals or authored glyph bands for localized details, with controlled depth bias and a measured camera test. Keep imported textures/material presets reusable; do not duplicate a full set per module, room, faction variant or player.
 
-SGC `SGCAssetSlot.texture` currently exposes one texture, not a PBR set. The first material slice must prove a reusable material/visual wrapper binding through the existing bounds check before claiming all SGC slots support this table. D-010 modular themes remain cosmetic: materials/visuals cannot change collision, navigation, footprints, sockets or native layout ownership. Do not paint over an enclosure defect or move a wall to fit a trim.
+SGC slots can bind a shared `StandardMaterial3D` through `SGCAssetSlot.pbr_material` on the original mesh. Empty assignments fall back to the legacy `texture` property or the style palette. This path preserves the visible mesh bounds and the camera fade. [Sprint 13 material proof](../reviews/2026-11-24-sprint13-sgc-embarkation.md). D-010 modular themes remain cosmetic: materials/visuals cannot change collision, navigation, footprints, sockets or native layout ownership. Do not paint over an enclosure defect or move a wall to fit a trim.
 
 ## Provisional runtime budgets
 
@@ -58,7 +58,7 @@ Keep high-resolution originals in local intake. Do not upscale poor sources and 
 | `load_map` converts images to RGB8; recipe can use lossy encoding for data | Sprint 7 proves lossless opaque PNG/normal/ORM delivery and reference channel checks. Alpha preservation remains unresolved and must be added/proved before hair/cards, cutout decals or foliage. MP5SD source alpha was uniformly opaque; it does not prove alpha support. |
 | Weapon loader uses the D-015 `metallic = 0` workaround | Sprint 7 records the current appearance; Sprint 13 tests proper light/reflection treatment in a bounded SGC area. Keep source PBR, compare old/new, then adopt reviewed overrides deliberately. Never flatten all source metallic maps to compensate for darkness. |
 | Runtime load has a cache/mipmap solution, but no general LOD authoring contract | Sprint 10 confirmed that all six held weapons use LOD0, with shared meshes/materials and full texture mips. Sprint 15 checks the shared resources and total scene cost of repeated armoury props. |
-| No complete PBR material-set binding in SGC’s single-texture slot | Sprint 13 adds the minimum reusable binding consumed by the embarkation area, preserving slot bounds, fade and fallback. |
+| No complete PBR material-set binding in SGC’s single-texture slot | Resolved in Sprint 13. Mapped walls, floors and supports consume native materials. The original mesh bounds, camera fade and legacy fallback still apply. |
 | Credits live outside `client/` | **Resolved in Sprint 7:** generated `asset_credits.tres` and the lobby reader deliver attribution and both full required licences. Clean release export verifies eight model files and exact legal texts. Maintain source/credit synchronization and repeat export proof after relevant changes. |
 
 ## Material acceptance checklist

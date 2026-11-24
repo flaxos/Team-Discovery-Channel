@@ -48,7 +48,7 @@ The navigation bake refuses to save a map with enclosure errors, and `test_sgc_e
 
 ## Art briefs and replacement
 
-Every generated module has a stable `SGCAssetSlot` in the map resource and `asset_slot` metadata on its body: dimensions, description, style, visual scene, texture and replacement status. Styles supply palette, roughness, metallic response, material channels, texture scale, wear and references.
+Every generated module has a stable `SGCAssetSlot` in the map resource and `asset_slot` metadata on its body: dimensions, description, style, visual scene, legacy texture, optional shared PBR material and replacement status. Styles supply palette, roughness, metallic response, material channels, texture scale, wear and references.
 
 | Family | Appearance brief |
 | --- | --- |
@@ -60,7 +60,7 @@ Every generated module has a stable `SGCAssetSlot` in the map resource and `asse
 | Stairs and guards | Charcoal painted steel, visible treads and handrails, scuffed edges. Continuous protective collision stays independent of visual balusters. |
 | Support props | Supply racks, utility cabinets and staging benches; utilitarian painted metal, clear silhouettes, no obstruction of portals or anchors. |
 
-Textures can be assigned per slot. `replace_asset_visual(slot_id, packed_scene)` validates visual bounds against the slot envelope, disables replacement collision, and keeps the original gameplay shape. Oversized replacements fail without replacing the placeholder. Generated art should use the supplied dimensions and material channels. AI artwork generation is deferred; these are functional placeholders and briefs.
+A slot can use a shared native StandardMaterial3D on its original mesh. Empty assignments fall back to its legacy texture or style. The embarkation chamber, side approaches and existing ramp are the first production use. [Sprint 13 review](../reviews/2026-11-24-sprint13-sgc-embarkation.md). `replace_asset_visual(slot_id, packed_scene)` validates visual bounds against the slot envelope, disables replacement collision, and keeps the original gameplay shape. Oversized replacements fail without replacing the placeholder. Generated art should use the supplied dimensions and material channels. AI artwork generation is deferred; these are functional placeholders and briefs.
 
 Ceilings have independent collision on physics layer 8 (128), included in character and weapon masks and excluded from navigation baking to prevent walkable roof islands. Both observation windows have separate blast shutters and consoles; the control shutter retracts into its sill and the briefing shutter retracts above its frame. Their closed positions are inset from the glass to avoid coplanar surfaces.
 
