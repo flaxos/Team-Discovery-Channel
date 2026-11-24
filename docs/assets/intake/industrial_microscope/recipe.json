@@ -1,0 +1,20 @@
+{
+  "source": "/tmp/tdc-asset-intake/sprint16-industrial-microscope/industrial_microscope_1k.gltf",
+  "output": "../../../../client/assets/props/industrial_microscope.glb",
+  "root_name": "IndustrialMicroscope",
+  "keep_nodes": [
+    "industrial_microscope"
+  ],
+  "max_texture_size": 1024,
+  "image_format": "PNG",
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/sprint16-industrial-microscope/textures/industrial_microscope_diff_1k.jpg",
+      "normal": "/tmp/tdc-asset-intake/sprint16-industrial-microscope/textures/industrial_microscope_nor_gl_1k.jpg",
+      "normal_convention": "opengl",
+      "ao": "/tmp/tdc-asset-intake/sprint16-industrial-microscope/ao.png",
+      "roughness": "/tmp/tdc-asset-intake/sprint16-industrial-microscope/roughness.png",
+      "metallic": "/tmp/tdc-asset-intake/sprint16-industrial-microscope/metallic.png"
+    }
+  }
+}

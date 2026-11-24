@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/SGCMedicalCoverVisual.gd" id="1_visual"]
+
+[node name="MedicalSupplyCases" type="MeshInstance3D"]
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("1_visual")
+style = 1

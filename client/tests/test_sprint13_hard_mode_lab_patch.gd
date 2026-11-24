@@ -91,9 +91,23 @@ func _process(_delta: float) -> bool:
 		assert(patch_drive != null, "LabDataPatchDrive must exist in Level 28 LaboratorySector")
 		assert(not patch_drive.is_retrieved, "Patch drive must start unretrieved")
 
-		# Player retrieves ROM
-		patch_drive.pickup_patch(player)
-		player.is_carrying_patch_rom = true
+		var bench := gateroom.get_node(^"Level28Complex/LaboratorySector/ResearchBenchEast") as CSGBox3D
+		var instrument := bench.get_node(^"IndustrialMicroscope") as Node3D
+		var imported := instrument.get_node_or_null(^"ImportedInstrument") as Node3D
+		var expects_instrument := not OS.get_cmdline_user_args().has("--expect-lab-fallback")
+		if (imported != null) != expects_instrument or not bench.visible or not bench.use_collision:
+			push_error("The authored bench must remain in both packs, with the instrument only in the standard pack")
+			quit(1)
+			return true
+		if imported != null and (instrument.position != Vector3(0, bench.size.y * 0.5, 1) \
+				or not imported.find_children("*", "CollisionObject3D", true, false).is_empty()):
+			push_error("The microscope must sit on the bench as a collision-free visual")
+			quit(1)
+			return true
+
+		# Use the same approach and interaction as the player on the lab floor.
+		player.global_position = patch_drive.global_position + Vector3(1.35, -1.3, 0)
+		player._try_interact()
 
 		assert(patch_drive.is_retrieved, "LabDataPatchDrive must be marked retrieved")
 		assert(player.is_carrying_patch_rom, "Player must be carrying clean dialing ROM")
@@ -153,8 +167,18 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Outbound Dialing & Squad Extraction Victory         ")
 		print("========================================================\n")
 		wave_mgr.end_mission()
-		gateroom.queue_free()
-		quit(0)
-		return true
+		call_deferred("_finish")
 
 	return false
+
+
+func _finish() -> void:
+	# Let the extraction and interaction areas retire their body overlaps before teardown.
+	player.collision_layer = 0
+	for frame in range(3):
+		await physics_frame
+	player.queue_free()
+	await process_frame
+	gateroom.queue_free()
+	await process_frame
+	quit(0)
