@@ -146,9 +146,20 @@ func run_test() -> void:
 	assert(player.health_component.current_health == 30, "Remote armor request outside station range must fail")
 	local.global_position = armor.global_position
 	await frames(40)
+	var ammo := host.get_node("Level28Complex/ArmorySector/AmmoCrate1") as ArmoryResupplyStation
+	var visitor := load("res://scenes/entities/Player.tscn").instantiate() as PlayerController3D
+	visitor.name = "1"
+	host.players_container.add_child(visitor)
+	visitor.set_physics_process(false)
+	visitor.global_position = ammo.global_position + Vector3(-1.3, -0.5, 0)
+	visitor.current_weapon.reserve_ammo = 0
+	visitor._try_interact()
 	local_armor.interact(local)
 	await frames(20)
-	assert(player.health_component.current_health == player.health_component.max_health, "Nearby remote armor request heals on server")
+	assert(player.health_component.current_health == player.health_component.max_health and local_armor.current_cooldown > 0.0,
+		"Remote visitor receives the re-armour interaction and cooldown")
+	assert(visitor.current_weapon.reserve_ammo == visitor.current_weapon.reserve_capacity,
+		"A second visitor can use the munitions station during re-armour")
 
 	var rack: ArmoryResupplyStation = host.get_node("Level28Complex/ArmorySector/WeaponRackNorth") as ArmoryResupplyStation
 	assert(rack != null)

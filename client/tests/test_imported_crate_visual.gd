@@ -74,9 +74,35 @@ func check_dressed(room: Node) -> void:
 		assert(is_equal_approx(snappedf((hit.position as Vector3).x, 0.001), box.global_position.x - 0.8),
 			"Collision face unchanged")
 	assert(meshes.size() == 1, "Both stacks share one loaded crate mesh")
-	var rack := room.find_child("WeaponRackNorth", true, false) as ArmoryResupplyStation
-	assert(rack != null and rack.crate_visual == null, "Weapon racks are not dressed")
-	assert((rack.get_node(^".") as CSGBox3D).transparency == 0.0, "Weapon racks still drawn")
+
+
+func check_gear_stations(room: Node) -> bool:
+	var north := room.find_child("WeaponRackNorth", true, false) as ArmoryResupplyStation
+	var south := room.find_child("WeaponRackSouth", true, false) as ArmoryResupplyStation
+	var rack := north.occlusion_visual as MeshInstance3D
+	var other := south.occlusion_visual as MeshInstance3D
+	if rack == null or other == null or rack.mesh != other.mesh:
+		return false
+	var box := north.get_node(^".") as CSGBox3D
+	var envelope := AABB(-box.size / 2.0, box.size)
+	var hit := box.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(
+		box.global_position + Vector3(-1.5, 0, 0), box.global_position, 1))
+	if not box.use_collision or envelope.size != Vector3(0.8, 2.8, 4.0) or box.transparency != 1.0 \
+			or not envelope.grow(0.001).encloses(rack.get_aabb()) or hit.get("collider") != box:
+		return false
+	var armor := room.find_child("ArmoryArmorStation", true, false) as ArmoryArmorStation
+	var original := armor.get_node(^"RackMesh") as MeshInstance3D
+	var shelf := armor.get_node_or_null(^"ImportedShelf") as Node3D
+	if OS.get_cmdline_user_args().has("--expect-armory-fallback"):
+		return shelf == null and original.visible and not ResourceLoader.exists(CrateStackVisual.LOD_MESH_PATH)
+	if shelf == null or original.visible or armor.interact_area == null:
+		return false
+	var imported := shelf.get_node(^"worn_metal_rack") as MeshInstance3D
+	var fit := shelf.transform * imported.transform * imported.get_aabb()
+	var material := imported.mesh.surface_get_material(0) as StandardMaterial3D
+	return (original.transform * original.get_aabb()).grow(0.001).encloses(fit) \
+		and material.albedo_texture.get_image().has_mipmaps() \
+		and ResourceLoader.exists(CrateStackVisual.LOD_MESH_PATH)
 
 
 func check_fallbacks() -> void:
@@ -108,6 +134,35 @@ func check_fallbacks() -> void:
 	await process_frame
 
 
+func check_camera_fade(room: Node) -> void:
+	var first := room.find_child("AmmoCrate1", true, false) as ArmoryResupplyStation
+	var second := room.find_child("AmmoCrate2", true, false) as ArmoryResupplyStation
+	var first_stack := first.crate_visual.get_node(^"Crates") as MultiMeshInstance3D
+	var second_stack := second.crate_visual.get_node(^"Crates") as MultiMeshInstance3D
+	var shared := first_stack.material_override as StandardMaterial3D
+	assert(shared != null and second_stack.material_override == shared, "Both stacks share the opaque material")
+	var player := (load("res://scenes/entities/Player.tscn") as PackedScene).instantiate() as PlayerController3D
+	player.name = "1"
+	room.get_node(^"Players").add_child(player)
+	player.set_physics_process(false)
+	player.is_crouch_toggled = true
+	player.global_position = first.global_position + Vector3(1.4, -0.5, 0)
+	player.rotation.y = -PI / 2.0
+	player.camera_rig.global_position = player.global_position
+	player._process_cover_and_peeking(0.1, Vector3.ZERO)
+	await frames(2)
+	player._update_camera_and_occlusion(1.0 / 60.0)
+	var faded := first_stack.material_override as StandardMaterial3D
+	assert(player.occluded_nodes.has(first_stack), "The real crate collider redirects the fade to its visible stack")
+	assert(faded != shared and faded.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA, "Only the occluding stack should fade")
+	assert(second_stack.material_override == shared and shared.albedo_color.a == 1.0, "Fading must not change the shared material")
+	player.rotation.y = PI / 2.0
+	player._update_camera_and_occlusion(1.0 / 60.0)
+	assert(first_stack.material_override == shared, "Turning the camera clear of cover restores the shared material")
+	player.queue_free()
+	await process_frame
+
+
 func run() -> void:
 	check_loader()
 	await check_fallbacks()
@@ -116,5 +171,10 @@ func run() -> void:
 	await (room.get_node("SGCMap") as SGCMap).navigation_ready
 	await frames(3)
 	check_dressed(room)
+	if not check_gear_stations(room):
+		push_error("SGC equipment rack, re-armour shelf, crate LOD or stock fallback did not match the fit contract")
+		quit(1)
+		return
+	await check_camera_fade(room)
 	print("test_imported_crate_visual: PASS")
 	await preload("res://tests/support/finish.gd").success(self)

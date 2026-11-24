@@ -100,6 +100,13 @@ func _process(delta: float) -> bool:
 		# Mount turret
 		turret.mount(player)
 		assert(turret.mounted_player == player, "Player must be registered as mounted operative")
+		var look_yaw := player.rotation.y
+		turret.receive_player_input(turret.global_position + Vector3(-8, 1, 7), false)
+		var rear := turret.turret_head.global_basis.z
+		assert((player.global_position - turret.global_position).dot(rear) > 0.99, "Operative stands behind the traversed gun")
+		assert(player.visuals.global_basis.z.dot(rear) > 0.99 and not player.weapon_holder.visible,
+			"Mounted body faces the gun with the personal weapon stowed")
+		assert(is_equal_approx(player.rotation.y, look_yaw), "Gun traverse leaves the player's look input intact")
 
 		# Manual fire
 		var fired := turret.try_manual_fire(Vector3(0, 0, -1))
@@ -109,6 +116,7 @@ func _process(delta: float) -> bool:
 		# Dismount
 		turret.dismount()
 		assert(turret.mounted_player == null, "Operative must be cleared from mounted turret")
+		assert(player.weapon_holder.visible and is_zero_approx(player.visuals.rotation.y), "Dismount restores the walking pose")
 		turret.queue_free()
 		print("[TEST 2/5] PASS: .50 Cal mounting, manual aiming, firing, and dismounting verified.")
 		step = 2

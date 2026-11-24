@@ -71,7 +71,13 @@ const MAX_C4_CHARGES: int = 2
 var claymore_charges: int = 2
 const MAX_CLAYMORE_CHARGES: int = 2
 var active_turret: DeployableTurret = null
-var mounted_turret: DeployableTurret = null
+var mounted_turret: DeployableTurret = null:
+	set(value):
+		mounted_turret = value
+		if weapon_holder != null:
+			weapon_holder.visible = value == null
+		if value == null and visuals != null:
+			visuals.rotation.y = 0.0
 var turret_cooldown: float = 0.0
 const TURRET_COOLDOWN_S: float = 30.0
 var active_revive_target: CharacterBody3D = null
@@ -140,6 +146,7 @@ var locked_target_world_pos: Vector3 = Vector3.ZERO
 @onready var camera_rig: Node3D = $CameraRig if has_node("CameraRig") else null
 @onready var camera: Camera3D = $CameraRig/Camera3D if has_node("CameraRig/Camera3D") else null
 @onready var laser_sight: Node3D = $WeaponHolder/LaserSight if has_node("WeaponHolder/LaserSight") else null
+@onready var visuals := get_node_or_null(^"Visuals") as Node3D
 @onready var body_mesh: Node3D = $Visuals/BodyMesh if has_node("Visuals/BodyMesh") else null
 @onready var visor_mesh: MeshInstance3D = $Visuals/VisorMesh if has_node("Visuals/VisorMesh") else null
 @onready var class_gear: Node3D = $Visuals/ClassGear if has_node("Visuals/ClassGear") else null
@@ -566,7 +573,8 @@ func _physics_process(delta: float) -> void:
 	if not is_local_authority:
 		if multiplayer.is_server() and turret_cooldown > 0.0 and not is_instance_valid(mounted_turret):
 			turret_cooldown = maxf(0.0, turret_cooldown - delta)
-		move_and_slide()
+		if not is_instance_valid(mounted_turret):
+			move_and_slide()
 		return
 
 	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
@@ -654,8 +662,6 @@ func _physics_process(delta: float) -> void:
 
 	# If mounted on .50 cal tripod, lock position behind gun and process manual fire
 	if mounted_turret != null and is_instance_valid(mounted_turret):
-		velocity = Vector3.ZERO
-		global_position = mounted_turret.global_position + mounted_turret.global_transform.basis.z * 0.75
 		if mounted_turret.receive_player_input(current_aim_target, Input.is_action_pressed("fire")):
 			add_screen_shake(0.20)
 		_update_camera_and_occlusion(delta)
@@ -836,14 +842,16 @@ func _update_wall_occlusion() -> void:
 		return
 
 	var cam_pos := camera.global_position
-	var player_head := global_position + Vector3(0, 1.2, 0)
+	var sight_target := global_position + Vector3(0, 1.2, 0)
+	if is_crouching and body_mesh != null:
+		sight_target.y = body_mesh.global_position.y
 	var newly_hit: Dictionary = {}
 
 	# Cast 3 ray passes (center, left flank, right flank) to detect wide occluding structures
 	var ray_targets: Array[Vector3] = [
-		player_head,
-		player_head + Vector3(-0.6, 0, 0),
-		player_head + Vector3(0.6, 0, 0)
+		sight_target,
+		sight_target + Vector3(-0.6, 0, 0),
+		sight_target + Vector3(0.6, 0, 0)
 	]
 
 	var exclude: Array[RID] = [get_rid()]
@@ -864,8 +872,10 @@ func _update_wall_occlusion() -> void:
 				var node: Node = col as Node
 				if node.has_meta("asset_slot") and node.get_child_count() > 0:
 					node = node.get_child(0)
+				elif node is ArmoryResupplyStation and is_instance_valid(node.occlusion_visual):
+					node = node.occlusion_visual
 				# Do not occlude floors below the operative's feet/head or cover sandbags
-				var is_floor_below: bool = node.name.begins_with("Floor") and node.global_position.y <= player_head.y
+				var is_floor_below: bool = node.name.begins_with("Floor") and node.global_position.y <= sight_target.y
 				# Do not occlude Level 27 structures when operative is on Level 28
 				var is_l27_upper: bool = global_position.y < 4.5 and (node.name.contains("27") or node.name.begins_with("Briefing") or node.name.begins_with("Office") or node.name.begins_with("Security") or node.name.begins_with("Conference") or node.name.begins_with("Chair"))
 				if node != self and not is_floor_below and not is_l27_upper and not node.name.begins_with("Sandbag"):
@@ -940,7 +950,6 @@ func _update_mouse_mode() -> void:
 
 func _setup_visual_materials() -> void:
 	original_visual_materials.clear()
-	var visuals := get_node_or_null("Visuals") as Node3D
 	if visuals == null:
 		return
 	_collect_mesh_instances(visuals)
@@ -2133,7 +2142,6 @@ func _try_interact() -> void:
 	# 1. If currently mounted on a .50 cal turret, dismount
 	if mounted_turret != null:
 		mounted_turret.dismount()
-		mounted_turret = null
 		return
 
 	# 1b. Stealth takedown from behind on an unalerted Jaffa within reach

@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS15",
+  "asset_id": "worn_metal_rack",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Dress the existing Level 28 re-armour station with a textured equipment shelf.",
+  "target": {
+    "scene": "res://scenes/props/ArmoryArmorStation.tscn",
+    "visual_branch": "ImportedShelf under ArmoryArmorStation",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/reviews/2026-11-24-sprint15-sgc-armoury.md",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.7,
+        0.0,
+        -0.25
+      ],
+      "max_m": [
+        0.7,
+        2.0,
+        0.325
+      ]
+    },
+    "anchors": [
+      {
+        "name": "RackMesh",
+        "position_m": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "purpose": "Station cabinet envelope of 1.4 \u00d7 2.0 \u00d7 0.5 m."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://polyhaven.com/a/worn_metal_rack",
+        "decision": "selected",
+        "reason": "Textured painted steel, one material and a documented packing route. Uniform scale 0.83 fits the original cabinet depth."
+      }
+    ],
+    "selected_source": {
+      "page": "https://polyhaven.com/a/worn_metal_rack",
+      "creator": "Luca B",
+      "licence": "CC0 1.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/worn_metal_rack/source.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 8000,
+    "max_materials": 1,
+    "lod_triangle_limits": [
+      8000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "rack_steel",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#343A36",
+        "#646655"
+      ],
+      "surface_notes": "Opaque painted steel. Preserve the photographed wear, OpenGL normal and ARM channel order. Adjust metallic response at runtime in the station lighting."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 20,
+    "measurement_plan": "Measure the single mipmapped shelf material and compare normal and alarm views in the authored Level 28 armoury."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Use the existing re-armour station while a second operative uses the armoury racks or ammo crates. Check approach, use, cooldown, fallback and the Linux pack."
+}

@@ -25,8 +25,15 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 ### Provenance & Technical Verification (AP-1c)
 - **Source and rights:** Published by Poly Haven, whose licence page states that every asset is by its staff or an artist who donated or sold it directly to Poly Haven, under CC0. The asset's info record names Fabi_G as sole author (`donated: true`). Checked 16 November 2026.
 - **Files:** Downloaded from the public `gltf/1k` listing; each file matched the listing's md5 and size. Hashes and the full intake record: [`docs/assets/intake/plastic_crate_02.json`](../docs/assets/intake/plastic_crate_02.json).
-- **Modifications:** Container only. `tools/gltf_to_glb.py` packed the `.gltf`, `.bin` and three JPEG maps into one GLB without re-encoding any data. At runtime the wrapper draws it opaque, replaces the orange colour factor with an olive tint, wires the ARM map's occlusion channel and generates mipmaps; the committed file keeps the source material.
+- **Modifications:** `tools/gltf_to_glb.py` packed the `.gltf`, `.bin` and three JPEG maps into one GLB without re-encoding. The wrapper draws it opaque, uses an olive tint, wires the ARM map's occlusion channel and generates mipmaps. Sprint 15 derived two lower-detail index buffers for `plastic_crate_02_lods.res`, using the source geometry and the same runtime material.
 - **Godot 4.4.1:** `importer="keep"` like AP-1a, loaded from `res://` bytes by `RuntimeGLB`; checked in a Linux release export. Khronos glTF-Validator: 0 errors. Review record: [`docs/reviews/2026-11-16-ap1c-plastic-crate.md`](../docs/reviews/2026-11-16-ap1c-plastic-crate.md).
+
+| Asset File | Title & Description | Creator | Source URL | License | Dimensions & Attachment | Difficulty |
+|---|---|---|---|---|---|---|
+| `client/assets/props/worn_metal_rack.glb` | Worn Metal Rack, painted steel shelving | **Luca B** for **Poly Haven** | https://polyhaven.com/a/worn_metal_rack | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | `0.915 × 1.900 × 0.600 m` before uniform 0.83 scale. Fitted within the SGC Level 28 re-armour station. | `S` |
+
+- **Source and rights:** Poly Haven lists Luca B as sole author and records the asset as donated. Its public listing and licence cover modification and redistribution. [Provider licence](https://polyhaven.com/license) · [Source and hashes](../docs/assets/intake/worn_metal_rack/source.json).
+- **Modifications:** Repacked the geometry and the 1K colour, OpenGL normal and ORM maps into a self-contained GLB. The prepared maps encode the decoded provider inputs as PNG. The SGC station centres and uniformly scales the shelf, generates mipmaps and reduces the metallic factor for the existing indoor lighting. [Recipe](../docs/assets/intake/worn_metal_rack/recipe.json).
 
 | Asset File | Title & Description | Creator | Source URL | License | Dimensions & Attachment | Difficulty |
 |---|---|---|---|---|---|---|

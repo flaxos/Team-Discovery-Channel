@@ -20,7 +20,9 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 13 merged via #86.** The existing SGC embarkation chamber, side approaches and ramp use three shared PBR sets. Captures compare the original and dressed scenes under normal and alarm lighting and record the bounded lighting experiment. Owner art review is open. [Sprint 13 review](docs/reviews/2026-11-24-sprint13-sgc-embarkation.md).
 
-**Sprint 14 is integrated locally.** The control readout, observation frame, gate rim and secured iris are ready for owner art review. [Sprint 14 evidence](docs/reviews/2026-11-24-sprint14-sgc-control-gate-iris.md).
+**Sprint 14 merged via #87.** The control readout, observation frame, gate rim and secured iris are ready for owner art review. [PR #87](https://github.com/flaxos/Team-Discovery-Channel/pull/87) · [Sprint 14 evidence](docs/reviews/2026-11-24-sprint14-sgc-control-gate-iris.md).
+
+**Sprint 15 is integrated locally.** The armoury has fitted loadout cabinets and a community re-armour shelf. The two ammo stacks share cheaper distance geometry, and they fade when they occlude the camera. A follow-up aligns the mounted M2 operator with the live receiver on all peers. [Sprint 15 review](docs/reviews/2026-11-24-sprint15-sgc-armoury.md).
 
 | Option | What | Who | Detail |
 |---|---|---|---|

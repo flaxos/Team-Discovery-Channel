@@ -7,6 +7,7 @@ extends Node3D
 ## nothing changes and the original box stays visible.
 
 const MODEL_PATH := "res://assets/props/plastic_crate_02_1k.glb"
+const LOD_MESH_PATH := "res://assets/props/plastic_crate_02_lods.res"
 ## Olive drab in place of the source's orange colour factor, to sit with the SGC armoury.
 const DEFAULT_TINT := Color(0.36, 0.42, 0.26)
 ## Same allowance as SGCMap.replace_asset_visual().
@@ -63,6 +64,10 @@ static func crate_mesh(anchor: Node, model_path: String, tint: Color) -> ArrayMe
 	var material := mesh.surface_get_material(0) as StandardMaterial3D
 	if material == null:
 		return null
+	if model_path == MODEL_PATH and ResourceLoader.exists(LOD_MESH_PATH):
+		var lod_mesh := ResourceLoader.load(LOD_MESH_PATH, "ArrayMesh", ResourceLoader.CACHE_MODE_IGNORE) as ArrayMesh
+		if lod_mesh != null and lod_mesh.get_surface_count() == 1 and lod_mesh.get_aabb().is_equal_approx(mesh.get_aabb()):
+			mesh = lod_mesh
 	mesh.surface_set_material(0, prepared_material(material, tint))
 	if root != null:
 		cache[key] = weakref(mesh)
@@ -137,6 +142,8 @@ func build(mesh: Mesh, envelope: AABB) -> bool:
 	var crates := MultiMeshInstance3D.new()
 	crates.name = "Crates"
 	crates.multimesh = multimesh
+	# Give the camera a per-stack override so fading never changes the shared material.
+	crates.material_override = mesh.surface_get_material(0)
 	add_child(crates)
 	crate_count = transforms.size()
 	bounds = merged

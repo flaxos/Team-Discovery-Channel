@@ -1,0 +1,20 @@
+{
+  "source": "/tmp/tdc-asset-intake/sprint15-worn-metal-rack/worn_metal_rack_1k.gltf",
+  "output": "../../../../client/assets/props/worn_metal_rack.glb",
+  "root_name": "WornMetalRack",
+  "keep_nodes": [
+    "worn_metal_rack"
+  ],
+  "max_texture_size": 1024,
+  "image_format": "PNG",
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/sprint15-worn-metal-rack/textures/worn_metal_rack_diff_1k.jpg",
+      "normal": "/tmp/tdc-asset-intake/sprint15-worn-metal-rack/textures/worn_metal_rack_nor_gl_1k.jpg",
+      "normal_convention": "opengl",
+      "ao": "/tmp/tdc-asset-intake/sprint15-worn-metal-rack/ao.png",
+      "roughness": "/tmp/tdc-asset-intake/sprint15-worn-metal-rack/roughness.png",
+      "metallic": "/tmp/tdc-asset-intake/sprint15-worn-metal-rack/metallic.png"
+    }
+  }
+}

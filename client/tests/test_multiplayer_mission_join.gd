@@ -21,6 +21,14 @@ func _finalize() -> void:
 	if child_pid > 0 and OS.is_process_running(child_pid):
 		OS.kill(child_pid)
 
+func check_armoury(room: GateRoom) -> void:
+	var sector := room.get_node(^"Level28Complex/ArmorySector")
+	var crate := sector.get_node(^"AmmoCrate1") as ArmoryResupplyStation
+	var rack := sector.get_node(^"WeaponRackNorth") as ArmoryResupplyStation
+	assert(crate.crate_visual != null and rack.occlusion_visual != null,
+		"A loaded client dresses the ammo and loadout stations")
+	assert(sector.has_node(^"ArmoryArmorStation/ImportedShelf"), "A loaded client fits the re-armour shelf")
+
 func run_test() -> void:
 	net = root.get_node("NetworkManager") as SGCNetworkManager
 	var args := OS.get_cmdline_user_args()
@@ -50,8 +58,7 @@ func run_test() -> void:
 		await frames(30)
 		assert(actor.class_id == SGCNetworkManager.CLASS_CARTER_TECH and actor.health_component.max_health == 100, "Ready handshake must preserve the registered class")
 		assert(room.wave_manager.completed_incursions == 3 and room.wave_manager.computer_upgraded, "Late join must receive objective snapshot")
-		var crate := room.find_child("AmmoCrate1", true, false) as ArmoryResupplyStation
-		assert(crate != null and crate.crate_visual != null, "AP-1c: a late joiner dresses the armoury crate locally")
+		check_armoury(room)
 		mark("joined")
 		for _i: int in range(1200):
 			await frames(1)
@@ -60,8 +67,7 @@ func run_test() -> void:
 		assert(main.current_gate_room != room, "Host retry must replace client world")
 		await frames(60)
 		assert(main.current_gate_room.get_node("Players").has_node(str(net.local_peer_id)), "Retry must respawn the client at canonical paths")
-		var retried_crate := main.current_gate_room.find_child("AmmoCrate1", true, false) as ArmoryResupplyStation
-		assert(retried_crate != null and retried_crate.crate_visual != null, "AP-1c: retry rebuilds the dressed armoury crate")
+		check_armoury(main.current_gate_room)
 		mark("retried")
 	else:
 		var room := main.current_gate_room as GateRoom

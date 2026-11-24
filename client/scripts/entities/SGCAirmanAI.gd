@@ -467,7 +467,6 @@ func mount_turret(turret: DeployableTurret) -> void:
 	else:
 		turret.mount(self)
 	current_state = State.MAN_TURRET
-	global_position = turret.global_position + turret.global_transform.basis.z * 0.75
 	is_in_cover = true
 	is_crouching = false
 	is_peeking = true

@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://c8sgcgateroom01"]
+[gd_scene load_steps=28 format=3 uid="uid://c8sgcgateroom01"]
 
 [ext_resource type="Script" path="res://scripts/map/SGCMap.gd" id="30_map"]
 
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/Level27Complex.tscn" id="8_l2701"]
 [ext_resource type="PackedScene" path="res://scenes/props/SGCElevator.tscn" id="9_elev01"]
 [ext_resource type="Script" path="res://scripts/props/ArmoryResupplyStation.gd" id="10_armory"]
+[ext_resource type="Script" path="res://scripts/props/SGCArmoryRackVisual.gd" id="33_rack"]
 [ext_resource type="PackedScene" path="res://scenes/props/SGCDialingConsole.tscn" id="11_sgcdial01"]
 [ext_resource type="PackedScene" path="res://scenes/props/LabDataPatchDrive.tscn" id="12_labpatch01"]
 [ext_resource type="PackedScene" path="res://scenes/props/IrisServoHousing.tscn" id="13_irisservo01"]
@@ -469,6 +470,9 @@ material = SubResource("Mat_Door")
 script = ExtResource("10_armory")
 station_type = 1
 
+[node name="RackVisual" type="MeshInstance3D" parent="Level28Complex/ArmorySector/WeaponRackNorth"]
+script = ExtResource("33_rack")
+
 [node name="WeaponRackSouth" type="CSGBox3D" parent="Level28Complex/ArmorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52.5, 1.5, 41)
 use_collision = true
@@ -477,8 +481,12 @@ material = SubResource("Mat_Door")
 script = ExtResource("10_armory")
 station_type = 1
 
+[node name="RackVisual" type="MeshInstance3D" parent="Level28Complex/ArmorySector/WeaponRackSouth"]
+script = ExtResource("33_rack")
+
 [node name="ArmoryArmorStation" parent="Level28Complex/ArmorySector" instance=ExtResource("16_armor01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 29)
+sgc_shelf_dressing = true
 
 [node name="SignArmory" type="Label3D" parent="Level28Complex/ArmorySector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 4.5, 36)

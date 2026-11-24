@@ -23,7 +23,15 @@ func class_for_slot(index: int) -> String:
 func check_m2(turret: DeployableTurret, id: int) -> bool:
 	return turret != null and turret.has_node("TurretHead/M2Gun") and turret.has_node("M2Tripod") \
 		and is_instance_valid(turret.mounted_player) and turret.mounted_player.name == str(id) \
-		and absf(turret.turret_head.rotation.y) > 0.1
+		and absf(turret.turret_head.rotation.y) > 1.57 and operator_behind_gun(turret)
+
+
+func operator_behind_gun(turret: DeployableTurret) -> bool:
+	var actor := turret.mounted_player as PlayerController3D
+	var rear := turret.turret_head.global_basis.z
+	return actor != null and not actor.weapon_holder.visible \
+		and (actor.global_position - turret.global_position).distance_to(rear * DeployableTurret.GUNNER_REAR_OFFSET) < 0.01 \
+		and actor.visuals.global_basis.z.dot(rear) > 0.99
 
 
 func snapshot(label: String, active_slots: Array[int], expected_count: int = 4) -> void:
@@ -53,7 +61,8 @@ func host_check_deployment() -> void:
 		return
 	var turret := room.get_node(deployed_path) as DeployableTurret
 	require(turret.mounted_player == actor and actor.mounted_turret == turret, "Mount admitted on the server")
-	require(is_equal_approx(turret.global_position.distance_to(actor.global_position), 1.6), "Existing deployment offset")
+	require(turret.global_position.is_equal_approx(Vector3(0, 0.05, 2.9)), "Existing deployment offset")
+	require(operator_behind_gun(turret), "Server places the remote operative behind the gun as soon as they mount")
 	turret.turret_fired.connect(func(origin: Vector3, _direction: Vector3) -> void: shot_origins.append(origin))
 	mark("m2_fire")
 	deadline = Time.get_ticks_msec() + 15000
@@ -61,6 +70,12 @@ func host_check_deployment() -> void:
 		await frames(1)
 	require(shot_origins.size() == 1 and shot_origins[0].is_equal_approx(turret.muzzle_point.global_position),
 		"Remote input produces one authoritative shot from the existing marker")
+	if not await marked("m2_turned"):
+		return
+	deadline = Time.get_ticks_msec() + 15000
+	while not check_m2(turret, id) and Time.get_ticks_msec() < deadline:
+		await frames(1)
+	require(check_m2(turret, id), "The remote operative follows a turn past 90 degrees on the server")
 
 
 func see_snapshot(label: String) -> void:
@@ -108,4 +123,9 @@ func client_deploy_and_mount() -> void:
 	require(actor.mounted_turret == turret, "Owner receives mount confirmation")
 	mark("m2_mounted", net.local_peer_id)
 	if await marked("m2_fire"):
-		turret.receive_player_input(turret.global_position + Vector3(5, 0.75, -10), true)
+		turret.receive_player_input(turret.global_position + Vector3(10, 0.75, 5), true)
+		deadline = Time.get_ticks_msec() + 15000
+		while not check_m2(turret, net.local_peer_id) and Time.get_ticks_msec() < deadline:
+			await frames(1)
+		require(check_m2(turret, net.local_peer_id), "The owner stays behind and faces the gun after the turn")
+		mark("m2_turned")

@@ -62,6 +62,18 @@ func run() -> void:
 	Engine.max_fps = 0
 	RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(), true)
 	var output := ProjectSettings.globalize_path("res://../build/asset-review/plastic-crate")
+	if OS.get_cmdline_user_args().has("--compare-lods"):
+		output = ProjectSettings.globalize_path("res://../build/asset-review/sprint15-crate-lods")
+		DirAccess.make_dir_recursive_absolute(output)
+		for profile: String in ["full", "lod"]:
+			root.mesh_lod_threshold = 0.0 if profile == "full" else 1.0
+			for view in VIEWS:
+				camera.position = view.camera
+				camera.look_at(view.target)
+				await capture(output.path_join("%s-%s.png" % [profile, view.id]))
+			await cost(profile, camera)
+		await preload("res://tests/support/finish.gd").success(self)
+		return
 	DirAccess.make_dir_recursive_absolute(output)
 	var stations: Array[ArmoryResupplyStation] = []
 	for crate_name: String in ["AmmoCrate1", "AmmoCrate2"]:
