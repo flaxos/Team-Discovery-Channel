@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://c5sgcplayer01"]
+[gd_scene load_steps=11 format=3 uid="uid://c5sgcplayer01"]
 
 [ext_resource type="Script" path="res://scripts/entities/PlayerController3D.gd" id="1_pc3d"]
 [ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
 [ext_resource type="PackedScene" uid="uid://c3sgcnameplate01" path="res://scenes/ui/Nameplate3D.tscn" id="3_np01"]
+[ext_resource type="Script" path="res://scripts/entities/SGCSquadVisual.gd" id="4_squad"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -79,6 +80,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.3)
 mesh = SubResource("BoxMesh_visor")
 
 [node name="ClassGear" type="Node3D" parent="Visuals"]
+
+[node name="SquadRig" type="Node3D" parent="Visuals"]
+script = ExtResource("4_squad")
 
 [node name="Nameplate3D" parent="." instance=ExtResource("3_np01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)

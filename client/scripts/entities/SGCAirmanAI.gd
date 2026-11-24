@@ -15,6 +15,7 @@ signal corner_held(airman: SGCAirmanAI, anchor_pos: Vector3)
 signal leapfrog_started(airman: SGCAirmanAI, target_pos: Vector3)
 signal leapfrog_completed(airman: SGCAirmanAI, anchor_pos: Vector3)
 signal hallway_suppressed(airman: SGCAirmanAI, hallway_dir: Vector3)
+signal mp5_visual_fired
 
 enum State {
 	STAGING,
@@ -398,6 +399,7 @@ func _fire_mp5(dir: Vector3) -> void:
 
 @rpc("call_local", "unreliable")
 func play_mp5_fx(from: Vector3, to: Vector3) -> void:
+	mp5_visual_fired.emit()
 	var tracer: MeshInstance3D = MeshInstance3D.new()
 	var imm: ImmediateMesh = ImmediateMesh.new()
 	tracer.mesh = imm
@@ -459,13 +461,11 @@ func _process_turret(delta: float) -> void:
 
 
 func mount_turret(turret: DeployableTurret) -> void:
-	if turret == null or turret.mounted_player != null:
+	if not is_instance_valid(turret) or is_instance_valid(mounted_turret):
 		return
-	mounted_turret = turret
-	if turret.has_method("mount_airman"):
-		turret.mount_airman(self)
-	else:
-		turret.mount(self)
+	turret.mount_airman(self)
+	if mounted_turret != turret:
+		return
 	current_state = State.MAN_TURRET
 	is_in_cover = true
 	is_crouching = false

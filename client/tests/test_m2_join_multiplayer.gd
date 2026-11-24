@@ -21,9 +21,19 @@ func class_for_slot(index: int) -> String:
 
 
 func check_m2(turret: DeployableTurret, id: int) -> bool:
-	return turret != null and turret.has_node("TurretHead/M2Gun") and turret.has_node("M2Tripod") \
-		and is_instance_valid(turret.mounted_player) and turret.mounted_player.name == str(id) \
-		and absf(turret.turret_head.rotation.y) > 1.57 and operator_behind_gun(turret)
+	if turret == null or not turret.has_node("TurretHead/M2Gun") or not turret.has_node("M2Tripod"):
+		return false
+	if not is_instance_valid(turret.mounted_player) or turret.mounted_player.name != str(id):
+		return false
+	if absf(turret.turret_head.rotation.y) <= 1.57 or not operator_behind_gun(turret):
+		return false
+	var rig := turret.mounted_player.get_node(^"Visuals/SquadRig") as Node3D
+	if rig.pose != &"aim_crouch_idle":
+		return false
+	var right: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[0], rig.grip_bones[1]))
+	var left: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[2], rig.grip_bones[3]))
+	return right.distance_to(turret.right_grip.global_position) < 0.04 \
+		and left.distance_to(turret.left_grip.global_position) < 0.04
 
 
 func operator_behind_gun(turret: DeployableTurret) -> bool:

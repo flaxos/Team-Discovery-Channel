@@ -209,6 +209,9 @@ func see_snapshot(label: String) -> void:
 
 
 func check_imported_loadout(actor: PlayerController3D) -> void:
+	var rig := actor.get_node(^"Visuals/SquadRig")
+	require(rig.skeleton != null and rig.skin_visual.visible and not actor.body_mesh.visible,
+		"Every squad member uses the shared skin, including remote spawns and replacements")
 	if actor.active_slot == 2 and actor.class_id in [
 		SGCNetworkManager.CLASS_CARTER_TECH, SGCNetworkManager.CLASS_TEALC_JAFFA
 	]:

@@ -31,6 +31,28 @@ func check_armoury(room: GateRoom) -> void:
 	assert(room.has_node(^"SGCMap/STAGINGCover/ReplacementVisual") and room.has_node(^"SGCMap/SupplyRack1/ReplacementVisual"),
 		"A loaded client dresses both Level 26 medical slots")
 
+func wait_for_airman_pose(room: GateRoom, expected: StringName) -> bool:
+	var airman := room.get_node(^"Allies/AirmanDavis") as SGCAirmanAI
+	var rig := airman.get_node(^"Visuals/AirmanRig")
+	for _step in range(180):
+		if rig.pose == expected and rig.skeleton != null and not airman.get_node(^"Visuals/BodyMesh").visible:
+			return true
+		await frames(1)
+	return false
+
+func wait_for_mounted_airman(room: GateRoom) -> bool:
+	var airman := room.get_node(^"Allies/AirmanSiler") as SGCAirmanAI
+	var turret := room.get_node(^"BunkerGeometry/TurretEast") as DeployableTurret
+	var rig := airman.get_node(^"Visuals/AirmanRig")
+	for _step in range(180):
+		if airman.mounted_turret == turret and turret.mounted_player == airman and turret.turret_head.rotation.y > 1.57:
+			var right: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[0], rig.grip_bones[1]))
+			var left: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[2], rig.grip_bones[3]))
+			if not rig.weapon_model.visible and right.distance_to(turret.right_grip.global_position) < 0.035 and left.distance_to(turret.left_grip.global_position) < 0.035:
+				return true
+		await frames(1)
+	return false
+
 func run_test() -> void:
 	net = root.get_node("NetworkManager") as SGCNetworkManager
 	var args := OS.get_cmdline_user_args()
@@ -61,6 +83,8 @@ func run_test() -> void:
 		assert(actor.class_id == SGCNetworkManager.CLASS_CARTER_TECH and actor.health_component.max_health == 100, "Ready handshake must preserve the registered class")
 		assert(room.wave_manager.completed_incursions == 3 and room.wave_manager.computer_upgraded, "Late join must receive objective snapshot")
 		check_armoury(room)
+		assert(await wait_for_airman_pose(room, &"downed"), "A late client shows the current downed Airman pose")
+		assert(await wait_for_mounted_airman(room), "A late client places both hands on the occupied M2")
 		mark("joined")
 		for _i: int in range(1200):
 			await frames(1)
@@ -70,6 +94,9 @@ func run_test() -> void:
 		await frames(60)
 		assert(main.current_gate_room.get_node("Players").has_node(str(net.local_peer_id)), "Retry must respawn the client at canonical paths")
 		check_armoury(main.current_gate_room)
+		assert(await wait_for_airman_pose(main.current_gate_room, &"ready_idle"), "Retry shows the new standing Airman")
+		var retry_siler := main.current_gate_room.get_node(^"Allies/AirmanSiler") as SGCAirmanAI
+		assert(retry_siler.mounted_turret == null, "Retry clears the old Airman mount")
 		mark("retried")
 	else:
 		var room := main.current_gate_room as GateRoom
@@ -77,6 +104,12 @@ func run_test() -> void:
 		room.wave_manager.defense_started = true
 		room.wave_manager.completed_incursions = 3
 		room.wave_manager.computer_upgraded = true
+		var airman := room.get_node(^"Allies/AirmanDavis") as SGCAirmanAI
+		airman.health_component.take_damage(400)
+		var siler := room.get_node(^"Allies/AirmanSiler") as SGCAirmanAI
+		var turret := room.get_node(^"BunkerGeometry/TurretEast") as DeployableTurret
+		siler.mount_turret(turret)
+		turret.turret_head.rotation.y = 1.98
 		child_pid = OS.create_process(OS.get_executable_path(), ["--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"), "--log-file", output_dir.path_join("client.log"), "--script", "res://tests/test_multiplayer_mission_join.gd", "--", "--mission-join-child", "--result-dir", output_dir])
 		assert(child_pid > 0)
 		for _i: int in range(1500):

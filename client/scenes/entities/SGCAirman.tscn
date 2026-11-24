@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://csgcairman01"]
+[gd_scene load_steps=10 format=3 uid="uid://csgcairman01"]
 
 [ext_resource type="Script" path="res://scripts/entities/SGCAirmanAI.gd" id="1_airman"]
 [ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
+[ext_resource type="Script" path="res://scripts/entities/SGCAirmanVisual.gd" id="3_visual"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_Body"]
 radius = 0.45
@@ -70,6 +71,9 @@ mesh = SubResource("CapsuleMesh_Torso")
 [node name="HelmetMesh" type="MeshInstance3D" parent="Visuals"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, -0.05)
 mesh = SubResource("SphereMesh_Helmet")
+
+[node name="AirmanRig" type="Node3D" parent="Visuals"]
+script = ExtResource("3_visual")
 
 [node name="Nameplate" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)

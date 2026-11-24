@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS19",
+  "asset_id": "sgc_airman",
+  "status": "ready_for_intake",
+  "kind": "rigged_character",
+  "purpose": "One uniformed SGC Airman with skeletal locomotion, aiming, shot reaction, downing and recovery.",
+  "target": {
+    "scene": "res://scenes/entities/SGCAirman.tscn",
+    "visual_branch": "Visuals/AirmanRig",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/reviews/2026-11-25-sprint19-airman-rig.md",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.86,
+        -0.29,
+        -1.1
+      ],
+      "max_m": [
+        0.86,
+        1.8,
+        1.65
+      ]
+    },
+    "anchors": [
+      {
+        "name": "MuzzlePoint",
+        "position_m": [
+          0.25,
+          1.15,
+          -0.6
+        ],
+        "purpose": "Existing authored muzzle marker on the Airman."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/military-tactical-suit-lowpolygameready-ef698ce36b1545a78ce592dd3db4c7ed",
+        "decision": "selected",
+        "reason": "Detailed body, known creator, usable PBR textures and weighted rig from a credited redistribution."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/american-soldier-rigged-5b1967e7f83547be8a1c3ae656ab1ad4",
+        "decision": "rejected",
+        "reason": "No source archive available from the signed-out route."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/free-military-soldier-rigged-e9c56308a67d4a3db62e914fafa4d198",
+        "decision": "rejected",
+        "reason": "Untextured body differs from the target style. Only its credited retargeted motion intermediary was used."
+      }
+    ],
+    "selected_source": {
+      "page": "https://sketchfab.com/3d-models/military-tactical-suit-lowpolygameready-ef698ce36b1545a78ce592dd3db4c7ed",
+      "creator": "DanlyVostok",
+      "licence": "CC BY 4.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/sprint19-airman/tactical-source.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 32000,
+    "max_materials": 7,
+    "lod_triangle_limits": [
+      32000
+    ],
+    "uv_required": true
+  },
+  "rig": {
+    "profile_ref": "res://resources/characters/sgc_airman_bone_map.tres",
+    "rest_pose_ref": "docs/assets/intake/sprint19-airman/rest-pose.json",
+    "max_weights_per_vertex": 4,
+    "root_motion": "in_place_only",
+    "required_clips": [
+      "ready_idle",
+      "ready_walk",
+      "ready_run",
+      "aim_idle",
+      "aim_walk",
+      "aim_crouch_idle",
+      "aim_crouch_walk",
+      "shoot",
+      "downed",
+      "prone_crawl",
+      "death",
+      "revive_kneel",
+      "revived"
+    ],
+    "hand_anchors": [
+      "RightHand",
+      "LeftHand"
+    ]
+  },
+  "materials": [
+    {
+      "id": "tactical_suit",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#3B4337",
+        "#544B37"
+      ],
+      "surface_notes": "Preserve decoded source colour and data. Normal and packed surface maps are re-encoded losslessly. Reduce the source metallic factors for bunker lighting."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 128,
+    "measurement_plan": "Measure distinct skin textures after mipmap generation, skinned triangles, cold prepare time and shared geometry on repeated Airmen."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "sockets",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Use the existing SGC Airman movement orders, posture, firing effects and health recovery. Confirm visible movement, the local cosmetic grip and fallback on a Linux export."
+}

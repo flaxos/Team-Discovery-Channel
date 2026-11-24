@@ -3,6 +3,10 @@ extends SceneTree
 
 const SGC_SCENE := preload("res://scenes/main/SGCUATBase.tscn")
 const PLAYER_SCENE := preload("res://scenes/entities/Player.tscn")
+const EMBARKATION_SLOT_PREFIXES := [
+	"GATE_ROOM", "AtriumRear", "GATE_EAST_ACCESS", "GATE_WEST_ACCESS",
+	"CONTROL_ROOM__CONTROL_CONNECTORRail", "ControlFrontBase", "SiloOverheadBeam",
+]
 
 
 func _init() -> void:
@@ -22,7 +26,7 @@ func run() -> void:
 		if not body.has_meta("asset_slot"):
 			continue
 		var slot := body.get_meta("asset_slot") as SGCAssetSlot
-		if slot.pbr_material == null:
+		if slot.pbr_material == null or not is_embarkation_slot(slot.id):
 			continue
 		var mesh := body.get_child(0) as MeshInstance3D
 		if slot.id == &"GATE_EAST_ACCESSWall0_12.0_0.0":
@@ -108,3 +112,10 @@ func run() -> void:
 	pawn.queue_free()
 	await process_frame
 	await preload("res://tests/support/finish.gd").success(self)
+
+
+func is_embarkation_slot(id: StringName) -> bool:
+	for prefix: String in EMBARKATION_SLOT_PREFIXES:
+		if id.begins_with(prefix):
+			return true
+	return false

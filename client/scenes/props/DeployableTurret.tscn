@@ -102,5 +102,11 @@ mesh = SubResource("BoxMesh_ShieldBracket")
 [node name="MuzzlePoint" type="Marker3D" parent="TurretHead"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
 
+[node name="LeftGrip" type="Marker3D" parent="TurretHead"]
+position = Vector3(-0.064, -0.007, 0.720)
+
+[node name="RightGrip" type="Marker3D" parent="TurretHead"]
+position = Vector3(0.064, -0.007, 0.720)
+
 [node name="TurretReplication" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("Replication_Turret")
