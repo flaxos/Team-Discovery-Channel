@@ -1,0 +1,46 @@
+{
+  "source": "https://polyhaven.com/a/television_02",
+  "creator": "Benny Weimer",
+  "licence": "CC0 1.0",
+  "licence_page": "https://polyhaven.com/license",
+  "source_files": {
+    "television_02_1k.gltf": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/television_02/television_02_1k.gltf",
+      "md5": "7fac593c38eda87404e5fd77a0da6979",
+      "size": 2767,
+      "sha256": "8e7d7cb6bbdb5713b7d4ed21ece7c0f9c41912359c2c0f5065b7e77f5bf4cdcf"
+    },
+    "textures/television_02_nor_gl_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/television_02/television_02_nor_gl_1k.jpg",
+      "md5": "f7f3e0ea914c0fa01e3be02fc4146b3e",
+      "size": 292847,
+      "sha256": "d241001bb67ffe262612ff46930d62f751c425b6e9be8704e762c2dc5b48e536"
+    },
+    "textures/television_02_diff_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/television_02/television_02_diff_1k.jpg",
+      "md5": "a80b482e7aa0b57c93978c11cc0d0a1b",
+      "size": 391490,
+      "sha256": "216bc64108a79f3728e4f0fa2927da2491a3c3f5c619c8d48418c2aad84afb5e"
+    },
+    "textures/television_02_arm_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/television_02/television_02_arm_1k.jpg",
+      "md5": "607a19871471d04b32924fe0138b5423",
+      "size": 471183,
+      "sha256": "7fa42cc4ce2b2a09e2889aaf7897265a79223cad2f3267e035884c96ab37d48b"
+    },
+    "television_02.bin": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/television_02/television_02.bin",
+      "md5": "2d486ed0c0d589cdb4b2acaf65242773",
+      "size": 81668,
+      "sha256": "73f1d3519f7bdacca24c892e2614ff756d5d27f5c33fb518cb8aac9154fa710b"
+    }
+  },
+  "prepared": {
+    "client/assets/props/sprint18_television.glb": {
+      "bytes": 2355248,
+      "sha256": "29778a3df53e9658de059da40b2c4dc30ee8b53716cdd9e0da241ffb0525e637",
+      "md5": "7f3de79983a4432166882e740bb9262b"
+    }
+  },
+  "verification": "Provider MD5s and file lengths matched all five source files. The recipe packs RGB PNG maps and keeps the named mesh."
+}

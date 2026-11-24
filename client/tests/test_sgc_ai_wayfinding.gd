@@ -19,6 +19,8 @@ func run() -> void:
 	root.add_child(room)
 	map = room.get_node("SGCMap") as SGCMap
 	await map.navigation_ready
+	if "--alarm" in OS.get_cmdline_user_args():
+		room.set_emergency_lights(true)
 	for ally in room.get_node("Allies").get_children():
 		ally.queue_free()
 	await physics_frame

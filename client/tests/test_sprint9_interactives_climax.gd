@@ -130,7 +130,15 @@ func _process(_delta: float) -> bool:
 		var cctv := gateroom.find_child("CCTVMonitorBank", true, false) as SecurityMonitorConsole
 		assert(cctv != null, "CCTVMonitorBank must exist in Security Station with SecurityMonitorConsole script")
 		assert(cctv.is_in_group("interactable"), "CCTVMonitorBank must be in 'interactable' group")
-
+		var bank := gateroom.find_child("CCTVMonitorBank", true, false) as CSGBox3D
+		var dressing := bank.get_node(^"ReplacementVisual") as MeshInstance3D
+		assert(bank.use_collision and bank.size == Vector3(0.6, 1.6, 4), "CCTV cover and interaction envelope")
+		var missing_crt := "--expect-cctv-fallback" in OS.get_cmdline_user_args()
+		if missing_crt:
+			assert(bank.transparency == 0 and dressing.mesh == null, "Cyan bank fallback is visible")
+		else:
+			assert(bank.transparency == 1 and dressing.mesh != null, "Fitted bank replaces the original render")
+			check_crt_fit(dressing, bank.size)
 		player.global_position = cctv.global_position + Vector3(0.5, 0.0, 0.5)
 
 		# 1. Enter CCTV mode
@@ -144,16 +152,21 @@ func _process(_delta: float) -> bool:
 		assert(player.is_in_cctv_mode, "PlayerController3D must be flagged in CCTV mode")
 		assert(cctv.current_feed_index == 0, "Initial camera must be Feed 0 (CAM 01: GATE ROOM ARENA)")
 		assert(player.camera_rig.global_position.distance_to(SecurityMonitorConsole.FEEDS[0]["position"]) < 0.1, "CameraRig must be anchored at Cam 1 coordinates")
+		if not missing_crt:
+			check_crt_selection(dressing, 0)
 
 		# 2. Cycle CCTV feeds
 		var cycled_box := [""]
-		cctv.cctv_cycled.connect(func(idx: int, fname: String) -> void:
+		cctv.cctv_cycled.connect(func(_idx: int, fname: String) -> void:
 			cycled_box[0] = fname
-		, CONNECT_ONE_SHOT)
-
-		cctv.cycle_feed()
-		assert(cctv.current_feed_index == 1, "Camera feed must advance to Feed 1 (CAM 02: CONTROL ROOM MEZZANINE)")
-		assert(cycled_box[0] == "CAM 02: CONTROL ROOM MEZZANINE", "Feed name must match Control Room Mezzanine")
+		)
+		for index: int in [1, 2, 3, 0]:
+			cctv.cycle_feed()
+			var feed := SecurityMonitorConsole.FEEDS[index]
+			assert(cctv.current_feed_index == index and cycled_box[0] == feed.name, "Feeds cycle and wrap")
+			assert(player.camera_rig.global_position.distance_to(feed.position) < 0.1, "Selected feed moves the player camera")
+			if not missing_crt:
+				check_crt_selection(dressing, index)
 
 		# 3. Exit CCTV mode
 		var exited_box := [false]
@@ -164,7 +177,9 @@ func _process(_delta: float) -> bool:
 		cctv.exit_cctv()
 		assert(exited_box[0], "CCTV console must emit cctv_exited signal")
 		assert(not player.is_in_cctv_mode, "PlayerController3D must clear CCTV mode on exit")
-		print("[TEST 4/5] PASS: Security Station CCTV console verified (Enter -> Cam 1 -> Cam 2 Cycle -> Clean Exit).")
+		if not missing_crt:
+			check_crt_selection(dressing, -1)
+		print("[TEST 4/5] PASS: Security Station CCTV console verified (Enter -> Cycle All Four -> Clean Exit).")
 
 	elif ticks == 10:
 		# TEST 5: Multi-Sector Climax Incursion System
@@ -198,7 +213,43 @@ func _process(_delta: float) -> bool:
 		print("  ✓ Security Station CCTV (Multi-Camera Surveillance)   ")
 		print("  ✓ Foothold Climax Incursion (Multi-Sector Assault)    ")
 		print("========================================================\n")
-		preload("res://tests/support/finish.gd").success(self)
+		finish_fixture()
 		return false
 
 	return false
+
+
+func finish_fixture() -> void:
+	var combatants := gateroom.get_node(^"Enemies").get_children()
+	combatants.append(player)
+	for body: CharacterBody3D in combatants:
+		body.set_physics_process(false)
+		body.collision_layer = 0
+		body.collision_mask = 0
+	for frame in range(3):
+		await physics_frame
+	for body: CharacterBody3D in combatants:
+		body.queue_free()
+	await process_frame
+	await preload("res://tests/support/finish.gd").success(self)
+
+
+func check_crt_fit(dressing: MeshInstance3D, size: Vector3) -> void:
+	var hull := AABB(-size / 2, size).grow(0.002)
+	assert(hull.encloses(dressing.transform * dressing.get_aabb()), "Cabinet fits original CSG cover")
+	var first := dressing.get_node(^"Monitor1") as MeshInstance3D
+	var finish := first.material_override as StandardMaterial3D
+	assert(finish.albedo_texture.get_image().has_mipmaps(), "CRT maps are ready for the game camera")
+	assert(finish.normal_texture.get_image().has_mipmaps() and finish.ao_texture != null)
+	assert(dressing.find_children("*", "CollisionObject3D", true, false).is_empty())
+	for index in range(1, 5):
+		var monitor := dressing.get_node("Monitor%d" % index) as MeshInstance3D
+		assert(monitor.mesh == first.mesh and monitor.material_override == finish, "Monitors share one visual")
+		assert(hull.encloses((dressing.transform * monitor.transform) * monitor.get_aabb()), "CRT fits original hull")
+		assert(monitor.basis.z.normalized().dot(Vector3.RIGHT) > 0.999, "CRT faces the security aisle")
+
+
+func check_crt_selection(dressing: MeshInstance3D, selected: int) -> void:
+	for index in range(4):
+		var label := dressing.get_node("Feed%d" % (index + 1)) as Label3D
+		assert((label.modulate.g > 0.9) == (index == selected), "Readout follows the existing CCTV interaction")

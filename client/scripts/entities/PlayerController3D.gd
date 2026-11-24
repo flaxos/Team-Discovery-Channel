@@ -884,6 +884,9 @@ func _update_wall_occlusion() -> void:
 				var is_l27_upper: bool = global_position.y < 4.5 and (collider_name.contains("27") or collider_name.begins_with("Briefing") or collider_name.begins_with("Office") or collider_name.begins_with("Security") or collider_name.begins_with("Conference") or collider_name.begins_with("Chair"))
 				if node != self and not is_floor_below and not is_l27_upper and not node.name.begins_with("Sandbag"):
 					newly_hit[node] = true
+					if node == replacement:
+						for visual: Node in replacement.find_children("*", "MeshInstance3D", true, false):
+							newly_hit[visual] = true
 
 	# Fade newly occluded nodes
 	for node: Node in newly_hit.keys():

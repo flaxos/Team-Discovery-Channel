@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS18",
+  "asset_id": "sprint18_television",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Fit four small CRTs in the authored Level 27 CCTV monitor bank.",
+  "target": {
+    "scene": "res://scenes/world/Level27Complex.tscn",
+    "visual_branch": "SecurityStation/CCTVMonitorBank/ReplacementVisual",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/reviews/2026-11-24-sprint18-sgc-coverage.md",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.3,
+        -0.8,
+        -2.0
+      ],
+      "max_m": [
+        0.3,
+        0.8,
+        2.0
+      ]
+    },
+    "anchors": [
+      {
+        "name": "CCTVMonitorBank",
+        "position_m": [
+          0,
+          0,
+          0
+        ],
+        "purpose": "Existing console hull and interaction origin."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://polyhaven.com/a/television_02",
+        "decision": "selected",
+        "reason": "Redistributable opaque 1K PBR textures, fitted CRT silhouette and 2,310 triangles shared across four displays."
+      }
+    ],
+    "selected_source": {
+      "page": "https://polyhaven.com/a/television_02",
+      "creator": "Benny Weimer",
+      "licence": "CC0 1.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/sprint18-television/source.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 2400,
+    "max_materials": 1,
+    "lod_triangle_limits": [
+      2400
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "television_surface",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#343936",
+        "#262925"
+      ],
+      "surface_notes": "Original opaque CRT finish with runtime mipmaps and reduced indoor reflectivity."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 20,
+    "measurement_plan": "Confirm all four surfaces share one mesh and material with three 1K mipmapped textures."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Use the normal Level 27 security console interaction, cycle and wrap all four built-in camera feeds, then exit. Check rendered fits, preserved collision and fallback from exported Linux builds."
+}

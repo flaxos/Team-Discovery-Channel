@@ -1,0 +1,18 @@
+{
+  "source": "/tmp/tdc-asset-intake/sprint18-television-02/television_02_1k.gltf",
+  "output": "../../../../client/assets/props/sprint18_television.glb",
+  "root_name": "SecurityTelevision",
+  "keep_nodes": ["television_02"],
+  "max_texture_size": 1024,
+  "image_format": "PNG",
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/sprint18-television-02/textures/television_02_diff_1k.jpg",
+      "normal": "/tmp/tdc-asset-intake/sprint18-television-02/textures/television_02_nor_gl_1k.jpg",
+      "normal_convention": "opengl",
+      "ao": "/tmp/tdc-asset-intake/sprint18-television-02/ao.png",
+      "roughness": "/tmp/tdc-asset-intake/sprint18-television-02/roughness.png",
+      "metallic": "/tmp/tdc-asset-intake/sprint18-television-02/metallic.png"
+    }
+  }
+}
