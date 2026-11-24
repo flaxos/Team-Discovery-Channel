@@ -1,0 +1,94 @@
+{
+  "ok": true,
+  "file": "client/assets/props/industrial_microscope.glb",
+  "bytes": 5028736,
+  "sha256": "e2b138b655e15dbe837a3d863b010a8e8c6a52abbc5bb12a2f71bc3be79006fe",
+  "scope": "GLB JSON declarations only; no full validation, engine import or licence clearance",
+  "generator": "Godot Engine v4.4.1.stable.official@49a5bc7b616bd04689a2c89e89bda41f50241464",
+  "declared_triangles_unique_meshes": 14568,
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "primitives": [
+        {
+          "mode": 4,
+          "declared_vertices": 14068,
+          "declared_triangles": 14568,
+          "attributes": [
+            "NORMAL",
+            "POSITION",
+            "TANGENT",
+            "TEXCOORD_0"
+          ],
+          "mesh_local_declared_bounds": {
+            "min": [
+              -0.0937639772891998,
+              0.0,
+              -0.279994070529938
+            ],
+            "max": [
+              0.120770841836929,
+              0.460121750831604,
+              0.166605472564697
+            ],
+            "size": [
+              0.21453481912612882,
+              0.460121750831604,
+              0.446599543094635
+            ]
+          },
+          "morph_targets": 0
+        }
+      ]
+    }
+  ],
+  "node_names": [
+    "IndustrialMicroscope",
+    "industrial_microscope"
+  ],
+  "skins": [],
+  "animation_names": [],
+  "images": [
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    },
+    {
+      "name": "",
+      "mime_type": "image/png",
+      "declared_embedded": true
+    }
+  ],
+  "materials": [
+    {
+      "name": "industrial_microscope2",
+      "metallic_factor": 1.0,
+      "roughness_factor": 1.0,
+      "normal_texture": true,
+      "double_sided": false,
+      "alpha_mode": "OPAQUE"
+    }
+  ],
+  "required_extensions": [],
+  "external_dependencies": [],
+  "errors": [],
+  "manual_review": [
+    "Metallic materials require the mission-lighting/D-015 wrapper review",
+    "Verify transformed dimensions, source forward axis, sockets and visual quality in Godot"
+  ],
+  "work_order": {
+    "ok": true,
+    "scope": "Request validation only; no licence or engine/art approval",
+    "asset_id": "industrial_microscope",
+    "status": "ready_for_intake",
+    "work_order_sha256": "2f14fb01f9ff3661949267e3443d1759e6733936c7e8ee4309d7d869fbd45f14",
+    "schema_sha256": "c12d756075cf9c2b098e064204eab5b6cb1ab755832309bebe9445265e5f89fc",
+    "errors": []
+  }
+}

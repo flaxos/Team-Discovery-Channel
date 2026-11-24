@@ -28,6 +28,8 @@ func check_armoury(room: GateRoom) -> void:
 	assert(crate.crate_visual != null and rack.occlusion_visual != null,
 		"A loaded client dresses the ammo and loadout stations")
 	assert(sector.has_node(^"ArmoryArmorStation/ImportedShelf"), "A loaded client fits the re-armour shelf")
+	assert(room.has_node(^"SGCMap/STAGINGCover/ReplacementVisual") and room.has_node(^"SGCMap/SupplyRack1/ReplacementVisual"),
+		"A loaded client dresses both Level 26 medical slots")
 
 func run_test() -> void:
 	net = root.get_node("NetworkManager") as SGCNetworkManager

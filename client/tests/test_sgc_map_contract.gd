@@ -29,6 +29,14 @@ func run() -> void:
 		assert(
 			slot.style_id in style_ids and slot.dimensions.x > 0 and not slot.description.is_empty()
 		)
+	if not check_medical_cover(map):
+		push_error("Level 26 medical props must fit the live slots and keep their original cover colliders")
+		quit(1)
+		return
+	if not await check_medical_camera(room, map):
+		push_error("Crouch occlusion must fade the visible medical cabinet and restore its finish")
+		quit(1)
+		return
 	# Art replacements must preserve gameplay collision and reject over-sized visuals.
 	var visual := MeshInstance3D.new()
 	var box := BoxMesh.new()
@@ -61,3 +69,45 @@ func run() -> void:
 		"PASS source provenance, fallback routes, art metadata, visual bounds and unreachable destinations"
 	)
 	await preload("res://tests/support/finish.gd").success(self)
+
+
+func check_medical_cover(map: SGCMap) -> bool:
+	var footprints := {"STAGINGCover": Vector3(1.6, 1, 1), "SupplyRack1": Vector3(1.4, 1.8, 1.5)}
+	for id: String in footprints:
+		var body := map.get_node(id) as StaticBody3D
+		var visual := body.get_node_or_null(^"ReplacementVisual") as MeshInstance3D
+		var original := body.get_child(0) as MeshInstance3D
+		var collision := body.get_child(1) as CollisionShape3D
+		var size := footprints[id] as Vector3
+		if visual == null or original.visible or collision.disabled or (collision.shape as BoxShape3D).size != size:
+			return false
+		var replacement_bounds := visual.transform * visual.get_aabb()
+		if not AABB(-size / 2.0, size).grow(0.002).encloses(replacement_bounds):
+			return false
+		var query := PhysicsRayQueryParameters3D.create(body.global_position + Vector3(2, 0, 0), body.global_position, 1)
+		if body.get_world_3d().direct_space_state.intersect_ray(query).get("collider") != body:
+			return false
+	return true
+
+
+func check_medical_camera(room: GateRoom, map: SGCMap) -> bool:
+	var body := map.get_node(^"STAGINGCover") as StaticBody3D
+	var cabinet := body.get_node(^"ReplacementVisual") as MeshInstance3D
+	var original_finish := cabinet.material_override
+	var operative := preload("res://scenes/entities/Player.tscn").instantiate() as PlayerController3D
+	operative.name = "1"
+	room.players_container.add_child(operative)
+	operative.set_physics_process(false)
+	operative.global_position = body.global_position + Vector3(0, -0.5, -1.25)
+	operative.camera_rig.global_position = operative.global_position
+	operative.is_crouch_toggled = true
+	operative._process_cover_and_peeking(0.1, Vector3.ZERO)
+	await physics_frame
+	operative._update_camera_and_occlusion(1.0 / 60.0)
+	var faded := operative.occluded_nodes.has(cabinet) and cabinet.material_override != original_finish
+	operative.rotation.y = PI
+	operative._update_camera_and_occlusion(1.0 / 60.0)
+	var restored := cabinet.material_override == original_finish
+	operative.queue_free()
+	await process_frame
+	return faded and restored

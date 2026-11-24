@@ -143,3 +143,12 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 
 - **Source and rights:** Poly Haven lists the three artist-contributed sets under [CC0](https://polyhaven.com/license). The official file manifest provided the map URLs and checksums. [Source and prepared map hashes](../docs/assets/intake/sgc-embarkation.json).
 - **Changes:** The 1K diffuse JPEGs retain their source bytes. The OpenGL normal and packed AO, roughness and metallic maps use 8-bit lossless PNGs. Native Godot materials add colour tint, normal strength, mipmaps and measured repeat scales.
+
+### SGC lab equipment — Sprint 16
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/props/industrial_microscope.glb` | Industrial Microscope | Lukas Walzer for Poly Haven | https://polyhaven.com/a/industrial_microscope | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | East research bench, Level 28 SGC laboratory | S |
+
+- **Source and rights:** Poly Haven records Lukas Walzer as the sole creator and identifies the work as donated under [CC0](https://polyhaven.com/license). The public 1K glTF components matched the provider's sizes and checksums. [Intake source manifest](../docs/assets/intake/industrial_microscope/source.json).
+- **Changes:** Omitted the loose cable and recipe-packed the body with PNG colour, OpenGL normal and ORM maps. The runtime wrapper rotates and centres the unchanged instrument geometry, generates mipmaps and lowers the metallic factor for the SGC lighting. [Preparation recipe](../docs/assets/intake/industrial_microscope/recipe.json).

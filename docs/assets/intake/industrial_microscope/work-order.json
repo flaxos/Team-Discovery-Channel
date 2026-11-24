@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS16",
+  "asset_id": "industrial_microscope",
+  "status": "ready_for_intake",
+  "kind": "rigid_model",
+  "purpose": "Dress the east SGC research bench with one static textured microscope.",
+  "target": {
+    "scene": "res://scenes/main/GateRoom.tscn",
+    "visual_branch": "Level28Complex/LaboratorySector/ResearchBenchEast/IndustrialMicroscope",
+    "measurement_status": "measured",
+    "measurement_evidence": "docs/reviews/2026-11-24-sprint16-sgc-lab-support.md",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.46,
+        0,
+        -0.42
+      ],
+      "max_m": [
+        0.46,
+        0.54,
+        0.42
+      ]
+    },
+    "anchors": [
+      {
+        "name": "IndustrialMicroscope",
+        "position_m": [
+          0,
+          0,
+          0
+        ],
+        "purpose": "Floor pivot centred at the top of the east research bench."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_only",
+    "search_record": [
+      {
+        "page": "https://polyhaven.com/a/industrial_microscope",
+        "decision": "selected",
+        "reason": "Measured body fits the existing bench and includes a 1K PBR set from a verified community source."
+      }
+    ],
+    "selected_source": {
+      "page": "https://polyhaven.com/a/industrial_microscope",
+      "creator": "Lukas Walzer",
+      "licence": "CC0 1.0",
+      "archive_terms_status": "recorded_in_intake",
+      "intake_record": "docs/assets/intake/industrial_microscope/source.json"
+    },
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 17000,
+    "max_materials": 1,
+    "lod_triangle_limits": [
+      17000
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "microscope",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#414341",
+        "#2C2D2B"
+      ],
+      "surface_notes": "Keep neutral instrument colours and packed ARM. Compare a matte treatment in normal and alarm lighting."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 20,
+    "measurement_plan": "Check one mipmapped 1K material and compare the normal and alarm views from the lab aisle."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Approach the existing west bench, take the ROM, upload in control and verify outbound dialing. Inspect the east bench instrument with and without the prepared asset."
+}

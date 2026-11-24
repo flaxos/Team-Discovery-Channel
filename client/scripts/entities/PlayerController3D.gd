@@ -871,7 +871,8 @@ func _update_wall_occlusion() -> void:
 			if col is Node:
 				var node: Node = col as Node
 				if node.has_meta("asset_slot") and node.get_child_count() > 0:
-					node = node.get_child(0)
+					var replacement := node.get_node_or_null(^"ReplacementVisual") as MeshInstance3D
+					node = replacement if replacement != null else node.get_child(0)
 				elif node is ArmoryResupplyStation and is_instance_valid(node.occlusion_visual):
 					node = node.occlusion_visual
 				# Do not occlude floors below the operative's feet/head or cover sandbags
