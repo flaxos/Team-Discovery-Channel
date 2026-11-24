@@ -24,7 +24,9 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 15 merged via #88.** The armoury has fitted loadout cabinets and a community re-armour shelf. The ammo stacks use crate LODs and fade when they occlude the camera. The mounted M2 operator follows the live receiver on all peers. [PR #88](https://github.com/flaxos/Team-Discovery-Channel/pull/88) · [Sprint 15 review](docs/reviews/2026-11-24-sprint15-sgc-armoury.md).
 
-**Sprint 16 is integrated locally.** The lab has a fitted community microscope, and the hard-mode fixture uses the ROM pickup from the west aisle. Level 26 staging and storage have a fitted medical cabinet and transport cases. Owner art review is open. [Sprint 16 review](docs/reviews/2026-11-24-sprint16-sgc-lab-support.md).
+**Sprint 16 merged via #89.** The lab has a fitted community microscope, and the hard-mode fixture uses the ROM pickup from the west aisle. Level 26 staging and storage have a fitted medical cabinet and transport cases. [PR #89](https://github.com/flaxos/Team-Discovery-Channel/pull/89) · [Sprint 16 review](docs/reviews/2026-11-24-sprint16-sgc-lab-support.md).
+
+**Sprint 17 is ready for art review.** Level 27 has fitted briefing and command furniture, a live briefing shutter readout and observation captures from both rooms. [Sprint 17 review](docs/reviews/2026-11-24-sprint17-sgc-briefing-command.md).
 
 | Option | What | Who | Detail |
 |---|---|---|---|

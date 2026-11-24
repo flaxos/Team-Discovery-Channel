@@ -870,15 +870,18 @@ func _update_wall_occlusion() -> void:
 			cur_exclude.append(res.get("rid"))
 			if col is Node:
 				var node: Node = col as Node
+				var collider_name := node.name
+				var replacement := node.get_node_or_null(^"ReplacementVisual") as MeshInstance3D
 				if node.has_meta("asset_slot") and node.get_child_count() > 0:
-					var replacement := node.get_node_or_null(^"ReplacementVisual") as MeshInstance3D
 					node = replacement if replacement != null else node.get_child(0)
+				elif replacement != null and replacement.mesh != null:
+					node = replacement
 				elif node is ArmoryResupplyStation and is_instance_valid(node.occlusion_visual):
 					node = node.occlusion_visual
 				# Do not occlude floors below the operative's feet/head or cover sandbags
 				var is_floor_below: bool = node.name.begins_with("Floor") and node.global_position.y <= sight_target.y
 				# Do not occlude Level 27 structures when operative is on Level 28
-				var is_l27_upper: bool = global_position.y < 4.5 and (node.name.contains("27") or node.name.begins_with("Briefing") or node.name.begins_with("Office") or node.name.begins_with("Security") or node.name.begins_with("Conference") or node.name.begins_with("Chair"))
+				var is_l27_upper: bool = global_position.y < 4.5 and (collider_name.contains("27") or collider_name.begins_with("Briefing") or collider_name.begins_with("Office") or collider_name.begins_with("Security") or collider_name.begins_with("Conference") or collider_name.begins_with("Chair"))
 				if node != self and not is_floor_below and not is_l27_upper and not node.name.begins_with("Sandbag"):
 					newly_hit[node] = true
 

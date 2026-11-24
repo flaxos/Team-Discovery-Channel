@@ -1,10 +1,13 @@
-[gd_scene load_steps=16 format=3 uid="uid://b8x7y4z2w9q02"]
+[gd_scene load_steps=20 format=3 uid="uid://b8x7y4z2w9q02"]
 
 [ext_resource type="Script" path="res://scripts/props/GeneralsDefenseTerminal.gd" id="1_gen_def"]
 [ext_resource type="Script" path="res://scripts/props/SecurityMonitorConsole.gd" id="2_sec_mon"]
 [ext_resource type="Script" path="res://scripts/props/BlastDoorConsole.gd" id="3_bdc"]
 
 [ext_resource type="Script" path="res://scripts/world/SpiralStaircase.gd" id="20_stairs"]
+[ext_resource type="Material" path="res://resources/materials/sgc/briefing_wood.tres" id="21_wood"]
+[ext_resource type="Script" path="res://scripts/props/SGCBriefingFurniture.gd" id="22_furniture"]
+[ext_resource type="Script" path="res://scripts/props/SGCObservationStatus.gd" id="23_readout"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor27"]
 albedo_color = Color(0.28, 0.30, 0.32, 1)
@@ -13,10 +16,6 @@ roughness = 0.65
 [sub_resource type="StandardMaterial3D" id="Mat_Wall27"]
 albedo_color = Color(0.42, 0.45, 0.48, 1)
 roughness = 0.75
-
-[sub_resource type="StandardMaterial3D" id="Mat_WoodMahogany"]
-albedo_color = Color(0.24, 0.12, 0.08, 1)
-roughness = 0.35
 
 [sub_resource type="StandardMaterial3D" id="Mat_LeatherBlack"]
 albedo_color = Color(0.12, 0.12, 0.14, 1)
@@ -54,6 +53,14 @@ roughness = 0.35
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_Console"]
 height = 2.0
 radius = 2.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_ObservationBoard"]
+albedo_color = Color(0.09, 0.13, 0.16, 1)
+roughness = 0.82
+
+[sub_resource type="BoxMesh" id="Mesh_ObservationBoard"]
+material = SubResource("Mat_ObservationBoard")
+size = Vector3(0.78, 0.43, 0.046)
 
 [node name="Level27Complex" type="Node3D"]
 
@@ -117,11 +124,26 @@ collision_mask = 2
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BriefingRoom/BriefingBlastDoorConsole/ConsoleInteractArea"]
 shape = SubResource("CylinderShape3D_Console")
 
+[node name="ObservationBoard" type="MeshInstance3D" parent="BriefingRoom"]
+position = Vector3(6.46, 7.16, 8.028)
+mesh = SubResource("Mesh_ObservationBoard")
+
+[node name="ShutterStatus" type="Label3D" parent="BriefingRoom/ObservationBoard"]
+position = Vector3(0, 0, 0.024)
+font_size = 22
+pixel_size = 0.0025
+outline_size = 3
+script = ExtResource("23_readout")
+
 [node name="ConferenceTable" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, 15)
 use_collision = true
 size = Vector3(2.4, 0.8, 5.5)
-material = SubResource("Mat_WoodMahogany")
+material = ExtResource("21_wood")
+
+[node name="ReplacementVisual" type="MeshInstance3D" parent="BriefingRoom/ConferenceTable"]
+script = ExtResource("22_furniture")
+form = 1
 
 [node name="ChairWest1" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 5.8, 13.5)
@@ -129,11 +151,19 @@ use_collision = true
 size = Vector3(0.6, 0.6, 0.6)
 material = SubResource("Mat_LeatherBlack")
 
+[node name="ReplacementVisual" type="MeshInstance3D" parent="BriefingRoom/ChairWest1"]
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("22_furniture")
+
 [node name="ChairWest2" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 5.8, 15)
 use_collision = true
 size = Vector3(0.6, 0.6, 0.6)
 material = SubResource("Mat_LeatherBlack")
+
+[node name="ReplacementVisual" type="MeshInstance3D" parent="BriefingRoom/ChairWest2"]
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("22_furniture")
 
 [node name="ChairWest3" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 5.8, 16.5)
@@ -141,11 +171,19 @@ use_collision = true
 size = Vector3(0.6, 0.6, 0.6)
 material = SubResource("Mat_LeatherBlack")
 
+[node name="ReplacementVisual" type="MeshInstance3D" parent="BriefingRoom/ChairWest3"]
+rotation = Vector3(0, 1.5707963, 0)
+script = ExtResource("22_furniture")
+
 [node name="ChairEast1" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 5.8, 13.5)
 use_collision = true
 size = Vector3(0.6, 0.6, 0.6)
 material = SubResource("Mat_LeatherBlack")
+
+[node name="ReplacementVisual" type="MeshInstance3D" parent="BriefingRoom/ChairEast1"]
+rotation = Vector3(0, -1.5707963, 0)
+script = ExtResource("22_furniture")
 
 [node name="ChairEast2" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 5.8, 15)
@@ -153,11 +191,19 @@ use_collision = true
 size = Vector3(0.6, 0.6, 0.6)
 material = SubResource("Mat_LeatherBlack")
 
+[node name="ReplacementVisual" type="MeshInstance3D" parent="BriefingRoom/ChairEast2"]
+rotation = Vector3(0, -1.5707963, 0)
+script = ExtResource("22_furniture")
+
 [node name="ChairEast3" type="CSGBox3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 5.8, 16.5)
 use_collision = true
 size = Vector3(0.6, 0.6, 0.6)
 material = SubResource("Mat_LeatherBlack")
+
+[node name="ReplacementVisual" type="MeshInstance3D" parent="BriefingRoom/ChairEast3"]
+rotation = Vector3(0, -1.5707963, 0)
+script = ExtResource("22_furniture")
 
 [node name="SignBriefing" type="Label3D" parent="BriefingRoom"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.2, 21.9)
@@ -172,13 +218,21 @@ modulate = Color(0.9, 0.95, 1, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 5.9, 15)
 use_collision = true
 size = Vector3(2.8, 0.8, 1.6)
-material = SubResource("Mat_WoodMahogany")
+material = ExtResource("21_wood")
+
+[node name="ReplacementVisual" type="MeshInstance3D" parent="GeneralsOffice/HammondsDesk"]
+script = ExtResource("22_furniture")
+form = 2
 
 [node name="ExecutiveChair" type="CSGBox3D" parent="GeneralsOffice"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 6, 15)
 use_collision = true
 size = Vector3(0.7, 1, 0.7)
 material = SubResource("Mat_LeatherBlack")
+
+[node name="ReplacementVisual" type="MeshInstance3D" parent="GeneralsOffice/ExecutiveChair"]
+rotation = Vector3(0, -1.5707963, 0)
+script = ExtResource("22_furniture")
 
 [node name="RedHotlinePhone" type="CSGBox3D" parent="GeneralsOffice"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 6.4, 14.7)

@@ -68,7 +68,7 @@ See the [contract](plans/ammunition-sharing.md) and [review](reviews/2026-11-18-
 | `test_sgc_enclosure` | Closed room/shaft boundaries; deliberate placement gap, portal crack, removed floor/ceiling/casing fail; closure with lift on another floor; invalid floor rejected. |
 | `test_sgc_map_routes` | Production player, friendly and Jaffa capsules move continuously through every walk/stair edge in both directions. Only route setup places an actor. |
 | `test_sgc_lift_routes`, `test_elevator_replication` | Three-floor entry/arrival/exit, queued calls, physical carrying and replicated lift state. |
-| `test_sgc_uat_architecture` | Roof coverage, sealed raised operations, shutter alignment, picker and aimed buttons, live-controller grounding throughout long ascent/descent. |
+| `test_sgc_uat_architecture` | Roof coverage, sealed raised operations, shutter alignment and readout, two-sided observation glass collision, fitted briefing and command furniture, two-sided table fade, aimed buttons and live-controller grounding throughout long ascent/descent. |
 | `test_sgc_ai_wayfinding` | Actual friendly orders and hostile overrun traversal into upper/support floors. |
 | `test_sgc_map_contract` | Provenance, alternate routing, art bounds and collision, and invalid destinations. Sprint 16 adds medical cabinet and case fit, original cover rays and crouch camera fade. `test_multiplayer_mission_join` checks the slots after load and retry. [Lab and support review](reviews/2026-11-24-sprint16-sgc-lab-support.md). |
 | `test_mission_selection_uat` | Real lobby/coordinator dispatch, quiet UAT startup, retry and retained Defense activation. |
