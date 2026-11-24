@@ -26,8 +26,9 @@ func mark(label: String) -> void:
 	FileAccess.open(output_dir.path_join(label), FileAccess.WRITE).store_string("ok")
 
 
-func marked(label: String, limit: int = 3000) -> bool:
-	for _i: int in range(limit):
+func marked(label: String, timeout_ms: int = 15000) -> bool:
+	var deadline := Time.get_ticks_msec() + timeout_ms
+	while Time.get_ticks_msec() < deadline:
 		if FileAccess.file_exists(output_dir.path_join(label)):
 			return true
 		await frames(1)
@@ -74,6 +75,9 @@ func run_test() -> void:
 		await run_server()
 	else:
 		await run_client()
+	if main == null:
+		quit(1)
+		return
 	net.multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	main.queue_free()
 	await frames(2)

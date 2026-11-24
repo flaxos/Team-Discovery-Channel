@@ -17,12 +17,17 @@ var current_upload_time: float = 0.0
 var is_uploading_patch: bool = false
 var uploader_player: PlayerController3D = null
 
-@onready var crt_screen_center: MeshInstance3D = get_node_or_null("CRTScreenCenter")
+@onready var status_readout := get_node_or_null("CRTScreenCenter/StatusReadout") as Label3D
 @onready var status_light: OmniLight3D = get_node_or_null("StatusLight")
 
 
 func _ready() -> void:
 	super._ready()
+	dialing_engaged.connect(func(_player: Node) -> void: _update_screen_visuals())
+	dialing_cancelled.connect(_update_screen_visuals)
+	phase_changed.connect(func(_phase: DialPhase) -> void: _update_screen_visuals())
+	chevron_advanced.connect(func(_locked: int, _total: int) -> void: _update_screen_visuals())
+	gdo_beat_advanced.connect(func(_entered: int, _total: int) -> void: _update_screen_visuals())
 	_update_screen_visuals()
 
 
@@ -34,7 +39,6 @@ func start_dialing(player: PlayerController3D) -> void:
 		return
 
 	super.start_dialing(player)
-	_update_screen_visuals()
 
 
 func set_buffer_corrupted(corrupted: bool) -> void:
@@ -176,21 +180,33 @@ func _update_screen_visuals() -> void:
 	if status_light == null:
 		return
 
+	var message := "GATE STANDBY"
 	if is_buffer_corrupted:
+		message = "BUFFER LOCKED"
 		status_light.light_color = Color(1.0, 0.15, 0.1)
 		status_light.light_energy = 3.5
 	elif is_uploading_patch:
+		message = "ROM UPLOAD"
 		status_light.light_color = Color(0.2, 0.6, 1.0)
 		status_light.light_energy = 4.0
 	elif current_phase == DialPhase.CHEVRONS:
+		message = "CHEVRONS %d/%d" % [current_chevron_index, TOTAL_CHEVRONS]
 		status_light.light_color = Color(1.0, 0.6, 0.1)
 		status_light.light_energy = 3.0
+	elif current_phase == DialPhase.GDO_AUTH:
+		message = "GDO %d/%d" % [gdo_index, GDO_CODE_LENGTH]
+		status_light.light_color = Color(0.2, 0.65, 1.0)
+		status_light.light_energy = 1.2
 	elif current_phase == DialPhase.COMPLETE:
+		message = "OUTBOUND READY"
 		status_light.light_color = Color(0.1, 0.9, 0.3)
 		status_light.light_energy = 2.5
 	else:
 		status_light.light_color = Color(0.3, 0.8, 0.4)
 		status_light.light_energy = 1.2
+	if status_readout != null:
+		status_readout.text = message
+		status_readout.modulate = status_light.light_color.lerp(Color.WHITE, 0.45)
 
 
 func request_abort_mission() -> void:

@@ -33,6 +33,8 @@ Historical baseline: at gameplay commit **`a720594`**, the full profile passed *
 
 ## Coverage contracts
 
+Sprint 14 extends `test_gate_lifecycle_and_modes` with SGC rim measurements, the physical aperture contract and the secured inbound iris. `test_sgc_iris_join_multiplayer` and `test_sgc_iris_join_dedicated` exercise the replacement peer’s repair snapshot and a clean retry with four operatives. [Sprint 14 review](reviews/2026-11-24-sprint14-sgc-control-gate-iris.md).
+
 Sprint 13’s `test_sgc_embarkation_materials` checks the three shared PBR sets, texture channels and mipmaps, legacy fallback, player camera fade and collision along the route to the gate. It also runs from the Linux release pack. [Sprint 13 review and GPU captures](reviews/2026-11-24-sprint13-sgc-embarkation.md).
 
 Sprint 12’s `test_field_kit_visuals` verifies the four exterior fits, C4 and smoke effect origins, arming cues and shield removal. Use `-- --expect-fallback` in an export with both community prop GLBs excluded. The four-operative `test_field_kit_join_multiplayer` and `test_field_kit_join_dedicated` verify remote deployment, readiness-gated delivery during gate travel, spent stock at destination and a clean retry. [Sprint 12 review](reviews/2026-11-23-sprint12-field-kit.md).

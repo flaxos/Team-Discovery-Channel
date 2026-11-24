@@ -1,0 +1,61 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/SGCGateTrim.gd" id="trim"]
+[ext_resource type="Shader" path="res://shaders/SGCIrisFace.gdshader" id="seams"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Housing"]
+albedo_color = Color(0.20, 0.25, 0.28, 1)
+metallic = 0.18
+roughness = 0.68
+
+[sub_resource type="StandardMaterial3D" id="Mat_Trim"]
+albedo_color = Color(0.42, 0.49, 0.53, 1)
+metallic = 0.2
+roughness = 0.52
+
+[sub_resource type="TorusMesh" id="Mesh_Housing"]
+material = SubResource("Mat_Housing")
+inner_radius = 3.07
+outer_radius = 3.35
+rings = 96
+ring_segments = 12
+
+[sub_resource type="TorusMesh" id="Mesh_Trim"]
+material = SubResource("Mat_Trim")
+inner_radius = 3.24
+outer_radius = 3.30
+rings = 96
+ring_segments = 8
+
+[sub_resource type="ShaderMaterial" id="Mat_Iris"]
+shader = ExtResource("seams")
+
+[sub_resource type="CylinderMesh" id="Mesh_Iris"]
+material = SubResource("Mat_Iris")
+top_radius = 2.735
+bottom_radius = 2.735
+height = 0.08
+radial_segments = 96
+rings = 0
+
+[node name="SGCGateTrim" type="Node3D"]
+script = ExtResource("trim")
+
+[node name="Rim" type="Node3D" parent="."]
+
+[node name="OuterCasing" type="MeshInstance3D" parent="Rim"]
+position = Vector3(0, 0, -0.045)
+rotation_degrees = Vector3(90, 0, 0)
+scale = Vector3(1, 1.6, 1)
+mesh = SubResource("Mesh_Housing")
+
+[node name="LippedEdge" type="MeshInstance3D" parent="Rim"]
+position = Vector3(0, 0, 0.17)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Mesh_Trim")
+
+[node name="IrisFace" type="MeshInstance3D" parent="."]
+visible = false
+position = Vector3(0, 0, 0.17)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Mesh_Iris")

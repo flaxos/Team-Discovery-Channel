@@ -1,11 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://cirisservo01"]
+[gd_scene load_steps=12 format=3 uid="uid://cirisservo01"]
 
 [ext_resource type="Script" path="res://scripts/props/IrisServoHousing.gd" id="1_servo"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_ServoSteel"]
-albedo_color = Color(0.2, 0.22, 0.25, 1)
-metallic = 0.85
-roughness = 0.35
+albedo_color = Color(0.24, 0.28, 0.31, 1)
+metallic = 0.16
+roughness = 0.61
 
 [sub_resource type="BoxMesh" id="BoxMesh_Housing"]
 material = SubResource("Mat_ServoSteel")
@@ -19,6 +19,23 @@ roughness = 0.4
 material = SubResource("Mat_ServoLever")
 size = Vector3(0.15, 0.4, 0.15)
 
+[sub_resource type="StandardMaterial3D" id="Mat_ServicePanel"]
+albedo_color = Color(0.11, 0.15, 0.16, 1)
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="Mesh_ServicePanel"]
+material = SubResource("Mat_ServicePanel")
+size = Vector3(0.82, 0.9, 0.016)
+
+[sub_resource type="StandardMaterial3D" id="Mat_ServiceRib"]
+albedo_color = Color(0.43, 0.46, 0.47, 1)
+metallic = 0.18
+roughness = 0.65
+
+[sub_resource type="BoxMesh" id="Mesh_ServiceRib"]
+material = SubResource("Mat_ServiceRib")
+size = Vector3(0.72, 0.031, 0.012)
+
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_Trigger"]
 height = 2.0
 radius = 2.4
@@ -29,6 +46,30 @@ script = ExtResource("1_servo")
 [node name="HousingMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 mesh = SubResource("BoxMesh_Housing")
+
+[node name="ServicePanel" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.61, 0.397)
+mesh = SubResource("Mesh_ServicePanel")
+
+[node name="PanelTitle" type="Label3D" parent="."]
+position = Vector3(0, 0.86, 0.409)
+text = "IRIS DRIVE"
+font_size = 28
+pixel_size = 0.00155
+outline_size = 0
+cast_shadow = 0
+
+[node name="ServiceRib1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.25, 0.408)
+mesh = SubResource("Mesh_ServiceRib")
+
+[node name="ServiceRib2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.32, 0.408)
+mesh = SubResource("Mesh_ServiceRib")
+
+[node name="ServiceRib3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.39, 0.408)
+mesh = SubResource("Mesh_ServiceRib")
 
 [node name="LeverMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.15, 0.2)
