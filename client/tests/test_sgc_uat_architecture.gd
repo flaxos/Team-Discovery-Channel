@@ -39,6 +39,27 @@ func run() -> void:
 	root.add_child(room)
 	var map := room.get_node("SGCMap") as SGCMap
 	await map.navigation_ready
+	var table := room.get_node(^"Level27Complex/BriefingRoom/ConferenceTable") as CSGBox3D
+	var desk := room.get_node(^"Level27Complex/GeneralsOffice/HammondsDesk") as CSGBox3D
+	var wood := table.material as StandardMaterial3D
+	check(table.use_collision and table.size == Vector3(2.4, 0.8, 5.5), "Briefing table retains its cover volume")
+	check(desk.use_collision and desk.size == Vector3(2.8, 0.8, 1.6), "Command desk retains its cover volume")
+	check(wood != null and desk.material == wood and wood.uv1_triplanar, "Both fixtures use one fitted wood material")
+	check(wood != null and wood.albedo_texture != null and wood.normal_enabled and wood.normal_texture != null
+		and wood.ao_texture == wood.roughness_texture and wood.ao_texture != null, "Wood uses source colour, normal and packed surface data")
+	if wood != null:
+		for texture: Texture2D in [wood.albedo_texture, wood.normal_texture, wood.ao_texture]:
+			check(texture != null and texture.get_size() == Vector2(1024, 1024) and texture.get_image().has_mipmaps(),
+				"The shared wood maps need 1K resolution and mipmaps")
+	check_furniture_profile(table, table.size)
+	check_furniture_profile(desk, desk.size)
+	for side: String in ["West", "East"]:
+		for i in range(1, 4):
+			var chair := room.get_node("Level27Complex/BriefingRoom/Chair%s%d" % [side, i]) as CSGBox3D
+			check_furniture_profile(chair, Vector3(0.6, 0.6, 0.6))
+	check_furniture_profile(room.get_node(^"Level27Complex/GeneralsOffice/ExecutiveChair") as CSGBox3D,
+		Vector3(0.7, 1, 0.7))
+	await check_furniture_fade(table)
 	check(
 		map.definition.region(&"CONTROL_ROOM").floor_offset == 1.5,
 		"Operations must overlook embarkation floor"
@@ -80,18 +101,31 @@ func run() -> void:
 		room.get_node("Level28Complex/ControlRoomMezzanine/ControlWindowConsole")
 		as BlastDoorConsole
 	)
+	var briefing_console := room.get_node(^"Level27Complex/BriefingRoom/BriefingBlastDoorConsole") as BlastDoorConsole
+	var status := room.get_node(^"Level27Complex/BriefingRoom/ObservationBoard/ShutterStatus") as Label3D
+	var glass := room.find_child("BriefingGateRoomOverlook", true, false) as CSGBox3D
+	check(status.text.ends_with("OPEN"), "Briefing board shows open at load")
+	for side: float in [-1.0, 1.0]:
+		var p := glass.global_position + Vector3(0.13, 0.09, 0)
+		var through := Vector3(0, 0, side * 0.65)
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(p + through, p - through, 1))
+		check(hit.get("collider") == glass, "The open-shutter pane remains sealed from both sides")
 	console.interact()
 	await frames(90)
 	check(room.is_control_window_closed, "Control console must close its shutter")
-	room.toggle_observation_shutters(true)
+	check(status.text.ends_with("OPEN"), "Control shutter leaves the briefing readout alone")
+	briefing_console.interact()
 	await frames(90)
-	var glass := room.find_child("BriefingGateRoomOverlook", true, false) as CSGBox3D
+	check(status.text.ends_with("SEALED"), "Briefing readout follows the existing shutter command")
 	var shutter := room.find_child("BriefingBlastShutters", true, false) as CSGBox3D
 	check(
 		shutter.position.z - shutter.size.z / 2 > glass.position.z + glass.size.z / 2,
 		"Shutter and glass must not overlap"
 	)
 	check(absf(shutter.position.y - 7.4) < 0.01, "Shutter must align with its window")
+	briefing_console.interact()
+	await frames(90)
+	check(status.text.ends_with("OPEN") and room.is_control_window_closed, "Briefing opens independently")
 	pawn = load("res://scenes/entities/Player.tscn").instantiate() as PlayerController3D
 	pawn.name = "1"
 	room.get_node("Players").add_child(pawn)
@@ -134,4 +168,41 @@ func run() -> void:
 	print(
 		"PASS roof coverage, sealed raised operations, shutter alignment, dynamic buttons and continuous live lift grounding"
 	)
+	# Retire lift-floor and call-area overlaps before disposing the exported world.
+	pawn.collision_layer = 0
+	await frames(3)
+	pawn.queue_free()
+	await process_frame
 	await preload("res://tests/support/finish.gd").success(self)
+
+
+func check_furniture_profile(body: CSGBox3D, size: Vector3) -> void:
+	var visual := body.get_node_or_null(^"ReplacementVisual") as MeshInstance3D
+	check(body.use_collision and body.size == size and body.transparency == 1.0, "Authored furniture collider retains its envelope")
+	check(visual != null and visual.mesh != null and visual.material_override != null, "Fitted furniture is present")
+	if visual != null and visual.mesh != null:
+		check(AABB(-size / 2.0, size).grow(0.002).encloses(visual.transform * visual.get_aabb()), "Furniture must fit its authored collider")
+
+
+func check_furniture_fade(table: CSGBox3D) -> void:
+	var visual := table.get_node(^"ReplacementVisual") as MeshInstance3D
+	var finish := visual.material_override
+	var operative := preload("res://scenes/entities/Player.tscn").instantiate() as PlayerController3D
+	operative.name = "1"
+	room.players_container.add_child(operative)
+	operative.set_physics_process(false)
+	operative.is_crouch_toggled = true
+	for side: float in [-1.0, 1.0]:
+		operative.global_position = table.global_position + Vector3(side * 2.25, -0.4, 1.05)
+		operative._process_cover_and_peeking(0.1, Vector3.ZERO)
+		await physics_frame
+		operative.camera.global_position = table.global_position + Vector3(-side * 2.5, 0.17, 1.05)
+		operative._update_wall_occlusion()
+		check(operative.occluded_nodes.has(visual) and visual.material_override != finish, "The visible table fades from either aisle")
+		operative.camera.global_position = table.global_position + Vector3(side * 3.0, 0.17, 1.05)
+		operative._update_wall_occlusion()
+		check(visual.material_override == finish, "Clearing occlusion restores the exact finish")
+	operative.collision_layer = 0
+	await frames(3)
+	operative.queue_free()
+	await process_frame

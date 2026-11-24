@@ -152,3 +152,11 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 
 - **Source and rights:** Poly Haven records Lukas Walzer as the sole creator and identifies the work as donated under [CC0](https://polyhaven.com/license). The public 1K glTF components matched the provider's sizes and checksums. [Intake source manifest](../docs/assets/intake/industrial_microscope/source.json).
 - **Changes:** Omitted the loose cable and recipe-packed the body with PNG colour, OpenGL normal and ORM maps. The runtime wrapper rotates and centres the unchanged instrument geometry, generates mipmaps and lowers the metallic factor for the SGC lighting. [Preparation recipe](../docs/assets/intake/industrial_microscope/recipe.json).
+
+### SGC briefing and command wood — Sprint 17
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/resources/materials/sgc/briefing_wood.tres` | Wood Table 001 | Dimitrios Savva and Rico Cilliers for Poly Haven | https://polyhaven.com/a/wood_table_001 | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Shared varnished wood finish on the briefing table and command desk | S |
+
+- **Changes:** Preserved the provider’s 1K diffuse JPEG and converted the 16-bit OpenGL normal and packed ARM maps to 8-bit RGB PNG. The standard material uses a 1.5 m triplanar repeat, mipmaps and a restrained tint. [Source and prepared hashes](../docs/assets/intake/sprint17-briefing-wood.json).

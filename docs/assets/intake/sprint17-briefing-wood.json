@@ -1,0 +1,50 @@
+{
+  "title": "Wood Table 001",
+  "authors": {
+    "Dimitrios Savva": "Photography",
+    "Rico Cilliers": "Processing"
+  },
+  "source": "https://polyhaven.com/a/wood_table_001",
+  "licence": "CC0-1.0",
+  "licence_evidence": "https://polyhaven.com/license",
+  "download_listing": "https://api.polyhaven.com/files/wood_table_001",
+  "target": "client/resources/materials/sgc/briefing_wood.tres",
+  "source_files": {
+    "albedo": {
+      "size": 215573,
+      "md5": "56652a7339b16a76afad20d3585f66ea",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_001/wood_table_001_diff_1k.jpg",
+      "file": "wood_table_001_diff_1k.jpg",
+      "sha256": "460dd08d240f4a1f02982415048c3c5c200f385db212da18dc7e2df68bf4d0be"
+    },
+    "normal": {
+      "size": 4961551,
+      "md5": "e34b6eb7939a0f99bd11740f8d85a56c",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/wood_table_001/wood_table_001_nor_gl_1k.png",
+      "file": "wood_table_001_nor_gl_1k.png",
+      "sha256": "3d1dc2cc14cd9a3d2bc0035560aa715f4f8786902b4b72e78135f1d097428f98"
+    },
+    "orm": {
+      "size": 4325846,
+      "md5": "6fca21c59c05de84025bf07d8682a320",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/wood_table_001/wood_table_001_arm_1k.png",
+      "file": "wood_table_001_arm_1k.png",
+      "sha256": "3cf680cefc5a01cef895ef835220421b75a9108b6dc16a8761839e05f63b4107"
+    }
+  },
+  "prepared_files": {
+    "client/assets/materials/sgc/briefing_wood_albedo.jpg": {
+      "bytes": 215573,
+      "sha256": "460dd08d240f4a1f02982415048c3c5c200f385db212da18dc7e2df68bf4d0be"
+    },
+    "client/assets/materials/sgc/briefing_wood_normal.png": {
+      "bytes": 1087848,
+      "sha256": "3858fa6ff1510b58c6a1eb6983f443023d2cdf47a0974b703decf72af78d4eab"
+    },
+    "client/assets/materials/sgc/briefing_wood_orm.png": {
+      "bytes": 1452003,
+      "sha256": "fc1b5cea72d1bb64428df9147e8e633c61431edb057d5eaf1eb4adf0f11c7d9d"
+    }
+  },
+  "changes": "Preserve the source JPEG. Convert OpenGL normal and packed ARM maps from RGB16 to RGB8 PNG, with source axes and channel order retained. Use a shared 1.5 m triplanar repeat."
+}
