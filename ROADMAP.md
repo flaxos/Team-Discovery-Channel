@@ -30,9 +30,13 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 18 route dressing merged via #91.** The three-floor route has a fitted CCTV bank, storage and staging props, and shared concrete finishes. The architecture follow-up integrates the deferred ceilings, fluorescent fixtures, conduits and service stair finishes. Owner art review is open. [PR #91](https://github.com/flaxos/Team-Discovery-Channel/pull/91) · [Sprint 18 review](docs/reviews/2026-11-24-sprint18-sgc-coverage.md).
 
-**Sprint 19 is ready for art review.** The uniformed Airman is the temporary model for all four playable operatives and existing SGC personnel. The shared rig steps through stationary turns and follows both M2 handles when mounted. [Sprint 19 review](docs/reviews/2026-11-25-sprint19-airman-rig.md).
+**Sprint 19 is ready for art review.** The uniformed Airman is the model for existing SGC personnel and the basis for all four playable operatives. The shared rig steps through stationary turns and follows both M2 handles when mounted. [Sprint 19 review](docs/reviews/2026-11-25-sprint19-airman-rig.md).
 
-**Sprint 20 is in progress.** The downloaded Serpent helmet is fitted locally to the shared rig. The downloaded body was reviewed, and the rigged body finish and helmet authorship check are still open. [Serpent preview and intake](docs/reviews/2026-11-25-sprint20-serpent-jaffa.md).
+**Sprint 20 preview merged via #99.** The downloaded Serpent helmet is fitted locally to the shared rig. Body art and the helmet authorship check are open. [PR #99](https://github.com/flaxos/Team-Discovery-Channel/pull/99) · [Serpent preview and intake](docs/reviews/2026-11-25-sprint20-serpent-jaffa.md).
+
+**Sprint 21 has a saved Horus preview.** The existing shock guard wears a native falcon helmet and blue-black armour in the opt-in build. Final surface and motion review remain open.
+
+**Sprint 22 has a local Recon preview.** O’Neill wears slate fatigues, tan webbing and a shoulder radio on the shared Airman rig. The P90 and M9 have Recon-specific palm targets and a cosmetic reload posture. The review includes the SGC alarm lights, shoulder and ADS cameras, and motion footage. [Sprint 22 review](docs/reviews/2026-11-25-sprint22-oneill-recon.md).
 
 **R16 ring transport.** In Goa’uld Infiltration, step onto a ring pad and press Interact to carry the squad members aboard between decks. Both endpoints share a server-controlled cycle and an occupied receiving pad blocks transport. This gameplay slice uses the existing ring assets and clears a prerequisite for the mothership work. [Transport setup](docs/maps/modular-vertical-kit.md#equipment-and-transport-interfaces).
 
