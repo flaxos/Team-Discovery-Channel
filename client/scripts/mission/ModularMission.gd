@@ -324,6 +324,10 @@ func _add_presentation() -> void:
 	if palette != null:
 		settings.ambient_light_color = palette.ambient_color
 		settings.ambient_light_energy = palette.ambient_energy
+	if level.find_child("Rings", true, false) is TransportRings:
+		settings.glow_enabled = true
+		settings.glow_hdr_threshold = 2.2
+		settings.glow_intensity = 0.38
 	var environment := WorldEnvironment.new()
 	environment.environment = settings
 	add_child(environment)

@@ -10,10 +10,12 @@ signal rings_retracted()
 signal reinforcement_spawned(enemy: JaffaAI)
 
 const Interaction = preload("res://scripts/net/ServerInteraction.gd")
+const PlayerTransportVfx = preload("res://scripts/props/RingTransportVfx.gd")
 const BOARDING_RADIUS := 1.72
 const PAD_RADIUS := 2.2
 const DESCENT_SECONDS := 0.22
 const RETRACT_SECONDS := 0.35
+const PLAYER_RETRACT_SECONDS := 0.70
 
 enum RingState { INACTIVE, TELEGRAPH, SLAM, BEAM, RETRACT }
 
@@ -31,6 +33,10 @@ var current_state: RingState = RingState.INACTIVE
 var telegraph_timer: float = 0.0
 var _player_transport := false
 var _prompt: Label3D
+var _vfx: Node3D
+var _sending := false
+var _phase_started_ms := 0
+var _phase_duration := 1.0
 
 @onready var rings_container: Node3D = $RingsStack if has_node("RingsStack") else null
 @onready var beam_column: MeshInstance3D = $BeamColumn if has_node("BeamColumn") else null
@@ -60,6 +66,10 @@ func enable_player_transport() -> void:
 		return
 	_player_transport = true
 	add_to_group(&"interactable")
+	if DisplayServer.get_name() != "headless" and rings_container != null and telegraph_light != null and has_node("FloorPlate"):
+		_vfx = PlayerTransportVfx.new()
+		add_child(_vfx)
+		_vfx.configure(rings_container, $FloorPlate, telegraph_light)
 	_prompt = Label3D.new()
 	_prompt.position.y = 2.5
 	_prompt.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -137,6 +147,11 @@ func _run_transport(target: TransportRings) -> void:
 	if not _has_transport_pair():
 		return
 	_set_pair_state(target, RingState.SLAM)
+	var players := MissionWorld.find(self, "Players")
+	if not target._pad_occupied([]):
+		for player: Node in players.get_children():
+			if player is PlayerController3D and _can_board(player):
+				_show_rider_scan(player, true)
 	await get_tree().create_timer(DESCENT_SECONDS).timeout
 	if not _has_transport_pair():
 		return
@@ -144,7 +159,6 @@ func _run_transport(target: TransportRings) -> void:
 	var started := Time.get_ticks_msec()
 	var arrived: Array[Node] = []
 	var net: Node = get_node_or_null("/root/NetworkManager")
-	var players := MissionWorld.find(self, "Players")
 	for player: Node in players.get_children():
 		if not _has_transport_pair() or target._pad_occupied(arrived):
 			break
@@ -154,11 +168,13 @@ func _run_transport(target: TransportRings) -> void:
 		if net != null and net.is_in_active_session() and multiplayer == net.multiplayer:
 			if await net.relocate_player(player, destination):
 				arrived.append(player)
+				_show_rider_scan(player, false)
 		else:
 			var point: Vector3 = destination.call()
 			if point.is_finite():
 				player.apply_transport_arrival(point)
 				arrived.append(player)
+				_show_rider_scan(player, false)
 	if not _has_transport_pair():
 		return
 	var remaining := beam_duration_s - (Time.get_ticks_msec() - started) / 1000.0
@@ -167,7 +183,7 @@ func _run_transport(target: TransportRings) -> void:
 	if not _has_transport_pair():
 		return
 	_set_pair_state(target, RingState.RETRACT)
-	await get_tree().create_timer(RETRACT_SECONDS).timeout
+	await get_tree().create_timer(PLAYER_RETRACT_SECONDS).timeout
 	if _has_transport_pair():
 		_set_pair_state(target, RingState.INACTIVE)
 
@@ -181,53 +197,69 @@ func _arrival_for(player: PlayerController3D, target: TransportRings, arrived: A
 
 
 func _set_pair_state(target: TransportRings, state: RingState) -> void:
-	show_transport_state(state)
-	target.show_transport_state(state)
-	SGCNetworkManager.mission_rpc(self, &"show_transport_state", [state])
-	SGCNetworkManager.mission_rpc(target, &"show_transport_state", [state])
+	var duration: float = [1.0, telegraph_duration_s, DESCENT_SECONDS, beam_duration_s, PLAYER_RETRACT_SECONDS][state]
+	show_transport_state(state, true, duration)
+	target.show_transport_state(state, false, duration)
+	SGCNetworkManager.mission_rpc(self, &"show_transport_state", [state, true, duration])
+	SGCNetworkManager.mission_rpc(target, &"show_transport_state", [state, false, duration])
+
+
+func _show_rider_scan(player: PlayerController3D, sending: bool) -> void:
+	player.show_ring_transport_scan(player.global_position, sending)
+	SGCNetworkManager.mission_rpc(
+		self, &"present_rider_scan", [get_path_to(player), player.global_position, sending], player.health_component
+	)
+
+
+@rpc("authority", "call_remote", "reliable")
+func present_rider_scan(player_path: NodePath, point: Vector3, sending: bool) -> void:
+	var player := get_node_or_null(player_path) as PlayerController3D
+	if player != null:
+		player.show_ring_transport_scan(point, sending)
 
 
 func _send_transport_snapshot(peer_id: int) -> void:
 	if current_state != RingState.INACTIVE:
-		show_transport_state.rpc_id(peer_id, current_state)
+		show_transport_state.rpc_id(
+			peer_id, current_state, _sending, _phase_duration,
+			(Time.get_ticks_msec() - _phase_started_ms) * 0.001
+		)
 
 
 @rpc("authority", "call_remote", "reliable")
-func show_transport_state(state: RingState) -> void:
+func show_transport_state(state: RingState, sending: bool, duration: float, elapsed: float = 0.0) -> void:
 	if not _player_transport or state == current_state:
 		return
 	current_state = state
+	_sending = sending
+	_phase_duration = duration
+	_phase_started_ms = Time.get_ticks_msec() - int(elapsed * 1000.0)
 	if telegraph_light != null:
 		telegraph_light.visible = state != RingState.INACTIVE
-		telegraph_light.light_energy = 4.0
-	if beam_column != null:
-		beam_column.visible = state == RingState.BEAM
-	if rings_container != null:
-		rings_container.visible = state in [RingState.SLAM, RingState.BEAM, RingState.RETRACT]
-		match state:
-			RingState.SLAM:
-				rings_container.position.y = 8.0
-				create_tween().tween_property(rings_container, "position:y", 0.0, DESCENT_SECONDS)
-			RingState.BEAM:
-				rings_container.position.y = 0.0
-			RingState.RETRACT:
-				create_tween().tween_property(rings_container, "position:y", 8.0, RETRACT_SECONDS)
+	if _vfx != null:
+		_vfx.show_phase(StringName(RingState.keys()[state]), sending, elapsed, maxf(duration, 0.01))
 	match state:
 		RingState.TELEGRAPH:
 			telegraph_started.emit()
-			_play_sfx("res://audio/sfx_rings.wav", 60.0)
+			if elapsed < 0.20:
+				_play_sfx("res://audio/sfx_rings.wav", 24.0)
 		RingState.SLAM:
 			rings_slammed.emit(global_position)
 		RingState.BEAM:
 			beam_discharged.emit()
+			if elapsed < 0.20:
+				_play_sfx("res://audio/sfx_ring_transfer.wav", 24.0, 1.0 if sending else 0.86)
 		RingState.RETRACT:
 			rings_retracted.emit()
+			if elapsed < 0.20:
+				_play_sfx("res://audio/sfx_ring_retract.wav", 24.0)
 	_update_prompt()
 
 
 func _update_prompt() -> void:
-	var caption := "[E] TRANSPORT RINGS" if current_state == RingState.INACTIVE else "TRANSPORT IN PROGRESS"
+	_prompt.visible = current_state == RingState.INACTIVE
 	var bindings := get_node_or_null("/root/KeybindingManager")
+	var caption := "[E] TRANSPORT RINGS"
 	_prompt.text = bindings.format_prompt(caption) if bindings != null else caption
 
 
@@ -359,7 +391,7 @@ func _retract_rings() -> void:
 
 	if rings_container != null:
 		var tween := create_tween()
-		tween.tween_property(rings_container, "position:y", 8.0, 0.35)
+		tween.tween_property(rings_container, "position:y", 8.0, RETRACT_SECONDS)
 		tween.tween_callback(func() -> void:
 			current_state = RingState.INACTIVE
 			rings_container.visible = false
@@ -381,7 +413,7 @@ func _on_crush_body_entered(body: Node) -> void:
 		health.take_damage(crush_damage, self, "ring_crush")
 
 
-func _play_sfx(path: String, max_dist: float) -> void:
+func _play_sfx(path: String, max_dist: float, pitch: float = 1.0) -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	if ResourceLoader.exists(path):
@@ -389,6 +421,7 @@ func _play_sfx(path: String, max_dist: float) -> void:
 		audio.stream = load(path)
 		audio.bus = &"SFX"
 		audio.max_distance = max_dist
+		audio.pitch_scale = pitch
 		audio.unit_size = 12.0
 		add_child(audio)
 		audio.finished.connect(audio.queue_free)

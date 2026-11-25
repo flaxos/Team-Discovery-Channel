@@ -53,6 +53,8 @@ assert(errors.is_empty(), str(errors))
 
 This resolves every endpoint before changing any rig, sets paired-ring references and paths, and disables enemy spawning. Reapply the binding after instancing or reloading a manually attached rig. The `ring_transport` preset places the shared scene. `ModularMission` enables player interaction for reciprocal pairs after assembly. Stand on the pad and use Interact. The server locks both endpoints for the cycle, checks that its destination is clear of live actors, and carries standing operatives aboard at beam time with their spacing intact. A joining client receives the current phase for both rings. Bare structural previews keep the markers and pairing data available for inspection.
 
+Installed pads use five bronze bands with original geometric inlays at the authored 2.30 m outer radius. Both pads charge and deploy during the two-second warning. Sending starts an upward emissive scan on the riders. On arrival the receiving field sweeps downward and each moved operative fades back into view. The field and directional streaks stay within the 2.9 m presentation column, then the bands pack down over 0.70 seconds. The original power-up cue is followed by synthesized transfer and latch cues. Late joins get the pad phase and direction with elapsed time. The rider effects follow the authoritative movement handoff.
+
 Keep a physical route between decks for navigation and use the paired rings as a player shortcut. Selected-room structural inspection omits transport pairing requirements for the isolated preview.
 
 Run the compound ring tests on a listen host and a dedicated server with four operatives each.
