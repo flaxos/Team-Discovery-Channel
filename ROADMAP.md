@@ -36,9 +36,11 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 21 has a saved Horus preview.** The existing shock guard wears a native falcon helmet and blue-black armour in the opt-in build. Final surface and motion review remain open.
 
-**Sprint 22 is in PR #100.** O’Neill wears slate fatigues, tan webbing and a shoulder radio on the shared Airman rig. The P90 and M9 have Recon-specific palm targets and a cosmetic reload posture. The review includes the SGC alarm lights, shoulder and ADS cameras, and motion footage. [PR #100](https://github.com/flaxos/Team-Discovery-Channel/pull/100) · [Sprint 22 review](docs/reviews/2026-11-25-sprint22-oneill-recon.md).
+**Sprint 22 merged via #100.** O’Neill wears slate fatigues, tan webbing and a shoulder radio on the shared Airman rig. The P90 and M9 have Recon-specific palm targets and a cosmetic reload posture. The review includes the SGC alarm lights, shoulder and ADS cameras, and motion footage. [PR #100](https://github.com/flaxos/Team-Discovery-Channel/pull/100) · [Sprint 22 review](docs/reviews/2026-11-25-sprint22-oneill-recon.md).
 
-**Sprint 23 has a local Carter Tech preview.** Carter wears khaki fatigues and a compact scanner on the shared rig, with MP5SD and Zat grip fits. The SGC iris-repair state drives the close-range lever and panel pose. [Carter Tech review](docs/reviews/2026-11-25-sprint23-carter-tech.md).
+**Sprint 23 has a Carter Tech preview for review.** Carter wears khaki fatigues and a compact scanner on the shared rig, with MP5SD and Zat grip fits. The SGC iris-repair state drives the close-range lever and panel pose. [Carter Tech review](docs/reviews/2026-11-25-sprint23-carter-tech.md).
+
+**Sprint 24 has a Teal’c preview ready for art review.** The bronze plates and two-handed staff fit were checked through standing, running and crouch walking. The Zat stays equipped through the drag, and the staff returns on recovery. The PR also includes the Sprint 23 Carter Tech preview. [Teal’c review](docs/reviews/2026-11-25-sprint24-tealc-jaffa.md).
 
 **R16 ring transport.** In Goa’uld Infiltration, step onto a ring pad and press Interact to carry the squad members aboard between decks. Both endpoints share a server-controlled cycle and an occupied receiving pad blocks transport. This gameplay slice uses the existing ring assets and clears a prerequisite for the mothership work. [Transport setup](docs/maps/modular-vertical-kit.md#equipment-and-transport-interfaces).
 

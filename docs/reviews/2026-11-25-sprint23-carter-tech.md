@@ -20,4 +20,4 @@ The existing credited model files are reused. The scanner and repair markers wer
 
 The starter preview covers a first costume and equipment fit in the real SGC scene. The close-range fixture checks both palms within 3.5 cm of their servo targets and verifies that aiming or moving beyond reach restores the held weapon. Six targeted suites passed, including four-player listen and dedicated checks for the class kit across gate travel, late join and retry. The Linux export passed the shared rig, SGC embarkation materials and credits checks. Captures use Godot Forward+ on Mesa llvmpipe.
 
-Offworld and alarm-light captures, continuous motion and health-state review, the full project suite, and owner art acceptance remain open.
+All 135 Godot suites passed across the local runs on the combined Sprint 23 and 24 branch. Offworld and alarm-light captures, continuous motion and health-state review, and owner art acceptance for Carter remain open. [Combined verification](2026-11-25-sprint24-tealc-jaffa.md#captures-and-verification).
