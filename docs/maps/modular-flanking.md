@@ -4,7 +4,7 @@ Existing modular missions now give trailing sentries an alternate-entrance maneu
 
 ## Starting a flank
 
-The host can start one when a standing sentry of formation rank 1 or later actually sees a live standing threat, an earlier rank nearby is already engaging that same target, and no nearby guard already has a flank. Leads retain existing cover/combat behavior. A target within melee range plus one metre is too close to start. Support is checked at assignment; this chunk adds no suppression or squad-role coordinator.
+The host can start one when a standing sentry of formation rank 1 or later actually sees a live standing threat, an earlier rank nearby is already engaging that same target, and no nearby guard already has a flank. Leads retain existing cover/combat behavior. A target within melee range plus one metre is too close to start. The host checks support at assignment.
 
 `LevelNavigator.plan_flank` uses the native walking graph with current runtime locks. It finds a usable route with the fewest room connections, removes that approach's final connection and looks for another entrance. Same-room encounters, unreachable/out-of-level positions and a missing alternate retain ordinary combat/cover. The second entrance must offer at least 45 degrees of angle change from the direct approach and lie at least 2.7 m from the last sighting.
 
@@ -25,3 +25,11 @@ Only the server plans and executes AI movement. Both Jaffa scenes replicate the 
 - `test_modular_flanking` reuses TA-3's existing loop fixture. Real perception starts combat, the lead holds and a trailing guard physically traverses the other rooms. It checks a second guard's fallback, open passages, locks before/during travel, cost and missing-route rejection, last-sighting behavior after concealed motion, newly visible movement/close threats, obstruction/timeout, target departure, alarm preemption, incapacitation and stand-down.
 - `test_modular_flanking_multiplayer` / `test_modular_flanking_dedicated` use the unchanged infiltration compound with four operatives. Actual detection starts a flank; it is held briefly so late peers load deterministically, then the production controller traverses it. Every peer observes the alternate rooms and final pose/flag. They reject client planning, retry twice, cancel a second flank at mission failure and return cleanly on server shutdown.
 - Existing cover, perception, alarms, TA-3, travel and lifecycle suites remain regression coverage. The graphical cutaway and JSON capture distinguish planned points from observed host motion. Human squad readability, timing and WAN behavior remain review work.
+
+## Suppression
+
+Two operative ballistic rounds within 0.65 seconds can suppress a modular sentry. A direct hit counts, as does a traced round that passes within 1.15 m of the guard's torso with a clear path from the trace to the body. Solid walls, doors and props block that path. Hearing and sight still determine what the guard knows about the shooter. Zat and staff effects follow their existing rules.
+
+An amber down arrow marks the guard's crouch. During suppression the guard stops firing, drops any committed flank and uses the shared navigation system to reach a qualifying prop within 7 m of walking distance. It ducks in place when no prop qualifies. A quiet period of 1.3 seconds ends the reaction. Sustained fire can hold it for up to 3 seconds, followed by a 1-second recovery window. Alarm errands take priority. Incapacitation and mission stand-down clear the reaction.
+
+`test_modular_suppression` fires real traces through the modular extraction fixture and checks exposure, cover, timing, health and stun. `test_multiplayer_state_replication` verifies the amber tell and crouch on an ENet replica. The four-operative listen and dedicated flanking suites cover adjacent behavior. Pacing in a human squad remains to be played.

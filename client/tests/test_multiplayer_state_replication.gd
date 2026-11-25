@@ -65,8 +65,15 @@ func run_test() -> void:
 	assert(enemy_replica != null, "Existing EnemySpawner must instantiate remote Jaffa")
 	enemy.position.x = 2.0
 	enemy._set_crouching(true)
+	enemy.is_suppressed = true
 	await frames(40)
 	assert(enemy_replica.position.distance_to(enemy.position) < 0.05 and enemy_replica.is_crouching, "Jaffa transform/posture sync without client physics drift")
+	assert(enemy_replica.is_suppressed and enemy_replica.visuals_root.position.y < -0.3)
+	assert(enemy_replica.get_node("AwarenessTell").text == "↓")
+	enemy.is_suppressed = false
+	enemy._set_crouching(false)
+	await frames(40)
+	assert(not enemy_replica.is_suppressed and is_zero_approx(enemy_replica.visuals_root.position.y))
 	var replica_deaths: Array[int] = [0]
 	enemy_replica.jaffa_died.connect(func(_node: Node) -> void: replica_deaths[0] += 1)
 	enemy_replica._on_died()

@@ -513,8 +513,8 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 		return
 	if audio_player != null:
 		audio_player.play()
+	var shooter: Node = _operative()
 	if noise_radius > 0.0 and is_inside_tree():
-		var shooter: Node = _operative()
 		get_tree().call_group(
 			&"noise_listeners", &"hear", origin, noise_radius, shooter if shooter != null else get_parent()
 		)
@@ -546,20 +546,24 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 	elif get_parent() != null and get_parent().get_parent() is CollisionObject3D:
 		exclude_list.append((get_parent().get_parent() as CollisionObject3D).get_rid())
 
-	var hit_pos := origin + dir * max_range_m
+	var range_end := origin + dir * max_range_m
+	var hit_pos := range_end
+	var trace_end := range_end
 	var hit_node: Node = null
 
 	# Trace ray with ballistic penetration through reinforced observation glass
 	for iter in range(4):
-		var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * max_range_m)
+		var query := PhysicsRayQueryParameters3D.create(origin, range_end)
 		query.collision_mask = 1 | 2 | 4 | 128 | (64 if is_zat else 0)  # Zat can target nonblocking corpses.
 		query.exclude = exclude_list
 		var result := space.intersect_ray(query)
 		if result.is_empty():
+			trace_end = range_end
 			break
 
 		var col: Node = result["collider"] as Node
 		hit_pos = result["position"]
+		trace_end = hit_pos
 		hit_node = col
 
 		# If hit observation glass, allow high-velocity bullet penetration through window
@@ -571,6 +575,10 @@ func _perform_shot(origin: Vector3, dir: Vector3) -> void:
 			_apply_hit(hit_node)
 			break
 
+	if not is_zat and not is_plasma and shooter is PlayerController3D:
+		var mission := MissionWorld.of(shooter)
+		if mission.has_method(&"register_operative_shot"):
+			mission.register_operative_shot(origin, trace_end, hit_node)
 	fired.emit(origin, dir, hit_pos, hit_node)
 
 
