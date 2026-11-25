@@ -110,6 +110,17 @@ var _flank_time := 0.0
 var _flank_cooldown := 0.0
 var _flank_subject: WeakRef
 var flank_status := "idle"
+## Replicated through the guard's existing pose synchronizer for the overhead tell.
+var is_suppressed := false
+const INCOMING_FIRE_WINDOW := 0.65
+const SUPPRESSION_HOLD := 1.3
+const SUPPRESSION_LIMIT := 3.0
+const SUPPRESSION_RECOVERY := 1.0
+var _incoming_fire_window := 0.0
+var _suppression_hold := 0.0
+var _suppression_limit := 0.0
+var _suppression_recovery := 0.0
+var _suppression_cover := Vector3.INF
 ## Staff height while standing to fire over a cover prop, above the tallest low cover.
 const OVER_COVER_STAFF_HEIGHT := 1.35
 ## Seconds left standing up to fire over cover, and until the cover is re-checked.
@@ -185,6 +196,7 @@ func start_column_march(march_target_pos: Vector3) -> void:
 ## Walks the waypoints in order through the shared navigator; resumes after combat.
 func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 	_clear_modular_flank()
+	_clear_suppression()
 	patrol_points = points.duplicate()
 	patrol_index = 0
 	patrol_laps = 0
@@ -198,6 +210,7 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 ## Mission over: stop fighting and moving for good. Safe on replicas.
 func stand_down() -> void:
 	_clear_modular_flank()
+	_clear_suppression()
 	current_target = null
 	velocity = Vector3.ZERO
 	investigating = false
@@ -241,7 +254,7 @@ func _update_perception(delta: float) -> void:
 func _engage(target: Node3D, spread: bool) -> void:
 	current_target = target
 	investigating = false
-	if current_state in [State.PATROL, State.ADVANCE, State.IDLE, State.CHASE, State.MARCHING_FORMATION]:
+	if not is_suppressed and current_state in [State.PATROL, State.ADVANCE, State.IDLE, State.CHASE, State.MARCHING_FORMATION]:
 		break_formation_and_engage()
 	if spread:
 		_alert_nearby_formation_jaffa()
@@ -276,6 +289,7 @@ func investigate_at(at: Vector3) -> void:
 ## Perception keeps running, so the Jaffa still notices and reports what it sees.
 func run_to(spot: Vector3, look: Vector3) -> void:
 	_clear_modular_flank()
+	_clear_suppression()
 	errand = spot
 	_errand_look = look
 	_set_crouching(false)
@@ -436,7 +450,7 @@ func _process(_delta: float) -> void:
 	if _tell == null:
 		return
 	_tell.visible = (
-		(raising_alarm or awareness_level != JaffaPerception.Level.UNAWARE)
+		(raising_alarm or is_suppressed or awareness_level != JaffaPerception.Level.UNAWARE)
 		and current_state != State.DEAD
 	)
 	if not _tell.visible:
@@ -444,6 +458,9 @@ func _process(_delta: float) -> void:
 	if raising_alarm:
 		_tell.text = "!!"
 		_tell.modulate = Color(1.0, 0.2, 0.75)
+	elif is_suppressed:
+		_tell.text = "↓"
+		_tell.modulate = Color(1.0, 0.67, 0.28)
 	elif awareness_level == JaffaPerception.Level.ALERTED:
 		_tell.text = "!"
 		_tell.modulate = Color(1.0, 0.25, 0.15)
@@ -478,6 +495,7 @@ func _physics_process(delta: float) -> void:
 
 	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
 		_clear_modular_flank()
+		_clear_suppression()
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 		move_and_slide()
@@ -487,6 +505,9 @@ func _physics_process(delta: float) -> void:
 		_update_perception(delta)
 		if errand != Vector3.INF:
 			_process_errand(delta)
+			move_and_slide()
+			return
+		if _process_suppression(delta):
 			move_and_slide()
 			return
 
@@ -504,6 +525,71 @@ func _physics_process(delta: float) -> void:
 			_process_advance_state(delta)
 
 	move_and_slide()
+
+
+func can_be_suppressed() -> bool:
+	return (
+		profile == Profile.SENTRY and is_physics_processing() and errand == Vector3.INF
+		and current_state not in [State.DEAD, State.STUNNED, State.DOWNED]
+		and not health_component.is_dead and not health_component.is_stunned and not health_component.is_downed
+	)
+
+
+## Two nearby rounds within the pressure window make a sentry duck. Perception
+## continues to own the target and receives no new sighting from this reaction.
+func register_incoming_fire(origin: Vector3) -> void:
+	if not multiplayer.is_server() or not can_be_suppressed() or _suppression_recovery > 0.0:
+		return
+	if is_suppressed:
+		_suppression_hold = SUPPRESSION_HOLD
+		return
+	if _incoming_fire_window <= 0.0:
+		_incoming_fire_window = INCOMING_FIRE_WINDOW
+		return
+	var level := LevelNavigator.find_level(self)
+	if level == null:
+		return
+	if _flank_navigation != null:
+		_end_modular_flank("suppressed")
+	is_suppressed = true
+	_incoming_fire_window = 0.0
+	_suppression_hold = SUPPRESSION_HOLD
+	_suppression_limit = SUPPRESSION_LIMIT
+	var threat_floor := origin - Vector3.UP * LevelNavigator.THREAT_TORSO
+	var found := LevelNavigator.prop_cover(level, self, threat_floor, 7.0)
+	_suppression_cover = found.get("spot", Vector3.INF)
+	_peek = 0.0
+	_set_crouching(true)
+
+
+func _process_suppression(delta: float) -> bool:
+	_incoming_fire_window = maxf(0.0, _incoming_fire_window - delta)
+	_suppression_recovery = maxf(0.0, _suppression_recovery - delta)
+	if not is_suppressed:
+		return false
+	_suppression_hold -= delta
+	_suppression_limit -= delta
+	if _suppression_hold <= 0.0 or _suppression_limit <= 0.0:
+		_clear_suppression()
+		_suppression_recovery = SUPPRESSION_RECOVERY
+		_set_crouching(false)
+		return false
+	_set_crouching(true)
+	if _suppression_cover.is_finite() and global_position.distance_to(_suppression_cover) > 0.85:
+		_advance_towards(_suppression_cover, delta, march_speed)
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, 17.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 17.0 * delta)
+	return true
+
+
+func _clear_suppression() -> void:
+	is_suppressed = false
+	_incoming_fire_window = 0.0
+	_suppression_hold = 0.0
+	_suppression_limit = 0.0
+	_suppression_recovery = 0.0
+	_suppression_cover = Vector3.INF
 
 
 func _process_marching_formation(delta: float) -> void:
@@ -1225,7 +1311,7 @@ func _process_combat(delta: float, dist: float) -> void:
 
 
 func _fire_staff_blast() -> void:
-	if current_target == null or not _has_line_of_sight(current_target):
+	if is_suppressed or current_target == null or not _has_line_of_sight(current_target):
 		return
 
 	_dispatch_single_plasma_bolt()
@@ -1241,7 +1327,7 @@ func _fire_staff_blast() -> void:
 
 
 func _dispatch_single_plasma_bolt() -> void:
-	if current_target == null or not _has_line_of_sight(current_target):
+	if is_suppressed or current_target == null or not _has_line_of_sight(current_target):
 		return
 
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.2, -0.6)
@@ -1424,6 +1510,7 @@ func play_staff_fire_fx(origin_pos: Vector3) -> void:
 
 func _on_stunned(duration: float) -> void:
 	_clear_modular_flank()
+	_clear_suppression()
 	current_state = State.STUNNED
 	current_target = null
 	investigating = false
@@ -1449,6 +1536,7 @@ func _on_recovered_from_stun() -> void:
 
 func _on_died() -> void:
 	_clear_modular_flank()
+	_clear_suppression()
 	if navigator != null: navigator.reset()
 	if _death_notified:
 		return

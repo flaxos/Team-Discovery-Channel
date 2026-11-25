@@ -6,6 +6,7 @@ extends GateRoom
 ## (MissionAlert: alarm consoles and reinforcements). SGC-only nodes are simply absent.
 signal started
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
+const NEAR_MISS_RADIUS := 1.15
 @export var definition: MissionDefinition
 var is_started := false
 var setup_errors := PackedStringArray()
@@ -111,6 +112,32 @@ func hostiles_alive() -> int:
 		if health != null and not health.is_dead:
 			alive += 1
 	return alive
+
+
+## The authoritative ballistic trace already stops at its first blocking hit.
+func register_operative_shot(origin: Vector3, hit: Vector3, impact: Node) -> void:
+	if not multiplayer.is_server() or not is_started or mission_result >= 0:
+		return
+	var travel := hit - origin
+	if travel.length_squared() < 0.04:
+		return
+	# Start the occlusion check just before the impact surface so that its far side
+	# cannot pick up pressure through the wall.
+	var end := hit - travel.normalized() * 0.035
+	var space := get_world_3d().direct_space_state
+	for child: Node in enemies.get_children():
+		var guard := child as JaffaAI
+		if guard == null or not guard.can_be_suppressed():
+			continue
+		if impact != guard:
+			var centre := guard.global_position + Vector3.UP * (0.72 if guard.is_crouching else 1.05)
+			var closest := Geometry3D.get_closest_point_to_segment(centre, origin, end)
+			if centre.distance_squared_to(closest) > NEAR_MISS_RADIUS * NEAR_MISS_RADIUS:
+				continue
+			var query := PhysicsRayQueryParameters3D.create(closest, centre, 1 | 128)
+			if not space.intersect_ray(query).is_empty():
+				continue
+		guard.register_incoming_fire(origin)
 
 
 ## The banner changes only when a hostile arrives, dies or leaves, or the alert level

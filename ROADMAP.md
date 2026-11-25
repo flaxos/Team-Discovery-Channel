@@ -77,6 +77,8 @@ Community asset preparation now includes source-verified shortlists, a staged in
 | **Not built** | Sound propagation through walls. General room-entry triggers and objective enabling beyond the implemented objective-completion/raised-alarm actions. Cover in rooms without low props (bare modules fall back to a marker). Goa'uld shields. Non-Goa'uld faction art. Outdoor terrain. Campaign progression |
 | **Accepted by people** | Phases 1 to 3, by one owner playing alone on 14 November 2026 ([record](docs/reviews/2026-11-14-owner-solo-uat.md)). Not yet run by two people: late join, shared extraction, revive, mixed-route play, SGC Defense, and two-world gate travel on the current build |
 
+**TA-2 suppression.** Closely spaced ballistic fire makes a modular sentry duck and seek nearby cover. An amber down arrow marks the opening for the squad. [Behavior and verification](docs/maps/modular-flanking.md#suppression).
+
 The full classification, with source paths and tests, is the [capability matrix](docs/plans/master-development-roadmap.md#2-capability-matrix).
 
 ### Known problems that affect planning
