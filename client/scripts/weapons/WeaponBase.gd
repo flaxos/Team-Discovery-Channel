@@ -484,6 +484,8 @@ func consume_shot() -> bool:
 
 
 func try_fire(spread_mult: float = 1.0, direction_override: Vector3 = Vector3.ZERO) -> bool:
+	if MissionWorld.combat_ended(self):
+		return false
 	var operative: Node = _operative()
 	if is_inside_tree() and multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return operative.request_weapon_fire() if operative != null and operative.is_local_authority else false
@@ -518,6 +520,8 @@ func try_fire(spread_mult: float = 1.0, direction_override: Vector3 = Vector3.ZE
 
 
 func _perform_shot(origin: Vector3, dir: Vector3) -> void:
+	if MissionWorld.combat_ended(self):
+		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	if audio_player != null:

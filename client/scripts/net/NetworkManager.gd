@@ -735,7 +735,7 @@ func resume_player_transfer(token: int, destination: Vector3 = Vector3.INF) -> v
 		actor.tree_exited.disconnect(saved.cleanup)
 		if destination.is_finite():
 			actor.apply_transport_arrival(destination)
-		actor.set_physics_process(saved.physics)
+		actor.set_physics_process(saved.physics and not MissionWorld.combat_ended(actor))
 		(actor.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer).public_visibility = saved.visible
 	_paused_actors.erase(token)
 

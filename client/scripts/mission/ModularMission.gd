@@ -38,7 +38,6 @@ func _ready() -> void:
 			entry.global_transform * Vector3((i % 2 - 0.5) * 1.2, 0.05, (i / 2 - 0.5) * 1.6)
 		)
 	enemies.child_entered_tree.connect(_on_hostile_entered)
-	players_container.child_entered_tree.connect(_on_operative_entered)
 	enemies.child_exiting_tree.connect(func(_node: Node) -> void: _show_hostiles.call_deferred())
 	objectives.setup(definition, level, players_container)
 	objectives.objective_changed.connect(_show_objective)
@@ -86,7 +85,7 @@ func _setup_airman_spawner() -> void:
 	allies_container = Node3D.new()
 	allies_container.name = "Allies"
 	add_child(allies_container)
-	allies_container.child_entered_tree.connect(_on_airman_entered)
+	allies_container.child_entered_tree.connect(_on_combatant_entered)
 	var spawner := MultiplayerSpawner.new()
 	spawner.name = "AllySpawner"
 	spawner.spawn_path = NodePath("../Allies")
@@ -111,11 +110,6 @@ func _spawn_airman_support(entry: Node3D) -> void:
 		airman.position = allies_container.to_local(positions[i])
 		airman.rotation.y = entry.global_rotation.y - global_rotation.y
 		allies_container.add_child(airman, true)
-
-
-func _on_airman_entered(node: Node) -> void:
-	if mission_result >= 0 and node is SGCAirmanAI:
-		node.stand_down.call_deferred()
 
 
 func apply_airman_order(issuer: PlayerController3D, command: int, point: Vector3, target: Node) -> Dictionary:
@@ -152,11 +146,6 @@ func _on_hostile_entered(node: Node) -> void:
 	if health != null:
 		health.died.connect(_show_hostiles)
 	_show_hostiles.call_deferred()
-
-
-func _on_operative_entered(node: Node) -> void:
-	if mission_result >= 0 and node is PlayerController3D:
-		(node.get_node("HealthComponent") as HealthComponent).frozen = true
 
 
 func hostiles_alive() -> int:
@@ -317,31 +306,16 @@ func alert_summary() -> String:
 	return "UNDETECTED"
 
 
-## One result per mission: a later squad wipe cannot overwrite a success, or the reverse.
-func _finish_mission(victory: bool) -> void:
-	if mission_result < 0:
-		super._finish_mission(victory)
-
-
 @rpc("authority", "call_local", "reliable")
 func sync_mission_result(victory: bool) -> void:
+	if mission_result >= 0:
+		return
 	if hud != null:
 		hud.total_kills = hostiles_eliminated_count()
 	super.sync_mission_result(victory)
-	# The result is final: hostiles stand down and nothing further happens to the squad.
 	objectives.set_physics_process(false)
 	alert.set_physics_process(false)
 	events.stop()
-	for enemy in enemies.get_children():
-		if enemy is JaffaAI:
-			(enemy as JaffaAI).stand_down()
-	if allies_container != null:
-		for airman: SGCAirmanAI in allies_container.get_children():
-			airman.stand_down()
-	for player in players_container.get_children():
-		var health := player.get_node_or_null("HealthComponent") as HealthComponent
-		if health != null:
-			health.frozen = true
 	_show_debrief(victory)
 
 

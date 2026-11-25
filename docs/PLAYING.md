@@ -30,6 +30,8 @@ A hidden development mission, **Two worlds** (`--mission two_worlds_dev`), loads
 
 UAT inherits the Defense map, including props, friendly personnel, stairs and the lift. It disables automatic hostile gate activations and enemy waves; it is an exploration/test mode rather than an extraction run. Difficulty is disabled. The host owns mission/difficulty selection; clients receive it, including on joining and retry.
 
+When SGC Defense reaches its debrief, combat stops and health stays at the result state. A squadmate joining at that point sees the debrief. **Retry Mission** starts a fresh round for the connected squad.
+
 The base game on the development machine is `/home/flax/games/Team-Discovery-Channel/client`. To ensure that copy is loaded:
 
 ```sh

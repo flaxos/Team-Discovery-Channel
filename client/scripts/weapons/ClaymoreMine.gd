@@ -66,7 +66,7 @@ func _on_tripwire_tripped(body: Node) -> void:
 
 
 func detonate() -> void:
-	if KitNetwork.is_replica(self):
+	if KitNetwork.is_replica(self) or MissionWorld.combat_ended(self):
 		return
 	is_armed = false
 	detonated.emit(global_position)

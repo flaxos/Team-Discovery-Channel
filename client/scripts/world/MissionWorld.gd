@@ -65,3 +65,8 @@ static func first_in_group(node: Node, group: StringName) -> Node:
 static func presented(node: Node) -> bool:
 	var world := of(node)
 	return world == null or not world.is_in_group(GROUP) or bool(world.get(&"is_presented"))
+
+
+static func combat_ended(node: Node) -> bool:
+	var world := of(node)
+	return world != null and world.is_in_group(GROUP) and int(world.get(&"mission_result")) >= 0

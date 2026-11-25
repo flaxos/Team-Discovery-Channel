@@ -570,6 +570,16 @@ func _equip_weapon_by_id(weapon_id: String) -> void:
 	current_weapon.fired.connect(_on_weapon_fired)
 
 
+func stand_down() -> void:
+	velocity = Vector3.ZERO
+	stop_dragging_body()
+	close_squad_command_wheel()
+	active_revive_target = null
+	_server_revive_target = NodePath()
+	set_process_unhandled_input(false)
+	set_physics_process(false)
+
+
 func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
 		_server_revive_tick(delta)
@@ -1120,6 +1130,8 @@ func _request_turret_deployment() -> void:
 
 
 func _deploy_turret_on_server() -> void:
+	if MissionWorld.combat_ended(self):
+		return
 	if turret_cooldown > 0.0 or health_component == null or health_component.is_dead \
 			or health_component.is_downed or health_component.is_stunned:
 		return
@@ -1192,6 +1204,8 @@ func _confirm_field_kit(claymore: int, satchel: int, smoke: int, shield: int) ->
 
 
 func _use_field_kit_on_server(action: int, mode: int) -> void:
+	if MissionWorld.combat_ended(self):
+		return
 	match action:
 		FieldKitAction.SATCHEL:
 			if class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
@@ -2539,7 +2553,7 @@ func _show_ammo_share_feedback(message: String) -> void:
 
 # Combat requests carry intent only. The server chooses weapon statistics, spread, ray hits and damage.
 func _valid_combat_sender() -> bool:
-	return multiplayer.is_server() and _combat_peer_allowed(multiplayer.get_remote_sender_id())
+	return multiplayer.is_server() and not MissionWorld.combat_ended(self) and _combat_peer_allowed(multiplayer.get_remote_sender_id())
 
 
 func _combat_peer_allowed(sender: int) -> bool:
