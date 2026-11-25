@@ -13,6 +13,7 @@ const SMOKE_GRENADE_PATH: String = "res://scenes/weapons/SmokeGrenade.tscn"
 const SmokeGrenadeScript = preload("res://scripts/weapons/SmokeGrenade.gd")
 const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
 const RadialCommandWheelScript = preload("res://scripts/ui/RadialCommandWheel.gd")
+const RingScan := preload("res://scripts/props/ring_transport_scan.gdshader")
 
 signal player_died(peer_id: int)
 signal player_downed(peer_id: int)
@@ -139,6 +140,8 @@ var is_holding_command_input: bool = false
 var is_command_wheel_open: bool = false
 var command_press_start_pos: Vector2 = Vector2.ZERO
 var locked_target_world_pos: Vector3 = Vector3.ZERO
+var _ring_scan_tween: Tween
+var _ring_scan_parts: Dictionary = {}
 
 @onready var synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer if has_node("MultiplayerSynchronizer") else null
 @onready var health_component: HealthComponent = $HealthComponent if has_node("HealthComponent") else null
@@ -2149,6 +2152,62 @@ func _on_vaporized() -> void:
 	var flash_tween := flash.create_tween()
 	flash_tween.tween_property(flash, "light_energy", 0.0, 0.25)
 	flash_tween.tween_callback(flash.queue_free)
+
+
+func apply_transport_arrival(destination: Vector3) -> void:
+	global_position = destination
+	velocity = Vector3.ZERO
+	if is_local_authority and camera_rig != null:
+		camera_rig.global_position = destination
+	reset_physics_interpolation()
+
+
+func show_ring_transport_scan(point: Vector3, sending: bool) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	# A reliable effect event can precede the observer's movement relay.
+	var deadline := Time.get_ticks_msec() + 450
+	while not sending and global_position.distance_squared_to(point) > 3.0:
+		if Time.get_ticks_msec() > deadline:
+			return
+		await get_tree().process_frame
+		if not is_inside_tree():
+			return
+	if _ring_scan_tween != null:
+		_ring_scan_tween.kill()
+	_restore_ring_scan()
+	var material := ShaderMaterial.new()
+	material.shader = RingScan
+	material.set_shader_parameter(&"floor_level", point.y)
+	for branch: Node in [visuals, weapon_holder]:
+		if branch == null:
+			continue
+		for part: GeometryInstance3D in branch.find_children("*", "GeometryInstance3D", true, false):
+			if part.is_visible_in_tree():
+				_ring_scan_parts[part] = [part.material_overlay, part.transparency]
+				part.material_overlay = material
+	var update_scan := func(progress: float) -> void:
+		var height := lerpf(-0.12, 1.95, progress if sending else 1.0 - progress)
+		material.set_shader_parameter(&"frontier", height)
+		var fade := smoothstep(0.20, 1.0, progress) if sending else 1.0 - smoothstep(0.03, 0.93, progress)
+		for part: GeometryInstance3D in _ring_scan_parts:
+			if is_instance_valid(part):
+				part.transparency = maxf(_ring_scan_parts[part][1], 0.91 * fade)
+	update_scan.call(0.0)
+	_ring_scan_tween = create_tween()
+	_ring_scan_tween.tween_method(update_scan, 0.0, 1.0, 0.22 if sending else 0.46)
+	if sending:
+		_ring_scan_tween.tween_interval(0.10)
+	_ring_scan_tween.tween_callback(_restore_ring_scan)
+
+
+func _restore_ring_scan() -> void:
+	for part: GeometryInstance3D in _ring_scan_parts:
+		if is_instance_valid(part):
+			var original: Array = _ring_scan_parts[part]
+			part.material_overlay = original[0]
+			part.transparency = original[1]
+	_ring_scan_parts.clear()
 
 
 func _try_interact() -> void:

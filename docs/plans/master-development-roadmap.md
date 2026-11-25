@@ -71,7 +71,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | DHD and SGC console | Verified (SGC) | `SGCDialingConsole`, buffer lockout and ROM upload |
 | Iris | Verified (SGC) | Hard-difficulty iris repair (`IrisServoHousing`) |
 | Gate travel, world transitions | Verified (GT-2/GT-3) | Two-world `MissionSession` (`travel_infiltration`) with outbound dialing, complete state hand-off, presentation switching, and D-017 split-squad rules (`test_gate_travel`, `test_gate_travel_multiplayer`) |
-| Transport rings | Placeholder in missions | `TransportRings` has beam, pair teleport and reinforcement code from the early sprints. It is not instanced in the SGC. On modular levels the `ring_transport` preset places paired but idle rings; nothing triggers them, and the teleport runs on every peer without server validation |
+| Transport rings | Implemented in modular missions (R16) | Interact from the pad to carry eligible operatives to the paired endpoint. The server checks the receiving pad, synchronizes phases to both ends and sends the active phase on join. The same operative nodes keep their health and gear. |
 | Goa'uld shield mechanics | Missing | `DeployableShield` is the Tau'ri ballistic shield |
 | Jaffa and faction equipment | Partial | Jaffa guard and shock guard with staff weapons; player staff and Zat. No other faction units |
 | Offworld entry and extraction | Verified (GT-3) | `ModularMission` wires nested `Stargate` and `DHD`; site gate opens for home after objectives complete and lands returning operatives on the SGC ramp (`test_gate_return`, `test_gate_return_multiplayer`) |
@@ -419,7 +419,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R13 | Human two-player testing | Outstanding | No signed checklist for any mission | EX-2 |
 | R14 | Jaffa keep attacking downed operatives | Changed in EX-1 to the default of open question 3 | A downed operative is only chosen when no standing one is in perception. Applies to all Jaffa, SGC included | Revisit if question 3 is answered differently |
 | R15 | Security doors had no mission action | Addressed by EV-2-1 | Generator sabotage now releases named command security through the existing server API, with real peer snapshots/retry coverage | Human pacing review; remaining EV-2 chunks separate |
-| R16 | Ring transport is not mission-ready | New, confirmed | No trigger on modular levels; the teleport moves operatives on each peer without server validation | Review before any mothership work |
+| R16 | Ring transport lacks an authoritative mission interaction | Implemented for authored modular pairs | Server-validated boarding and destination clearance, movement handoff, busy lock and late snapshots. Four-operative listen and dedicated suites exercise the compound pair in both directions and through retry | Human play review |
 | R17 | Per-tick tree searches in AI | Fixed for sentries (ST-1); assault unchanged | Sentry perception runs at 10 Hz and caches the operative containers. The assault rule still searches the tree and casts rays every physics tick per Jaffa | Revisit if SGC Defense frame time suffers |
 | R18 | Class descriptions promise absent kit | New, confirmed | See the class row in section 2 | CO-2 |
 | R19 | Stale limitations in older guides | Confirmed | The navigation guide still listed modular combat as unverified and cover as SGC coordinates, both superseded by PR #39. Corrected with dated notes in this change | Done here |

@@ -125,6 +125,7 @@ var mission_ready_peers: Dictionary = {}
 var _restart_acks: Dictionary = {}
 var _player_pauses: Dictionary = {}
 var _paused_actors: Dictionary = {}
+var _next_transfer_token := 0
 var _session_generation := 0
 
 var _peer: ENetMultiplayerPeer
@@ -648,32 +649,57 @@ func is_player_paused_for_transfer(actor: Node) -> bool:
 	return false
 
 
-## Drain the owner's reliable movement stream before removing its old world node.
-## A unique host instance token prevents a stale acknowledgement from pausing a retry.
 func pause_player_for_transfer(actor: Node) -> bool:
+	return (await _begin_player_transfer(actor)) >= 0
+
+
+## Drain the owner's reliable movement stream before changing its position or world.
+func _begin_player_transfer(actor: Node) -> int:
 	var owner := actor.get_multiplayer_authority()
 	if owner == 1:
-		return true
+		return 0
 	if not is_server or restart_pending or owner not in multiplayer.get_peers():
-		return false
-	var token := actor.get_instance_id()
-	if _player_pauses.has(token):
-		return false
+		return -1
+	var actor_id := actor.get_instance_id()
+	if _player_pauses.has(actor_id):
+		return -1
+	_next_transfer_token += 1
+	var token := _next_transfer_token
 	var actor_path := actor.get_path()
 	var session_peer := _peer
-	_player_pauses[token] = {"owner": owner, "acked": false, "timed_out": false, "deadline": Time.get_ticks_msec() + 5000}
+	var state := {"owner": owner, "token": token, "acked": false, "timed_out": false, "deadline": Time.get_ticks_msec() + 5000}
+	_player_pauses[actor_id] = state
 	prepare_player_transfer.rpc_id(owner, actor_path, token)
 	while session_peer == _peer and not restart_pending and owner in multiplayer.get_peers():
-		if _player_pauses[token].acked or _player_pauses[token].timed_out:
+		if state.acked or state.timed_out:
 			break
 		await _player_transfer_changed
-	var acknowledged: bool = _player_pauses.get(token, {}).get("acked", false)
-	_player_pauses.erase(token)
+	_player_pauses.erase(actor_id)
 	if session_peer != _peer or restart_pending:
-		return false
-	if not acknowledged and owner in multiplayer.get_peers():
+		return -1
+	if owner not in multiplayer.get_peers():
+		return -1
+	if not state.acked or not is_instance_valid(actor) or actor.is_queued_for_deletion():
 		resume_player_transfer.rpc_id(owner, token)
-	return acknowledged and is_instance_valid(actor) and not actor.is_queued_for_deletion() and owner in multiplayer.get_peers()
+		return -1
+	return token
+
+
+## Calculate clearance after the owner stops moving. Both replicas commit the new
+## position before the owner resumes publishing movement.
+func relocate_player(actor: Node, arrival: Callable) -> bool:
+	if not is_server:
+		return false
+	var owner := actor.get_multiplayer_authority()
+	var token := await _begin_player_transfer(actor)
+	if token < 0:
+		return false
+	var destination: Vector3 = arrival.call() if arrival.is_valid() else Vector3.INF
+	if destination.is_finite():
+		actor.apply_transport_arrival(destination)
+	if token > 0:
+		resume_player_transfer.rpc_id(owner, token, destination)
+	return destination.is_finite()
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -681,25 +707,34 @@ func prepare_player_transfer(actor_path: NodePath, token: int) -> void:
 	var actor := get_node_or_null(actor_path)
 	if actor != null and actor.get_multiplayer_authority() == multiplayer.get_unique_id():
 		var sync := actor.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer
-		_paused_actors[token] = {"actor": actor, "physics": actor.is_physics_processing(), "visible": sync.public_visibility}
-		actor.tree_exited.connect(func() -> void: _paused_actors.erase(token), CONNECT_ONE_SHOT)
+		var cleanup := func() -> void: _paused_actors.erase(token)
+		_paused_actors[token] = {"actor": actor, "physics": actor.is_physics_processing(), "visible": sync.public_visibility, "cleanup": cleanup}
+		actor.tree_exited.connect(cleanup, CONNECT_ONE_SHOT)
 		actor.set_physics_process(false)
 		sync.public_visibility = false
-	acknowledge_player_transfer.rpc_id(1, token)
+		acknowledge_player_transfer.rpc_id(1, token)
 
 
 @rpc("any_peer", "call_remote", "reliable")
 func acknowledge_player_transfer(token: int) -> void:
-	if is_server and _player_pauses.has(token) and _player_pauses[token].owner == multiplayer.get_remote_sender_id():
-		_player_pauses[token].acked = true
-		_player_transfer_changed.emit()
+	if not is_server:
+		return
+	var sender := multiplayer.get_remote_sender_id()
+	for state: Dictionary in _player_pauses.values():
+		if state.token == token and state.owner == sender:
+			state.acked = true
+			_player_transfer_changed.emit()
+			return
 
 
 @rpc("authority", "call_remote", "reliable")
-func resume_player_transfer(token: int) -> void:
+func resume_player_transfer(token: int, destination: Vector3 = Vector3.INF) -> void:
 	var saved: Dictionary = _paused_actors.get(token, {})
 	if not saved.is_empty() and is_instance_valid(saved.actor):
 		var actor: Node = saved.actor
+		actor.tree_exited.disconnect(saved.cleanup)
+		if destination.is_finite():
+			actor.apply_transport_arrival(destination)
 		actor.set_physics_process(saved.physics)
 		(actor.get_node("MultiplayerSynchronizer") as MultiplayerSynchronizer).public_visibility = saved.visible
 	_paused_actors.erase(token)

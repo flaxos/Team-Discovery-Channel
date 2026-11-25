@@ -206,7 +206,7 @@ Two sources. Neither is a measure of time, and the play record is one solo sessi
 | `up_hall` | `Room03TJunction` | 6 | Upper junction; patrol |
 | `cmd_antechamber` | `Room04Chamber` | 4 | Patrol; security door to command |
 | `ramp` | `Room14Ramp4m` | 2 | Only way up |
-| `ring_lower`, `ring_upper` | `Room15TransportChamber` | 2 each | Dead ends; rings are inert |
+| `ring_lower`, `ring_upper` | `Room15TransportChamber` | 2 each | Paired player transport between decks |
 | `cmd_command` | `Room11LargeChamber` | 2 | Objective 2; patrol |
 | `cmd_observation` | `Room04Chamber` | 1 | Alarm console; patrol |
 

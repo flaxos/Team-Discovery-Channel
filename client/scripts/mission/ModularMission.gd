@@ -52,6 +52,8 @@ func _ready() -> void:
 		events.timer_expired.connect(_on_timer_expired)
 		objectives.advancement_allowed = events.allow_progress
 	super._ready()
+	for rings: TransportRings in level.find_children("*", "TransportRings", true, false):
+		rings.enable_player_transport()
 	if DisplayServer.get_name() != "headless":
 		_add_presentation()
 	if not level.ready_for_navigation:
@@ -322,6 +324,10 @@ func _add_presentation() -> void:
 	if palette != null:
 		settings.ambient_light_color = palette.ambient_color
 		settings.ambient_light_energy = palette.ambient_energy
+	if level.find_child("Rings", true, false) is TransportRings:
+		settings.glow_enabled = true
+		settings.glow_hdr_threshold = 2.2
+		settings.glow_intensity = 0.38
 	var environment := WorldEnvironment.new()
 	environment.environment = settings
 	add_child(environment)

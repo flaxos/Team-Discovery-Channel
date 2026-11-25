@@ -26,7 +26,7 @@ const GRID_SIZE: float = 8.0
 
 static func module_definitions() -> Array[LevelModuleDefinition]:
 	var result: Array[LevelModuleDefinition] = []
-	var files := DirAccess.get_files_at("res://resources/level_modules/")
+	var files := ResourceLoader.list_directory("res://resources/level_modules/")
 	files.sort()
 	for file: String in files:
 		if file.ends_with(".tres"):
