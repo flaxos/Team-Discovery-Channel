@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/SGCServiceConduitVisual.gd" id="1_visual"]
+
+[sub_resource type="StandardMaterial3D" id="Finish"]
+vertex_color_use_as_albedo = true
+metallic = 0.32
+roughness = 0.65
+
+[node name="ServiceConduit" type="MeshInstance3D"]
+cast_shadow = 0
+material_override = SubResource("Finish")
+script = ExtResource("1_visual")

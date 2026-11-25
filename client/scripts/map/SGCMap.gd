@@ -182,13 +182,18 @@ func _build_region(r: SGCRegion) -> void:
 		alarm.light_energy = 0.0
 		alarm.omni_range = 10.0
 		room.get_node("EmergencyLights").add_child(alarm)
-	_box(
+	var fixture := _box(
 		str(r.id) + "LightFixture",
 		light.position + Vector3(0, 0.15, 0),
 		Vector3(1.8, 0.12, 0.5),
 		&"steel",
 		false
 	)
+	var fixture_body := fixture.get_parent() as Node3D
+	var fixture_slot := fixture_body.get_meta("asset_slot") as SGCAssetSlot
+	if fixture_slot.visual_scene != null:
+		# Recess the housing against the ceiling while keeping the light below it.
+		fixture_body.position.y = y + r.ceiling_height - fixture_slot.dimensions.y / 2.0
 	var sign := Label3D.new()
 	sign.position = Vector3(r.footprint.get_center().x, y + 2.7, r.footprint.end.y - 0.25)
 	sign.rotation.y = PI
@@ -483,6 +488,9 @@ func _build_guards() -> void:
 
 
 func replace_asset_visual(slot_id: StringName, scene: PackedScene) -> bool:
+	# A retry can retire this map before its deferred replacements run.
+	if not is_inside_tree() or is_queued_for_deletion():
+		return false
 	var body := get_node_or_null(NodePath(slot_id)) as StaticBody3D
 	if body == null or scene == null:
 		return false
@@ -490,6 +498,8 @@ func replace_asset_visual(slot_id: StringName, scene: PackedScene) -> bool:
 	var replacement := scene.instantiate() as Node3D
 	if replacement == null:
 		return false
+	if replacement.has_method("fit_to_slot"):
+		replacement.fit_to_slot(slot.dimensions)
 	body.add_child(replacement)
 	if replacement is CollisionObject3D:
 		replacement.collision_layer = 0

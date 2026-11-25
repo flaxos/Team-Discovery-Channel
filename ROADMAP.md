@@ -28,7 +28,7 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 17 merged via #90.** Level 27 has fitted briefing and command furniture, a live briefing shutter readout and observation captures from both rooms. [PR #90](https://github.com/flaxos/Team-Discovery-Channel/pull/90) · [Sprint 17 review](docs/reviews/2026-11-24-sprint17-sgc-briefing-command.md).
 
-**Sprint 18 merged via #91.** The three-floor route has a fitted CCTV bank, storage and staging props, and shared concrete finishes. The review records which ceiling, fixture and stair art remains for a later pass. [PR #91](https://github.com/flaxos/Team-Discovery-Channel/pull/91) · [Sprint 18 review](docs/reviews/2026-11-24-sprint18-sgc-coverage.md).
+**Sprint 18 route dressing merged via #91.** The three-floor route has a fitted CCTV bank, storage and staging props, and shared concrete finishes. The architecture follow-up integrates the deferred ceilings, fluorescent fixtures, conduits and service stair finishes. Owner art review is open. [PR #91](https://github.com/flaxos/Team-Discovery-Channel/pull/91) · [Sprint 18 review](docs/reviews/2026-11-24-sprint18-sgc-coverage.md).
 
 **Sprint 19 is ready for art review.** The uniformed Airman is the temporary model for all four playable operatives and existing SGC personnel. The shared rig steps through stationary turns and follows both M2 handles when mounted. [Sprint 19 review](docs/reviews/2026-11-25-sprint19-airman-rig.md).
 

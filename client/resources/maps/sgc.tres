@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SGCMapDefinition" load_steps=852 format=3]
+[gd_resource type="Resource" script_class="SGCMapDefinition" load_steps=857 format=3]
 
 [ext_resource type="Script" path="res://scripts/map/SGCAssetSlot.gd" id="1_qra6f"]
 [ext_resource type="Script" path="res://scripts/map/SGCConnection.gd" id="2_42w4v"]
@@ -14,6 +14,11 @@
 [ext_resource type="Material" path="res://resources/materials/sgc/service_cabinet_steel.tres" id="service_cabinet_steel"]
 [ext_resource type="PackedScene" path="res://scenes/props/SGCMedicalCasesAboveCabinet.tscn" id="cases_above_cabinet"]
 [ext_resource type="PackedScene" path="res://scenes/props/SGCStagingWorkbench.tscn" id="staging_workbench"]
+[ext_resource type="Material" path="res://resources/materials/sgc/service_ceiling.tres" id="service_ceiling"]
+[ext_resource type="Material" path="res://resources/materials/sgc/service_frame.tres" id="service_frame"]
+[ext_resource type="Material" path="res://resources/materials/sgc/service_tread.tres" id="service_tread"]
+[ext_resource type="PackedScene" path="res://scenes/props/SGCServiceLight.tscn" id="service_light"]
+[ext_resource type="PackedScene" path="res://scenes/props/SGCServiceConduit.tscn" id="service_conduit"]
 
 [sub_resource type="Resource" id="Resource_bq8bi"]
 script = ExtResource("1_qra6f")
@@ -1456,7 +1461,8 @@ id = &"WEST_SERVICECeiling"
 style_id = &"ceiling"
 dimensions = Vector3(6, 0.24, 26)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_5smo3"]
 script = ExtResource("1_qra6f")
@@ -1464,7 +1470,8 @@ id = &"WEST_SERVICECeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(6, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_b1mos"]
 script = ExtResource("1_qra6f")
@@ -1472,7 +1479,8 @@ id = &"WEST_SERVICECeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(6, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_nv02r"]
 script = ExtResource("1_qra6f")
@@ -1480,7 +1488,8 @@ id = &"WEST_SERVICECeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(6, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_6sa60"]
 script = ExtResource("1_qra6f")
@@ -1488,7 +1497,8 @@ id = &"WEST_SERVICECeilingBeam3"
 style_id = &"steel"
 dimensions = Vector3(6, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ghj2d"]
 script = ExtResource("1_qra6f")
@@ -1496,7 +1506,8 @@ id = &"WEST_SERVICECeilingBeam4"
 style_id = &"steel"
 dimensions = Vector3(6, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_4ba1f"]
 script = ExtResource("1_qra6f")
@@ -1504,7 +1515,8 @@ id = &"WEST_SERVICECeilingBeam5"
 style_id = &"steel"
 dimensions = Vector3(6, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_6mv54"]
 script = ExtResource("1_qra6f")
@@ -1512,7 +1524,8 @@ id = &"WEST_SERVICELightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_164qq"]
 script = ExtResource("1_qra6f")
@@ -1565,7 +1578,8 @@ id = &"WEST_FALLBACKCeiling"
 style_id = &"ceiling"
 dimensions = Vector3(19, 0.24, 4)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_6lmd0"]
 script = ExtResource("1_qra6f")
@@ -1573,7 +1587,8 @@ id = &"WEST_FALLBACKCeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(19, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_o1x23"]
 script = ExtResource("1_qra6f")
@@ -1581,7 +1596,8 @@ id = &"WEST_FALLBACKLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_g16fv"]
 script = ExtResource("1_qra6f")
@@ -1900,7 +1916,8 @@ id = &"SECURITY_STATIONCeiling"
 style_id = &"ceiling"
 dimensions = Vector3(12, 0.24, 14)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_rjs2s"]
 script = ExtResource("1_qra6f")
@@ -1908,7 +1925,8 @@ id = &"SECURITY_STATIONCeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(12, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_sm33a"]
 script = ExtResource("1_qra6f")
@@ -1916,7 +1934,8 @@ id = &"SECURITY_STATIONCeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(12, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_hj3vl"]
 script = ExtResource("1_qra6f")
@@ -1924,7 +1943,8 @@ id = &"SECURITY_STATIONCeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(12, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_lh7ky"]
 script = ExtResource("1_qra6f")
@@ -1932,7 +1952,8 @@ id = &"SECURITY_STATIONLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_08bcr"]
 script = ExtResource("1_qra6f")
@@ -2142,7 +2163,8 @@ id = &"UPPER_ELEVATOR_LOBBYCeiling"
 style_id = &"ceiling"
 dimensions = Vector3(8.4, 0.24, 16)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_57al0"]
 script = ExtResource("1_qra6f")
@@ -2150,7 +2172,8 @@ id = &"UPPER_ELEVATOR_LOBBYCeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_j0fvv"]
 script = ExtResource("1_qra6f")
@@ -2158,7 +2181,8 @@ id = &"UPPER_ELEVATOR_LOBBYCeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ke1fq"]
 script = ExtResource("1_qra6f")
@@ -2166,7 +2190,8 @@ id = &"UPPER_ELEVATOR_LOBBYCeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_11be5"]
 script = ExtResource("1_qra6f")
@@ -2174,7 +2199,8 @@ id = &"UPPER_ELEVATOR_LOBBYCeilingBeam3"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_7coni"]
 script = ExtResource("1_qra6f")
@@ -2182,7 +2208,8 @@ id = &"UPPER_ELEVATOR_LOBBYLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_qado1"]
 script = ExtResource("1_qra6f")
@@ -2190,7 +2217,8 @@ id = &"SERVICE_STAIRWELLFloor"
 style_id = &"bunker"
 dimensions = Vector3(8.4, 0.3, 14)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_floor")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ht113"]
 script = ExtResource("1_qra6f")
@@ -2198,7 +2226,8 @@ id = &"SERVICE_STAIRWELLWall0_27.0_0.0"
 style_id = &"bunker"
 dimensions = Vector3(0.5, 3.8, 0.3)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_aikia"]
 script = ExtResource("1_qra6f")
@@ -2206,7 +2235,8 @@ id = &"SERVICE_STAIRWELLWall0_33.5_0.0"
 style_id = &"bunker"
 dimensions = Vector3(1.9, 3.8, 0.3)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_0ignm"]
 script = ExtResource("1_qra6f")
@@ -2214,7 +2244,8 @@ id = &"SERVICE_STAIRWELLWall1_27.0_0.0"
 style_id = &"bunker"
 dimensions = Vector3(8.4, 3.8, 0.3)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_vvave"]
 script = ExtResource("1_qra6f")
@@ -2222,7 +2253,8 @@ id = &"SERVICE_STAIRWELLWall2_26.0_0.0"
 style_id = &"bunker"
 dimensions = Vector3(0.3, 3.8, 14)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_xkx0e"]
 script = ExtResource("1_qra6f")
@@ -2230,7 +2262,8 @@ id = &"SERVICE_STAIRWELLWall3_26.0_0.0"
 style_id = &"bunker"
 dimensions = Vector3(0.3, 3.8, 14)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_eqn43"]
 script = ExtResource("1_qra6f")
@@ -2238,7 +2271,8 @@ id = &"SERVICE_STAIRWELLCeilingS"
 style_id = &"ceiling"
 dimensions = Vector3(8.4, 0.24, 1.6)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_0j6bx"]
 script = ExtResource("1_qra6f")
@@ -2246,7 +2280,8 @@ id = &"SERVICE_STAIRWELLCeilingW"
 style_id = &"ceiling"
 dimensions = Vector3(3.4, 0.24, 12.4)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_d8hkm"]
 script = ExtResource("1_qra6f")
@@ -2254,7 +2289,8 @@ id = &"SERVICE_STAIRWELLCeilingWBeam0"
 style_id = &"steel"
 dimensions = Vector3(3.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_aj6pc"]
 script = ExtResource("1_qra6f")
@@ -2262,7 +2298,8 @@ id = &"SERVICE_STAIRWELLCeilingWBeam1"
 style_id = &"steel"
 dimensions = Vector3(3.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_6p8f0"]
 script = ExtResource("1_qra6f")
@@ -2270,7 +2307,8 @@ id = &"SERVICE_STAIRWELLCeilingWBeam2"
 style_id = &"steel"
 dimensions = Vector3(3.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_hp6ii"]
 script = ExtResource("1_qra6f")
@@ -2278,7 +2316,8 @@ id = &"SERVICE_STAIRWELLCeilingE"
 style_id = &"ceiling"
 dimensions = Vector3(1.8, 0.24, 12.4)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_86cbk"]
 script = ExtResource("1_qra6f")
@@ -2286,7 +2325,8 @@ id = &"SERVICE_STAIRWELLCeilingEBeam0"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_s6ciu"]
 script = ExtResource("1_qra6f")
@@ -2294,7 +2334,8 @@ id = &"SERVICE_STAIRWELLCeilingEBeam1"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_paomr"]
 script = ExtResource("1_qra6f")
@@ -2302,7 +2343,8 @@ id = &"SERVICE_STAIRWELLCeilingEBeam2"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_eqpp4"]
 script = ExtResource("1_qra6f")
@@ -2310,7 +2352,8 @@ id = &"SERVICE_STAIRWELLLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_ar4dx"]
 script = ExtResource("1_qra6f")
@@ -2417,7 +2460,8 @@ id = &"SUPPORT_LOBBYCeiling"
 style_id = &"ceiling"
 dimensions = Vector3(8.4, 0.24, 16)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_a6uvw"]
 script = ExtResource("1_qra6f")
@@ -2425,7 +2469,8 @@ id = &"SUPPORT_LOBBYCeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_uaf14"]
 script = ExtResource("1_qra6f")
@@ -2433,7 +2478,8 @@ id = &"SUPPORT_LOBBYCeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_wmiip"]
 script = ExtResource("1_qra6f")
@@ -2441,7 +2487,8 @@ id = &"SUPPORT_LOBBYCeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_4bdgx"]
 script = ExtResource("1_qra6f")
@@ -2449,7 +2496,8 @@ id = &"SUPPORT_LOBBYCeilingBeam3"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_t3bhn"]
 script = ExtResource("1_qra6f")
@@ -2457,7 +2505,8 @@ id = &"SUPPORT_LOBBYLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_thru1"]
 script = ExtResource("1_qra6f")
@@ -2546,7 +2595,8 @@ id = &"SUPPORT_CORRIDORCeiling"
 style_id = &"ceiling"
 dimensions = Vector3(8, 0.24, 16)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_4ukkj"]
 script = ExtResource("1_qra6f")
@@ -2554,7 +2604,8 @@ id = &"SUPPORT_CORRIDORCeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(8, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_d5be5"]
 script = ExtResource("1_qra6f")
@@ -2562,7 +2613,8 @@ id = &"SUPPORT_CORRIDORCeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(8, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_xeey1"]
 script = ExtResource("1_qra6f")
@@ -2570,7 +2622,8 @@ id = &"SUPPORT_CORRIDORCeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(8, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_h4hel"]
 script = ExtResource("1_qra6f")
@@ -2578,7 +2631,8 @@ id = &"SUPPORT_CORRIDORCeilingBeam3"
 style_id = &"steel"
 dimensions = Vector3(8, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_2lqn5"]
 script = ExtResource("1_qra6f")
@@ -2586,7 +2640,8 @@ id = &"SUPPORT_CORRIDORLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_r23e1"]
 script = ExtResource("1_qra6f")
@@ -2675,7 +2730,8 @@ id = &"STAGINGCeiling"
 style_id = &"ceiling"
 dimensions = Vector3(12, 0.24, 16)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_fnaqo"]
 script = ExtResource("1_qra6f")
@@ -2683,7 +2739,8 @@ id = &"STAGINGCeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(12, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ym6gp"]
 script = ExtResource("1_qra6f")
@@ -2691,7 +2748,8 @@ id = &"STAGINGCeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(12, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_yi8il"]
 script = ExtResource("1_qra6f")
@@ -2699,7 +2757,8 @@ id = &"STAGINGCeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(12, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_b8i8h"]
 script = ExtResource("1_qra6f")
@@ -2707,7 +2766,8 @@ id = &"STAGINGCeilingBeam3"
 style_id = &"steel"
 dimensions = Vector3(12, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_valm7"]
 script = ExtResource("1_qra6f")
@@ -2715,7 +2775,8 @@ id = &"STAGINGLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_1xqxd"]
 script = ExtResource("1_qra6f")
@@ -2804,7 +2865,8 @@ id = &"STORAGECeiling"
 style_id = &"ceiling"
 dimensions = Vector3(20, 0.24, 12)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_2nuqy"]
 script = ExtResource("1_qra6f")
@@ -2812,7 +2874,8 @@ id = &"STORAGECeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(20, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_gdcvv"]
 script = ExtResource("1_qra6f")
@@ -2820,7 +2883,8 @@ id = &"STORAGECeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(20, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_3dvda"]
 script = ExtResource("1_qra6f")
@@ -2828,7 +2892,8 @@ id = &"STORAGECeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(20, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_si01i"]
 script = ExtResource("1_qra6f")
@@ -2836,7 +2901,8 @@ id = &"STORAGELightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_5j1re"]
 script = ExtResource("1_qra6f")
@@ -2943,7 +3009,8 @@ id = &"SERVICE_ROOMCeiling"
 style_id = &"ceiling"
 dimensions = Vector3(8.4, 0.24, 14)
 description = "Reinforced concrete ceiling panels with dark seams, steel beams and silo service fittings."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_qg81c"]
 script = ExtResource("1_qra6f")
@@ -2951,7 +3018,8 @@ id = &"SERVICE_ROOMCeilingBeam0"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_48i1u"]
 script = ExtResource("1_qra6f")
@@ -2959,7 +3027,8 @@ id = &"SERVICE_ROOMCeilingBeam1"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_mc14u"]
 script = ExtResource("1_qra6f")
@@ -2967,7 +3036,8 @@ id = &"SERVICE_ROOMCeilingBeam2"
 style_id = &"steel"
 dimensions = Vector3(8.4, 0.18, 0.18)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_2xhbm"]
 script = ExtResource("1_qra6f")
@@ -2975,7 +3045,8 @@ id = &"SERVICE_ROOMLightFixture"
 style_id = &"steel"
 dimensions = Vector3(1.8, 0.12, 0.5)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_light")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_ornst"]
 script = ExtResource("1_qra6f")
@@ -4019,7 +4090,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMWalkSurface"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.2, 13.4004)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_s0eei"]
 script = ExtResource("1_qra6f")
@@ -4027,7 +4099,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMRail-1.3"
 style_id = &"steel"
 dimensions = Vector3(0.1, 1.1, 13.4004)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_kp2f3"]
 script = ExtResource("1_qra6f")
@@ -4035,7 +4108,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMRail1.3"
 style_id = &"steel"
 dimensions = Vector3(0.1, 1.1, 13.4004)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_qg6jp"]
 script = ExtResource("1_qra6f")
@@ -4043,7 +4117,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread0"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_08kkn"]
 script = ExtResource("1_qra6f")
@@ -4051,7 +4126,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread1"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_3cco4"]
 script = ExtResource("1_qra6f")
@@ -4059,7 +4135,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread2"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_n18c3"]
 script = ExtResource("1_qra6f")
@@ -4067,7 +4144,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread3"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_0bd5p"]
 script = ExtResource("1_qra6f")
@@ -4075,7 +4153,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread4"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_gbkce"]
 script = ExtResource("1_qra6f")
@@ -4083,7 +4162,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread5"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_6ah3b"]
 script = ExtResource("1_qra6f")
@@ -4091,7 +4171,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread6"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_fqpuj"]
 script = ExtResource("1_qra6f")
@@ -4099,7 +4180,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread7"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_pipbt"]
 script = ExtResource("1_qra6f")
@@ -4107,7 +4189,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread8"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_furqy"]
 script = ExtResource("1_qra6f")
@@ -4115,7 +4198,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread9"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_gb343"]
 script = ExtResource("1_qra6f")
@@ -4123,7 +4207,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread10"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_1kxhn"]
 script = ExtResource("1_qra6f")
@@ -4131,7 +4216,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread11"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_r0en7"]
 script = ExtResource("1_qra6f")
@@ -4139,7 +4225,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread12"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ljfa3"]
 script = ExtResource("1_qra6f")
@@ -4147,7 +4234,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread13"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_wgw57"]
 script = ExtResource("1_qra6f")
@@ -4155,7 +4243,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread14"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_h4i0y"]
 script = ExtResource("1_qra6f")
@@ -4163,7 +4252,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread15"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_v2u53"]
 script = ExtResource("1_qra6f")
@@ -4171,7 +4261,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread16"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_4jbjt"]
 script = ExtResource("1_qra6f")
@@ -4179,7 +4270,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread17"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_26mbk"]
 script = ExtResource("1_qra6f")
@@ -4187,7 +4279,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread18"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_1ebxg"]
 script = ExtResource("1_qra6f")
@@ -4195,7 +4288,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread19"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_573u7"]
 script = ExtResource("1_qra6f")
@@ -4203,7 +4297,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread20"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_7ro6t"]
 script = ExtResource("1_qra6f")
@@ -4211,7 +4306,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread21"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_nit57"]
 script = ExtResource("1_qra6f")
@@ -4219,7 +4315,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread22"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ojr3c"]
 script = ExtResource("1_qra6f")
@@ -4227,7 +4324,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread23"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_b2fh1"]
 script = ExtResource("1_qra6f")
@@ -4235,7 +4333,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread24"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_djxo5"]
 script = ExtResource("1_qra6f")
@@ -4243,7 +4342,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread25"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_3kta5"]
 script = ExtResource("1_qra6f")
@@ -4251,7 +4351,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread26"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_xi87x"]
 script = ExtResource("1_qra6f")
@@ -4259,7 +4360,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread27"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_8akmp"]
 script = ExtResource("1_qra6f")
@@ -4267,7 +4369,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread28"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_dd60u"]
 script = ExtResource("1_qra6f")
@@ -4275,7 +4378,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread29"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_qcx03"]
 script = ExtResource("1_qra6f")
@@ -4283,7 +4387,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread30"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_r6b5s"]
 script = ExtResource("1_qra6f")
@@ -4291,7 +4396,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread31"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_dmklt"]
 script = ExtResource("1_qra6f")
@@ -4299,7 +4405,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread32"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_el470"]
 script = ExtResource("1_qra6f")
@@ -4307,7 +4414,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread33"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_0bk7n"]
 script = ExtResource("1_qra6f")
@@ -4315,7 +4423,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMTread34"
 style_id = &"steel"
 dimensions = Vector3(2.4, 0.12, 0.372941)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_tread")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_slkxy"]
 script = ExtResource("1_qra6f")
@@ -4392,7 +4501,8 @@ id = &"ServiceHoleGuard30.5"
 style_id = &"steel"
 dimensions = Vector3(0.1, 1.1, 12.1)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_gwxnt"]
 script = ExtResource("1_qra6f")
@@ -4400,7 +4510,8 @@ id = &"ServiceHoleGuard33.5"
 style_id = &"steel"
 dimensions = Vector3(0.1, 1.1, 12.1)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_lsfja"]
 script = ExtResource("1_qra6f")
@@ -4408,7 +4519,8 @@ id = &"ServiceHoleNorthGuard"
 style_id = &"steel"
 dimensions = Vector3(2.8, 1.1, 0.1)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_frame")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_k70si"]
 script = ExtResource("1_qra6f")
@@ -4613,7 +4725,8 @@ id = &"WEST_SERVICEServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 25)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_2gq6y"]
 script = ExtResource("1_qra6f")
@@ -4621,7 +4734,8 @@ id = &"WEST_FALLBACKServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 3)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_xsboo"]
 script = ExtResource("1_qra6f")
@@ -4645,7 +4759,8 @@ id = &"SECURITY_STATIONServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 13)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_t0jv5"]
 script = ExtResource("1_qra6f")
@@ -4661,7 +4776,8 @@ id = &"UPPER_ELEVATOR_LOBBYServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 15)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_3pj8a"]
 script = ExtResource("1_qra6f")
@@ -4669,7 +4785,8 @@ id = &"SERVICE_STAIRWELLServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 13)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_15opk"]
 script = ExtResource("1_qra6f")
@@ -4677,7 +4794,8 @@ id = &"SUPPORT_LOBBYServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 15)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_bnyf2"]
 script = ExtResource("1_qra6f")
@@ -4685,7 +4803,8 @@ id = &"SUPPORT_CORRIDORServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 15)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_s4wjs"]
 script = ExtResource("1_qra6f")
@@ -4693,7 +4812,8 @@ id = &"STAGINGServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 15)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_vmuxq"]
 script = ExtResource("1_qra6f")
@@ -4719,7 +4839,8 @@ id = &"STORAGEServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 11)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_33c57"]
 script = ExtResource("1_qra6f")
@@ -4763,7 +4884,8 @@ id = &"SERVICE_ROOMServiceConduit"
 style_id = &"steel"
 dimensions = Vector3(0.12, 0.12, 13)
 description = "Painted charcoal steel handrails, open metal treads, scuffed edges, no bright white trim."
-replacement_status = "placeholder"
+visual_scene = ExtResource("service_conduit")
+replacement_status = "replaced"
 
 [sub_resource type="Resource" id="Resource_lm5f0"]
 script = ExtResource("1_qra6f")
@@ -5772,7 +5894,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_0"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.4)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_tci65"]
 script = ExtResource("1_qra6f")
@@ -5780,7 +5903,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_7"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.4)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_7vh2g"]
 script = ExtResource("1_qra6f")
@@ -5788,7 +5912,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_8"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 1.6)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_jeipx"]
 script = ExtResource("1_qra6f")
@@ -5796,7 +5921,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_9"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.4)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_y8lyc"]
 script = ExtResource("1_qra6f")
@@ -5804,7 +5930,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_10"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 2.6)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ayrvs"]
 script = ExtResource("1_qra6f")
@@ -5812,7 +5939,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_11"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 3)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_irfng"]
 script = ExtResource("1_qra6f")
@@ -5820,7 +5948,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_12"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 1)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_xqihe"]
 script = ExtResource("1_qra6f")
@@ -5828,7 +5957,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_13"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 1)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_tjbf6"]
 script = ExtResource("1_qra6f")
@@ -5836,7 +5966,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_14"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 2)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_jk7sf"]
 script = ExtResource("1_qra6f")
@@ -5844,7 +5975,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_-1.0_8_16"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.400002)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_n7fnr"]
 script = ExtResource("1_qra6f")
@@ -5852,7 +5984,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_0"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.4)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_1n4dj"]
 script = ExtResource("1_qra6f")
@@ -5860,7 +5993,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_7"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.4)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_05eqo"]
 script = ExtResource("1_qra6f")
@@ -5868,7 +6002,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_8"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 1.6)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_e5obg"]
 script = ExtResource("1_qra6f")
@@ -5876,7 +6011,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_9"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.4)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_ugfbq"]
 script = ExtResource("1_qra6f")
@@ -5884,7 +6020,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_10"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 2.6)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_h3ude"]
 script = ExtResource("1_qra6f")
@@ -5892,7 +6029,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_11"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 3)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_0v2bn"]
 script = ExtResource("1_qra6f")
@@ -5900,7 +6038,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_12"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 1)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_1vu3e"]
 script = ExtResource("1_qra6f")
@@ -5908,7 +6047,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_13"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 1)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_iisdl"]
 script = ExtResource("1_qra6f")
@@ -5916,7 +6056,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_14"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 2)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_h63i8"]
 script = ExtResource("1_qra6f")
@@ -5924,7 +6065,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure0_1.0_8_16"
 style_id = &"bunker"
 dimensions = Vector3(0.2, 1.7, 0.400002)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_k1a7r"]
 script = ExtResource("1_qra6f")
@@ -5932,7 +6074,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure1_-1.0_7_0"
 style_id = &"bunker"
 dimensions = Vector3(3.2, 0.2, 0.4)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_gynib"]
 script = ExtResource("1_qra6f")
@@ -5940,7 +6083,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure1_-1.0_8_0"
 style_id = &"bunker"
 dimensions = Vector3(3.2, 0.2, 1.6)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("service_ceiling")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_5i74w"]
 script = ExtResource("1_qra6f")
@@ -5948,7 +6092,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure2_-1.0_0_8"
 style_id = &"bunker"
 dimensions = Vector3(3.2, 1.7, 0.2)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_pw18g"]
 script = ExtResource("1_qra6f")
@@ -5956,7 +6101,8 @@ id = &"SERVICE_STAIRWELL__SERVICE_ROOMEnclosure2_1.0_0_8"
 style_id = &"bunker"
 dimensions = Vector3(3.2, 1.7, 0.2)
 description = "Muted cast concrete, panel seams, dark painted steel frames and exposed service conduits."
-replacement_status = "placeholder"
+pbr_material = ExtResource("embarkation_wall")
+replacement_status = "material"
 
 [sub_resource type="Resource" id="Resource_eckmd"]
 script = ExtResource("1_qra6f")
