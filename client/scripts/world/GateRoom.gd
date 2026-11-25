@@ -771,7 +771,7 @@ func _stop_world_combat() -> void:
 	for node: Node in MissionWorld.in_group(self, &"turret"):
 		if node is DeployableTurret and MissionWorld.of(node) == self:
 			node.stand_down()
-	for node: Node in get_tree().get_nodes_in_group(&"plasma_bolt"):
+	for node: Node in MissionWorld.in_group(self, &"plasma_bolt"):
 		if node is PlasmaBolt and node.mission_world == self:
 			node.stand_down()
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
