@@ -74,6 +74,7 @@ var emergency_strobe_timer: float = 0.0
 var player_sectors: Dictionary = {}
 @export var mission_id: String = SGCNetworkManager.MISSION_SGC_DEFENSE
 var mission_result: int = -1
+var _defense_staging_started := false
 var visited_sectors: Dictionary = {}
 ## Set when this world is one of several in a mission (MissionSession); null otherwise.
 var session: MissionSession = null
@@ -166,6 +167,9 @@ func _ready() -> void:
 		players_container.child_entered_tree.connect(_on_player_child_entered)
 		for existing_p: Node in players_container.get_children():
 			_on_player_child_entered(existing_p)
+	for container: Node in [players_container, get_node_or_null("Enemies"), allies_container]:
+		if container != null:
+			container.child_entered_tree.connect(_on_combatant_entered)
 
 	# Connect WaveManager and DHD to HUD and emergency lighting
 	if wave_manager != null:
@@ -677,6 +681,8 @@ func conclude(victory: bool) -> void:
 
 
 func _evaluate_squad_status() -> void:
+	if mission_result >= 0:
+		return
 	if session != null:
 		# The mission is lost only when every world's operatives are down (D-017).
 		session.squad_changed()
@@ -731,25 +737,64 @@ func return_spawn_position(peer_id: int) -> Vector3:
 
 
 func _finish_mission(victory: bool) -> void:
+	if mission_result >= 0:
+		return
+	sync_mission_result(victory)
 	if wave_manager != null:
 		wave_manager.end_mission()
 	elif stargate_mesh != null and multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		stargate_mesh.close_wormhole()
 	# A peer that is still loading receives the result in its room snapshot instead.
 	SGCNetworkManager.mission_rpc(self, &"sync_mission_result", [victory])
-	sync_mission_result(victory)
 
 
 @rpc("authority", "call_local", "reliable")
 func sync_mission_result(victory: bool) -> void:
+	if mission_result >= 0:
+		return
 	mission_result = 1 if victory else 0
 	if wave_manager != null:
 		wave_manager.mission_ended = true
+	_stop_world_combat()
 	if hud != null:
 		if victory:
 			hud.show_victory()
 		else:
 			hud.show_defeat()
+
+
+func _stop_world_combat() -> void:
+	for container: Node in [players_container, get_node_or_null("Enemies"), allies_container]:
+		if container != null:
+			for actor: Node in container.get_children():
+				_stop_combatant(actor)
+	for node: Node in MissionWorld.in_group(self, &"turret"):
+		if node is DeployableTurret and MissionWorld.of(node) == self:
+			node.stand_down()
+	for node: Node in get_tree().get_nodes_in_group(&"plasma_bolt"):
+		if node is PlasmaBolt and node.mission_world == self:
+			node.stand_down()
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		for item: Node in $FieldKitDeployments.get_children():
+			if item is C4Satchel or item is ClaymoreMine:
+				item.queue_free()
+
+
+func _on_combatant_entered(actor: Node) -> void:
+	if mission_result >= 0:
+		# The spawner can deliver the actor after the result snapshot. Its child health
+		# and visuals are initialized before the deferred stop runs.
+		_stop_combatant.call_deferred(actor)
+
+
+func _stop_combatant(actor: Node) -> void:
+	if not is_instance_valid(actor) or not actor.is_inside_tree():
+		return
+	if actor is JaffaAI or actor is SGCAirmanAIScript or actor is PlayerController3D:
+		var health := actor.get_node_or_null("HealthComponent") as HealthComponent
+		if health != null:
+			health.frozen = true
+		actor.stand_down()
 
 
 func toggle_blast_doors() -> void:
@@ -869,6 +914,8 @@ func sync_observation_shutters(force_closed: bool) -> void:
 
 
 func _start_foothold_defense() -> void:
+	if mission_result >= 0 or _defense_staging_started:
+		return
 	if mission_id == SGCNetworkManager.MISSION_SGC_UAT:
 		if hud != null:
 			var net_chk: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
@@ -877,8 +924,9 @@ func _start_foothold_defense() -> void:
 			else:
 				hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
 		return
-	if wave_manager == null:
+	if wave_manager == null or wave_manager.mission_ended or wave_manager.defense_started:
 		return
+	_defense_staging_started = true
 	print("GateRoom: STAGING PHASE: Operatives resupply at Armory before incursion...")
 	if hud != null:
 		hud.update_objective("STAGE AT ARMORY: COLLECT MUNITIONS & TACTICAL GEAR", Color(0.4, 0.9, 1.0))
@@ -893,7 +941,10 @@ func _start_foothold_defense() -> void:
 
 
 func _trigger_base_scramble() -> void:
-	if mission_id == SGCNetworkManager.MISSION_SGC_UAT: return
+	if not is_inside_tree() or is_queued_for_deletion() or mission_result >= 0:
+		return
+	if mission_id == SGCNetworkManager.MISSION_SGC_UAT or wave_manager == null or wave_manager.mission_ended or wave_manager.defense_started:
+		return
 	print("GateRoom: KLAXON SOUNDS! RED ALERT! UNSCHEDULED OFFWORLD ACTIVATION!")
 	set_emergency_lights(true)
 

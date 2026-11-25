@@ -11,12 +11,14 @@ signal exploded(impact_point: Vector3)
 @export var is_enemy_bolt: bool = true
 
 var shooter: Node = null
+var mission_world: Node
 var direction: Vector3 = Vector3.FORWARD
 var lifetime: float = 0.0
 var _detonated: bool = false
 
 
 func _ready() -> void:
+	add_to_group(&"plasma_bolt")
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 
@@ -36,6 +38,7 @@ func initialize(p_origin: Vector3, p_direction: Vector3, p_shooter: Node, p_is_e
 	global_position = p_origin
 	direction = p_direction.normalized()
 	shooter = p_shooter
+	mission_world = MissionWorld.of(shooter)
 	is_enemy_bolt = p_is_enemy
 
 	# Orient mesh towards flight direction
@@ -50,6 +53,12 @@ func initialize(p_origin: Vector3, p_direction: Vector3, p_shooter: Node, p_is_e
 		collision_mask = 1 | 4 | 128  # World (1) and Jaffa (3)
 
 	_play_fire_sound()
+
+
+func stand_down() -> void:
+	_detonated = true
+	set_physics_process(false)
+	queue_free()
 
 
 func _play_fire_sound() -> void:

@@ -98,7 +98,7 @@ func _play_beep_sfx() -> void:
 
 
 func detonate() -> void:
-	if KitNetwork.is_replica(self) or is_detonated or not is_armed:
+	if KitNetwork.is_replica(self) or is_detonated or not is_armed or MissionWorld.combat_ended(self):
 		return
 	is_detonated = true
 	exploded.emit(global_position)

@@ -191,7 +191,8 @@ func end_mission() -> void:
 
 
 func start_wave_defense() -> void:
-	if not hostile_gate_activation_enabled: return
+	if not hostile_gate_activation_enabled or MissionWorld.combat_ended(self):
+		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	current_wave = 0

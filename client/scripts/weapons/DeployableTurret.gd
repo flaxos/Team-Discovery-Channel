@@ -25,6 +25,7 @@ var mounted_player: CharacterBody3D = null
 var mounted_actor_path: NodePath
 var _remote_aim := Vector3.ZERO
 var _remote_fire := false
+var _combat_stopped := false
 
 @onready var muzzle_point: Marker3D = $TurretHead/MuzzlePoint if has_node("TurretHead/MuzzlePoint") else null
 @onready var turret_head: Node3D = $TurretHead if has_node("TurretHead") else null
@@ -58,6 +59,19 @@ func _ready() -> void:
 	if interact_area != null:
 		interact_area.body_entered.connect(_on_interact_entered)
 		interact_area.body_exited.connect(_on_interact_exited)
+	if MissionWorld.combat_ended(self):
+		stand_down()
+
+
+func stand_down() -> void:
+	_combat_stopped = true
+	current_target = null
+	_remote_fire = false
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		dismount()
+	else:
+		_set_occupant(null)
+	set_physics_process(false)
 
 
 func _physics_process(delta: float) -> void:
@@ -115,7 +129,7 @@ func _aim_head(target: Vector3) -> void:
 
 
 func try_manual_fire(aim_dir: Vector3) -> bool:
-	if not multiplayer.is_server() or fire_cooldown > 0.0 or aim_dir == Vector3.ZERO:
+	if _combat_stopped or not multiplayer.is_server() or fire_cooldown > 0.0 or aim_dir == Vector3.ZERO:
 		return false
 	fire_cooldown = 60.0 / fire_rate_rpm
 	_fire_shot(aim_dir)
@@ -123,6 +137,8 @@ func try_manual_fire(aim_dir: Vector3) -> bool:
 
 
 func receive_player_input(target: Vector3, fire: bool) -> bool:
+	if _combat_stopped:
+		return false
 	if not multiplayer.is_server():
 		_request_input.rpc_id(1, target, fire)
 		return false
@@ -134,7 +150,7 @@ func receive_player_input(target: Vector3, fire: bool) -> bool:
 
 @rpc("any_peer", "call_remote", "unreliable_ordered")
 func _request_input(target: Vector3, fire: bool) -> void:
-	if not multiplayer.is_server() or not is_instance_valid(mounted_player) or not target.is_finite():
+	if _combat_stopped or not multiplayer.is_server() or not is_instance_valid(mounted_player) or not target.is_finite():
 		return
 	var operative := mounted_player as PlayerController3D
 	if operative == null or multiplayer.get_remote_sender_id() != operative.peer_id:
@@ -169,7 +185,7 @@ func _mount_in_reach(player: PlayerController3D) -> void:
 
 
 func mount(player: CharacterBody3D) -> void:
-	if not multiplayer.is_server() or is_instance_valid(mounted_player):
+	if _combat_stopped or not multiplayer.is_server() or is_instance_valid(mounted_player):
 		return
 	mounted_actor_path = get_path_to(player)
 	_set_occupant(player)
