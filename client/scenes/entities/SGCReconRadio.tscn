@@ -1,0 +1,99 @@
+[gd_scene load_steps=13 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Material_webbing"]
+albedo_color = Color(0.37, 0.34, 0.25, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="Material_case"]
+albedo_color = Color(0.13, 0.15, 0.16, 1)
+roughness = 0.88
+
+[sub_resource type="StandardMaterial3D" id="Material_hardware"]
+albedo_color = Color(0.28, 0.29, 0.27, 1)
+metallic = 0.32
+roughness = 0.69
+
+[sub_resource type="StandardMaterial3D" id="Material_label"]
+albedo_color = Color(0.67, 0.62, 0.47, 1)
+roughness = 0.89
+
+[sub_resource type="BoxMesh" id="Mesh_pouch"]
+material = SubResource("Material_webbing")
+size = Vector3(0.127, 0.188, 0.078)
+
+[sub_resource type="BoxMesh" id="Mesh_transceiver"]
+material = SubResource("Material_case")
+size = Vector3(0.103, 0.213, 0.064)
+
+[sub_resource type="BoxMesh" id="Mesh_flap"]
+material = SubResource("Material_case")
+size = Vector3(0.126, 0.047, 0.007)
+
+[sub_resource type="BoxMesh" id="Mesh_label"]
+material = SubResource("Material_label")
+size = Vector3(0.056, 0.022, 0.002)
+
+[sub_resource type="BoxMesh" id="Mesh_strap"]
+material = SubResource("Material_webbing")
+size = Vector3(0.031, 0.142, 0.006)
+
+[sub_resource type="CylinderMesh" id="Mesh_socket"]
+material = SubResource("Material_hardware")
+top_radius = 0.011
+bottom_radius = 0.013
+height = 0.019
+radial_segments = 8
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Mesh_dial"]
+material = SubResource("Material_case")
+top_radius = 0.015
+bottom_radius = 0.015
+height = 0.026
+radial_segments = 10
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Mesh_antenna"]
+material = SubResource("Material_case")
+top_radius = 0.0025
+bottom_radius = 0.004
+height = 0.32
+radial_segments = 6
+rings = 0
+
+[node name="ReconRadio" type="Node3D"]
+
+[node name="RadioMount" type="Node3D" parent="."]
+position = Vector3(-0.143, 1.297, 0.146)
+rotation = Vector3(-0.11, -0.16, 0.10)
+
+[node name="Pouch" type="MeshInstance3D" parent="RadioMount"]
+mesh = SubResource("Mesh_pouch")
+
+[node name="Transceiver" type="MeshInstance3D" parent="RadioMount"]
+position = Vector3(0, 0.023, 0)
+mesh = SubResource("Mesh_transceiver")
+
+[node name="Flap" type="MeshInstance3D" parent="RadioMount"]
+position = Vector3(0, 0.064, 0.04)
+mesh = SubResource("Mesh_flap")
+
+[node name="Label" type="MeshInstance3D" parent="RadioMount"]
+position = Vector3(-0.02, 0.066, 0.045)
+mesh = SubResource("Mesh_label")
+
+[node name="Retainer" type="MeshInstance3D" parent="RadioMount"]
+position = Vector3(0.026, -0.022, 0.041)
+mesh = SubResource("Mesh_strap")
+
+[node name="AntennaSocket" type="MeshInstance3D" parent="RadioMount"]
+position = Vector3(-0.031, 0.136, 0)
+mesh = SubResource("Mesh_socket")
+
+[node name="TuningDial" type="MeshInstance3D" parent="RadioMount"]
+position = Vector3(0.028, 0.139, 0)
+mesh = SubResource("Mesh_dial")
+
+[node name="WhipAntenna" type="MeshInstance3D" parent="RadioMount"]
+position = Vector3(-0.031, 0.301, 0)
+mesh = SubResource("Mesh_antenna")

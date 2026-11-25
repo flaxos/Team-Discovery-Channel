@@ -25,7 +25,7 @@ func run() -> void:
 	var collision := airman.get_node(^"CollisionShape3D") as CollisionShape3D
 	assert(is_equal_approx(collision.shape.height, 1.8) and is_equal_approx(collision.shape.radius, 0.45))
 	var fallback_mode := "--expect-airman-fallback" in OS.get_cmdline_user_args()
-	check_squad(room, visual, fallback_mode)
+	await check_squad(room, visual, fallback_mode)
 	if fallback_mode:
 		assert(fallback.visible and visual.get_child_count() == 0)
 	else:
@@ -94,7 +94,10 @@ func run() -> void:
 
 func check_squad(room: GateRoom, airman_rig: Node3D, fallback: bool) -> void:
 	var index := 0
-	for role: String in SGCNetworkManager.CLASS_PROFILES:
+	var roles := SGCNetworkManager.CLASS_PROFILES.keys()
+	roles.erase(SGCNetworkManager.CLASS_SG3_HEAVY)
+	roles.append(SGCNetworkManager.CLASS_SG3_HEAVY)
+	for role: String in roles:
 		var actor := PLAYER.instantiate() as PlayerController3D
 		actor.name = "Squad" + str(index)
 		actor.class_id = role
@@ -115,13 +118,91 @@ func check_squad(room: GateRoom, airman_rig: Node3D, fallback: bool) -> void:
 				rig._process(1.0 / 60.0)
 				var weapon := actor.current_weapon
 				var model := weapon.get_node(^"WeaponModel") as Node3D
-				var grips: Array = rig.PALM_GRIPS[weapon.weapon_id]
+				var grips: Array = rig.palm_grips(weapon.weapon_id)
 				var palm: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[0], rig.grip_bones[1]))
 				assert(palm.distance_to(model.to_global(grips[0])) < 0.001, "The weapon follows the right palm")
 				assert(weapon.position == Vector3(0.3, 0.9, -0.4), "Rigging moves only held weapon art")
 			if role == SGCNetworkManager.CLASS_SG3_HEAVY:
 				check_player_poses(room, actor, rig)
+			if role == SGCNetworkManager.CLASS_ONEILL_RECON:
+				await check_recon(room, actor, rig, airman_rig)
 		actor.queue_free()
+
+
+func check_recon(room: GateRoom, actor: PlayerController3D, rig: Node3D, airman_rig: Node3D) -> void:
+	var uniform := rig.skin_visual.find_child("Object_107", true, false) as MeshInstance3D
+	var airman_uniform := airman_rig.skin_visual.find_child("Object_107", true, false) as MeshInstance3D
+	var base := airman_uniform.get_active_material(0) as StandardMaterial3D
+	var palette := uniform.get_active_material(0) as StandardMaterial3D
+	assert(palette != base and palette.albedo_color != base.albedo_color)
+	assert(palette.albedo_texture == base.albedo_texture and palette.normal_texture == base.normal_texture)
+	var antenna := rig.recon_mount.find_child("WhipAntenna", true, false) as MeshInstance3D
+	assert(antenna.is_visible_in_tree() and rig.recon_mount.bone_name == BONE_MAP.get_skeleton_bone_name(&"UpperChest"))
+	rig.set_camera_alpha(0.15)
+	assert(is_equal_approx(antenna.transparency, 0.85))
+	actor._restore_visual_materials()
+	assert(is_zero_approx(antenna.transparency))
+	actor.class_configured.emit(SGCNetworkManager.CLASS_SG3_HEAVY)
+	assert(not antenna.is_visible_in_tree() and uniform.get_active_material(0) == base)
+	actor.class_configured.emit(SGCNetworkManager.CLASS_ONEILL_RECON)
+	assert(antenna.is_visible_in_tree() and uniform.get_active_material(0) == palette)
+	actor.switch_slot(1)
+
+	actor.is_aiming_down_sights = true
+	actor.position.x += 0.10
+	rig._process(1.0 / 60.0)
+	assert(rig.pose == &"aim_walk")
+	actor.is_crouching = true
+	actor.position.x += 0.10
+	rig._process(1.0 / 60.0)
+	assert(rig.pose == &"aim_crouch_walk")
+	actor.is_crouching = false
+	var p90 := actor.current_weapon
+	assert(p90.weapon_id == "p90")
+	var model := p90.get_node(^"WeaponModel") as Node3D
+	var muzzle := p90.muzzle_point.transform
+	actor.current_aim_target = p90.muzzle_point.global_position + Vector3.FORWARD * 10.0
+	var fired := p90.try_fire()
+	assert(fired)
+	rig._process(1.0 / 60.0)
+	assert(rig.pose == &"shoot" and rig.recoil > 0.0)
+	p90.reload()
+	assert(p90.is_reloading)
+	for frame in range(16):
+		rig._process(1.0 / 60.0)
+	assert(is_equal_approx(rig.reload_blend, 1.0))
+	assert(model.global_basis.z.y > p90.global_basis.z.y + 0.30 and p90.muzzle_point.transform == muzzle)
+	actor.switch_slot(2)
+	rig._process(1.0 / 60.0)
+	assert(is_zero_approx(rig.reload_blend) and actor.current_weapon.weapon_id == "m9")
+	actor.switch_slot(1)
+	await p90.reloaded
+	for frame in range(16):
+		rig._process(1.0 / 60.0)
+	assert(is_zero_approx(rig.reload_blend) and p90.current_ammo == p90.mag_capacity)
+
+	var rescuer := PLAYER.instantiate() as PlayerController3D
+	rescuer.name = "ReconRescuer"
+	rescuer.position = actor.position + Vector3(0.6, 0, 0)
+	room.players_container.add_child(rescuer)
+	rescuer.set_physics_process(false)
+	rescuer.is_window_focused = true
+	actor.health_component.take_damage(400)
+	rig._process(1.0 / 60.0)
+	assert(rig.pose == &"downed" and actor.current_weapon.weapon_id == "m9")
+	rescuer.start_dragging_body(actor)
+	var downed_position := actor.position
+	await physics_frame
+	rescuer._physics_process(1.0 / 60.0)
+	rig._process(1.0 / 60.0)
+	assert(rescuer.dragged_body == actor and actor.position.distance_to(downed_position) > 0.05)
+	assert(rig.pose == &"prone_crawl" and actor.current_weapon.weapon_id == "m9")
+	rescuer.stop_dragging_body()
+	actor.health_component.revive()
+	rig._process(1.0 / 60.0)
+	assert(rig.pose == &"revived" and actor.current_weapon.weapon_id == "p90" and antenna.is_visible_in_tree())
+	rescuer.queue_free()
+	print("PASS O'Neill Recon kit, role isolation, weapon presentation and recovery")
 
 
 func check_player_poses(room: GateRoom, actor: PlayerController3D, rig: Node3D) -> void:
