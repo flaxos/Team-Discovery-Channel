@@ -1,0 +1,22 @@
+{
+  "source": "/tmp/tdc-asset-intake/sprint20/serpent-guards-helmet/unpacked/source/HeadGear_LP.fbx",
+  "output": "../../../build/asset-review/sprint20-serpent-intake/serpent_guard_helmet.glb",
+  "root_name": "SerpentGuardHelmet",
+  "max_texture_size": 1536,
+  "image_format": "PNG",
+  "materials": {
+    "*": {
+      "albedo": "/tmp/tdc-asset-intake/sprint20/serpent-guards-helmet/unpacked/textures/HeadGear_LP_BaseColor.jpg",
+      "normal": "/tmp/tdc-asset-intake/sprint20/serpent-guards-helmet/unpacked/textures/HeadGear_LP_NormalOGL.jpg",
+      "normal_convention": "opengl",
+      "roughness": "/tmp/tdc-asset-intake/sprint20/serpent-guards-helmet/unpacked/textures/HeadGear_LP_Roughness.jpg",
+      "metallic": "/tmp/tdc-asset-intake/sprint20/serpent-guards-helmet/unpacked/textures/HeadGear_LP_Metallic.jpg"
+    }
+  },
+  "keep_nodes": [
+    "eyes_lp",
+    "head_lp",
+    "neck_lp",
+    "back_lp"
+  ]
+}

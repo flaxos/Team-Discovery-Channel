@@ -128,15 +128,16 @@ func run_host() -> void:
 			break
 	assert(room.alert.reinforcements_spawned == 2, "First reinforcements arrived")
 
-	child_pid = OS.create_process(
-		OS.get_executable_path(),
-		[
-			"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
-			"--log-file", output_dir.path_join("client.log"),
-			"--script", "res://tests/test_mission_alert_multiplayer.gd",
-			"--", "--alert-child", "--result-dir", output_dir
-		]
-	)
+	var child_args: PackedStringArray = [
+		"--headless", "--fixed-fps", "60", "--path", ProjectSettings.globalize_path("res://"),
+		"--log-file", output_dir.path_join("client.log"),
+		"--script", "res://tests/test_mission_alert_multiplayer.gd",
+		"--", "--alert-child", "--result-dir", output_dir
+	]
+	for argument in OS.get_cmdline_user_args():
+		if argument == "--serpent-preview" or argument.begins_with("--serpent-helmet="):
+			child_args.append(argument)
+	child_pid = OS.create_process(OS.get_executable_path(), child_args)
 	assert(child_pid > 0)
 	assert(await marked("late"), "The late client sees the alarm")
 
@@ -190,6 +191,7 @@ func run_client() -> void:
 	assert(room.hud.enemies_label.text.begins_with("ALARM RAISED"), room.hud.enemies_label.text)
 	for enemy in room.enemies.get_children():
 		assert(not (enemy as JaffaAI).raising_alarm, "Nobody is running once the alarm is up")
+	check_serpent_replicas(room)
 	mark("late")
 
 	var old_room := room.get_instance_id()
@@ -201,6 +203,7 @@ func run_client() -> void:
 		if room.enemies.get_child_count() == 6:
 			break
 	assert(alert.alert_level == Level.CALM and not alert.spotted and not alert.disabled.has(true))
+	check_serpent_replicas(room)
 	assert(alert.consoles[0].is_in_group("interactable"))
 	# Out of reach (the client spawns at the gate): the server refuses.
 	alert.consoles[1].interact(me)
@@ -233,3 +236,29 @@ func run_client() -> void:
 	assert(room.hud.enemies_label.text.begins_with("COMPOUND ALERTED"), room.hud.enemies_label.text)
 	mark("client_runner")
 	await frames(30)
+
+
+func check_serpent_replicas(room: ModularMission) -> void:
+	if "--serpent-preview" not in OS.get_cmdline_user_args():
+		return
+	var community_helmet := false
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--serpent-helmet="):
+			community_helmet = true
+			break
+	var fitted := 0
+	var shared_helmet: Mesh
+	for enemy: JaffaAI in room.enemies.get_children():
+		var rig := enemy.get_node_or_null(^"SerpentRig") as Node3D
+		if rig == null:
+			continue
+		assert(rig.is_processing() and rig.skeleton.has_node(^"SerpentHelmet"))
+		assert(not enemy.body_mesh.visible and enemy.muzzle_point.position == Vector3(0, 0, -1.1))
+		if community_helmet:
+			var eyes := rig.skeleton.get_node(^"SerpentHelmet").find_child("eyes_lp", true, false) as MeshInstance3D
+			assert(eyes != null, "A late join or retry fits the same staged helmet")
+			if shared_helmet == null:
+				shared_helmet = eyes.mesh
+			assert(eyes.mesh == shared_helmet, "Guards share the staged helmet mesh resources")
+		fitted += 1
+	assert(fitted > 0, "The remote offworld scene displays a standard Serpent guard")

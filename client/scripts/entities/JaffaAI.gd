@@ -7,6 +7,7 @@ extends CharacterBody3D
 signal jaffa_died(killer: Node)
 signal jaffa_vaporized()
 signal staff_fired(origin: Vector3, direction: Vector3)
+signal staff_visual_fired
 signal patrol_waypoint_reached(index: int)
 signal patrol_lap_completed(laps: int)
 
@@ -1495,6 +1496,7 @@ func _process_melee(delta: float) -> void:
 func play_staff_fire_fx(origin_pos: Vector3) -> void:
 	if not is_inside_tree() or get_tree() == null:
 		return
+	staff_visual_fired.emit()
 	# Orange muzzle burst light
 	var burst := OmniLight3D.new()
 	burst.light_color = Color(1.0, 0.5, 0.1)
