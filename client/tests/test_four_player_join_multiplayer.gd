@@ -215,6 +215,9 @@ func check_imported_loadout(actor: PlayerController3D) -> void:
 	var has_radio: bool = rig.recon_mount != null and rig.recon_mount.visible
 	require(has_radio == (actor.class_id == SGCNetworkManager.CLASS_ONEILL_RECON),
 		"Only O’Neill Recon carries the radio, including after travel and retry")
+	var has_scanner: bool = rig.tech_mount != null and rig.tech_mount.visible
+	require(has_scanner == (actor.class_id == SGCNetworkManager.CLASS_CARTER_TECH),
+		"The tech scanner follows Carter through travel, replacement and retry")
 	if actor.active_slot == 2 and actor.class_id in [
 		SGCNetworkManager.CLASS_CARTER_TECH, SGCNetworkManager.CLASS_TEALC_JAFFA
 	]:

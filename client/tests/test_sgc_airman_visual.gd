@@ -126,7 +126,52 @@ func check_squad(room: GateRoom, airman_rig: Node3D, fallback: bool) -> void:
 				check_player_poses(room, actor, rig)
 			if role == SGCNetworkManager.CLASS_ONEILL_RECON:
 				await check_recon(room, actor, rig, airman_rig)
+			if role == SGCNetworkManager.CLASS_CARTER_TECH:
+				check_carter(room, actor, rig, airman_rig)
 		actor.queue_free()
+
+
+func check_carter(room: GateRoom, actor: PlayerController3D, rig: Node3D, airman_rig: Node3D) -> void:
+	var servo := room.get_node(^"IrisServoHousing") as IrisServoHousing
+	var display := rig.tech_mount.find_child("ScannerDisplay", true, false) as MeshInstance3D
+	assert(display.is_visible_in_tree() and rig.recon_mount == null)
+	var uniform := rig.skin_visual.find_child("Object_107", true, false) as MeshInstance3D
+	var base := (airman_rig.skin_visual.find_child("Object_107", true, false) as MeshInstance3D).get_active_material(0) as StandardMaterial3D
+	var finish := uniform.get_active_material(0) as StandardMaterial3D
+	assert(finish.albedo_color != base.albedo_color and finish.albedo_texture == base.albedo_texture)
+	rig.set_camera_alpha(0.15)
+	assert(is_equal_approx(display.transparency, 0.85))
+	actor._restore_visual_materials()
+	assert(is_zero_approx(display.transparency))
+
+	actor.switch_slot(1)
+	var model := actor.current_weapon.get_node(^"WeaponModel") as Node3D
+	var muzzle := actor.current_weapon.muzzle_point.transform
+	actor.global_position = servo.to_global(Vector3(0, 0.01, 0.63))
+	actor.global_rotation.y = servo.global_rotation.y
+	servo.start_repair(actor)
+	assert(servo.is_repairing and servo.repairer_player == actor)
+	rig.previous_position = actor.global_position
+	rig.ground_speed = 0.0
+	for frame in range(12):
+		rig._process(1.0 / 60.0)
+	assert(not model.visible and actor.current_weapon.muzzle_point.transform == muzzle)
+	var right: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[0], rig.grip_bones[1]))
+	var left: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[2], rig.grip_bones[3]))
+	var lever := servo.get_node(^"LeverMesh/RepairLeverPalm") as Marker3D
+	var brace := servo.get_node(^"RepairBracePalm") as Marker3D
+	assert(right.distance_to(lever.global_position) < 0.035 and left.distance_to(brace.global_position) < 0.035)
+	actor.is_aiming_down_sights = true
+	rig._process(1.0 / 60.0)
+	assert(model.visible and servo.is_repairing, "Aiming releases the visual pose without changing the repair")
+	actor.is_aiming_down_sights = false
+	actor.global_position = servo.to_global(Vector3(0, 0.01, 1.7))
+	rig.previous_position = actor.global_position
+	rig._process(1.0 / 60.0)
+	assert(model.visible and servo.is_repairing, "Distant repairs keep the regular weapon pose")
+	servo.cancel_repair()
+	assert(not servo.is_repairing)
+	print("PASS Carter Tech kit, material isolation and iris repair contact")
 
 
 func check_recon(room: GateRoom, actor: PlayerController3D, rig: Node3D, airman_rig: Node3D) -> void:
