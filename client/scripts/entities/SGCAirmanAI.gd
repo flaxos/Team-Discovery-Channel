@@ -33,7 +33,11 @@ enum State {
 	COVER_FIRE
 }
 
-@export var airman_callsign: String = "AIRMAN DAVIS"
+@export var airman_callsign: String = "AIRMAN DAVIS":
+	set(value):
+		airman_callsign = value
+		if nameplate != null:
+			nameplate.text = value
 @export var move_speed: float = 5.2
 @export var weapon_damage: float = 22.0
 @export var fire_rate_rpm: float = 600.0
@@ -68,6 +72,7 @@ var is_hallway_secured: bool = false
 
 var current_scramble_waypoint_index: int = 0
 var navigator: SGCNavigator
+var _modular_tactics := false
 
 const TACTICAL_ANCHORS: Array[Dictionary] = [
 	# Gate Room Arena & Sandbags
@@ -131,6 +136,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	collision_mask |= 128
 	navigator = SGCNavigator.new(self)
+	_modular_tactics = LevelNavigator.find_level(self) != null
 	add_to_group("sgc_airmen")
 	add_to_group("allies")
 	add_to_group("airmen")
@@ -188,7 +194,7 @@ func _physics_process(delta: float) -> void:
 			print("SGCAirmanAI [%s]: Squadmate down! Providing covering fire and moving to revive!" % airman_callsign)
 
 	# Universal priority 2: Check for uncrewed .50 Cal turret within tactical reach (~8.0m)
-	if mounted_turret == null and current_state != State.DOWNED and current_state != State.DEAD and current_state != State.REVIVE_PLAYER and current_state != State.ORDER_MOVE and current_state != State.ORDER_REGROUP:
+	if not _modular_tactics and mounted_turret == null and current_state != State.DOWNED and current_state != State.DEAD and current_state != State.REVIVE_PLAYER and current_state != State.ORDER_MOVE and current_state != State.ORDER_REGROUP:
 		var available_turret: DeployableTurret = _find_available_turret()
 		if available_turret != null:
 			var d_tur: float = global_position.distance_to(available_turret.global_position)
@@ -526,6 +532,8 @@ func order_move_to(pos: Vector3) -> void:
 	ordered_position = pos
 	is_leapfrogging_advancing = false
 	is_providing_cover_fire = false
+	if _modular_tactics:
+		_clear_modular_posture()
 	current_state = State.ORDER_MOVE
 	order_acknowledged.emit(self, "MOVE")
 	print("SGCAirmanAI [%s]: Moving to position %s! Taking cover!" % [airman_callsign, str(pos)])
@@ -536,6 +544,8 @@ func order_mount_turret(turret: DeployableTurret) -> void:
 		return
 	if mounted_turret != null and mounted_turret != turret:
 		dismount_turret()
+	if _modular_tactics:
+		_clear_modular_posture()
 	target_turret_to_mount = turret
 	is_leapfrogging_advancing = false
 	is_providing_cover_fire = false
@@ -553,6 +563,8 @@ func order_revive(target: CharacterBody3D) -> void:
 		return
 	if mounted_turret != null:
 		dismount_turret()
+	if _modular_tactics:
+		_clear_modular_posture()
 	target_player_to_revive = target
 	is_leapfrogging_advancing = false
 	is_providing_cover_fire = false
@@ -600,15 +612,17 @@ func _process_move_to_turret(delta: float) -> void:
 
 func _process_order_move(delta: float) -> void:
 	var dist: float = global_position.distance_to(ordered_position)
+	var arrival_radius := 0.6 if _modular_tactics else 1.2
 	var move_dest: Vector3 = _get_hallway_destination(ordered_position)
 	var to_dest: Vector3 = (move_dest - global_position)
 	to_dest.y = 0.0
 
-	if dist > 1.2:
+	if dist > arrival_radius:
 		var dir: Vector3 = to_dest.normalized()
 		velocity.x = dir.x * move_speed
 		velocity.z = dir.z * move_speed
-		rotation.y = atan2(-dir.x, -dir.z)
+		if not dir.is_zero_approx():
+			rotation.y = atan2(-dir.x, -dir.z)
 		if body_mesh != null:
 			body_mesh.scale.y = 1.0
 			body_mesh.position.y = 0.0
@@ -626,7 +640,7 @@ func _process_order_move(delta: float) -> void:
 		if jaffa_dist <= combat_range and fire_cooldown <= 0.0:
 			var aim_dir: Vector3 = (current_target_jaffa.global_position - global_position)
 			aim_dir.y = 0.0
-			if aim_dir.length_squared() > 0.01 and dist <= 1.2:
+			if aim_dir.length_squared() > 0.01 and dist <= arrival_radius:
 				rotation.y = atan2(-aim_dir.x, -aim_dir.z)
 			fire_cooldown = 60.0 / fire_rate_rpm
 			_fire_mp5(aim_dir.normalized())
@@ -681,10 +695,21 @@ func _process_downed_crawl(delta: float) -> void:
 
 
 func _process_hold_corner(delta: float) -> void:
+	if _modular_tactics:
+		if global_position.distance_to(current_anchor_position) > 0.7:
+			var step := navigator.next_position(current_anchor_position, delta) - global_position
+			step.y = 0.0
+			var heading := step.normalized()
+			velocity.x = heading.x * move_speed
+			velocity.z = heading.z * move_speed
+			if not heading.is_zero_approx():
+				rotation.y = atan2(-heading.x, -heading.z)
+			return
+		is_in_cover = current_anchor_type == "cover"
 	# Keep anchor position clamped
 	var to_anchor: Vector3 = (current_anchor_position - global_position)
 	to_anchor.y = 0.0
-	if to_anchor.length() > 0.6:
+	if not _modular_tactics and to_anchor.length() > 0.6:
 		var dir: Vector3 = to_anchor.normalized()
 		velocity.x = dir.x * (move_speed * 0.6)
 		velocity.z = dir.z * (move_speed * 0.6)
@@ -693,7 +718,8 @@ func _process_hold_corner(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 
 	# Check player-led progression: Human pointman must advance into forward room first!
-	_check_player_led_progression()
+	if not _modular_tactics:
+		_check_player_led_progression()
 	if current_state != State.HOLD_CORNER:
 		return
 
@@ -842,21 +868,50 @@ func hold_corner(anchor_pos: Vector3, facing_dir: Vector3 = Vector3(0.0, 0.0, -1
 		return
 	if mounted_turret != null:
 		dismount_turret()
+	if _modular_tactics:
+		_clear_modular_posture()
 	current_anchor_position = anchor_pos
 	current_anchor_facing = facing_dir
 	current_anchor_type = anchor_type
-	is_in_cover = true
+	is_in_cover = not _modular_tactics or anchor_type == "cover"
 	is_crouching = true
 	is_peeking = false
 	is_leapfrogging_advancing = false
 	is_providing_cover_fire = false
 	current_state = State.HOLD_CORNER
-	global_position = anchor_pos
+	if _modular_tactics and global_position.distance_to(anchor_pos) > 0.7:
+		is_crouching = false
+		is_in_cover = false
+		return
+	if not _modular_tactics:
+		global_position = anchor_pos
 	if body_mesh != null:
 		body_mesh.scale.y = 0.65
 		body_mesh.position.y = 0.15
 	corner_held.emit(self, anchor_pos)
 	print("SGCAirmanAI [%s]: Holding corner at %s! Watching hallway %s!" % [airman_callsign, str(anchor_pos), str(facing_dir)])
+
+
+func _clear_modular_posture() -> void:
+	is_in_cover = false
+	is_peeking = false
+	is_crouching = false
+	is_suppressing = false
+	suppress_timer = 0.0
+	if body_mesh != null:
+		body_mesh.scale.y = 1.0
+		body_mesh.position.y = 0.0
+
+
+func stand_down() -> void:
+	if is_instance_valid(mounted_turret):
+		dismount_turret()
+	_clear_modular_posture()
+	velocity = Vector3.ZERO
+	if current_state not in [State.DEAD, State.DOWNED]:
+		current_state = State.STAGING
+	health_component.frozen = true
+	set_physics_process(false)
 
 
 func advance_to_next_cover(target_pos: Vector3, facing_dir: Vector3 = Vector3(0.0, 0.0, -1.0)) -> void:
@@ -1002,6 +1057,8 @@ func advance_leapfrog(forward_sector: String) -> void:
 
 
 func _find_best_forward_anchor(target_sec: String) -> Dictionary:
+	if _modular_tactics:
+		return {}
 	var best_anchor: Dictionary = {}
 	var min_dist: float = 999999.0
 
@@ -1044,6 +1101,8 @@ func _is_anchor_occupied(anchor_pos: Vector3) -> bool:
 
 
 func find_best_tactical_anchor(preferred_sector: String = "") -> Dictionary:
+	if _modular_tactics:
+		return {}
 	var sec: String = preferred_sector
 	if sec.is_empty():
 		sec = _get_current_sector()

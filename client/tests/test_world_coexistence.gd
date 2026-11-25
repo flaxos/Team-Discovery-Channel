@@ -107,7 +107,7 @@ func run() -> void:
 	for jaffa in sentries():
 		assert(jaffa.global_position.x > 1500.0, "Patrols stand in the site, not at the origin")
 
-	# --- Placement: everyone starts at home; the site spawns nobody.
+	# --- Operative placement: everyone starts at home.
 	var operative := home.players_container.get_node_or_null("1") as PlayerController3D
 	assert(operative != null, "The host's operative is in the SGC")
 	assert(site.players_container.get_child_count() == 0, "No operative was created in the site")
@@ -122,7 +122,10 @@ func run() -> void:
 	assert(MissionWorld.of(sentry) == site and MissionWorld.of(site.level) == site)
 	assert(MissionWorld.find(sentry, "Players") == site.players_container)
 	assert(MissionWorld.find(sentry, "Enemies") == site.enemies)
-	assert(MissionWorld.find(sentry, "Allies") == null, "The site has no airmen; the SGC's are not its own")
+	assert(MissionWorld.find(sentry, "Allies") == site.allies_container)
+	assert(site.allies_container.get_child_count() == 2, "The site has its own support fireteam")
+	for support: SGCAirmanAI in site.allies_container.get_children():
+		assert(MissionWorld.of(support) == site and MissionWorld.find(support, "Players") == site.players_container)
 	assert(MissionWorld.find(sentry, "GateRoom") == site and MissionWorld.find(sentry, "TacticalHUD") == site.hud)
 	assert(MissionWorld.find(airman, "Players") == home.players_container)
 	assert(MissionWorld.find(airman, "Allies") == home.allies_container)

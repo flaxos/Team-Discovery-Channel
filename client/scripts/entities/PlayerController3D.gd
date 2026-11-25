@@ -1723,6 +1723,8 @@ func close_squad_command_wheel() -> void:
 
 func execute_squad_radial_command(cmd_index: int, target_world_pos: Vector3) -> void:
 	close_squad_command_wheel()
+	if _request_modular_order(cmd_index, target_world_pos):
+		return
 	var hud := _get_tactical_hud()
 	var sector_name: String = _get_sector_name_for_pos(target_world_pos)
 
@@ -1919,6 +1921,8 @@ func _get_sector_name_for_pos(pos: Vector3) -> String:
 
 
 func issue_squad_command(hit_pos: Vector3, target_node: Node = null) -> void:
+	if _request_modular_order(RadialCommandWheel.CMD_CONTEXT_ORDER, hit_pos, target_node):
+		return
 	var airman := _find_nearest_active_airman()
 	if airman == null:
 		var hud := _get_tactical_hud()
@@ -1969,6 +1973,8 @@ func issue_squad_command(hit_pos: Vector3, target_node: Node = null) -> void:
 
 
 func issue_squad_regroup() -> void:
+	if _request_modular_order(RadialCommandWheel.CMD_REGROUP_ON_ME, global_position):
+		return
 	var hud := _get_tactical_hud()
 	var active_airmen := _get_all_active_airmen()
 	if active_airmen.is_empty():
@@ -1987,6 +1993,57 @@ func issue_squad_regroup() -> void:
 		hud.show_squad_order_toast("[TACTICAL ORDER: SQUAD -> REGROUP ON ME (SECTOR: %s)]" % sector_name)
 	print("[RADIO SQUAWK] %s: 'Roger that, regrouping on your six!'" % active_airmen[0].airman_callsign)
 	print("Player %d ordered ALL SGC Airmen to REGROUP!" % peer_id)
+
+
+func _request_modular_order(command: int, point: Vector3, target: Node = null) -> bool:
+	var world := MissionWorld.of(self)
+	if world == null or not world.has_method(&"apply_airman_order"):
+		return false
+	var path := NodePath()
+	if is_instance_valid(target) and target.is_inside_tree() and MissionWorld.of(target) == world:
+		path = get_path_to(target)
+	if multiplayer.is_server():
+		server_request_airman_order(command, point, path)
+	elif is_local_authority:
+		server_request_airman_order.rpc_id(1, command, point, path)
+	return true
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_airman_order(command: int, point: Vector3, target_path: NodePath) -> void:
+	if not _valid_combat_sender() or command < 0 or command > RadialCommandWheel.CMD_CONTEXT_ORDER:
+		return
+	var world := MissionWorld.of(self)
+	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if world == null or not world.has_method(&"apply_airman_order"):
+		return
+	if net != null and (net.restart_pending or net.is_player_paused_for_transfer(self)):
+		return
+	var target := get_node_or_null(target_path) if not target_path.is_empty() else null
+	var result: Dictionary = world.apply_airman_order(self, command, point, target)
+	if result.is_empty():
+		return
+	var location: Vector3 = result.get("point", Vector3.INF)
+	if peer_id == 1:
+		_show_airman_order_feedback(command, location, result.message)
+	else:
+		receive_airman_order_feedback.rpc_id(peer_id, command, location, result.message)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func receive_airman_order_feedback(command: int, point: Vector3, message: String) -> void:
+	if multiplayer.get_remote_sender_id() == 1 and is_local_authority:
+		_show_airman_order_feedback(command, point, message)
+
+
+func _show_airman_order_feedback(command: int, point: Vector3, message: String) -> void:
+	var hud := _get_tactical_hud()
+	if hud != null:
+		hud.show_squad_order_toast(message)
+	if point.is_finite():
+		var marker_style := command if command < RadialCommandWheel.CMD_CONTEXT_ORDER else RadialCommandWheel.CMD_MOVE_TO_COVER
+		_spawn_command_waypoint_fx(point, marker_style)
+		_play_command_radio_sound()
 
 
 func _find_nearest_active_airman() -> SGCAirmanAIScript:
