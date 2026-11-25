@@ -1,0 +1,101 @@
+{
+  "inspected_on": "2026-11-25",
+  "classification": "local fit only",
+  "acquisition": "Original archives supplied by the owner from Sketchfab",
+  "sources": {
+    "jaffa": {
+      "creator": "merlincodes",
+      "listing": "https://sketchfab.com/3d-models/jaffa-8a1b28c4a1dc4a4d81f7ef5531aa480d",
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "files": {
+        "jaffa.zip": "fe861f2d305fc03ce57ad671de3d66802ac770352ec1f78ed81bf7115ea29d46",
+        "unpacked/source/jaffa.glb": "9f7e594e6865695243c0d2d209a6f8afd573a7162695ddcf0b956603bcc3ae40",
+        "unpacked/textures/wheel-color-palette_0.png": "4995bd14c7dd01243fcd1638ffdd403756debedba2740e7cf19220078d51ca2a"
+      }
+    },
+    "serpent-guards-helmet": {
+      "creator": "AJS (VUC)",
+      "listing": "https://sketchfab.com/3d-models/serpent-guards-helmet-5c5d2555b447405ab2fa8434ffcfd74e",
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "files": {
+        "serpent-guards-helmet.zip": "b155c27c13985360880198ff70bed2a0d682ae0b69c43deb8599b8c63c758699",
+        "unpacked/source/HeadGear_LP.fbx": "bda63dc3290e43bdbf07677fc7fe58cf2fccf48f697824b2b11b931360becfa9",
+        "unpacked/textures/HeadGear_LP_BaseColor.jpg": "94e3412c4dceaa73f2dabf7f1a598fba1be4097e1725eafa2a56a4ba939ec7ca",
+        "unpacked/textures/HeadGear_LP_Metallic.jpg": "266b0a12164195d6484575fe38c8bc736d6bbc6e2cae0d29bbb3715a1be0becb",
+        "unpacked/textures/HeadGear_LP_NormalOGL.jpg": "1d847860bf45d4232e786f1092c6716358e17d107565938722824211b2ef2767",
+        "unpacked/textures/HeadGear_LP_Roughness.jpg": "48d044548523821fd25430c448c586c6f3caff3a37fb32c5a5be842d308c3737",
+        "unpacked/textures/HeadGear_LP_Specular.jpg": "3c0c35341f84d9286d1a7441051b955a79dfd1e3aef9b05d8d1866b78bed5b04"
+      }
+    }
+  },
+  "helmet_preparation": {
+    "status": "Local fit. Listing and archive match. The FBX author field is blank and the listing has no creator authorship statement.",
+    "tool": "Godot 4.4.1 rigid packer",
+    "pack": {
+      "bytes": 7342688,
+      "image_format": "PNG",
+      "lossy_quality": 0.899999976158142,
+      "max_texture_size": 1536,
+      "meshes": [
+        {
+          "bounds": "[P: (-1.148093, 3.327802, 1.536799), S: (2.324055, 1.275793, 1.084537)]",
+          "name": "eyes_lp",
+          "triangles": 280
+        },
+        {
+          "bounds": "[P: (-2.10823, 2.447304, 0.215339), S: (4.235998, 3.020501, 3.330812)]",
+          "name": "head_lp",
+          "triangles": 412
+        },
+        {
+          "bounds": "[P: (-1.415966, 0.633906, -0.73585), S: (2.83185, 2.919174, 2.343934)]",
+          "name": "neck_lp",
+          "triangles": 252
+        },
+        {
+          "bounds": "[P: (-2.272814, 0.362677, -2.75625), S: (4.551637, 4.794177, 3.19378)]",
+          "name": "back_lp",
+          "triangles": 547
+        }
+      ],
+      "sha256": "c60416c03cdb94ca268cf87df0445f2effd273188d5b93019376786fb1920dd3"
+    },
+    "khronos_errors": 0,
+    "khronos_warnings": 0,
+    "fit": {
+      "position_m": [
+        0,
+        -0.244,
+        -0.065
+      ],
+      "uniform_scale": 0.096,
+      "orientation": "+Z in the initial bone fitting frame"
+    }
+  },
+  "body_evaluation": {
+    "decision": "Reviewed and set aside for this slice",
+    "triangles": 2056,
+    "joint_count": 16,
+    "skinned_meshes": 1,
+    "separate_unbound_parts": [
+      "helmet",
+      "skirt",
+      "chestplate"
+    ],
+    "timed_clips_s": {
+      "handAttack": 2.5,
+      "handMove": 2.5,
+      "Idle": 2.5,
+      "recoil": 1.667
+    },
+    "pose_only_clips": [
+      "Base",
+      "Base.001"
+    ],
+    "khronos_errors": 0,
+    "khronos_warnings": 1,
+    "warning": "NODE_SKINNED_MESH_NON_ROOT"
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS20",
+  "asset_id": "serpent_jaffa_character",
+  "status": "draft",
+  "kind": "rigged_character",
+  "purpose": "Fit one standard offworld Serpent guard with a distinct static hood, weighted body and textured armour on the existing humanoid animation contract.",
+  "target": {
+    "scene": "res://scenes/entities/JaffaGuard.tscn",
+    "visual_branch": "SerpentRig",
+    "measurement_status": "unmeasured",
+    "measurement_evidence": null,
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": null,
+    "anchors": [
+      {
+        "name": "StaffEmitterStanding",
+        "position_m": [
+          0.35,
+          1,
+          -1.3
+        ],
+        "purpose": "Authoritative emitter in the guard frame before stance changes. Follow the staff mount in motion."
+      },
+      {
+        "name": "AwarenessTell",
+        "position_m": [
+          0,
+          2.45,
+          0
+        ],
+        "purpose": "Keep the ready and combat helmet silhouettes below the authored awareness marker."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_first_generated_gap",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/serpent-guards-helmet-5c5d2555b447405ab2fa8434ffcfd74e",
+        "decision": "unavailable",
+        "reason": "Owner archive inspected. Local fitting uses the textured rigid model, pending confirmation of uploader authorship before redistribution."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/jaffa-8a1b28c4a1dc4a4d81f7ef5531aa480d",
+        "decision": "rejected",
+        "reason": "Owner archive inspected. The single palette map, 16-joint rig, four timed clips and detached rigid armour do not meet the playable combat and detail targets."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/stargate-royal-jaffa-fanart-17cfeeef444a43c1a0c57e5d8b933ed6",
+        "decision": "rejected",
+        "reason": "Creator disables downloads and tags the model NoAI."
+      },
+      {
+        "page": "https://www.turbosquid.com/3d-models/3d-jaffa-stargate/521423",
+        "decision": "rejected",
+        "reason": "Editorial-only grant is incompatible with distributed game content."
+      }
+    ],
+    "selected_source": null,
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 32000,
+    "max_materials": 5,
+    "lod_triangle_limits": [
+      32000,
+      15000
+    ],
+    "uv_required": true
+  },
+  "rig": {
+    "profile_ref": "res://resources/characters/sgc_airman_bone_map.tres",
+    "rest_pose_ref": "docs/assets/intake/sprint19-airman/rest-pose.json",
+    "max_weights_per_vertex": 4,
+    "root_motion": "in_place_only",
+    "required_clips": [
+      "ready_idle",
+      "ready_walk",
+      "ready_run",
+      "aim_idle",
+      "aim_walk",
+      "aim_crouch_idle",
+      "aim_crouch_walk",
+      "shoot",
+      "downed",
+      "death"
+    ],
+    "hand_anchors": [
+      "RightHand",
+      "LeftHand"
+    ]
+  },
+  "materials": [
+    {
+      "id": "dark_cloth",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#24272B",
+        "#3E444B"
+      ],
+      "surface_notes": "Dark matte woven underlayer. Preserve separable opaque surfaces and avoid current SGC insignia or pouches."
+    },
+    {
+      "id": "serpent_armour",
+      "resolution": 2048,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#30261E",
+        "#845E39"
+      ],
+      "surface_notes": "Muted bronze hood, overlapping armour plates and small warm eye accents. Verify neck and shoulder clearance across the required clips."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 64,
+    "measurement_plan": "Measure unique decoded mip chains, skinned vertices, frame cost and shared cache with standard guards in the actual offworld checkpoint."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "sockets",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Use an authored offworld patrol. Verify the awareness tell, the established staff fire origin, crouch clearance, Zat stun and recovery, a quiet takedown and death, then check late joining, retry and packaged fallback. Measure the final body in the selected ready and combat poses before promoting this draft."
+}

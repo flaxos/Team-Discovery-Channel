@@ -32,6 +32,8 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 19 is ready for art review.** The uniformed Airman is the temporary model for all four playable operatives and existing SGC personnel. The shared rig steps through stationary turns and follows both M2 handles when mounted. [Sprint 19 review](docs/reviews/2026-11-25-sprint19-airman-rig.md).
 
+**Sprint 20 is in progress.** The downloaded Serpent helmet is fitted locally to the shared rig. The downloaded body was reviewed, and the rigged body finish and helmet authorship check are still open. [Serpent preview and intake](docs/reviews/2026-11-25-sprint20-serpent-jaffa.md).
+
 **R16 ring transport.** In Goa’uld Infiltration, step onto a ring pad and press Interact to carry the squad members aboard between decks. Both endpoints share a server-controlled cycle and an occupied receiving pad blocks transport. This gameplay slice uses the existing ring assets and clears a prerequisite for the mothership work. [Transport setup](docs/maps/modular-vertical-kit.md#equipment-and-transport-interfaces).
 
 | Option | What | Who | Detail |

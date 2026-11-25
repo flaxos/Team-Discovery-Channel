@@ -3,6 +3,7 @@ extends SceneTree
 ## .glb weapon model ingestion with D-015 material sanitization (roadmap AP-1a).
 const MISSION := SGCNetworkManager.MISSION_MODULAR_EXTRACTION
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
+const SERPENT_RIG := ^"SerpentRig"
 var net: SGCNetworkManager
 var main: MainGameCoordinator
 var room: ModularMission
@@ -79,13 +80,11 @@ func retire(jaffa: JaffaAI) -> void:
 
 
 func verify_ap1a_weapon_models() -> void:
-	var repo_root := ProjectSettings.globalize_path("res://").trim_suffix("client/").trim_suffix("client")
-	var attr_path := repo_root.path_join("credits/ATTRIBUTIONS.md")
-	var lic_path := repo_root.path_join("credits/licenses/CC0-1.0.txt")
-	assert(FileAccess.file_exists(attr_path), "AP-1a provenance manifest exists: " + attr_path)
-	assert(FileAccess.file_exists(lic_path), "AP-1a license text exists: " + lic_path)
-	var attr_text := FileAccess.get_file_as_string(attr_path)
-	assert(attr_text.contains("p90_smg.glb") and attr_text.contains("mp5_silenced.glb"), "Manifest records both weapon GLBs")
+	var credits := preload("res://resources/asset_credits.tres")
+	var asset_files: Array = credits.get_meta("asset_files")
+	var licences: Dictionary = credits.get_meta("licenses")
+	assert("client/assets/weapons/p90_smg.glb" in asset_files and "client/assets/weapons/mp5_silenced.glb" in asset_files)
+	assert(not str(licences.get("CC0-1.0.txt", "")).is_empty(), "The export carries the full CC0 licence")
 
 	for pair: Array in [[WeaponP90, "p90"], [WeaponMP5, "mp5"]]:
 		var script_cls: GDScript = pair[0]
@@ -144,6 +143,7 @@ func run() -> void:
 	var guard := sentry(open.at, open.facing)
 	var witness := sentry(open.front, open.facing)  # 6 m ahead of guard, facing away
 	await frames(5)
+	check_serpent_visual(guard)
 	assert(room.alert.alert_level == MissionAlert.Level.CALM)
 
 	# Too far behind (3.5 m > 2.2 m): takedown rejected
@@ -166,6 +166,7 @@ func run() -> void:
 	player._try_interact()
 	await frames(3)
 	assert(guard.health_component.is_dead and guard.current_state == JaffaAI.State.DEAD, "Guard silently eliminated")
+	check_serpent_visual(guard, &"death")
 	assert(witness.awareness_level == JaffaPerception.Level.UNAWARE, "Nearby sentry did not hear or get alerted")
 	assert(room.alert.alert_level == MissionAlert.Level.CALM, "Compound alert stays CALM after stealth takedown")
 
@@ -216,6 +217,8 @@ func run() -> void:
 	assert(zat.try_fire(0.0, aim_dir), "1st Zat shot fired")
 	await frames(5)
 	assert(target_sentry.health_component.is_stunned and target_sentry.current_state == JaffaAI.State.STUNNED, "1st Zat shot stuns sentry")
+	check_serpent_visual(target_sentry, &"downed")
+	assert(target_sentry.stun_fx.visible)
 	assert(target_sentry.awareness_level == JaffaPerception.Level.UNAWARE, "Stunned sentry did not become ALERTED")
 	assert(sibling_sentry.awareness_level == JaffaPerception.Level.UNAWARE, "Sibling sentry 6m away was not alerted")
 	assert(room.alert.alert_level == MissionAlert.Level.CALM, "MissionAlert remains CALM on quiet Zat stun")
@@ -253,3 +256,32 @@ func run() -> void:
 
 	print("SW-1 & AP-1a stealth takedowns, quiet Zat, and weapon GLB ingestion verified.")
 	quit(0)
+
+
+func check_serpent_visual(guard: JaffaAI, expected_pose: StringName = &"") -> void:
+	var rig := guard.get_node(SERPENT_RIG) as Node3D
+	if "--serpent-preview" not in OS.get_cmdline_user_args():
+		assert(guard.body_mesh.visible and not rig.is_processing())
+		return
+	assert(rig.is_processing() and not guard.body_mesh.visible)
+	var helmet := rig.skeleton.get_node(^"SerpentHelmet") as BoneAttachment3D
+	assert(helmet != null)
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--serpent-helmet="):
+			var eyes := helmet.find_child("eyes_lp", true, false) as MeshInstance3D
+			assert(eyes != null and eyes.is_visible_in_tree(), "The staged community helmet replaces the native hood")
+			var finish := eyes.get_active_material(0) as StandardMaterial3D
+			assert(finish.normal_enabled and finish.normal_texture.get_image().has_mipmaps())
+			var bounds: AABB = (guard.global_transform.affine_inverse() * eyes.global_transform) * eyes.get_aabb()
+			assert(bounds.end.y < 2.45, "The helmet stays below the awareness tell")
+			break
+	assert(guard.muzzle_point.position == Vector3(0, 0, -1.1))
+	if expected_pose != &"":
+		rig._process(0.0)
+		assert(rig.pose == expected_pose)
+		assert(not (guard.staff_mount.get_node(^"StaffVisual") as Node3D).visible)
+	else:
+		var origin := guard.muzzle_point.global_position
+		guard.play_staff_fire_fx(origin)
+		rig._process(0.0)
+		assert(rig.pose == &"shoot" and guard.muzzle_point.global_position == origin)

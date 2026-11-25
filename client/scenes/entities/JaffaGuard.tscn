@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://bjaffaguard01"]
+[gd_scene load_steps=12 format=3 uid="uid://bjaffaguard01"]
 
 [ext_resource type="Script" path="res://scripts/entities/JaffaAI.gd" id="1_jaffa"]
 [ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
+[ext_resource type="Script" path="res://scripts/entities/JaffaSerpentVisual.gd" id="3_serpent"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jaffa"]
 radius = 0.45
@@ -104,6 +105,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 light_color = Color(0.2, 0.7, 1, 1)
 light_energy = 3.5
 omni_range = 3.0
+
+[node name="SerpentRig" type="Node3D" parent="."]
+script = ExtResource("3_serpent")
 
 [node name="StaffMount" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 1, -0.2)
