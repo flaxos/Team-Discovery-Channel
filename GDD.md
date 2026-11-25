@@ -49,16 +49,16 @@ Every modular room currently renders in a neutral placeholder style. Faction the
 
 ## Classes and combat
 
-| Class | Primary | Secondary | Health | Class gadget in code |
-| --- | --- | --- | --- | --- |
-| SG-3 Heavy Support Marine | M249 | M9 | 150 | Deployable .50 cal tripod |
-| Tech Specialist & Archaeologist | MP5 | Zat | 100 | None |
-| Pointman / Recon Leader | P90 | M9 | 120 | C4 satchels (timed or remote) |
-| Allied Jaffa / Tok'ra Infiltrator | Staff weapon | Zat | 160 | None |
+| Class | Primary | Secondary | Health | Base speed | Loadout feature |
+| --- | --- | --- | --- | --- | --- |
+| SG-3 Heavy Support Marine | M249 | M9 | 150 | 6.0 m/s | Deployable .50 cal tripod |
+| Tech Specialist & Archaeologist | Suppressed MP5SD | Zat | 100 | 6.8 m/s | Quiet stun sidearm |
+| Pointman / Recon Leader | P90 | M9 | 120 | 7.2 m/s | C4 satchels (timed or remote) |
+| Allied Jaffa / Tok'ra Infiltrator | Staff weapon | Zat | 160 | 6.5 m/s | Both weapons use heat |
 
 All classes can use claymores, the ballistic shield, smoke, body dragging, revive and squad orders. The SGC adds resupply and armour stations, weapon racks and fixed turrets. Zat progression is stun, kill, then corpse vaporization; stun defaults to 20 seconds. A downed operative bleeds out in 20 seconds and is revived to 40% health.
 
-The lobby's class descriptions also mention a rocket launcher, flashbangs, a sprint dodge, a MALP scout, faster dialling, a melee parry and symbiote regeneration. **None of these is implemented.** Treat that text as aspiration until the roles are designed (roadmap workstream H).
+The lobby shows each class's starting weapons, maximum health, base movement speed and shared field kit. Weapon names are shared with the in-game display.
 
 Players use a tactical third-person camera with shoulder ADS and camera-relative movement. The squad radial works while holding ADS. Persistent remapping supports keyboard/mouse alternatives, conflict resolution and live prompts. [Playing](docs/PLAYING.md) is the control reference.
 

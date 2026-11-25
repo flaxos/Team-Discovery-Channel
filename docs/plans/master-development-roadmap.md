@@ -33,7 +33,7 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 |---|---|---|
 | Hosting and joining (listen host) | Verified | `scripts/net/NetworkManager.gd`; `test_netcode_smoke`, `test_multiplayer_mission_join` |
 | Dedicated server | Partial | `--server` loads the selected mission scene directly (`MainGameCoordinator._ready`). `test_sprint5_dedicated_smoke` covers SGC; `test_modular_extraction_dedicated` covers the modular mission host (EX-1). Any connected client can restart the mission |
-| Player classes and loadouts | Partial | Four profiles set weapons, health and speed. Class gadget exists for Heavy (tripod turret) and Recon (C4) only (`PlayerController3D._deploy_tactical_gadget`). The lobby descriptions also promise a rocket launcher, flashbangs, sprint dodge, MALP scout, fast dialling, melee parry and symbiote regeneration: none exist in code |
+| Player classes and loadouts | Verified against the lobby (R18) | Four profiles supply weapons, health and base speed. Heavy has the tripod and Recon has C4. The lobby names the shared field kit and uses the same weapon names as the in-game display. `test_lobby_class_loadouts` checks each card against a spawned operative. |
 | Mission selection | Verified | Four entries in `NetworkManager.MISSIONS` (the fourth since GI-1); host-owned, synced on join and retry; `test_mission_selection_uat` |
 | World lifecycle | Verified, single world | One scene per mission id; `MainGameCoordinator` swaps the whole world. No mid-mission world change |
 | Authority and replication | Verified | Server resolves combat, objectives and shared interactions; `test_multiplayer_combat_authority`, `test_multiplayer_state_replication`, `test_gate_client_authority` |
@@ -422,7 +422,7 @@ Each previously reported issue was checked against the code at `bf56743`.
 | R15 | Security doors had no mission action | Addressed by EV-2-1 | Generator sabotage now releases named command security through the existing server API, with real peer snapshots/retry coverage | Human pacing review; remaining EV-2 chunks separate |
 | R16 | Ring transport lacks an authoritative mission interaction | Implemented for authored modular pairs | Server-validated boarding and destination clearance, movement handoff, busy lock and late snapshots. Four-operative listen and dedicated suites exercise the compound pair in both directions and through retry | Human play review |
 | R17 | Per-tick tree searches in AI | Fixed for sentries (ST-1); assault unchanged | Sentry perception runs at 10 Hz and caches the operative containers. The assault rule still searches the tree and casts rays every physics tick per Jaffa | Revisit if SGC Defense frame time suffers |
-| R18 | Class descriptions promise absent kit | New, confirmed | See the class row in section 2 | CO-2 |
+| R18 | Class descriptions promise absent kit | Fixed by the loadout audit | Lobby cards reflect actual starting weapons, stats and gear. Reopening the lobby restores the selected class on the card and picker. | Expand roles through CO-2 if designed |
 | R19 | Stale limitations in older guides | Confirmed | The navigation guide still listed modular combat as unverified and cover as SGC coordinates, both superseded by PR #39. Corrected with dated notes in this change | Done here |
 | R20 | Authoring tools untested by a fresh agent | Outstanding | Stated in the authoring review | GI-0 doubles as that test if run by a new session |
 | R21 | Module headers outside their own cell | New, confirmed (GA-1) | The north and south headers of `Room05` to `Room13`, `Room15` and `Room16` are centred 0.1 m beyond the cell edge and overlap the adjoining room's header. Invisible with one material; flickers against a themed lintel. GA-1 stood lintel gold 5 mm proud; Sprint 6 finishes both faces so a neighbouring header back retains the design. Existing structural offsets are preserved | Separate structural pass with collision/enclosure re-verification; the cosmetic mitigation is covered by Sprint 6 join captures |
@@ -545,5 +545,5 @@ These change scope or design. Each has a default that the plan assumes until ans
 5. **Should a solo player fail on the first down?** Today yes, because the squad is then down. Default: unchanged until CO-1.
 6. **Is the offworld loop the main game, with SGC Defense as one mission among several, or the reverse?** Default: offworld becomes the main loop; SGC Defense stays as it is.
 7. **How is art made?** **Answered 14 November 2026: in-engine pieces built by agents** ([D-012](../DECISIONS.md)). Modelled replacements stay possible later.
-8. **How far should class descriptions be honoured?** Trim the text or build the perks. Default: trim until CO-2.
+8. **How far should class descriptions be honoured?** R18 made the lobby reflect the implemented loadouts. Further class perks belong to CO-2 design.
 9. **Is any saved progress wanted before there are three or more offworld missions?** Default: no.

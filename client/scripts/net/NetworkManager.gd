@@ -68,7 +68,7 @@ const CLASS_TEALC_JAFFA: String = "tealc_jaffa"
 const CLASS_PROFILES: Dictionary = {
 	CLASS_SG3_HEAVY: {
 		"name": "SG-3 Heavy Support Marine",
-		"desc": "M249 SAW, claymore mines, deployable .50 cal tripod, rocket launcher.",
+		"desc": "Deployable .50 cal tripod.",
 		"primary": "m249",
 		"secondary": "m9",
 		"health": 150.0,
@@ -76,7 +76,7 @@ const CLASS_PROFILES: Dictionary = {
 	},
 	CLASS_CARTER_TECH: {
 		"name": "Tech Specialist & Archaeologist",
-		"desc": "MP5, Zat'nik'tel, 2x fast DHD dialer, GDO Iris override, MALP scout.",
+		"desc": "Suppressed primary fire and a quiet stun sidearm.",
 		"primary": "mp5",
 		"secondary": "zat",
 		"health": 100.0,
@@ -84,7 +84,7 @@ const CLASS_PROFILES: Dictionary = {
 	},
 	CLASS_ONEILL_RECON: {
 		"name": "Pointman / Recon Leader",
-		"desc": "Suppressed P90, tactical C4 satchel charges, flashbangs, sprint dodge.",
+		"desc": "Remote or timed C4 satchels.",
 		"primary": "p90",
 		"secondary": "m9",
 		"health": 120.0,
@@ -92,7 +92,7 @@ const CLASS_PROFILES: Dictionary = {
 	},
 	CLASS_TEALC_JAFFA: {
 		"name": "Allied Jaffa / Tok'ra Infiltrator",
-		"desc": "Ma'Tok Staff weapon, Zat'nik'tel, melee parry strike, symbiote regeneration.",
+		"desc": "Heat-based staff and Zat. Both cool between shots.",
 		"primary": "staff_weapon",
 		"secondary": "zat",
 		"health": 160.0,
