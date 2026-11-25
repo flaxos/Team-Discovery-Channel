@@ -255,11 +255,9 @@ func _process(_delta: float) -> bool:
 		gateroom.is_animating_observation_shutters = false
 
 		# Test Red Alert Klaxon scramble automatic sealing
-		var wm: WaveManager = gateroom.wave_manager
-		gateroom.wave_manager = null # Suppress incursion wave spawning during test
 		gateroom._trigger_base_scramble()
 		assert(gateroom.is_observation_shutters_closed, "Red alert base scramble must automatically seal observation blast shutters")
-		gateroom.wave_manager = wm
+		assert(gateroom.wave_manager.defense_started, "The Defense wave manager accepts the scramble")
 
 		print("[TEST 5/6] PASS: Observation Lounge 12m blast shutters, console toggle & red alert sealing verified.")
 

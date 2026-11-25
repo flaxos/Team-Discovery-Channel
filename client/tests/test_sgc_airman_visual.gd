@@ -126,7 +126,128 @@ func check_squad(room: GateRoom, airman_rig: Node3D, fallback: bool) -> void:
 				check_player_poses(room, actor, rig)
 			if role == SGCNetworkManager.CLASS_ONEILL_RECON:
 				await check_recon(room, actor, rig, airman_rig)
+			if role == SGCNetworkManager.CLASS_CARTER_TECH:
+				check_carter(room, actor, rig, airman_rig)
+			if role == SGCNetworkManager.CLASS_TEALC_JAFFA:
+				await check_tealc(room, actor, rig)
 		actor.queue_free()
+
+
+func check_tealc(room: GateRoom, actor: PlayerController3D, rig: Node3D) -> void:
+	var front_plate := rig.jaffa_mount.find_child("UpperPlate", true, false) as MeshInstance3D
+	assert(front_plate.is_visible_in_tree() and rig.recon_mount == null and rig.tech_mount == null)
+	rig.set_camera_alpha(0.15)
+	assert(is_equal_approx(front_plate.transparency, 0.85))
+	actor._restore_visual_materials()
+	assert(is_zero_approx(front_plate.transparency))
+
+	actor.switch_slot(1)
+	actor.is_aiming_down_sights = true
+	var staff := actor.current_weapon as WeaponStaff
+	var model := staff.get_node(^"WeaponModel") as Node3D
+	var muzzle := staff.muzzle_point.transform
+	for crouched: bool in [false, true]:
+		actor.is_crouching = crouched
+		for pitch: float in [-PI / 4.0, 0.0, PI / 4.0]:
+			actor.weapon_holder.rotation.x = pitch
+			for frame in range(10):
+				rig._process(1.0 / 60.0)
+			check_staff_contacts(rig, model)
+			assert(actor.to_local(model.global_position).x > 0.22, "The shaft clears the right side of the vest")
+			assert(model.global_basis.z.is_equal_approx(staff.global_basis.z.normalized()))
+	assert(staff.muzzle_point.transform == muzzle)
+	var shot_origin := staff.muzzle_point.global_position
+	var shot_direction := -staff.global_basis.z.normalized()
+	var fired := staff.try_fire(0.0, shot_direction)
+	assert(fired)
+	var found_bolt := false
+	for bolt: PlasmaBolt in get_nodes_in_group(&"plasma_bolt"):
+		if bolt.shooter == actor:
+			assert(bolt.global_position.is_equal_approx(shot_origin) and bolt.direction.is_equal_approx(shot_direction))
+			found_bolt = true
+			bolt.queue_free()
+	assert(found_bolt, "The staff shot uses the authoritative muzzle and aim")
+	rig._process(1.0 / 60.0)
+	check_staff_contacts(rig, model)
+	var visible_emitter := model.to_global(staff.muzzle_point.position)
+	assert(rig.show_shot(shot_origin, true, false).is_equal_approx(visible_emitter))
+
+	var drag_start := actor.position
+	for gait: StringName in [&"ready_run", &"aim_walk", &"aim_crouch_walk"]:
+		actor.is_sprinting = gait == &"ready_run"
+		actor.is_aiming_down_sights = not actor.is_sprinting
+		actor.is_crouching = gait == &"aim_crouch_walk"
+		for frame in range(160):
+			actor.rotation.y += 0.005
+			actor.position -= actor.global_basis.z * (0.10 if actor.is_sprinting else 0.03)
+			actor.weapon_holder.rotation.x = PI / 4.0 * sin(float(frame) * TAU / 120.0)
+			rig._process(1.0 / 60.0)
+			if frame >= 30:
+				assert(rig.pose == gait, "Expected %s while moving, saw %s" % [gait, rig.pose])
+				check_staff_contacts(rig, model)
+				assert(actor.to_local(model.global_position).x > 0.22)
+
+	actor.is_crouching = false
+	actor.is_sprinting = false
+	actor.position = drag_start
+	rig.previous_position = actor.global_position
+	rig.ground_speed = 0.0
+	await check_dragged_pose(room, actor, rig, "zat")
+	actor.health_component.revive()
+	rig._process(1.0 / 60.0)
+	assert(rig.pose == &"revived" and actor.current_weapon == staff and front_plate.is_visible_in_tree())
+	print("PASS Teal’c Jaffa armour, moving staff grips, plasma alignment and Zat through drag and recovery")
+
+
+func check_staff_contacts(rig: Node3D, model: Node3D) -> void:
+	var grips: Array = rig.palm_grips("staff_weapon")
+	var right: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[0], rig.grip_bones[1]))
+	var left: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[2], rig.grip_bones[3]))
+	assert(right.distance_to(model.to_global(grips[0])) < 0.015, "Rear palm stays on the staff sleeve")
+	assert(left.distance_to(model.to_global(grips[1])) < 0.015, "Front palm stays on the staff sleeve")
+
+
+func check_carter(room: GateRoom, actor: PlayerController3D, rig: Node3D, airman_rig: Node3D) -> void:
+	var servo := room.get_node(^"IrisServoHousing") as IrisServoHousing
+	var display := rig.tech_mount.find_child("ScannerDisplay", true, false) as MeshInstance3D
+	assert(display.is_visible_in_tree() and rig.recon_mount == null)
+	var uniform := rig.skin_visual.find_child("Object_107", true, false) as MeshInstance3D
+	var base := (airman_rig.skin_visual.find_child("Object_107", true, false) as MeshInstance3D).get_active_material(0) as StandardMaterial3D
+	var finish := uniform.get_active_material(0) as StandardMaterial3D
+	assert(finish.albedo_color != base.albedo_color and finish.albedo_texture == base.albedo_texture)
+	rig.set_camera_alpha(0.15)
+	assert(is_equal_approx(display.transparency, 0.85))
+	actor._restore_visual_materials()
+	assert(is_zero_approx(display.transparency))
+
+	actor.switch_slot(1)
+	var model := actor.current_weapon.get_node(^"WeaponModel") as Node3D
+	var muzzle := actor.current_weapon.muzzle_point.transform
+	actor.global_position = servo.to_global(Vector3(0, 0.01, 0.63))
+	actor.global_rotation.y = servo.global_rotation.y
+	servo.start_repair(actor)
+	assert(servo.is_repairing and servo.repairer_player == actor)
+	rig.previous_position = actor.global_position
+	rig.ground_speed = 0.0
+	for frame in range(12):
+		rig._process(1.0 / 60.0)
+	assert(not model.visible and actor.current_weapon.muzzle_point.transform == muzzle)
+	var right: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[0], rig.grip_bones[1]))
+	var left: Vector3 = rig.to_global(rig.hand_center(rig.grip_bones[2], rig.grip_bones[3]))
+	var lever := servo.get_node(^"LeverMesh/RepairLeverPalm") as Marker3D
+	var brace := servo.get_node(^"RepairBracePalm") as Marker3D
+	assert(right.distance_to(lever.global_position) < 0.035 and left.distance_to(brace.global_position) < 0.035)
+	actor.is_aiming_down_sights = true
+	rig._process(1.0 / 60.0)
+	assert(model.visible and servo.is_repairing, "Aiming releases the visual pose without changing the repair")
+	actor.is_aiming_down_sights = false
+	actor.global_position = servo.to_global(Vector3(0, 0.01, 1.7))
+	rig.previous_position = actor.global_position
+	rig._process(1.0 / 60.0)
+	assert(model.visible and servo.is_repairing, "Distant repairs keep the regular weapon pose")
+	servo.cancel_repair()
+	assert(not servo.is_repairing)
+	print("PASS Carter Tech kit, material isolation and iris repair contact")
 
 
 func check_recon(room: GateRoom, actor: PlayerController3D, rig: Node3D, airman_rig: Node3D) -> void:
@@ -181,28 +302,32 @@ func check_recon(room: GateRoom, actor: PlayerController3D, rig: Node3D, airman_
 		rig._process(1.0 / 60.0)
 	assert(is_zero_approx(rig.reload_blend) and p90.current_ammo == p90.mag_capacity)
 
+	await check_dragged_pose(room, actor, rig, "m9")
+	actor.health_component.revive()
+	rig._process(1.0 / 60.0)
+	assert(rig.pose == &"revived" and actor.current_weapon.weapon_id == "p90" and antenna.is_visible_in_tree())
+	print("PASS O'Neill Recon kit, role isolation, weapon presentation and recovery")
+
+
+func check_dragged_pose(room: GateRoom, actor: PlayerController3D, rig: Node3D, sidearm_id: String) -> void:
 	var rescuer := PLAYER.instantiate() as PlayerController3D
-	rescuer.name = "ReconRescuer"
+	rescuer.name = "RecoveryRescuer"
 	rescuer.position = actor.position + Vector3(0.6, 0, 0)
-	room.players_container.add_child(rescuer)
+	room.players_container.add_child(rescuer, true)
 	rescuer.set_physics_process(false)
 	rescuer.is_window_focused = true
 	actor.health_component.take_damage(400)
 	rig._process(1.0 / 60.0)
-	assert(rig.pose == &"downed" and actor.current_weapon.weapon_id == "m9")
+	assert(rig.pose == &"downed" and actor.current_weapon.weapon_id == sidearm_id)
 	rescuer.start_dragging_body(actor)
 	var downed_position := actor.position
 	await physics_frame
 	rescuer._physics_process(1.0 / 60.0)
 	rig._process(1.0 / 60.0)
 	assert(rescuer.dragged_body == actor and actor.position.distance_to(downed_position) > 0.05)
-	assert(rig.pose == &"prone_crawl" and actor.current_weapon.weapon_id == "m9")
+	assert(rig.pose == &"prone_crawl" and actor.current_weapon.weapon_id == sidearm_id)
 	rescuer.stop_dragging_body()
-	actor.health_component.revive()
-	rig._process(1.0 / 60.0)
-	assert(rig.pose == &"revived" and actor.current_weapon.weapon_id == "p90" and antenna.is_visible_in_tree())
 	rescuer.queue_free()
-	print("PASS O'Neill Recon kit, role isolation, weapon presentation and recovery")
 
 
 func check_player_poses(room: GateRoom, actor: PlayerController3D, rig: Node3D) -> void:

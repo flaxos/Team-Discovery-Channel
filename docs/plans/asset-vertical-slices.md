@@ -46,9 +46,9 @@ If a prerequisite is unfinished, report it and finish only the prerequisite work
 | 19 | Rigged Airman patrol/combat/recovery; shared rig adapter | The uniformed Airman is also the temporary model for the four playable operatives and existing SGC personnel. Owner art review open. [Airman and squad rig review](../reviews/2026-11-25-sprint19-airman-rig.md). | `Start sprint 19 from docs/plans/asset-vertical-slices.md` |
 | 20 | Serpent Jaffa in a complete combat encounter | Opt-in preview merged via [#99](https://github.com/flaxos/Team-Discovery-Channel/pull/99). The community helmet is fitted to the live guard for local review. Body art and the helmet authorship check are pending. [Preview and intake](../reviews/2026-11-25-sprint20-serpent-jaffa.md). | `Start sprint 20 from docs/plans/asset-vertical-slices.md` |
 | 21 | Horus Jaffa in the same authoritative encounter | Local opt-in preview saved. Armour surface and motion review pending. | `Start sprint 21 from docs/plans/asset-vertical-slices.md` |
-| 22 | O’Neill recon operative with P90/M9 grips | Local Recon preview with SGC and offworld captures. Owner art review pending. [Recon review](../reviews/2026-11-25-sprint22-oneill-recon.md). | `Start sprint 22 from docs/plans/asset-vertical-slices.md` |
-| 23 | Carter tech operative with MP5/Zat and gadget | Planned | `Start sprint 23 from docs/plans/asset-vertical-slices.md` |
-| 24 | Teal’c operative with staff/Zat | Planned | `Start sprint 24 from docs/plans/asset-vertical-slices.md` |
+| 22 | O’Neill recon operative with P90/M9 grips | Recon preview merged via [PR #100](https://github.com/flaxos/Team-Discovery-Channel/pull/100) with SGC and offworld captures. Owner art review pending. [Recon review](../reviews/2026-11-25-sprint22-oneill-recon.md). | `Start sprint 22 from docs/plans/asset-vertical-slices.md` |
+| 23 | Carter tech operative with MP5/Zat and gadget | Tech kit, weapon fits and iris-repair pose under review alongside Sprint 24. [Carter Tech review](../reviews/2026-11-25-sprint23-carter-tech.md). | `Start sprint 23 from docs/plans/asset-vertical-slices.md` |
+| 24 | Teal’c operative with staff/Zat | Allied Jaffa preview under review with bronze armour, standing and moving staff grip checks, and Zat during drag. SGC alarm and offworld captures ready for owner art review. [Teal’c review](../reviews/2026-11-25-sprint24-tealc-jaffa.md). | `Start sprint 24 from docs/plans/asset-vertical-slices.md` |
 | 25 | SG3 heavy operative and complete four-class weapon matrix | Planned | `Start sprint 25 from docs/plans/asset-vertical-slices.md` |
 | 26 | SGC laboratory/medical/administrative civilians | Planned | `Start sprint 26 from docs/plans/asset-vertical-slices.md` |
 | 27 | Offworld gate arrival, DHD and departure | Planned | `Start sprint 27 from docs/plans/asset-vertical-slices.md` |
@@ -111,7 +111,7 @@ Character slices need a redistributable model **and** an adequate animation set.
 
 **Sprint 19 — Airman and the rig path.** Depends on 18 and weapon assets. Deliver **one full Airman archetype**, with uniform/gear, in real patrol, aim/fire and down/recovery scenes. Introduce a skin/animation-preserving pipeline and visual adapter consumed by that NPC; current rigid packing loses rigs. Cover existing idle, walk/run, crouch, turn, aim/fire, down/death and any applicable revive/drag transitions. Preserve controller, typed procedural nodes/fallback and muzzle; prevent double crouch/death scaling. Verify clips, feet, hand targets, alpha, occlusion, bounds and export on peers. One source clip alone cannot close this slice.
 
-O’Neill, Carter, Teal’c, SG-3 Heavy and existing SGC personnel share the Sprint 19 rig. O’Neill has a Recon uniform and radio. Carter, Teal’c and SG-3 Heavy still wear the temporary uniform until their character sprints. Sprint 26 adds civilian roles at authored stations.
+O’Neill, Carter, Teal’c, SG-3 Heavy and existing SGC personnel share the Sprint 19 rig. O’Neill has a Recon uniform and radio. Carter has a Tech uniform and scanner. Teal’c has an Allied Jaffa armour variant. SG-3 Heavy still wears the temporary uniform until Sprint 25. Sprint 26 adds civilian roles at authored stations.
 
 **Sprint 20 — Serpent Jaffa.** Depends on 19/8/9. Deliver **one Jaffa body/armour archetype plus Serpent helmet**, reusing the verified rig where suitable. Test patrol, awareness tell, aim/fire, stun, takedown and down/death in a live offworld encounter. Preserve armor/stun FX behavior, current AI stats, staff mount and replicated state. The 771-face helmet is a lead, not a finished high-fidelity rig. Any helmet mechanism needs actual parts/states; a static accepted helmet is preferable to an unsupported animation claim.
 
@@ -119,7 +119,7 @@ O’Neill, Carter, Teal’c, SG-3 Heavy and existing SGC personnel share the Spr
 
 **Sprint 22 — O’Neill recon.** Depends on 19/10 and follows 21. Deliver **one recon player appearance** for existing `oneill_recon`, P90/M9 grips, uniform/gear, hand targets and current view modes. Exercise move/crouch/aim/fire/reload/switch, downed M9, revive/drag and travel. Preserve player camera, body/capsule, identity/nameplate and sync. A source head is optional; no unverified celebrity likeness or new class mechanics are required to finish the uniformed role.
 
-The local preview uses the existing Airman rig, P90 and M9. The uniform, radio and weapon poses are available for art review. [Sprint 22 review](../reviews/2026-11-25-sprint22-oneill-recon.md).
+The merged preview uses the existing Airman rig, P90 and M9. The uniform, radio and weapon poses are available for art review. [Sprint 22 review](../reviews/2026-11-25-sprint22-oneill-recon.md).
 
 **Sprint 23 — Carter tech.** Depends on 22/7/9. Deliver **one tech appearance** for existing `carter_tech`, MP5/Zat contact targets and the current gadget interaction poses. Check gear clipping, all shared movement/health states and interaction hand placement without moving authoritative controls. Use the same proven skeleton/animation library where it deforms correctly; otherwise record the actual adaptation. No new hacking minigame or gender-specific controller fork.
 
