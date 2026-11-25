@@ -53,6 +53,7 @@ func _ready() -> void:
 
 func _setup_class_options() -> void:
 	class_option_button.clear()
+	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	var classes := [
 		SGCNetworkManager.CLASS_SG3_HEAVY,
 		SGCNetworkManager.CLASS_CARTER_TECH,
@@ -66,8 +67,10 @@ func _setup_class_options() -> void:
 		class_option_button.add_item(info["name"], i)
 		class_option_button.set_item_metadata(i, c_id)
 
-	class_option_button.selected = 0
-	_update_class_description(classes[0])
+	var saved_index := classes.find(net.selected_class_id) if net != null else -1
+	var selected_index := maxi(0, saved_index)
+	class_option_button.select(selected_index)
+	_update_class_description(classes[selected_index])
 
 
 func _setup_difficulty_options() -> void:
@@ -100,18 +103,16 @@ func _on_mission_settings_changed(_tier: int) -> void:
 
 
 func _update_class_description(c_id: String) -> void:
-	var info: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(c_id, {})
-	var primary_name: String = info.get("primary", "").to_upper()
-	var secondary_name: String = info.get("secondary", "").to_upper()
-	var hp: float = info.get("health", 100.0)
-	var spd: float = info.get("speed", 6.0)
-
-	class_desc_label.text = "%s\nPrimary: %s | Sidearm: %s\nArmor HP: %.0f | Speed: %.1f m/s" % [
-		info.get("desc", ""),
-		primary_name,
-		secondary_name,
-		hp,
-		spd
+	var info: Dictionary = SGCNetworkManager.CLASS_PROFILES[c_id]
+	class_desc_label.text = "Primary  %s\nSidearm  %s\n%.0f HP  ·  %.1f m/s base speed\n%s\nShared kit  %d claymores, %d smoke grenades, %d deployable shield" % [
+		WeaponBase.DISPLAY_NAMES[info.primary],
+		WeaponBase.DISPLAY_NAMES[info.secondary],
+		info.health,
+		info.speed,
+		info.desc,
+		PlayerController3D.MAX_CLAYMORE_CHARGES,
+		PlayerController3D.MAX_SMOKE_GRENADES,
+		PlayerController3D.MAX_DEPLOYABLE_SHIELDS,
 	]
 
 

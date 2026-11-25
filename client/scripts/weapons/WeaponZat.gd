@@ -6,7 +6,7 @@ extends WeaponBase
 
 func _init() -> void:
 	weapon_id = "zat"
-	display_name = "Zat'nik'tel"
+	display_name = DISPLAY_NAMES[weapon_id]
 	damage = 10.0
 	fire_rate_rpm = 200.0
 	uses_heat = true

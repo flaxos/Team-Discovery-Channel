@@ -7,7 +7,7 @@ extends WeaponBase
 func _init() -> void:
 	weapon_id = "mp5"
 	ammo_type = "9x19"
-	display_name = "HK MP5-SD Tactical SMG"
+	display_name = DISPLAY_NAMES[weapon_id]
 	damage = 20.0
 	fire_rate_rpm = 800.0
 	mag_capacity = 30

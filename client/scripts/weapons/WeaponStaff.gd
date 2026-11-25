@@ -6,7 +6,7 @@ extends WeaponBase
 
 func _init() -> void:
 	weapon_id = "staff_weapon"
-	display_name = "Ma'Tok Staff Weapon"
+	display_name = DISPLAY_NAMES[weapon_id]
 	damage = 85.0
 	fire_rate_rpm = 180.0
 	uses_heat = true

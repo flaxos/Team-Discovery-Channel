@@ -8,6 +8,15 @@ signal fired(origin: Vector3, direction: Vector3, hit_point: Vector3, hit_target
 signal reloaded()
 signal ammo_changed(current: int, reserve: int)
 
+const DISPLAY_NAMES := {
+	"m249": "M249 SAW Squad Automatic Weapon",
+	"m9": "Beretta M9 9mm Pistol",
+	"mp5": "HK MP5-SD Tactical SMG",
+	"p90": "FN P90 Tactical PDW",
+	"staff_weapon": "Ma'Tok Staff Weapon",
+	"zat": "Zat'nik'tel",
+}
+
 @export var weapon_id: String = "p90"
 @export var display_name: String = "FN P90 PDW"
 @export var damage: float = 24.0
