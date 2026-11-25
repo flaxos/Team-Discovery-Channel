@@ -13,6 +13,8 @@ const CMD_HOLD_CORNER: int = 1
 const CMD_SUPPRESS_HALLWAY: int = 2
 const CMD_MAN_50_CAL: int = 3
 const CMD_REGROUP_ON_ME: int = 4
+## Contextual tap uses the same request as the wheel.
+const CMD_CONTEXT_ORDER: int = 5
 
 const SLICE_NAMES: Array[String] = [
 	"MOVE TO COVER",

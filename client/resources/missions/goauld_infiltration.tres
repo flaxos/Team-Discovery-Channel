@@ -96,6 +96,7 @@ shock_guard = true
 [resource]
 script = ExtResource("1_definition")
 title = "GOA'ULD INFILTRATION — GREYBOX"
+airman_support = true
 layout = ExtResource("4_layout")
 objectives = Array[ExtResource("2_objective")]([SubResource("sabotage"), SubResource("download"), SubResource("extract")])
 patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_checkpoint"), SubResource("patrol_generator"), SubResource("patrol_stores"), SubResource("patrol_upper"), SubResource("patrol_command")])

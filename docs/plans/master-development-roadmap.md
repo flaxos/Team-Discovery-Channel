@@ -49,8 +49,8 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 
 | System | State | Evidence and gap |
 |---|---|---|
-| Friendly squad commands | Verified (SGC) | Radial wheel, pings, move/hold/regroup/turret orders; `test_squad_radial_wheel`, `test_airman_tactical_anchors` |
-| Friendly NPC navigation | Awaiting human | Airmen navigate modular levels through `SGCNavigator` → `LevelNavigator` (PR #38). Tactical anchors, leapfrog and suppression still read SGC sectors |
+| Friendly squad commands | Verified in SGC and Goa'uld Infiltration | The modular mission can stage two Airmen. The host resolves wheel orders and pings to authored cover approaches and rally markers, including orders from remote operatives. [Friendly squad orders](../maps/modular-vertical-kit.md#friendly-squad-orders) |
+| Friendly NPC navigation | Modular orders verified by automated tests | Airmen use `SGCNavigator` → `LevelNavigator` for authored cover and rally positions. The four-operative suites check traversal, replication, and retry. Automatic SGC leapfrogging still uses its own sectors. |
 | Jaffa patrols and navigation | Awaiting human | `JaffaAI.start_patrol`; `test_modular_npc_navigation`, `test_modular_npc_multiplayer` |
 | Enemy detection | Awaiting human (patrols); defect (gate waves) | Patrols use sentry perception (ST-1): view cone, line of sight, suspicious before alerted, search; `test_jaffa_perception`. Gate waves and columns keep the assault rule, which acquires any operative within 22 m through walls (`_find_nearest_target`) |
 | Cover and flanking | Partial | SGC: sandbag cover and corridor flank from literal coordinates. Modular (TA-1): Jaffa crouch behind solid low cover props, stand to fire over them and move when flanked (`test_jaffa_prop_cover`); rooms without props fall back to the room-centre `cover` marker. TA-2 chunk 1 adds bounded server-owned alternate-entrance flanking for review (sprint 4); suppression and friendly squad tactics remain future work |

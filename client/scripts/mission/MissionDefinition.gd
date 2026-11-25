@@ -12,6 +12,8 @@ extends Resource
 @export var reinforcements: Array[MissionReinforcement] = []
 ## One-shot objective/alarm conditions that release security doors or start extraction time.
 @export var triggers: Array[MissionTrigger] = []
+## Optional Airman fireteam staged on either side of the authored entry marker.
+@export var airman_support := false
 
 
 func validate() -> PackedStringArray:

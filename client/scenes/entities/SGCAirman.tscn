@@ -48,6 +48,9 @@ properties/5/replication_mode = 2
 properties/6/path = NodePath(".:collision_layer")
 properties/6/spawn = true
 properties/6/replication_mode = 2
+properties/7/path = NodePath(".:airman_callsign")
+properties/7/spawn = true
+properties/7/replication_mode = 2
 
 [node name="SGCAirman" type="CharacterBody3D"]
 collision_layer = 2

@@ -63,6 +63,20 @@ Run the compound ring tests on a listen host and a dedicated server with four op
 python3 tools/run_godot_tests.py test_ring_transport_multiplayer test_ring_transport_dedicated
 ```
 
+## Friendly squad orders
+
+Goa'uld Infiltration stages Reyes and Chen beside the existing entry marker. The same fireteam is available at the offworld site in Operation Infiltration. A modular mission can opt in through `MissionDefinition.airman_support`. The host checks that both staging spots are on the walkable floor. Each side of a split-world mission owns its own Airmen.
+
+Tap the command key to send an Airman to the aimed room, or hold it to use the squad wheel. Move to Cover and Hold Corner prefer the reachable approach of a solid `cover` attachment in the aimed room. Where there is no usable cover, they use the room's authored `entry`, `patrol` or `destination` marker as a rally point. Regroup uses the issuing operative's room and assigns separate positions around its markers, including positions along narrow corridors. Airmen walk to the accepted positions on the live navigation map, opening ordinary doors and respecting security locks.
+
+The host resolves orders from operative intent. The wheel's covering-fire order requires a clear lane from the Airman. A turret order needs an available turret near the ping, and a contextual revive requires a downed operative in the same world. The HUD shows the accepted destination or the reason the Airman cannot act. Airmen stage again on retry and stand down at the mission result.
+
+The listen and dedicated fixtures exercise the command and movement through a real ENet session with four operatives. They cover late join during movement, the checkpoint door, regroup in a narrow passage and a fresh retry. `test_world_coexistence` checks that the site and the SGC resolve their own squads.
+
+```sh
+python3 tools/run_godot_tests.py test_modular_squad_orders_multiplayer test_modular_squad_orders_dedicated test_world_coexistence
+```
+
 ## Build and inspect the development fixture
 
 Open `res://resources/levels/vertical_kit_demo.tres`, click **Open**, then **Validate** and **Preview 3D**. It contains a ramp, lower T-junction, upper corridor, transport shell and hangar shell. Decks are `deck0` (0 m) and `upper` (4 m). Walk from the lower junction up the ramp; the transport branch has a standard E-operated door. Equipment anchors are empty; there are no automatic enemies or gate/ring activation.

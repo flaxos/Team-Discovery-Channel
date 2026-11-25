@@ -7,6 +7,8 @@ extends GateRoom
 signal started
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
 const NEAR_MISS_RADIUS := 1.15
+const AIRMAN := "res://scenes/entities/SGCAirman.tscn"
+const SquadOrders := preload("res://scripts/mission/ModularSquadOrders.gd")
 @export var definition: MissionDefinition
 var is_started := false
 var setup_errors := PackedStringArray()
@@ -53,6 +55,8 @@ func _ready() -> void:
 		events.timer_expired.connect(_on_timer_expired)
 		objectives.advancement_allowed = events.allow_progress
 	super._ready()
+	if definition.airman_support:
+		_setup_airman_spawner()
 	for rings: TransportRings in level.find_children("*", "TransportRings", true, false):
 		rings.enable_player_transport()
 	if DisplayServer.get_name() != "headless":
@@ -68,12 +72,62 @@ func _ready() -> void:
 			)
 			if floor_point.distance_to(point.global_position) > 0.5:
 				setup_errors.append("Spawn point off the walkable floor: " + str(point.name))
+		if setup_errors.is_empty() and definition.airman_support and mission_result < 0:
+			_spawn_airman_support(entry)
 		for error in setup_errors:
 			push_error("ModularMission: " + error)
 		if setup_errors.is_empty():
 			_spawn_patrols()
 	is_started = true
 	started.emit()
+
+
+func _setup_airman_spawner() -> void:
+	allies_container = Node3D.new()
+	allies_container.name = "Allies"
+	add_child(allies_container)
+	allies_container.child_entered_tree.connect(_on_airman_entered)
+	var spawner := MultiplayerSpawner.new()
+	spawner.name = "AllySpawner"
+	spawner.spawn_path = NodePath("../Allies")
+	spawner.add_spawnable_scene(AIRMAN)
+	add_child(spawner)
+
+
+func _spawn_airman_support(entry: Node3D) -> void:
+	var positions: Array[Vector3] = []
+	for offset: float in [-2.0, 2.0]:
+		var point := entry.to_global(Vector3(offset, 0.0, 0.0))
+		var floor_point := NavigationServer3D.map_get_closest_point(level.navigation_map, point)
+		if floor_point.distance_to(point) > 0.45:
+			setup_errors.append("Airman rally position off the walkable floor")
+			return
+		positions.append(floor_point + Vector3.UP * 0.05)
+	var scene := load(AIRMAN) as PackedScene
+	for i in range(positions.size()):
+		var airman := scene.instantiate() as SGCAirmanAI
+		airman.name = "Support%d" % (i + 1)
+		airman.airman_callsign = ["AIRMAN REYES", "AIRMAN CHEN"][i]
+		airman.position = allies_container.to_local(positions[i])
+		airman.rotation.y = entry.global_rotation.y - global_rotation.y
+		allies_container.add_child(airman, true)
+
+
+func _on_airman_entered(node: Node) -> void:
+	if mission_result >= 0 and node is SGCAirmanAI:
+		node.stand_down.call_deferred()
+
+
+func apply_airman_order(issuer: PlayerController3D, command: int, point: Vector3, target: Node) -> Dictionary:
+	if not multiplayer.is_server() or not is_started or mission_result >= 0 or issuer.get_parent() != players_container:
+		return {}
+	var health := issuer.health_component
+	if command < 0 or command > RadialCommandWheel.CMD_CONTEXT_ORDER or health == null:
+		return {}
+	if health.is_dead or health.is_downed or health.is_stunned or health.frozen:
+		return {}
+	var aim := issuer.global_position if command == RadialCommandWheel.CMD_REGROUP_ON_ME else point
+	return SquadOrders.apply(self, level, issuer, command, aim, target)
 
 
 func _on_event_notice(text: String) -> void:
@@ -281,6 +335,9 @@ func sync_mission_result(victory: bool) -> void:
 	for enemy in enemies.get_children():
 		if enemy is JaffaAI:
 			(enemy as JaffaAI).stand_down()
+	if allies_container != null:
+		for airman: SGCAirmanAI in allies_container.get_children():
+			airman.stand_down()
 	for player in players_container.get_children():
 		var health := player.get_node_or_null("HealthComponent") as HealthComponent
 		if health != null:
