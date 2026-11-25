@@ -51,9 +51,15 @@ var errors := LevelTransportBindings.bind_rings(layout, assembly)
 assert(errors.is_empty(), str(errors))
 ```
 
-This resolves every endpoint before changing any rig, sets existing paired-ring references/paths and disables enemy spawning. It does not activate the rings, create new RPCs or replace transport behaviour. Reapply the binding after instancing/reloading manually attached rigs. Automatic equipment instantiation and preset integration remain Batch C work. The test suite confirms the existing shared gate scene fits its anchor and remains inactive.
+This resolves every endpoint before changing any rig, sets paired-ring references and paths, and disables enemy spawning. Reapply the binding after instancing or reloading a manually attached rig. The `ring_transport` preset places the shared scene. `ModularMission` enables player interaction for reciprocal pairs after assembly. Stand on the pad and use Interact. The server locks both endpoints for the cycle, checks that its destination is clear of live actors, and carries standing operatives aboard at beam time with their spacing intact. A joining client receives the current phase for both rings. Bare structural previews keep the markers and pairing data available for inspection.
 
-Transport pairs are not continuous navigation edges. Existing ring gameplay handles transport when invoked; NPC transport decisions are not implemented. Final walkable layout connectivity still requires physical routes. Selected-room structural inspection omits transport pairing requirements for the isolated preview.
+Keep a physical route between decks for navigation and use the paired rings as a player shortcut. Selected-room structural inspection omits transport pairing requirements for the isolated preview.
+
+Run the compound ring tests on a listen host and a dedicated server with four operatives each.
+
+```sh
+python3 tools/run_godot_tests.py test_ring_transport_multiplayer test_ring_transport_dedicated
+```
 
 ## Build and inspect the development fixture
 

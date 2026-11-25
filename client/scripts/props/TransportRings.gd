@@ -9,6 +9,12 @@ signal beam_discharged()
 signal rings_retracted()
 signal reinforcement_spawned(enemy: JaffaAI)
 
+const Interaction = preload("res://scripts/net/ServerInteraction.gd")
+const BOARDING_RADIUS := 1.72
+const PAD_RADIUS := 2.2
+const DESCENT_SECONDS := 0.22
+const RETRACT_SECONDS := 0.35
+
 enum RingState { INACTIVE, TELEGRAPH, SLAM, BEAM, RETRACT }
 
 @export var ring_count: int = 5
@@ -23,6 +29,8 @@ var paired_rings: TransportRings = null
 
 var current_state: RingState = RingState.INACTIVE
 var telegraph_timer: float = 0.0
+var _player_transport := false
+var _prompt: Label3D
 
 @onready var rings_container: Node3D = $RingsStack if has_node("RingsStack") else null
 @onready var beam_column: MeshInstance3D = $BeamColumn if has_node("BeamColumn") else null
@@ -46,15 +54,194 @@ func _resolve_paired_rings() -> void:
 		paired_rings = get_node(paired_rings_path) as TransportRings
 
 
+## ModularMission enables only the reciprocal pair resolved by level assembly.
+func enable_player_transport() -> void:
+	if _player_transport or paired_rings == null or paired_rings == self or paired_rings.paired_rings != self:
+		return
+	_player_transport = true
+	add_to_group(&"interactable")
+	_prompt = Label3D.new()
+	_prompt.position.y = 2.5
+	_prompt.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_prompt.font_size = 30
+	_prompt.visibility_range_end = 12.0
+	add_child(_prompt)
+	_update_prompt()
+	var net: Node = get_node_or_null("/root/NetworkManager")
+	if multiplayer.is_server() and net != null and net.is_in_active_session() and multiplayer == net.multiplayer:
+		net.mission_peer_ready.connect(_send_transport_snapshot)
+
+
+func interact(player: PlayerController3D) -> void:
+	if not _player_transport or player == null or not _aboard(player, BOARDING_RADIUS):
+		return
+	if multiplayer.is_server():
+		request_transport(get_path_to(player))
+	else:
+		request_transport.rpc_id(1, get_path_to(player))
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_transport(player_path: NodePath) -> void:
+	if not multiplayer.is_server() or not _has_transport_pair():
+		return
+	var target := paired_rings
+	if current_state != RingState.INACTIVE or target.current_state != RingState.INACTIVE:
+		return
+	var player := Interaction.resolve(self, player_path, PAD_RADIUS)
+	if player == null or not _can_board(player) or target._pad_occupied([]):
+		return
+	_run_transport(target)
+
+
+func _has_transport_pair() -> bool:
+	return (
+		_player_transport and is_inside_tree() and is_instance_valid(paired_rings)
+		and paired_rings.is_inside_tree() and paired_rings._player_transport
+		and paired_rings.paired_rings == self
+	)
+
+
+func _aboard(actor: Node3D, radius: float) -> bool:
+	var pos := to_local(actor.global_position)
+	return absf(pos.y) <= 0.45 and Vector2(pos.x, pos.z).length_squared() <= radius * radius
+
+
+func _can_board(player: PlayerController3D) -> bool:
+	var health := player.health_component
+	return (
+		player.is_inside_tree() and not player.is_queued_for_deletion()
+		and player.get_parent() == MissionWorld.find(self, "Players")
+		and health != null and not (health.is_dead or health.is_downed or health.is_stunned or health.frozen)
+		and not is_instance_valid(player.mounted_turret) and not player.is_dragging_body
+		and _aboard(player, BOARDING_RADIUS)
+	)
+
+
+func _pad_occupied(arrived: Array[Node]) -> bool:
+	for container_name: String in ["Players", "Enemies"]:
+		var container := MissionWorld.find(self, container_name)
+		if container == null:
+			continue
+		for body: Node in container.get_children():
+			if body is Node3D and body not in arrived and _aboard(body, PAD_RADIUS):
+				var health := body.get_node_or_null("HealthComponent") as HealthComponent
+				if health != null and not health.is_dead:
+					return true
+	return false
+
+
+func _run_transport(target: TransportRings) -> void:
+	_set_pair_state(target, RingState.TELEGRAPH)
+	await get_tree().create_timer(telegraph_duration_s).timeout
+	if not _has_transport_pair():
+		return
+	_set_pair_state(target, RingState.SLAM)
+	await get_tree().create_timer(DESCENT_SECONDS).timeout
+	if not _has_transport_pair():
+		return
+	_set_pair_state(target, RingState.BEAM)
+	var started := Time.get_ticks_msec()
+	var arrived: Array[Node] = []
+	var net: Node = get_node_or_null("/root/NetworkManager")
+	var players := MissionWorld.find(self, "Players")
+	for player: Node in players.get_children():
+		if not _has_transport_pair() or target._pad_occupied(arrived):
+			break
+		if not is_instance_valid(player) or not player is PlayerController3D or not _can_board(player):
+			continue
+		var destination := _arrival_for.bind(player, target, arrived)
+		if net != null and net.is_in_active_session() and multiplayer == net.multiplayer:
+			if await net.relocate_player(player, destination):
+				arrived.append(player)
+		else:
+			var point: Vector3 = destination.call()
+			if point.is_finite():
+				player.apply_transport_arrival(point)
+				arrived.append(player)
+	if not _has_transport_pair():
+		return
+	var remaining := beam_duration_s - (Time.get_ticks_msec() - started) / 1000.0
+	if remaining > 0.0:
+		await get_tree().create_timer(remaining).timeout
+	if not _has_transport_pair():
+		return
+	_set_pair_state(target, RingState.RETRACT)
+	await get_tree().create_timer(RETRACT_SECONDS).timeout
+	if _has_transport_pair():
+		_set_pair_state(target, RingState.INACTIVE)
+
+
+func _arrival_for(player: PlayerController3D, target: TransportRings, arrived: Array[Node]) -> Vector3:
+	if not _has_transport_pair() or not is_instance_valid(player) or not _can_board(player) or target._pad_occupied(arrived):
+		return Vector3.INF
+	var offset := to_local(player.global_position)
+	offset.y = 0.08
+	return target.to_global(offset)
+
+
+func _set_pair_state(target: TransportRings, state: RingState) -> void:
+	show_transport_state(state)
+	target.show_transport_state(state)
+	SGCNetworkManager.mission_rpc(self, &"show_transport_state", [state])
+	SGCNetworkManager.mission_rpc(target, &"show_transport_state", [state])
+
+
+func _send_transport_snapshot(peer_id: int) -> void:
+	if current_state != RingState.INACTIVE:
+		show_transport_state.rpc_id(peer_id, current_state)
+
+
+@rpc("authority", "call_remote", "reliable")
+func show_transport_state(state: RingState) -> void:
+	if not _player_transport or state == current_state:
+		return
+	current_state = state
+	if telegraph_light != null:
+		telegraph_light.visible = state != RingState.INACTIVE
+		telegraph_light.light_energy = 4.0
+	if beam_column != null:
+		beam_column.visible = state == RingState.BEAM
+	if rings_container != null:
+		rings_container.visible = state in [RingState.SLAM, RingState.BEAM, RingState.RETRACT]
+		match state:
+			RingState.SLAM:
+				rings_container.position.y = 8.0
+				create_tween().tween_property(rings_container, "position:y", 0.0, DESCENT_SECONDS)
+			RingState.BEAM:
+				rings_container.position.y = 0.0
+			RingState.RETRACT:
+				create_tween().tween_property(rings_container, "position:y", 8.0, RETRACT_SECONDS)
+	match state:
+		RingState.TELEGRAPH:
+			telegraph_started.emit()
+			_play_sfx("res://audio/sfx_rings.wav", 60.0)
+		RingState.SLAM:
+			rings_slammed.emit(global_position)
+		RingState.BEAM:
+			beam_discharged.emit()
+		RingState.RETRACT:
+			rings_retracted.emit()
+	_update_prompt()
+
+
+func _update_prompt() -> void:
+	var caption := "[E] TRANSPORT RINGS" if current_state == RingState.INACTIVE else "TRANSPORT IN PROGRESS"
+	var bindings := get_node_or_null("/root/KeybindingManager")
+	_prompt.text = bindings.format_prompt(caption) if bindings != null else caption
+
+
 ## Initiates the transport ring drop sequence
 func trigger_ring_drop() -> void:
-	if not multiplayer.is_server():
+	if _player_transport or not multiplayer.is_server():
 		return
 	rpc("sync_trigger_ring_drop")
 
 
 @rpc("call_local", "reliable")
 func sync_trigger_ring_drop() -> void:
+	if _player_transport:
+		return
 	current_state = RingState.TELEGRAPH
 	telegraph_started.emit()
 	print("Transport Rings: Ceiling hatch opening! Rings descending in 2s...")
@@ -109,6 +296,13 @@ func _discharge_beam() -> void:
 		beam_column.visible = true
 		beam_column.scale = Vector3(1, 1, 1)
 
+	if multiplayer.is_server():
+		_discharge_tactical_payload()
+	var timer := get_tree().create_timer(beam_duration_s)
+	timer.timeout.connect(_retract_rings)
+
+
+func _discharge_tactical_payload() -> void:
 	var intercepted_explosive: bool = false
 
 	# 1. Check for explosives inside the rings (Tactical Interception)
@@ -131,16 +325,12 @@ func _discharge_beam() -> void:
 			var player := p as PlayerController3D
 			if player != null and global_position.distance_to(player.global_position) <= 2.2:
 				var dest: Vector3 = paired_rings.global_position + Vector3(0, 0.1, 0)
-				player.global_position = dest
+				player.apply_transport_arrival(dest)
 				print("Transport Rings: Operative %s beamed to paired rings at %s!" % [player.name, str(dest)])
-				paired_rings.trigger_ring_drop()
 
 	# 3. If server and not intercepted, spawn reinforcements
-	if multiplayer.is_server() and spawn_enemies_on_beam and not intercepted_explosive:
+	if spawn_enemies_on_beam and not intercepted_explosive:
 		_spawn_ring_reinforcements()
-
-	var timer := get_tree().create_timer(beam_duration_s)
-	timer.timeout.connect(_retract_rings)
 
 
 func _spawn_ring_reinforcements() -> void:
@@ -183,7 +373,7 @@ func _retract_rings() -> void:
 
 
 func _on_crush_body_entered(body: Node) -> void:
-	if current_state != RingState.SLAM:
+	if not multiplayer.is_server() or current_state != RingState.SLAM:
 		return
 	var health := body.get_node_or_null("HealthComponent") as HealthComponent
 	if health != null and not health.is_dead:

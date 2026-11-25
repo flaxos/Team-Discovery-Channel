@@ -52,6 +52,8 @@ func _ready() -> void:
 		events.timer_expired.connect(_on_timer_expired)
 		objectives.advancement_allowed = events.allow_progress
 	super._ready()
+	for rings: TransportRings in level.find_children("*", "TransportRings", true, false):
+		rings.enable_player_transport()
 	if DisplayServer.get_name() != "headless":
 		_add_presentation()
 	if not level.ready_for_navigation:

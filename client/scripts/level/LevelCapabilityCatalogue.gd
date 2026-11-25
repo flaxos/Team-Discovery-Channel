@@ -35,7 +35,7 @@ static func encode(value: Variant) -> Variant:
 
 static func presets() -> Array[LevelRoomPreset]:
 	var result: Array[LevelRoomPreset] = []
-	var files := DirAccess.get_files_at("res://resources/room_presets/")
+	var files := ResourceLoader.list_directory("res://resources/room_presets/")
 	files.sort()
 	for file: String in files:
 		if file.ends_with(".tres"):
@@ -54,7 +54,7 @@ static func preset_by_id(id: StringName) -> LevelRoomPreset:
 
 static func composites() -> Array[LevelCompositeDefinition]:
 	var result: Array[LevelCompositeDefinition] = []
-	var files := DirAccess.get_files_at("res://resources/level_composites/")
+	var files := ResourceLoader.list_directory("res://resources/level_composites/")
 	files.sort()
 	for file: String in files:
 		if file.ends_with(".tres"):

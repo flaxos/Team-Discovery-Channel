@@ -10,7 +10,8 @@ static var _theme_files: PackedStringArray = []
 
 static func definitions() -> Array[LevelVisualTheme]:
 	var result: Array[LevelVisualTheme] = []
-	var files := DirAccess.get_files_at(DIRECTORY)
+	# Resource names stay the same when Godot remaps them into a release pack.
+	var files := ResourceLoader.list_directory(DIRECTORY)
 	files.sort()
 	for file: String in files:
 		if file.ends_with(".tres"):
@@ -21,7 +22,7 @@ static func definitions() -> Array[LevelVisualTheme]:
 
 
 static func registry() -> Dictionary:
-	var files := DirAccess.get_files_at(DIRECTORY)
+	var files := ResourceLoader.list_directory(DIRECTORY)
 	files.sort()
 	if _themes.is_empty() or files != _theme_files:
 		_themes.clear()

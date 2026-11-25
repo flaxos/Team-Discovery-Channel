@@ -2151,6 +2151,14 @@ func _on_vaporized() -> void:
 	flash_tween.tween_callback(flash.queue_free)
 
 
+func apply_transport_arrival(destination: Vector3) -> void:
+	global_position = destination
+	velocity = Vector3.ZERO
+	if is_local_authority and camera_rig != null:
+		camera_rig.global_position = destination
+	reset_physics_interpolation()
+
+
 func _try_interact() -> void:
 	# 0. If currently dragging a body, dropping it takes precedence
 	if is_dragging_body:
