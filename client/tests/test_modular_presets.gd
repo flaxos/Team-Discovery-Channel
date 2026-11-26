@@ -56,7 +56,7 @@ func run() -> void:
 			assert(node != null)
 			if attachment.scene != null:
 				assert(node.scene_file_path == attachment.scene.resource_path)
-			if attachment.placeholder_size != Vector3.ZERO:
+			elif attachment.placeholder_size != Vector3.ZERO:
 				assert(node.scene_file_path == "res://scenes/level/RoomPlaceholder.tscn")
 			if node is TransportRings:
 				assert(
