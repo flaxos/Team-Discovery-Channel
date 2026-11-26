@@ -47,16 +47,16 @@ On the RTX 3060 at 1440 × 900 with Forward+, 60-frame samples from the stock ga
 
 ## Coverage ledger
 
-All six rows passed the runtime mesh, cache, packaged model and attribution checks. Owner mesh/material review and animated grips remain open.
+All six rows passed the runtime mesh, cache, packaged model and attribution checks. Sprint 25 closes the playable palm-contact and weapon-anchor verification for both weapon slots of all four classes. The owner accepted the Sprint 25 fit with the limitations recorded below. The original mesh and material reviews retain their own status. [Sprint 25 matrix and captures](2026-11-26-sprint25-sg3-heavy.md).
 
 | Asset and live slot | Provenance and recipe | Fallback | Pending review |
 |---|---|---|---|
-| M9, O’Neill and SG3 Heavy sidearm | `emran.bayati`, CC BY 4.0. [Intake](../assets/intake/beretta_m9.json) · [Recipe](../assets/intake/beretta_m9/recipe.json) | Two procedural boxes | Downed readability and grips in 22/25 |
-| P90, O’Neill primary | Rotuma, CC BY 4.0. [Intake](../assets/intake/p90.json) · [Recipe](../assets/intake/p90/recipe.json) | Procedural bullpup | Grip in 22 and highest LOD0 triangle count in this set |
-| MP5SD, Carter primary | WillyG99, CC BY 4.0. [Intake](../assets/intake/mp5sd.json) · [Recipe](../assets/intake/mp5sd/recipe.json) | Procedural SMG | 2K exception and cold load measured here. Grip in 23 |
-| M249, SG3 Heavy primary | AK / skaf13, CC BY 4.0. [Intake](../assets/intake/m249.json) · [Recipe](../assets/intake/m249/recipe.json) | Procedural receiver, drum and barrel | Carried bipod silhouette in Sprint 10, grip in 25 |
-| Staff, Teal’c primary and both Jaffa variants | Original project tri-vane staff. [Work order](../assets/intake/staff/work-order.json) · [Recipe](../assets/intake/staff/pack.json) | Existing procedural staff visuals | NPC and player grips in 20/21/24. NPC fit evidence is in the [Sprint 8 review](2026-11-23-sprint8-staff-intake.md) |
-| Zat, Carter and Teal’c sidearm | Original project loop-frame Zat. [Work order](../assets/intake/zat/work-order.json) · [Recipe](../assets/intake/zat/pack.json) | Procedural box and sphere | Downed readability and grips in 23/24 |
+| M9, O’Neill and SG-3 Heavy sidearm | `emran.bayati`, CC BY 4.0. [Intake](../assets/intake/beretta_m9.json) · [Recipe](../assets/intake/beretta_m9/recipe.json) | Two procedural boxes | Both roles’ grips and downed selection verified. Downed camera readability remains open. |
+| P90, O’Neill primary | Rotuma, CC BY 4.0. [Intake](../assets/intake/p90.json) · [Recipe](../assets/intake/p90/recipe.json) | Procedural bullpup | Grip and reload posture verified. LOD0 remains the highest triangle count in this set. |
+| MP5SD, Carter primary | WillyG99, CC BY 4.0. [Intake](../assets/intake/mp5sd.json) · [Recipe](../assets/intake/mp5sd/recipe.json) | Procedural SMG | Grip and reload posture verified. The 2K exception and cold-load cost remain recorded above. |
+| M249, SG-3 Heavy primary | AK / skaf13, CC BY 4.0. [Intake](../assets/intake/m249.json) · [Recipe](../assets/intake/m249/recipe.json) | Procedural receiver, drum and barrel | Grip and reload posture verified. The fixed extended bipod remains on the accepted Sprint 25 fit. |
+| Staff, Teal’c primary and both Jaffa variants | Original project tri-vane staff. [Work order](../assets/intake/staff/work-order.json) · [Recipe](../assets/intake/staff/pack.json) | Existing procedural staff visuals | Moving player grips and muzzle verified. The NPC evidence remains in the [Sprint 8 review](2026-11-23-sprint8-staff-intake.md). |
+| Zat, Carter and Teal’c sidearm | Original project loop-frame Zat. [Work order](../assets/intake/zat/work-order.json) · [Recipe](../assets/intake/zat/pack.json) | Procedural box and sphere | Both roles’ grips and downed selection verified. Downed camera readability remains open. |
 
 Distributed attribution and the full applicable licence texts are accessible in the lobby and checked against the maintained manifest. [Attributions](../../credits/ATTRIBUTIONS.md).
 

@@ -17,7 +17,16 @@ func client_script() -> String:
 func class_for_slot(index: int) -> String:
 	if index == SHOOTER_SLOT:
 		return SGCNetworkManager.CLASS_SG3_HEAVY
+	if index == 4:
+		return SGCNetworkManager.CLASS_ONEILL_RECON if is_dedicated else SGCNetworkManager.CLASS_TEALC_JAFFA
+	if index == 5:
+		return SGCNetworkManager.CLASS_ONEILL_RECON
 	return super.class_for_slot(index)
+
+
+func run_host() -> void:
+	net.selected_class_id = SGCNetworkManager.CLASS_ONEILL_RECON
+	await super.run_host()
 
 
 func check_m2(turret: DeployableTurret, id: int) -> bool:
@@ -92,20 +101,19 @@ func see_snapshot(label: String) -> void:
 	await super.see_snapshot(label)
 	if label == "retry" and slot == SHOOTER_SLOT:
 		await client_deploy_and_mount()
-	var replacement := slot > (4 if is_dedicated else 3)
-	if replacement and label == "rejoined":
+	if label == "rejoined":
 		var path := NodePath(str(read_mark("m2_deploy")))
 		var id := int(read_mark("m2_mounted"))
 		var deadline := Time.get_ticks_msec() + 15000
 		while Time.get_ticks_msec() < deadline:
 			var turret := main.current_gate_room.get_node_or_null(path) as DeployableTurret
 			if check_m2(turret, id):
-				print("M2_JOIN: replacement received occupied and aimed M2")
+				print("M2_JOIN: observer ", slot, " received occupied and aimed M2")
 				return
 			await frames(1)
-		require(false, "Replacement must see deployed visual, occupant and aim")
-	elif replacement and label == "second_retry":
-		require(main.current_gate_room.get_node("TurretDeployments").get_child_count() == 0, "Replacement sees an empty deployment list after retry")
+		require(false, "Every observer must see the deployed visual, occupant and aim")
+	elif label == "second_retry":
+		require(main.current_gate_room.get_node("TurretDeployments").get_child_count() == 0, "Every client sees an empty deployment list after retry")
 
 
 func client_deploy_and_mount() -> void:

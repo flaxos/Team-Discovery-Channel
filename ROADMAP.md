@@ -38,9 +38,11 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 22 merged via #100.** O’Neill wears slate fatigues, tan webbing and a shoulder radio on the shared Airman rig. The P90 and M9 have Recon-specific palm targets and a cosmetic reload posture. The review includes the SGC alarm lights, shoulder and ADS cameras, and motion footage. [PR #100](https://github.com/flaxos/Team-Discovery-Channel/pull/100) · [Sprint 22 review](docs/reviews/2026-11-25-sprint22-oneill-recon.md).
 
-**Sprint 23 has a Carter Tech preview for review.** Carter wears khaki fatigues and a compact scanner on the shared rig, with MP5SD and Zat grip fits. The SGC iris-repair state drives the close-range lever and panel pose. [Carter Tech review](docs/reviews/2026-11-25-sprint23-carter-tech.md).
+**Sprint 23 merged with Sprint 24 in PR #101.** Carter wears khaki fatigues and a compact scanner on the shared rig, with MP5SD and Zat grip fits. The SGC iris-repair state drives the close-range lever and panel pose. [Carter Tech review](docs/reviews/2026-11-25-sprint23-carter-tech.md).
 
-**Sprint 24 has a Teal’c preview ready for art review.** The bronze plates and two-handed staff fit were checked through standing, running and crouch walking. The Zat stays equipped through the drag, and the staff returns on recovery. The PR also includes the Sprint 23 Carter Tech preview. [Teal’c review](docs/reviews/2026-11-25-sprint24-tealc-jaffa.md).
+**Sprint 24 merged via PR #101.** The bronze plates and two-handed staff fit were checked through standing, running and crouch walking. The Zat stays equipped through the drag, and the staff returns on recovery. Owner art review remains open for both previews. [Teal’c review](docs/reviews/2026-11-25-sprint24-tealc-jaffa.md) · [PR #101](https://github.com/flaxos/Team-Discovery-Channel/pull/101).
+
+**Sprint 25 passed owner art review on 26 November 2026.** SG-3 Heavy wears a new carrier on the shared Airman rig with measured M249 and M9 grips. The four-class weapon matrix and M2 rear-position check are recorded with Linux export evidence and screenshots. The review records the accepted fit and remaining animation polish. [Sprint 25 review](docs/reviews/2026-11-26-sprint25-sg3-heavy.md).
 
 **R16 ring transport.** In Goa’uld Infiltration, step onto a ring pad and press Interact to carry the squad members aboard between decks. Both endpoints share a server-controlled cycle and an occupied receiving pad blocks transport. This gameplay slice uses the existing ring assets and clears a prerequisite for the mothership work. [Transport setup](docs/maps/modular-vertical-kit.md#equipment-and-transport-interfaces).
 
