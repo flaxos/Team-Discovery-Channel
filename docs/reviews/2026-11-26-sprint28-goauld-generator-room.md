@@ -1,0 +1,28 @@
+# Sprint 28 — Goa’uld generator room
+
+Sprint 28 builds on `dbb5dd6`, the Sprint 26 and 27 merge to `main`. The live generator is instance `generator` of `room10` (`Room10LongChamber`) with the `generator` preset. Its 8 × 16 m chamber has a 3.4 m clear height and sits at `(8, 0, 56)` with a 90° turn. [Native layout](../../client/resources/levels/goauld_infiltration_01.tres) · [Generator preset](../../client/resources/room_presets/generator.tres) · [Generator catalogue](../../build/sprint28/generator-catalogue.json).
+
+## Art and fit
+
+The engineering surfaces add the Goa’uld floor, ceiling and inset wall treatment to the long chamber. The service raceway sits within the wall face. The third family is the equipment, with twin enclosed cores and a console angled toward the existing approach. Both props reuse the native basalt, bronze and gold materials. The two cores and the console display dim when the mission fires `generator_releases_command`. Peers use the same event for both live updates and late-join snapshots. A fresh mission starts with all three lights powered. [Goa’uld theme](../../client/resources/level_themes/goauld.tres) · [Generator machinery](../../client/scenes/props/OffworldGeneratorMachinery.tscn) · [Console](../../client/scenes/props/OffworldGeneratorConsole.tscn) · [Status adapter](../../client/scripts/level/GeneratorStatusLight.gd).
+
+| Slot | Room-local origin in metres | Existing solid envelope in metres (W × H × D) | Visible meshes and triangles |
+|---|---|---|---|
+| `console` | `(2.6, 0, -2.6)` | `1.0 × 1.0 × 0.8` | 10 meshes, 220 triangles |
+| `machinery` | `(0, 0, 5)` | `2.0 × 2.4 × 3.0` | 31 meshes, 716 triangles |
+
+The two scenes inherit the original static bodies and leave the room transforms, interaction binding and navmesh approaches in place. Each visible mesh fits its attachment bounds. The engine measured both approach points 0.20 m vertically above the baked navmesh floor. The theme test compares the compound against neutral for identical navigation, solids, sockets and markers. [Measured fit](../../build/sprint28/final-generator-capture.log) · [Local fit and mission test](../../client/tests/test_mission_events.gd) · [Theme parity test](../../client/tests/test_goauld_theme.gd).
+
+**Sourcing.** The casing and console are original Godot scenes. The art uses existing project materials and zero new textures or downloads. The screened generator by julianaaczel listed CC BY 4.0 and credited a separate concept artist. MisterF1sh’s CC Attribution generator used a container form that did not fit the chamber’s upright envelope. The diesel plant by adam-q-kane was a terrestrial CAT design with 298.4k triangles. The fitted scenes retain the compound’s palette and are editable through the preset. [Electric Generator](https://sketchfab.com/3d-models/electric-generator-e6e0f270e03345a5b3e02a2ddea91b44) · [SciFi Stylized Container Power Generator](https://sketchfab.com/3d-models/scifi-stylized-container-power-generator-d3a4316fe9ac4967b51b2b1cb0bfa980) · [Industry Diesel Generator](https://sketchfab.com/3d-models/industry-diesel-generator-power-plant-r3-800k-4a1b2a793b174475803d637d4c996bac).
+
+## Technical verification
+
+- Native validation passed schema, sockets, overlap, enclosure, equipment, navigation and required markers with zero warnings. The compound has 16 rooms with authored pieces and four with the palette. The theme generator is reproducible and all 60 Python checks passed. [Native validation](../../build/sprint28/final-native-validation.json) · [Python results](../../build/sprint28/python.log).
+- The guarded entrance uses `inner → generator`. The quiet mission suite moves through `service → service2 → svc_adapter → stores → maint → generator`, completes sabotage and records, and extracts. The loud suite raises the alarm through the runner, spawns reinforcements and extracts after both objectives. [Route proofs](../../build/sprint28/infiltration-topology.json) · [Focused Godot results](../../build/sprint28/focused.log).
+- The local and ENet mission-event suites checked reach, downed-player rejection, live command release, stale snapshots and retry. The listen and dedicated suites exercised the live update, a late join with the door released and a remote operative earning release via the actual console. [ENet fixture](../../client/tests/test_mission_events_multiplayer.gd).
+- The four-operative listen and dedicated suites passed delayed loading, gate travel with peers in both worlds, return, replacement late join and two retries. The full Godot profile also runs in CI. [Focused Godot summary](../../build/sprint28/focused/summary.json).
+- The standard Linux release booted and its packaged mission-event test passed sabotage and retry. The second package booted with the procedural gate fallback. Both packages passed the offworld dais route and extraction. [Linux export log](../../build/sprint28/linux-export.log).
+
+## Owner art review
+
+Review the casing silhouette and the console controls from both entrances. Compare the same maintenance viewpoint before and after shutdown, then check the third-person view with the alarm raised. The screenshots came from the running mission with the actual interaction, existing alarm presentation and stock player camera for the final view. Owner art approval is open. [Guarded entrance](../../build/sprint28/final-generator-guarded.png) · [Maintenance entrance](../../build/sprint28/final-generator-maintenance.png) · [Console](../../build/sprint28/final-generator-console.png) · [Shutdown](../../build/sprint28/final-generator-shutdown.png) · [Alarm shoulder view](../../build/sprint28/final-generator-alarm-shoulder.png).

@@ -81,6 +81,7 @@ func fresh_snapshot(room: ModularMission) -> void:
 	# host applies mission locks; wait for the authoritative initialized snapshot.
 	for i in range(1800):
 		if room.events.fired.is_empty() and room.objectives.index == 0 and Fixture.door(room).locked:
+			Fixture.check_generator_lights(Fixture.generator_lights(room), true)
 			return
 		await frames(1)
 	assert(false, "Retry snapshot fired=%s index=%d locked=%s" %
@@ -193,6 +194,7 @@ func run_client() -> void:
 				break
 			await frames(1)
 		assert(room.events.fired.has(Fixture.ID) and not Fixture.door(room).locked)
+		Fixture.check_generator_lights(Fixture.generator_lights(room), false)
 		mark("observer_released")
 		assert(await marked("observer_leave"))
 		return
@@ -205,6 +207,7 @@ func run_client() -> void:
 		"Snapshot does not replay a stale event notice")
 	room.events.sync_fired(PackedStringArray())
 	assert(room.events.fired.has(Fixture.ID), "An older snapshot cannot undo a live release")
+	Fixture.check_generator_lights(Fixture.generator_lights(room), false)
 	mark("late")
 	var previous := room.get_instance_id()
 	room = await mission(previous)

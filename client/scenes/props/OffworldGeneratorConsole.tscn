@@ -1,0 +1,106 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Script" path="res://scripts/level/GeneratorStatusLight.gd" id="status"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="StandardMaterial3D" id="powered"]
+albedo_color = Color(0.07, 0.4, 0.38, 1)
+roughness = 0.26
+emission_enabled = true
+emission = Color(0.16, 0.72, 0.62, 1)
+emission_energy_multiplier = 1.45
+
+[sub_resource type="StandardMaterial3D" id="shutdown"]
+albedo_color = Color(0.052, 0.077, 0.072, 1)
+roughness = 0.36
+
+[sub_resource type="BoxMesh" id="plinth"]
+material = ExtResource("basalt")
+size = Vector3(0.94, 0.12, 0.75)
+
+[sub_resource type="CylinderMesh" id="stand"]
+material = ExtResource("bronze")
+top_radius = 0.2
+bottom_radius = 0.3
+height = 0.55
+radial_segments = 8
+rings = 0
+
+[sub_resource type="BoxMesh" id="case"]
+material = ExtResource("basalt")
+size = Vector3(0.63, 0.185, 0.43)
+
+[sub_resource type="BoxMesh" id="bezel"]
+material = ExtResource("gold")
+size = Vector3(0.59, 0.06, 0.39)
+
+[sub_resource type="BoxMesh" id="face"]
+material = ExtResource("bronze")
+size = Vector3(0.49, 0.025, 0.31)
+
+[sub_resource type="BoxMesh" id="display"]
+material = SubResource("powered")
+size = Vector3(0.26, 0.022, 0.105)
+
+[sub_resource type="CylinderMesh" id="key"]
+material = ExtResource("gold")
+top_radius = 0.023
+bottom_radius = 0.028
+height = 0.035
+radial_segments = 8
+rings = 0
+
+[node name="OffworldGeneratorConsole" instance=ExtResource("base")]
+size = Vector3(1, 1, 0.8)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="Plinth" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.06, 0)
+mesh = SubResource("plinth")
+
+[node name="Stand" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.37, 0)
+mesh = SubResource("stand")
+
+[node name="Case" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.713, 0)
+rotation = Vector3(0.25, -0.57, 0)
+mesh = SubResource("case")
+
+[node name="Bezel" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.82, 0)
+rotation = Vector3(0.25, -0.57, 0)
+mesh = SubResource("bezel")
+
+[node name="Face" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.85, 0)
+rotation = Vector3(0.25, -0.57, 0)
+mesh = SubResource("face")
+
+[node name="Display" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.039, 0.887, -0.07)
+rotation = Vector3(0.25, -0.57, 0)
+mesh = SubResource("display")
+script = ExtResource("status")
+shutdown_material = SubResource("shutdown")
+
+[node name="Key1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.16, 0.844, -0.012400000000000008)
+mesh = SubResource("key")
+
+[node name="Key2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.068, 0.844, 0.046479999999999994)
+mesh = SubResource("key")
+
+[node name="Key3" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.023, 0.844, 0.10472)
+mesh = SubResource("key")
+
+[node name="Key4" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.115, 0.844, 0.1636)
+mesh = SubResource("key")
