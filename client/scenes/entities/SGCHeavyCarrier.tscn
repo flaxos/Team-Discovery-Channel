@@ -1,0 +1,85 @@
+[gd_scene load_steps=10 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Material_carrier"]
+albedo_color = Color(0.18, 0.22, 0.15, 1)
+roughness = 0.93
+
+[sub_resource type="StandardMaterial3D" id="Material_pouch"]
+albedo_color = Color(0.28, 0.31, 0.21, 1)
+roughness = 0.88
+
+[sub_resource type="StandardMaterial3D" id="Material_webbing"]
+albedo_color = Color(0.14, 0.15, 0.12, 1)
+roughness = 0.87
+
+[sub_resource type="BoxMesh" id="Mesh_carrier"]
+material = SubResource("Material_carrier")
+size = Vector3(0.28, 0.148, 0.024)
+
+[sub_resource type="BoxMesh" id="Mesh_ammo_pouch"]
+material = SubResource("Material_pouch")
+size = Vector3(0.123, 0.103, 0.042)
+
+[sub_resource type="BoxMesh" id="Mesh_flap"]
+material = SubResource("Material_carrier")
+size = Vector3(0.123, 0.030, 0.007)
+
+[sub_resource type="BoxMesh" id="Mesh_back_sleeve"]
+material = SubResource("Material_carrier")
+size = Vector3(0.255, 0.176, 0.056)
+
+[sub_resource type="BoxMesh" id="Mesh_webbing"]
+material = SubResource("Material_webbing")
+size = Vector3(0.024, 0.172, 0.009)
+
+[sub_resource type="BoxMesh" id="Mesh_pull_tab"]
+material = SubResource("Material_webbing")
+size = Vector3(0.025, 0.028, 0.005)
+
+[node name="HeavyCarrier" type="Node3D"]
+
+[node name="FrontCarrier" type="Node3D" parent="."]
+position = Vector3(0, 1.27, -0.196)
+rotation = Vector3(0.12, 0, 0)
+
+[node name="CarrierPanel" type="MeshInstance3D" parent="FrontCarrier"]
+mesh = SubResource("Mesh_carrier")
+
+[node name="LeftAmmoPouch" type="MeshInstance3D" parent="FrontCarrier"]
+position = Vector3(-0.067, -0.016, -0.029)
+mesh = SubResource("Mesh_ammo_pouch")
+
+[node name="RightAmmoPouch" type="MeshInstance3D" parent="FrontCarrier"]
+position = Vector3(0.067, -0.016, -0.029)
+mesh = SubResource("Mesh_ammo_pouch")
+
+[node name="LeftFlap" type="MeshInstance3D" parent="FrontCarrier/LeftAmmoPouch"]
+position = Vector3(0, 0.038, -0.022)
+mesh = SubResource("Mesh_flap")
+
+[node name="RightFlap" type="MeshInstance3D" parent="FrontCarrier/RightAmmoPouch"]
+position = Vector3(0, 0.038, -0.022)
+mesh = SubResource("Mesh_flap")
+
+[node name="LeftPullTab" type="MeshInstance3D" parent="FrontCarrier/LeftAmmoPouch"]
+position = Vector3(0, 0.014, -0.026)
+mesh = SubResource("Mesh_pull_tab")
+
+[node name="RightPullTab" type="MeshInstance3D" parent="FrontCarrier/RightAmmoPouch"]
+position = Vector3(0, 0.014, -0.026)
+mesh = SubResource("Mesh_pull_tab")
+
+[node name="BackCarrier" type="Node3D" parent="."]
+position = Vector3(0, 1.287, 0.157)
+rotation = Vector3(-0.17, 0, 0)
+
+[node name="UtilitySleeve" type="MeshInstance3D" parent="BackCarrier"]
+mesh = SubResource("Mesh_back_sleeve")
+
+[node name="LeftRetainer" type="MeshInstance3D" parent="BackCarrier"]
+position = Vector3(-0.065, 0, 0.031)
+mesh = SubResource("Mesh_webbing")
+
+[node name="RightRetainer" type="MeshInstance3D" parent="BackCarrier"]
+position = Vector3(0.065, 0, 0.031)
+mesh = SubResource("Mesh_webbing")

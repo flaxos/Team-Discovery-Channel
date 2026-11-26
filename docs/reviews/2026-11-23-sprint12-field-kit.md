@@ -11,6 +11,8 @@ Sprint 12 starts from the merged M2 at `264c7fd`. The four prop exteriors are in
 
 The underlying scenes retain the same collision, health, interaction and effect anchors. The kit has no pickup or disarm state. Character grip art remains open in the character sprints. [Scene inventory and original visual bounds](../assets/intake/field-kit/baseline.json) · [Six held weapons](2026-11-23-sprint10-held-weapon-audit.md) · [M2 defensive position](2026-11-23-sprint11-m2-intake.md).
 
+Sprint 25 distinguishes the equipped weapons and the M2's two mounted hand contacts from field-kit inventory actions. The satchel, claymore, smoke and shield rows cover placement or throw, the deployed states above, replica delivery, carried stock and retry cleanup. Dedicated per-item hand animations and owner art approval remain open. [Sprint 25 review](2026-11-26-sprint25-sg3-heavy.md).
+
 ## Source and fit
 
 The two owner downloads supplied the C4 and smoke exteriors. Each creator listing identifies CC BY 4.0. Neither nested archive adds separate terms. The C4 archive is **Simple Old C4**, a different source from the Tinley candidate recorded at sprint start. The C4 preparation reorients the OBJ and generates tangent space for the normal map. The smoke archive contains explicit OpenGL and DirectX normals and the recipe uses the OpenGL version. Both GLBs use a 1K colour, normal and packed surface map, shared mipmapped mesh and material resources, and the original placeholder as a fallback. [Source comparison](../assets/intake/field-kit/sources.json) · [C4 archive](../assets/intake/field-kit/c4-archive.json) · [Smoke archive](../assets/intake/field-kit/smoke-archive.json) · [Credits](../../credits/ATTRIBUTIONS.md).

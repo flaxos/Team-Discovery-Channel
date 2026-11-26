@@ -221,6 +221,17 @@ func check_imported_loadout(actor: PlayerController3D) -> void:
 	var has_jaffa_kit: bool = rig.jaffa_mount != null and rig.jaffa_mount.visible
 	require(has_jaffa_kit == (actor.class_id == SGCNetworkManager.CLASS_TEALC_JAFFA),
 		"Teal’c keeps the bronze Jaffa kit after travel, replacement and retry")
+	var has_carrier: bool = rig.heavy_mount != null and rig.heavy_mount.visible
+	require(has_carrier == (actor.class_id == SGCNetworkManager.CLASS_SG3_HEAVY),
+		"Only SG-3 Heavy carries the Heavy kit after travel, replacement and retry")
+	if has_carrier:
+		var weapon := actor.current_weapon
+		var primary := actor.active_slot == 1
+		var id := "m249" if primary else "m9"
+		var muzzle := Vector3(0, 0.03, -0.62) if primary else Vector3(0, 0.02, -0.18)
+		require(weapon != null and weapon.weapon_id == id and weapon.muzzle_point.position.is_equal_approx(muzzle)
+			and weapon.has_node(^"WeaponModel/ImportedGLB"),
+			"Heavy keeps the credited visual, assigned slot and original gameplay muzzle")
 	if actor.active_slot == 2 and actor.class_id in [
 		SGCNetworkManager.CLASS_CARTER_TECH, SGCNetworkManager.CLASS_TEALC_JAFFA
 	]:
