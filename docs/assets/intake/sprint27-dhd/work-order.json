@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS27",
+  "asset_id": "offworld_dhd",
+  "status": "draft",
+  "kind": "rigid_model",
+  "purpose": "Fit a readable offworld DHD exterior to the authored Goa’uld Infiltration console. The current gate controller and HUD own every dialing action.",
+  "target": {
+    "scene": "res://scenes/mission/GoauldInfiltrationMission.tscn",
+    "visual_branch": "Level/gate/Attachments/RoomContent/DHD",
+    "measurement_status": "measured",
+    "measurement_evidence": "build/sprint27/arrival-baseline.log",
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "bounds_m": {
+      "min_m": [
+        -0.65,
+        0.0,
+        -0.5
+      ],
+      "max_m": [
+        0.65,
+        1.3,
+        0.5
+      ]
+    },
+    "anchors": [
+      {
+        "name": "Floor origin",
+        "position_m": [
+          0,
+          0,
+          0
+        ],
+        "purpose": "Keep the exterior grounded inside the authored solid body."
+      },
+      {
+        "name": "DeckMesh",
+        "position_m": [
+          0,
+          1.05,
+          0.05
+        ],
+        "purpose": "Use the existing deck centre as a reference. The present visual reaches 1.245 m at its highest edge."
+      },
+      {
+        "name": "Approach",
+        "position_m": [
+          -1.8,
+          0,
+          0
+        ],
+        "purpose": "Face the operator side toward this authored approach and preserve the walkable aisle."
+      },
+      {
+        "name": "InteractArea",
+        "position_m": [
+          0,
+          1,
+          0
+        ],
+        "purpose": "Preserve the 2.4 m trigger radius and 2.0 m trigger height."
+      }
+    ],
+    "coordinate_space": "visual_parent_local"
+  },
+  "acquisition": {
+    "policy": "community_first_generated_gap",
+    "search_record": [
+      {
+        "page": "https://sketchfab.com/3d-models/stargate-dhd-b1abb7d1b4504a47a3163f3ac768fe85",
+        "decision": "rejected",
+        "reason": "CC BY 4.0 candidate lists 1,649 triangles and zero textures. Keep as a form reference for the search. High-fidelity operated views still need a source."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/stargate-dhd-f300336799f746e990b773d82e51032e",
+        "decision": "unavailable",
+        "reason": "The 16,840-triangle textured model is offered under the Standard store licence. Public asset redistribution is unverified."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/stargate-sg1-dial-home-device-dhd-1db8db3e0a0d4ea3876ccca25db4b572",
+        "decision": "unavailable",
+        "reason": "The public record lists 63,574 triangles and six textures. It exposes neither a download option nor a licence grant."
+      }
+    ],
+    "selected_source": null,
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 20000,
+    "max_materials": 3,
+    "lod_triangle_limits": [
+      20000,
+      8000,
+      2500
+    ],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "dhd_exterior",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {
+        "r": "ao",
+        "g": "roughness",
+        "b": "metallic"
+      },
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": [
+        "#2C2925",
+        "#544536",
+        "#A17B49"
+      ],
+      "surface_notes": "Use matte stone and bronze with a separately controllable, restrained indicator. Check the deck and indicator under the existing mission lighting and from the stock shoulder camera."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 24,
+    "measurement_plan": "Measure unique decoded textures including mipmaps, cold and cached setup, visible triangles and frame time against the current console at the same camera and lighting."
+  },
+  "preserve_gameplay": [
+    "collision",
+    "navigation",
+    "sockets",
+    "muzzle_and_interaction_anchors",
+    "stats_and_timing",
+    "network_authority",
+    "native_layout"
+  ],
+  "deliverables": [
+    "self_contained_glb",
+    "lossless_maps",
+    "recipe_or_export_settings",
+    "source_and_generation_provenance",
+    "intake_and_validator_reports",
+    "gameplay_wrapper",
+    "gpu_captures",
+    "export_proof"
+  ],
+  "acceptance_scenario": "Operation Infiltration on four-player listen and dedicated servers. Exercise arrival, regroup, objective-gated DHD feedback, automatic return-gate opening, departure, late join during travel and retry. Capture the approach and operator views and run the Linux export."
+}

@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
 [ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/props/DHDConsole.tscn" id="DHDConsole"]
-[ext_resource type="PackedScene" path="res://scenes/props/Stargate.tscn" id="Stargate"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldDHD.tscn" id="DHDConsole"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldStargate.tscn" id="Stargate"]
 [sub_resource type="Resource" id="a0"]
 script = ExtResource("2")
 id = &"Stargate"
@@ -11,7 +11,7 @@ local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)
 approach = Vector3(0,-3.5,7)
 anchor = &"gate"
 scene = ExtResource("Stargate")
-bounds = AABB(-3.5,-3.48,-2,7,7.2,8)
+bounds = AABB(-3.5,-3.5,-2,7,7.22,8)
 [sub_resource type="Resource" id="a1"]
 script = ExtResource("2")
 id = &"DHD"

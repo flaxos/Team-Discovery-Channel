@@ -1,0 +1,26 @@
+{
+  "source": "https://polyhaven.com/a/rock_01",
+  "provider_api": "https://api.polyhaven.com/files/rock_01",
+  "creator": "Rob Tuytel",
+  "licence": "CC0 1.0 Universal",
+  "maps": [
+    {
+      "file": "client/assets/materials/offworld/gate_stone_albedo.jpg",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_01/rock_01_diff_1k.jpg",
+      "bytes": 688083,
+      "sha256": "0b5f0418eb1e686190c5d33bb54c400b1f9ed58813b5e34aa5e573a5197302b5"
+    },
+    {
+      "file": "client/assets/materials/offworld/gate_stone_normal.png",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/rock_01/rock_01_nor_gl_1k.png",
+      "bytes": 1913482,
+      "sha256": "28ed28b8109590352fce645896390fdff75aeb827ec41841fab94400e59238e5"
+    },
+    {
+      "file": "client/assets/materials/offworld/gate_stone_arm.png",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/rock_01/rock_01_arm_1k.png",
+      "bytes": 1532309,
+      "sha256": "fba8b2fbe6d606087d99a6501e8e5e97824dae2a69aed19510a607bb3d1f0740"
+    }
+  ]
+}

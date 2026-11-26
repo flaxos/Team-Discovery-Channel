@@ -1,0 +1,384 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/props/gate_ashlar.obj" id="1_block"]
+[ext_resource type="Texture2D" path="res://assets/materials/offworld/gate_stone_albedo.jpg" id="2_albedo"]
+[ext_resource type="Texture2D" path="res://assets/materials/offworld/gate_stone_normal.png" id="3_normal"]
+[ext_resource type="Texture2D" path="res://assets/materials/offworld/gate_stone_arm.png" id="4_arm"]
+[ext_resource type="Material" path="res://resources/materials/offworld/gate_stone.tres" id="5_grey"]
+
+[sub_resource type="ConvexPolygonShape3D" id="WalkableDais"]
+points = PackedVector3Array(-3.43, 0, -1.9, 3.43, 0, -1.9, -3.43, 0.75, -0.72, 3.43, 0.75, -0.72, -3.43, 0.75, 1.2, 3.43, 0.75, 1.2, -3.43, 0, 4.6, 3.43, 0, 4.6)
+
+[sub_resource type="StandardMaterial3D" id="AshlarPale"]
+albedo_color = Color(0.83, 0.91, 1.0, 1)
+albedo_texture = ExtResource("2_albedo")
+roughness_texture = ExtResource("4_arm")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.7
+normal_texture = ExtResource("3_normal")
+ao_enabled = true
+ao_texture = ExtResource("4_arm")
+ao_texture_channel = 0
+uv1_scale = Vector3(0.667, 0.667, 0.667)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="AshlarDark"]
+albedo_color = Color(0.67, 0.74, 0.84, 1)
+albedo_texture = ExtResource("2_albedo")
+roughness_texture = ExtResource("4_arm")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.7
+normal_texture = ExtResource("3_normal")
+ao_enabled = true
+ao_texture = ExtResource("4_arm")
+ao_texture_channel = 0
+uv1_scale = Vector3(0.667, 0.667, 0.667)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="AshlarWarm"]
+albedo_color = Color(0.77, 0.82, 0.88, 1)
+albedo_texture = ExtResource("2_albedo")
+roughness_texture = ExtResource("4_arm")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.7
+normal_texture = ExtResource("3_normal")
+ao_enabled = true
+ao_texture = ExtResource("4_arm")
+ao_texture_channel = 0
+uv1_scale = Vector3(0.667, 0.667, 0.667)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="RecessedBed"]
+albedo_color = Color(0.4, 0.45, 0.51, 1)
+albedo_texture = ExtResource("2_albedo")
+roughness_texture = ExtResource("4_arm")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.7
+normal_texture = ExtResource("3_normal")
+ao_enabled = true
+ao_texture = ExtResource("4_arm")
+ao_texture_channel = 0
+uv1_scale = Vector3(0.667, 0.667, 0.667)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[node name="StoneDais" type="StaticBody3D"]
+collision_mask = 0
+
+[node name="WalkableSlope" type="CollisionShape3D" parent="."]
+shape = SubResource("WalkableDais")
+
+[node name="RearStep01" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="RearStep01"]
+position = Vector3(0.0000, 0.0156, -1.7033)
+scale = Vector3(6.8200, 0.0312, 0.3933)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="Stone01" type="MeshInstance3D" parent="RearStep01"]
+position = Vector3(-2.5700, 0.0781, -1.7033)
+scale = Vector3(1.7150, 0.0938, 0.3753)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="Stone02" type="MeshInstance3D" parent="RearStep01"]
+position = Vector3(-0.9500, 0.0781, -1.7033)
+scale = Vector3(1.4750, 0.0938, 0.3753)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="Stone03" type="MeshInstance3D" parent="RearStep01"]
+position = Vector3(0.6500, 0.0781, -1.7033)
+scale = Vector3(1.6750, 0.0938, 0.3753)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="Stone04" type="MeshInstance3D" parent="RearStep01"]
+position = Vector3(2.4700, 0.0781, -1.7033)
+scale = Vector3(1.9150, 0.0938, 0.3753)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="RearStep02" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="RearStep02"]
+position = Vector3(0.0000, 0.0841, -1.3100)
+scale = Vector3(6.8200, 0.1681, 0.3934)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="Stone01" type="MeshInstance3D" parent="RearStep02"]
+position = Vector3(-2.8200, 0.2716, -1.3100)
+scale = Vector3(1.2150, 0.2069, 0.3754)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="Stone02" type="MeshInstance3D" parent="RearStep02"]
+position = Vector3(-1.4750, 0.2716, -1.3100)
+scale = Vector3(1.4250, 0.2069, 0.3754)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="Stone03" type="MeshInstance3D" parent="RearStep02"]
+position = Vector3(-0.0250, 0.2716, -1.3100)
+scale = Vector3(1.4250, 0.2069, 0.3754)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="Stone04" type="MeshInstance3D" parent="RearStep02"]
+position = Vector3(1.4550, 0.2716, -1.3100)
+scale = Vector3(1.4850, 0.2069, 0.3754)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="Stone05" type="MeshInstance3D" parent="RearStep02"]
+position = Vector3(2.8250, 0.2716, -1.3100)
+scale = Vector3(1.2050, 0.2069, 0.3754)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="RearStep03" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="RearStep03"]
+position = Vector3(0.0000, 0.1888, -0.9166)
+scale = Vector3(6.8200, 0.3776, 0.3933)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="Stone01" type="MeshInstance3D" parent="RearStep03"]
+position = Vector3(-2.5450, 0.5013, -0.9166)
+scale = Vector3(1.7650, 0.2474, 0.3753)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="Stone02" type="MeshInstance3D" parent="RearStep03"]
+position = Vector3(-0.9750, 0.5013, -0.9166)
+scale = Vector3(1.3250, 0.2474, 0.3753)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="Stone03" type="MeshInstance3D" parent="RearStep03"]
+position = Vector3(0.5750, 0.5013, -0.9166)
+scale = Vector3(1.7250, 0.2474, 0.3753)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="Stone04" type="MeshInstance3D" parent="RearStep03"]
+position = Vector3(2.4450, 0.5013, -0.9166)
+scale = Vector3(1.9650, 0.2474, 0.3753)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="Landing" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="Landing"]
+position = Vector3(0, 0.24, 0.24)
+scale = Vector3(6.82, 0.48, 1.92)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="ThresholdStone" type="MeshInstance3D" parent="Landing"]
+position = Vector3(0, 0.615, 0.24)
+scale = Vector3(1.68, 0.27, 1.902)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="RearStone01" type="MeshInstance3D" parent="Landing"]
+position = Vector3(-2.795, 0.615, -0.3)
+scale = Vector3(1.265, 0.27, 0.822)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="RearStone02" type="MeshInstance3D" parent="Landing"]
+position = Vector3(-1.5, 0.615, -0.3)
+scale = Vector3(1.275, 0.27, 0.822)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="RearStone03" type="MeshInstance3D" parent="Landing"]
+position = Vector3(1.51, 0.615, -0.3)
+scale = Vector3(1.295, 0.27, 0.822)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="RearStone04" type="MeshInstance3D" parent="Landing"]
+position = Vector3(2.805, 0.615, -0.3)
+scale = Vector3(1.245, 0.27, 0.822)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="FrontStone01" type="MeshInstance3D" parent="Landing"]
+position = Vector3(-2.665, 0.615, 0.66)
+scale = Vector3(1.525, 0.27, 1.062)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="FrontStone02" type="MeshInstance3D" parent="Landing"]
+position = Vector3(-1.37, 0.615, 0.66)
+scale = Vector3(1.015, 0.27, 1.062)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="FrontStone03" type="MeshInstance3D" parent="Landing"]
+position = Vector3(1.42, 0.615, 0.66)
+scale = Vector3(1.115, 0.27, 1.062)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="FrontStone04" type="MeshInstance3D" parent="Landing"]
+position = Vector3(2.715, 0.615, 0.66)
+scale = Vector3(1.425, 0.27, 1.062)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="FrontStep04" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="FrontStep04"]
+position = Vector3(0.0000, 0.1672, 1.6250)
+scale = Vector3(6.8200, 0.3344, 0.8500)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="Stone01" type="MeshInstance3D" parent="FrontStep04"]
+position = Vector3(-2.8300, 0.4952, 1.6250)
+scale = Vector3(1.1950, 0.3216, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="Stone02" type="MeshInstance3D" parent="FrontStep04"]
+position = Vector3(-1.5850, 0.4952, 1.6250)
+scale = Vector3(1.2450, 0.3216, 0.8320)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="Stone03" type="MeshInstance3D" parent="FrontStep04"]
+position = Vector3(-0.1650, 0.4952, 1.6250)
+scale = Vector3(1.5450, 0.3216, 0.8320)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="Stone04" type="MeshInstance3D" parent="FrontStep04"]
+position = Vector3(1.3500, 0.4952, 1.6250)
+scale = Vector3(1.4350, 0.3216, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="Stone05" type="MeshInstance3D" parent="FrontStep04"]
+position = Vector3(2.7600, 0.4952, 1.6250)
+scale = Vector3(1.3350, 0.3216, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="FrontStep03" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="FrontStep03"]
+position = Vector3(0.0000, 0.0977, 2.4750)
+scale = Vector3(6.8200, 0.1954, 0.8500)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="Stone01" type="MeshInstance3D" parent="FrontStep03"]
+position = Vector3(-2.5900, 0.3322, 2.4750)
+scale = Vector3(1.6750, 0.2736, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="Stone02" type="MeshInstance3D" parent="FrontStep03"]
+position = Vector3(-1.0400, 0.3322, 2.4750)
+scale = Vector3(1.3750, 0.2736, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="Stone03" type="MeshInstance3D" parent="FrontStep03"]
+position = Vector3(0.5100, 0.3322, 2.4750)
+scale = Vector3(1.6750, 0.2736, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="Stone04" type="MeshInstance3D" parent="FrontStep03"]
+position = Vector3(2.4000, 0.3322, 2.4750)
+scale = Vector3(2.0550, 0.2736, 0.8320)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="FrontStep02" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="FrontStep02"]
+position = Vector3(0.0000, 0.0447, 3.3250)
+scale = Vector3(6.8200, 0.0894, 0.8500)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="Stone01" type="MeshInstance3D" parent="FrontStep02"]
+position = Vector3(-2.7350, 0.1852, 3.3250)
+scale = Vector3(1.3850, 0.1916, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="Stone02" type="MeshInstance3D" parent="FrontStep02"]
+position = Vector3(-1.3450, 0.1852, 3.3250)
+scale = Vector3(1.3450, 0.1916, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="Stone03" type="MeshInstance3D" parent="FrontStep02"]
+position = Vector3(0.0000, 0.1852, 3.3250)
+scale = Vector3(1.2950, 0.1916, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
+
+[node name="Stone04" type="MeshInstance3D" parent="FrontStep02"]
+position = Vector3(1.3100, 0.1852, 3.3250)
+scale = Vector3(1.2750, 0.1916, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarPale")
+
+[node name="Stone05" type="MeshInstance3D" parent="FrontStep02"]
+position = Vector3(2.7000, 0.1852, 3.3250)
+scale = Vector3(1.4550, 0.1916, 0.8320)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="FrontStep01" type="Node3D" parent="."]
+
+[node name="JointBed" type="MeshInstance3D" parent="FrontStep01"]
+position = Vector3(0.0000, 0.0147, 4.1750)
+scale = Vector3(6.8200, 0.0294, 0.8500)
+mesh = ExtResource("1_block")
+material_override = SubResource("RecessedBed")
+
+[node name="Stone01" type="MeshInstance3D" parent="FrontStep01"]
+position = Vector3(-2.6700, 0.0617, 4.1750)
+scale = Vector3(1.5150, 0.0646, 0.8320)
+mesh = ExtResource("1_block")
+material_override = ExtResource("5_grey")
+
+[node name="Stone02" type="MeshInstance3D" parent="FrontStep01"]
+position = Vector3(-1.1000, 0.0617, 4.1750)
+scale = Vector3(1.5750, 0.0646, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="Stone03" type="MeshInstance3D" parent="FrontStep01"]
+position = Vector3(0.6250, 0.0617, 4.1750)
+scale = Vector3(1.8250, 0.0646, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarWarm")
+
+[node name="Stone04" type="MeshInstance3D" parent="FrontStep01"]
+position = Vector3(2.4950, 0.0617, 4.1750)
+scale = Vector3(1.8650, 0.0646, 0.8320)
+mesh = ExtResource("1_block")
+material_override = SubResource("AshlarDark")
