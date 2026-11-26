@@ -196,3 +196,20 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 - **Changes:** Prepared the publicly redistributed suit and selected motion from cktang88’s attributed character files. Dropped the floating headset and disconnected source mesh, re-encoded decoded textures as PNG, compensated normalized vertex units in inverse binds and mapped the selected animation channels onto the suit’s skeleton. The game fits the original Airman scene and uses its existing action cues. [Redistributor credits](https://github.com/cktang88/3d-fps/blob/130ac2a5c856401ec36e7d35afcfefe40c5801f4/README.md).
 - **Changes:** Motion was sourced from the redistributed BAMEN character intermediary with the Universal Animation Library Standard retargeting credited by the redistributor. The production file uses the tactical suit’s mesh and skin. [BAMEN character listing](https://sketchfab.com/3d-models/free-military-soldier-rigged-e9c56308a67d4a3db62e914fafa4d198) · [Universal Animation Library](https://quaternius.itch.io/universal-animation-library) · [Universal Animation Library 2](https://quaternius.itch.io/universal-animation-library-2) · [Source and prepared hashes](../docs/assets/intake/sprint19-airman/tactical-source.json).
 - **Sprint 20 reuse:** The opt-in Serpent fitting preview reuses four skinned clothing pieces, shared animations and the BoneMap, with a darker cloth material. The built-in helmet and armour fittings are original native geometry authored for this prototype. [Serpent review](../docs/reviews/2026-11-25-sprint20-serpent-jaffa.md).
+- **Changes:** Sprint 26 reuses four skinned clothing meshes and the Airman BoneMap for the SGC civilians. Their solid workwear, workstation poses and held props are project adaptations. The civilian variant omits the helmet, armour, pads and tactical gear.
+
+### SGC civilian head
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/assets/characters/sgc_civilian_head.glb` | MakeHuman base head with system skin, eyes and Short01 hair | MakeHuman team and system-asset contributors | [Pinned base](https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj), [system pack](https://www.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html) | [CC0 1.0](licenses/CC0-1.0.txt) | Shared head on the civilian Head bone | M |
+
+- **Modifications:** Cropped the base mesh at the neckline, conformed the system eye and hair meshes to the base mesh, prepared cropped maps with an alpha-tested hair silhouette, and packed the three surfaces into one upright metre-scale GLB. [Source and prepared hashes](../docs/assets/intake/sprint26-civilian-head.json).
+
+### Offworld gate stone — Sprint 27
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/resources/materials/offworld/gate_stone.tres` | Rock 01 | Rob Tuytel for Poly Haven | https://polyhaven.com/a/rock_01 | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Shared 1.5 m repeat on the original stepped gate dais | S |
+
+- **Changes:** The 1K diffuse JPEG, OpenGL normal and packed AO, roughness and metallic PNG maps retain their source bytes. The native materials add grey tint variation, triplanar mapping and mipmaps. [Source map hashes](../docs/assets/intake/sprint27-gate-stone.json).

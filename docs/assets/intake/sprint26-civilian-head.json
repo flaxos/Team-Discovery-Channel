@@ -1,0 +1,110 @@
+{
+  "creator": "MakeHuman team and system-asset contributors",
+  "licence": "CC0 1.0 Universal",
+  "licence_source": "https://www.makehumancommunity.org/about/license.html",
+  "base_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "base_source": "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj",
+  "system_pack": "https://files.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+  "system_pack_catalogue": "https://www.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
+  "intake": [
+    "System pack members checked for absolute paths, traversal and symlinks before selective extraction.",
+    "Asset licence from the pinned MakeHuman LICENSE.md and declarations in the selected system assets."
+  ],
+  "source_files": {
+    "makehuman/data/3dobjs/base.obj": {
+      "bytes": 1749303,
+      "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c"
+    },
+    "LICENSE.md": {
+      "bytes": 3598,
+      "sha256": "edd99571ca62698f78c943fd4fffb159a413c315fa0d4819d3cec5cadaf8b4f1"
+    },
+    "makehuman_system_assets_cc0.zip": {
+      "bytes": 280737770,
+      "sha256": "b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107"
+    },
+    "skins/young_asian_male/young_lightskinned_male_diffuse3.png": {
+      "bytes": 3593099,
+      "sha256": "f50016a5507fc687dc8df06599c8ea48de950cd185de33a71cafc1319ddab4d5"
+    },
+    "skins/young_asian_male/young_asian_male.mhmat": {
+      "bytes": 1452,
+      "sha256": "9fdfc9863cd15d1359311435f2da7de3906f81d6eea549fba6bf14cd82ceb6a0"
+    },
+    "eyes/high-poly/high-poly.obj": {
+      "bytes": 100882,
+      "sha256": "da2493215b708a344c33dc72f2a9a5b8fa985dcc5a70ad3b208995cf871da8e1"
+    },
+    "eyes/high-poly/high-poly.mhclo": {
+      "bytes": 72490,
+      "sha256": "b183cfe37120ab726f9b3f2ea6cd3a64c44ce7b4bd91a77c841cf70c04f83a0d"
+    },
+    "eyes/materials/brown_eye.png": {
+      "bytes": 610817,
+      "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b"
+    },
+    "eyes/materials/brown.mhmat": {
+      "bytes": 1247,
+      "sha256": "4abad93ce50541c08127721e77bce035640c9f16bed16cd0f5524b1cd5908465"
+    },
+    "hair/short01/short01.obj": {
+      "bytes": 194450,
+      "sha256": "d998d8416f9b5d5591f1d756f4d292288d000a6951bc0f4d2e8e72727bbc44fa"
+    },
+    "hair/short01/short01.mhclo": {
+      "bytes": 201588,
+      "sha256": "ae1ffaa98da5753b803b3a173bede4895d2215e6bb94763f3765a71f0e984f35"
+    },
+    "hair/short01/short01_diffuse.png": {
+      "bytes": 2354146,
+      "sha256": "f34a0957184e3d1e911ed59245f874f8d4843f61ee44ff49f43edb4be0196949"
+    },
+    "hair/short01/short01.mhmat": {
+      "bytes": 1314,
+      "sha256": "01e2e12ce3f3d3c859225456660acadcdd27d4f4b4d888bcbd6f11998cadd975"
+    }
+  },
+  "process": "tools/prepare_sprint26_civilian_head.py",
+  "prepared": {
+    "file": "client/assets/characters/sgc_civilian_head.glb",
+    "bytes": 1833468,
+    "sha256": "4bac552fdb79c2ead00683271df853d4501dee64b400d6a62e487b0a73b27522",
+    "triangles": 14202,
+    "surfaces": 3,
+    "validator": {
+      "numErrors": 0,
+      "numWarnings": 0,
+      "numInfos": 0,
+      "numHints": 0
+    }
+  },
+  "prepared_maps": {
+    "eyes.png": {
+      "bytes": 52652,
+      "sha256": "3e2a5d137c7bfcdcaaaeae652883a0d5dfc12a91d3b6d6b99eed519507364878",
+      "image_mode": "RGB",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    "face.png": {
+      "bytes": 1071444,
+      "sha256": "43d3843357b099c6ae482f38560b5afb3b5e148d5b0c759219fc97739baf8d34",
+      "image_mode": "RGB",
+      "dimensions": [
+        1024,
+        1024
+      ]
+    },
+    "hair.png": {
+      "bytes": 342031,
+      "sha256": "08b1fd6b6721c1e19c14d422dd57ab20a3aabd3022a5fec738ebbafbb83d5b91",
+      "image_mode": "RGBA",
+      "dimensions": [
+        512,
+        512
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
-# Goa'uld theme kit (GA-1 + GA-2 corridor family)
+# Goa'uld theme kit
 
-The first faction art in the game: a palette that reaches every room of a `goauld` layout, and built pieces for all eight corridor/junction/adapter modules plus the compact chamber (`room01`–`room09`). It follows the [Goa'uld visual brief](goauld-visual-brief.md), made in the engine by a generator ([D-012](../DECISIONS.md)). Sprint 6 recovers and finishes GA-2 part 1; [current evidence and provenance](../reviews/2026-11-18-sprint6-goauld-corridors.md).
+The first faction art in the game: a palette that reaches every room of a `goauld` layout, and built pieces for all eight corridor/junction/adapter modules plus the compact chamber (`room01`–`room09`). Sprint 27 adds the `room16` arrival hangar. It follows the [Goa'uld visual brief](goauld-visual-brief.md), made in the engine by a generator ([D-012](../DECISIONS.md)). Sprint 6 recovers and finishes GA-2 part 1; [current evidence and provenance](../reviews/2026-11-18-sprint6-goauld-corridors.md).
 
 Nothing here changes collision, sockets, positions or navigation ([D-010](../DECISIONS.md)). An automated suite proves that on the infiltration compound. **A person has not yet reviewed the look**: that is this milestone's open gate.
 
@@ -8,8 +8,8 @@ Nothing here changes collision, sockets, positions or navigation ([D-010](../DEC
 
 | | Rooms in the infiltration compound | What changes |
 |---|---|---|
-| **Pieces** | 14 of 20: the original 8, both T-junctions, the narrow corner, both wide corners and the width adapter | Ribbed walls, a plinth, a frieze with a gold band, door lintels with a gold block, connected floor runners and margins, coffered ceilings |
-| **Palette only** | Gate room, generator, command room, ramp and both ring rooms | The same slabs in dark stone, with bronze lintels and sandstone props |
+| **Pieces** | 15 of 20: the original 14 plus the arrival hangar | Ribbed walls, a plinth, a frieze with a gold band, door lintels with a gold block, connected floor runners and margins, coffered ceilings |
+| **Palette only** | Generator, command room, ramp and both ring rooms | The same slabs in dark stone, with bronze lintels and sandstone props |
 
 The original GA-1 captures, taken under the mission's lighting, remain in [`docs/reviews/ga1-captures/`](../reviews/ga1-captures/). These two views show the first slice; the [Sprint 6 review](../reviews/2026-11-18-sprint6-goauld-corridors.md) compares every new shape against GA-1 coverage and includes Jaffa, connected joins and the production camera.
 
@@ -27,15 +27,17 @@ python3 tools/theme_kit.py            # regenerate the kit
 python3 tools/theme_kit.py --check    # fail if the committed kit is stale
 ```
 
-`tools/theme_kit.py` reads the nine module scenes, and for every structural slab writes a piece inside its box, with the lintel exception below:
+`tools/theme_kit.py` reads ten module scenes, and for every structural slab writes a piece inside its box, with the lintel exception below:
 
 | Output | Contents |
 |---|---|
-| `client/resources/level_themes/goauld.tres` | The theme: one material per resolver slot, and 106 variants (one per slab of the nine modules, each with its rotation) |
+| `client/resources/level_themes/goauld.tres` | The theme: one material per resolver slot, and 130 variants, each with its slab and rotation |
 | `client/resources/level_themes/goauld/*.tres` | Eight materials, one per palette role. Change a colour here by changing `PALETTE` in the generator |
-| `client/scenes/level/themes/goauld/*.tscn` | 41 distinct shared piece scenes: box meshes only, no scripts, no collision. Together with eight materials and the theme, 50 generated files |
+| `client/scenes/level/themes/goauld/*.tscn` | 60 distinct shared piece scenes: box meshes only, no scripts, no collision. Together with eight materials and the theme, 69 generated files |
 
 **Do not edit the generated files by hand.** A unit test fails when they differ from the generator's output.
+
+The 12 m arrival hangar uses four-metre rib spacing and an upper band above the tall north opening. Thin portal floors and roofs remain flush, and the east-wall service recess stays within its original slab. [Sprint 27 room and DHD](../reviews/2026-11-26-sprint27-offworld-gate-arrival.md).
 
 The rules the generator applies, each from the brief:
 
@@ -61,7 +63,7 @@ The rules the generator applies, each from the brief:
 | `visual_source` | The first theme in the fallback chain with art of its own. `goauld` for every room of a `goauld` layout |
 | `coverage` | `pieces` when that theme has built scenes for the room's module, `palette` when it only recolours the slabs, `generic` when no theme applies |
 
-`python3 tools/level_authoring.py validate --layout … --summary` counts rooms by both. The infiltration compound reports `goauld -> goauld (pieces)`: 14 and `goauld -> goauld (palette)`: 6. The nine-room `goauld_corridor_gallery.tres` reports nine pieced rooms and has a continuous entry-to-destination route.
+`python3 tools/level_authoring.py validate --layout … --summary` counts rooms by both. The infiltration compound reports `goauld -> goauld (pieces)`: 15 and `goauld -> goauld (palette)`: 5. The nine-room `goauld_corridor_gallery.tres` reports nine pieced rooms and has a continuous entry-to-destination route.
 
 A theme's `materials` must be keyed by the resolver's slot names: `floor`, `ceiling`, `door_frame`, `portal`, `wall`, `detail`, `prop`. `validate_theme` now rejects any other key, where it used to ignore it silently. The five other themes still declare the older descriptive names in `decoration_slots`; that list is catalogue text and nothing reads it.
 
@@ -96,7 +98,7 @@ Sources: [`chamber_door_neutral_jaffa_before.png`](../reviews/ga1-captures/chamb
 
 | Suite | Proves |
 |---|---|
-| `client/tests/test_goauld_theme.gd` | On the infiltration compound: all 20 rooms report `goauld`; 14 have pieces and 6 the palette; every slab of the pieced rooms is replaced; collision shapes, navigation vertices/polygons, module/socket/marker poses and cover are identical to neutral. All nine definitions apply under all four rotations without collision changes or fallback. The connected gallery also matches neutral structure/navigation. Gold stays above 2.8 m; floors are flat; relief faces inward; unknown material keys are rejected |
+| `client/tests/test_goauld_theme.gd` | On the infiltration compound: all 20 rooms report `goauld`; 15 have built pieces and 5 use the palette; every slab of the pieced rooms is replaced; collision shapes, navigation vertices/polygons, module/socket/marker poses and cover are identical to neutral. All ten definitions apply under all four rotations without collision changes or fallback. The connected gallery also matches neutral structure/navigation. Gold stays above 2.8 m; floors are flat; relief faces inward; unknown material keys are rejected |
 | `tools/tests/test_theme_kit.py` | On generated geometry: current output, positive dimensions, exact slab bounds with the 5 mm lintel allowance, disjoint boxes, solid pieces, flush ceiling edges, flat floors, connected runner bands, finished corner ends and both lintel faces, gold height/accent limits and the original palette/armour contrast rules |
 | `client/tests/test_level_themes.gd`, `test_level_demonstrations.gd` | Updated: `goauld` now reports its own art; the other four factions still fall back to neutral |
 
@@ -124,7 +126,7 @@ Play `godot --path client -- --mission goauld_infiltration` from a checkout of t
 
 | | Where it goes |
 |---|---|
-| The remaining six module types (long/large/special chambers, ramp, rings and gate room) | Later GA-2 chunks, in the brief's order. Inspect unfinished work before extending `MODULES`; tall rooms need a second frieze tier (G-8) |
+| The remaining module types (long/large chambers, ramp and rings) | Later GA-2 chunks, in the brief's order. Inspect unfinished work before extending `MODULES`; tall rooms need a second frieze tier (G-8) |
 | Lighting: warm ambient, fixtures, removing the fixed directional light | V3 (G-3) |
 | Themed door leaves | G-2 |
 | Free-standing decoration: columns, braziers | G-5 |

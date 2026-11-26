@@ -44,6 +44,10 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 25 passed owner art review on 26 November 2026.** SG-3 Heavy wears a new carrier on the shared Airman rig with measured M249 and M9 grips. The four-class weapon matrix and M2 rear-position check are recorded with Linux export evidence and screenshots. The review records the accepted fit and remaining animation polish. [Sprint 25 review](docs/reviews/2026-11-26-sprint25-sg3-heavy.md).
 
+**Sprint 26 adds three stationary civilian roles.** The lab technician, medic and administrator appear at authored workstations in SGC UAT and Defense. They share a fitted head and the Airman rig, with distinct workwear and props. The four-player fixtures check the stations after travel, late join and retry. Owner art review is open. [Sprint 26 review](docs/reviews/2026-11-26-sprint26-sgc-civilians.md) · [Sprint 25 merge](https://github.com/flaxos/Team-Discovery-Channel/pull/102).
+
+**Sprint 27 fits a reusable stone platform to the offworld gate.** A full stone slab meets the inner rim and event horizon at foot level. The stock operative can walk either approach and cross the gate plane while grounded. The original DHD follows the existing gate state, and the hangar has tall-wall trim and recessed service cabinets. Owner art review is open. [Sprint 27 review](docs/reviews/2026-11-26-sprint27-offworld-gate-arrival.md).
+
 **R16 ring transport.** In Goa’uld Infiltration, step onto a ring pad and press Interact to carry the squad members aboard between decks. Both endpoints share a server-controlled cycle and an occupied receiving pad blocks transport. This gameplay slice uses the existing ring assets and clears a prerequisite for the mothership work. [Transport setup](docs/maps/modular-vertical-kit.md#equipment-and-transport-interfaces).
 
 | Option | What | Who | Detail |

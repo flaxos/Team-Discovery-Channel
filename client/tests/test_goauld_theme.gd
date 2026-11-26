@@ -1,6 +1,6 @@
 extends SceneTree
-## GA-1 plus GA-2 part 1 on the production infiltration compound: the palette reaches
-## every room, and the corridor family and compact chamber get built pieces,
+## The palette reaches the whole live infiltration compound. Corridors, compact chambers
+## and the arrival hangar use built pieces,
 ## and nothing a theme does changes collision or navigation (decision D-010). The same layout
 ## is assembled twice, once as authored and once forced to the neutral theme, and compared.
 const LAYOUT := "res://resources/levels/goauld_infiltration_01.tres"
@@ -14,7 +14,8 @@ const PIECE_MODULES: Array[StringName] = [
 	&"room06",
 	&"room07",
 	&"room08",
-	&"room09"
+	&"room09",
+	&"room16",
 ]
 const FRIEZE_BASE := 2.8
 
@@ -85,7 +86,7 @@ func flat(point: Vector3) -> float:
 func run() -> void:
 	var theme := LevelThemeResolver.registry()[&"goauld"] as LevelVisualTheme
 	assert(LevelThemeResolver.validate_theme(theme).is_empty(), str(LevelThemeResolver.validate_theme(theme)))
-	assert(theme.art_status == "authored" and theme.variants.size() == 106)
+	assert(theme.art_status == "authored" and theme.variants.size() == 130)
 	for slot_id: String in theme.materials:
 		assert(slot_id in LevelThemeResolver.SLOTS, slot_id)
 	for slot_id: String in theme.decoration_slots:
@@ -181,9 +182,9 @@ func run() -> void:
 			var prop := module.get_node_or_null(LevelRoomComposer.node_path(attachment)) as LevelPlaceholderProp
 			if prop != null:
 				assert((prop.get_node("Visuals/Mesh") as MeshInstance3D).material_override == theme.materials["prop"])
-	assert(pieced == 14, "Corridors, junctions, adapters and compact chambers have pieces: %d" % pieced)
+	assert(pieced == 15, "Corridors, compact chambers and the arrival hangar have pieces: %d" % pieced)
 
-	# --- All nine definitions, including those not in the compound, apply under each turn.
+	# --- Every built module, including those outside the compound, applies under each turn.
 	for mod_id: StringName in PIECE_MODULES:
 		var def := LevelCatalogue.module_by_id(mod_id)
 		assert(def != null, str(mod_id))
@@ -252,7 +253,7 @@ func run() -> void:
 	gallery.queue_free()
 	await process_frame
 	print(
-		"PASS goa'uld theme: palette on 20 rooms, pieces on 14 (%d cosmetic meshes), collision, navigation, sockets and markers identical to neutral, gold above door height, flat floors, relief facing the room"
+		"PASS goa'uld theme: palette on 20 rooms, pieces on 15 (%d cosmetic meshes), collision, navigation, sockets and markers identical to neutral, gold above door height, flat floors, relief facing the room"
 		% cosmetic_meshes
 	)
 	await preload("res://tests/support/finish.gd").success(self)

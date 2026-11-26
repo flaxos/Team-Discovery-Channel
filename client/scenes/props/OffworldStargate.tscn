@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/Stargate.tscn" id="1_gate"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldGateStoneDais.tscn" id="2_dais"]
+
+[node name="OffworldStargate" instance=ExtResource("1_gate")]
+
+[node name="StoneDais" parent="." instance=ExtResource("2_dais")]
+position = Vector3(0, -3.5, 0)

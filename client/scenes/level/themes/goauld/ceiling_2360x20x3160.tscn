@@ -1,0 +1,430 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/ceiling.tres" id="ceiling"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("ceiling")
+size = Vector3(23.6, 0.1, 31.6)
+
+[sub_resource type="BoxMesh" id="m1"]
+material = ExtResource("bronze")
+size = Vector3(23.6, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m2"]
+material = ExtResource("bronze")
+size = Vector3(23.6, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m3"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 30.8)
+
+[sub_resource type="BoxMesh" id="m4"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 30.8)
+
+[sub_resource type="BoxMesh" id="m5"]
+material = ExtResource("bronze")
+size = Vector3(22.8, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m6"]
+material = ExtResource("bronze")
+size = Vector3(22.8, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m7"]
+material = ExtResource("bronze")
+size = Vector3(22.8, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m8"]
+material = ExtResource("bronze")
+size = Vector3(22.8, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m9"]
+material = ExtResource("bronze")
+size = Vector3(22.8, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m10"]
+material = ExtResource("bronze")
+size = Vector3(22.8, 0.1, 0.4)
+
+[sub_resource type="BoxMesh" id="m11"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m12"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m13"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m14"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 3)
+
+[sub_resource type="BoxMesh" id="m15"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m16"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m17"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m18"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m19"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m20"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m21"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 3)
+
+[sub_resource type="BoxMesh" id="m22"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m23"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m24"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m25"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m26"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m27"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m28"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 3)
+
+[sub_resource type="BoxMesh" id="m29"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m30"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m31"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m32"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m33"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m34"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m35"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 3)
+
+[sub_resource type="BoxMesh" id="m36"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m37"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m38"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m39"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m40"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m41"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m42"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 3)
+
+[sub_resource type="BoxMesh" id="m43"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m44"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m45"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m46"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[sub_resource type="BoxMesh" id="m47"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m48"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m49"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 3)
+
+[sub_resource type="BoxMesh" id="m50"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 1.1)
+
+[sub_resource type="BoxMesh" id="m51"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 2.6)
+
+[sub_resource type="BoxMesh" id="m52"]
+material = ExtResource("bronze")
+size = Vector3(0.4, 0.1, 9)
+
+[node name="Ceiling" type="Node3D"]
+
+[node name="Bays" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.05, 0)
+mesh = SubResource("m0")
+
+[node name="BorderNorth" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, -15.6)
+mesh = SubResource("m1")
+
+[node name="BorderSouth" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 15.6)
+mesh = SubResource("m2")
+
+[node name="BorderWest" type="MeshInstance3D" parent="."]
+position = Vector3(-11.6, -0.05, 0)
+mesh = SubResource("m3")
+
+[node name="BorderEast" type="MeshInstance3D" parent="."]
+position = Vector3(11.6, -0.05, 0)
+mesh = SubResource("m4")
+
+[node name="BeamX0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, -6.2)
+mesh = SubResource("m5")
+
+[node name="BeamX1" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, -3.2)
+mesh = SubResource("m6")
+
+[node name="BeamX2" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, -1.7)
+mesh = SubResource("m7")
+
+[node name="BeamX3" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 1.7)
+mesh = SubResource("m8")
+
+[node name="BeamX4" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 3.2)
+mesh = SubResource("m9")
+
+[node name="BeamX5" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 6.2)
+mesh = SubResource("m10")
+
+[node name="BeamZ0_0" type="MeshInstance3D" parent="."]
+position = Vector3(-6.2, -0.05, -10.9)
+mesh = SubResource("m11")
+
+[node name="BeamZ0_1" type="MeshInstance3D" parent="."]
+position = Vector3(-6.2, -0.05, -4.7)
+mesh = SubResource("m12")
+
+[node name="BeamZ0_2" type="MeshInstance3D" parent="."]
+position = Vector3(-6.2, -0.05, -2.45)
+mesh = SubResource("m13")
+
+[node name="BeamZ0_3" type="MeshInstance3D" parent="."]
+position = Vector3(-6.2, -0.05, 0)
+mesh = SubResource("m14")
+
+[node name="BeamZ0_4" type="MeshInstance3D" parent="."]
+position = Vector3(-6.2, -0.05, 2.45)
+mesh = SubResource("m15")
+
+[node name="BeamZ0_5" type="MeshInstance3D" parent="."]
+position = Vector3(-6.2, -0.05, 4.7)
+mesh = SubResource("m16")
+
+[node name="BeamZ0_6" type="MeshInstance3D" parent="."]
+position = Vector3(-6.2, -0.05, 10.9)
+mesh = SubResource("m17")
+
+[node name="BeamZ1_0" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, -0.05, -10.9)
+mesh = SubResource("m18")
+
+[node name="BeamZ1_1" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, -0.05, -4.7)
+mesh = SubResource("m19")
+
+[node name="BeamZ1_2" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, -0.05, -2.45)
+mesh = SubResource("m20")
+
+[node name="BeamZ1_3" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, -0.05, 0)
+mesh = SubResource("m21")
+
+[node name="BeamZ1_4" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, -0.05, 2.45)
+mesh = SubResource("m22")
+
+[node name="BeamZ1_5" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, -0.05, 4.7)
+mesh = SubResource("m23")
+
+[node name="BeamZ1_6" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, -0.05, 10.9)
+mesh = SubResource("m24")
+
+[node name="BeamZ2_0" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, -0.05, -10.9)
+mesh = SubResource("m25")
+
+[node name="BeamZ2_1" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, -0.05, -4.7)
+mesh = SubResource("m26")
+
+[node name="BeamZ2_2" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, -0.05, -2.45)
+mesh = SubResource("m27")
+
+[node name="BeamZ2_3" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, -0.05, 0)
+mesh = SubResource("m28")
+
+[node name="BeamZ2_4" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, -0.05, 2.45)
+mesh = SubResource("m29")
+
+[node name="BeamZ2_5" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, -0.05, 4.7)
+mesh = SubResource("m30")
+
+[node name="BeamZ2_6" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, -0.05, 10.9)
+mesh = SubResource("m31")
+
+[node name="BeamZ3_0" type="MeshInstance3D" parent="."]
+position = Vector3(1.7, -0.05, -10.9)
+mesh = SubResource("m32")
+
+[node name="BeamZ3_1" type="MeshInstance3D" parent="."]
+position = Vector3(1.7, -0.05, -4.7)
+mesh = SubResource("m33")
+
+[node name="BeamZ3_2" type="MeshInstance3D" parent="."]
+position = Vector3(1.7, -0.05, -2.45)
+mesh = SubResource("m34")
+
+[node name="BeamZ3_3" type="MeshInstance3D" parent="."]
+position = Vector3(1.7, -0.05, 0)
+mesh = SubResource("m35")
+
+[node name="BeamZ3_4" type="MeshInstance3D" parent="."]
+position = Vector3(1.7, -0.05, 2.45)
+mesh = SubResource("m36")
+
+[node name="BeamZ3_5" type="MeshInstance3D" parent="."]
+position = Vector3(1.7, -0.05, 4.7)
+mesh = SubResource("m37")
+
+[node name="BeamZ3_6" type="MeshInstance3D" parent="."]
+position = Vector3(1.7, -0.05, 10.9)
+mesh = SubResource("m38")
+
+[node name="BeamZ4_0" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.05, -10.9)
+mesh = SubResource("m39")
+
+[node name="BeamZ4_1" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.05, -4.7)
+mesh = SubResource("m40")
+
+[node name="BeamZ4_2" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.05, -2.45)
+mesh = SubResource("m41")
+
+[node name="BeamZ4_3" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.05, 0)
+mesh = SubResource("m42")
+
+[node name="BeamZ4_4" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.05, 2.45)
+mesh = SubResource("m43")
+
+[node name="BeamZ4_5" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.05, 4.7)
+mesh = SubResource("m44")
+
+[node name="BeamZ4_6" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.05, 10.9)
+mesh = SubResource("m45")
+
+[node name="BeamZ5_0" type="MeshInstance3D" parent="."]
+position = Vector3(6.2, -0.05, -10.9)
+mesh = SubResource("m46")
+
+[node name="BeamZ5_1" type="MeshInstance3D" parent="."]
+position = Vector3(6.2, -0.05, -4.7)
+mesh = SubResource("m47")
+
+[node name="BeamZ5_2" type="MeshInstance3D" parent="."]
+position = Vector3(6.2, -0.05, -2.45)
+mesh = SubResource("m48")
+
+[node name="BeamZ5_3" type="MeshInstance3D" parent="."]
+position = Vector3(6.2, -0.05, 0)
+mesh = SubResource("m49")
+
+[node name="BeamZ5_4" type="MeshInstance3D" parent="."]
+position = Vector3(6.2, -0.05, 2.45)
+mesh = SubResource("m50")
+
+[node name="BeamZ5_5" type="MeshInstance3D" parent="."]
+position = Vector3(6.2, -0.05, 4.7)
+mesh = SubResource("m51")
+
+[node name="BeamZ5_6" type="MeshInstance3D" parent="."]
+position = Vector3(6.2, -0.05, 10.9)
+mesh = SubResource("m52")
