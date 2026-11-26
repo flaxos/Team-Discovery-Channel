@@ -80,6 +80,8 @@ func run() -> void:
 	var door := Fixture.door(room)
 	assert(door != null and door.locked and not door.is_open)
 	assert(room.events.fired.is_empty())
+	var lights := Fixture.generator_lights(room)
+	Fixture.check_generator_lights(lights, true)
 	# TA-3 sees the live lock, while the generator remains reachable from insertion.
 	var probe := CharacterBody3D.new()
 	room.level.add_child(probe)
@@ -106,6 +108,7 @@ func run() -> void:
 	await frames(2)
 	assert(room.objectives.index == 1 and not door.locked)
 	assert(room.events.fired == PackedStringArray([Fixture.ID]))
+	Fixture.check_generator_lights(lights, false)
 	assert(room.hud.squad_toast_label.text == room.definition.triggers[0].notice)
 	var unlocked := LevelNavigator.new(probe, room.level)
 	probe.global_position = room.level.marker(&"cmd_antechamber", &"entry")
@@ -122,6 +125,7 @@ func run() -> void:
 	door = Fixture.door(room)
 	assert(door.locked and room.events.fired.is_empty() and room.objectives.index == 0,
 		"Retry restores the original mission gate")
+	Fixture.check_generator_lights(Fixture.generator_lights(room), true)
 	room.conclude(false)
 	assert(not room.events.active)
 	room.objectives.sync_state(1)

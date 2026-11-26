@@ -860,13 +860,349 @@ local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
 [sub_resource type="Resource" id="v106"]
 script = ExtResource("3")
+id = &"room10_Floor0"
+slot = &"Floor0"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/floor_800x20x300_b.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v107"]
+script = ExtResource("3")
+id = &"room10_Roof1"
+slot = &"Roof1"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/ceiling_800x20x300.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v108"]
+script = ExtResource("3")
+id = &"room10_Floor2"
+slot = &"Floor2"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/floor_800x20x300_b.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v109"]
+script = ExtResource("3")
+id = &"room10_Roof3"
+slot = &"Roof3"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/ceiling_800x20x300.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v110"]
+script = ExtResource("3")
+id = &"room10_Floor4"
+slot = &"Floor4"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/floor_760x20x230.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v111"]
+script = ExtResource("3")
+id = &"room10_Roof5"
+slot = &"Roof5"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/ceiling_760x20x230.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v112"]
+script = ExtResource("3")
+id = &"room10_Floor6"
+slot = &"Floor6"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/floor_760x20x500.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v113"]
+script = ExtResource("3")
+id = &"room10_Roof7"
+slot = &"Roof7"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/ceiling_760x20x500.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v114"]
+script = ExtResource("3")
+id = &"room10_Floor8"
+slot = &"Floor8"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/floor_760x20x230.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v115"]
+script = ExtResource("3")
+id = &"room10_Roof9"
+slot = &"Roof9"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/ceiling_760x20x230.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v116"]
+script = ExtResource("3")
+id = &"room10_Floor10"
+slot = &"Floor10"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/floor_300x20x20.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v117"]
+script = ExtResource("3")
+id = &"room10_Roof11"
+slot = &"Roof11"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/ceiling_300x20x20.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v118"]
+script = ExtResource("3")
+id = &"room10_Floor12"
+slot = &"Floor12"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/floor_300x20x20.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v119"]
+script = ExtResource("3")
+id = &"room10_Roof13"
+slot = &"Roof13"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/ceiling_300x20x20.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v120"]
+script = ExtResource("3")
+id = &"room10_Header15"
+slot = &"Header15"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/lintel_20x60x300.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v121"]
+script = ExtResource("3")
+id = &"room10_Header17"
+slot = &"Header17"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/lintel_20x60x300.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v122"]
+script = ExtResource("3")
+id = &"room10_Wall18"
+slot = &"Wall18"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_corner_corner.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v123"]
+script = ExtResource("3")
+id = &"room10_Wall19"
+slot = &"Wall19"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x500_corner_corner.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v124"]
+script = ExtResource("3")
+id = &"room10_Wall20"
+slot = &"Wall20"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_corner_corner_b.tscn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v125"]
+script = ExtResource("3")
+id = &"room10_Wall21"
+slot = &"Wall21"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_jamb_jamb.tscn"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v126"]
+script = ExtResource("3")
+id = &"room10_Wall22"
+slot = &"Wall22"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_jamb_jamb.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v127"]
+script = ExtResource("3")
+id = &"room10_Wall23"
+slot = &"Wall23"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_jamb_jamb.tscn"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v128"]
+script = ExtResource("3")
+id = &"room10_Wall24"
+slot = &"Wall24"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_jamb_jamb.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v129"]
+script = ExtResource("3")
+id = &"room10_Wall25"
+slot = &"Wall25"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_corner_corner_b.tscn"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v130"]
+script = ExtResource("3")
+id = &"room10_Wall26"
+slot = &"Wall26"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x500_corner_corner_b.tscn"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v131"]
+script = ExtResource("3")
+id = &"room10_Wall27"
+slot = &"Wall27"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_corner_corner.tscn"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v132"]
+script = ExtResource("3")
+id = &"room10_Header29"
+slot = &"Header29"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/lintel_20x60x300.tscn"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v133"]
+script = ExtResource("3")
+id = &"room10_Header31"
+slot = &"Header31"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/lintel_20x60x300.tscn"
+local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[sub_resource type="Resource" id="v134"]
+script = ExtResource("3")
+id = &"room10_Header33"
+slot = &"Header33"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/lintel_20x60x300.tscn"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v135"]
+script = ExtResource("3")
+id = &"room10_Wall34"
+slot = &"Wall34"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_jamb_corner.tscn"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v136"]
+script = ExtResource("3")
+id = &"room10_Wall35"
+slot = &"Wall35"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_corner_jamb.tscn"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v137"]
+script = ExtResource("3")
+id = &"room10_Wall36"
+slot = &"Wall36"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v138"]
+script = ExtResource("3")
+id = &"room10_Wall37"
+slot = &"Wall37"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v139"]
+script = ExtResource("3")
+id = &"room10_Wall38"
+slot = &"Wall38"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v140"]
+script = ExtResource("3")
+id = &"room10_Wall39"
+slot = &"Wall39"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v141"]
+script = ExtResource("3")
+id = &"room10_Wall40"
+slot = &"Wall40"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v142"]
+script = ExtResource("3")
+id = &"room10_Wall41"
+slot = &"Wall41"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v143"]
+script = ExtResource("3")
+id = &"room10_Wall42"
+slot = &"Wall42"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v144"]
+script = ExtResource("3")
+id = &"room10_Wall43"
+slot = &"Wall43"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x20_corner_corner.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v145"]
+script = ExtResource("3")
+id = &"room10_Wall44"
+slot = &"Wall44"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_corner_jamb.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v146"]
+script = ExtResource("3")
+id = &"room10_Wall45"
+slot = &"Wall45"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/wall_20x340x230_jamb_corner.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v147"]
+script = ExtResource("3")
+id = &"room10_Header47"
+slot = &"Header47"
+module_ids = PackedStringArray("room10")
+scene_path = "res://scenes/level/themes/goauld/lintel_20x60x300.tscn"
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+
+[sub_resource type="Resource" id="v148"]
+script = ExtResource("3")
 id = &"room16_Floor0"
 slot = &"Floor0"
 module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/floor_2360x20x3160.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v107"]
+[sub_resource type="Resource" id="v149"]
 script = ExtResource("3")
 id = &"room16_Roof1"
 slot = &"Roof1"
@@ -874,7 +1210,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/ceiling_2360x20x3160.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v108"]
+[sub_resource type="Resource" id="v150"]
 script = ExtResource("3")
 id = &"room16_Floor2"
 slot = &"Floor2"
@@ -882,7 +1218,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/floor_300x20x20.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v109"]
+[sub_resource type="Resource" id="v151"]
 script = ExtResource("3")
 id = &"room16_Roof3"
 slot = &"Roof3"
@@ -890,7 +1226,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/ceiling_300x20x20.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v110"]
+[sub_resource type="Resource" id="v152"]
 script = ExtResource("3")
 id = &"room16_Floor4"
 slot = &"Floor4"
@@ -898,7 +1234,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/floor_1200x20x20.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v111"]
+[sub_resource type="Resource" id="v153"]
 script = ExtResource("3")
 id = &"room16_Roof5"
 slot = &"Roof5"
@@ -906,7 +1242,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/ceiling_1200x20x20.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v112"]
+[sub_resource type="Resource" id="v154"]
 script = ExtResource("3")
 id = &"room16_Floor6"
 slot = &"Floor6"
@@ -914,7 +1250,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/floor_600x20x20.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v113"]
+[sub_resource type="Resource" id="v155"]
 script = ExtResource("3")
 id = &"room16_Roof7"
 slot = &"Roof7"
@@ -922,7 +1258,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/ceiling_600x20x20.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v114"]
+[sub_resource type="Resource" id="v156"]
 script = ExtResource("3")
 id = &"room16_Wall8"
 slot = &"Wall8"
@@ -930,7 +1266,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x3160_corner_corner.tscn"
 local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v115"]
+[sub_resource type="Resource" id="v157"]
 script = ExtResource("3")
 id = &"room16_Wall9"
 slot = &"Wall9"
@@ -938,7 +1274,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x20_jamb_jamb.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v116"]
+[sub_resource type="Resource" id="v158"]
 script = ExtResource("3")
 id = &"room16_Wall10"
 slot = &"Wall10"
@@ -946,7 +1282,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x20_jamb_jamb.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v117"]
+[sub_resource type="Resource" id="v159"]
 script = ExtResource("3")
 id = &"room16_Wall11"
 slot = &"Wall11"
@@ -954,7 +1290,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x20_jamb_jamb.tscn"
 local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v118"]
+[sub_resource type="Resource" id="v160"]
 script = ExtResource("3")
 id = &"room16_Wall12"
 slot = &"Wall12"
@@ -962,7 +1298,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x20_jamb_jamb.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v119"]
+[sub_resource type="Resource" id="v161"]
 script = ExtResource("3")
 id = &"room16_Wall13"
 slot = &"Wall13"
@@ -970,7 +1306,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x20_jamb_jamb.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v120"]
+[sub_resource type="Resource" id="v162"]
 script = ExtResource("3")
 id = &"room16_Wall14"
 slot = &"Wall14"
@@ -978,7 +1314,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x20_jamb_jamb.tscn"
 local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v121"]
+[sub_resource type="Resource" id="v163"]
 script = ExtResource("3")
 id = &"room16_Wall15"
 slot = &"Wall15"
@@ -986,7 +1322,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x3160_corner_corner_b.tscn"
 local_transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
 
-[sub_resource type="Resource" id="v122"]
+[sub_resource type="Resource" id="v164"]
 script = ExtResource("3")
 id = &"room16_Header17"
 slot = &"Header17"
@@ -994,7 +1330,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/lintel_20x200x1200.tscn"
 local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v123"]
+[sub_resource type="Resource" id="v165"]
 script = ExtResource("3")
 id = &"room16_Wall18"
 slot = &"Wall18"
@@ -1002,7 +1338,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x580_jamb_corner.tscn"
 local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v124"]
+[sub_resource type="Resource" id="v166"]
 script = ExtResource("3")
 id = &"room16_Wall19"
 slot = &"Wall19"
@@ -1010,7 +1346,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x580_corner_jamb.tscn"
 local_transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v125"]
+[sub_resource type="Resource" id="v167"]
 script = ExtResource("3")
 id = &"room16_Wall20"
 slot = &"Wall20"
@@ -1018,7 +1354,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x230_corner_jamb.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v126"]
+[sub_resource type="Resource" id="v168"]
 script = ExtResource("3")
 id = &"room16_Wall21"
 slot = &"Wall21"
@@ -1026,7 +1362,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x350_jamb_jamb.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v127"]
+[sub_resource type="Resource" id="v169"]
 script = ExtResource("3")
 id = &"room16_Wall22"
 slot = &"Wall22"
@@ -1034,7 +1370,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/wall_20x1200x880_jamb_corner.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v128"]
+[sub_resource type="Resource" id="v170"]
 script = ExtResource("3")
 id = &"room16_Header24"
 slot = &"Header24"
@@ -1042,7 +1378,7 @@ module_ids = PackedStringArray("room16")
 scene_path = "res://scenes/level/themes/goauld/lintel_20x920x300.tscn"
 local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="v129"]
+[sub_resource type="Resource" id="v171"]
 script = ExtResource("3")
 id = &"room16_Header26"
 slot = &"Header26"
@@ -1060,6 +1396,6 @@ fallback_id = &"neutral"
 compatible_families = PackedStringArray("corridor", "chamber", "adapter", "vertical")
 lighting = ExtResource("2")
 materials = {"ceiling": ExtResource("ceiling"), "detail": ExtResource("bronze"), "door_frame": ExtResource("bronze"), "floor": ExtResource("floor_runner"), "portal": ExtResource("portal"), "prop": ExtResource("prop"), "wall": ExtResource("basalt")}
-variants = Array[ExtResource("3")]([SubResource("v0"), SubResource("v1"), SubResource("v2"), SubResource("v3"), SubResource("v4"), SubResource("v5"), SubResource("v6"), SubResource("v7"), SubResource("v8"), SubResource("v9"), SubResource("v10"), SubResource("v11"), SubResource("v12"), SubResource("v13"), SubResource("v14"), SubResource("v15"), SubResource("v16"), SubResource("v17"), SubResource("v18"), SubResource("v19"), SubResource("v20"), SubResource("v21"), SubResource("v22"), SubResource("v23"), SubResource("v24"), SubResource("v25"), SubResource("v26"), SubResource("v27"), SubResource("v28"), SubResource("v29"), SubResource("v30"), SubResource("v31"), SubResource("v32"), SubResource("v33"), SubResource("v34"), SubResource("v35"), SubResource("v36"), SubResource("v37"), SubResource("v38"), SubResource("v39"), SubResource("v40"), SubResource("v41"), SubResource("v42"), SubResource("v43"), SubResource("v44"), SubResource("v45"), SubResource("v46"), SubResource("v47"), SubResource("v48"), SubResource("v49"), SubResource("v50"), SubResource("v51"), SubResource("v52"), SubResource("v53"), SubResource("v54"), SubResource("v55"), SubResource("v56"), SubResource("v57"), SubResource("v58"), SubResource("v59"), SubResource("v60"), SubResource("v61"), SubResource("v62"), SubResource("v63"), SubResource("v64"), SubResource("v65"), SubResource("v66"), SubResource("v67"), SubResource("v68"), SubResource("v69"), SubResource("v70"), SubResource("v71"), SubResource("v72"), SubResource("v73"), SubResource("v74"), SubResource("v75"), SubResource("v76"), SubResource("v77"), SubResource("v78"), SubResource("v79"), SubResource("v80"), SubResource("v81"), SubResource("v82"), SubResource("v83"), SubResource("v84"), SubResource("v85"), SubResource("v86"), SubResource("v87"), SubResource("v88"), SubResource("v89"), SubResource("v90"), SubResource("v91"), SubResource("v92"), SubResource("v93"), SubResource("v94"), SubResource("v95"), SubResource("v96"), SubResource("v97"), SubResource("v98"), SubResource("v99"), SubResource("v100"), SubResource("v101"), SubResource("v102"), SubResource("v103"), SubResource("v104"), SubResource("v105"), SubResource("v106"), SubResource("v107"), SubResource("v108"), SubResource("v109"), SubResource("v110"), SubResource("v111"), SubResource("v112"), SubResource("v113"), SubResource("v114"), SubResource("v115"), SubResource("v116"), SubResource("v117"), SubResource("v118"), SubResource("v119"), SubResource("v120"), SubResource("v121"), SubResource("v122"), SubResource("v123"), SubResource("v124"), SubResource("v125"), SubResource("v126"), SubResource("v127"), SubResource("v128"), SubResource("v129")])
+variants = Array[ExtResource("3")]([SubResource("v0"), SubResource("v1"), SubResource("v2"), SubResource("v3"), SubResource("v4"), SubResource("v5"), SubResource("v6"), SubResource("v7"), SubResource("v8"), SubResource("v9"), SubResource("v10"), SubResource("v11"), SubResource("v12"), SubResource("v13"), SubResource("v14"), SubResource("v15"), SubResource("v16"), SubResource("v17"), SubResource("v18"), SubResource("v19"), SubResource("v20"), SubResource("v21"), SubResource("v22"), SubResource("v23"), SubResource("v24"), SubResource("v25"), SubResource("v26"), SubResource("v27"), SubResource("v28"), SubResource("v29"), SubResource("v30"), SubResource("v31"), SubResource("v32"), SubResource("v33"), SubResource("v34"), SubResource("v35"), SubResource("v36"), SubResource("v37"), SubResource("v38"), SubResource("v39"), SubResource("v40"), SubResource("v41"), SubResource("v42"), SubResource("v43"), SubResource("v44"), SubResource("v45"), SubResource("v46"), SubResource("v47"), SubResource("v48"), SubResource("v49"), SubResource("v50"), SubResource("v51"), SubResource("v52"), SubResource("v53"), SubResource("v54"), SubResource("v55"), SubResource("v56"), SubResource("v57"), SubResource("v58"), SubResource("v59"), SubResource("v60"), SubResource("v61"), SubResource("v62"), SubResource("v63"), SubResource("v64"), SubResource("v65"), SubResource("v66"), SubResource("v67"), SubResource("v68"), SubResource("v69"), SubResource("v70"), SubResource("v71"), SubResource("v72"), SubResource("v73"), SubResource("v74"), SubResource("v75"), SubResource("v76"), SubResource("v77"), SubResource("v78"), SubResource("v79"), SubResource("v80"), SubResource("v81"), SubResource("v82"), SubResource("v83"), SubResource("v84"), SubResource("v85"), SubResource("v86"), SubResource("v87"), SubResource("v88"), SubResource("v89"), SubResource("v90"), SubResource("v91"), SubResource("v92"), SubResource("v93"), SubResource("v94"), SubResource("v95"), SubResource("v96"), SubResource("v97"), SubResource("v98"), SubResource("v99"), SubResource("v100"), SubResource("v101"), SubResource("v102"), SubResource("v103"), SubResource("v104"), SubResource("v105"), SubResource("v106"), SubResource("v107"), SubResource("v108"), SubResource("v109"), SubResource("v110"), SubResource("v111"), SubResource("v112"), SubResource("v113"), SubResource("v114"), SubResource("v115"), SubResource("v116"), SubResource("v117"), SubResource("v118"), SubResource("v119"), SubResource("v120"), SubResource("v121"), SubResource("v122"), SubResource("v123"), SubResource("v124"), SubResource("v125"), SubResource("v126"), SubResource("v127"), SubResource("v128"), SubResource("v129"), SubResource("v130"), SubResource("v131"), SubResource("v132"), SubResource("v133"), SubResource("v134"), SubResource("v135"), SubResource("v136"), SubResource("v137"), SubResource("v138"), SubResource("v139"), SubResource("v140"), SubResource("v141"), SubResource("v142"), SubResource("v143"), SubResource("v144"), SubResource("v145"), SubResource("v146"), SubResource("v147"), SubResource("v148"), SubResource("v149"), SubResource("v150"), SubResource("v151"), SubResource("v152"), SubResource("v153"), SubResource("v154"), SubResource("v155"), SubResource("v156"), SubResource("v157"), SubResource("v158"), SubResource("v159"), SubResource("v160"), SubResource("v161"), SubResource("v162"), SubResource("v163"), SubResource("v164"), SubResource("v165"), SubResource("v166"), SubResource("v167"), SubResource("v168"), SubResource("v169"), SubResource("v170"), SubResource("v171")])
 decoration_slots = PackedStringArray("ceiling", "detail", "door_frame", "floor", "portal", "prop", "wall")
 art_status = "authored"

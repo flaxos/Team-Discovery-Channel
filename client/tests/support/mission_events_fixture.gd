@@ -34,3 +34,34 @@ static func stand_down(room: ModularMission) -> void:
 		(enemy as JaffaAI).stand_down()
 	for player: PlayerController3D in room.players_container.get_children():
 		player.health_component.current_health = 1000000.0
+
+
+static func generator_lights(room: ModularMission) -> Array[MeshInstance3D]:
+	var lights: Array[MeshInstance3D] = []
+	var item := room.level.layout.instance(&"generator")
+	var module := room.level.get_node(^"generator") as LevelModule
+	for attachment: LevelRoomAttachment in LevelRoomComposer.resolved(item):
+		if attachment.id not in [&"console", &"machinery"]:
+			continue
+		var prop := module.get_node(LevelRoomComposer.node_path(attachment)) as LevelPlaceholderProp
+		var shape := prop.get_node(^"Structure/Body/Shape") as CollisionShape3D
+		assert((shape.shape as BoxShape3D).size == attachment.bounds.size)
+		assert(shape.global_position.is_equal_approx(prop.to_global(attachment.bounds.get_center())))
+		var visuals := prop.get_node(^"Visuals") as Node3D
+		assert(not (visuals.get_node(^"Mesh") as MeshInstance3D).visible)
+		assert(visuals.find_children("*", "CollisionObject3D", true, false).is_empty())
+		for mesh: MeshInstance3D in visuals.find_children("*", "MeshInstance3D", true, false):
+			if mesh.visible:
+				assert(attachment.bounds.grow(0.005).encloses(mesh.transform * mesh.get_aabb()),
+					"Dressing must fit the original solid envelope: " + str(mesh.name))
+			if mesh.name in [&"Display", &"FrontCore", &"RearCore"]:
+				lights.append(mesh)
+	assert(lights.size() == 3)
+	return lights
+
+
+static func check_generator_lights(lights: Array[MeshInstance3D], powered: bool) -> void:
+	for light in lights:
+		var material := light.get_active_material(0) as StandardMaterial3D
+		assert(material != null and material.emission_enabled == powered,
+			"Generator feedback follows the live mission release")

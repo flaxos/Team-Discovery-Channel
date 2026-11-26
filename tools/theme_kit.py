@@ -41,6 +41,7 @@ MODULES = {
     "room07": "Room07WideCorner.tscn",
     "room08": "Room08WideJunction.tscn",
     "room09": "Room09WidthAdapter.tscn",
+    "room10": "Room10LongChamber.tscn",
     "room16": "Room16HangarShell.tscn",
 }
 
@@ -238,10 +239,10 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
     free_low, free_high = -half, half
     for end, kind in ends.items():
         if kind == "jamb":
-            width = min(RIB, half) if tall else RIB
+            width = min(RIB, half) if length < .4 else RIB
             ribs.append((end * half - (width if end > 0 else 0), end * half + (width if end < 0 else 0), "Jamb"))
         elif kind == "corner":
-            width = min(pier_widths[end], half) if tall else pier_widths[end]
+            width = min(pier_widths[end], half) if length < .4 else pier_widths[end]
             ribs.append((end * half - (width if end > 0 else 0), end * half + (width if end < 0 else 0), "Pier"))
         else:
             continue
@@ -304,6 +305,13 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
             boxes.append(span("ServicePull%d" % index, "bronze", (service_back[1], front[1]),
                               (floor + 1.10, floor + 1.21), (start + .25, start + .47)))
         boxes.append(span("ServiceLintel", "bronze", front, (floor + 2.14, floor + 2.32), (-11.38, -8.24)))
+    if slab.name == "Wall26" and length == 5.0 and height == 3.4:
+        # A recessed raceway between the jamb and the first rib of the long chamber.
+        boxes.append(span("ServiceChannel", "portal", (back[1], front[1] - .032),
+                          (floor + 1.48, floor + 2.42), (-1.65, .45)))
+        for index, y in enumerate((1.68, 1.93, 2.18)):
+            boxes.append(span("ServiceRail%d" % index, "bronze", (front[1] - .032, front[1]),
+                              (floor + y, floor + y + .065), (-1.54, .33)))
     return boxes, turn, "%s_%s" % (ends[-1], ends[1])
 
 

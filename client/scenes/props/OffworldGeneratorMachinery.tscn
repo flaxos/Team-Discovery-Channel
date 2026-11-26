@@ -1,0 +1,224 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Script" path="res://scripts/level/GeneratorStatusLight.gd" id="status"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="StandardMaterial3D" id="powered"]
+albedo_color = Color(0.07, 0.4, 0.38, 1)
+roughness = 0.26
+emission_enabled = true
+emission = Color(0.16, 0.72, 0.62, 1)
+emission_energy_multiplier = 1.45
+
+[sub_resource type="StandardMaterial3D" id="shutdown"]
+albedo_color = Color(0.052, 0.077, 0.072, 1)
+roughness = 0.36
+
+[sub_resource type="BoxMesh" id="footing"]
+material = ExtResource("basalt")
+size = Vector3(1.94, 0.23, 2.92)
+
+[sub_resource type="BoxMesh" id="sill"]
+material = ExtResource("bronze")
+size = Vector3(1.78, 0.16, 2.68)
+
+[sub_resource type="BoxMesh" id="side_armor"]
+material = ExtResource("basalt")
+size = Vector3(0.34, 1.86, 2.48)
+
+[sub_resource type="BoxMesh" id="trim"]
+material = ExtResource("gold")
+size = Vector3(0.075, 0.065, 2.55)
+
+[sub_resource type="BoxMesh" id="overhead"]
+material = ExtResource("bronze")
+size = Vector3(1.7, 0.18, 2.48)
+
+[sub_resource type="CylinderMesh" id="vault"]
+material = ExtResource("bronze")
+top_radius = 0.62
+bottom_radius = 0.74
+height = 0.31
+radial_segments = 8
+rings = 0
+
+[sub_resource type="CylinderMesh" id="core"]
+material = SubResource("powered")
+top_radius = 0.37
+bottom_radius = 0.38
+height = 1.63
+radial_segments = 12
+rings = 0
+
+[sub_resource type="CylinderMesh" id="socket"]
+material = ExtResource("basalt")
+top_radius = 0.52
+bottom_radius = 0.59
+height = 0.24
+radial_segments = 8
+rings = 0
+
+[sub_resource type="CylinderMesh" id="collar"]
+material = ExtResource("gold")
+top_radius = 0.53
+bottom_radius = 0.56
+height = 0.1
+radial_segments = 8
+rings = 0
+
+[sub_resource type="CylinderMesh" id="brace"]
+material = ExtResource("bronze")
+top_radius = 0.118
+bottom_radius = 0.16
+height = 1.9
+radial_segments = 8
+rings = 0
+
+[sub_resource type="CylinderMesh" id="band"]
+material = ExtResource("bronze")
+top_radius = 0.425
+bottom_radius = 0.425
+height = 0.055
+radial_segments = 12
+rings = 0
+
+[sub_resource type="BoxMesh" id="vent"]
+material = ExtResource("bronze")
+size = Vector3(0.19, 0.055, 0.24)
+
+[node name="OffworldGeneratorMachinery" instance=ExtResource("base")]
+size = Vector3(2, 2.4, 3)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="Footing" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.115, 0)
+mesh = SubResource("footing")
+
+[node name="Sill" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.3, 0)
+mesh = SubResource("sill")
+
+[node name="CasingTop" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 2.29, 0)
+mesh = SubResource("overhead")
+
+[node name="LeftArmor" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.75, 1.29, 0)
+mesh = SubResource("side_armor")
+
+[node name="LeftRail" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.75, 2.15, 0)
+mesh = SubResource("trim")
+
+[node name="LeftVent1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.9075, 1.78, -0.86)
+mesh = SubResource("vent")
+
+[node name="LeftVent2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.9075, 1.78, -0.44)
+mesh = SubResource("vent")
+
+[node name="LeftVent3" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.9075, 1.78, 0)
+mesh = SubResource("vent")
+
+[node name="LeftVent4" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.9075, 1.78, 0.44)
+mesh = SubResource("vent")
+
+[node name="LeftVent5" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.9075, 1.78, 0.86)
+mesh = SubResource("vent")
+
+[node name="RightArmor" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.75, 1.29, 0)
+mesh = SubResource("side_armor")
+
+[node name="RightRail" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.75, 2.15, 0)
+mesh = SubResource("trim")
+
+[node name="RightVent1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.9075, 1.78, -0.86)
+mesh = SubResource("vent")
+
+[node name="RightVent2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.9075, 1.78, -0.44)
+mesh = SubResource("vent")
+
+[node name="RightVent3" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.9075, 1.78, 0)
+mesh = SubResource("vent")
+
+[node name="RightVent4" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.9075, 1.78, 0.44)
+mesh = SubResource("vent")
+
+[node name="RightVent5" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.9075, 1.78, 0.86)
+mesh = SubResource("vent")
+
+[node name="FrontSocket" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.47, -0.65)
+mesh = SubResource("socket")
+
+[node name="FrontCollar" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.64, -0.65)
+mesh = SubResource("collar")
+
+[node name="FrontCore" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 1.25, -0.65)
+mesh = SubResource("core")
+script = ExtResource("status")
+shutdown_material = SubResource("shutdown")
+
+[node name="FrontBand" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 1.3, -0.65)
+mesh = SubResource("band")
+
+[node name="FrontVault" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 2.1, -0.65)
+mesh = SubResource("vault")
+
+[node name="RearSocket" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.47, 0.65)
+mesh = SubResource("socket")
+
+[node name="RearCollar" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.64, 0.65)
+mesh = SubResource("collar")
+
+[node name="RearCore" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 1.25, 0.65)
+mesh = SubResource("core")
+script = ExtResource("status")
+shutdown_material = SubResource("shutdown")
+
+[node name="RearBand" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 1.3, 0.65)
+mesh = SubResource("band")
+
+[node name="RearVault" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 2.1, 0.65)
+mesh = SubResource("vault")
+
+[node name="LeftFrontBrace" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.56, 1.28, -1.15)
+mesh = SubResource("brace")
+
+[node name="LeftRearBrace" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.56, 1.28, 1.15)
+mesh = SubResource("brace")
+
+[node name="RightFrontBrace" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.56, 1.28, -1.15)
+mesh = SubResource("brace")
+
+[node name="RightRearBrace" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.56, 1.28, 1.15)
+mesh = SubResource("brace")
