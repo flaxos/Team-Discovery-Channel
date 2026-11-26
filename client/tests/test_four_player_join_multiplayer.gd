@@ -1,5 +1,5 @@
 extends SceneTree
-## Real processes, full operative roster, deliberately delayed loads, split-world travel,
+## Real processes, full operative roster, deliberately delayed loads, round-trip gate travel,
 ## connected retry and replacement late join after retry. The dedicated variant has four
 ## remote operatives plus its pawnless server; the listen host is one of four operatives.
 const DelayedCoordinator = preload("res://tests/support/delayed_mission_coordinator.gd")
@@ -135,24 +135,27 @@ func client_script() -> String:
 
 
 func travel(id: int) -> void:
-	var home := main.current_gate_room as GateRoom
-	var gate := home.stargate_mesh
+	await travel_between(id, main.current_gate_room as GateRoom, main.current_site as GateRoom)
+
+
+func travel_between(id: int, source: GateRoom, destination: GateRoom) -> void:
+	var gate := source.stargate_mesh
 	if gate.current_state == StargateRing.GateState.INACTIVE:
 		require(gate.reserve_connection(false))
 		gate.authorize_extraction()
 		for chevron in range(1, 8):
 			gate.lock_chevron(chevron)
-		var deadline := Time.get_ticks_msec() + 15000
-		while gate.current_state != StargateRing.GateState.ACTIVE and Time.get_ticks_msec() < deadline:
-			await frames(1)
-		require(gate.current_state == StargateRing.GateState.ACTIVE)
-	var actor := home.players_container.get_node(str(id)) as PlayerController3D
+	var deadline := Time.get_ticks_msec() + 15000
+	while gate.current_state != StargateRing.GateState.ACTIVE and Time.get_ticks_msec() < deadline:
+		await frames(1)
+	require(gate.current_state == StargateRing.GateState.ACTIVE, "The staged gate connection stabilizes")
+	var actor := source.players_container.get_node(str(id)) as PlayerController3D
 	gate._on_extraction_entered(actor)
 	var arrival_deadline := Time.get_ticks_msec() + 15000
-	while not main.current_site.get_node("Players").has_node(str(id)) and Time.get_ticks_msec() < arrival_deadline:
+	while not destination.players_container.has_node(str(id)) and Time.get_ticks_msec() < arrival_deadline:
 		await frames(1)
-	require(not home.players_container.has_node(str(id)))
-	require(main.current_site.get_node("Players").has_node(str(id)))
+	require(not source.players_container.has_node(str(id)), "Gate travel removes the source operative")
+	require(destination.players_container.has_node(str(id)), "Gate travel spawns the destination operative")
 
 
 func snapshot(label: String, active_slots: Array[int], expected_count: int = 4) -> void:
@@ -167,6 +170,7 @@ func snapshot(label: String, active_slots: Array[int], expected_count: int = 4) 
 				"health": actor.health_component.current_health, "crouching": actor.is_crouching}
 	require(expected.size() == expected_count, "Exactly the expected operative identities across both worlds")
 	require(not is_dedicated or not expected.has("1"), "Dedicated host remains pawnless")
+	mark("stations_" + label, civilian_stations())
 	mark("snapshot_" + label, expected)
 	for index in active_slots:
 		require(await marked("seen_%s_%d" % [label, index]))
@@ -204,8 +208,28 @@ func see_snapshot(label: String) -> void:
 			check_imported_loadout(actor)
 	var own_world := int(expected[str(net.local_peer_id)].world)
 	require(main.session.presented == main.worlds()[own_world], "Each operative presents its own world")
-	require((main.current_site as ModularMission).events.fired.is_empty())
+	var site := main.current_site as ModularMission
+	if label == "returned":
+		require(site.objectives.is_complete(), "The return snapshot follows objective completion")
+	else:
+		require(site.events.fired.is_empty())
+	require(read_mark("stations_" + label) == civilian_stations(),
+		"Stationary SGC civilian roles match on every visible and hidden world after " + label)
 	mark("seen_%s_%d" % [label, slot])
+
+
+func civilian_stations() -> String:
+	var room := main.current_gate_room as GateRoom
+	var stations := room.get_node_or_null(^"CivilianStations")
+	require(stations != null and stations.get_child_count() == 3, "SGC has three native civilian stations")
+	require(not main.current_site.has_node(^"CivilianStations"), "Offworld has its own authored population")
+	var poses := {}
+	for station: Marker3D in stations.get_children():
+		var actor := station.get_node_or_null(^"Civilian") as SGCCivilianVisual
+		require(actor != null and actor.has_skeletal_body and actor.work_prop != null, "Each peer loads the full civilian visual")
+		require(actor.is_visible_in_tree() == room.is_presented, "Civilian visibility follows the SGC world")
+		poses[station.name] = [actor.role, str(actor.global_transform)]
+	return JSON.stringify(poses)
 
 
 func check_imported_loadout(actor: PlayerController3D) -> void:
@@ -333,6 +357,14 @@ func run_host() -> void:
 	var tealc := (main.current_site as GateRoom).players_container.get_node(str(ids[2])) as PlayerController3D
 	tealc.switch_slot(2)
 	await snapshot("motion", active)
+	# Stage completed objectives for the placement check. The gate-return fixture plays the objectives.
+	var objectives := (main.current_site as ModularMission).objectives
+	var completed := objectives.definition.objectives.size()
+	SGCNetworkManager.mission_rpc(objectives, &"sync_state", [completed])
+	objectives.sync_state(completed)
+	await travel_between(ids[0], main.current_site as GateRoom, main.current_gate_room as GateRoom)
+	await frames(30)
+	await snapshot("returned", active)
 	var previous := main.current_gate_room.get_instance_id()
 	require(net.request_restart_game())
 	for index in active:
@@ -414,6 +446,7 @@ func run_client() -> void:
 			actor.is_crouching = true
 			mark("moved", [actor.position.x, actor.position.y, actor.position.z])
 		await see_snapshot("motion")
+		await see_snapshot("returned")
 		var previous := main.current_gate_room.get_instance_id()
 		await worlds(previous)
 		mark("ready_%d_2" % slot)

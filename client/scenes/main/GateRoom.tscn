@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://c8sgcgateroom01"]
+[gd_scene load_steps=31 format=3 uid="uid://c8sgcgateroom01"]
 
 [ext_resource type="Script" path="res://scripts/map/SGCMap.gd" id="30_map"]
 
@@ -24,6 +24,7 @@
 [ext_resource type="Material" path="res://resources/materials/sgc/embarkation_steel.tres" id="31_tread"]
 
 [ext_resource type="PackedScene" path="res://scenes/props/SGCGateTrim.tscn" id="32_gate_trim"]
+[ext_resource type="PackedScene" path="res://scenes/entities/SGCCivilian.tscn" id="35_civilian"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Door"]
 albedo_color = Color(0.24, 0.27, 0.3, 1)
@@ -654,6 +655,27 @@ script = ExtResource("2_wm01")
 [node name="TacticalHUD" parent="." instance=ExtResource("6_hud01")]
 
 [node name="Level27Complex" parent="." instance=ExtResource("8_l2701")]
+
+[node name="CivilianStations" type="Node3D" parent="."]
+
+[node name="Laboratory" type="Marker3D" parent="CivilianStations"]
+position = Vector3(33.35, 0, 53)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="Civilian" parent="CivilianStations/Laboratory" instance=ExtResource("35_civilian")]
+
+[node name="Medical" type="Marker3D" parent="CivilianStations"]
+position = Vector3(10, 11, 23.7)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="Civilian" parent="CivilianStations/Medical" instance=ExtResource("35_civilian")]
+role = 1
+
+[node name="Administration" type="Marker3D" parent="CivilianStations"]
+position = Vector3(13.1, 5.5, 16.6)
+
+[node name="Civilian" parent="CivilianStations/Administration" instance=ExtResource("35_civilian")]
+role = 2
 
 [node name="SGCElevator" parent="." instance=ExtResource("9_elev01")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 37, 0, 18)

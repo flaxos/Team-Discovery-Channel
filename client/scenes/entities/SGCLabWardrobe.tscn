@@ -1,0 +1,95 @@
+[gd_scene load_steps=12 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Material_lapel"]
+albedo_color = Color(0.92, 0.93, 0.9, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_trim"]
+albedo_color = Color(0.21, 0.33, 0.38, 1)
+roughness = 0.87
+
+[sub_resource type="StandardMaterial3D" id="Material_cover"]
+albedo_color = Color(0.19, 0.31, 0.34, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_page"]
+albedo_color = Color(0.84, 0.86, 0.8, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="Mesh_lapel"]
+size = Vector3(0.048, 0.18, 0.012)
+material = SubResource("Material_lapel")
+
+[sub_resource type="BoxMesh" id="Mesh_seam"]
+size = Vector3(0.015, 0.17, 0.008)
+material = SubResource("Material_lapel")
+
+[sub_resource type="BoxMesh" id="Mesh_pocket"]
+size = Vector3(0.081, 0.077, 0.018)
+material = SubResource("Material_lapel")
+
+[sub_resource type="BoxMesh" id="Mesh_pen"]
+size = Vector3(0.008, 0.041, 0.008)
+material = SubResource("Material_trim")
+
+[sub_resource type="BoxMesh" id="Mesh_clipboard"]
+size = Vector3(0.26, 0.016, 0.17)
+material = SubResource("Material_cover")
+
+[sub_resource type="BoxMesh" id="Mesh_notes"]
+size = Vector3(0.225, 0.006, 0.14)
+material = SubResource("Material_page")
+
+[sub_resource type="BoxMesh" id="Mesh_clip"]
+size = Vector3(0.065, 0.017, 0.015)
+material = SubResource("Material_trim")
+
+[node name="LaboratoryWardrobe" type="Node3D"]
+
+[node name="ChestDetails" type="Node3D" parent="."]
+
+[node name="LeftLapel" type="MeshInstance3D" parent="ChestDetails"]
+position = Vector3(-0.022, 1.287, -0.148)
+rotation = Vector3(-0.20, 0, 0.45)
+mesh = SubResource("Mesh_lapel")
+
+[node name="RightLapel" type="MeshInstance3D" parent="ChestDetails"]
+position = Vector3(0.064, 1.287, -0.152)
+rotation = Vector3(-0.20, 0, -0.45)
+mesh = SubResource("Mesh_lapel")
+
+[node name="Placket" type="MeshInstance3D" parent="ChestDetails"]
+position = Vector3(0.022, 1.15, -0.121)
+rotation = Vector3(-0.16, 0, 0)
+mesh = SubResource("Mesh_seam")
+
+[node name="BreastPocket" type="MeshInstance3D" parent="ChestDetails"]
+position = Vector3(-0.104, 1.233, -0.132)
+rotation = Vector3(-0.18, 0.33, 0)
+mesh = SubResource("Mesh_pocket")
+
+[node name="Pen" type="MeshInstance3D" parent="ChestDetails/BreastPocket"]
+position = Vector3(-0.013, 0.042, -0.009)
+rotation = Vector3(0, 0, 0.13)
+mesh = SubResource("Mesh_pen")
+
+[node name="WorkProp" type="Node3D" parent="."]
+position = Vector3(-0.065, 1.065, -0.24)
+rotation = Vector3(0.23, 0.12, 0)
+
+[node name="Clipboard" type="MeshInstance3D" parent="WorkProp"]
+mesh = SubResource("Mesh_clipboard")
+
+[node name="Notes" type="MeshInstance3D" parent="WorkProp"]
+position = Vector3(0, 0.01, 0)
+mesh = SubResource("Mesh_notes")
+
+[node name="Clip" type="MeshInstance3D" parent="WorkProp"]
+position = Vector3(0, 0.016, -0.073)
+mesh = SubResource("Mesh_clip")
+
+[node name="SupportPalm" type="Marker3D" parent="WorkProp"]
+position = Vector3(-0.107, -0.031, 0.041)
+
+[node name="ActionPalm" type="Marker3D" parent="WorkProp"]
+position = Vector3(0.083, 0.038, -0.003)
