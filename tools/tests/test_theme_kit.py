@@ -67,7 +67,7 @@ class GoauldKit(unittest.TestCase):
             wanted = {slab.name for slab in kit.read_slabs(kit.MODULE_SCENES / scene) if slab.slot != 'portal'}
             got = {variant['slot'] for variant in self.variants if variant['module'] == module_id}
             self.assertEqual(got, wanted, module_id)
-        self.assertEqual(len(self.variants), 172)
+        self.assertEqual(len(self.variants), 226)
         self.assertEqual(len({variant['id'] for variant in self.variants}), len(self.variants))
 
     def test_each_piece_fills_exactly_its_slab(self):

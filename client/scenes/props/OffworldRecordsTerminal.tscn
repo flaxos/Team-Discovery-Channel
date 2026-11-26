@@ -1,0 +1,176 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+[ext_resource type="Script" path="res://scripts/level/CommandRecordsDisplay.gd" id="display"]
+
+[sub_resource type="StandardMaterial3D" id="glass"]
+albedo_color = Color(0.019, 0.08, 0.07, 1)
+roughness = 0.32
+emission_enabled = true
+emission = Color(0.025, 0.16, 0.135, 1)
+
+[sub_resource type="BoxMesh" id="base"]
+material = ExtResource("basalt")
+size = Vector3(1.93, 0.14, 0.88)
+
+[sub_resource type="BoxMesh" id="pod"]
+material = ExtResource("bronze")
+size = Vector3(0.46, 0.54, 0.7)
+
+[sub_resource type="BoxMesh" id="cassette"]
+material = ExtResource("basalt")
+size = Vector3(0.31, 0.09, 0.035)
+
+[sub_resource type="BoxMesh" id="handle"]
+material = ExtResource("gold")
+size = Vector3(0.17, 0.022, 0.018)
+
+[sub_resource type="BoxMesh" id="crossbar"]
+material = ExtResource("basalt")
+size = Vector3(1.54, 0.13, 0.41)
+
+[sub_resource type="BoxMesh" id="desk"]
+material = ExtResource("basalt")
+size = Vector3(1.84, 0.17, 0.82)
+
+[sub_resource type="BoxMesh" id="bezel"]
+material = ExtResource("bronze")
+size = Vector3(1.56, 0.043, 0.5)
+
+[sub_resource type="BoxMesh" id="screen"]
+material = SubResource("glass")
+size = Vector3(1.36, 0.025, 0.365)
+
+[sub_resource type="BoxMesh" id="trim"]
+material = ExtResource("gold")
+size = Vector3(1.73, 0.038, 0.035)
+
+[sub_resource type="CylinderMesh" id="button"]
+material = ExtResource("gold")
+top_radius = 0.042
+bottom_radius = 0.049
+height = 0.025
+radial_segments = 8
+rings = 0
+
+[node name="OffworldRecordsTerminal" instance=ExtResource("base")]
+size = Vector3(2, 1, 1)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="Plinth" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.07, 0)
+mesh = SubResource("base")
+
+[node name="TerminalBridge" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.63, 0.06)
+mesh = SubResource("crossbar")
+
+[node name="LeftRecordsBank" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.65, 0.39, 0)
+mesh = SubResource("pod")
+
+[node name="LeftCassette0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.65, 0.29, -0.355)
+mesh = SubResource("cassette")
+
+[node name="LeftLatch0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.65, 0.29, -0.378)
+mesh = SubResource("handle")
+
+[node name="LeftCassette1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.65, 0.43, -0.355)
+mesh = SubResource("cassette")
+
+[node name="LeftLatch1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.65, 0.43, -0.378)
+mesh = SubResource("handle")
+
+[node name="LeftCassette2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.65, 0.57, -0.355)
+mesh = SubResource("cassette")
+
+[node name="LeftLatch2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.65, 0.57, -0.378)
+mesh = SubResource("handle")
+
+[node name="RightRecordsBank" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.65, 0.39, 0)
+mesh = SubResource("pod")
+
+[node name="RightCassette0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.65, 0.29, -0.355)
+mesh = SubResource("cassette")
+
+[node name="RightLatch0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.65, 0.29, -0.378)
+mesh = SubResource("handle")
+
+[node name="RightCassette1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.65, 0.43, -0.355)
+mesh = SubResource("cassette")
+
+[node name="RightLatch1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.65, 0.43, -0.378)
+mesh = SubResource("handle")
+
+[node name="RightCassette2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.65, 0.57, -0.355)
+mesh = SubResource("cassette")
+
+[node name="RightLatch2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.65, 0.57, -0.378)
+mesh = SubResource("handle")
+
+[node name="Desk" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.751, 0)
+rotation = Vector3(-0.23, 0, 0)
+mesh = SubResource("desk")
+
+[node name="DisplayBezel" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.855, 0.085)
+rotation = Vector3(-0.23, 0, 0)
+mesh = SubResource("bezel")
+
+[node name="DisplayGlass" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.883, 0.079)
+rotation = Vector3(-0.23, 0, 0)
+mesh = SubResource("screen")
+
+[node name="FrontRim" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.733, -0.409)
+mesh = SubResource("trim")
+
+[node name="Key0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.74, 0.801, -0.285)
+rotation = Vector3(-0.23, 0, 0)
+mesh = SubResource("button")
+
+[node name="Key1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.52, 0.801, -0.285)
+rotation = Vector3(-0.23, 0, 0)
+mesh = SubResource("button")
+
+[node name="Key2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.52, 0.801, -0.285)
+rotation = Vector3(-0.23, 0, 0)
+mesh = SubResource("button")
+
+[node name="Key3" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.74, 0.801, -0.285)
+rotation = Vector3(-0.23, 0, 0)
+mesh = SubResource("button")
+
+[node name="RecordsDisplay" type="Label3D" parent="Visuals"]
+position = Vector3(0, 0.902, 0.075)
+rotation = Vector3(-1.340796, 3.141593, 0)
+pixel_size = 0.0024
+modulate = Color(0.32, 0.93, 0.78, 1)
+text = "RECORDS"
+font_size = 46
+outline_size = 0
+script = ExtResource("display")

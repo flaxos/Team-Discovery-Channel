@@ -31,3 +31,26 @@ static func spot(room: ModularMission, index: int) -> Vector3:
 		if point.distance_to(target.global_position) < MissionInteractable.REACH - 0.3:
 			return point
 	return Vector3.INF
+
+
+static func records_display(room: ModularMission) -> Label3D:
+	return station(room, 1).get_parent().get_node(^"Visuals/RecordsDisplay") as Label3D
+
+
+static func assert_console_envelopes(room: ModularMission) -> void:
+	var item := room.level.layout.instance(&"cmd_command")
+	var module := room.level.get_node(^"cmd_command") as LevelModule
+	for attachment: LevelRoomAttachment in LevelRoomComposer.resolved(item):
+		if attachment.component != &"console":
+			continue
+		var prop := module.get_node(LevelRoomComposer.node_path(attachment)) as LevelPlaceholderProp
+		var shape := prop.get_node(^"Structure/Body/Shape") as CollisionShape3D
+		assert((shape.shape as BoxShape3D).size == attachment.bounds.size)
+		assert(shape.global_position.is_equal_approx(prop.to_global(attachment.bounds.get_center())))
+		var visuals := prop.get_node(^"Visuals") as Node3D
+		assert(not (visuals.get_node(^"Mesh") as MeshInstance3D).visible)
+		assert(visuals.find_children("*", "CollisionObject3D", true, false).is_empty())
+		for mesh: MeshInstance3D in visuals.find_children("*", "MeshInstance3D", true, false):
+			if mesh.visible:
+				assert(attachment.bounds.grow(0.005).encloses(mesh.transform * mesh.get_aabb()),
+					"Command dressing fits its solid envelope: " + str(mesh.name))

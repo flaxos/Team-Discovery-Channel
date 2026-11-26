@@ -58,6 +58,7 @@ func mission(previous: int = 0) -> ModularMission:
 			assert(room.events.timer_state == MissionEvents.TimerState.IDLE)
 			assert(not room.hud.mission_countdown_panel.visible)
 			assert(room.events.fired.is_empty() and Fixture.door(room).locked)
+			assert(Fixture.records_display(room).text == "ACCESS LOCKED")
 			return room
 		await frames(1)
 	assert(false, "Timed mission failed to start")
@@ -73,9 +74,11 @@ func start_timer(room: ModularMission, seconds: float) -> void:
 		assert(room.objectives.index == index + 1)
 		if index == 0:
 			assert(room.events.timer_state == MissionEvents.TimerState.IDLE and not Fixture.door(room).locked)
+			assert(Fixture.records_display(room).text == "RECORDS READY")
 	assert(room.events.timer_state == MissionEvents.TimerState.RUNNING)
 	assert(room.events.fired.size() == 2 and room.hud.mission_countdown_panel.visible)
 	assert(room.hud.mission_countdown_label.text.begins_with("EXTRACTION\n"))
+	assert(Fixture.records_display(room).text == "RECORDS SENT\n" + room.hud.mission_countdown_label.text.get_slice("\n", 1))
 	var remaining := room.events.remaining_seconds()
 	Fixture.station(room, 1).interact(actor)
 	room.events._on_objective_changed(room.objectives.index)
@@ -98,6 +101,7 @@ func run() -> void:
 	assert(net.set_mission(SGCNetworkManager.MISSION_TIMED_EXTRACTION))
 	net.request_start_game()
 	var room := await mission()
+	Fixture.assert_console_envelopes(room)
 	start_timer(room, 1.0)
 	await frames(2)
 	assert(not room.hud.mission_countdown_panel.get_global_rect().intersects(room.hud.get_node("TopBanner").get_global_rect()))
@@ -110,6 +114,7 @@ func run() -> void:
 	await process_frame
 	assert(room.mission_result == 0 and not paused)
 	assert(room.events.timer_state == MissionEvents.TimerState.EXPIRED)
+	assert(Fixture.records_display(room).text == "RECORDS SENT")
 	assert(not room.hud.mission_countdown_panel.visible and room.hud.is_mission_ended)
 	assert(room.hud.debrief_subtitle.text == "EXTRACTION WINDOW EXPIRED")
 	assert((room.players_container.get_node("1") as PlayerController3D).health_component.frozen)
