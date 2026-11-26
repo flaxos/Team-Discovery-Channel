@@ -1,0 +1,475 @@
+[gd_scene load_steps=29 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/DHDConsole.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/props/OffworldDHDVisual.gd" id="2_feedback"]
+[ext_resource type="Material" path="res://resources/materials/offworld/gate_stone.tres" id="Stone"]
+
+[sub_resource type="StandardMaterial3D" id="Basalt"]
+albedo_color = Color(0.21, 0.23, 0.24, 1)
+roughness = 0.78
+
+[sub_resource type="StandardMaterial3D" id="Bronze"]
+albedo_color = Color(0.49, 0.33, 0.17, 1)
+roughness = 0.42
+
+[sub_resource type="StandardMaterial3D" id="Gold"]
+albedo_color = Color(0.74, 0.56, 0.28, 1)
+roughness = 0.38
+
+[sub_resource type="StandardMaterial3D" id="Recess"]
+albedo_color = Color(0.12, 0.14, 0.15, 1)
+roughness = 0.78
+
+[sub_resource type="StandardMaterial3D" id="Ceramic"]
+albedo_color = Color(0.33, 0.26, 0.19, 1)
+roughness = 0.43
+
+[sub_resource type="StandardMaterial3D" id="Glyph"]
+albedo_color = Color(0.82, 0.65, 0.39, 1)
+roughness = 0.62
+
+[sub_resource type="StandardMaterial3D" id="Amber"]
+albedo_color = Color(0.77, 0.28, 0.075, 1)
+roughness = 0.22
+emission_enabled = true
+emission = Color(1.0, 0.29, 0.065, 1)
+emission_energy_multiplier = 0.24
+
+[sub_resource type="CylinderMesh" id="Foot"]
+material = ExtResource("Stone")
+top_radius = 0.365
+bottom_radius = 0.415
+height = 0.105
+radial_segments = 12
+rings = 0
+
+[sub_resource type="CylinderMesh" id="FootBand"]
+material = SubResource("Bronze")
+top_radius = 0.365
+bottom_radius = 0.372
+height = 0.031
+radial_segments = 12
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Plinth"]
+material = ExtResource("Stone")
+top_radius = 0.274
+bottom_radius = 0.342
+height = 0.18
+radial_segments = 12
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Trunk"]
+material = ExtResource("Stone")
+top_radius = 0.245
+bottom_radius = 0.278
+height = 0.49
+radial_segments = 12
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Collar"]
+material = SubResource("Bronze")
+top_radius = 0.345
+bottom_radius = 0.247
+height = 0.14
+radial_segments = 12
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Neck"]
+material = SubResource("Basalt")
+top_radius = 0.31
+bottom_radius = 0.35
+height = 0.05
+radial_segments = 12
+rings = 0
+
+[sub_resource type="CylinderMesh" id="DeckDish"]
+material = SubResource("Basalt")
+top_radius = 0.486
+bottom_radius = 0.35
+height = 0.125
+radial_segments = 32
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Bezel"]
+material = SubResource("Bronze")
+top_radius = 0.486
+bottom_radius = 0.483
+height = 0.025
+radial_segments = 32
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Face"]
+material = SubResource("Recess")
+top_radius = 0.455
+bottom_radius = 0.469
+height = 0.028
+radial_segments = 32
+rings = 0
+
+[sub_resource type="CylinderMesh" id="CentreSeat"]
+material = SubResource("Bronze")
+top_radius = 0.186
+bottom_radius = 0.201
+height = 0.019
+radial_segments = 24
+rings = 0
+
+[sub_resource type="CylinderMesh" id="DomeRim"]
+material = SubResource("Gold")
+top_radius = 0.161
+bottom_radius = 0.17
+height = 0.017
+radial_segments = 24
+rings = 0
+
+[sub_resource type="CylinderMesh" id="Stud"]
+material = SubResource("Gold")
+top_radius = 0.024
+bottom_radius = 0.024
+height = 0.012
+radial_segments = 8
+rings = 0
+
+[sub_resource type="BoxMesh" id="Key"]
+material = SubResource("Ceramic")
+size = Vector3(0.114, 0.022, 0.119)
+
+[sub_resource type="BoxMesh" id="NotchShort"]
+material = SubResource("Glyph")
+size = Vector3(0.009, 0.004, 0.036)
+
+[sub_resource type="BoxMesh" id="NotchLong"]
+material = SubResource("Glyph")
+size = Vector3(0.009, 0.004, 0.055)
+
+[sub_resource type="BoxMesh" id="TrunkInlay"]
+material = SubResource("Bronze")
+size = Vector3(0.037, 0.27, 0.021)
+
+[sub_resource type="BoxMesh" id="TrunkPlate"]
+material = SubResource("Basalt")
+size = Vector3(0.107, 0.13, 0.021)
+
+[sub_resource type="SphereMesh" id="Dome"]
+material = SubResource("Amber")
+radius = 0.147
+height = 0.082
+radial_segments = 28
+rings = 10
+
+[node name="OffworldDHD" instance=ExtResource("1_base")]
+
+[node name="BaseMesh" parent="." index="0"]
+visible = false
+
+[node name="DeckMesh" parent="." index="1"]
+visible = false
+
+[node name="Exterior" type="Node3D" parent="." index="4"]
+script = ExtResource("2_feedback")
+
+[node name="Deck" type="Node3D" parent="Exterior"]
+position = Vector3(0, 1.055, 0)
+rotation = Vector3(0, 0, 0.261799)
+
+[node name="Foot" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.05300, 0.00000)
+mesh = SubResource("Foot")
+
+[node name="FootBand" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.11900, 0.00000)
+mesh = SubResource("FootBand")
+
+[node name="Plinth" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.22400, 0.00000)
+mesh = SubResource("Plinth")
+
+[node name="Trunk" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.54700, 0.00000)
+mesh = SubResource("Trunk")
+
+[node name="Collar" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.85900, 0.00000)
+mesh = SubResource("Collar")
+
+[node name="Neck" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.94600, 0.00000)
+mesh = SubResource("Neck")
+
+[node name="Inlay1" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.54000, 0.26000)
+mesh = SubResource("TrunkInlay")
+
+[node name="Plate1" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.68500, 0.26780)
+mesh = SubResource("TrunkPlate")
+
+[node name="Inlay2" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.22517, 0.54000, 0.13000)
+rotation = Vector3(0, 1.047198, 0)
+mesh = SubResource("TrunkInlay")
+
+[node name="Plate2" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.23192, 0.68500, 0.13390)
+rotation = Vector3(0, 1.047198, 0)
+mesh = SubResource("TrunkPlate")
+
+[node name="Inlay3" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.22517, 0.54000, -0.13000)
+rotation = Vector3(0, 2.094395, 0)
+mesh = SubResource("TrunkInlay")
+
+[node name="Plate3" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.23192, 0.68500, -0.13390)
+rotation = Vector3(0, 2.094395, 0)
+mesh = SubResource("TrunkPlate")
+
+[node name="Inlay4" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.54000, -0.26000)
+rotation = Vector3(0, 3.141593, 0)
+mesh = SubResource("TrunkInlay")
+
+[node name="Plate4" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(0.00000, 0.68500, -0.26780)
+rotation = Vector3(0, 3.141593, 0)
+mesh = SubResource("TrunkPlate")
+
+[node name="Inlay5" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(-0.22517, 0.54000, -0.13000)
+rotation = Vector3(0, 4.188790, 0)
+mesh = SubResource("TrunkInlay")
+
+[node name="Plate5" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(-0.23192, 0.68500, -0.13390)
+rotation = Vector3(0, 4.188790, 0)
+mesh = SubResource("TrunkPlate")
+
+[node name="Inlay6" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(-0.22517, 0.54000, 0.13000)
+rotation = Vector3(0, 5.235988, 0)
+mesh = SubResource("TrunkInlay")
+
+[node name="Plate6" type="MeshInstance3D" parent="Exterior"]
+position = Vector3(-0.23192, 0.68500, 0.13390)
+rotation = Vector3(0, 5.235988, 0)
+mesh = SubResource("TrunkPlate")
+
+[node name="DeckDish" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, -0.02500, 0.00000)
+mesh = SubResource("DeckDish")
+
+[node name="Bezel" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.04700, 0.00000)
+mesh = SubResource("Bezel")
+
+[node name="Face" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.06000, 0.00000)
+mesh = SubResource("Face")
+
+[node name="CentreSeat" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.08300, 0.00000)
+mesh = SubResource("CentreSeat")
+
+[node name="DomeRim" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.09500, 0.00000)
+mesh = SubResource("DomeRim")
+
+[node name="Dome" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.11200, 0.00000)
+mesh = SubResource("Dome")
+
+[node name="Key01" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.08100, 0.33600)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key01"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, 0.700000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key01"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 1.550000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Stud1" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.07800, 0.43000)
+mesh = SubResource("Stud")
+
+[node name="Key02" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.16800, 0.08100, 0.29098)
+rotation = Vector3(0, 0.523599, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key02"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, -0.660000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key02"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Key03" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.29098, 0.08100, 0.16800)
+rotation = Vector3(0, 1.047198, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key03"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, 0.700000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key03"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Key04" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.33600, 0.08100, 0.00000)
+rotation = Vector3(0, 1.570796, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key04"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, -0.660000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key04"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 1.550000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Stud4" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.43000, 0.07800, 0.00000)
+mesh = SubResource("Stud")
+
+[node name="Key05" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.29098, 0.08100, -0.16800)
+rotation = Vector3(0, 2.094395, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key05"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, 0.700000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key05"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Key06" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.16800, 0.08100, -0.29098)
+rotation = Vector3(0, 2.617994, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key06"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, -0.660000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key06"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Key07" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.08100, -0.33600)
+rotation = Vector3(0, 3.141593, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key07"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, 0.700000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key07"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 1.550000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Stud7" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(0.00000, 0.07800, -0.43000)
+mesh = SubResource("Stud")
+
+[node name="Key08" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(-0.16800, 0.08100, -0.29098)
+rotation = Vector3(0, 3.665191, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key08"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, -0.660000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key08"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Key09" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(-0.29098, 0.08100, -0.16800)
+rotation = Vector3(0, 4.188790, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key09"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, 0.700000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key09"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Key10" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(-0.33600, 0.08100, -0.00000)
+rotation = Vector3(0, 4.712389, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key10"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, -0.660000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key10"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 1.550000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Stud10" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(-0.43000, 0.07800, -0.00000)
+mesh = SubResource("Stud")
+
+[node name="Key11" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(-0.29098, 0.08100, 0.16800)
+rotation = Vector3(0, 5.235988, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key11"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, 0.700000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key11"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")
+
+[node name="Key12" type="MeshInstance3D" parent="Exterior/Deck"]
+position = Vector3(-0.16800, 0.08100, 0.29098)
+rotation = Vector3(0, 5.759587, 0)
+mesh = SubResource("Key")
+
+[node name="Stroke" type="MeshInstance3D" parent="Exterior/Deck/Key12"]
+position = Vector3(-0.02400, 0.01200, 0.00000)
+rotation = Vector3(0, -0.660000, 0)
+mesh = SubResource("NotchLong")
+
+[node name="Bar" type="MeshInstance3D" parent="Exterior/Deck/Key12"]
+position = Vector3(0.02200, 0.01200, 0.00000)
+rotation = Vector3(0, 0.390000, 0)
+mesh = SubResource("NotchShort")

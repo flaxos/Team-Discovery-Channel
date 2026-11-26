@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/floor_runner.tres" id="floor_runner"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("floor_runner")
+size = Vector3(6, 0.2, 0.2)
+
+[node name="Floor" type="Node3D"]
+
+[node name="PortalFloor" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("m0")

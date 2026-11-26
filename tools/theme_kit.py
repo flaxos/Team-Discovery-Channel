@@ -41,6 +41,7 @@ MODULES = {
     "room07": "Room07WideCorner.tscn",
     "room08": "Room08WideJunction.tscn",
     "room09": "Room09WidthAdapter.tscn",
+    "room16": "Room16HangarShell.tscn",
 }
 
 # name: (albedo, metallic, roughness). Values and contrast checks: brief, section 2.3.
@@ -207,6 +208,7 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
     thin = 2 - axis if axis in (0, 2) else 0
     length = slab.size[axis]
     height = slab.size[1]
+    tall = height >= 10
     floor = -height / 2  # the slab stands on the floor
     half = length / 2
     centre = slab.position[axis]
@@ -236,9 +238,10 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
     free_low, free_high = -half, half
     for end, kind in ends.items():
         if kind == "jamb":
-            ribs.append((end * half - (RIB if end > 0 else 0), end * half + (RIB if end < 0 else 0), "Jamb"))
+            width = min(RIB, half) if tall else RIB
+            ribs.append((end * half - (width if end > 0 else 0), end * half + (width if end < 0 else 0), "Jamb"))
         elif kind == "corner":
-            width = pier_widths[end]
+            width = min(pier_widths[end], half) if tall else pier_widths[end]
             ribs.append((end * half - (width if end > 0 else 0), end * half + (width if end < 0 else 0), "Pier"))
         else:
             continue
@@ -246,8 +249,8 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
             free_low = ribs[-1][1]
         else:
             free_high = ribs[-1][0]
-    for grid in GRID:
-        z = local(grid)
+    grid_lines = [4 * i for i in range(-int(half / 4), int(half / 4) + 1)] if tall else [local(grid) for grid in GRID]
+    for z in grid_lines:
         if z - RIB / 2 >= free_low + CLEARANCE - EPS and z + RIB / 2 <= free_high - CLEARANCE + EPS:
             ribs.append((z - RIB / 2, z + RIB / 2, "Rib"))
     ribs.sort()
@@ -282,7 +285,25 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
         boxes.append(span("%s%d" % (kind, index), "bronze", front, panel, (low, high)))
     boxes.append(span("FriezeLower", "bronze", front, (floor + FRIEZE_BASE, floor + BAND[0]), (-half, half)))
     boxes.append(span("Band", "gold", front, (floor + BAND[0], floor + BAND[1]), (-half, half)))
-    boxes.append(span("FriezeUpper", "bronze", front, (floor + BAND[1], floor + height), (-half, half)))
+    if tall:
+        boxes.extend([
+            span("FriezeUpper", "bronze", front, (floor + BAND[1], floor + 3.48), (-half, half)),
+            span("UpperBand", "gold", front, (floor + 10.08, floor + 10.22), (-half, half)),
+            span("Crown", "bronze", front, (floor + 10.22, floor + height), (-half, half)),
+        ])
+        for index, (low, high, _kind) in enumerate(ribs):
+            boxes.append(span("UpperRib%d" % index, "bronze", front, (floor + 3.48, floor + 10.08), (low, high)))
+    else:
+        boxes.append(span("FriezeUpper", "bronze", front, (floor + BAND[1], floor + height), (-half, half)))
+    if slab.name == "Wall15" and tall and length > 30:
+        # The cabinet doors and lintel sit in the recess between the -12 m and -8 m ribs.
+        service_back = (back[1], front[1] - .035)
+        for index, start in enumerate((-11.2, -10.1, -9.0)):
+            boxes.append(span("ServiceDoor%d" % index, "portal", service_back,
+                              (floor + .76, floor + 2.14), (start, start + .72)))
+            boxes.append(span("ServicePull%d" % index, "bronze", (service_back[1], front[1]),
+                              (floor + 1.10, floor + 1.21), (start + .25, start + .47)))
+        boxes.append(span("ServiceLintel", "bronze", front, (floor + 2.14, floor + 2.32), (-11.38, -8.24)))
     return boxes, turn, "%s_%s" % (ends[-1], ends[1])
 
 
@@ -299,7 +320,8 @@ def lintel_piece(slab: Slab) -> tuple[list[Box], int]:
     back = (-depth / 2, depth / 2 - LINTEL_RELIEF)
     front = (depth / 2 - LINTEL_RELIEF, depth / 2 + PROUD)
     reverse = (-depth / 2 - PROUD, -depth / 2)
-    band = (BAND[0] - base - height / 2, BAND[1] - base - height / 2)
+    band_height = BAND if base < BAND[0] else (base + .08, base + .22)
+    band = (band_height[0] - base - height / 2, band_height[1] - base - height / 2)
     key = CARTOUCHE / 2
     return (
         [
@@ -384,6 +406,8 @@ def floor_piece(slab: Slab, openings: list[Slab] | None = None) -> list[Box]:
     """Colour only: every box is the full slab thickness, so the walking surface is flat."""
     x, t, z = (s / 2 for s in slab.size)
     full = (-t, t)
+    if min(x, z) <= .4:
+        return [span("PortalFloor", "floor_runner", (-x, x), full, (-z, z))]
     if openings is not None:
         return corridor_floor(slab, openings)
     if is_passage(slab):
@@ -416,6 +440,8 @@ def ceiling_piece(slab: Slab, jambs: list[float]) -> list[Box]:
     lintels stop at the slab's lower face: a bay that reached the edge would leave a slit
     above them, open to whatever is outside."""
     x, t, z = (s / 2 for s in slab.size)
+    if min(x, z) <= .4:
+        return [span("PortalRoof", "ceiling", (-x, x), (-t, t), (-z, z))]
     boxes = [span("Bays", "ceiling", (-x, x), (-t + RELIEF, t), (-z, z))]
     beam = (-t, -t + RELIEF)
     passage = is_passage(slab)
@@ -582,7 +608,7 @@ def build() -> tuple[dict[Path, str], list[dict], dict[str, tuple[Slab, list[Box
                 boxes, turn = lintel_piece(slab)
                 kind = "lintel"
             elif slab.slot == "floor":
-                boxes = floor_piece(slab, openings if module_id not in ("room01", "room04") else None)
+                boxes = floor_piece(slab, openings if module_id not in ("room01", "room04", "room16") else None)
                 kind = "floor"
             elif slab.slot == "ceiling":
                 boxes, kind = ceiling_piece(slab, jambs), "ceiling"

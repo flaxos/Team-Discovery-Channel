@@ -205,3 +205,11 @@ The lobby’s **Community Credits & Licences** window displays an exportable res
 | `client/assets/characters/sgc_civilian_head.glb` | MakeHuman base head with system skin, eyes and Short01 hair | MakeHuman team and system-asset contributors | [Pinned base](https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj), [system pack](https://www.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html) | [CC0 1.0](licenses/CC0-1.0.txt) | Shared head on the civilian Head bone | M |
 
 - **Modifications:** Cropped the base mesh at the neckline, conformed the system eye and hair meshes to the base mesh, prepared cropped maps with an alpha-tested hair silhouette, and packed the three surfaces into one upright metre-scale GLB. [Source and prepared hashes](../docs/assets/intake/sprint26-civilian-head.json).
+
+### Offworld gate stone — Sprint 27
+
+| Asset file | Title | Creator | Source | Licence | Integration | Effort |
+|---|---|---|---|---|---|---|
+| `client/resources/materials/offworld/gate_stone.tres` | Rock 01 | Rob Tuytel for Poly Haven | https://polyhaven.com/a/rock_01 | [CC0 1.0 Universal](licenses/CC0-1.0.txt) | Shared 1.5 m repeat on the original stepped gate dais | S |
+
+- **Changes:** The 1K diffuse JPEG, OpenGL normal and packed AO, roughness and metallic PNG maps retain their source bytes. The native materials add grey tint variation, triplanar mapping and mipmaps. [Source map hashes](../docs/assets/intake/sprint27-gate-stone.json).

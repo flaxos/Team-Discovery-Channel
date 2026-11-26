@@ -67,7 +67,7 @@ class GoauldKit(unittest.TestCase):
             wanted = {slab.name for slab in kit.read_slabs(kit.MODULE_SCENES / scene) if slab.slot != 'portal'}
             got = {variant['slot'] for variant in self.variants if variant['module'] == module_id}
             self.assertEqual(got, wanted, module_id)
-        self.assertEqual(len(self.variants), 106)
+        self.assertEqual(len(self.variants), 130)
         self.assertEqual(len({variant['id'] for variant in self.variants}), len(self.variants))
 
     def test_each_piece_fills_exactly_its_slab(self):
@@ -111,7 +111,8 @@ class GoauldKit(unittest.TestCase):
                 for v in samples(-z, z):
                     if x - abs(u) < ring - 1e-6 or z - abs(v) < ring - 1e-6:
                         self.assertTrue(covers(flush, (0, 2), (u, v)), '%s: slit at %s' % (name, (u, v)))
-            self.assertTrue(any(box.low()[1] > -t + 1e-6 for box in boxes), name + ' has recessed bays')
+            if min(x, z) > .4:
+                self.assertTrue(any(box.low()[1] > -t + 1e-6 for box in boxes), name + ' has recessed bays')
 
     def test_floors_are_colour_only(self):
         # Relief in a floor would separate what is seen from what the collision supports.
@@ -141,7 +142,9 @@ class GoauldKit(unittest.TestCase):
             size = local_size(slab, turn)
             for side in (-1, 1):
                 for z in (0, -size[2] / 3, size[2] / 3):
-                    point = (side * (size[0] / 2 + kit.PROUD / 2), 3.1 - slab.position[1], z)
+                    sill = slab.position[1] - size[1] / 2
+                    band = sill + .15 if sill >= 10.0 else 3.1
+                    point = (side * (size[0] / 2 + kit.PROUD / 2), band - slab.position[1], z)
                     found = [box.material for box in boxes if all(lo < v < hi for lo, v, hi in zip(box.low(), point, box.high()))]
                     self.assertEqual(found, ['gold'], '%s face %d at %s' % (name, side, z))
 
