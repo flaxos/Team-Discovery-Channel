@@ -44,6 +44,8 @@ MODULES = {
     "room10": "Room10LongChamber.tscn",
     "room16": "Room16HangarShell.tscn",
     "room11": "Room11LargeChamber.tscn",
+    "room14": "Room14Ramp4m.tscn",
+    "room15": "Room15TransportChamber.tscn",
 }
 
 # name: (albedo, metallic, roughness). Values and contrast checks: brief, section 2.3.
@@ -340,18 +342,64 @@ def lintel_piece(slab: Slab) -> tuple[list[Box], int]:
     band_height = BAND if base < BAND[0] else (base + .08, base + .22)
     band = (band_height[0] - base - height / 2, band_height[1] - base - height / 2)
     key = CARTOUCHE / 2
+    # The tall ring chamber has a narrow walking portal under a single large header.
+    cartouche_top = -height / 2 + .56 if height == 7.6 and width == 3.0 else height / 2
     return (
         [
             span("Back", "bronze", back, (-height / 2, height / 2), (-half, half)),
-            span("Cartouche", "gold", front, (-height / 2 + SOFFIT_GAP, height / 2), (-key, key)),
+            span("Cartouche", "gold", front, (-height / 2 + SOFFIT_GAP, cartouche_top), (-key, key)),
             span("BandA", "gold", front, band, (-half, -key)),
             span("BandB", "gold", front, band, (key, half)),
-            span("CartoucheBack", "gold", reverse, (-height / 2 + SOFFIT_GAP, height / 2), (-key, key)),
+            span("CartoucheBack", "gold", reverse, (-height / 2 + SOFFIT_GAP, cartouche_top), (-key, key)),
             span("BandBackA", "gold", reverse, band, (-half, -key)),
             span("BandBackB", "gold", reverse, band, (key, half)),
         ],
         turn,
     )
+
+
+def ramp_wall_piece(slab: Slab) -> tuple[list[Box], int]:
+    """Stepped bronze panels inside the native side slab of the 4 m ramp."""
+    turn = facing(slab)
+    _, travel_sign = ROTATIONS[turn][1]
+    depth, height, length = slab.size
+    floor = -height / 2
+    reach = (-length / 2, length / 2)
+    front = (depth / 2 - RELIEF, depth / 2)
+    boxes = [span("Backing", "basalt", (-depth / 2, front[0]), (floor, -floor), reach)]
+    for index in range(8):
+        start = index * 2
+        low, high = sorted(travel_sign * (distance - length / 2) for distance in (start, start + 2))
+        rise = min(4, max(0, (start + 1 - 2) / 3))
+        cap = floor + rise + .48
+        boxes.append(span("Plinth" if index == 0 else "Plinth%d" % index,
+                          "bronze", front, (floor, cap), (low, high)))
+        boxes.append(span("Rib%d" % index, "bronze", front, (cap, -floor - .44),
+                          (low + .18, low + .36)))
+    boxes.extend([
+        span("CrownBase", "bronze", front, (-floor - .44, -floor - .28), reach),
+        span("Band", "gold", front, (-floor - .28, -floor - .16), reach),
+        span("Crown", "bronze", front, (-floor - .16, -floor), reach),
+    ])
+    return boxes, turn
+
+
+def ring_floor_piece(slab: Slab) -> list[Box]:
+    """A flush bronze frame outside the 5 m square transport reserve."""
+    x, t, z = (axis / 2 for axis in slab.size)
+    full = (-t, t)
+    inside, outside = 2.56, 2.72
+    return [
+        span("DaisField", "floor_runner", (-inside, inside), full, (-inside, inside)),
+        span("RimNorth", "bronze", (-outside, outside), full, (-outside, -inside)),
+        span("RimSouth", "bronze", (-outside, outside), full, (inside, outside)),
+        span("RimWest", "bronze", (-outside, -inside), full, (-inside, inside)),
+        span("RimEast", "bronze", (inside, outside), full, (-inside, inside)),
+        span("MarginNorth", "floor_margin", (-x, x), full, (-z, -outside)),
+        span("MarginSouth", "floor_margin", (-x, x), full, (outside, z)),
+        span("MarginWest", "floor_margin", (-x, -outside), full, (-outside, outside)),
+        span("MarginEast", "floor_margin", (outside, x), full, (-outside, outside)),
+    ]
 
 
 def is_passage(slab: Slab) -> bool:
@@ -619,16 +667,31 @@ def build() -> tuple[dict[Path, str], list[dict], dict[str, tuple[Slab, list[Box
         for slab in slabs:
             turn = 0
             if slab.slot == "wall":
-                boxes, turn, ends = wall_piece(slab, walls, extent)
+                if module_id == "room14":
+                    boxes, turn = ramp_wall_piece(slab)
+                    ends = "ramp"
+                else:
+                    boxes, turn, ends = wall_piece(slab, walls, extent)
                 kind = "wall"
             elif slab.slot == "door_frame":
                 boxes, turn = lintel_piece(slab)
                 kind = "lintel"
             elif slab.slot == "floor":
-                boxes = floor_piece(slab, openings if module_id not in ("room01", "room04", "room16") else None)
+                if module_id == "room15" and slab.name == "Floor0":
+                    boxes = ring_floor_piece(slab)
+                else:
+                    continuous = module_id not in ("room01", "room04", "room14", "room16")
+                    boxes = floor_piece(slab, openings if continuous else None)
                 kind = "floor"
             elif slab.slot == "ceiling":
                 boxes, kind = ceiling_piece(slab, jambs), "ceiling"
+            elif module_id == "room14" and slab.name.startswith("Handrail"):
+                x, y, z = (axis / 2 for axis in slab.size)
+                boxes = [
+                    span("RailBody", "basalt", (-x, x), (-y, 0), (-z, z)),
+                    span("RailCrown", "bronze", (-x, x), (0, y), (-z, z)),
+                ]
+                kind = "rail"
             else:
                 continue  # sealed openings take the palette only
             if any(min(box.size) <= EPS for box in boxes):

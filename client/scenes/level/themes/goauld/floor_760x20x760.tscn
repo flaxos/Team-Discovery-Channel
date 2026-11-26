@@ -1,0 +1,79 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/floor_margin.tres" id="floor_margin"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/floor_runner.tres" id="floor_runner"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("floor_runner")
+size = Vector3(5.12, 0.2, 5.12)
+
+[sub_resource type="BoxMesh" id="m1"]
+material = ExtResource("bronze")
+size = Vector3(5.44, 0.2, 0.16)
+
+[sub_resource type="BoxMesh" id="m2"]
+material = ExtResource("bronze")
+size = Vector3(5.44, 0.2, 0.16)
+
+[sub_resource type="BoxMesh" id="m3"]
+material = ExtResource("bronze")
+size = Vector3(0.16, 0.2, 5.12)
+
+[sub_resource type="BoxMesh" id="m4"]
+material = ExtResource("bronze")
+size = Vector3(0.16, 0.2, 5.12)
+
+[sub_resource type="BoxMesh" id="m5"]
+material = ExtResource("floor_margin")
+size = Vector3(7.6, 0.2, 1.08)
+
+[sub_resource type="BoxMesh" id="m6"]
+material = ExtResource("floor_margin")
+size = Vector3(7.6, 0.2, 1.08)
+
+[sub_resource type="BoxMesh" id="m7"]
+material = ExtResource("floor_margin")
+size = Vector3(1.08, 0.2, 5.44)
+
+[sub_resource type="BoxMesh" id="m8"]
+material = ExtResource("floor_margin")
+size = Vector3(1.08, 0.2, 5.44)
+
+[node name="Floor" type="Node3D"]
+
+[node name="DaisField" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("m0")
+
+[node name="RimNorth" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -2.64)
+mesh = SubResource("m1")
+
+[node name="RimSouth" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 2.64)
+mesh = SubResource("m2")
+
+[node name="RimWest" type="MeshInstance3D" parent="."]
+position = Vector3(-2.64, 0, 0)
+mesh = SubResource("m3")
+
+[node name="RimEast" type="MeshInstance3D" parent="."]
+position = Vector3(2.64, 0, 0)
+mesh = SubResource("m4")
+
+[node name="MarginNorth" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -3.26)
+mesh = SubResource("m5")
+
+[node name="MarginSouth" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 3.26)
+mesh = SubResource("m6")
+
+[node name="MarginWest" type="MeshInstance3D" parent="."]
+position = Vector3(-3.26, 0, 0)
+mesh = SubResource("m7")
+
+[node name="MarginEast" type="MeshInstance3D" parent="."]
+position = Vector3(3.26, 0, 0)
+mesh = SubResource("m8")
