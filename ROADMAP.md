@@ -64,6 +64,8 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 
 **Sprint 31 dresses the Alpha Site outpost interior and observation vista.** Pre-fab shelter surfaces (`tauri_sgc`), field cargo crates, communications rack, and field console dress native room presets. The observation aperture frames an exterior alien mountain vista beyond the authored boundary while preserving 100% enclosure and collision containment. SGC civilian presence and the full entry/objective/return mission loop are verified. Owner art review is open. [Sprint 31 review](docs/reviews/2026-11-27-sprint31-alpha-site-outpost.md).
 
+**Sprint 32 dresses the Ha’tak mothership boarding route and ring breach.** The two-deck route (`ai2_goauld_mothership_boarding.tres`) spans 9 modules dressed in authored Goa’uld trim, featuring three prop families (boarding bulkhead frame, sliding interior door, heavy naquadah cargo crates). Operatives enter via safe gate travel to the hangar, breach Deck 1 via reciprocal R16 transport rings (`rings_boarding` <-> `rings_upper`), access the shipboard manifest console, and extract. The mothership coexists with SGC as the two live worlds without flight or docking simulation. Owner art review is open. [Sprint 32 review](docs/reviews/2026-11-27-sprint32-mothership-boarding.md).
+
 **R16 ring transport.** In Goa’uld Infiltration, step onto a ring pad and press Interact to carry the squad members aboard between decks. Both endpoints share a server-controlled cycle and an occupied receiving pad blocks transport. This gameplay slice uses the existing ring assets and clears a prerequisite for the mothership work. [Transport setup](docs/maps/modular-vertical-kit.md#equipment-and-transport-interfaces).
 
 | Option | What | Who | Detail |

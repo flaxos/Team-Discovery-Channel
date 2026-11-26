@@ -1,0 +1,289 @@
+[gd_resource type="Resource" script_class="LevelLayout" load_steps=31 format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelModuleConnection.gd" id="1_conn"]
+[ext_resource type="Script" path="res://scripts/level/LevelModuleInstance.gd" id="2_inst"]
+[ext_resource type="Script" path="res://scripts/level/LevelTransportEndpoint.gd" id="3_endpoint"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room16HangarShell.tres" id="4_room16"]
+[ext_resource type="Resource" path="res://resources/room_presets/stargate_dhd.tres" id="5_stargate_dhd"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room01Straight.tres" id="6_room01"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room04Chamber.tres" id="7_room04"]
+[ext_resource type="Resource" path="res://resources/room_presets/mothership_cargo.tres" id="8_cargo"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room15TransportChamber.tres" id="9_room15"]
+[ext_resource type="Resource" path="res://resources/room_presets/ring_transport.tres" id="10_rings"]
+[ext_resource type="Resource" path="res://resources/level_modules/Room14Ramp4m.tres" id="11_room14"]
+[ext_resource type="Resource" path="res://resources/room_presets/mothership_checkpoint.tres" id="12_checkpoint"]
+[ext_resource type="Script" path="res://scripts/level/LevelLayout.gd" id="13_layout"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeZone.gd" id="14_zone"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomOverride.gd" id="15_override"]
+
+[sub_resource type="Resource" id="endpoint_boarding"]
+script = ExtResource("3_endpoint")
+id = &"rings_boarding"
+kind = "rings"
+target_id = &"rings_upper"
+anchor = &"transport"
+node_path = NodePath("Attachments/Interactions/transport/Rings")
+
+[sub_resource type="Resource" id="endpoint_upper"]
+script = ExtResource("3_endpoint")
+id = &"rings_upper"
+kind = "rings"
+target_id = &"rings_boarding"
+anchor = &"transport"
+node_path = NodePath("Attachments/Interactions/transport/Rings")
+
+[sub_resource type="Resource" id="inst_gate"]
+script = ExtResource("2_inst")
+id = &"gate"
+module = ExtResource("4_room16")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("3_endpoint")]([])
+socket_decks = {}
+position = Vector2(0, 0)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("5_stargate_dhd")
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"gate"
+
+[sub_resource type="Resource" id="inst_vestibule"]
+script = ExtResource("2_inst")
+id = &"vestibule"
+module = ExtResource("6_room01")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("3_endpoint")]([])
+socket_decks = {}
+position = Vector2(0, 32)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"corridor"
+
+[sub_resource type="Resource" id="inst_cargo_bay"]
+script = ExtResource("2_inst")
+id = &"cargo_bay"
+module = ExtResource("7_room04")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("3_endpoint")]([])
+socket_decks = {}
+position = Vector2(0, 40)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("8_cargo")
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"cargo"
+
+[sub_resource type="Resource" id="inst_stores_hall"]
+script = ExtResource("2_inst")
+id = &"stores_hall"
+module = ExtResource("6_room01")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("3_endpoint")]([])
+socket_decks = {}
+position = Vector2(8, 40)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"corridor"
+
+[sub_resource type="Resource" id="inst_ring_lower"]
+script = ExtResource("2_inst")
+id = &"ring_lower"
+module = ExtResource("9_room15")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("3_endpoint")]([SubResource("endpoint_boarding")])
+socket_decks = {}
+position = Vector2(16, 40)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("10_rings")
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"ring_transport"
+
+[sub_resource type="Resource" id="inst_ramp"]
+script = ExtResource("2_inst")
+id = &"ramp"
+module = ExtResource("11_room14")
+deck = &"deck0"
+transport_endpoints = Array[ExtResource("3_endpoint")]([])
+socket_decks = {
+"upper": "upper"
+}
+position = Vector2(-8, 40)
+quarter_turn = 3
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"ramp"
+
+[sub_resource type="Resource" id="inst_upper_hall"]
+script = ExtResource("2_inst")
+id = &"upper_hall"
+module = ExtResource("6_room01")
+deck = &"upper"
+transport_endpoints = Array[ExtResource("3_endpoint")]([])
+socket_decks = {}
+position = Vector2(-24, 40)
+quarter_turn = 1
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"corridor"
+
+[sub_resource type="Resource" id="inst_interior_checkpoint"]
+script = ExtResource("2_inst")
+id = &"interior_checkpoint"
+module = ExtResource("7_room04")
+deck = &"upper"
+transport_endpoints = Array[ExtResource("3_endpoint")]([])
+socket_decks = {}
+position = Vector2(-32, 40)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("12_checkpoint")
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"security_checkpoint"
+
+[sub_resource type="Resource" id="inst_ring_upper"]
+script = ExtResource("2_inst")
+id = &"ring_upper"
+module = ExtResource("9_room15")
+deck = &"upper"
+transport_endpoints = Array[ExtResource("3_endpoint")]([SubResource("endpoint_upper")])
+socket_decks = {}
+position = Vector2(-32, 32)
+quarter_turn = 0
+available_sockets = PackedStringArray()
+tags = PackedStringArray()
+style = &"neutral"
+room_preset = ExtResource("10_rings")
+attachment_overrides = Array[ExtResource("15_override")]([])
+theme_id = &""
+theme_zone = &""
+role = &"ring_transport"
+
+[sub_resource type="Resource" id="conn_gate_vestibule"]
+script = ExtResource("1_conn")
+from_instance = &"gate"
+from_socket = &"south_00"
+to_instance = &"vestibule"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="conn_vestibule_cargo"]
+script = ExtResource("1_conn")
+from_instance = &"vestibule"
+from_socket = &"south"
+to_instance = &"cargo_bay"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="conn_cargo_stores_hall"]
+script = ExtResource("1_conn")
+from_instance = &"cargo_bay"
+from_socket = &"east"
+to_instance = &"stores_hall"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="conn_stores_hall_ring_lower"]
+script = ExtResource("1_conn")
+from_instance = &"stores_hall"
+from_socket = &"south"
+to_instance = &"ring_lower"
+to_socket = &"north"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="conn_cargo_ramp"]
+script = ExtResource("1_conn")
+from_instance = &"cargo_bay"
+from_socket = &"west"
+to_instance = &"ramp"
+to_socket = &"lower"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="conn_ramp_upper_hall"]
+script = ExtResource("1_conn")
+from_instance = &"ramp"
+from_socket = &"upper"
+to_instance = &"upper_hall"
+to_socket = &"south"
+security_id = &""
+initially_locked = false
+state = "open"
+
+[sub_resource type="Resource" id="conn_upper_hall_checkpoint"]
+script = ExtResource("1_conn")
+from_instance = &"upper_hall"
+from_socket = &"north"
+to_instance = &"interior_checkpoint"
+to_socket = &"east"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[sub_resource type="Resource" id="conn_checkpoint_ring_upper"]
+script = ExtResource("1_conn")
+from_instance = &"interior_checkpoint"
+from_socket = &"north"
+to_instance = &"ring_upper"
+to_socket = &"south"
+security_id = &""
+initially_locked = false
+state = "door"
+
+[resource]
+script = ExtResource("13_layout")
+schema_version = 1
+decks = {
+"deck0": 0.0,
+"upper": 4.0
+}
+default_theme = &"goauld"
+theme_zones = Array[ExtResource("14_zone")]([])
+instances = Array[ExtResource("2_inst")]([SubResource("inst_gate"), SubResource("inst_vestibule"), SubResource("inst_cargo_bay"), SubResource("inst_stores_hall"), SubResource("inst_ring_lower"), SubResource("inst_ramp"), SubResource("inst_upper_hall"), SubResource("inst_interior_checkpoint"), SubResource("inst_ring_upper")])
+connections = Array[ExtResource("1_conn")]([SubResource("conn_gate_vestibule"), SubResource("conn_vestibule_cargo"), SubResource("conn_cargo_stores_hall"), SubResource("conn_stores_hall_ring_lower"), SubResource("conn_cargo_ramp"), SubResource("conn_ramp_upper_hall"), SubResource("conn_upper_hall_checkpoint"), SubResource("conn_checkpoint_ring_upper")])
+entry_instance = &"gate"
+entry_marker = &"entry"
+destination_instance = &"interior_checkpoint"
+destination_marker = &"destination"

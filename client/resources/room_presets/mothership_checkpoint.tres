@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldRecordsTerminal.tscn" id="3_console"]
+[ext_resource type="PackedScene" path="res://scenes/props/MothershipCargoCrate.tscn" id="4_crate"]
+[ext_resource type="PackedScene" path="res://scenes/props/MothershipBoardingBulkhead.tscn" id="5_bulkhead"]
+
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"console"
+component = &"console"
+scene = ExtResource("3_console")
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, -2.6)
+approach = Vector3(-1.2, 0, 1.2)
+placeholder_size = Vector3(2.0, 1.0, 1.0)
+bounds = AABB(-1.0, 0, -0.5, 2.0, 1.0, 1.0)
+references = PackedStringArray("systems.control")
+
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"patrol_entry"
+component = &"patrol"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+approach = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+id = &"patrol_exit"
+component = &"patrol"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+approach = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+id = &"cover_left"
+component = &"cover"
+scene = ExtResource("4_crate")
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0, 2.6)
+approach = Vector3(1.2, 0, -1.2)
+placeholder_size = Vector3(1.4, 1.2, 1.4)
+bounds = AABB(-0.7, 0, -0.7, 1.4, 1.2, 1.4)
+
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("2")
+id = &"cover_right"
+component = &"cover"
+scene = ExtResource("4_crate")
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, 2.6)
+approach = Vector3(-1.2, 0, -1.2)
+placeholder_size = Vector3(1.4, 1.2, 1.4)
+bounds = AABB(-0.7, 0, -0.7, 1.4, 1.2, 1.4)
+
+[sub_resource type="Resource" id="a5"]
+script = ExtResource("2")
+id = &"guard"
+component = &"spawn"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+approach = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="a6"]
+script = ExtResource("2")
+id = &"door_control"
+component = &"system"
+scene = ExtResource("5_bulkhead")
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0, -2.6)
+approach = Vector3(1.2, 0, 1.2)
+placeholder_size = Vector3(1.6, 2.0, 0.6)
+bounds = AABB(-0.8, 0, -0.3, 1.6, 2.0, 0.6)
+references = PackedStringArray("doors.access", "alarm.zone")
+
+[resource]
+script = ExtResource("1")
+id = &"mothership_checkpoint"
+label = "Mothership security checkpoint"
+compatible_modules = PackedStringArray("room04", "room10", "room11", "room13", "room15")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6")])
+system_references = PackedStringArray("doors.access", "alarm.zone")
+description = "Ha'tak mothership security checkpoint with heavy airlock bulkhead control and ordnance crate cover."
+synonyms = PackedStringArray("mothership checkpoint", "security airlock", "bulkhead checkpoint")

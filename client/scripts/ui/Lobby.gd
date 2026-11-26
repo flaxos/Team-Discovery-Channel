@@ -272,7 +272,7 @@ func _sync_mission_selection() -> void:
 	for i in range(mission_option_button.item_count):
 		if mission_option_button.get_item_metadata(i) == mission_id: mission_option_button.select(i)
 	mission_description_label.text = SGCNetworkManager.MISSIONS[mission_id]["description"]
-	start_game_button.text = {SGCNetworkManager.MISSION_SGC_UAT: "LAUNCH UAT BASE", SGCNetworkManager.MISSION_MODULAR_EXTRACTION: "LAUNCH EXTRACTION UAT", SGCNetworkManager.MISSION_GOAULD_INFILTRATION: "LAUNCH INFILTRATION", SGCNetworkManager.MISSION_TWO_WORLDS_DEV: "LAUNCH TWO WORLDS (DEV)", SGCNetworkManager.MISSION_TRAVEL_INFILTRATION: "LAUNCH TRAVEL MISSION", SGCNetworkManager.MISSION_TIMED_EXTRACTION: "LAUNCH TIMED EXTRACTION", SGCNetworkManager.MISSION_ALARM_ESCAPE: "LAUNCH ALARM ESCAPE", SGCNetworkManager.MISSION_TAURI_ALPHA_SITE: "LAUNCH ALPHA SITE"}.get(mission_id, "LAUNCH SGC DEFENSE")
+	start_game_button.text = {SGCNetworkManager.MISSION_SGC_UAT: "LAUNCH UAT BASE", SGCNetworkManager.MISSION_MODULAR_EXTRACTION: "LAUNCH EXTRACTION UAT", SGCNetworkManager.MISSION_GOAULD_INFILTRATION: "LAUNCH INFILTRATION", SGCNetworkManager.MISSION_TWO_WORLDS_DEV: "LAUNCH TWO WORLDS (DEV)", SGCNetworkManager.MISSION_TRAVEL_INFILTRATION: "LAUNCH TRAVEL MISSION", SGCNetworkManager.MISSION_TIMED_EXTRACTION: "LAUNCH TIMED EXTRACTION", SGCNetworkManager.MISSION_ALARM_ESCAPE: "LAUNCH ALARM ESCAPE", SGCNetworkManager.MISSION_TAURI_ALPHA_SITE: "LAUNCH ALPHA SITE", SGCNetworkManager.MISSION_TRAVEL_MOTHERSHIP: "LAUNCH MOTHERSHIP MISSION"}.get(mission_id, "LAUNCH SGC DEFENSE")
 
 func _on_mission_selected(index: int) -> void:
 	if _network_manager != null: _network_manager.set_mission(str(mission_option_button.get_item_metadata(index)))

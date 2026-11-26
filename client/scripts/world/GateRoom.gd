@@ -235,7 +235,7 @@ func _ready() -> void:
 	_setup_sector_shrouds()
 	if mission_id == SGCNetworkManager.MISSION_SGC_UAT and hud != null:
 		var net_chk: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-		if net_chk != null and net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_INFILTRATION:
+		if net_chk != null and (net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_INFILTRATION or net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_MOTHERSHIP):
 			hud.update_objective("TRAVEL MISSION: DIAL STARGATE TO DEPLOY AWAY TEAM", Color(0.4, 0.9, 1.0))
 		else:
 			hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
@@ -919,7 +919,7 @@ func _start_foothold_defense() -> void:
 	if mission_id == SGCNetworkManager.MISSION_SGC_UAT:
 		if hud != null:
 			var net_chk: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
-			if net_chk != null and net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_INFILTRATION:
+			if net_chk != null and (net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_INFILTRATION or net_chk.selected_mission_id == SGCNetworkManager.MISSION_TRAVEL_MOTHERSHIP):
 				hud.update_objective("TRAVEL MISSION: DIAL STARGATE TO DEPLOY AWAY TEAM", Color(0.4, 0.9, 1.0))
 			else:
 				hud.update_objective("UAT BASE: EXPLORE SUBLEVELS 28 / 27 / 26 — NO HOSTILE ACTIVATION", Color(0.4, 0.9, 1.0))
