@@ -73,6 +73,7 @@ func fresh(room: ModularMission) -> void:
 	require(Fixture.door(room).locked and room.objectives.index == 0 and room.events.fired.is_empty())
 	require(room.events.timer_state == MissionEvents.TimerState.IDLE and room.mission_result == -1)
 	require(not room.hud.mission_countdown_panel.visible)
+	require(Fixture.records_display(room).text == "ACCESS LOCKED")
 
 
 func use_consoles(room: ModularMission) -> void:
@@ -219,6 +220,13 @@ func run_client() -> void:
 		require(room.hud.squad_toast_label.text != room.definition.triggers[1].notice,
 			"A snapshot does not replay the timer-start notice")
 	require(room.hud.mission_countdown_panel.visible)
+	# The objective and clock snapshots can arrive on different frames.
+	var display := Fixture.records_display(room)
+	var display_deadline := Time.get_ticks_msec() + 3000
+	while room.objectives.index != 2 and Time.get_ticks_msec() < display_deadline:
+		await frames(1)
+	require(display.text == "RECORDS SENT\n" + room.hud.mission_countdown_label.text.get_slice("\n", 1),
+		"The terminal shows both the earned record and the same clock as the HUD")
 	var remaining := room.events.remaining_seconds()
 	room.events._on_objective_changed(2)
 	require(not room.events._expire_timer(), "A client cannot expire the mission")
@@ -249,6 +257,7 @@ func run_client() -> void:
 	await result(room, 0)
 	await state(room, MissionEvents.TimerState.EXPIRED)
 	require(room.hud.debrief_subtitle.text == "EXTRACTION WINDOW EXPIRED")
+	require(Fixture.records_display(room).text == "RECORDS SENT")
 	room.events.sync_countdown(1000000, str(room.events.timer_id), MissionEvents.TimerState.RUNNING, 180.0)
 	require(room.events.timer_state == MissionEvents.TimerState.EXPIRED and not room.hud.mission_countdown_panel.visible,
 		"A terminal snapshot cannot be resurrected")

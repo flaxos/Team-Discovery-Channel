@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
 [ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldCommandStation.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldRecordsTerminal.tscn" id="4"]
 [sub_resource type="Resource" id="a0"]
 script = ExtResource("2")
 id = &"console"
@@ -8,6 +10,7 @@ component = &"console"
 local_transform = Transform3D(1,0,0,0,1,0,0,0,1,2.6,0,-2.6)
 approach = Vector3(-1.2,0,1.2)
 placeholder_size = Vector3(1,1,0.8)
+scene = ExtResource("3")
 bounds = AABB(-0.5,0,-0.4,1,1,0.8)
 references = PackedStringArray("systems.control")
 [sub_resource type="Resource" id="a1"]
@@ -29,6 +32,7 @@ component = &"console"
 local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.6,0,-2.6)
 approach = Vector3(1.2,0,1.2)
 placeholder_size = Vector3(1,1,0.8)
+scene = ExtResource("3")
 bounds = AABB(-0.5,0,-0.4,1,1,0.8)
 [sub_resource type="Resource" id="a4"]
 script = ExtResource("2")
@@ -37,6 +41,7 @@ component = &"console"
 local_transform = Transform3D(1,0,0,0,1,0,0,0,1,8,0,4)
 approach = Vector3(0,0,-1.5)
 placeholder_size = Vector3(2,1,1)
+scene = ExtResource("4")
 bounds = AABB(-1.0,0,-0.5,2,1,1)
 [sub_resource type="Resource" id="a5"]
 script = ExtResource("2")

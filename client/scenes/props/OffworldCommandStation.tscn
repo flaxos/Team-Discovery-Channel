@@ -1,0 +1,89 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="StandardMaterial3D" id="glass"]
+albedo_color = Color(0.019, 0.08, 0.07, 1)
+roughness = 0.32
+emission_enabled = true
+emission = Color(0.025, 0.16, 0.135, 1)
+
+[sub_resource type="BoxMesh" id="foot"]
+material = ExtResource("basalt")
+size = Vector3(0.94, 0.12, 0.75)
+
+[sub_resource type="CylinderMesh" id="column"]
+material = ExtResource("bronze")
+top_radius = 0.22
+bottom_radius = 0.31
+height = 0.56
+radial_segments = 8
+rings = 0
+
+[sub_resource type="BoxMesh" id="console"]
+material = ExtResource("basalt")
+size = Vector3(0.74, 0.16, 0.54)
+
+[sub_resource type="BoxMesh" id="bezel"]
+material = ExtResource("bronze")
+size = Vector3(0.63, 0.042, 0.41)
+
+[sub_resource type="BoxMesh" id="screen"]
+material = SubResource("glass")
+size = Vector3(0.49, 0.024, 0.23)
+
+[sub_resource type="BoxMesh" id="key"]
+material = ExtResource("gold")
+size = Vector3(0.078, 0.027, 0.054)
+
+[node name="OffworldCommandStation" instance=ExtResource("base")]
+size = Vector3(1, 1, 0.8)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="Plinth" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.06, 0)
+mesh = SubResource("foot")
+
+[node name="Column" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("column")
+
+[node name="Console" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.746, 0)
+rotation = Vector3(0.25, 0, 0)
+mesh = SubResource("console")
+
+[node name="Bezel" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.839, -0.012)
+rotation = Vector3(0.25, 0, 0)
+mesh = SubResource("bezel")
+
+[node name="StatusGlass" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.87, -0.061)
+rotation = Vector3(0.25, 0, 0)
+mesh = SubResource("screen")
+
+[node name="Key0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.21, 0.82, 0.156)
+rotation = Vector3(0.25, 0, 0)
+mesh = SubResource("key")
+
+[node name="Key1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.07, 0.82, 0.156)
+rotation = Vector3(0.25, 0, 0)
+mesh = SubResource("key")
+
+[node name="Key2" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.07, 0.82, 0.156)
+rotation = Vector3(0.25, 0, 0)
+mesh = SubResource("key")
+
+[node name="Key3" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.21, 0.82, 0.156)
+rotation = Vector3(0.25, 0, 0)
+mesh = SubResource("key")

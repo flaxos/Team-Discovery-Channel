@@ -43,6 +43,7 @@ MODULES = {
     "room09": "Room09WidthAdapter.tscn",
     "room10": "Room10LongChamber.tscn",
     "room16": "Room16HangarShell.tscn",
+    "room11": "Room11LargeChamber.tscn",
 }
 
 # name: (albedo, metallic, roughness). Values and contrast checks: brief, section 2.3.
@@ -312,6 +313,14 @@ def wall_piece(slab: Slab, walls: list[Slab], extent: tuple[float, float]) -> tu
         for index, y in enumerate((1.68, 1.93, 2.18)):
             boxes.append(span("ServiceRail%d" % index, "bronze", (front[1] - .032, front[1]),
                               (floor + y, floor + y + .065), (-1.54, .33)))
+    if slab.name == "Wall34" and slab.position == (11.9, 1.7, 4.0):
+        # A stepped bronze seal sits in the command chamber's eastern wall recess.
+        relief_face = front[1] - .028
+        boxes.append(span("SealPanel", "portal", (back[1], relief_face),
+                          (floor + .85, floor + 2.72), (-1.78, .62)))
+        for index, (width, y) in enumerate(((1.72, 1.26), (1.25, 1.54), (.76, 1.82), (.3, 2.10))):
+            boxes.append(span("SealTier%d" % index, "bronze", (relief_face, front[1]),
+                              (floor + y, floor + y + .16), (-.58 - width / 2, -.58 + width / 2)))
     return boxes, turn, "%s_%s" % (ends[-1], ends[1])
 
 
