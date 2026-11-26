@@ -32,9 +32,9 @@ func run() -> void:
 		source.default_theme = id
 		assert(LevelLayoutValidator.validate(source).is_empty())
 		assert(LevelThemeResolver.apply(source, item, module).is_empty())
-		# Goa'uld is the one faction with art of its own (GA-1); the rest fall back.
+		# Goa'uld has built pieces; Tau'ri has authored palette materials; the rest fall back.
 		var info := LevelThemeResolver.describe(source, item)
-		assert(info.visual_source == ("goauld" if id == &"goauld" else "neutral"), str(info))
+		assert(info.visual_source == (str(id) if id in [&"goauld", &"tauri_sgc"] else "neutral"), str(info))
 		assert(info.coverage == ("pieces" if id == &"goauld" else "palette"), str(info))
 		assert(
 			(

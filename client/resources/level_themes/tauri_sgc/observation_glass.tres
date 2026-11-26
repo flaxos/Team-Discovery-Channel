@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "Tau'ri Observation Glass"
+transparency = 1
+albedo_color = Color(0.15, 0.22, 0.25, 0.20)
+roughness = 0.12
+refraction_enabled = true
+refraction_scale = 0.015

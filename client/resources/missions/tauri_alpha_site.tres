@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
+[ext_resource type="Script" path="res://scripts/mission/MissionPatrol.gd" id="3_patrol"]
+[ext_resource type="Resource" path="res://resources/levels/ai2_tauri_alpha_site.tres" id="4_layout"]
+
+[sub_resource type="Resource" id="reach_command"]
+script = ExtResource("2_objective")
+id = &"reach_command"
+kind = "reach"
+room = &"cmd_command"
+text = "REACH THE ALPHA SITE COMMAND CENTER"
+
+[sub_resource type="Resource" id="download_records"]
+script = ExtResource("2_objective")
+id = &"download_records"
+kind = "interact"
+room = &"cmd_command"
+attachment = &"main_console"
+text = "RECOVER TELEMETRY AND COMMAND RECORDS"
+prompt = "DOWNLOAD ALPHA SITE RECORDS"
+
+[sub_resource type="Resource" id="extract_entry"]
+script = ExtResource("2_objective")
+id = &"extract"
+kind = "extract"
+room = &"entry"
+marker = &"entry"
+radius = 3.5
+text = "RETURN TO INSERTION POINT — ALL STANDING OPERATIVES"
+
+[sub_resource type="Resource" id="patrol_checkpoint"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("gate_check", "hub")
+size = 2
+
+[sub_resource type="Resource" id="patrol_command"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("south_hall", "cmd_antechamber")
+size = 1
+
+[resource]
+script = ExtResource("1_definition")
+title = "ALPHA SITE OUTPOST — RECONNAISSANCE"
+layout = ExtResource("4_layout")
+objectives = Array[ExtResource("2_objective")]([SubResource("reach_command"), SubResource("download_records"), SubResource("extract_entry")])
+patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_checkpoint"), SubResource("patrol_command")])
+airman_support = false

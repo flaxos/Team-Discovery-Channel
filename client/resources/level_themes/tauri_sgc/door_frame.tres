@@ -1,0 +1,25 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/materials/sgc/embarkation_steel_albedo.jpg" id="albedo"]
+[ext_resource type="Texture2D" path="res://assets/materials/sgc/embarkation_steel_normal.png" id="normal"]
+[ext_resource type="Texture2D" path="res://assets/materials/sgc/embarkation_steel_orm.png" id="orm"]
+
+[resource]
+resource_name = "Tau'ri Industrial Steel Portal Frame"
+albedo_color = Color(0.45, 0.47, 0.46, 1)
+albedo_texture = ExtResource("albedo")
+metallic = 0.7
+metallic_texture = ExtResource("orm")
+metallic_texture_channel = 2
+roughness = 0.55
+roughness_texture = ExtResource("orm")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("normal")
+ao_enabled = true
+ao_texture = ExtResource("orm")
+ao_texture_channel = 0
+uv1_scale = Vector3(1.5, 1.5, 1.5)
+uv1_triplanar = true
+texture_filter = 5
