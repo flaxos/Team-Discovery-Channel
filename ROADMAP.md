@@ -8,6 +8,14 @@ Sizes below are relative effort, not dates. Nothing in this file is a delivery c
 
 ## Start here
 
+### Current and next sprints
+
+| Status | Sprint | Work |
+|---|---|---|
+| In review | 30 · Tall ring chambers and upper-deck traversal | Ramp and ring-chamber dressing is in place. Both seams, head clearance, boarding from both pads and the four-operative ring cycle passed focused checks. Full regression and owner art review are open. [Sprint 30 review](docs/reviews/2026-11-26-sprint30-goauld-vertical-chambers.md) |
+| In review | 31 · Alpha Site outpost | Playable interior route with pre-fab shelter surfaces, field equipment, observation aperture vista, and civilian presence. Entry, objective, and return loop verified. [Draft PR #108](https://github.com/flaxos/Team-Discovery-Channel/pull/108) · [Sprint 31 review](docs/reviews/2026-11-27-sprint31-alpha-site-outpost.md) |
+| Next | 32 · Mothership boarding and ring breach | Boarding-ring entry, Goa'uld airlock/bulkhead transition and primary corridor route. [Sprint 32 scope](docs/plans/asset-vertical-slices.md#offworld-locations-and-mothership) |
+
 **Resume state on 21 November 2026.** Phases 1 to 3 are implemented, merged, and **accepted by an owner on a solo session** ([record](docs/reviews/2026-11-14-owner-solo-uat.md), [D-014](docs/DECISIONS.md)). The two-player sessions were deferred, so co-op behaviour on a human run is still covered by automated suites only, and every tuning value is provisional. Gate travel and SW-1 are now merged through PR #58. TA-3 and its post-combat hardening, CO-1 resupply, and the community weapon/gate imports are merged through #69. EV-2 chunk 1 is merged in #70. The R24 four-operative joining/travel fix is merged in #71. Sprint 1 session cleanup is merged in #72. Sprint 2 Timed Extraction is merged in #73. Sprint 3 Alarm Escape is merged in #74. Sprint 4 modular alternate-entrance flanking is merged in #75. Sprint 5 ammunition sharing is merged in #76. Sprint 6 GA-2 part 1 is merged in #77; owner art acceptance remains pending. The [completed six-sprint sequence](docs/plans/next-six-sprints.md) leads into the owner-requested [community-first asset programme, Sprints 7–35](docs/plans/asset-vertical-slices.md): weapons, SGC, rigged characters, offworld locations and bounded mothership art. The earlier GT-1 local baseline was **80/80**.
 
 Two owner decisions on 14 November shape what follows: art is built in the engine by agents ([D-012](docs/DECISIONS.md)), and players may be in different worlds at once ([D-013](docs/DECISIONS.md)). The design that followed is written: [gate travel with a split team](docs/plans/gate-travel-split-worlds.md), with the owners' four rules for a split team in [D-017](docs/DECISIONS.md). A third, matte Jaffa armour ([D-015](docs/DECISIONS.md)), came out of building the art.
@@ -51,6 +59,10 @@ Two owner decisions on 14 November shape what follows: art is built in the engin
 **Sprint 28 merged via PR #105.** The long chamber gets engineering surfaces, a fitted generator and console, and recessed service detail. The cores and console display dim when the existing sabotage event releases command security. The review includes both routes, alarm extraction, late join, retry and the Linux export. Owner art review is open. [Sprint 28 review](docs/reviews/2026-11-26-sprint28-goauld-generator-room.md).
 
 **Sprint 29 dresses the upper-deck command room.** Its fitted records terminal shows access, download and countdown state from the mission. Two reusable side consoles and a bronze wall seal complete the room. The review covers Infiltration, Timed Extraction, Alarm Escape and four-operative late joins. Owner art review is open. [Sprint 29 review](docs/reviews/2026-11-26-sprint29-goauld-command-room.md).
+
+**Sprint 30 dresses the Goa’uld ramp and ring chambers.** Both pads share the tall-wall kit and flush frame around the operating space. The pitched floor runner and two-tone rails continue through both landings. [Sprint 30 review](docs/reviews/2026-11-26-sprint30-goauld-vertical-chambers.md).
+
+**Sprint 31 dresses the Alpha Site outpost interior and observation vista.** Pre-fab shelter surfaces (`tauri_sgc`), field cargo crates, communications rack, and field console dress native room presets. The observation aperture frames an exterior alien mountain vista beyond the authored boundary while preserving 100% enclosure and collision containment. SGC civilian presence and the full entry/objective/return mission loop are verified. Owner art review is open. [Sprint 31 review](docs/reviews/2026-11-27-sprint31-alpha-site-outpost.md).
 
 **R16 ring transport.** In Goa’uld Infiltration, step onto a ring pad and press Interact to carry the squad members aboard between decks. Both endpoints share a server-controlled cycle and an occupied receiving pad blocks transport. This gameplay slice uses the existing ring assets and clears a prerequisite for the mothership work. [Transport setup](docs/maps/modular-vertical-kit.md#equipment-and-transport-interfaces).
 

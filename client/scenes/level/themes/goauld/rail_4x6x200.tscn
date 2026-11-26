@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+
+[sub_resource type="BoxMesh" id="m0"]
+material = ExtResource("basalt")
+size = Vector3(0.04, 0.03, 2)
+
+[sub_resource type="BoxMesh" id="m1"]
+material = ExtResource("bronze")
+size = Vector3(0.04, 0.03, 2)
+
+[node name="Rail" type="Node3D"]
+
+[node name="RailBody" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.015, 0)
+mesh = SubResource("m0")
+
+[node name="RailCrown" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.015, 0)
+mesh = SubResource("m1")

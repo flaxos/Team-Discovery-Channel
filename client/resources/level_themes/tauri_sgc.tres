@@ -1,14 +1,44 @@
 [gd_resource type="Resource" script_class="LevelVisualTheme" format=3]
+
 [ext_resource type="Script" path="res://scripts/level/LevelVisualTheme.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/level_themes/neutral_lighting.tres" id="2"]
+[ext_resource type="Script" path="res://scripts/level/LevelThemeVariant.gd" id="3_variant"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/ceiling.tres" id="4_ceiling"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/detail.tres" id="5_detail"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/door_frame.tres" id="6_door_frame"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/floor.tres" id="7_floor"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/portal.tres" id="8_portal"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/prop.tres" id="9_prop"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/wall.tres" id="10_wall"]
+[ext_resource type="StandardMaterial3D" path="res://resources/level_themes/tauri_sgc/observation_glass.tres" id="11_glass"]
+
+[sub_resource type="Resource" id="v_obs_south"]
+script = ExtResource("3_variant")
+id = &"room04_south_window"
+slot = &"south"
+module_ids = PackedStringArray("room04")
+material = ExtResource("11_glass")
+
 [resource]
 script = ExtResource("1")
 id = &"tauri_sgc"
 display_name = "Tau’ri / SGC"
 description = "Earth military installation: utilitarian concrete, steel panels, restrained task lighting and clear equipment markings."
-synonyms = PackedStringArray("earth","military","sgc","tauri")
+synonyms = PackedStringArray("earth", "military", "sgc", "tauri")
 fallback_id = &"neutral"
 lighting = ExtResource("2")
-compatible_families = PackedStringArray("corridor","chamber","adapter","vertical")
-decoration_slots = PackedStringArray("wall_panels","floor_detail","ceiling_detail","door_frame","room_detail")
-art_status = "fallback"
+compatible_families = PackedStringArray("corridor", "chamber", "adapter", "vertical")
+decoration_slots = PackedStringArray("wall_panels", "floor_detail", "ceiling_detail", "door_frame", "room_detail")
+art_status = "authored"
+materials = {
+"ceiling": ExtResource("4_ceiling"),
+"detail": ExtResource("5_detail"),
+"door_frame": ExtResource("6_door_frame"),
+"floor": ExtResource("7_floor"),
+"portal": ExtResource("8_portal"),
+"prop": ExtResource("9_prop"),
+"wall": ExtResource("10_wall")
+}
+variants = Array[ExtResource("3_variant")]([SubResource("v_obs_south")])
+surface_material = ExtResource("10_wall")
+prop_material = ExtResource("9_prop")

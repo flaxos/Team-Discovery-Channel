@@ -1,53 +1,85 @@
 [gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+
 [ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/props/AlphaSiteFieldConsole.tscn" id="3_console"]
+[ext_resource type="PackedScene" path="res://scenes/props/AlphaSiteFieldCommsRack.tscn" id="4_rack"]
+[ext_resource type="PackedScene" path="res://scenes/entities/SGCCivilian.tscn" id="5_civilian"]
+[ext_resource type="PackedScene" path="res://scenes/props/AlphaSiteObservationVista.tscn" id="6_vista"]
+
 [sub_resource type="Resource" id="a0"]
 script = ExtResource("2")
 id = &"console"
 component = &"console"
-local_transform = Transform3D(1,0,0,0,1,0,0,0,1,2.6,0,-2.6)
-approach = Vector3(-1.2,0,1.2)
-placeholder_size = Vector3(1,1,0.8)
-bounds = AABB(-0.5,0,-0.4,1,1,0.8)
+scene = ExtResource("3_console")
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, -2.6)
+approach = Vector3(-1.2, 0, 1.2)
+placeholder_size = Vector3(1, 1, 0.8)
+bounds = AABB(-0.5, 0, -0.4, 1, 1, 0.8)
 references = PackedStringArray("systems.control")
+
 [sub_resource type="Resource" id="a1"]
 script = ExtResource("2")
 id = &"patrol_entry"
 component = &"patrol"
-local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,-1)
-approach = Vector3(0,0,0)
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+approach = Vector3(0, 0, 0)
+
 [sub_resource type="Resource" id="a2"]
 script = ExtResource("2")
 id = &"patrol_exit"
 component = &"patrol"
-local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,1)
-approach = Vector3(0,0,0)
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+approach = Vector3(0, 0, 0)
+
 [sub_resource type="Resource" id="a3"]
 script = ExtResource("2")
 id = &"communications_display"
 component = &"equipment"
-local_transform = Transform3D(1,0,0,0,1,0,0,0,1,-2.6,0,-2.6)
-approach = Vector3(1.2,0,1.2)
-placeholder_size = Vector3(2,1.5,0.3)
-bounds = AABB(-1.0,0,-0.15,2,1.5,0.3)
+scene = ExtResource("4_rack")
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0, -2.6)
+approach = Vector3(1.2, 0, 1.2)
+placeholder_size = Vector3(2, 1.5, 0.3)
+bounds = AABB(-1.0, 0, -0.15, 2, 1.5, 0.3)
+
 [sub_resource type="Resource" id="a4"]
 script = ExtResource("2")
 id = &"staff_station"
 component = &"spawn"
-local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,0)
-approach = Vector3(0,0,0)
+reachable = false
+scene = ExtResource("5_civilian")
+local_transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 1.6, 0, -2.6)
+approach = Vector3(0, 0, 0)
+bounds = AABB(-0.35, 0, -0.35, 0.7, 1.8, 0.7)
+blocks_movement = false
+placeholder_size = Vector3(0, 0, 0)
+
 [sub_resource type="Resource" id="a5"]
 script = ExtResource("2")
 id = &"intelligence"
 component = &"objective"
-local_transform = Transform3D(1,0,0,0,1,0,0,0,1,0,0,1.2)
-approach = Vector3(0,0,0)
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.2)
+approach = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="a6"]
+script = ExtResource("2")
+id = &"observation_vista"
+component = &"vista"
+scene = ExtResource("6_vista")
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.4)
+approach = Vector3(0, 0, -1)
+bounds = AABB(-1.5, 0, -0.2, 3.0, 2.8, 0.4)
+blocks_movement = false
+placeholder_size = Vector3(0, 0, 0)
+required = false
+reachable = false
+
 [resource]
 script = ExtResource("1")
 id = &"observation_communications"
 label = "Observation / communications"
-compatible_modules = PackedStringArray("room04","room10","room11","room13","room15")
-attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5")])
-system_references = PackedStringArray("communications.network","objective.intelligence")
+compatible_modules = PackedStringArray("room04", "room10", "room11", "room13", "room15")
+attachments = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6")])
+system_references = PackedStringArray("communications.network", "objective.intelligence")
 description = "Observation / communications configuration with reusable equipment and reachable markers; no mission progression."
-synonyms = PackedStringArray("observation","communications room","intelligence")
+synonyms = PackedStringArray("observation", "communications room", "intelligence")

@@ -1,0 +1,134 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/door_frame.tres" id="frame_steel"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/detail.tres" id="louvre_steel"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/wall.tres" id="rock_cliff"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/observation_glass.tres" id="tactical_glass"]
+
+[sub_resource type="StandardMaterial3D" id="conifer_foliage"]
+albedo_color = Color(0.14, 0.24, 0.12, 1)
+roughness = 0.90
+
+[sub_resource type="StandardMaterial3D" id="offworld_sky"]
+shading_mode = 0
+albedo_color = Color(0.38, 0.58, 0.74, 1)
+
+[sub_resource type="BoxMesh" id="frame_horizontal"]
+material = ExtResource("frame_steel")
+size = Vector3(3.2, 0.36, 0.22)
+
+[sub_resource type="BoxMesh" id="frame_vertical"]
+material = ExtResource("frame_steel")
+size = Vector3(0.24, 2.15, 0.22)
+
+[sub_resource type="BoxMesh" id="mullion"]
+material = ExtResource("louvre_steel")
+size = Vector3(0.08, 2.05, 0.16)
+
+[sub_resource type="BoxMesh" id="glass_pane"]
+material = ExtResource("tactical_glass")
+size = Vector3(2.65, 2.05, 0.02)
+
+[sub_resource type="PrismMesh" id="mountain_peak_1"]
+material = ExtResource("rock_cliff")
+left_to_right = 0.65
+size = Vector3(36.0, 22.0, 16.0)
+
+[sub_resource type="PrismMesh" id="mountain_peak_2"]
+material = ExtResource("rock_cliff")
+left_to_right = 0.35
+size = Vector3(48.0, 28.0, 20.0)
+
+[sub_resource type="PrismMesh" id="mountain_peak_3"]
+material = ExtResource("rock_cliff")
+left_to_right = 0.5
+size = Vector3(28.0, 16.0, 12.0)
+
+[sub_resource type="BoxMesh" id="canyon_ground"]
+material = ExtResource("rock_cliff")
+size = Vector3(50.0, 5.0, 40.0)
+
+[sub_resource type="CylinderMesh" id="pine_tree"]
+material = SubResource("conifer_foliage")
+top_radius = 0.05
+bottom_radius = 1.3
+height = 5.5
+radial_segments = 6
+
+[sub_resource type="QuadMesh" id="sky_backdrop"]
+material = SubResource("offworld_sky")
+size = Vector2(100.0, 55.0)
+
+[node name="AlphaSiteObservationVista" type="Node3D"]
+
+[node name="InteriorAperture" type="Node3D" parent="."]
+
+[node name="FrameTop" type="MeshInstance3D" parent="InteriorAperture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.62, 0)
+mesh = SubResource("frame_horizontal")
+
+[node name="FrameBottom" type="MeshInstance3D" parent="InteriorAperture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0)
+mesh = SubResource("frame_horizontal")
+
+[node name="FrameLeft" type="MeshInstance3D" parent="InteriorAperture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.48, 1.45, 0)
+mesh = SubResource("frame_vertical")
+
+[node name="FrameRight" type="MeshInstance3D" parent="InteriorAperture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.48, 1.45, 0)
+mesh = SubResource("frame_vertical")
+
+[node name="MullionLeft" type="MeshInstance3D" parent="InteriorAperture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.50, 1.45, 0.02)
+mesh = SubResource("mullion")
+
+[node name="MullionRight" type="MeshInstance3D" parent="InteriorAperture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.50, 1.45, 0.02)
+mesh = SubResource("mullion")
+
+[node name="GlassPane" type="MeshInstance3D" parent="InteriorAperture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0.04)
+mesh = SubResource("glass_pane")
+
+[node name="ExteriorVista" type="Node3D" parent="."]
+
+[node name="CanyonGround" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.5, 20.0)
+mesh = SubResource("canyon_ground")
+
+[node name="RidgeLeft" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -18.0, 7.0, 26.0)
+mesh = SubResource("mountain_peak_1")
+
+[node name="RidgeRight" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 20.0, 9.0, 32.0)
+mesh = SubResource("mountain_peak_2")
+
+[node name="RidgeCenter" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 42.0)
+mesh = SubResource("mountain_peak_3")
+
+[node name="Pine01" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.75, 8.5)
+mesh = SubResource("pine_tree")
+
+[node name="Pine02" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 5.2, 3.3, 11.0)
+mesh = SubResource("pine_tree")
+
+[node name="Pine03" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, -1.8, 2.45, 14.5)
+mesh = SubResource("pine_tree")
+
+[node name="Pine04" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, -9.0, 4.5, 18.0)
+mesh = SubResource("pine_tree")
+
+[node name="Pine05" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(1.1, 0, 0, 0, 1.1, 0, 0, 0, 1.1, 8.5, 4.8, 20.5)
+mesh = SubResource("pine_tree")
+
+[node name="SkyBackdrop" type="MeshInstance3D" parent="ExteriorVista"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16.0, 52.0)
+mesh = SubResource("sky_backdrop")

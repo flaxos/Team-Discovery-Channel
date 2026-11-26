@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/door_frame.tres" id="steel"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/prop.tres" id="olive_prop"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/detail.tres" id="detail_mat"]
+
+[sub_resource type="StandardMaterial3D" id="stencil_mat"]
+albedo_color = Color(0.72, 0.70, 0.62, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="pallet"]
+material = ExtResource("steel")
+size = Vector3(1.36, 0.12, 1.36)
+
+[sub_resource type="BoxMesh" id="body"]
+material = ExtResource("olive_prop")
+size = Vector3(1.30, 0.96, 1.30)
+
+[sub_resource type="BoxMesh" id="corner"]
+material = ExtResource("steel")
+size = Vector3(0.08, 0.98, 0.08)
+
+[sub_resource type="BoxMesh" id="latch"]
+material = ExtResource("detail_mat")
+size = Vector3(0.12, 0.08, 0.04)
+
+[sub_resource type="BoxMesh" id="stencil"]
+material = SubResource("stencil_mat")
+size = Vector3(0.68, 0.22, 0.015)
+
+[node name="AlphaSiteFieldCrate" instance=ExtResource("base")]
+size = Vector3(1.4, 1.2, 1.4)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="PalletBase" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, 0)
+mesh = SubResource("pallet")
+
+[node name="CrateBody" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.60, 0)
+mesh = SubResource("body")
+
+[node name="CornerNW" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62, 0.61, -0.62)
+mesh = SubResource("corner")
+
+[node name="CornerNE" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.62, 0.61, -0.62)
+mesh = SubResource("corner")
+
+[node name="CornerSW" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62, 0.61, 0.62)
+mesh = SubResource("corner")
+
+[node name="CornerSE" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.62, 0.61, 0.62)
+mesh = SubResource("corner")
+
+[node name="LatchFront" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0.66)
+mesh = SubResource("latch")
+
+[node name="StencilPlate" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, 0.655)
+mesh = SubResource("stencil")

@@ -67,7 +67,7 @@ class GoauldKit(unittest.TestCase):
             wanted = {slab.name for slab in kit.read_slabs(kit.MODULE_SCENES / scene) if slab.slot != 'portal'}
             got = {variant['slot'] for variant in self.variants if variant['module'] == module_id}
             self.assertEqual(got, wanted, module_id)
-        self.assertEqual(len(self.variants), 226)
+        self.assertEqual(len(self.variants), 260)
         self.assertEqual(len({variant['id'] for variant in self.variants}), len(self.variants))
 
     def test_each_piece_fills_exactly_its_slab(self):
@@ -143,7 +143,7 @@ class GoauldKit(unittest.TestCase):
             for side in (-1, 1):
                 for z in (0, -size[2] / 3, size[2] / 3):
                     sill = slab.position[1] - size[1] / 2
-                    band = sill + .15 if sill >= 10.0 else 3.1
+                    band = sill + .15 if sill >= kit.BAND[0] else 3.1
                     point = (side * (size[0] / 2 + kit.PROUD / 2), band - slab.position[1], z)
                     found = [box.material for box in boxes if all(lo < v < hi for lo, v, hi in zip(box.low(), point, box.high()))]
                     self.assertEqual(found, ['gold'], '%s face %d at %s' % (name, side, z))

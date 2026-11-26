@@ -1,0 +1,95 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/door_frame.tres" id="steel"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/prop.tres" id="olive_prop"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/detail.tres" id="detail_mat"]
+
+[sub_resource type="StandardMaterial3D" id="crt_mat"]
+albedo_color = Color(0.04, 0.12, 0.08, 1)
+roughness = 0.25
+emission_enabled = true
+emission = Color(0.06, 0.28, 0.18, 1)
+
+[sub_resource type="StandardMaterial3D" id="led_amber"]
+albedo_color = Color(0.15, 0.10, 0.02, 1)
+emission_enabled = true
+emission = Color(0.90, 0.55, 0.08, 1)
+
+[sub_resource type="BoxMesh" id="frame_upright"]
+material = ExtResource("steel")
+size = Vector3(0.06, 1.48, 0.28)
+
+[sub_resource type="BoxMesh" id="shelf_plate"]
+material = ExtResource("steel")
+size = Vector3(1.92, 0.04, 0.28)
+
+[sub_resource type="BoxMesh" id="unit_panel"]
+material = ExtResource("olive_prop")
+size = Vector3(0.58, 0.38, 0.25)
+
+[sub_resource type="BoxMesh" id="monitor_casing"]
+material = ExtResource("detail_mat")
+size = Vector3(0.68, 0.48, 0.26)
+
+[sub_resource type="BoxMesh" id="monitor_screen"]
+material = SubResource("crt_mat")
+size = Vector3(0.58, 0.38, 0.02)
+
+[sub_resource type="BoxMesh" id="led_strip"]
+material = SubResource("led_amber")
+size = Vector3(0.18, 0.03, 0.02)
+
+[node name="AlphaSiteFieldCommsRack" instance=ExtResource("base")]
+size = Vector3(2.0, 1.5, 0.3)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="UprightLeft" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.96, 0.74, 0)
+mesh = SubResource("frame_upright")
+
+[node name="UprightMidL" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32, 0.74, 0)
+mesh = SubResource("frame_upright")
+
+[node name="UprightMidR" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.32, 0.74, 0)
+mesh = SubResource("frame_upright")
+
+[node name="UprightRight" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96, 0.74, 0)
+mesh = SubResource("frame_upright")
+
+[node name="ShelfBottom" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("shelf_plate")
+
+[node name="ShelfMid" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+mesh = SubResource("shelf_plate")
+
+[node name="ShelfTop" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.46, 0)
+mesh = SubResource("shelf_plate")
+
+[node name="RadioUnit1" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.64, 0.32, 0)
+mesh = SubResource("unit_panel")
+
+[node name="RadioUnit2" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.32, 0)
+mesh = SubResource("unit_panel")
+
+[node name="TelemetryMonitor" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+mesh = SubResource("monitor_casing")
+
+[node name="ScreenDisplay" type="MeshInstance3D" parent="Visuals/TelemetryMonitor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.13)
+mesh = SubResource("monitor_screen")
+
+[node name="StatusLED" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.64, 0.45, 0.13)
+mesh = SubResource("led_strip")

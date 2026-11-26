@@ -1,6 +1,6 @@
 extends SceneTree
 ## The palette reaches the whole live infiltration compound. Corridors, compact chambers,
-## the generator and the arrival hangar use built pieces,
+## the objective rooms, the arrival hangar and the vertical route use built pieces.
 ## and nothing a theme does changes collision or navigation (decision D-010). The same layout
 ## is assembled twice, once as authored and once forced to the neutral theme, and compared.
 const LAYOUT := "res://resources/levels/goauld_infiltration_01.tres"
@@ -17,6 +17,8 @@ const PIECE_MODULES: Array[StringName] = [
 	&"room09",
 	&"room10",
 	&"room11",
+	&"room14",
+	&"room15",
 	&"room16",
 ]
 const FRIEZE_BASE := 2.8
@@ -88,7 +90,7 @@ func flat(point: Vector3) -> float:
 func run() -> void:
 	var theme := LevelThemeResolver.registry()[&"goauld"] as LevelVisualTheme
 	assert(LevelThemeResolver.validate_theme(theme).is_empty(), str(LevelThemeResolver.validate_theme(theme)))
-	assert(theme.art_status == "authored" and theme.variants.size() == 226)
+	assert(theme.art_status == "authored" and theme.variants.size() == 260)
 	for slot_id: String in theme.materials:
 		assert(slot_id in LevelThemeResolver.SLOTS, slot_id)
 	for slot_id: String in theme.decoration_slots:
@@ -143,7 +145,14 @@ func run() -> void:
 					assert(box.position.y >= floor_y + FRIEZE_BASE - 0.001, "%s/%s/%s" % [item.id, mesh.name, part.name])
 				# A floor is colour only: every part ends at the walking surface.
 				if slot_id == &"floor":
-					assert(is_equal_approx(box.end.y, mesh.global_position.y + 0.1), str(part.name))
+					var floor_space := mesh.global_transform.affine_inverse() * part.global_transform
+					assert(is_equal_approx((floor_space * part.mesh.get_aabb()).end.y, 0.1), str(part.name))
+				if item.module.id == &"room15" and part.name.begins_with("Rim"):
+					var local := module.global_transform.affine_inverse() * part.global_transform
+					var rim := local * part.mesh.get_aabb()
+					var reserve: AABB = item.module.equipment_clearances["transport"]
+					reserve.position.y = rim.position.y
+					assert(not rim.intersects(reserve), "The flush rim clears the ring operating footprint")
 			var centre := module.global_position
 			var dims: Vector3 = mesh.get_meta("dimensions", Vector3.ONE)
 			var thin_axis := 0 if dims.x < dims.z else 2
@@ -184,7 +193,7 @@ func run() -> void:
 			var prop := module.get_node_or_null(LevelRoomComposer.node_path(attachment)) as LevelPlaceholderProp
 			if prop != null:
 				assert((prop.get_node("Visuals/Mesh") as MeshInstance3D).material_override == theme.materials["prop"])
-	assert(pieced == 17, "Corridors, compact chambers, generator, command and arrival hangar have pieces: %d" % pieced)
+	assert(pieced == source.instances.size(), "Every room in the live compound uses authored pieces")
 
 	# --- Every built module, including those outside the compound, applies under each turn.
 	for mod_id: StringName in PIECE_MODULES:

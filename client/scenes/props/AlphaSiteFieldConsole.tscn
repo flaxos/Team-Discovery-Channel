@@ -1,0 +1,73 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/door_frame.tres" id="steel"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/prop.tres" id="olive_prop"]
+[ext_resource type="Material" path="res://resources/level_themes/tauri_sgc/detail.tres" id="detail_mat"]
+
+[sub_resource type="StandardMaterial3D" id="terminal_screen_mat"]
+albedo_color = Color(0.04, 0.10, 0.14, 1)
+roughness = 0.28
+emission_enabled = true
+emission = Color(0.08, 0.32, 0.38, 1)
+
+[sub_resource type="BoxMesh" id="table_top"]
+material = ExtResource("olive_prop")
+size = Vector3(0.96, 0.05, 0.76)
+
+[sub_resource type="CylinderMesh" id="table_leg"]
+material = ExtResource("steel")
+top_radius = 0.024
+bottom_radius = 0.024
+height = 0.70
+radial_segments = 6
+
+[sub_resource type="BoxMesh" id="terminal_base"]
+material = ExtResource("detail_mat")
+size = Vector3(0.48, 0.035, 0.34)
+
+[sub_resource type="BoxMesh" id="terminal_screen"]
+material = SubResource("terminal_screen_mat")
+size = Vector3(0.44, 0.28, 0.02)
+
+[sub_resource type="BoxMesh" id="transceiver_case"]
+material = ExtResource("detail_mat")
+size = Vector3(0.26, 0.18, 0.22)
+
+[node name="AlphaSiteFieldConsole" instance=ExtResource("base")]
+size = Vector3(1.0, 1.0, 0.8)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="TableTop" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.71, 0)
+mesh = SubResource("table_top")
+
+[node name="LegNW" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.35, -0.32)
+mesh = SubResource("table_leg")
+
+[node name="LegNE" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.35, -0.32)
+mesh = SubResource("table_leg")
+
+[node name="LegSW" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.35, 0.32)
+mesh = SubResource("table_leg")
+
+[node name="LegSE" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.35, 0.32)
+mesh = SubResource("table_leg")
+
+[node name="TerminalBase" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.75, 0.06)
+mesh = SubResource("terminal_base")
+
+[node name="TerminalScreen" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, -0.12, 0.88, -0.09)
+mesh = SubResource("terminal_screen")
+
+[node name="FieldTransceiver" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.82, -0.12)
+mesh = SubResource("transceiver_case")
