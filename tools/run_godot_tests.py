@@ -37,6 +37,7 @@ MULTIPLAYER = (
     'test_modular_flanking_dedicated',
     'test_ammunition_sharing_dedicated',
     'test_goauld_personal_shield_dedicated',
+    'test_campaign_variation_dedicated',
 )
 FATAL = re.compile(r'(?:SCRIPT ERROR:|(?:^|\n)ERROR:|Assertion failed|WARNING: ObjectDB|AddressSanitizer|Segmentation fault)', re.MULTILINE)
 ANSI = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')

@@ -11,8 +11,15 @@ const NEAR_MISS_RADIUS := 1.15
 const AIRMAN := "res://scenes/entities/SGCAirman.tscn"
 const SquadOrders := preload("res://scripts/mission/ModularSquadOrders.gd")
 @export var definition: MissionDefinition
+var base_definition: MissionDefinition
 var is_started := false
 var setup_errors := PackedStringArray()
+var active_difficulty: int = SGCNetworkManager.DIFFICULTY_EASY
+var active_run_seed: int = 0
+var active_modifiers: Array[String] = []
+var active_variant: Dictionary = {}
+var active_patrol_plans: Array[Dictionary] = []
+var _patrols_spawned: int = 0
 @onready var level: LevelAssembly = $Level
 @onready var objectives: MissionObjectives = $Objectives
 @onready var enemies: Node3D = $Enemies
@@ -25,7 +32,48 @@ func _enter_tree() -> void:
 	($Level as LevelAssembly).layout = definition.layout
 
 
+func _resolve_variation_context() -> void:
+	if definition == null:
+		return
+	if base_definition == null:
+		base_definition = definition
+	active_difficulty = SGCNetworkManager.DIFFICULTY_EASY
+	active_run_seed = 0
+	active_modifiers.clear()
+	active_variant.clear()
+
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if campaign_mgr != null and campaign_mgr.get("is_campaign_active"):
+		active_difficulty = MissionDifficulty.clamp_tier(int(campaign_mgr.get("campaign_difficulty")))
+		active_run_seed = int(campaign_mgr.get("run_seed"))
+		active_modifiers = MissionDifficulty.sanitize_modifiers(campaign_mgr.get("active_modifiers"))
+		var stage_var: Variant = campaign_mgr.call(&"get_stage_variant")
+		if stage_var is Dictionary and not (stage_var as Dictionary).is_empty():
+			active_variant = (stage_var as Dictionary).duplicate(true)
+		elif active_run_seed > 0:
+			var stage_idx: int = int(campaign_mgr.get("current_stage_index"))
+			active_variant = MissionDifficulty.build_stage_variant(
+				active_run_seed, stage_idx, active_difficulty, base_definition.objective_variant_entries()
+			)
+	elif net != null and MissionDifficulty.supports_difficulty_selection(net.selected_mission_id):
+		active_difficulty = MissionDifficulty.clamp_tier(net.mission_difficulty)
+		active_run_seed = net.run_seed
+		active_modifiers = MissionDifficulty.sanitize_modifiers(net.selected_modifiers)
+		if active_run_seed > 0:
+			active_variant = MissionDifficulty.build_stage_variant(
+				active_run_seed, 0, active_difficulty, base_definition.objective_variant_entries()
+			)
+
+	var variant_id: String = str(active_variant.get("objective_variant_id", ""))
+	if not variant_id.is_empty():
+		definition = base_definition.with_variant(StringName(variant_id)) as MissionDefinition
+	else:
+		definition = base_definition
+
+
 func _ready() -> void:
+	_resolve_variation_context()
 	setup_errors = definition.validate()
 	var layout := level.layout
 	var entry := (
@@ -45,11 +93,13 @@ func _ready() -> void:
 	objectives.completed.connect(_on_objectives_completed)
 	_show_objective(objectives.index)
 	alert.setup(definition, level, enemies)
+	alert.configure_difficulty(active_difficulty, active_modifiers)
 	alert.level_changed.connect(_on_alert_changed)
 	alert.runner_changed.connect(_on_alarm_runner)
 	alert.console_disabled.connect(_on_alarm_disabled)
 	if setup_errors.is_empty():
 		events.setup(definition, level, objectives, alert)
+		events.configure_difficulty(active_difficulty, active_modifiers)
 		events.notice_shown.connect(_on_event_notice)
 		events.countdown_changed.connect(_on_countdown_changed)
 		events.timer_expired.connect(_on_timer_expired)
@@ -143,6 +193,8 @@ func _on_countdown_changed(label: String, seconds: float, running: bool) -> void
 
 
 func _on_hostile_entered(node: Node) -> void:
+	if str(node.name).begins_with("Jaffa_P"):
+		_patrols_spawned += 1
 	var health := node.get_node_or_null("HealthComponent") as HealthComponent
 	if health != null:
 		health.died.connect(_show_hostiles)
@@ -232,21 +284,44 @@ func _on_alarm_disabled(_index: int) -> void:
 
 
 func _spawn_patrols() -> void:
-	for p in range(definition.patrols.size()):
-		var patrol := definition.patrols[p]
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	var stage_idx: int = int(campaign_mgr.get("current_stage_index")) if (campaign_mgr != null and campaign_mgr.get("is_campaign_active")) else 0
+	active_patrol_plans = MissionDifficulty.resolve_patrol_plans(
+		definition, active_difficulty, active_run_seed, stage_idx, active_modifiers
+	)
+	var notice_scale: float = MissionDifficulty.sight_notice_scale(active_difficulty, active_modifiers)
+	for p: int in range(active_patrol_plans.size()):
+		var plan: Dictionary = active_patrol_plans[p]
+		var rooms: PackedStringArray = plan["rooms"] as PackedStringArray
+		var marker_name: StringName = plan["marker"] as StringName
 		var route: Array[Vector3] = []
-		for room in patrol.rooms:
-			route.append(level.marker(StringName(room), patrol.marker))
-		var home := level.get_node(patrol.rooms[0]) as Node3D
-		for n in range(patrol.size):
-			var scene_path := SHOCK_JAFFA if patrol.shock_guard else JAFFA
+		for room: String in rooms:
+			route.append(level.marker(StringName(room), marker_name))
+		var home := level.get_node(rooms[0]) as Node3D
+		var p_size: int = int(plan["size"])
+		var base_size: int = int(plan["base_size"])
+		var use_shock_all: bool = bool(plan["shock_guard"])
+		var base_shield: bool = bool(plan["personal_shield"])
+		var promoted_shield: bool = bool(plan["promoted_lead_shield"])
+		for n: int in range(p_size):
+			var use_shock: bool = use_shock_all or (promoted_shield and n == 0)
+			var scene_path := SHOCK_JAFFA if use_shock else JAFFA
 			var jaffa := load(scene_path).instantiate() as JaffaAI
 			jaffa.name = "Jaffa_P%d_%d" % [p, n]
 			# Rank 0 leads and suppresses; later ranks take marker cover when engaged.
 			jaffa.formation_rank = n
-			if patrol.personal_shield and n == 0:
+			if (base_shield or promoted_shield) and n == 0:
 				jaffa.has_personal_shield = true
-			jaffa.position = enemies.to_local(route[0] + home.global_basis.z * -1.2 * n)
+			if notice_scale != 1.0:
+				jaffa.notice_time_near *= notice_scale
+				jaffa.notice_time_far *= notice_scale
+			var world_spot: Vector3
+			if n < base_size:
+				world_spot = route[0] + home.global_basis.z * -1.2 * n
+			else:
+				var candidate := route[0] + home.global_basis.x * (1.15 if n % 2 == 0 else -1.15) + home.global_basis.z * -0.9
+				world_spot = NavigationServer3D.map_get_closest_point(level.navigation_map, candidate)
+			jaffa.position = enemies.to_local(world_spot)
 			jaffa.position.y += 0.05
 			enemies.add_child(jaffa, true)
 			jaffa.start_patrol(route)
@@ -294,7 +369,9 @@ func _open_return_gate() -> void:
 
 func hostiles_eliminated_count() -> int:
 	var hostiles := alert.reinforcements_spawned if alert != null else 0
-	if definition != null:
+	if _patrols_spawned > 0:
+		hostiles += _patrols_spawned
+	elif definition != null:
 		for patrol in definition.patrols:
 			hostiles += patrol.size
 	return maxi(0, hostiles - hostiles_alive())

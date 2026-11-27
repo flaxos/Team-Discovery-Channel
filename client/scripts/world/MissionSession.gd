@@ -206,6 +206,30 @@ func _build_debrief(victory: bool) -> Dictionary:
 	var lost_text: String = "NONE" if lost_names.is_empty() else "%d (%s)" % [lost_names.size(), ", ".join(lost_names)]
 	var outcome: String = ("ALL AWAY TEAM RETURNED" if lost_names.is_empty() else "RETURNED WITH LOSSES") if victory else "SQUAD LOST"
 
+	var tier: int = SGCNetworkManager.DIFFICULTY_EASY
+	var run_seed: int = 0
+	var active_mods: Array[String] = []
+	var variant_label: String = "STANDARD DIRECTIVE"
+	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+	if site_world.get("active_difficulty") != null:
+		tier = MissionDifficulty.clamp_tier(int(site_world.get("active_difficulty")))
+	elif net != null:
+		tier = MissionDifficulty.clamp_tier(net.mission_difficulty)
+	if site_world.get("active_run_seed") != null:
+		run_seed = int(site_world.get("active_run_seed"))
+	if site_world.get("active_modifiers") is Array:
+		active_mods = MissionDifficulty.sanitize_modifiers(site_world.get("active_modifiers"))
+	if site_world.get("active_variant") is Dictionary:
+		var site_var: Dictionary = site_world.get("active_variant") as Dictionary
+		if not str(site_var.get("objective_variant_label", "")).is_empty():
+			variant_label = str(site_var.get("objective_variant_label"))
+
+	var tier_name: String = MissionDifficulty.tier_name(tier).to_upper()
+	var stage_rating: String = MissionDifficulty.compute_stage_rating(
+		victory, stealth, lost_names.size(), tier, active_mods
+	)
+	var status_text: String = "STATUS: %s — %s | TIER: %s | RATING: %s" % [outcome, stealth, tier_name, stage_rating]
+
 	var title_text: String = "EXTRACTION SUCCESSFUL" if victory else "MISSION FAILED"
 	var subtitle_text: String = (
 		"AWAY TEAM DEBRIEF — RETURNED TO SGC"
@@ -220,14 +244,23 @@ func _build_debrief(victory: bool) -> Dictionary:
 		var stage_total: int = int(campaign_mgr.get("active_campaign").stage_count()) if campaign_mgr.get("active_campaign") != null else 3
 		var stage_data: Dictionary = campaign_mgr.call(&"get_current_stage")
 		var stage_title: String = str(stage_data.get("stage_title", "Stage %d" % (stage_idx + 1)))
+		if run_seed <= 0:
+			run_seed = int(campaign_mgr.get("run_seed"))
 		if victory:
 			if stage_idx + 1 < stage_total:
 				title_text = "STAGE %d SECURED: %s" % [stage_idx + 1, stage_title.to_upper()]
 				subtitle_text = "INTEL SECURED: %s" % str(stage_data.get("intel_unlocked_description", "GATE TELEMETRY ACQUIRED"))
 				leave_text = "PROCEED TO NEXT STAGE (STAGE %d/%d)" % [stage_idx + 2, stage_total]
 			else:
+				var camp_rating: Dictionary = MissionDifficulty.compute_campaign_rating(
+					campaign_mgr.get("stage_history"), tier, active_mods
+				)
+				var honors_arr: Array = camp_rating.get("honors", [])
+				var honors_suffix: String = "" if honors_arr.is_empty() else " | HONORS: %s" % ", ".join(honors_arr)
 				title_text = "CAMPAIGN VICTORY — OPERATION COMPLETE"
-				subtitle_text = "ALL %d OPERATIONAL STAGES ACCOMPLISHED — SGC SECURE" % stage_total
+				subtitle_text = "ALL %d STAGES CLEARED (%s · GRADE %s%s)" % [
+					stage_total, tier_name, str(camp_rating.get("rating", stage_rating)), honors_suffix
+				]
 				leave_text = "FINALIZE CAMPAIGN"
 		else:
 			title_text = "STAGE %d COMPROMISED: %s" % [stage_idx + 1, stage_title.to_upper()]
@@ -241,10 +274,16 @@ func _build_debrief(victory: bool) -> Dictionary:
 		"kills": "HOSTILES ELIMINATED: %d" % kills,
 		"objectives": "OBJECTIVES COMPLETE: %d / %d" % [obj_done, obj_total],
 		"squad": "RETURNED: %s | LOST: %s" % [ret_text, lost_text],
-		"status": "STATUS: %s — %s" % [outcome, stealth],
+		"status": status_text,
 		"leave": leave_text,
 		"kill_count": kills,
-		"duration_seconds": duration_s
+		"duration_seconds": duration_s,
+		"stealth": stealth,
+		"lost_count": lost_names.size(),
+		"difficulty": tier,
+		"rating": stage_rating,
+		"run_seed": run_seed,
+		"variant_label": variant_label
 	}
 
 

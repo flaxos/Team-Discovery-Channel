@@ -83,9 +83,13 @@ func _setup_difficulty_options() -> void:
 func _sync_difficulty_selection() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	var tier: int = net.mission_difficulty if net != null else SGCNetworkManager.DIFFICULTY_EASY
+	var mission_id: String = net.selected_mission_id if net != null else SGCNetworkManager.MISSION_SGC_DEFENSE
 	difficulty_option_button.select(tier)
-	difficulty_option_button.get_parent().visible = net == null or net.selected_mission_id not in [SGCNetworkManager.MISSION_SGC_UAT, SGCNetworkManager.MISSION_TIMED_EXTRACTION, SGCNetworkManager.MISSION_ALARM_ESCAPE]
-	difficulty_description_label.text = SGCNetworkManager.DIFFICULTY_DESCRIPTIONS[tier]
+	difficulty_option_button.get_parent().visible = net == null or mission_id not in [SGCNetworkManager.MISSION_SGC_UAT, SGCNetworkManager.MISSION_TIMED_EXTRACTION, SGCNetworkManager.MISSION_ALARM_ESCAPE]
+	if mission_id != SGCNetworkManager.MISSION_SGC_DEFENSE and MissionDifficulty.supports_difficulty_selection(mission_id):
+		difficulty_description_label.text = MissionDifficulty.offworld_description(tier)
+	else:
+		difficulty_description_label.text = SGCNetworkManager.DIFFICULTY_DESCRIPTIONS[tier]
 	if net != null and net.is_in_active_session() and not net.is_server:
 		difficulty_description_label.text += "\nMission mode is selected by the host."
 
@@ -213,8 +217,8 @@ func _on_start_game_pressed() -> void:
 	if net != null and net.is_server:
 		if net.selected_mission_id == SGCNetworkManager.MISSION_CAMPAIGN_OPERATION:
 			var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
-			if campaign_mgr != null and not campaign_mgr.get("is_campaign_active"):
-				campaign_mgr.call(&"start_campaign")
+			if campaign_mgr != null and (not campaign_mgr.get("is_campaign_active") or campaign_mgr.get("campaign_completed")):
+				campaign_mgr.call(&"start_campaign", null, net.mission_difficulty, net.run_seed, net.selected_modifiers)
 		net.request_start_game()
 
 
@@ -249,12 +253,26 @@ func _update_ui_state() -> void:
 	var is_connected: bool = (net != null and net.is_in_active_session())
 	var is_server: bool = (net != null and net.is_server)
 
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	var mission_id: String = net.selected_mission_id if net != null else SGCNetworkManager.MISSION_SGC_DEFENSE
+	var supports_diff: bool = net == null or MissionDifficulty.supports_difficulty_selection(mission_id)
+	var resuming_campaign: bool = (
+		mission_id == SGCNetworkManager.MISSION_CAMPAIGN_OPERATION
+		and campaign_mgr != null
+		and bool(campaign_mgr.get("is_campaign_active"))
+		and not bool(campaign_mgr.get("campaign_completed"))
+	)
 	host_button.disabled = is_connected
 	join_button.disabled = is_connected
 	start_game_button.visible = is_server
 	start_game_button.disabled = not is_server
 	mission_option_button.disabled = (is_connected and not is_server) or (net != null and net.mission_started)
-	difficulty_option_button.disabled = (is_connected and not is_server) or (net != null and (net.mission_started or net.selected_mission_id != SGCNetworkManager.MISSION_SGC_DEFENSE))
+	difficulty_option_button.disabled = (
+		(is_connected and not is_server)
+		or (net != null and net.mission_started)
+		or not supports_diff
+		or resuming_campaign
+	)
 	_sync_mission_selection()
 	_sync_difficulty_selection()
 
@@ -295,10 +313,19 @@ func _sync_mission_selection() -> void:
 		var stage_idx: int = int(campaign_mgr.get("current_stage_index"))
 		var stage_data: Dictionary = campaign_mgr.call(&"get_current_stage")
 		var total: int = int(campaign_mgr.get("active_campaign").stage_count()) if campaign_mgr.get("active_campaign") != null else 3
-		mission_description_label.text = "[ACTIVE CAMPAIGN: Stage %d of %d — %s]\n%s" % [
-			stage_idx + 1, total, stage_data.get("stage_title", ""), stage_data.get("briefing", "")
+		var tier_label: String = MissionDifficulty.tier_name(int(campaign_mgr.get("campaign_difficulty")))
+		var seed_val: int = int(campaign_mgr.get("run_seed"))
+		mission_description_label.text = "[ACTIVE CAMPAIGN: Stage %d/%d — %s | %s · Seed #%d]\n%s" % [
+			stage_idx + 1, total, stage_data.get("stage_title", ""), tier_label, seed_val, stage_data.get("briefing", "")
 		]
 		start_game_button.text = "RESUME CAMPAIGN (STAGE %d/%d)" % [stage_idx + 1, total]
+	elif mission_id == SGCNetworkManager.MISSION_CAMPAIGN_OPERATION and campaign_mgr != null and campaign_mgr.has_method(&"get_career_records"):
+		var rec: Dictionary = campaign_mgr.call(&"get_career_records")
+		var clears: int = int(rec.get("total_completions", 0))
+		if clears > 0:
+			mission_description_label.text += "\nCareer Record: %d cleared · Best %s (%s)" % [
+				clears, str(rec.get("best_rating", "A")), str(rec.get("highest_difficulty_name", "Easy"))
+			]
 
 func _on_mission_selected(index: int) -> void:
 	if _network_manager != null: _network_manager.set_mission(str(mission_option_button.get_item_metadata(index)))

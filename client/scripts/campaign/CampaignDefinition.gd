@@ -51,4 +51,17 @@ func validate() -> PackedStringArray:
 			for g: Variant in chevrons:
 				if not str(g) in valid_glyphs:
 					errors.append("Stage %d (%s): invalid glyph '%s' in chevron_sequence." % [i, stage_id, str(g)])
+
+		if stage.has("objective_variants"):
+			var raw_variants: Variant = stage.get("objective_variants")
+			if not (raw_variants is Array):
+				errors.append("Stage %d (%s): objective_variants must be an Array." % [i, stage_id])
+			else:
+				for v_entry: Variant in raw_variants:
+					if not (v_entry is Dictionary):
+						errors.append("Stage %d (%s): objective_variants entries must be Dictionaries." % [i, stage_id])
+					else:
+						var v_dict: Dictionary = v_entry as Dictionary
+						if str(v_dict.get("id", "")).strip_edges().is_empty() or str(v_dict.get("label", "")).strip_edges().is_empty():
+							errors.append("Stage %d (%s): objective variant entry requires non-empty id and label." % [i, stage_id])
 	return errors

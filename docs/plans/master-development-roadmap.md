@@ -377,8 +377,8 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 
 ### L — Campaign and replayability
 
-**CA-1 — Mission progression and outcomes** · M–L · needs GT-3 and at least two offworld missions.
-**CA-2 — Variation and difficulty** · M · patrol and objective variants per run, difficulty tiers for offworld missions. Patrol variation can start after GI-2 because it is data.
+**CA-1 — Mission progression and outcomes** — *implemented* (Operation Ha'tak Strike, Briefing Terminal, carried inventory, host disk persistence).
+**CA-2 — Variation and difficulty** — *implemented* ([CA-2 spec](campaign-variation-and-tiers.md), offworld Easy/Medium/Hard tiers, deterministic `run_seed`, composable mutators, patrol route/officer shield variation, data-driven `MissionObjectiveVariant` bonus steps, tactical ratings/honors, persistent career records; verified via `test_campaign_variation_and_tiers`, `test_campaign_variation_multiplayer`, `test_campaign_variation_dedicated`).
 
 ## 6. Visual and content track
 
