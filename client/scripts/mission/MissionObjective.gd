@@ -11,5 +11,6 @@ extends Resource
 @export var marker: StringName
 @export var attachment: StringName
 @export var radius: float = 3.0
+@export var initially_enabled: bool = true
 @export var text: String
 @export var prompt: String = "USE CONSOLE"

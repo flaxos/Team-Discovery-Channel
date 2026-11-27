@@ -13,7 +13,10 @@ var objectives: MissionObjectives
 var alert: MissionAlert
 var fired := PackedStringArray()
 var active := false
+var _level: LevelAssembly
 var _doors: Dictionary = {}
+var _pending_locks: Dictionary = {}
+var _has_room_triggers := false
 var _started := false
 var _waiting_peers: Dictionary = {}
 var timer_state := TimerState.IDLE
@@ -36,10 +39,16 @@ func _ready() -> void:
 
 func setup(mission: MissionDefinition, level: LevelAssembly, progress: MissionObjectives, compound_alert: MissionAlert) -> void:
 	definition = mission
+	_level = level
 	objectives = progress
 	alert = compound_alert
+	_doors.clear()
+	_pending_locks.clear()
+	_has_room_triggers = false
 	for trigger in definition.triggers:
-		if trigger.action != "release_door":
+		if trigger.condition == "room_entered":
+			_has_room_triggers = true
+		if trigger.action not in ["release_door", "lock_door"]:
 			continue
 		for child in level.get_children():
 			var door := child as ModularDoor
@@ -58,7 +67,7 @@ func start() -> PackedStringArray:
 	if _started or definition.triggers.is_empty():
 		return errors
 	for trigger in definition.triggers:
-		if trigger.action == "release_door" and not _doors.has(trigger.id):
+		if trigger.action in ["release_door", "lock_door"] and not _doors.has(trigger.id):
 			errors.append("Missing runtime security door: %s" % trigger.security_id)
 	if not errors.is_empty():
 		return errors
@@ -70,6 +79,8 @@ func start() -> PackedStringArray:
 				errors.append("Could not initialize mission door: %s" % trigger.security_id)
 		_on_objective_changed(objectives.index)
 		_on_alert_changed(alert.alert_level)
+		if _has_room_triggers:
+			_check_room_entries()
 		for peer: int in _waiting_peers:
 			_send_snapshot(peer)
 		_waiting_peers.clear()
@@ -83,6 +94,7 @@ func start() -> PackedStringArray:
 
 func stop() -> void:
 	active = false
+	_pending_locks.clear()
 	if multiplayer.is_server() and timer_state == TimerState.RUNNING:
 		_stopped_remaining = remaining_seconds()
 		timer_state = TimerState.STOPPED
@@ -171,13 +183,49 @@ func sync_countdown(revision: int, id: String, state: int, seconds: float) -> vo
 	_show_timer()
 
 
-func _on_objective_changed(index: int) -> void:
+func _physics_process(_delta: float) -> void:
+	if not active or not multiplayer.is_server() or get_tree().paused:
+		return
+	_retry_pending_locks()
+	if _has_room_triggers:
+		_check_room_entries()
+
+
+func _retry_pending_locks() -> void:
+	if _pending_locks.is_empty():
+		return
+	for trigger: MissionTrigger in _pending_locks.values():
+		_apply(trigger)
+
+
+func _check_room_entries() -> void:
+	for trigger in definition.triggers:
+		if trigger.condition == "room_entered" and not fired.has(str(trigger.id)) and _standing_in_room(trigger.room):
+			_apply(trigger)
+
+
+func _standing_in_room(room_id: StringName) -> bool:
+	if _level == null or _level.layout == null or objectives == null or objectives.players == null:
+		return false
+	var module := _level.get_node_or_null(str(room_id)) as Node3D
+	var item := _level.layout.instance(room_id)
+	if module == null or item == null or item.module == null:
+		return false
+	for player: PlayerController3D in objectives.standing():
+		if item.module.occupied.has_point(module.to_local(player.global_position + Vector3.UP * 0.25)):
+			return true
+	return false
+
+
+func _on_objective_changed(_index: int) -> void:
 	if not active or not multiplayer.is_server():
 		return
 	for trigger in definition.triggers:
 		if trigger.condition != "objective_completed":
 			continue
-		for i in range(mini(index, objectives.index)):
+		for i in range(definition.objectives.size()):
+			if not objectives.is_objective_completed(i):
+				continue
 			if definition.objectives[i].id != trigger.objective_id:
 				continue
 			_apply(trigger)
@@ -185,11 +233,16 @@ func _on_objective_changed(index: int) -> void:
 
 
 func _on_alert_changed(value: int) -> void:
-	if not active or not multiplayer.is_server() or value != MissionAlert.Level.ALARM or not alert.is_raised():
+	if not active or not multiplayer.is_server():
 		return
-	for trigger in definition.triggers:
-		if trigger.condition == "alarm_raised":
-			_apply(trigger)
+	if value >= MissionAlert.Level.SEARCHING:
+		for trigger in definition.triggers:
+			if trigger.condition == "alert_searching":
+				_apply(trigger)
+	if value == MissionAlert.Level.ALARM and alert.is_raised():
+		for trigger in definition.triggers:
+			if trigger.condition == "alarm_raised":
+				_apply(trigger)
 
 
 func _apply(trigger: MissionTrigger) -> void:
@@ -198,6 +251,12 @@ func _apply(trigger: MissionTrigger) -> void:
 	var applied := false
 	if trigger.action == "release_door":
 		applied = (_doors[trigger.id] as ModularDoor).set_locked(false)
+	elif trigger.action == "lock_door":
+		var door := _doors.get(trigger.id) as ModularDoor
+		if door != null:
+			applied = door.set_locked(true)
+			if not applied and not door.locked:
+				_pending_locks[trigger.id] = trigger
 	elif trigger.action == "start_timer" and timer_state == TimerState.IDLE:
 		timer_id = trigger.id
 		timer_state = TimerState.RUNNING
@@ -206,10 +265,16 @@ func _apply(trigger: MissionTrigger) -> void:
 		_publish_timer()
 		_show_timer()
 		applied = true
+	elif trigger.action == "enable_objective":
+		applied = objectives.enable_objective(trigger.target_objective_id)
+	elif trigger.action == "show_notice":
+		applied = true
 	if applied:
+		_pending_locks.erase(trigger.id)
 		fired.append(str(trigger.id))
 		trigger_fired.emit(trigger.id)
-		notice_shown.emit(trigger.notice)
+		if not trigger.notice.is_empty():
+			notice_shown.emit(trigger.notice)
 		SGCNetworkManager.mission_rpc(self, &"sync_fired", [fired, str(trigger.id)])
 
 
@@ -224,7 +289,7 @@ func sync_fired(ids: PackedStringArray, live_id: String = "") -> void:
 		if ids.has(id) and not fired.has(id):
 			fired.append(id)
 			trigger_fired.emit(trigger.id)
-			if id == live_id:
+			if id == live_id and not trigger.notice.is_empty():
 				notice_shown.emit(trigger.notice)
 
 

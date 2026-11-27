@@ -84,11 +84,16 @@ func validate() -> PackedStringArray:
 		errors.append("Mission needs a layout and at least one objective")
 		return errors
 	var ids := {}
+	var obj_by_id := {}
+	var disabled_objectives := {}
 	for objective in objectives:
 		if objective == null or objective.id == &"" or ids.has(objective.id):
 			errors.append("Duplicate/empty objective id")
 			continue
 		ids[objective.id] = true
+		obj_by_id[objective.id] = objective
+		if not objective.initially_enabled:
+			disabled_objectives[objective.id] = true
 		var item := layout.instance(objective.room)
 		if item == null:
 			errors.append("Unknown objective room: %s/%s" % [objective.id, objective.room])
@@ -98,6 +103,8 @@ func validate() -> PackedStringArray:
 			)
 	if objectives[-1] != null and objectives[-1].kind != "extract":
 		errors.append("The final objective must be an extraction")
+	elif objectives[-1] != null and not objectives[-1].initially_enabled:
+		errors.append("Final extraction objective must start enabled")
 	for patrol in patrols:
 		if patrol == null or patrol.rooms.is_empty():
 			errors.append("Empty patrol")
@@ -130,6 +137,8 @@ func validate() -> PackedStringArray:
 		errors.append("Reinforcements need at least one alarm console")
 	var trigger_ids := {}
 	var door_ids := {}
+	var lock_ids := {}
+	var enabled_targets := {}
 	var timer_count := 0
 	for trigger in triggers:
 		if trigger == null:
@@ -141,18 +150,35 @@ func validate() -> PackedStringArray:
 		if trigger.condition == "alarm_raised":
 			if trigger.objective_id != &"":
 				errors.append("Alarm trigger cannot also name an objective: %s" % trigger.id)
+			if trigger.room != &"":
+				errors.append("Only room_entered triggers may name a room: %s" % trigger.id)
 			if alarms.is_empty():
 				errors.append("Alarm trigger needs an alarm console: %s" % trigger.id)
-			if trigger.action != "start_timer":
+			if trigger.action == "release_door":
 				errors.append("Alarm trigger supports start_timer only: %s" % trigger.id)
+		elif trigger.condition == "alert_searching":
+			if trigger.objective_id != &"":
+				errors.append("Alert trigger cannot also name an objective: %s" % trigger.id)
+			if trigger.room != &"":
+				errors.append("Only room_entered triggers may name a room: %s" % trigger.id)
+			if trigger.action == "release_door":
+				errors.append("Alert trigger cannot release doors: %s" % trigger.id)
+		elif trigger.condition == "room_entered":
+			if trigger.objective_id != &"":
+				errors.append("Room trigger cannot also name an objective: %s" % trigger.id)
+			if str(trigger.room).strip_edges().is_empty() or layout.instance(trigger.room) == null:
+				errors.append("Unknown trigger room: %s/%s" % [trigger.id, trigger.room])
 		elif trigger.condition != "objective_completed":
 			errors.append("Unknown mission condition: %s/%s" % [trigger.id, trigger.condition])
-		elif not ids.has(trigger.objective_id):
-			errors.append("Unknown trigger objective: %s/%s" % [trigger.id, trigger.objective_id])
 		else:
-			for objective in objectives:
-				if objective != null and objective.id == trigger.objective_id and objective.kind == "extract":
-					errors.append("Mission action must precede extraction: %s" % trigger.id)
+			if trigger.room != &"":
+				errors.append("Only room_entered triggers may name a room: %s" % trigger.id)
+			if not ids.has(trigger.objective_id):
+				errors.append("Unknown trigger objective: %s/%s" % [trigger.id, trigger.objective_id])
+			else:
+				for objective in objectives:
+					if objective != null and objective.id == trigger.objective_id and objective.kind == "extract":
+						errors.append("Mission action must precede extraction: %s" % trigger.id)
 		if trigger.action == "start_timer":
 			timer_count += 1
 			if not is_finite(trigger.duration_seconds) or trigger.duration_seconds <= 0.0 or trigger.duration_seconds > 86400.0:
@@ -161,10 +187,50 @@ func validate() -> PackedStringArray:
 				errors.append("Timer needs a label: %s" % trigger.id)
 			if trigger.security_id != &"":
 				errors.append("Timer cannot also target a security door: %s" % trigger.id)
+			if trigger.target_objective_id != &"":
+				errors.append("Timer cannot also target an objective: %s" % trigger.id)
+			continue
+		if trigger.action == "enable_objective":
+			if trigger.security_id != &"":
+				errors.append("Objective enable trigger cannot target a security door: %s" % trigger.id)
+			if not ids.has(trigger.target_objective_id):
+				errors.append("Unknown target objective: %s/%s" % [trigger.id, trigger.target_objective_id])
+			else:
+				var target_obj := obj_by_id[trigger.target_objective_id] as MissionObjective
+				if target_obj != null and target_obj.kind == "extract":
+					errors.append("Cannot dynamically enable extraction objective: %s" % trigger.id)
+				elif target_obj != null and target_obj.initially_enabled:
+					errors.append("Target objective is already initially enabled: %s/%s" % [trigger.id, trigger.target_objective_id])
+				if trigger.condition == "objective_completed" and trigger.target_objective_id == trigger.objective_id:
+					errors.append("Objective cannot enable itself: %s" % trigger.id)
+				enabled_targets[trigger.target_objective_id] = true
+			continue
+		if trigger.action == "show_notice":
+			if trigger.notice.strip_edges().is_empty():
+				errors.append("Notice trigger needs a non-empty notice: %s" % trigger.id)
+			if trigger.security_id != &"" or trigger.target_objective_id != &"":
+				errors.append("Notice trigger cannot target doors or objectives: %s" % trigger.id)
+			continue
+		if trigger.action == "lock_door":
+			if trigger.target_objective_id != &"":
+				errors.append("Door action cannot target an objective: %s" % trigger.id)
+			var lock_matches := 0
+			for connection in layout.connections:
+				if connection.state == "security_door" and connection.security_id == trigger.security_id:
+					lock_matches += 1
+			if str(trigger.security_id).strip_edges().is_empty() or lock_matches != 1:
+				errors.append("Trigger needs one named security door: %s/%s" % [trigger.id, trigger.security_id])
+			if lock_ids.has(trigger.security_id):
+				errors.append("Security door has multiple lock triggers: %s" % trigger.security_id)
+			if door_ids.has(trigger.security_id):
+				errors.append("Security door cannot both lock and release: %s" % trigger.security_id)
+			lock_ids[trigger.security_id] = true
 			continue
 		if trigger.action != "release_door":
 			errors.append("Unknown mission action: %s/%s" % [trigger.id, trigger.action])
 			continue
+		if trigger.target_objective_id != &"":
+			errors.append("Door action cannot target an objective: %s" % trigger.id)
 		var matches := 0
 		for connection in layout.connections:
 			if connection.state == "security_door" and connection.security_id == trigger.security_id:
@@ -173,7 +239,12 @@ func validate() -> PackedStringArray:
 			errors.append("Trigger needs one named security door: %s/%s" % [trigger.id, trigger.security_id])
 		if door_ids.has(trigger.security_id):
 			errors.append("Security door has multiple release triggers: %s" % trigger.security_id)
+		if lock_ids.has(trigger.security_id):
+			errors.append("Security door cannot both lock and release: %s" % trigger.security_id)
 		door_ids[trigger.security_id] = true
+	for disabled_id: StringName in disabled_objectives:
+		if not enabled_targets.has(disabled_id):
+			errors.append("Disabled objective has no enable trigger: %s" % disabled_id)
 	if timer_count > 1:
 		errors.append("Mission supports one extraction timer")
 	if errors.is_empty() and not triggers.is_empty():
@@ -185,7 +256,20 @@ func validate() -> PackedStringArray:
 				if door_ids.has(StringName(edge.security_id)):
 					edge.locked = true
 		var previous := str(layout.entry_instance)
+		var unlock_room_releases := func() -> void:
+			var progressed := true
+			while progressed:
+				progressed = false
+				var reachable := LevelTopology.reach(links, previous, [], true)
+				for trigger in triggers:
+					if trigger.condition == "room_entered" and trigger.action == "release_door" and reachable.has(str(trigger.room)):
+						for edges: Array in links.values():
+							for edge: Dictionary in edges:
+								if edge.security_id == str(trigger.security_id) and edge.locked:
+									edge.locked = false
+									progressed = true
 		for objective in objectives:
+			unlock_room_releases.call()
 			if LevelTopology.path(links, previous, str(objective.room), [], true).is_empty():
 				errors.append("Mission doors block objective: %s" % objective.id)
 			for trigger in triggers:
@@ -195,6 +279,20 @@ func validate() -> PackedStringArray:
 							if edge.security_id == str(trigger.security_id):
 								edge.locked = false
 			previous = str(objective.room)
+		unlock_room_releases.call()
+		var all_reachable := LevelTopology.reach(links, str(layout.entry_instance), [], true)
+		for trigger in triggers:
+			if trigger.condition == "room_entered" and not all_reachable.has(str(trigger.room)):
+				errors.append("Mission doors block trigger room: %s" % trigger.room)
+		if not lock_ids.is_empty():
+			var lock_links := LevelTopology.graph(layout)
+			for edges: Array in lock_links.values():
+				for edge: Dictionary in edges:
+					if lock_ids.has(StringName(edge.security_id)):
+						edge.locked = true
+			for objective in objectives:
+				if LevelTopology.path(lock_links, str(layout.entry_instance), str(objective.room), [], true).is_empty():
+					errors.append("Lock trigger permanently blocks objective: %s" % objective.id)
 
 	var variant_ids := {}
 	for variant: MissionObjectiveVariant in objective_variants:

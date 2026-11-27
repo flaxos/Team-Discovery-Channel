@@ -284,15 +284,21 @@ func _engage(target: Node3D, spread: bool) -> void:
 		_alert_nearby_formation_jaffa()
 
 
-## Server: a noise at `at` that carries `radius` metres in a straight line; walls do not muffle
-## it. A sentry in range that is not already fighting turns suspicious and goes to look.
-## Called through the `noise_listeners` group by weapons and explosives.
-func hear(at: Vector3, radius: float, _source: Node = null) -> void:
+## Server: a noise at `at` that carries `radius` metres with wall and closed-door attenuation.
+## A sentry within effective acoustic range that is not already fighting turns suspicious and
+## goes to look. Called through the `noise_listeners` group by weapons and explosives.
+func hear(at: Vector3, radius: float, source: Node = null) -> void:
 	if profile != Profile.SENTRY or perception == null or not is_physics_processing():
 		return
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
+	if source != null and is_instance_valid(source) and MissionWorld.of(source) != MissionWorld.of(self):
+		return
 	if errand != Vector3.INF or global_position.distance_to(at) > radius:
+		return
+	var world_node := MissionWorld.of(self)
+	var level := world_node.get_node_or_null("Level") as LevelAssembly if world_node != null else null
+	if LevelAcoustics.effective_distance(get_world_3d(), level, at, global_position) > radius:
 		return
 	investigate_at(at)
 

@@ -203,14 +203,27 @@ func run() -> void:
 	assert(await watch(s, 2.0) == JaffaPerception.Level.UNAWARE, "Out of range")
 	await retire(s)
 
-	# --- Walls do not muffle a shot (no propagation model): a shot behind a wall is heard.
+	# --- Walls attenuate shots via LevelAcoustics; a loud sound carries if effective <= radius, while attenuated gunfire is muffled.
 	place(player, walled.spot)
 	s = sentry(walled.at, walled.facing)
 	await frames(10)
 	assert(not s.perception.can_see(player))
-	await shoot(WeaponP90)
-	await frames(2)
-	assert(s.investigating and s.awareness_level == JaffaPerception.Level.SUSPICIOUS)
+	var wall_report := LevelAcoustics.analyze(room.get_world_3d(), level, player.global_position, s.global_position)
+	assert(int(wall_report["wall_count"]) > 0, "Wall barrier counted between walled spots")
+	assert(float(wall_report["effective"]) > float(wall_report["direct"]), "Walls increase effective acoustic distance")
+	# Force an attenuated scenario (close enough directly for P90, pushed past radius by wall/corridor penalty)
+	var synth_radius := float(wall_report["direct"]) + 1.0
+	if synth_radius < float(wall_report["effective"]):
+		s.hear(player.global_position, synth_radius, player)
+		assert(not s.investigating and s.awareness_level == JaffaPerception.Level.UNAWARE, "Wall attenuation blocks borderline noise")
+	if float(wall_report["effective"]) <= radius_of(WeaponP90):
+		await shoot(WeaponP90)
+		await frames(2)
+		assert(s.investigating and s.awareness_level == JaffaPerception.Level.SUSPICIOUS, "Walled shot still propagates via corridor/penetration when within effective radius")
+	else:
+		await shoot(WeaponP90)
+		await frames(2)
+		assert(not s.investigating and s.awareness_level == JaffaPerception.Level.UNAWARE, "Walled P90 shot muffled when walls push effective distance past radius")
 	await retire(s)
 
 	# --- A fighting sentry keeps its target; noise does not distract it.
@@ -235,9 +248,22 @@ func run() -> void:
 	var blast_at := Vector3.INF
 	for spot in marker_spots():
 		var d := spot.distance_to(s.global_position)
-		if d > radius_of(WeaponP90) + 1.0 and d < C4Satchel.NOISE_RADIUS - 1.0:
+		var eff := LevelAcoustics.effective_distance(room.get_world_3d(), level, spot, s.global_position)
+		if eff > radius_of(WeaponP90) + 1.0 and eff < C4Satchel.NOISE_RADIUS - 1.0 and d < C4Satchel.NOISE_RADIUS - 1.0:
 			blast_at = spot
-	assert(blast_at != Vector3.INF, "Fixture has a spot beyond rifle range but within a blast's")
+			break
+	if blast_at == Vector3.INF:
+		for sentry_spot in marker_spots():
+			for cand_spot in marker_spots():
+				var d := cand_spot.distance_to(sentry_spot)
+				var eff := LevelAcoustics.effective_distance(room.get_world_3d(), level, cand_spot, sentry_spot)
+				if d > 10.0 and d < C4Satchel.NOISE_RADIUS - 1.0 and eff > radius_of(WeaponP90) + 1.0 and eff < C4Satchel.NOISE_RADIUS - 1.0:
+					s.global_position = sentry_spot + Vector3(0, 0.05, 0)
+					blast_at = cand_spot
+					break
+			if blast_at != Vector3.INF:
+				break
+	assert(blast_at != Vector3.INF, "Fixture has a spot beyond rifle effective range but within a blast's")
 	charge.global_position = blast_at + Vector3(0, 0.3, 0)
 	await frames(45)
 	assert(charge.is_armed)
