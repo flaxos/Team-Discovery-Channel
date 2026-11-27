@@ -3,6 +3,7 @@
 [ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
 [ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
 [ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+[ext_resource type="PackedScene" path="res://scenes/props/MothershipExteriorSilhouette.tscn" id="silhouette"]
 
 [sub_resource type="BoxShape3D" id="collision_boundary"]
 size = Vector3(3.6, 2.6, 0.35)
@@ -152,3 +153,7 @@ mesh = SubResource("mesh_star")
 [node name="Star06" type="MeshInstance3D" parent="SpaceVista"]
 position = Vector3(-1.2, -0.5, 0.01)
 mesh = SubResource("mesh_star")
+
+[node name="EscortMothership" parent="SpaceVista" instance=ExtResource("silhouette")]
+transform = Transform3D(0.010875, 0.001722, 0.005072, 0, 0.011354, -0.003856, -0.005356, 0.003498, 0.010309, 0.45, 0.15, 0.005)
+
