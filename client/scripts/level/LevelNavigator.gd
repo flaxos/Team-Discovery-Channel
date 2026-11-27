@@ -110,6 +110,134 @@ static func cover_props(assembly: LevelAssembly) -> Array[Node3D]:
 	return result
 
 
+static func _append_modular_anchor(
+	anchors: Array[Dictionary],
+	assembly: LevelAssembly,
+	module: Node3D,
+	item_id: StringName,
+	has_bounds: bool,
+	occupied: AABB,
+	candidate: Vector3,
+	facing: Vector3,
+	anchor_type: String,
+	priority: int
+) -> void:
+	var snapped := NavigationServer3D.map_get_closest_point(assembly.navigation_map, candidate)
+	if snapped.distance_to(candidate) > 0.45:
+		return
+	if has_bounds and not occupied.grow(0.3).has_point(module.to_local(snapped)):
+		return
+	for existing: Dictionary in anchors:
+		if (existing["pos"] as Vector3).distance_to(snapped) < 0.65:
+			return
+	var flat_dir := Vector3(facing.x, 0.0, facing.z)
+	if flat_dir.length_squared() < 0.0001:
+		flat_dir = -module.global_basis.z
+		flat_dir.y = 0.0
+	flat_dir = Vector3.FORWARD if flat_dir.length_squared() < 0.0001 else flat_dir.normalized()
+	anchors.append({
+		"pos": snapped,
+		"dir": flat_dir,
+		"sector": str(item_id).to_upper(),
+		"room_id": item_id,
+		"type": anchor_type,
+		"priority": priority,
+	})
+
+
+## Derive tactical anchors from modular room cover attachments, live deployable shields,
+## `Markers/cover`, lateral doorway/socket jambs, and entry/patrol/destination markers.
+static func room_tactical_anchors(
+	assembly: LevelAssembly, room_id: StringName = &"", threat: Vector3 = Vector3.INF
+) -> Array[Dictionary]:
+	var anchors: Array[Dictionary] = []
+	if assembly == null or not assembly.ready_for_navigation or assembly.layout == null:
+		return anchors
+	var has_threat := threat.is_finite()
+	for item in assembly.layout.instances:
+		if room_id != &"" and item.id != room_id:
+			continue
+		var module := assembly.get_node_or_null(str(item.id)) as Node3D
+		if module == null:
+			continue
+		var has_bounds := item.module != null
+		var occupied := item.module.occupied if has_bounds else AABB()
+		for attachment in LevelRoomComposer.resolved(item):
+			if attachment.component != &"cover" or not attachment.reachable:
+				continue
+			var node := module.get_node_or_null(LevelRoomComposer.node_path(attachment)) as Node3D
+			if node == null:
+				continue
+			var spot := node.global_transform * attachment.approach
+			var face := Vector3(node.global_position.x - spot.x, 0.0, node.global_position.z - spot.z)
+			if has_threat:
+				face = Vector3(threat.x - spot.x, 0.0, threat.z - spot.z)
+			_append_modular_anchor(anchors, assembly, module, item.id, has_bounds, occupied, spot, face, "cover", 0)
+		for node: Node in MissionWorld.in_group(assembly, &"deployable_shield"):
+			if not (node is StaticBody3D and is_instance_valid(node) and (node as StaticBody3D).collision_layer != 0):
+				continue
+			var shield := node as Node3D
+			if has_bounds and not occupied.grow(0.3).has_point(module.to_local(shield.global_position)):
+				continue
+			var fwd := -shield.global_basis.z
+			fwd.y = 0.0
+			fwd = Vector3.FORWARD if fwd.length_squared() < 0.0001 else fwd.normalized()
+			var side_a := shield.global_position - fwd * 0.75
+			var side_b := shield.global_position + fwd * 0.75
+			var spot := side_a
+			var face := fwd
+			if has_threat:
+				if side_b.distance_squared_to(threat) > side_a.distance_squared_to(threat):
+					spot = side_b
+				face = Vector3(threat.x - spot.x, 0.0, threat.z - spot.z)
+			_append_modular_anchor(anchors, assembly, module, item.id, has_bounds, occupied, spot, face, "deployable_shield", 0)
+		var cover_marker := module.get_node_or_null("Markers/cover") as Node3D
+		if cover_marker != null:
+			var face := Vector3(threat.x - cover_marker.global_position.x, 0.0, threat.z - cover_marker.global_position.z) if has_threat else -cover_marker.global_basis.z
+			_append_modular_anchor(anchors, assembly, module, item.id, has_bounds, occupied, cover_marker.global_position, face, "cover_marker", 1)
+		for edge in assembly.layout.connections:
+			if edge.from_instance != item.id and edge.to_instance != item.id:
+				continue
+			var sock_id := edge.from_socket if edge.from_instance == item.id else edge.to_socket
+			var sock := item.module.socket(sock_id) if has_bounds else null
+			if sock == null:
+				continue
+			var approach_w := module.to_global(sock.approach)
+			var sock_w := module.to_global(sock.local_transform.origin)
+			var outward := Vector3(sock_w.x - approach_w.x, 0.0, sock_w.z - approach_w.z)
+			if outward.length_squared() > 0.001:
+				outward = outward.normalized()
+				var right := Vector3(-outward.z, 0.0, outward.x)
+				for side: float in [-0.9, 0.9]:
+					_append_modular_anchor(anchors, assembly, module, item.id, has_bounds, occupied, approach_w + right * side, outward, "doorway_jamb", 2)
+		for id: String in ["entry", "patrol", "destination"]:
+			var marker := module.get_node_or_null("Markers/" + id) as Node3D
+			if marker == null:
+				continue
+			for offset: Vector3 in [Vector3.ZERO, Vector3.LEFT * 1.3, Vector3.RIGHT * 1.3, Vector3.FORWARD * 1.3, Vector3.BACK * 1.3]:
+				var pt := marker.to_global(offset)
+				var face := Vector3(threat.x - pt.x, 0.0, threat.z - pt.z) if has_threat else -marker.global_basis.z
+				_append_modular_anchor(anchors, assembly, module, item.id, has_bounds, occupied, pt, face, "rally", 3)
+	anchors.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a["priority"]) < int(b["priority"])
+	)
+	return anchors
+
+
+## True when a baked path segment sequence crosses any locked ModularDoor belonging to `assembly`.
+static func path_has_locked_door(assembly: LevelAssembly, path_points: PackedVector3Array) -> bool:
+	if assembly == null or path_points.size() < 2:
+		return false
+	for node in MissionWorld.in_group(assembly, &"modular_door"):
+		var door := node as ModularDoor
+		if door == null or not door.locked or not assembly.is_ancestor_of(door):
+			continue
+		for seg: int in range(path_points.size() - 1):
+			if _segment_crosses_static(door, path_points[seg], path_points[seg + 1]):
+				return true
+	return false
+
+
 ## True when `prop` blocks the line from a crouched actor at `spot` to a standing threat at
 ## `threat`: the first thing that line hits is part of the prop. Heights are measured from the
 ## floor the prop stands on, not from `spot`, which may be a navigation-mesh point above it.
@@ -339,13 +467,17 @@ func _locked_ahead() -> bool:
 	return false
 
 
-func _segment_crosses(door: ModularDoor, pt_a: Vector3, pt_b: Vector3) -> bool:
+static func _segment_crosses_static(door: ModularDoor, pt_a: Vector3, pt_b: Vector3) -> bool:
 	var a := door.to_local(pt_a)
 	var b := door.to_local(pt_b)
 	if a.z * b.z > 0.0 or is_equal_approx(a.z, b.z):
 		return false
 	var hit := a.lerp(b, a.z / (a.z - b.z))
 	return absf(hit.x) <= door.width / 2 + 0.3 and hit.y > -1.0 and hit.y < door.height + 1.0
+
+
+func _segment_crosses(door: ModularDoor, pt_a: Vector3, pt_b: Vector3) -> bool:
+	return _segment_crosses_static(door, pt_a, pt_b)
 
 
 func _reroute_around_locked_doors(goal: Vector3, candidates: Array[Node]) -> bool:

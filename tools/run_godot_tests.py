@@ -35,6 +35,8 @@ MULTIPLAYER = (
     'test_mission_countdown_dedicated',
     'test_alarm_escape_dedicated',
     'test_modular_flanking_dedicated',
+    'test_ta2_squad_tactics_multiplayer',
+    'test_ta2_squad_tactics_dedicated',
     'test_ammunition_sharing_dedicated',
     'test_co2_roles_and_cover_multiplayer',
     'test_co2_roles_and_cover_dedicated',

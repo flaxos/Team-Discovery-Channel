@@ -205,7 +205,7 @@ Automated suites never satisfy a human gate. The gates were defined for two peop
 | A | Extraction mission hardening | EX-1 | Now |
 | B | Stealth and perception | ST-1 | CI repair |
 | C | Mission scripting and events | EV-1 | ST-1, preferably GI-1 |
-| D | Tactical AI and combat | TA-1 | ST-1 |
+| D | Tactical AI and combat | TA-1, TA-2 (flanking, suppression, & modular friendly squad tactics: `test_ta2_squad_tactics*`), and TA-3 implemented | ST-1 |
 | E | Goa'uld infiltration mission | GI-0 | Now (layout), ST-1 (mission) |
 | F | Goa'uld architecture and visuals | GA-0/GA-1 done; GA-2 part 1 corridor kit implemented for review ([brief](docs/maps/goauld-visual-brief.md), [kit](docs/maps/goauld-theme-kit.md)); human art review, then larger chambers | Now |
 | G | Stargate world transitions | GT-1, GT-2, and GT-3 done | Complete (CA-1 / GA-2 / AP-1 next) |

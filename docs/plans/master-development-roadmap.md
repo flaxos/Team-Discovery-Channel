@@ -259,10 +259,10 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 - **Risks:** bare modules have no cover props, so rooms without presets still fall back.
 - **Complexity:** M · Fable · conflicts with ST-1 on `JaffaAI.gd`; run after it.
 
-**TA-2 — Flanking, suppression and squad tactics on modular levels** · L · Fable
-- **Chunk 1 implemented for review in sprint 4:** Jaffa choose a second entrance using the live room graph, socket/navmesh route and a bounded last sighting. Locked/missing routes retain cover/combat; incapacitation and mission end cancel. Four-operative listen/dedicated traversal, late join and retry fixtures. [Contract](../maps/modular-flanking.md), [review](../reviews/2026-11-18-sprint4-modular-flanking.md).
-- **Chunk 2 implemented for review:** Incoming ballistic fire can suppress Jaffa sentries. Cover blocks pressure and a short recovery window leaves room for the guard to act. [Rules and tests](../maps/modular-flanking.md#suppression).
-- **Remaining chunks:** Friendly squad tactics and airman anchors from room markers. Prerequisites: TA-1, TA-3. Human readability and tuning remain open.
+**TA-2 — Flanking, suppression and squad tactics on modular levels** · L · **built (chunks 1 & 2 PR #75/review; chunk 3 TA-2 friendly squad tactics milestone; [modular-flanking spec](../maps/modular-flanking.md), `test_modular_flanking*`, `test_modular_suppression`, `test_ta2_squad_tactics*`, `test_modular_squad_orders*`)**
+- **Chunk 1:** Jaffa alternate-entrance flanking via live room graph, socket/navmesh routes, and replicated `is_tactical_flanking`.
+- **Chunk 2:** Ballistic near-miss & hit suppression causing modular Jaffa sentries to duck/reposition to prop cover.
+- **Chunk 3:** `LevelNavigator.room_tactical_anchors` derives modular Airman anchors (authored `cover` attachments, live `DeployableShield`, `Markers/cover`, lateral doorway jambs, and `entry`/`patrol`/`destination` rally points); `ModularSquadOrders` and `SGCAirmanAI` support modular bounding leapfrog, coordinated revive cover fire, and Airman MP5 suppression of Jaffa sentries with `SGCAirman.tscn` state replication.
 
 **TA-3 — Navigation follow-ups: rerouting, avoidance, door closing** · **implemented 16 November 2026 on this branch; human check pending**
 - **Experience:** patrols walk round a locked door, do not jam in corridors, and close doors behind them.

@@ -33,3 +33,18 @@ Two operative ballistic rounds within 0.65 seconds can suppress a modular sentry
 An amber down arrow marks the guard's crouch. During suppression the guard stops firing, drops any committed flank and uses the shared navigation system to reach a qualifying prop within 7 m of walking distance. It ducks in place when no prop qualifies. A quiet period of 1.3 seconds ends the reaction. Sustained fire can hold it for up to 3 seconds, followed by a 1-second recovery window. Alarm errands take priority. Incapacitation and mission stand-down clear the reaction.
 
 `test_modular_suppression` fires real traces through the modular extraction fixture and checks exposure, cover, timing, health and stun. `test_multiplayer_state_replication` verifies the amber tell and crouch on an ENet replica. The four-operative listen and dedicated flanking suites cover adjacent behavior. Pacing in a human squad remains to be played.
+
+## Friendly squad tactics & modular anchors (TA-2 chunk 3)
+
+Modular levels replace the static SGC `TACTICAL_ANCHORS` table with native anchors derived directly from the assembled room topology (`LevelNavigator.room_tactical_anchors`):
+
+1. Authored `cover` room attachments (`priority 0`, `approach` facing the prop or active threat) and live deployed `DeployableShield` cover (`priority 0`, positioned on the shielded side).
+2. Authored `Markers/cover` fallback markers (`priority 1`).
+3. Native doorway/socket jambs (`priority 2`, offset ±0.9 m laterally from `socket.approach` so overwatching Airmen stay clear of doorway centerlines and AI/player traffic).
+4. Room `entry`, `patrol`, and `destination` rally points (`priority 3`).
+
+Every candidate anchor is snapped to the baked `LevelAssembly` navigation map, bounded to its room cell, deduplicated spatially, and filtered against locked doors and walkability.
+
+`ModularSquadOrders` resolves `Hold Corner`, `Move to Cover`, `Regroup`, and `Suppress Hallway` against those modular anchors, keeping explicit `Hold Corner` / `Suppress` orders pinned until released by a new movement, regroup, rescue, or turret command. In autonomous modular combat (`SGCAirmanAI`), cleared rooms with an advancing human pointman trigger coordinated bounding overwatch (`LEAPFROG_ADVANCE` paired with `COVER_FIRE`), downed-operative rescues send the closest standing Airman while a partner provides covering fire, Airman MP5 bursts feed `ModularMission.register_operative_shot` to suppress Jaffa sentries, and `SGCAirman.tscn` replicates `is_peeking`, `is_suppressing`, and `is_providing_cover_fire`.
+
+Acceptance: `test_ta2_squad_tactics` validates modular anchor extraction (including live `DeployableShield` anchors), bare-room doorway overwatch, modular bounding leapfrog progression, coordinated rescue cover fire, and Airman suppression of Jaffa sentries; `test_ta2_squad_tactics_multiplayer` and `test_ta2_squad_tactics_dedicated` verify listen and pawnless dedicated ENet replication and clean retry reset alongside `test_modular_squad_orders_multiplayer` and `_dedicated`.

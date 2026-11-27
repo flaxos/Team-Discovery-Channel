@@ -66,6 +66,7 @@ var current_anchor_type: String = "corner"
 
 var target_advance_position: Vector3 = Vector3.ZERO
 var target_advance_facing: Vector3 = Vector3(0.0, 0.0, -1.0)
+var target_advance_type: String = "corner"
 var is_leapfrogging_advancing: bool = false
 var is_providing_cover_fire: bool = false
 var is_hallway_secured: bool = false
@@ -73,6 +74,7 @@ var is_hallway_secured: bool = false
 var current_scramble_waypoint_index: int = 0
 var navigator: SGCNavigator
 var _modular_tactics := false
+var _explicit_hold_order: bool = false
 
 const TACTICAL_ANCHORS: Array[Dictionary] = [
 	# Gate Room Arena & Sandbags
@@ -180,18 +182,29 @@ func _physics_process(delta: float) -> void:
 
 	current_sector = _get_current_sector()
 
-	# Universal priority 1: Check if any downed operative needs emergency revive
+	# Universal priority 1: Coordinated rescue — nearest available Airman revives, partner covers
 	if current_state != State.DOWNED and current_state != State.DEAD and current_state != State.REVIVE_PLAYER:
 		var downed_player: PlayerController3D = _find_nearest_downed_player()
 		if downed_player != null:
-			target_player_to_revive = downed_player
-			if mounted_turret != null:
-				dismount_turret()
-			current_state = State.REVIVE_PLAYER
-			revive_channel_time = 0.0
-			is_leapfrogging_advancing = false
-			is_providing_cover_fire = false
-			print("SGCAirmanAI [%s]: Squadmate down! Providing covering fire and moving to revive!" % airman_callsign)
+			var partner: SGCAirmanAI = _find_fireteam_partner()
+			var partner_reviving: bool = partner != null and partner.current_state == State.REVIVE_PLAYER and partner.target_player_to_revive == downed_player
+			var partner_closer: bool = partner != null and partner.current_state not in [State.DEAD, State.DOWNED] and (
+				partner.global_position.distance_squared_to(downed_player.global_position) < global_position.distance_squared_to(downed_player.global_position) - 0.04
+				or (absf(partner.global_position.distance_squared_to(downed_player.global_position) - global_position.distance_squared_to(downed_player.global_position)) <= 0.04 and partner.name < name)
+			)
+			if partner_reviving or partner_closer:
+				if not _explicit_hold_order and current_state not in [State.COVER_FIRE, State.ORDER_MOVE, State.MAN_TURRET, State.LEAPFROG_ADVANCE]:
+					_enter_rescue_cover_fire(downed_player)
+			else:
+				_explicit_hold_order = false
+				target_player_to_revive = downed_player
+				if mounted_turret != null:
+					dismount_turret()
+				current_state = State.REVIVE_PLAYER
+				revive_channel_time = 0.0
+				is_leapfrogging_advancing = false
+				is_providing_cover_fire = false
+				print("SGCAirmanAI [%s]: Squadmate down! Moving to revive!" % airman_callsign)
 
 	# Universal priority 2: Check for uncrewed .50 Cal turret within tactical reach (~8.0m)
 	if not _modular_tactics and mounted_turret == null and current_state != State.DOWNED and current_state != State.DEAD and current_state != State.REVIVE_PLAYER and current_state != State.ORDER_MOVE and current_state != State.ORDER_REGROUP:
@@ -323,8 +336,30 @@ func _cast_los_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
 	return false
 
 
+func _step_towards(goal: Vector3, delta: float) -> Vector3:
+	return navigator.next_position(goal, delta) if navigator != null else goal
+
+
 func _get_hallway_destination(target_pos: Vector3) -> Vector3:
 	return navigator.next_position(target_pos) if navigator != null else global_position
+
+
+func _enter_rescue_cover_fire(downed_player: CharacterBody3D) -> void:
+	if mounted_turret != null:
+		dismount_turret()
+	current_state = State.COVER_FIRE
+	is_providing_cover_fire = true
+	is_leapfrogging_advancing = false
+	is_peeking = true
+	is_crouching = false
+	if current_anchor_position == Vector3.ZERO or global_position.distance_to(current_anchor_position) > 6.0:
+		current_anchor_position = global_position
+	var dir_to_threat := Vector3(downed_player.global_position.x - global_position.x, 0.0, downed_player.global_position.z - global_position.z)
+	if not dir_to_threat.is_zero_approx():
+		current_anchor_facing = dir_to_threat.normalized()
+	if body_mesh != null:
+		body_mesh.scale.y = 1.0
+		body_mesh.position.y = 0.0
 
 
 func _process_combat(delta: float) -> void:
@@ -338,14 +373,21 @@ func _process_combat(delta: float) -> void:
 				hold_corner(anchor_pos, best_anchor["dir"] as Vector3, str(best_anchor.get("type", "corner")))
 				return
 			else:
-				var move_dest: Vector3 = _get_hallway_destination(anchor_pos)
+				var move_dest: Vector3 = _step_towards(anchor_pos, delta)
 				var to_dest: Vector3 = (move_dest - global_position)
 				to_dest.y = 0.0
 				var dir: Vector3 = to_dest.normalized()
 				velocity.x = dir.x * (move_speed * 0.8)
 				velocity.z = dir.z * (move_speed * 0.8)
-				rotation.y = atan2(-dir.x, -dir.z)
+				if not dir.is_zero_approx():
+					rotation.y = atan2(-dir.x, -dir.z)
 				return
+
+	# Modular fireteams advance when the human pointman leads into a cleared forward room
+	if _modular_tactics and not _explicit_hold_order:
+		_check_player_led_progression()
+	if current_state != State.COMBAT:
+		return
 
 	# Acquire target Jaffa (filtered by line of sight)
 	_find_nearest_jaffa()
@@ -401,6 +443,10 @@ func _fire_mp5(dir: Vector3) -> void:
 
 	play_mp5_fx(origin, hit_pos)
 	SGCNetworkManager.mission_rpc(self, &"play_mp5_fx", [origin, hit_pos], health_component)
+	if _modular_tactics and not multiplayer.has_multiplayer_peer() or (_modular_tactics and multiplayer.is_server()):
+		var world: Node = MissionWorld.of(self)
+		if world != null and world.has_method(&"register_operative_shot"):
+			world.call(&"register_operative_shot", origin, hit_pos, result.get("collider") as Node)
 
 
 @rpc("call_local", "unreliable")
@@ -506,13 +552,14 @@ func _process_revive(delta: float) -> void:
 	var dist: float = global_position.distance_to(target_player_to_revive.global_position)
 	if dist > 1.8:
 		# Sprint to downed squadmate via hallway pathfinding
-		var move_dest: Vector3 = _get_hallway_destination(target_player_to_revive.global_position)
+		var move_dest: Vector3 = _step_towards(target_player_to_revive.global_position, delta)
 		var to_dest: Vector3 = (move_dest - global_position)
 		to_dest.y = 0.0
 		var dir: Vector3 = to_dest.normalized()
 		velocity.x = dir.x * move_speed
 		velocity.z = dir.z * move_speed
-		rotation.y = atan2(-dir.x, -dir.z)
+		if not dir.is_zero_approx():
+			rotation.y = atan2(-dir.x, -dir.z)
 	else:
 		# In range: channel revive
 		velocity = Vector3.ZERO
@@ -529,6 +576,7 @@ func order_move_to(pos: Vector3) -> void:
 		return
 	if mounted_turret != null:
 		dismount_turret()
+	_explicit_hold_order = false
 	ordered_position = pos
 	is_leapfrogging_advancing = false
 	is_providing_cover_fire = false
@@ -544,6 +592,7 @@ func order_mount_turret(turret: DeployableTurret) -> void:
 		return
 	if mounted_turret != null and mounted_turret != turret:
 		dismount_turret()
+	_explicit_hold_order = false
 	if _modular_tactics:
 		_clear_modular_posture()
 	target_turret_to_mount = turret
@@ -563,6 +612,7 @@ func order_revive(target: CharacterBody3D) -> void:
 		return
 	if mounted_turret != null:
 		dismount_turret()
+	_explicit_hold_order = false
 	if _modular_tactics:
 		_clear_modular_posture()
 	target_player_to_revive = target
@@ -579,6 +629,7 @@ func order_regroup(leader: CharacterBody3D) -> void:
 		return
 	if mounted_turret != null:
 		dismount_turret()
+	_explicit_hold_order = false
 	order_leader = leader
 	is_leapfrogging_advancing = false
 	is_providing_cover_fire = false
@@ -613,7 +664,7 @@ func _process_move_to_turret(delta: float) -> void:
 func _process_order_move(delta: float) -> void:
 	var dist: float = global_position.distance_to(ordered_position)
 	var arrival_radius := 0.6 if _modular_tactics else 1.2
-	var move_dest: Vector3 = _get_hallway_destination(ordered_position)
+	var move_dest: Vector3 = _step_towards(ordered_position, delta)
 	var to_dest: Vector3 = (move_dest - global_position)
 	to_dest.y = 0.0
 
@@ -654,7 +705,7 @@ func _process_order_regroup(delta: float) -> void:
 		return
 
 	var dist: float = global_position.distance_to(order_leader.global_position)
-	var move_dest: Vector3 = _get_hallway_destination(order_leader.global_position)
+	var move_dest: Vector3 = _step_towards(order_leader.global_position, delta)
 	var to_dest: Vector3 = (move_dest - global_position)
 	to_dest.y = 0.0
 
@@ -694,10 +745,14 @@ func _process_downed_crawl(delta: float) -> void:
 	velocity.z = move_toward(velocity.z, 0.0, 5.0 * delta)
 
 
+func _is_cover_anchor_type(anchor_type: String) -> bool:
+	return anchor_type in ["cover", "deployable_shield", "cover_marker", "doorway_jamb", "sandbag", "corner"]
+
+
 func _process_hold_corner(delta: float) -> void:
 	if _modular_tactics:
 		if global_position.distance_to(current_anchor_position) > 0.7:
-			var step := navigator.next_position(current_anchor_position, delta) - global_position
+			var step := _step_towards(current_anchor_position, delta) - global_position
 			step.y = 0.0
 			var heading := step.normalized()
 			velocity.x = heading.x * move_speed
@@ -705,7 +760,7 @@ func _process_hold_corner(delta: float) -> void:
 			if not heading.is_zero_approx():
 				rotation.y = atan2(-heading.x, -heading.z)
 			return
-		is_in_cover = current_anchor_type == "cover"
+		is_in_cover = _is_cover_anchor_type(current_anchor_type)
 	# Keep anchor position clamped
 	var to_anchor: Vector3 = (current_anchor_position - global_position)
 	to_anchor.y = 0.0
@@ -718,7 +773,7 @@ func _process_hold_corner(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 
 	# Check player-led progression: Human pointman must advance into forward room first!
-	if not _modular_tactics:
+	if not _modular_tactics or not _explicit_hold_order:
 		_check_player_led_progression()
 	if current_state != State.HOLD_CORNER:
 		return
@@ -779,16 +834,18 @@ func _process_hold_corner(delta: float) -> void:
 
 
 func _process_leapfrog_advance(delta: float) -> void:
-	var move_dest: Vector3 = _get_hallway_destination(target_advance_position)
+	var move_dest: Vector3 = _step_towards(target_advance_position, delta)
 	var to_dest: Vector3 = (move_dest - global_position)
 	to_dest.y = 0.0
 	var dist_to_target: float = global_position.distance_to(target_advance_position)
+	var arrive_dist: float = 0.75 if _modular_tactics else 1.0
 
-	if dist_to_target > 1.0:
+	if dist_to_target > arrive_dist:
 		var dir: Vector3 = to_dest.normalized()
 		velocity.x = dir.x * move_speed
 		velocity.z = dir.z * move_speed
-		rotation.y = atan2(-dir.x, -dir.z)
+		if not dir.is_zero_approx():
+			rotation.y = atan2(-dir.x, -dir.z)
 		if body_mesh != null:
 			body_mesh.scale.y = 1.0
 			body_mesh.position.y = 0.0
@@ -798,8 +855,9 @@ func _process_leapfrog_advance(delta: float) -> void:
 		velocity.z = 0.0
 		current_anchor_position = target_advance_position
 		current_anchor_facing = target_advance_facing
+		current_anchor_type = target_advance_type
 		is_leapfrogging_advancing = false
-		is_in_cover = true
+		is_in_cover = _is_cover_anchor_type(current_anchor_type) if _modular_tactics else true
 		is_crouching = true
 		is_peeking = false
 		if body_mesh != null:
@@ -823,8 +881,12 @@ func _process_cover_fire(delta: float) -> void:
 	# Maintain cover anchor and lay down continuous covering/suppressive fire down hallway
 	var to_anchor: Vector3 = (current_anchor_position - global_position)
 	to_anchor.y = 0.0
-	if to_anchor.length() > 0.6:
-		var dir: Vector3 = to_anchor.normalized()
+	if current_anchor_position != Vector3.ZERO and to_anchor.length() > (0.7 if _modular_tactics else 0.6):
+		var move_step := _step_towards(current_anchor_position, delta) - global_position
+		move_step.y = 0.0
+		var dir: Vector3 = move_step.normalized() if not _modular_tactics else to_anchor.normalized()
+		if _modular_tactics and not move_step.is_zero_approx():
+			dir = move_step.normalized()
 		velocity.x = dir.x * (move_speed * 0.6)
 		velocity.z = dir.z * (move_speed * 0.6)
 	else:
@@ -842,25 +904,35 @@ func _process_cover_fire(delta: float) -> void:
 	if current_target_jaffa != null and _has_line_of_sight(current_target_jaffa):
 		var aim_dir: Vector3 = (current_target_jaffa.global_position - global_position).normalized()
 		aim_dir.y = 0.0
-		rotation.y = atan2(-aim_dir.x, -aim_dir.z)
+		if not aim_dir.is_zero_approx():
+			rotation.y = atan2(-aim_dir.x, -aim_dir.z)
 		if fire_cooldown <= 0.0:
 			fire_cooldown = 60.0 / fire_rate_rpm
 			_fire_mp5(aim_dir)
 			hallway_suppressed.emit(self, aim_dir)
 	else:
 		# Train weapon down the hallway facing direction
-		rotation.y = atan2(-current_anchor_facing.x, -current_anchor_facing.z)
+		if not current_anchor_facing.is_zero_approx():
+			rotation.y = atan2(-current_anchor_facing.x, -current_anchor_facing.z)
 		if fire_cooldown <= 0.0 and randf() < 0.15:
 			fire_cooldown = (60.0 / fire_rate_rpm) * 1.5
 			_fire_mp5(current_anchor_facing)
 			hallway_suppressed.emit(self, current_anchor_facing)
 
-	# Check if partner has arrived at forward position
+	# Coordinate with partner: stay in cover fire while partner revives, otherwise follow leapfrog or stand down
 	var partner: SGCAirmanAI = _find_fireteam_partner()
+	var downed_op: PlayerController3D = _find_nearest_downed_player()
+	if partner != null and partner.current_state == State.REVIVE_PLAYER and downed_op != null:
+		return
 	if partner != null and not partner.is_leapfrogging_advancing and partner.current_state == State.HOLD_CORNER:
-		# Partner is set! Now we leapfrog forward to the forward sector!
 		var forward_sec: String = _get_sector_for_pos(partner.global_position)
-		_initiate_leapfrog_advance(forward_sec)
+		if not _modular_tactics or forward_sec != _get_current_sector():
+			_initiate_leapfrog_advance(forward_sec)
+			return
+	if _modular_tactics and (partner == null or (not partner.is_leapfrogging_advancing and partner.current_state != State.REVIVE_PLAYER)):
+		is_providing_cover_fire = false
+		is_peeking = false
+		current_state = State.HOLD_CORNER if current_anchor_position != Vector3.ZERO else State.COMBAT
 
 
 func hold_corner(anchor_pos: Vector3, facing_dir: Vector3 = Vector3(0.0, 0.0, -1.0), anchor_type: String = "corner") -> void:
@@ -873,7 +945,7 @@ func hold_corner(anchor_pos: Vector3, facing_dir: Vector3 = Vector3(0.0, 0.0, -1
 	current_anchor_position = anchor_pos
 	current_anchor_facing = facing_dir
 	current_anchor_type = anchor_type
-	is_in_cover = not _modular_tactics or anchor_type == "cover"
+	is_in_cover = not _modular_tactics or _is_cover_anchor_type(anchor_type)
 	is_crouching = true
 	is_peeking = false
 	is_leapfrogging_advancing = false
@@ -906,6 +978,7 @@ func _clear_modular_posture() -> void:
 func stand_down() -> void:
 	if is_instance_valid(mounted_turret):
 		dismount_turret()
+	_explicit_hold_order = false
 	_clear_modular_posture()
 	velocity = Vector3.ZERO
 	if current_state not in [State.DEAD, State.DOWNED]:
@@ -919,8 +992,10 @@ func advance_to_next_cover(target_pos: Vector3, facing_dir: Vector3 = Vector3(0.
 		return
 	if mounted_turret != null:
 		dismount_turret()
+	_explicit_hold_order = false
 	target_advance_position = target_pos
 	target_advance_facing = facing_dir
+	target_advance_type = "corner"
 	current_state = State.LEAPFROG_ADVANCE
 	is_leapfrogging_advancing = true
 	is_in_cover = false
@@ -991,6 +1066,8 @@ func _check_player_led_progression() -> void:
 	if player_sec != airman_sec and player_sec != "UNKNOWN" and not player_sec.is_empty():
 		var hostiles_in_sec: int = _count_hostiles_in_sector(airman_sec)
 		if hostiles_in_sec == 0:
+			if _modular_tactics and _find_best_forward_anchor(player_sec).is_empty():
+				return
 			_coordinate_squad_leapfrog(player_sec)
 
 
@@ -1002,6 +1079,9 @@ func _coordinate_squad_leapfrog(target_sec: String) -> void:
 			current_state = State.COVER_FIRE
 			is_providing_cover_fire = true
 			is_peeking = true
+			is_crouching = false
+			if current_anchor_position == Vector3.ZERO:
+				current_anchor_position = global_position
 			if body_mesh != null:
 				body_mesh.scale.y = 1.0
 				body_mesh.position.y = 0.0
@@ -1016,8 +1096,10 @@ func _initiate_leapfrog_advance(target_sec: String) -> void:
 	if anchor.is_empty():
 		return
 
+	_explicit_hold_order = false
 	target_advance_position = anchor["pos"] as Vector3
 	target_advance_facing = anchor["dir"] as Vector3
+	target_advance_type = str(anchor.get("type", "corner"))
 	current_state = State.LEAPFROG_ADVANCE
 	is_leapfrogging_advancing = true
 	is_in_cover = false
@@ -1027,11 +1109,14 @@ func _initiate_leapfrog_advance(target_sec: String) -> void:
 		body_mesh.position.y = 0.0
 
 	var partner: SGCAirmanAI = _find_fireteam_partner()
-	if partner != null and partner.current_state != State.DEAD and partner.current_state != State.DOWNED:
+	if partner != null and partner.current_state not in [State.DEAD, State.DOWNED, State.REVIVE_PLAYER, State.MAN_TURRET] and not partner._explicit_hold_order:
 		if not (partner.current_state == State.HOLD_CORNER and _get_sector_for_pos(partner.global_position) == target_sec):
 			partner.current_state = State.COVER_FIRE
+		if partner.current_anchor_position == Vector3.ZERO:
+			partner.current_anchor_position = partner.global_position
 		partner.is_providing_cover_fire = true
 		partner.is_peeking = true
+		partner.is_crouching = false
 		if partner.body_mesh != null:
 			partner.body_mesh.scale.y = 1.0
 			partner.body_mesh.position.y = 0.0
@@ -1056,9 +1141,35 @@ func advance_leapfrog(forward_sector: String) -> void:
 	_initiate_leapfrog_advance(forward_sector)
 
 
+func _pick_modular_anchor(target_sec: String, require_walk_min: float, max_straight_dist: float) -> Dictionary:
+	var level := LevelNavigator.find_level(self)
+	if level == null or not level.ready_for_navigation:
+		return {}
+	var room_id: StringName = StringName(target_sec.to_lower()) if not target_sec.is_empty() else &""
+	var threat := current_target_jaffa.global_position if is_instance_valid(current_target_jaffa) else Vector3.INF
+	var candidates := LevelNavigator.room_tactical_anchors(level, room_id, threat)
+	var best := {}
+	var best_priority := 999
+	var best_dist := INF
+	for anchor: Dictionary in candidates:
+		var pos: Vector3 = anchor["pos"] as Vector3
+		var straight_d := global_position.distance_to(pos)
+		if straight_d <= require_walk_min or straight_d > max_straight_dist or _is_anchor_occupied(pos):
+			continue
+		var path := level.local_path(global_position, pos)
+		if path.is_empty() or path[-1].distance_to(pos) > 0.8 or LevelNavigator.path_has_locked_door(level, path):
+			continue
+		var prio := int(anchor.get("priority", 3))
+		if prio < best_priority or (prio == best_priority and straight_d < best_dist):
+			best_priority = prio
+			best_dist = straight_d
+			best = anchor
+	return best
+
+
 func _find_best_forward_anchor(target_sec: String) -> Dictionary:
 	if _modular_tactics:
-		return {}
+		return _pick_modular_anchor(target_sec, 1.5, 45.0)
 	var best_anchor: Dictionary = {}
 	var min_dist: float = 999999.0
 
@@ -1102,7 +1213,8 @@ func _is_anchor_occupied(anchor_pos: Vector3) -> bool:
 
 func find_best_tactical_anchor(preferred_sector: String = "") -> Dictionary:
 	if _modular_tactics:
-		return {}
+		var sec_mod := preferred_sector if not preferred_sector.is_empty() else _get_current_sector()
+		return _pick_modular_anchor(sec_mod, 0.0, 14.0)
 	var sec: String = preferred_sector
 	if sec.is_empty():
 		sec = _get_current_sector()
@@ -1191,7 +1303,9 @@ func _count_hostiles_in_sector(sec: String) -> int:
 
 
 func _get_sector_for_pos(pos: Vector3) -> String:
-	var gr: GateRoom = MissionWorld.find(self, "GateRoom") as GateRoom
+	var gr: GateRoom = MissionWorld.of(self) as GateRoom
+	if gr == null:
+		gr = MissionWorld.find(self, "GateRoom") as GateRoom
 	if gr != null:
 		return gr.get_current_sector(pos)
 	if pos.x >= -7.5 and pos.x <= 7.5 and pos.z >= 7.8 and pos.z <= 22.0:
@@ -1279,6 +1393,7 @@ func _find_available_turret() -> DeployableTurret:
 
 func _on_downed() -> void:
 	current_state = State.DOWNED
+	_explicit_hold_order = false
 	if mounted_turret != null:
 		dismount_turret()
 	is_in_cover = false
@@ -1307,6 +1422,7 @@ func _on_revived() -> void:
 func _on_died() -> void:
 	if navigator != null: navigator.reset()
 	current_state = State.DEAD
+	_explicit_hold_order = false
 	if mounted_turret != null:
 		dismount_turret()
 	is_in_cover = false
