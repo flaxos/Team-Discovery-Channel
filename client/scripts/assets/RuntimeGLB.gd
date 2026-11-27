@@ -43,3 +43,65 @@ static func add_mipmaps(material: BaseMaterial3D) -> BaseMaterial3D:
 				done[texture] = texture
 		material.set(property, done[texture])
 	return material
+
+
+## Generates native hardware LOD index levels via ImporterMesh on heavy meshes
+## while preserving exact LOD0 vertices/triangles, bounds, materials and skin bindings.
+static func apply_mesh_lods(scene: Node, min_triangles: int = 2000) -> int:
+	if scene == null:
+		return 0
+	var generated_total := 0
+	for node: Node in scene.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi == null or not (mi.mesh is ArrayMesh):
+			continue
+		var src := mi.mesh as ArrayMesh
+		var surf_count := src.get_surface_count()
+		if surf_count == 0:
+			continue
+		var first_rs: Dictionary = RenderingServer.mesh_get_surface(src.get_rid(), 0)
+		if not (first_rs.get("lods", []) as Array).is_empty():
+			continue
+		var src_tris := 0
+		var src_surface_tris: Array[int] = []
+		for s in range(surf_count):
+			var idx := src.surface_get_arrays(s)[Mesh.ARRAY_INDEX] as PackedInt32Array
+			var tris := idx.size() / 3
+			src_tris += tris
+			src_surface_tris.append(tris)
+		if src_tris < min_triangles:
+			continue
+		var imp := ImporterMesh.new()
+		var custom_mask: int = (
+			Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS
+			| (Mesh.ARRAY_FORMAT_CUSTOM_MASK << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)
+			| (Mesh.ARRAY_FORMAT_CUSTOM_MASK << Mesh.ARRAY_FORMAT_CUSTOM1_SHIFT)
+			| (Mesh.ARRAY_FORMAT_CUSTOM_MASK << Mesh.ARRAY_FORMAT_CUSTOM2_SHIFT)
+			| (Mesh.ARRAY_FORMAT_CUSTOM_MASK << Mesh.ARRAY_FORMAT_CUSTOM3_SHIFT)
+		)
+		for s in range(surf_count):
+			var arr := src.surface_get_arrays(s)
+			var flags := src.surface_get_format(s) & custom_mask
+			imp.add_surface(Mesh.PRIMITIVE_TRIANGLES, arr, [], {}, src.surface_get_material(s), src.surface_get_name(s), flags)
+		imp.generate_lods(deg_to_rad(60.0), deg_to_rad(25.0), [])
+		var lods_here := 0
+		for s in range(imp.get_surface_count()):
+			lods_here += imp.get_surface_lod_count(s)
+		if lods_here == 0:
+			continue
+		var baked := imp.get_mesh()
+		if baked == null or baked.get_surface_count() != surf_count:
+			continue
+		if not baked.get_aabb().is_equal_approx(src.get_aabb()):
+			continue
+		var lod0_preserved := true
+		for s in range(surf_count):
+			var b_idx := baked.surface_get_arrays(s)[Mesh.ARRAY_INDEX] as PackedInt32Array
+			if b_idx.size() / 3 != src_surface_tris[s]:
+				lod0_preserved = false
+				break
+		if not lod0_preserved:
+			continue
+		mi.mesh = baked
+		generated_total += lods_here
+	return generated_total

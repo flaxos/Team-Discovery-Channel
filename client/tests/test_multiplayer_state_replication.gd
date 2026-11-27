@@ -184,6 +184,7 @@ func run_test() -> void:
 	assert(player.current_weapon.current_ammo == before_shot - 1, "Combat validation must accept the weapon selected by the server armory")
 
 	host.wave_manager.end_mission()
+	client.wave_manager.end_mission()
 	await frames(5)
 	host_api.multiplayer_peer = OfflineMultiplayerPeer.new()
 	client_api.multiplayer_peer = OfflineMultiplayerPeer.new()
@@ -197,4 +198,4 @@ func run_test() -> void:
 	server_peer.close()
 	client_peer.close()
 	print("PASS native NPC spawn/transform/despawn, mission snapshots, doors, lift and validated station requests")
-	quit(0)
+	await preload("res://tests/support/finish.gd").success(self)

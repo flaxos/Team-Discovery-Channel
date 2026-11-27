@@ -21,8 +21,11 @@ func _ready() -> void:
 			weapon_model.name = "AirmanMP5"
 			add_child(weapon_model)
 	previous_state = airman.current_state
-	activate(select_pose(false, false, false))
-	update_grounding(1.0)
+	if airman.current_state == SGCAirmanAI.State.DEAD or (airman.health_component != null and airman.health_component.is_dead):
+		snap_to_end(&"death")
+	else:
+		activate(select_pose(false, false, false))
+		update_grounding(1.0)
 	get_parent().get_node(^"BodyMesh").hide()
 	get_parent().get_node(^"HelmetMesh").hide()
 	airman.mp5_visual_fired.connect(queue_shot)
@@ -38,7 +41,10 @@ func _process(delta: float) -> void:
 	var recovering := previous_state == SGCAirmanAI.State.DOWNED and state != previous_state
 	previous_state = state
 	var next_pose := select_pose(ground_speed > 0.22, recovering, fitted_grips)
-	update_pose(next_pose, next_pose == &"shoot" and shot_pending, delta)
+	if next_pose == &"death" and pose != &"death" and airman.health_component != null and airman.health_component.snapped_from_snapshot:
+		snap_to_end(&"death")
+	else:
+		update_pose(next_pose, next_pose == &"shoot" and shot_pending, delta)
 	shot_pending = false
 	if turning != null:
 		var can_step := (

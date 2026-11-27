@@ -135,7 +135,7 @@ func run_host() -> void:
 		"--", "--alert-child", "--result-dir", output_dir
 	]
 	for argument in OS.get_cmdline_user_args():
-		if argument == "--serpent-preview" or argument.begins_with("--serpent-helmet="):
+		if argument == "--expect-jaffa-fallback" or argument.begins_with("--serpent-helmet="):
 			child_args.append(argument)
 	child_pid = OS.create_process(OS.get_executable_path(), child_args)
 	assert(child_pid > 0)
@@ -239,7 +239,7 @@ func run_client() -> void:
 
 
 func check_serpent_replicas(room: ModularMission) -> void:
-	if "--serpent-preview" not in OS.get_cmdline_user_args():
+	if "--expect-jaffa-fallback" in OS.get_cmdline_user_args():
 		return
 	var community_helmet := false
 	for argument in OS.get_cmdline_user_args():

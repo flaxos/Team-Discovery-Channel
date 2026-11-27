@@ -260,7 +260,7 @@ func run() -> void:
 
 func check_serpent_visual(guard: JaffaAI, expected_pose: StringName = &"") -> void:
 	var rig := guard.get_node(SERPENT_RIG) as Node3D
-	if "--serpent-preview" not in OS.get_cmdline_user_args():
+	if "--expect-jaffa-fallback" in OS.get_cmdline_user_args():
 		assert(guard.body_mesh.visible and not rig.is_processing())
 		return
 	assert(rig.is_processing() and not guard.body_mesh.visible)

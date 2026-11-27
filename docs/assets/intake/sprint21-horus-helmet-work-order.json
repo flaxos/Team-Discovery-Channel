@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": "AS21",
+  "asset_id": "horus_falcon_helmet",
+  "status": "draft",
+  "kind": "rigid_model",
+  "purpose": "Prepare a game-ready falcon helmet and layered metal finish compatible with the shared Jaffa head attachment. Match the authored Horus preview's swept profile and keep the Serpent and shock guard visibly distinct in the same light.",
+  "target": {
+    "scene": "res://scenes/entities/JaffaShockGuard.tscn",
+    "visual_branch": "HorusRig/<shared rig>/Skeleton3D/HorusHelmet",
+    "measurement_status": "unmeasured",
+    "measurement_evidence": null,
+    "units": "metres",
+    "up": "+Y",
+    "game_forward": "-Z",
+    "coordinate_space": "visual_parent_local",
+    "bounds_m": null,
+    "anchors": [
+      {"name": "HeadAttachment", "position_m": [0, 0, 0], "purpose": "Fit around the existing head bone with a clearance check against both shoulder plates."}
+    ]
+  },
+  "acquisition": {
+    "policy": "community_first_generated_gap",
+    "search_record": [
+      {
+        "page": "https://pinshape.com/items/46689-horus-stargate-sg1-helmet-model",
+        "decision": "unavailable",
+        "reason": "The CC0 print candidate requires a signed-in download. Inspect its actual source, triangle count and surface detail before choosing it; STL alone carries no UVs, maps or rig."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/stargate-jaffa-helmet-45e9dcaa597c4c23bcb0e829123df0ef",
+        "decision": "rejected",
+        "reason": "CC BY-NC 4.0 is excluded by the repository playbook."
+      },
+      {
+        "page": "https://sketchfab.com/3d-models/egyptian-falcon-guardian-a1ad4a9742da48789ca1ee856448f9d4",
+        "decision": "rejected",
+        "reason": "924,802-face upper-body asset. No lightweight helmet package or direct authorship statement verified."
+      }
+    ],
+    "selected_source": null,
+    "generation": null
+  },
+  "geometry": {
+    "max_lod0_triangles": 6000,
+    "max_materials": 4,
+    "lod_triangle_limits": [6000, 2200],
+    "uv_required": true
+  },
+  "rig": null,
+  "materials": [
+    {
+      "id": "falcon_metal_and_visor",
+      "resolution": 1024,
+      "albedo_space": "srgb",
+      "data_space": "linear",
+      "normal_convention": "opengl",
+      "orm_layout": {"r": "ao", "g": "roughness", "b": "metallic"},
+      "data_encoding": "lossless_png",
+      "alpha": "opaque",
+      "alpha_cutoff": null,
+      "metres_per_tile": null,
+      "palette": ["#28383D", "#84663D", "#1C8891"],
+      "surface_notes": "Blue-black steel, muted brass bill and brushed cheek plates. Bake panel breaks and subtle directional wear into the normal and roughness maps. Keep the opaque visor and its emission as separate material data."
+    }
+  ],
+  "budgets": {
+    "max_unique_texture_mib": 32,
+    "measurement_plan": "Measure mipmapped textures, the helmet's ready and crouched envelopes and repeated instance loading. Review close-up, ordinary tactical camera and silhouettes against Serpent."
+  },
+  "preserve_gameplay": ["collision", "navigation", "sockets", "muzzle_and_interaction_anchors", "stats_and_timing", "network_authority", "native_layout"],
+  "deliverables": ["self_contained_glb", "lossless_maps", "source_and_generation_provenance", "intake_and_validator_reports", "gameplay_wrapper", "gpu_captures", "export_proof"],
+  "acceptance_scenario": "Goa'uld Infiltration second alarm reinforcement group. Check clear head and shoulder motion while ready, moving, crouching and downed. Confirm placement under the awareness tell, repeat spawn after retry, and a normal game without preview flags."
+}

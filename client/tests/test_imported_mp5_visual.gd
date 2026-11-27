@@ -53,7 +53,7 @@ func run() -> void:
 			var material := mi.get_surface_override_material(surface) as StandardMaterial3D
 			assert(material != null and material.normal_enabled and is_zero_approx(material.metallic), "Preserve D-015")
 			for texture: Texture2D in [material.albedo_texture, material.normal_texture, material.roughness_texture]:
-				assert(texture != null and texture.get_width() == 2048 and texture.get_image().has_mipmaps(), "2K maps and mipmaps")
+				assert(texture != null and texture.get_width() == 1024 and texture.get_image().has_mipmaps(), "1K maps and mipmaps")
 				if not maps.has(texture.get_rid()):
 					maps[texture.get_rid()] = true
 					decoded_bytes += texture.get_image().get_data().size()
@@ -72,7 +72,7 @@ func run() -> void:
 	var crown := (crown_lo + crown_hi) * 0.5
 	assert(crown_count == 22 and crown.distance_to(MUZZLE) < 0.003, "Bore sits on gameplay muzzle: " + str(crown))
 	assert(lo.z >= MUZZLE.z - 0.003, "No geometry ahead of muzzle")
-	assert(decoded_bytes <= 128 * 1024 * 1024, "Documented shared texture budget")
+	assert(decoded_bytes <= 32 * 1024 * 1024, "1K shared texture budget")
 	var second := WeaponMP5.new()
 	start = Time.get_ticks_usec()
 	holder.add_child(second)
