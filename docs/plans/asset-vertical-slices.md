@@ -159,6 +159,8 @@ The delivered hero exterior silhouette uses `MothershipExteriorSilhouette.tscn` 
 
 **Sprint 35 — Programme acceptance slice.** Depends on all required preceding ledger rows. Run four players from equipped SGC through **one selected offworld site and back**, on listen and dedicated servers; run the other site as a separate session if part of the accepted asset coverage. Check late join while traveling, at destination, after return and after retry; all class/weapon and friendly/hostile/civilian views; normal/alarm lighting; export credits/licences, fallbacks and measured scene costs. Close remaining defects or identify exact unaccepted rows. Deliver a final asset-coverage/owner-art report, not a claim that passing tests automatically approves art. No new gameplay systems.
 
+The delivered programme acceptance slice verifies 4-player runs across listen and dedicated servers (`test_four_player_join_multiplayer.gd`, `test_four_player_join_dedicated.gd`), SGC civilians (`test_sgc_civilians.gd`), normal vs alarm lighting toggle, 27-asset attribution sync (`tools/sync_asset_credits.py --check`), scene cost audit (`measure_programme_costs.gd`), and publishes the master asset coverage and owner-art acceptance ledger concluding the Sprints 7–35 programme. [Sprint 35 review](../reviews/2026-11-27-sprint35-programme-acceptance.md).
+
 ## What to request when a slice is blocked
 
 Ask for the specific archive, purchase choice or art decision using the shared workflow’s card. Continue useful independent work. If the missing capability is gameplay (outdoors, ring transport, spaceflight, neutral AI), report the boundary and propose its own vertical slice rather than hiding it in import work. Do not create extra directories/checkouts to restart a blocked import.
