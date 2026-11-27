@@ -24,6 +24,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	add_to_group("cover")
 	add_to_group("deployable_shield")
+	set_meta("attachment_bounds", AABB(Vector3(-1.1, 0.0, -0.125), Vector3(2.2, 0.9, 0.25)))
 
 	if health_component != null:
 		health_component.max_health = max_durability

@@ -64,9 +64,18 @@ const MELEE_DAMAGE_FLANK: float = 150.0
 const MELEE_NOISE_RADIUS: float = 2.5
 const AMMO_SHARE_REACH: float = 3.0
 const AMMO_SHARE_COOLDOWN_MS: int = 500
+const MEDIC_REVIVE_DURATION_S: float = 1.25
+const MAX_MEDKIT_CHARGES: int = 2
+const MEDKIT_HEAL_AMOUNT: float = 50.0
+const MEDKIT_REACH: float = 3.0
+const MEDKIT_COOLDOWN_MS: int = 1000
 var _ammo_share_sequence: int = 0
 var _last_ammo_share_sequence: int = 0
 var _next_ammo_share_ms: int = 0
+var medkit_charges: int = 0
+var _field_aid_sequence: int = 0
+var _last_field_aid_sequence: int = 0
+var _next_field_aid_ms: int = 0
 var _revive_lease: float = 0.0
 var _server_revive_target: NodePath = NodePath()
 var _server_revive_time: float = 0.0
@@ -379,6 +388,7 @@ func _apply_class_profile(target_class_id: String) -> void:
 		class_id = target_class_id
 	var profile: Dictionary = SGCNetworkManager.CLASS_PROFILES.get(target_class_id, SGCNetworkManager.CLASS_PROFILES[SGCNetworkManager.CLASS_SG3_HEAVY])
 	base_speed = profile.get("speed", 6.0)
+	medkit_charges = MAX_MEDKIT_CHARGES if target_class_id == SGCNetworkManager.CLASS_CARTER_TECH else 0
 
 	if health_component != null:
 		health_component.max_health = profile.get("health", 120.0)
@@ -1204,17 +1214,39 @@ func _request_field_kit(action: int, mode: int) -> void:
 	_send_field_kit_inventory()
 
 
+func _authoritative_class_id() -> String:
+	return _server_class_id if is_inside_tree() and multiplayer != null and multiplayer.is_server() and not _server_class_id.is_empty() else class_id
+
+
+func is_field_medic() -> bool:
+	return _authoritative_class_id() == SGCNetworkManager.CLASS_CARTER_TECH
+
+
+func max_medkit_charges() -> int:
+	return MAX_MEDKIT_CHARGES if is_field_medic() else 0
+
+
+func revive_duration_s() -> float:
+	return MEDIC_REVIVE_DURATION_S if is_field_medic() else REVIVE_DURATION_S
+
+
+func revive_health_ratio() -> float:
+	return HealthComponent.MEDIC_REVIVE_HEALTH_RATIO if is_field_medic() else HealthComponent.DEFAULT_REVIVE_HEALTH_RATIO
+
+
 func _send_field_kit_inventory() -> void:
-	_confirm_field_kit.rpc_id(peer_id, claymore_charges, c4_charges_remaining, smoke_grenades_count, deployable_shields_count)
+	if is_inside_tree() and multiplayer != null and multiplayer.has_multiplayer_peer() and multiplayer.is_server() and peer_id in multiplayer.get_peers():
+		_confirm_field_kit.rpc_id(peer_id, claymore_charges, c4_charges_remaining, smoke_grenades_count, deployable_shields_count, medkit_charges)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _confirm_field_kit(claymore: int, satchel: int, smoke: int, shield: int) -> void:
+func _confirm_field_kit(claymore: int, satchel: int, smoke: int, shield: int, medkit: int = 0) -> void:
 	if is_local_authority and multiplayer.get_remote_sender_id() == 1:
 		claymore_charges = claymore
 		c4_charges_remaining = satchel
 		smoke_grenades_count = smoke
 		deployable_shields_count = shield
+		medkit_charges = medkit
 
 
 func _use_field_kit_on_server(action: int, mode: int) -> void:
@@ -1233,13 +1265,16 @@ func _use_field_kit_on_server(action: int, mode: int) -> void:
 
 
 func _deploy_tactical_gadget() -> void:
-	if class_id == SGCNetworkManager.CLASS_SG3_HEAVY:
+	var active_class: String = _authoritative_class_id()
+	if active_class == SGCNetworkManager.CLASS_SG3_HEAVY:
 		if multiplayer.is_server():
 			_deploy_turret_on_server()
 		elif turret_cooldown <= 0.0:
 			_request_turret_deployment.rpc_id(1)
-	elif class_id == SGCNetworkManager.CLASS_ONEILL_RECON:
+	elif active_class == SGCNetworkManager.CLASS_ONEILL_RECON:
 		_use_field_kit(FieldKitAction.SATCHEL, active_c4_timer_mode)
+	elif active_class == SGCNetworkManager.CLASS_CARTER_TECH:
+		request_field_aid(aimed_aid_recipient())
 
 
 func _use_satchel(mode: int) -> void:
@@ -1450,12 +1485,13 @@ func _process_revive(delta: float) -> void:
 						closest_downed = ally
 
 	if closest_downed != null:
+		var duration: float = revive_duration_s()
 		active_revive_target = closest_downed
 		_send_revive_hold(closest_downed)
 		current_revive_time += delta
-		var prog := clampf(current_revive_time / REVIVE_DURATION_S, 0.0, 1.0)
+		var prog := clampf(current_revive_time / duration, 0.0, 1.0)
 		revive_progress_changed.emit(prog)
-		if current_revive_time >= REVIVE_DURATION_S:
+		if current_revive_time >= duration:
 			var target_health := active_revive_target.get_node_or_null("HealthComponent") as HealthComponent
 			if target_health != null and not multiplayer.has_multiplayer_peer():
 				target_health.revive(self)
@@ -2272,16 +2308,69 @@ func deploy_shield() -> void:
 	_use_field_kit(FieldKitAction.SHIELD)
 
 
+func validate_shield_placement() -> Dictionary:
+	var forward: Vector3 = -global_transform.basis.z
+	forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		forward = Vector3.FORWARD
+	else:
+		forward = forward.normalized()
+	var right: Vector3 = Vector3(-forward.z, 0.0, forward.x)
+	var spawn_pos: Vector3 = global_position + forward * 1.3
+	spawn_pos.y = global_position.y
+	var world := MissionWorld.of(self)
+	var level_node := world.get_node_or_null("Level") as LevelAssembly if world != null else null
+	var space := get_world_3d().direct_space_state if is_inside_tree() and get_world_3d() != null else null
+	if space != null:
+		var chest_origin: Vector3 = global_position + Vector3(0.0, 0.55, 0.0)
+		var forward_query := PhysicsRayQueryParameters3D.create(chest_origin, chest_origin + forward * 1.35, 1 | 128, [get_rid()])
+		var forward_hit := space.intersect_ray(forward_query)
+		if not forward_hit.is_empty():
+			var hit_dist: float = chest_origin.distance_to(forward_hit["position"] as Vector3)
+			if hit_dist < 0.80:
+				return {"valid": false, "position": spawn_pos, "reason": "NO CLEARANCE FOR BALLISTIC SHIELD"}
+			spawn_pos = global_position + forward * maxf(0.68, hit_dist - 0.25)
+			spawn_pos.y = global_position.y
+		var center_probe: Vector3 = spawn_pos + Vector3(0.0, 0.55, 0.0)
+		var left_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(center_probe, center_probe - right * 0.95, 1 | 128, [get_rid()]))
+		var right_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(center_probe, center_probe + right * 0.95, 1 | 128, [get_rid()]))
+		if not left_hit.is_empty() and not right_hit.is_empty():
+			var span: float = (left_hit["position"] as Vector3).distance_to(right_hit["position"] as Vector3)
+			if span < 1.2:
+				return {"valid": false, "position": spawn_pos, "reason": "NO CLEARANCE FOR BALLISTIC SHIELD"}
+		var floor_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(spawn_pos + Vector3(0.0, 1.0, 0.0), spawn_pos + Vector3(0.0, -1.6, 0.0), 1, [get_rid()]))
+		if floor_hit.is_empty():
+			if level_node != null:
+				return {"valid": false, "position": spawn_pos, "reason": "SOLID FLOOR REQUIRED FOR SHIELD"}
+		else:
+			var floor_y: float = (floor_hit["position"] as Vector3).y
+			if absf(floor_y - global_position.y) > 0.08:
+				spawn_pos.y = floor_y
+	if level_node != null and level_node.ready_for_navigation:
+		var nav_pt: Vector3 = NavigationServer3D.map_get_closest_point(level_node.navigation_map, spawn_pos)
+		var flat_nav_err: float = Vector2(nav_pt.x - spawn_pos.x, nav_pt.z - spawn_pos.z).length()
+		if flat_nav_err > 1.25 or absf(nav_pt.y - spawn_pos.y) > 0.75:
+			return {"valid": false, "position": spawn_pos, "reason": "DEPLOY SHIELD ON WALKABLE FLOOR"}
+	for existing: Node in MissionWorld.in_group(self, &"deployable_shield"):
+		if existing is StaticBody3D and (existing as StaticBody3D).collision_layer != 0 and (existing as Node3D).global_position.distance_to(spawn_pos) < 0.8:
+			return {"valid": false, "position": spawn_pos, "reason": "SHIELD ALREADY DEPLOYED HERE"}
+	return {"valid": true, "position": spawn_pos, "reason": ""}
+
+
 func _spawn_shield() -> void:
 	if deployable_shields_count <= 0:
+		_ammo_share_feedback("NO BALLISTIC SHIELDS REMAINING")
 		print("Player %d: No Deployable Ballistic Shields remaining!" % peer_id)
+		return
+	var placement: Dictionary = validate_shield_placement()
+	if not bool(placement.get("valid", false)):
+		_ammo_share_feedback(str(placement.get("reason", "CANNOT DEPLOY SHIELD HERE")))
 		return
 	deployable_shields_count -= 1
 
 	var parent := _field_kit_parent()
 	var shield := (load(DEPLOYABLE_SHIELD_PATH) as PackedScene).instantiate() as DeployableShieldScript
-	var spawn_pos := global_position - global_transform.basis.z * 1.3
-	spawn_pos.y = global_position.y
+	var spawn_pos: Vector3 = placement.get("position", global_position - global_transform.basis.z * 1.3)
 	shield.position = MissionWorld.local(parent, spawn_pos)
 	shield.rotation.y = rotation.y
 
@@ -2591,7 +2680,7 @@ func _bindings() -> Node:
 
 
 ## Sharing uses active reserves only, so normal weapon snapshots and travel capture suffice.
-func _ammo_share_available() -> bool:
+func _field_action_available() -> bool:
 	if not is_inside_tree() or is_queued_for_deletion() or health_component == null:
 		return false
 	if health_component.is_dead or health_component.is_downed or health_component.is_stunned or health_component.frozen:
@@ -2603,6 +2692,145 @@ func _ammo_share_available() -> bool:
 		return false
 	var net := get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	return net == null or (not net.restart_pending and not net.is_player_paused_for_transfer(self))
+
+
+func _ammo_share_available() -> bool:
+	return _field_action_available()
+
+
+func _aid_target_label(target: Node3D) -> String:
+	if target == self:
+		return "SELF"
+	var callsign: Variant = target.get(&"player_callsign")
+	if callsign != null and not str(callsign).is_empty():
+		return str(callsign)
+	var airman_name: Variant = target.get(&"airman_callsign")
+	if airman_name != null and not str(airman_name).is_empty():
+		return str(airman_name)
+	return str(target.name)
+
+
+func aimed_aid_recipient() -> CharacterBody3D:
+	if camera == null or not is_inside_tree():
+		return null
+	var from := camera.global_position
+	var query := PhysicsRayQueryParameters3D.create(from, from - camera.global_basis.z * 80.0, 1 | 2 | 128, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	var target := hit.get("collider") as CharacterBody3D
+	if target == null or target == self:
+		return null
+	var same_team: bool = target.get_parent() == get_parent() or target is SGCAirmanAIScript
+	if not same_team or MissionWorld.of(target) != MissionWorld.of(self):
+		return null
+	return target if global_position.distance_to(target.global_position) <= MEDKIT_REACH + 1.0 else null
+
+
+func field_aid_offer(target: Node3D) -> Dictionary:
+	if not is_field_medic():
+		return {"heal": 0.0, "reason": "FIELD MEDKIT REQUIRES TECH SPECIALIST", "target_name": ""}
+	if not _field_action_available():
+		return {"heal": 0.0, "reason": "FIELD AID UNAVAILABLE", "target_name": ""}
+	if medkit_charges <= 0:
+		return {"heal": 0.0, "reason": "NO MEDKITS REMAINING", "target_name": ""}
+	var recipient: Node3D = target if target != null else self
+	var is_squad_member: bool = recipient == self or (
+		recipient is CharacterBody3D
+		and (recipient.get_parent() == get_parent() or recipient is SGCAirmanAIScript)
+		and MissionWorld.of(recipient) == MissionWorld.of(self)
+	)
+	if not is_squad_member:
+		return {"heal": 0.0, "reason": "TEAMMATE UNAVAILABLE", "target_name": ""}
+	var label: String = _aid_target_label(recipient)
+	var target_health := recipient.get_node_or_null("HealthComponent") as HealthComponent
+	if target_health == null or target_health.is_dead or target_health.frozen:
+		return {"heal": 0.0, "reason": "TEAMMATE UNAVAILABLE", "target_name": label}
+	if target_health.is_downed:
+		return {"heal": 0.0, "reason": "USE [%s] TO REVIVE" % _bindings().binding_text("interact"), "target_name": label}
+	if target_health.is_stunned:
+		return {"heal": 0.0, "reason": "TEAMMATE UNAVAILABLE", "target_name": label}
+	if recipient != self:
+		if global_position.distance_to(recipient.global_position) > MEDKIT_REACH:
+			return {"heal": 0.0, "reason": "MOVE CLOSER (3 m)", "target_name": label}
+		var exclude_rids: Array[RID] = [get_rid()]
+		if recipient is CollisionObject3D:
+			exclude_rids.append((recipient as CollisionObject3D).get_rid())
+		var los_query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP, recipient.global_position + Vector3.UP, 1 | 128, exclude_rids)
+		if not get_world_3d().direct_space_state.intersect_ray(los_query).is_empty():
+			return {"heal": 0.0, "reason": "PATH BLOCKED", "target_name": label}
+		if recipient.has_method(&"_field_action_available") and not bool(recipient.call(&"_field_action_available")):
+			return {"heal": 0.0, "reason": "TEAMMATE UNAVAILABLE", "target_name": label}
+	var missing: float = maxf(0.0, target_health.max_health - target_health.current_health)
+	if missing <= 0.05:
+		return {"heal": 0.0, "reason": "HEALTH ALREADY FULL" if recipient == self else "TEAMMATE AT FULL HEALTH", "target_name": label}
+	return {"heal": minf(MEDKIT_HEAL_AMOUNT, missing), "reason": "", "target_name": label}
+
+
+func field_aid_prompt() -> String:
+	if not is_field_medic() or not is_window_focused or _is_ui_modal_open() or is_command_wheel_open or is_in_cctv_mode or not _field_action_available():
+		return ""
+	var target := aimed_aid_recipient()
+	if target == null:
+		return ""
+	var offer := field_aid_offer(target)
+	if float(offer.heal) > 0.0:
+		return "[%s] FIELD AID +%d HP TO %s (%d LEFT)" % [_bindings().binding_text("gadget"), int(round(float(offer.heal))), str(offer.target_name), medkit_charges]
+	var target_health := target.get_node_or_null("HealthComponent") as HealthComponent
+	if target_health != null and (target_health.is_downed or target_health.current_health < target_health.max_health - 0.05):
+		return "%s — %s" % [str(offer.target_name), str(offer.reason)]
+	return ""
+
+
+func request_field_aid(target: Node3D = null) -> void:
+	if not is_local_authority or is_command_wheel_open or is_in_cctv_mode or not is_window_focused or _is_ui_modal_open() or not _field_action_available() or not is_field_medic():
+		return
+	var recipient: Node3D = target if target != null else self
+	var target_path: NodePath = NodePath() if recipient == self else get_parent().get_path_to(recipient)
+	var inc: Variant = recipient.get(&"ammo_share_incarnation")
+	var target_incarnation: String = str(inc) if inc != null else ""
+	_field_aid_sequence += 1
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		server_request_field_aid(_field_aid_sequence, ammo_share_incarnation, target_path, target_incarnation)
+	else:
+		server_request_field_aid.rpc_id(1, _field_aid_sequence, ammo_share_incarnation, target_path, target_incarnation)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_field_aid(sequence: int, incarnation: String, target_path: NodePath, target_incarnation: String) -> void:
+	if multiplayer.has_multiplayer_peer():
+		if not _valid_combat_sender():
+			return
+	elif MissionWorld.combat_ended(self):
+		return
+	if incarnation != ammo_share_incarnation or sequence <= _last_field_aid_sequence or not is_field_medic():
+		return
+	_last_field_aid_sequence = sequence
+	if Time.get_ticks_msec() < _next_field_aid_ms:
+		return
+	var recipient: Node3D = self if target_path.is_empty() else get_parent().get_node_or_null(target_path) as Node3D
+	if recipient == null:
+		return
+	if recipient != self and recipient.get_parent() == get_parent():
+		if str(recipient.get(&"ammo_share_incarnation")) != target_incarnation:
+			return
+	var offer := field_aid_offer(recipient)
+	var heal_amount: float = float(offer.heal)
+	if heal_amount <= 0.0:
+		_ammo_share_feedback(str(offer.reason))
+		_send_field_kit_inventory()
+		return
+	var target_health := recipient.get_node_or_null("HealthComponent") as HealthComponent
+	if target_health == null:
+		return
+	medkit_charges -= 1
+	_next_field_aid_ms = Time.get_ticks_msec() + MEDKIT_COOLDOWN_MS
+	target_health.heal(heal_amount)
+	_send_field_kit_inventory()
+	if recipient == self:
+		_ammo_share_feedback("FIELD AID APPLIED (+%d HP, %d LEFT)" % [int(round(heal_amount)), medkit_charges])
+	else:
+		_ammo_share_feedback("TREATED %s (+%d HP, %d LEFT)" % [str(offer.target_name), int(round(heal_amount)), medkit_charges])
+		if recipient.has_method(&"_ammo_share_feedback"):
+			recipient.call(&"_ammo_share_feedback", "FIELD AID +%d HP FROM %s" % [int(round(heal_amount)), player_callsign])
 
 
 func ammo_share_offer(target: PlayerController3D) -> Dictionary:
@@ -2866,7 +3094,7 @@ func _server_revive_tick(delta: float) -> void:
 		_server_revive_time = 0.0
 		return
 	_server_revive_time += delta
-	if _server_revive_time >= REVIVE_DURATION_S:
+	if _server_revive_time >= revive_duration_s():
 		health.revive(self)
 		_server_revive_target = NodePath()
 		_server_revive_time = 0.0

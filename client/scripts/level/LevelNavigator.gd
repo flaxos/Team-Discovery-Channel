@@ -104,6 +104,9 @@ static func cover_props(assembly: LevelAssembly) -> Array[Node3D]:
 				var node := module.get_node_or_null(LevelRoomComposer.node_path(attachment)) as Node3D
 				if node != null:
 					result.append(node)
+	for node: Node in MissionWorld.in_group(assembly, &"deployable_shield"):
+		if node is StaticBody3D and is_instance_valid(node) and (node as StaticBody3D).collision_layer != 0:
+			result.append(node as Node3D)
 	return result
 
 
@@ -116,7 +119,8 @@ static func prop_blocks(prop: Node3D, spot: Vector3, threat: Vector3) -> bool:
 		Vector3(spot.x, floor_y + CROUCHED_TORSO, spot.z), threat + Vector3(0, THREAT_TORSO, 0), 1
 	)
 	var hit := prop.get_world_3d().direct_space_state.intersect_ray(query)
-	return not hit.is_empty() and prop.is_ancestor_of(hit["collider"] as Node)
+	var collider := hit.get("collider") as Node
+	return collider != null and (collider == prop or prop.is_ancestor_of(collider))
 
 
 ## The nearest reachable spot behind a cover prop, on the side away from `threat`, where the

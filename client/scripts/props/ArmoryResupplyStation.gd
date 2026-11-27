@@ -133,16 +133,18 @@ func _perform_ammo_resupply(player: PlayerController3D) -> void:
 	player.c4_charges_remaining = player.MAX_C4_CHARGES
 	player.deployable_shields_count = player.MAX_DEPLOYABLE_SHIELDS
 	player.smoke_grenades_count = player.MAX_SMOKE_GRENADES
+	player.medkit_charges = player.max_medkit_charges()
 
 	_pulse_indicator(Color(0.1, 1.0, 0.4))
 	_play_resupply_sfx()
 
-	print("ArmoryResupplyStation: Operative %d resupplied ammo, Claymores (%d), C4 (%d), Shields (%d), and Smoke (%d)!" % [
+	print("ArmoryResupplyStation: Operative %d resupplied ammo, Claymores (%d), C4 (%d), Shields (%d), Smoke (%d), Medkits (%d)!" % [
 		player.peer_id,
 		player.claymore_charges,
 		player.c4_charges_remaining,
 		player.deployable_shields_count,
-		player.smoke_grenades_count
+		player.smoke_grenades_count,
+		player.medkit_charges
 	])
 	sync_feedback(cooldown_time)
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
@@ -288,3 +290,4 @@ func sync_inventory(player_path: NodePath, primary_id: String, swapped: bool) ->
 		player.c4_charges_remaining = player.MAX_C4_CHARGES
 		player.deployable_shields_count = player.MAX_DEPLOYABLE_SHIELDS
 		player.smoke_grenades_count = player.MAX_SMOKE_GRENADES
+		player.medkit_charges = player.max_medkit_charges()

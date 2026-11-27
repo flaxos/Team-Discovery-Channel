@@ -36,6 +36,8 @@ MULTIPLAYER = (
     'test_alarm_escape_dedicated',
     'test_modular_flanking_dedicated',
     'test_ammunition_sharing_dedicated',
+    'test_co2_roles_and_cover_multiplayer',
+    'test_co2_roles_and_cover_dedicated',
     'test_goauld_personal_shield_dedicated',
     'test_campaign_variation_dedicated',
 )
