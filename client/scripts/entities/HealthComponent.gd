@@ -134,14 +134,21 @@ func take_damage(amount: float, source: Node = null, damage_type: String = "bull
 
 	_publish_state("damage", final_dmg, source)
 
-## Revives a downed operative with 40% maximum health
+const DEFAULT_REVIVE_HEALTH_RATIO: float = 0.40
+const MEDIC_REVIVE_HEALTH_RATIO: float = 0.75
+
+
+## Revives a downed operative (40% max HP baseline, or reviver role ratio such as Field Medic 75%).
 func revive(_reviver: Node = null) -> void:
 	if not _can_mutate() or not is_downed or is_dead:
 		return
+	var ratio: float = DEFAULT_REVIVE_HEALTH_RATIO
+	if _reviver != null and _reviver.has_method(&"revive_health_ratio"):
+		ratio = clampf(float(_reviver.call(&"revive_health_ratio")), 0.1, 1.0)
 	snapped_from_snapshot = false
 	is_downed = false
 	bleedout_timer = 0.0
-	current_health = max_health * 0.40
+	current_health = max_health * ratio
 	health_changed.emit(current_health, max_health)
 	revived.emit()
 	_publish_state()

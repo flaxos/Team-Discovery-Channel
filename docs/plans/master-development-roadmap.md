@@ -341,8 +341,8 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 - Integrated into `armoury.tres` preset within `GoauldInfiltrationMission` (`Room04Chamber`) preserving room footprints, navigation/collision envelopes, objectives, and patrol markers.
 - Server-authoritative validation (`ServerInteraction.resolve`), reach validation ($\le 3.5$ m) across remote and host entry paths, late-join cooldown/state snapshots, and state reset on coordinated retry. Preserves legacy SGC zero-cooldown crate behavior, solo failure-on-down rules, and existing station behaviors.
 
-**CO-2 — Roles and sharing** · M · design first
-- Ammunition sharing, medic revive speed or heal, deployable cover offworld. Bring the lobby class descriptions and the code into agreement in either direction. Do not add perks merely because the description lists them.
+**CO-2 — Roles and sharing** · M · **built (chunk 1 PR #76; chunk 2 CO-2 roles/revive/medkit/cover milestone; [chunk 1 spec](ammunition-sharing.md), [chunk 2 spec](co2-roles-and-cover.md), `test_ammunition_sharing*`, `test_co2_roles_and_cover*`)**
+- Ammunition sharing (`B`), Tech Specialist (`carter_tech`) Field Medic 2× revive speed (`1.25 s`) & `75%` recovery HP plus 2 server-validated `[G]` Field Medkits (`+50 HP`, `3.0 m` reach/LOS, travel/campaign carryover & armoury restock), validated offworld `DeployableShield` cover with crouch/LOS/bolt blocking and `LevelNavigator` registration, and 1:1 agreement across `NetworkManager.CLASS_PROFILES`, `LobbyUI`, and `TacticalHUD`.
 
 ### I — Special weapons and faction mechanics
 

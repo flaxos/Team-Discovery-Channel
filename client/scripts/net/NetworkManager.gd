@@ -77,7 +77,7 @@ const CLASS_TEALC_JAFFA: String = "tealc_jaffa"
 const CLASS_PROFILES: Dictionary = {
 	CLASS_SG3_HEAVY: {
 		"name": "SG-3 Heavy Support Marine",
-		"desc": "Deployable .50 cal tripod.",
+		"desc": "Deployable .50 cal M2 tripod ([G], 30s cooldown).",
 		"primary": "m249",
 		"secondary": "m9",
 		"health": 150.0,
@@ -85,7 +85,7 @@ const CLASS_PROFILES: Dictionary = {
 	},
 	CLASS_CARTER_TECH: {
 		"name": "Tech Specialist & Archaeologist",
-		"desc": "Suppressed primary fire and a quiet stun sidearm.",
+		"desc": "Suppressed primary and Zat. Field Medic: 2x revive (75% HP), 2 medkits ([G], +50 HP).",
 		"primary": "mp5",
 		"secondary": "zat",
 		"health": 100.0,
@@ -93,7 +93,7 @@ const CLASS_PROFILES: Dictionary = {
 	},
 	CLASS_ONEILL_RECON: {
 		"name": "Pointman / Recon Leader",
-		"desc": "Remote or timed C4 satchels.",
+		"desc": "2 remote or timed C4 satchels ([G] deploy/detonate, [T] timer).",
 		"primary": "p90",
 		"secondary": "m9",
 		"health": 120.0,
@@ -101,7 +101,7 @@ const CLASS_PROFILES: Dictionary = {
 	},
 	CLASS_TEALC_JAFFA: {
 		"name": "Allied Jaffa / Tok'ra Infiltrator",
-		"desc": "Heat-based staff and Zat. Both cool between shots.",
+		"desc": "Heat-based Staff and Zat (no ammo needed; plasma drains Goa'uld shields).",
 		"primary": "staff_weapon",
 		"secondary": "zat",
 		"health": 160.0,

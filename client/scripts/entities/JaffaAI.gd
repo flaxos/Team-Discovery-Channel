@@ -1267,11 +1267,23 @@ func _has_line_of_sight(target: Node3D, from_eye: bool = false) -> bool:
 	if target is CollisionObject3D:
 		exclude_list.append((target as CollisionObject3D).get_rid())
 
-	# Test both head and torso for clear unoccluded LOS
-	var test_points: Array[Vector3] = [
-		target.global_position + Vector3(0, 1.5, 0),  # Head
-		target.global_position + Vector3(0, 1.0, 0)   # Torso
-	]
+	# Test both head and torso for clear unoccluded LOS (duck lower when operative is crouched in cover without peeking)
+	var crouched_in_cover: bool = (
+		target.get(&"is_crouching") == true
+		and target.get(&"is_in_cover") == true
+		and target.get(&"is_peeking") != true
+	)
+	var test_points: Array[Vector3] = []
+	if crouched_in_cover:
+		test_points = [
+			target.global_position + Vector3(0, 0.65, 0),
+			target.global_position + Vector3(0, 0.42, 0),
+		]
+	else:
+		test_points = [
+			target.global_position + Vector3(0, 1.5, 0),  # Head
+			target.global_position + Vector3(0, 1.0, 0)   # Torso
+		]
 	var health := target.get_node_or_null("HealthComponent") as HealthComponent
 	if health != null and health.is_downed:
 		test_points.append(target.global_position + Vector3(0, 0.35, 0))
@@ -1356,7 +1368,12 @@ func _dispatch_single_plasma_bolt() -> void:
 		return
 
 	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.2, -0.6)
-	var target_chest := current_target.global_position + Vector3(0, 1.0, 0)
+	var aim_height: float = 0.60 if (
+		current_target.get(&"is_crouching") == true
+		and current_target.get(&"is_in_cover") == true
+		and current_target.get(&"is_peeking") != true
+	) else 1.0
+	var target_chest := current_target.global_position + Vector3(0, aim_height, 0)
 	var base_dir := (target_chest - origin).normalized()
 
 	# Spread inaccuracy cone

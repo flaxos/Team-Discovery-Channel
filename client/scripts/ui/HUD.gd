@@ -512,8 +512,20 @@ func _process(delta: float) -> void:
 	if ammo_share_label != null:
 		var prompt := ""
 		if is_instance_valid(local_player) and not is_mission_ended:
-			prompt = local_player.ammo_share_prompt()
-			if prompt.is_empty():
+			var ammo_prompt: String = local_player.ammo_share_prompt()
+			var aid_prompt: String = local_player.field_aid_prompt()
+			if not ammo_prompt.is_empty() and not aid_prompt.is_empty():
+				if ammo_prompt.begins_with("[") and aid_prompt.begins_with("["):
+					prompt = ammo_prompt + "  |  " + aid_prompt
+				elif aid_prompt.begins_with("["):
+					prompt = aid_prompt
+				else:
+					prompt = ammo_prompt
+			elif not ammo_prompt.is_empty():
+				prompt = ammo_prompt
+			elif not aid_prompt.is_empty():
+				prompt = aid_prompt
+			else:
 				prompt = local_player.close_quarters_prompt()
 		ammo_share_label.text = prompt
 		ammo_share_label.visible = not prompt.is_empty()
@@ -570,7 +582,8 @@ func _on_revive_progress_changed(progress: float) -> void:
 			revive_bar.visible = true
 			revive_bar.value = progress * 100.0
 			if revive_label != null:
-				revive_label.text = "REVIVING SQUADMATE... (%d%%)" % int(progress * 100.0)
+				var prefix: String = "FIELD MEDIC REVIVE..." if (local_player != null and local_player.is_field_medic()) else "REVIVING SQUADMATE..."
+				revive_label.text = "%s (%d%%)" % [prefix, int(progress * 100.0)]
 		else:
 			revive_bar.visible = false
 
@@ -647,14 +660,25 @@ func _update_weapon_display() -> void:
 			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "THROW C4 (%d LEFT)" % local_player.c4_charges_remaining
 			gadget_label.modulate = Color(0.4, 0.9, 0.5)
 		else:
-			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "C4 DEPLETED (0/3)"
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "C4 DEPLETED (0/%d)" % local_player.MAX_C4_CHARGES
+			gadget_label.modulate = Color(0.7, 0.7, 0.7)
+	elif local_player.class_id == SGCNetworkManager.CLASS_CARTER_TECH:
+		if local_player.medkit_charges > 0:
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "FIELD MEDKIT (%d/%d)" % [local_player.medkit_charges, local_player.MAX_MEDKIT_CHARGES]
+			gadget_label.modulate = Color(0.4, 0.9, 0.5)
+		else:
+			gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "MEDKITS DEPLETED (0/%d)" % local_player.MAX_MEDKIT_CHARGES
 			gadget_label.modulate = Color(0.7, 0.7, 0.7)
 	else:
-		gadget_label.text = "[" + _bindings().binding_text("gadget") + "] " + "TACTICAL SATCHEL"
+		gadget_label.text = "HEAT ARSENAL"
+		gadget_label.modulate = Color(1.0, 0.85, 0.35)
 
-	# Append Claymore indicator
-	var claymore_str: String = "  |  [%s] CLAYMORE (%d/2)" % [_bindings().binding_text("plant_claymore"), local_player.claymore_charges]
-	gadget_label.text += claymore_str
+	# Append shared tactical kit indicators
+	gadget_label.text += "  |  [%s] CLAYMORE (%d/%d)  |  [%s] SHIELD (%d/%d)  |  [%s] SMOKE (%d/%d)" % [
+		_bindings().binding_text("plant_claymore"), local_player.claymore_charges, local_player.MAX_CLAYMORE_CHARGES,
+		_bindings().binding_text("deploy_shield"), local_player.deployable_shields_count, local_player.MAX_DEPLOYABLE_SHIELDS,
+		_bindings().binding_text("throw_smoke"), local_player.smoke_grenades_count, local_player.MAX_SMOKE_GRENADES,
+	]
 
 
 func _ensure_heat_ui_exists() -> void:

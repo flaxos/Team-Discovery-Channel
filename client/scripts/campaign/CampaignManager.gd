@@ -396,6 +396,7 @@ func apply_carryover(player: PlayerController3D) -> bool:
 	player.c4_charges_remaining = state.get("c4_charges_remaining", player.c4_charges_remaining)
 	player.smoke_grenades_count = state.get("smoke_grenades_count", player.smoke_grenades_count)
 	player.deployable_shields_count = state.get("deployable_shields_count", player.deployable_shields_count)
+	player.medkit_charges = state.get("medkit_charges", player.medkit_charges)
 	return true
 
 

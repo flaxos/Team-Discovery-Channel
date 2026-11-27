@@ -209,7 +209,7 @@ Automated suites never satisfy a human gate. The gates were defined for two peop
 | E | Goa'uld infiltration mission | GI-0 | Now (layout), ST-1 (mission) |
 | F | Goa'uld architecture and visuals | GA-0/GA-1 done; GA-2 part 1 corridor kit implemented for review ([brief](docs/maps/goauld-visual-brief.md), [kit](docs/maps/goauld-theme-kit.md)); human art review, then larger chambers | Now |
 | G | Stargate world transitions | GT-1, GT-2, and GT-3 done | Complete (CA-1 / GA-2 / AP-1 next) |
-| H | Expanded co-op mechanics | CO-1 | GI-1 |
+| H | Expanded co-op mechanics | CO-1 (`test_offworld_resupply`, `_multiplayer`) & CO-2 (`test_ammunition_sharing*`, `test_co2_roles_and_cover*`) complete | GI-1 |
 | I | Special weapons and faction mechanics | SW-1 (`test_stealth_takedowns_and_weapons`) & SW-2 (`test_goauld_personal_shield`, `_multiplayer`, `_dedicated`) done; SW-3 next | ST-2 |
 | J | Outdoor world construction | OW-0 | Any time; design spike only |
 | K | Other factions and locations | Alpha Site mission | EV-1 |
