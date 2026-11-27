@@ -195,7 +195,7 @@ func _state() -> Dictionary:
 
 func _publish_state(event: String = "", amount: float = 0.0, source: Node = null) -> void:
 	_revision += 1
-	if is_inside_tree() and multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+	if is_inside_tree() and not is_queued_for_deletion() and multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		var source_path: NodePath = get_path_to(source) if is_instance_valid(source) and source.is_inside_tree() else NodePath()
 		SGCNetworkManager.mission_rpc(
 			self, &"sync_health_state", [_state(), event, amount, source_path], self

@@ -37,8 +37,8 @@ The table below records every asset, visual family, and environment slice delive
 | **17** | SGC Briefing & Command | Poly Haven / TDC | CC0 1.0 | Level 27 briefing table, command desks, shutters | `test_boundary_containment_smoke.gd` | ~26k tris | Pending |
 | **18** | SGC Coverage Closure | Poly Haven / TDC | CC0 1.0 | CCTV security bank, storage props, conduits, lights | `test_programme_acceptance.gd` | 426,855 tris (3 floors) | Pending |
 | **19** | SGC Airman Rig Path | TDC Humanoid Skeleton | CC0 1.0 | Shared humanoid rig, BoneMap, locomotion/combat clips | `test_airman_tactical_anchors.gd` | 42,508 tris, 151 MB VRAM | Pending |
-| **20** | Serpent Guard Jaffa | Sketchfab / TDC | CC BY 4.0 | Serpent helmet, Jaffa body, staff mount, stun tells | `test_four_player_join_multiplayer.gd` | ~38k tris | Pending |
-| **21** | Horus Guard Jaffa | Sketchfab / TDC | CC BY 4.0 | Falcon helmet, shock guard blue-black armour | `test_four_player_join_multiplayer.gd` | ~39k tris | Pending |
+| **20** | Serpent Guard Jaffa | Sketchfab / TDC | CC BY 4.0 | Opt-in (`--serpent-preview`, ModularMission only); `JaffaGuard` uses primitive mesh by default (erratum; full promotion scheduled Milestone 2) | `test_four_player_join_multiplayer.gd` | ~38k tris | Pending |
+| **21** | Horus Guard Jaffa | Sketchfab / TDC | CC BY 4.0 | Local preview stashed (`stash@{0}`); `JaffaShockGuard` uses primitive mesh on `main` (erratum; recovery scheduled Milestone 2) | `test_four_player_join_multiplayer.gd` | ~39k tris | Pending |
 | **22** | O'Neill Recon Appearance | TDC on Airman Rig | CC0 1.0 | Slate fatigues, tan webbing, radio, P90/M9 grips | `test_four_player_join_multiplayer.gd` | Shared Airman + 1.2k | Pending |
 | **23** | Carter Tech Appearance | TDC on Airman Rig | CC0 1.0 | Khaki fatigues, scanner, MP5SD/Zat grips | `test_four_player_join_multiplayer.gd` | Shared Airman + 1.5k | Pending |
 | **24** | Teal'c Jaffa Appearance | TDC on Airman Rig | CC0 1.0 | Bronze Jaffa plates, two-handed staff, Zat | `test_four_player_join_multiplayer.gd` | Shared Airman + 3.8k | Pending |

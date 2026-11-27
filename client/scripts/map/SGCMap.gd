@@ -373,6 +373,8 @@ func _bake_navigation() -> void:
 		return
 	_build_stair_enclosures()
 	await get_tree().physics_frame
+	if not is_inside_tree():
+		return
 	nav_region = NavigationRegion3D.new()
 	nav_region.name = "Navigation"
 	var mesh := NavigationMesh.new()
@@ -400,6 +402,7 @@ func _bake_navigation() -> void:
 	nav_region.navigation_mesh = mesh
 	nav_region.set_navigation_map(navigation_map)
 	add_child(nav_region)
+	mesh = null
 	await get_tree().physics_frame
 	if not is_inside_tree():
 		return
@@ -470,8 +473,12 @@ func _physics_process(delta: float) -> void:
 
 
 func _exit_tree() -> void:
+	ready_for_navigation = false
+	if is_instance_valid(nav_region):
+		nav_region.navigation_mesh = null
 	if navigation_map.is_valid():
 		NavigationServer3D.free_rid(navigation_map)
+		navigation_map = RID()
 
 
 func _build_guards() -> void:

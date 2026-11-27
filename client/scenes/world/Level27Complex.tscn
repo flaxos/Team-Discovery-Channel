@@ -215,7 +215,7 @@ outline_size = 4
 modulate = Color(0.9, 0.95, 1, 1)
 
 [node name="SGCBriefingTerminal" parent="BriefingRoom" instance=ExtResource("25_briefing_terminal")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 5.5, 11.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, 11.2)
 
 [node name="GeneralsOffice" type="Node3D" parent="."]
 

@@ -7,7 +7,7 @@ static func success(tree: SceneTree) -> void:
 			node.stop()
 			node.stream = null
 	for node: Node in tree.root.get_children():
-		if node.name not in ["NetworkManager", "KeybindingManager"]:
+		if node.name not in ["NetworkManager", "KeybindingManager", "CampaignManager"]:
 			if node.has_method("end_mission"):
 				node.end_mission()
 			node.queue_free()

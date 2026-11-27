@@ -19,15 +19,37 @@ func _ready() -> void:
 
 	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
 	if campaign_mgr != null:
-		if campaign_mgr.has_signal(&"campaign_state_synced"):
+		if campaign_mgr.has_signal(&"campaign_state_synced") and not campaign_mgr.is_connected(&"campaign_state_synced", _update_display):
 			campaign_mgr.connect(&"campaign_state_synced", _update_display)
-		if campaign_mgr.has_signal(&"campaign_stage_advanced"):
-			campaign_mgr.connect(&"campaign_stage_advanced", func(_idx: int, _data: Dictionary) -> void: _update_display())
-		if campaign_mgr.has_signal(&"campaign_completed_event"):
-			campaign_mgr.connect(&"campaign_completed_event", func(_summary: Dictionary) -> void: _update_display())
-		if campaign_mgr.has_signal(&"campaign_reset_event"):
+		if campaign_mgr.has_signal(&"campaign_stage_advanced") and not campaign_mgr.is_connected(&"campaign_stage_advanced", _on_campaign_stage_advanced):
+			campaign_mgr.connect(&"campaign_stage_advanced", _on_campaign_stage_advanced)
+		if campaign_mgr.has_signal(&"campaign_completed_event") and not campaign_mgr.is_connected(&"campaign_completed_event", _on_campaign_completed):
+			campaign_mgr.connect(&"campaign_completed_event", _on_campaign_completed)
+		if campaign_mgr.has_signal(&"campaign_reset_event") and not campaign_mgr.is_connected(&"campaign_reset_event", _update_display):
 			campaign_mgr.connect(&"campaign_reset_event", _update_display)
 
+	_update_display()
+
+
+func _exit_tree() -> void:
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	if campaign_mgr == null:
+		return
+	if campaign_mgr.has_signal(&"campaign_state_synced") and campaign_mgr.is_connected(&"campaign_state_synced", _update_display):
+		campaign_mgr.disconnect(&"campaign_state_synced", _update_display)
+	if campaign_mgr.has_signal(&"campaign_stage_advanced") and campaign_mgr.is_connected(&"campaign_stage_advanced", _on_campaign_stage_advanced):
+		campaign_mgr.disconnect(&"campaign_stage_advanced", _on_campaign_stage_advanced)
+	if campaign_mgr.has_signal(&"campaign_completed_event") and campaign_mgr.is_connected(&"campaign_completed_event", _on_campaign_completed):
+		campaign_mgr.disconnect(&"campaign_completed_event", _on_campaign_completed)
+	if campaign_mgr.has_signal(&"campaign_reset_event") and campaign_mgr.is_connected(&"campaign_reset_event", _update_display):
+		campaign_mgr.disconnect(&"campaign_reset_event", _update_display)
+
+
+func _on_campaign_stage_advanced(_idx: int, _data: Dictionary) -> void:
+	_update_display()
+
+
+func _on_campaign_completed(_summary: Dictionary) -> void:
 	_update_display()
 
 
