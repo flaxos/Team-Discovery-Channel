@@ -14,6 +14,68 @@ extends Resource
 @export var triggers: Array[MissionTrigger] = []
 ## Optional Airman fireteam staged on either side of the authored entry marker.
 @export var airman_support := false
+## Optional per-run objective variations (Milestone CA-2).
+@export var objective_variants: Array[MissionObjectiveVariant] = []
+
+
+func objective_variant_entries() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	for variant: MissionObjectiveVariant in objective_variants:
+		if variant != null and not str(variant.id).is_empty():
+			entries.append({"id": str(variant.id), "label": variant.label})
+	return entries
+
+
+func find_variant(variant_id: StringName) -> MissionObjectiveVariant:
+	if str(variant_id).is_empty():
+		return null
+	for variant: MissionObjectiveVariant in objective_variants:
+		if variant != null and variant.id == variant_id:
+			return variant
+	return null
+
+
+## Returns `Resource` (not `MissionDefinition`) because naming its own class inside a script
+## creates a GDScript reference cycle with LevelRoomComposer/StargateRing that leaks at exit.
+func with_variant(variant_id: StringName) -> Resource:
+	if str(variant_id).is_empty() or variant_id == &"standard":
+		return self
+	var variant: MissionObjectiveVariant = find_variant(variant_id)
+	if variant == null or variant.bonus_objectives.is_empty():
+		return self
+	var copy: Resource = duplicate(false)
+	if copy == null:
+		return self
+	var existing_ids := {}
+	for existing_obj: MissionObjective in objectives:
+		if existing_obj != null and existing_obj.id != &"":
+			existing_ids[existing_obj.id] = true
+	var next_objectives: Array[MissionObjective] = []
+	var inserted := false
+	for obj: MissionObjective in objectives:
+		if not inserted and obj != null and variant.insert_before_id != &"" and obj.id == variant.insert_before_id:
+			for bonus: MissionObjective in variant.bonus_objectives:
+				if bonus != null and not existing_ids.has(bonus.id):
+					next_objectives.append(bonus)
+					existing_ids[bonus.id] = true
+			inserted = true
+		next_objectives.append(obj)
+	if not inserted:
+		var fallback: Array[MissionObjective] = []
+		for i: int in range(next_objectives.size()):
+			var obj: MissionObjective = next_objectives[i]
+			if not inserted and obj != null and obj.kind == "extract":
+				for bonus: MissionObjective in variant.bonus_objectives:
+					if bonus != null and not existing_ids.has(bonus.id):
+						fallback.append(bonus)
+						existing_ids[bonus.id] = true
+				inserted = true
+			fallback.append(obj)
+		next_objectives = fallback
+	var empty_variants: Array[MissionObjectiveVariant] = []
+	copy.set(&"objectives", next_objectives)
+	copy.set(&"objective_variants", empty_variants)
+	return copy
 
 
 func validate() -> PackedStringArray:
@@ -133,6 +195,21 @@ func validate() -> PackedStringArray:
 							if edge.security_id == str(trigger.security_id):
 								edge.locked = false
 			previous = str(objective.room)
+
+	var variant_ids := {}
+	for variant: MissionObjectiveVariant in objective_variants:
+		if variant == null or str(variant.id).strip_edges().is_empty() or variant_ids.has(variant.id):
+			errors.append("Duplicate/empty objective variant id")
+			continue
+		variant_ids[variant.id] = true
+		if variant.label.strip_edges().is_empty():
+			errors.append("Objective variant needs a label: %s" % variant.id)
+		if not variant.bonus_objectives.is_empty():
+			var applied: Resource = with_variant(variant.id)
+			var empty_variants: Array[MissionObjectiveVariant] = []
+			applied.set(&"objective_variants", empty_variants)
+			for err: String in (applied.call(&"validate") as PackedStringArray):
+				errors.append("Variant %s: %s" % [variant.id, err])
 	return errors
 
 

@@ -49,6 +49,13 @@ var _arrivals: Array[float] = []
 var _clock := 0.0
 var _quiet := 0.0
 var _klaxon := 0.0
+var difficulty_tier: int = 0
+var active_modifiers: Array[String] = []
+
+
+func configure_difficulty(tier: int, modifiers: Array = []) -> void:
+	difficulty_tier = MissionDifficulty.clamp_tier(tier)
+	active_modifiers = MissionDifficulty.sanitize_modifiers(modifiers)
 
 
 func setup(mission: MissionDefinition, assembly: LevelAssembly, hostiles: Node3D) -> void:
@@ -172,7 +179,8 @@ func _update_runner(hot: Array[JaffaAI], dt: float) -> void:
 		raise_progress = 0.0
 		return
 	raise_progress += dt
-	if raise_progress >= definition.alarms[runner_console].raise_time:
+	var effective_raise_time: float = definition.alarms[runner_console].raise_time * MissionDifficulty.alarm_raise_time_scale(difficulty_tier, active_modifiers)
+	if raise_progress >= effective_raise_time:
 		_raise_alarm()
 
 
@@ -224,8 +232,9 @@ func _can_run(jaffa: JaffaAI) -> bool:
 func _raise_alarm() -> void:
 	var at := last_known if last_known != Vector3.INF else runner.global_position
 	_release_runner()
+	var delay_scale: float = MissionDifficulty.reinforcement_delay_scale(difficulty_tier, active_modifiers)
 	for i in range(_arrivals.size()):
-		_arrivals[i] = definition.reinforcements[i].delay
+		_arrivals[i] = maxf(1.0, definition.reinforcements[i].delay * delay_scale)
 	for jaffa in _sentries():
 		jaffa.investigate_at(at)
 	_publish(Level.ALARM)
@@ -249,12 +258,17 @@ func _spawn_group(index: int) -> void:
 	var map := level.navigation_map
 	var target := last_known if last_known != Vector3.INF else node.global_position
 	target = NavigationServer3D.map_get_closest_point(map, target)
+	var notice_scale: float = MissionDifficulty.sight_notice_scale(difficulty_tier, active_modifiers)
 	for n in range(group.count):
-		var jaffa := load(SHOCK_JAFFA if group.shock_guard else JAFFA).instantiate() as JaffaAI
+		var promote_lead: bool = n == 0 and MissionDifficulty.should_promote_reinforcement_lead(difficulty_tier, index, active_modifiers)
+		var jaffa := load(SHOCK_JAFFA if (group.shock_guard or promote_lead) else JAFFA).instantiate() as JaffaAI
 		jaffa.name = "Jaffa_R%d_%d" % [index, n]
 		jaffa.formation_rank = n
-		if group.personal_shield and n == 0:
+		if n == 0 and (group.personal_shield or promote_lead):
 			jaffa.has_personal_shield = true
+		if notice_scale != 1.0:
+			jaffa.notice_time_near *= notice_scale
+			jaffa.notice_time_far *= notice_scale
 		var spot := NavigationServer3D.map_get_closest_point(
 			map, node.global_position + node.global_basis.x * (1.2 * n - 0.6 * (group.count - 1))
 		)

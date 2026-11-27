@@ -12,6 +12,16 @@ stages = [{
 "chevron_sequence": ["UP", "RIGHT", "DOWN", "LEFT", "UP", "UP", "RIGHT"],
 "intel_unlocked_description": "Ha'tak Mothership Cargo Bay Gate Address & Ring Frequency",
 "mission_id": "travel_infiltration",
+"objective_variants": [{
+"id": "standard",
+"label": "STANDARD DIRECTIVE"
+}, {
+"id": "armoury_recon",
+"label": "ARMOURY CACHE RECON"
+}, {
+"id": "observation_sweep",
+"label": "OBSERVATION DECK SWEEP"
+}],
 "stage_id": "stage_1_intel",
 "stage_title": "Stage 1: Outpost Infiltration & Intel Recovery",
 "target_objectives_summary": "1. Infiltrate compound\n2. Sabotage sub-space generator\n3. Download command records & ring codes\n4. Extract to SGC"
@@ -20,6 +30,16 @@ stages = [{
 "chevron_sequence": ["RIGHT", "UP", "LEFT", "DOWN", "RIGHT", "UP", "DOWN"],
 "intel_unlocked_description": "Command Bridge Layout & Reactor Diagnostic Keys",
 "mission_id": "travel_mothership",
+"objective_variants": [{
+"id": "standard",
+"label": "STANDARD BREACH"
+}, {
+"id": "ramp_flank_recon",
+"label": "DECK RAMP RECON"
+}, {
+"id": "upper_ring_sweep",
+"label": "UPPER RING SECURING"
+}],
 "stage_id": "stage_2_breach",
 "stage_title": "Stage 2: Mothership Cargo Bay & Ring Breach",
 "target_objectives_summary": "1. Deploy to Ha'tak cargo bay\n2. Breach interior bulkheads\n3. Transport ring breach to Deck 1\n4. Access shipboard manifest & extract"
@@ -28,6 +48,16 @@ stages = [{
 "chevron_sequence": ["UP", "UP", "LEFT", "RIGHT", "DOWN", "RIGHT", "LEFT"],
 "intel_unlocked_description": "Ha'tak System Offline — Fleet Threat Neutralized",
 "mission_id": "mothership_objective",
+"objective_variants": [{
+"id": "standard",
+"label": "STANDARD STRIKE"
+}, {
+"id": "cargo_sweep",
+"label": "CARGO BAY RECON"
+}, {
+"id": "upper_ring_lockdown",
+"label": "RING CHAMBER OVERWATCH"
+}],
 "stage_id": "stage_3_objective",
 "stage_title": "Stage 3: Bridge & Hyperdrive Reactor Sabotage",
 "target_objectives_summary": "1. Infiltrate command deck\n2. Sabotage hyperdrive reactor core\n3. Override bridge navigation helm\n4. Alarm escape to Stargate & SGC debrief"

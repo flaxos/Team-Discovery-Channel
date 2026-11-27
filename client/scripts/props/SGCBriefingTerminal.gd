@@ -81,7 +81,17 @@ func _update_display() -> void:
 		return
 
 	if campaign_mgr == null or not campaign_mgr.get("is_campaign_active"):
-		screen_label.text = "SGC MISSION BRIEFING TERMINAL\n=================================\nSTATUS: STANDBY — ALL QUIET\nNO ACTIVE CAMPAIGN OPERATION\n\nAccess lobby or select Campaign Mode\nto initiate an expeditionary directive."
+		var standby := "SGC MISSION BRIEFING TERMINAL\n=================================\nSTATUS: STANDBY — ALL QUIET\nNO ACTIVE CAMPAIGN OPERATION\n\nAccess lobby or select Campaign Mode\nto initiate an expeditionary directive."
+		if campaign_mgr != null and campaign_mgr.has_method(&"get_career_records"):
+			var rec: Dictionary = campaign_mgr.call(&"get_career_records")
+			var clears: int = int(rec.get("total_completions", 0))
+			if clears > 0:
+				standby += "\n\nSERVICE RECORD: %d CLEARED | BEST: %s (%s)" % [
+					clears,
+					str(rec.get("best_rating", "A")),
+					str(rec.get("highest_difficulty_name", "Easy")).to_upper()
+				]
+		screen_label.text = standby
 		screen_label.modulate = Color(0.4, 0.8, 1.0)
 		if status_light != null:
 			status_light.light_color = Color(0.2, 0.6, 1.0)
@@ -91,13 +101,24 @@ func _update_display() -> void:
 	var stage_idx: int = int(campaign_mgr.get("current_stage_index"))
 	var stage_data: Dictionary = campaign_mgr.call(&"get_current_stage")
 	var campaign_title: String = str(campaign_mgr.get("active_campaign").title) if campaign_mgr.get("active_campaign") != null else "OPERATION"
+	var tier_label: String = MissionDifficulty.tier_name(int(campaign_mgr.get("campaign_difficulty"))).to_upper()
+	var seed_val: int = int(campaign_mgr.get("run_seed"))
+	var mods: PackedStringArray = MissionDifficulty.modifier_names(campaign_mgr.get("active_modifiers"))
+	var mod_line: String = "" if mods.is_empty() else "\nMUTATORS: %s" % ", ".join(mods)
 
 	if is_completed:
 		var summary: Dictionary = campaign_mgr.call(&"get_campaign_summary")
-		screen_label.text = "CAMPAIGN VICTORY — %s\n=================================\nALL %d OPERATIONAL STAGES ACCOMPLISHED\nTOTAL HOSTILES ELIMINATED: %d\nSTATUS: MISSION COMPLETE — SGC SECURE" % [
+		var honors: Array = summary.get("honors", [])
+		var honors_line: String = "" if honors.is_empty() else "\nHONORS: %s" % ", ".join(honors)
+		screen_label.text = "CAMPAIGN VICTORY — %s\n=================================\nALL %d OPERATIONAL STAGES ACCOMPLISHED\nTIER: %s | RATING: %s | SEED: #%d%s\nTOTAL HOSTILES ELIMINATED: %d%s\nSTATUS: MISSION COMPLETE — SGC SECURE" % [
 			campaign_title.to_upper(),
 			int(summary.get("total_stages", 0)),
-			int(summary.get("total_kills", 0))
+			tier_label,
+			str(summary.get("rating", "A")),
+			seed_val,
+			mod_line,
+			int(summary.get("total_kills", 0)),
+			honors_line
 		]
 		screen_label.modulate = Color(0.2, 1.0, 0.4)
 		if status_light != null:
@@ -108,11 +129,17 @@ func _update_display() -> void:
 	var chevrons: Array = stage_data.get("chevron_sequence", [])
 	var glyph_str := "  >  ".join(chevrons)
 	var targets: String = str(stage_data.get("target_objectives_summary", ""))
+	var stage_var: Dictionary = campaign_mgr.call(&"get_stage_variant", stage_idx) if campaign_mgr.has_method(&"get_stage_variant") else {}
+	var var_label: String = str(stage_var.get("objective_variant_label", "STANDARD DIRECTIVE"))
 
-	screen_label.text = "%s — STAGE %d\n=================================\n%s\n\nOBJECTIVES:\n%s\n\nGATE ADDRESS:\n[ %s ]" % [
+	screen_label.text = "%s — STAGE %d\n=================================\n%s\nTIER: %s | SEED: #%d | VARIANT: %s%s\n\nOBJECTIVES:\n%s\n\nGATE ADDRESS:\n[ %s ]" % [
 		campaign_title.to_upper(),
 		stage_idx + 1,
 		stage_title,
+		tier_label,
+		seed_val,
+		var_label,
+		mod_line,
 		targets,
 		glyph_str
 	]

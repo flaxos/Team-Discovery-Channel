@@ -23,6 +23,11 @@ var _stopped_remaining := 0.0
 var _timer_revision := 0
 var _last_timer_revision := -1
 var _next_timer_sync := 0
+var timer_duration_scale: float = 1.0
+
+
+func configure_difficulty(tier: int, modifiers: Array = []) -> void:
+	timer_duration_scale = MissionDifficulty.timer_duration_scale(tier, modifiers)
 
 
 func _ready() -> void:
@@ -196,7 +201,8 @@ func _apply(trigger: MissionTrigger) -> void:
 	elif trigger.action == "start_timer" and timer_state == TimerState.IDLE:
 		timer_id = trigger.id
 		timer_state = TimerState.RUNNING
-		_deadline_msec = Time.get_ticks_msec() + int(trigger.duration_seconds * 1000.0)
+		var scaled_seconds: float = trigger.duration_seconds if is_equal_approx(timer_duration_scale, 1.0) else trigger.duration_seconds * timer_duration_scale
+		_deadline_msec = Time.get_ticks_msec() + int(scaled_seconds * 1000.0)
 		_publish_timer()
 		_show_timer()
 		applied = true

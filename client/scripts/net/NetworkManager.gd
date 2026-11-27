@@ -17,6 +17,7 @@ signal player_list_updated()
 signal game_started()
 signal mission_peer_ready(peer_id: int)
 signal mission_settings_changed(difficulty: int)
+signal run_variation_changed(run_seed: int, modifiers: PackedStringArray)
 signal mission_restart_preparing()
 signal mission_restart_released()
 signal mission_selection_changed(mission_id: String)
@@ -121,10 +122,29 @@ const MAX_RECONNECT_ATTEMPTS: int = 5
 var local_peer_id: int = 1
 var selected_class_id: String = CLASS_SG3_HEAVY
 var player_name: String = "O'Neill"
+const VALID_MODIFIER_IDS: PackedStringArray = [
+	"shielded_vanguard",
+	"rapid_response",
+	"heightened_watch",
+	"tight_extraction",
+	"iron_discipline"
+]
+
 var selected_mission_id: String = MISSION_SGC_DEFENSE
 var mission_difficulty: int = DIFFICULTY_EASY
+var run_seed: int = 0
+var selected_modifiers: Array[String] = []
 var mission_started: bool = false
 var restart_pending: bool = false
+
+
+func _sanitize_modifiers(raw: Array) -> Array[String]:
+	var clean: Array[String] = []
+	for item: Variant in raw:
+		var key: String = str(item).strip_edges().to_lower()
+		if VALID_MODIFIER_IDS.has(key) and not clean.has(key):
+			clean.append(key)
+	return clean
 
 ## peer_id -> Dictionary { name: String, class_id: String, node: Node3D }
 var peers: Dictionary = {}
@@ -237,6 +257,24 @@ func parse_cli_arguments(custom_args: PackedStringArray = PackedStringArray()) -
 					if tiers.has(tier_name):
 						mission_difficulty = tiers[tier_name]
 						result["difficulty"] = mission_difficulty
+			"--seed":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					var raw_seed: String = args[i].strip_edges()
+					if raw_seed.is_valid_int():
+						var parsed_seed: int = raw_seed.to_int()
+						if parsed_seed > 0:
+							run_seed = parsed_seed
+							result["seed"] = run_seed
+			"--modifier", "--modifiers":
+				if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+					i += 1
+					var raw_mods: PackedStringArray = args[i].split(",", false)
+					var combined_mods: Array = selected_modifiers.duplicate()
+					for m: String in raw_mods:
+						combined_mods.append(m)
+					selected_modifiers = _sanitize_modifiers(combined_mods)
+					result["modifiers"] = selected_modifiers.duplicate()
 			"--auto-start":
 				result["auto_start"] = true
 				auto_start_mission = true
@@ -334,7 +372,10 @@ func disconnect_game(reset_settings: bool = true) -> void:
 	if reset_settings:
 		mission_difficulty = DIFFICULTY_EASY
 		selected_mission_id = MISSION_SGC_DEFENSE
+		run_seed = 0
+		selected_modifiers.clear()
 		mission_selection_changed.emit(selected_mission_id)
+		run_variation_changed.emit(run_seed, PackedStringArray(selected_modifiers))
 	mission_settings_changed.emit(mission_difficulty)
 	if previous != null:
 		session_ended.emit()
@@ -359,6 +400,29 @@ func sync_mission_settings(tier: int) -> void:
 		return
 	mission_difficulty = tier
 	mission_settings_changed.emit(mission_difficulty)
+
+
+func set_run_variation(seed_value: int, modifiers: Array = []) -> bool:
+	if seed_value < 0 or mission_started:
+		return false
+	if is_in_active_session() and not is_server:
+		return false
+	run_seed = seed_value
+	selected_modifiers = _sanitize_modifiers(modifiers)
+	var packed := PackedStringArray(selected_modifiers)
+	run_variation_changed.emit(run_seed, packed)
+	if is_in_active_session() and is_server:
+		sync_run_variation.rpc(run_seed, packed)
+	return true
+
+
+@rpc("authority", "call_remote", "reliable")
+func sync_run_variation(seed_value: int, modifiers: Array) -> void:
+	if seed_value < 0:
+		return
+	run_seed = seed_value
+	selected_modifiers = _sanitize_modifiers(modifiers)
+	run_variation_changed.emit(run_seed, PackedStringArray(selected_modifiers))
 
 
 ## Include the selected mode in the transition RPC: every peer applies it before loading gameplay.
@@ -491,6 +555,11 @@ func register_player(p_name: String, p_class_id: String) -> void:
 		if multiplayer.has_multiplayer_peer() and sender_id != multiplayer.get_unique_id():
 			sync_mission_settings.rpc_id(sender_id, mission_difficulty)
 			sync_mission_selection.rpc_id(sender_id, selected_mission_id)
+			if run_seed > 0 or not selected_modifiers.is_empty():
+				sync_run_variation.rpc_id(sender_id, run_seed, PackedStringArray(selected_modifiers))
+			var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+			if campaign_mgr != null and campaign_mgr.get("is_campaign_active") and campaign_mgr.has_method(&"sync_to_peer"):
+				campaign_mgr.call(&"sync_to_peer", sender_id)
 		for id: int in peers:
 			if id != sender_id:
 				sync_peer_info.rpc_id(sender_id, id, peers[id]["name"], peers[id]["class_id"])
