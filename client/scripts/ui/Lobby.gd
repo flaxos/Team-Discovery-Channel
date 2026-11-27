@@ -211,6 +211,10 @@ func _on_name_changed(new_name: String) -> void:
 func _on_start_game_pressed() -> void:
 	var net: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
 	if net != null and net.is_server:
+		if net.selected_mission_id == SGCNetworkManager.MISSION_CAMPAIGN_OPERATION:
+			var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+			if campaign_mgr != null and not campaign_mgr.get("is_campaign_active"):
+				campaign_mgr.call(&"start_campaign")
 		net.request_start_game()
 
 
@@ -272,7 +276,29 @@ func _sync_mission_selection() -> void:
 	for i in range(mission_option_button.item_count):
 		if mission_option_button.get_item_metadata(i) == mission_id: mission_option_button.select(i)
 	mission_description_label.text = SGCNetworkManager.MISSIONS[mission_id]["description"]
-	start_game_button.text = {SGCNetworkManager.MISSION_SGC_UAT: "LAUNCH UAT BASE", SGCNetworkManager.MISSION_MODULAR_EXTRACTION: "LAUNCH EXTRACTION UAT", SGCNetworkManager.MISSION_GOAULD_INFILTRATION: "LAUNCH INFILTRATION", SGCNetworkManager.MISSION_TWO_WORLDS_DEV: "LAUNCH TWO WORLDS (DEV)", SGCNetworkManager.MISSION_TRAVEL_INFILTRATION: "LAUNCH TRAVEL MISSION", SGCNetworkManager.MISSION_TIMED_EXTRACTION: "LAUNCH TIMED EXTRACTION", SGCNetworkManager.MISSION_ALARM_ESCAPE: "LAUNCH ALARM ESCAPE", SGCNetworkManager.MISSION_TAURI_ALPHA_SITE: "LAUNCH ALPHA SITE", SGCNetworkManager.MISSION_TRAVEL_MOTHERSHIP: "LAUNCH MOTHERSHIP MISSION", SGCNetworkManager.MISSION_MOTHERSHIP_OBJECTIVE: "LAUNCH MOTHERSHIP OBJECTIVE"}.get(mission_id, "LAUNCH SGC DEFENSE")
+	start_game_button.text = {
+		SGCNetworkManager.MISSION_CAMPAIGN_OPERATION: "LAUNCH CAMPAIGN OPERATION",
+		SGCNetworkManager.MISSION_SGC_UAT: "LAUNCH UAT BASE",
+		SGCNetworkManager.MISSION_MODULAR_EXTRACTION: "LAUNCH EXTRACTION UAT",
+		SGCNetworkManager.MISSION_GOAULD_INFILTRATION: "LAUNCH INFILTRATION",
+		SGCNetworkManager.MISSION_TWO_WORLDS_DEV: "LAUNCH TWO WORLDS (DEV)",
+		SGCNetworkManager.MISSION_TRAVEL_INFILTRATION: "LAUNCH TRAVEL MISSION",
+		SGCNetworkManager.MISSION_TIMED_EXTRACTION: "LAUNCH TIMED EXTRACTION",
+		SGCNetworkManager.MISSION_ALARM_ESCAPE: "LAUNCH ALARM ESCAPE",
+		SGCNetworkManager.MISSION_TAURI_ALPHA_SITE: "LAUNCH ALPHA SITE",
+		SGCNetworkManager.MISSION_TRAVEL_MOTHERSHIP: "LAUNCH MOTHERSHIP MISSION",
+		SGCNetworkManager.MISSION_MOTHERSHIP_OBJECTIVE: "LAUNCH MOTHERSHIP OBJECTIVE"
+	}.get(mission_id, "LAUNCH SGC DEFENSE")
+
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	if mission_id == SGCNetworkManager.MISSION_CAMPAIGN_OPERATION and campaign_mgr != null and campaign_mgr.get("is_campaign_active"):
+		var stage_idx: int = int(campaign_mgr.get("current_stage_index"))
+		var stage_data: Dictionary = campaign_mgr.call(&"get_current_stage")
+		var total: int = int(campaign_mgr.get("active_campaign").stage_count()) if campaign_mgr.get("active_campaign") != null else 3
+		mission_description_label.text = "[ACTIVE CAMPAIGN: Stage %d of %d — %s]\n%s" % [
+			stage_idx + 1, total, stage_data.get("stage_title", ""), stage_data.get("briefing", "")
+		]
+		start_game_button.text = "RESUME CAMPAIGN (STAGE %d/%d)" % [stage_idx + 1, total]
 
 func _on_mission_selected(index: int) -> void:
 	if _network_manager != null: _network_manager.set_mission(str(mission_option_button.get_item_metadata(index)))

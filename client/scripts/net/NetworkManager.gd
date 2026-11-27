@@ -50,9 +50,11 @@ const MISSION_ALARM_ESCAPE: String = "goauld_alarm_escape"
 const MISSION_TAURI_ALPHA_SITE: String = "tauri_alpha_site"
 const MISSION_TRAVEL_MOTHERSHIP: String = "travel_mothership"
 const MISSION_MOTHERSHIP_OBJECTIVE: String = "mothership_objective"
+const MISSION_CAMPAIGN_OPERATION: String = "campaign_operation"
 ## "scene" is the mission's world. "site" adds a second world beside it (see
 ## MainGameCoordinator). "hidden" keeps an entry out of the lobby.
 const MISSIONS: Dictionary = {
+	MISSION_CAMPAIGN_OPERATION: {"name": "Campaign: Operation Ha'tak Strike", "description": "Linked three-stage expeditionary operation. Infiltrate a planetary compound to recover telemetry, breach a Ha'tak cargo bay via transport rings, and sabotage its hyperdrive core with carried squad inventory and debrief persistence.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldInfiltrationMission.tscn"},
 	MISSION_SGC_DEFENSE: {"name": "SGC Defense — Levels 28/27/26", "description": "Refactored three-level SGC. Defend against incoming Jaffa, complete objectives and extract.", "scene": "res://scenes/main/GateRoom.tscn"},
 	MISSION_SGC_UAT: {"name": "SGC UAT Base — No Hostile Activation", "description": "Explore the same three-level SGC with lifts, stairs, props and friendly personnel. No automatic hostile gate activations or enemy waves.", "scene": "res://scenes/main/SGCUATBase.tscn"},
 	MISSION_MODULAR_EXTRACTION: {"name": "Modular Extraction UAT — Development", "description": "Development slice on the modular test facility: reach the command room, download data from the main console and return to the insertion point. Jaffa patrols are active.", "scene": "res://scenes/mission/ModularExtractionMission.tscn"},

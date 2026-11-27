@@ -283,6 +283,22 @@ func _on_restart_pressed() -> void:
 
 
 func _on_return_pressed() -> void:
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	var is_campaign_next: bool = (campaign_mgr != null and campaign_mgr.get("is_campaign_active") and return_btn != null and return_btn.text.begins_with("PROCEED TO NEXT STAGE"))
+	if is_campaign_next:
+		var net_inst: SGCNetworkManager = get_node_or_null("/root/NetworkManager") as SGCNetworkManager
+		if net_inst != null and not net_inst.is_server:
+			show_squad_order_toast("WAITING FOR HOST TO ADVANCE CAMPAIGN")
+			return
+		if campaign_mgr.has_method(&"advance_to_next_stage"):
+			campaign_mgr.call(&"advance_to_next_stage")
+		if net_inst != null and net_inst.is_in_active_session():
+			net_inst.request_restart_game()
+			return
+
+	if campaign_mgr != null and campaign_mgr.get("is_campaign_active") and return_btn != null and return_btn.text == "FINALIZE CAMPAIGN":
+		campaign_mgr.call(&"reset_campaign")
+
 	var world: Node = get_parent()
 	if world != null:
 		var manager: Node = world.get_node_or_null("WaveManager")

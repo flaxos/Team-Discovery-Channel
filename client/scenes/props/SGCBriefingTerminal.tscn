@@ -1,0 +1,65 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/SGCBriefingTerminal.gd" id="1_term"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Base"]
+albedo_color = Color(0.18, 0.2, 0.23, 1)
+metallic = 0.0
+roughness = 0.65
+
+[sub_resource type="StandardMaterial3D" id="Mat_Screen"]
+albedo_color = Color(0.04, 0.07, 0.1, 1)
+emission_enabled = true
+emission = Color(0.05, 0.12, 0.18, 1)
+roughness = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_Interact"]
+height = 2.0
+radius = 2.0
+
+[node name="SGCBriefingTerminal" type="Node3D" groups=["briefing_terminal", "interactable"]]
+script = ExtResource("1_term")
+
+[node name="Pedestal" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+use_collision = true
+size = Vector3(1.2, 1.1, 0.6)
+material = SubResource("Mat_Base")
+
+[node name="ScreenPanel" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.2, 0.05)
+use_collision = true
+size = Vector3(1.1, 0.65, 0.06)
+material = SubResource("Mat_Screen")
+
+[node name="ScreenLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.2, 0.09)
+text = "SGC MISSION BRIEFING TERMINAL"
+font_size = 14
+outline_size = 2
+line_spacing = 4.0
+pixel_size = 0.002
+horizontal_alignment = 0
+vertical_alignment = 0
+
+[node name="PromptLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+visible = false
+text = "[E] ACCESS SGC BRIEFING TERMINAL"
+font_size = 18
+outline_size = 3
+modulate = Color(0.3, 0.9, 1, 1)
+
+[node name="StatusLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0.2)
+light_color = Color(0.2, 0.7, 1, 1)
+light_energy = 1.2
+omni_range = 3.0
+
+[node name="InteractArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_Interact")

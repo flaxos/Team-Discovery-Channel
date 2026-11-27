@@ -1002,6 +1002,9 @@ func _spawn_player(peer_id: int, p_class_id: String, spawn_pos: Vector3) -> void
 	player_instance.class_id = p_class_id
 
 	players_container.add_child(player_instance, true)
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	if campaign_mgr != null and campaign_mgr.get("is_campaign_active") and campaign_mgr.has_method(&"has_carryover") and campaign_mgr.call(&"has_carryover", peer_id):
+		campaign_mgr.call(&"apply_carryover", player_instance)
 	if session != null and session.has_method(&"record_participant"):
 		var label: String = player_instance.player_callsign
 		if label == "OPERATIVE" and peer_id != 1:

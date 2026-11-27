@@ -143,6 +143,19 @@ func finish(victory: bool) -> void:
 	result = 1 if victory else 0
 	var debrief: Dictionary = _build_debrief(victory)
 	last_debrief = debrief
+
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	if campaign_mgr != null and campaign_mgr.get("is_campaign_active") and multiplayer.is_server():
+		var captured_squad: Dictionary = {}
+		for world in worlds:
+			var p_container: Node = world.get(&"players_container") as Node
+			if p_container != null:
+				for child in p_container.get_children():
+					var p := child as PlayerController3D
+					if p != null and not captured_squad.has(p.peer_id):
+						captured_squad[p.peer_id] = capture_state(p)
+		campaign_mgr.call(&"record_stage_completion", debrief, victory, captured_squad)
+
 	for world in worlds:
 		world.call(&"_finish_mission", victory)
 	if not debrief.is_empty():
@@ -193,19 +206,43 @@ func _build_debrief(victory: bool) -> Dictionary:
 	var lost_text: String = "NONE" if lost_names.is_empty() else "%d (%s)" % [lost_names.size(), ", ".join(lost_names)]
 	var outcome: String = ("ALL AWAY TEAM RETURNED" if lost_names.is_empty() else "RETURNED WITH LOSSES") if victory else "SQUAD LOST"
 
+	var title_text: String = "EXTRACTION SUCCESSFUL" if victory else "MISSION FAILED"
+	var subtitle_text: String = (
+		"AWAY TEAM DEBRIEF — RETURNED TO SGC"
+		if victory
+		else "OFFWORLD OPERATION FAILED — SGC DEBRIEF"
+	)
+	var leave_text: String = "RETURN TO SGC BRIEFING"
+
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	if campaign_mgr != null and campaign_mgr.get("is_campaign_active"):
+		var stage_idx: int = int(campaign_mgr.get("current_stage_index"))
+		var stage_total: int = int(campaign_mgr.get("active_campaign").stage_count()) if campaign_mgr.get("active_campaign") != null else 3
+		var stage_data: Dictionary = campaign_mgr.call(&"get_current_stage")
+		var stage_title: String = str(stage_data.get("stage_title", "Stage %d" % (stage_idx + 1)))
+		if victory:
+			if stage_idx + 1 < stage_total:
+				title_text = "STAGE %d SECURED: %s" % [stage_idx + 1, stage_title.to_upper()]
+				subtitle_text = "INTEL SECURED: %s" % str(stage_data.get("intel_unlocked_description", "GATE TELEMETRY ACQUIRED"))
+				leave_text = "PROCEED TO NEXT STAGE (STAGE %d/%d)" % [stage_idx + 2, stage_total]
+			else:
+				title_text = "CAMPAIGN VICTORY — OPERATION COMPLETE"
+				subtitle_text = "ALL %d OPERATIONAL STAGES ACCOMPLISHED — SGC SECURE" % stage_total
+				leave_text = "FINALIZE CAMPAIGN"
+		else:
+			title_text = "STAGE %d COMPROMISED: %s" % [stage_idx + 1, stage_title.to_upper()]
+			subtitle_text = "TACTICAL WITHDRAWAL REQUIRED — SGC DEBRIEF"
+			leave_text = "RETURN TO SGC BRIEFING"
+
 	return {
-		"title": "EXTRACTION SUCCESSFUL" if victory else "MISSION FAILED",
-		"subtitle": (
-			"AWAY TEAM DEBRIEF — RETURNED TO SGC"
-			if victory
-			else "OFFWORLD OPERATION FAILED — SGC DEBRIEF"
-		),
+		"title": title_text,
+		"subtitle": subtitle_text,
 		"time": "MISSION DURATION: %02d:%02d" % [duration_s / 60, duration_s % 60],
 		"kills": "HOSTILES ELIMINATED: %d" % kills,
 		"objectives": "OBJECTIVES COMPLETE: %d / %d" % [obj_done, obj_total],
 		"squad": "RETURNED: %s | LOST: %s" % [ret_text, lost_text],
 		"status": "STATUS: %s — %s" % [outcome, stealth],
-		"leave": "RETURN TO SGC BRIEFING",
+		"leave": leave_text,
 		"kill_count": kills,
 		"duration_seconds": duration_s
 	}
