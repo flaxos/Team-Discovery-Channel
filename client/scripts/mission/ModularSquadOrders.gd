@@ -30,6 +30,7 @@ static func apply(
 		for airman: SGCAirmanAI in active:
 			var spot := _anchor(world, level, airman, issuer.global_position, false, active)
 			if not spot.is_empty():
+				airman._explicit_hold_order = false
 				airman.order_move_to(spot.point)
 				if not rally.is_finite():
 					rally = spot.point
@@ -39,12 +40,14 @@ static func apply(
 		var turret := _turret_at(world, aim)
 		if turret == null:
 			return {"message": "NO AVAILABLE TURRET AT THE PING"}
+		nearest._explicit_hold_order = false
 		nearest.order_mount_turret(turret)
 		return _ack(world, turret.global_position, nearest.airman_callsign + " • MAN TURRET")
 
 	if command == RadialCommandWheel.CMD_CONTEXT_ORDER and target is PlayerController3D and target.get_parent() == world.players_container:
 		var health: HealthComponent = target.health_component
 		if health != null and health.is_downed and not health.is_dead and target.global_position.distance_to(aim) <= 2.0:
+			nearest._explicit_hold_order = false
 			nearest.order_revive(target)
 			return _ack(world, target.global_position, nearest.airman_callsign + " • REVIVE")
 
@@ -59,27 +62,33 @@ static func apply(
 		if not world.get_world_3d().direct_space_state.intersect_ray(query).is_empty():
 			return {"message": "AIRMAN HAS NO CLEAR FIRING LANE"}
 		nearest.hold_corner(nearest.global_position, facing, "position")
+		nearest._explicit_hold_order = true
 		nearest.suppress_hallway(facing, 3.0)
 		return _ack(world, aim, nearest.airman_callsign + " • COVERING FIRE")
 
-	var anchor := _anchor(world, level, nearest, aim, true, active)
+	var prefer_corner: bool = (command == RadialCommandWheel.CMD_HOLD_CORNER)
+	var anchor := _anchor(world, level, nearest, aim, true, active, prefer_corner)
 	if anchor.is_empty():
 		return {"message": NO_ROUTE}
 	var label := "MOVE TO RALLY POINT"
 	if anchor.kind == "cover":
 		label = "MOVE TO COVER"
+	elif anchor.kind == "doorway_jamb":
+		label = "MOVE TO OVERWATCH"
 	if command == RadialCommandWheel.CMD_HOLD_CORNER:
-		label = "HOLD RALLY POINT" if anchor.kind == "rally" else "HOLD COVER"
-	if anchor.kind == "cover" or command == RadialCommandWheel.CMD_HOLD_CORNER:
+		label = "HOLD COVER" if anchor.kind == "cover" else ("HOLD CORNER" if anchor.kind == "doorway_jamb" else "HOLD RALLY POINT")
+	if anchor.kind in ["cover", "doorway_jamb"] or command == RadialCommandWheel.CMD_HOLD_CORNER:
 		nearest.hold_corner(anchor.point, anchor.facing, anchor.kind)
+		nearest._explicit_hold_order = (command == RadialCommandWheel.CMD_HOLD_CORNER)
 	else:
+		nearest._explicit_hold_order = false
 		nearest.order_move_to(anchor.point)
 	return _ack(world, anchor.point, nearest.airman_callsign + " • " + label)
 
 
 static func _anchor(
 	world: GateRoom, level: LevelAssembly, airman: SGCAirmanAI, aim: Vector3,
-	prefer_cover: bool, teammates: Array[SGCAirmanAI]
+	prefer_cover: bool, teammates: Array[SGCAirmanAI], prefer_corner: bool = false
 ) -> Dictionary:
 	var floor_point := NavigationServer3D.map_get_closest_point(level.navigation_map, aim)
 	if absf(floor_point.y - aim.y) > 3.0 or Vector2(floor_point.x - aim.x, floor_point.z - aim.z).length() > 1.4:
@@ -88,26 +97,28 @@ static func _anchor(
 	var item := level.layout.instance(room_id)
 	if item == null:
 		return {}
-	var module := level.get_node(str(room_id)) as Node3D
 	var options: Array[Dictionary] = []
-	if prefer_cover:
-		for attachment in LevelRoomComposer.resolved(item):
-			if attachment.component != &"cover" or not attachment.reachable:
-				continue
-			var node := module.get_node_or_null(LevelRoomComposer.node_path(attachment)) as Node3D
-			if node != null:
-				var spot := node.global_transform * attachment.approach
-				options.append({"point": spot, "kind": "cover", "facing": _heading(spot, node.global_position, -module.global_basis.z)})
-	for id: String in ["entry", "patrol", "destination"]:
-		var marker := module.get_node_or_null("Markers/" + id) as Node3D
-		if marker != null:
-			# Narrow corridors use the two positions along the lane.
-			for offset: Vector3 in [Vector3.ZERO, Vector3.LEFT * 1.3, Vector3.RIGHT * 1.3, Vector3.FORWARD * 1.3, Vector3.BACK * 1.3]:
-				var point := marker.to_global(offset)
-				options.append({"point": point, "kind": "rally", "facing": _heading(point, aim, -marker.global_basis.z)})
+	for raw: Dictionary in LevelNavigator.room_tactical_anchors(level, room_id):
+		var anchor_type := str(raw.get("type", "rally"))
+		var kind := "rally"
+		var rank := 0 if not prefer_cover else 3
+		if anchor_type in ["cover", "deployable_shield"]:
+			kind = "cover"
+			rank = 0 if prefer_cover else 2
+		elif anchor_type == "cover_marker":
+			kind = "cover"
+			rank = 1 if prefer_cover else 2
+		elif anchor_type == "doorway_jamb":
+			kind = "doorway_jamb"
+			rank = 1 if prefer_corner else (2 if prefer_cover else 3)
+		var pos: Vector3 = raw["pos"] as Vector3
+		var facing: Vector3 = raw["dir"] as Vector3
+		if kind == "rally":
+			facing = _heading(pos, aim, facing)
+		options.append({"point": pos, "kind": kind, "facing": facing, "rank": rank})
 	options.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		if a.kind != b.kind:
-			return a.kind == "cover"
+		if int(a.rank) != int(b.rank):
+			return int(a.rank) < int(b.rank)
 		return aim.distance_squared_to(a.point) < aim.distance_squared_to(b.point)
 	)
 	for option: Dictionary in options:
@@ -121,7 +132,7 @@ static func _anchor(
 		):
 			continue
 		var path := level.local_path(airman.global_position, point)
-		if not path.is_empty() and path[-1].distance_to(point) <= 0.5:
+		if not path.is_empty() and path[-1].distance_to(point) <= 0.5 and not LevelNavigator.path_has_locked_door(level, path):
 			option.point = point
 			return option
 	return {}

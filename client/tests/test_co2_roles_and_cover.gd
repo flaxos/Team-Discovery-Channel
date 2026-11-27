@@ -164,6 +164,9 @@ func run() -> void:
 	carter.request_field_aid(airman)
 	assert(airman.health_component.current_health > 60.0 and carter.medkit_charges == 0, "Carter heals injured Airman")
 	airman.queue_free()
+	if room.allies_container != null:
+		for ally in room.allies_container.get_children():
+			ally.set_physics_process(false)
 
 	var armoury := room.level.get_node_or_null("armoury") as LevelModule
 	assert(armoury != null)
