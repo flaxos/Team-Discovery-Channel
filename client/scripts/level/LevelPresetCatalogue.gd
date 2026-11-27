@@ -19,7 +19,9 @@ const PRESETS: PackedStringArray = [
 	"ceremonial",
 	"observation_communications",
 	"mothership_cargo",
-	"mothership_checkpoint"
+	"mothership_checkpoint",
+	"mothership_bridge",
+	"mothership_engineering"
 ]
 
 

@@ -1,0 +1,74 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1_preset"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2_attachment"]
+[ext_resource type="PackedScene" path="res://scenes/props/MothershipBridgeConsole.tscn" id="3_console"]
+[ext_resource type="PackedScene" path="res://scenes/props/MothershipViewportFrame.tscn" id="4_viewport"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldCommandStation.tscn" id="5_side_station"]
+
+[sub_resource type="Resource" id="a_bridge_console"]
+script = ExtResource("2_attachment")
+id = &"bridge_console"
+component = &"console"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 4)
+approach = Vector3(0, 0, -1.2)
+placeholder_size = Vector3(2, 1.1, 1)
+scene = ExtResource("3_console")
+bounds = AABB(-1, 0, -0.5, 2, 1.1, 1)
+references = PackedStringArray("systems.control", "objective.interact")
+
+[sub_resource type="Resource" id="a_side_station_left"]
+script = ExtResource("2_attachment")
+id = &"side_station_left"
+component = &"console"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 4)
+approach = Vector3(1.2, 0, 0)
+placeholder_size = Vector3(1, 1, 0.8)
+scene = ExtResource("5_side_station")
+bounds = AABB(-0.5, 0, -0.4, 1, 1, 0.8)
+references = PackedStringArray("systems.tactical")
+
+[sub_resource type="Resource" id="a_side_station_right"]
+script = ExtResource("2_attachment")
+id = &"side_station_right"
+component = &"console"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 4)
+approach = Vector3(-1.2, 0, 0)
+placeholder_size = Vector3(1, 1, 0.8)
+scene = ExtResource("5_side_station")
+bounds = AABB(-0.5, 0, -0.4, 1, 1, 0.8)
+references = PackedStringArray("systems.shields")
+
+[sub_resource type="Resource" id="a_viewport"]
+script = ExtResource("2_attachment")
+id = &"viewport"
+component = &"prop"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -3.4)
+approach = Vector3(0, 0, 1)
+scene = ExtResource("4_viewport")
+bounds = AABB(-1.8, 0, -0.15, 3.6, 2.6, 0.3)
+references = PackedStringArray("structure.viewport")
+
+[sub_resource type="Resource" id="a_patrol_entry"]
+script = ExtResource("2_attachment")
+id = &"patrol_entry"
+component = &"patrol"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+approach = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="a_patrol_helm"]
+script = ExtResource("2_attachment")
+id = &"patrol_helm"
+component = &"patrol"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 2)
+approach = Vector3(0, 0, 0)
+
+[resource]
+script = ExtResource("1_preset")
+id = &"mothership_bridge"
+label = "Mothership bridge"
+compatible_modules = PackedStringArray("room11")
+attachments = Array[ExtResource("2_attachment")]([SubResource("a_bridge_console"), SubResource("a_side_station_left"), SubResource("a_side_station_right"), SubResource("a_viewport"), SubResource("a_patrol_entry"), SubResource("a_patrol_helm")])
+system_references = PackedStringArray("systems.control", "structure.viewport")
+description = "Ha'tak command bridge with navigation helm console, tactical side stations, and deep-space observation viewport."
+synonyms = PackedStringArray("bridge", "command bridge", "helm")

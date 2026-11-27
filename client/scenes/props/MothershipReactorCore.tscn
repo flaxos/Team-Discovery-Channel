@@ -1,0 +1,132 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Script" path="res://scripts/level/MothershipReactorStatus.gd" id="status"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="StandardMaterial3D" id="core_powered"]
+albedo_color = Color(0.9, 0.45, 0.08, 1)
+roughness = 0.22
+emission_enabled = true
+emission = Color(1.0, 0.55, 0.12, 1)
+emission_energy_multiplier = 1.6
+
+[sub_resource type="StandardMaterial3D" id="core_shutdown"]
+albedo_color = Color(0.08, 0.06, 0.05, 1)
+roughness = 0.5
+emission_enabled = false
+
+[sub_resource type="BoxMesh" id="mesh_footing"]
+material = ExtResource("basalt")
+size = Vector3(2.2, 0.24, 3.0)
+
+[sub_resource type="BoxMesh" id="mesh_bed"]
+material = ExtResource("bronze")
+size = Vector3(1.9, 0.18, 2.7)
+
+[sub_resource type="BoxMesh" id="mesh_tower"]
+material = ExtResource("basalt")
+size = Vector3(0.42, 2.2, 2.5)
+
+[sub_resource type="BoxMesh" id="mesh_trim"]
+material = ExtResource("gold")
+size = Vector3(0.08, 2.2, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_cowling"]
+material = ExtResource("bronze")
+size = Vector3(1.85, 0.22, 2.45)
+
+[sub_resource type="CylinderMesh" id="mesh_ring"]
+material = ExtResource("bronze")
+top_radius = 0.52
+bottom_radius = 0.56
+height = 0.14
+radial_segments = 16
+rings = 0
+
+[sub_resource type="CylinderMesh" id="mesh_core"]
+material = SubResource("core_powered")
+top_radius = 0.38
+bottom_radius = 0.40
+height = 1.95
+radial_segments = 16
+rings = 0
+
+[sub_resource type="BoxMesh" id="mesh_interface_panel"]
+material = ExtResource("bronze")
+size = Vector3(0.7, 0.45, 0.2)
+
+[sub_resource type="BoxMesh" id="mesh_interface_screen"]
+material = ExtResource("gold")
+size = Vector3(0.5, 0.3, 0.05)
+
+[node name="MothershipReactorCore" instance=ExtResource("base")]
+size = Vector3(2.4, 2.8, 3.2)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="Footing" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.12, 0)
+mesh = SubResource("mesh_footing")
+
+[node name="ReactorBed" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.33, 0)
+mesh = SubResource("mesh_bed")
+
+[node name="TowerLeft" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.84, 1.4, 0)
+mesh = SubResource("mesh_tower")
+
+[node name="TowerRight" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.84, 1.4, 0)
+mesh = SubResource("mesh_tower")
+
+[node name="TrimLeftFront" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.61, 1.4, -1.2)
+mesh = SubResource("mesh_trim")
+
+[node name="TrimRightFront" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.61, 1.4, -1.2)
+mesh = SubResource("mesh_trim")
+
+[node name="TrimLeftBack" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.61, 1.4, 1.2)
+mesh = SubResource("mesh_trim")
+
+[node name="TrimRightBack" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.61, 1.4, 1.2)
+mesh = SubResource("mesh_trim")
+
+[node name="Cowling" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 2.56, 0)
+mesh = SubResource("mesh_cowling")
+
+[node name="RingTop" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 2.05, 0)
+mesh = SubResource("mesh_ring")
+
+[node name="RingMid" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 1.4, 0)
+mesh = SubResource("mesh_ring")
+
+[node name="RingBottom" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.75, 0)
+mesh = SubResource("mesh_ring")
+
+[node name="CoreColumn" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 1.4, 0)
+mesh = SubResource("mesh_core")
+script = ExtResource("status")
+event_id = &"sabotage_releases_bridge"
+shutdown_material = SubResource("core_shutdown")
+
+[node name="InterfacePanel" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.95, -1.35)
+mesh = SubResource("mesh_interface_panel")
+
+[node name="InterfaceScreen" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.95, -1.46)
+mesh = SubResource("mesh_interface_screen")
