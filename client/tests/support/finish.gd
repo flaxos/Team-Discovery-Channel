@@ -11,6 +11,8 @@ static func success(tree: SceneTree) -> void:
 			if node.has_method("end_mission"):
 				node.end_mission()
 			node.queue_free()
+	await tree.physics_frame
+	await tree.physics_frame
 	await tree.process_frame
 	# The audio mixer is asynchronous even when fixed-fps tests run faster than realtime.
 	OS.delay_msec(50)
