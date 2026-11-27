@@ -107,6 +107,8 @@ func _spawn_player_on_host(p_id: int, p_class: String, p_pos: Vector3) -> void:
 
 
 func _process(delta: float) -> bool:
+	if test_passed:
+		return false
 	ticks += 1
 
 	if ticks > 240 and not test_passed:
