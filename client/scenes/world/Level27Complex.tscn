@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/props/SGCBriefingFurniture.gd" id="22_furniture"]
 [ext_resource type="Script" path="res://scripts/props/SGCObservationStatus.gd" id="23_readout"]
 [ext_resource type="Script" path="res://scripts/props/SGCSecurityMonitorVisual.gd" id="24_security_visual"]
+[ext_resource type="PackedScene" path="res://scenes/props/SGCBriefingTerminal.tscn" id="25_briefing_terminal"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Floor27"]
 albedo_color = Color(0.28, 0.30, 0.32, 1)
@@ -212,6 +213,9 @@ text = "SGC BRIEFING ROOM - SUBLEVEL 27"
 font_size = 18
 outline_size = 4
 modulate = Color(0.9, 0.95, 1, 1)
+
+[node name="SGCBriefingTerminal" parent="BriefingRoom" instance=ExtResource("25_briefing_terminal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, 11.2)
 
 [node name="GeneralsOffice" type="Node3D" parent="."]
 

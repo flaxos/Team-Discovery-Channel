@@ -192,9 +192,9 @@ func _pulse_indicator(flash_color: Color) -> void:
 
 
 func _play_resupply_sfx() -> void:
-	if ResourceLoader.exists("res://audio/sfx_resupply.wav"):
+	if ResourceLoader.exists("res://audio/sfx_gdo_beep.wav"):
 		var audio := AudioStreamPlayer3D.new()
-		audio.stream = load("res://audio/sfx_resupply.wav")
+		audio.stream = load("res://audio/sfx_gdo_beep.wav")
 		audio.max_distance = 25.0
 		audio.unit_size = 5.0
 		add_child(audio)

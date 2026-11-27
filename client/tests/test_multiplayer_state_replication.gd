@@ -189,6 +189,8 @@ func run_test() -> void:
 	client_api.multiplayer_peer = OfflineMultiplayerPeer.new()
 	host_root.queue_free()
 	client_root.queue_free()
+	await physics_frame
+	await physics_frame
 	await frames(2)
 	host_api.multiplayer_peer = null
 	client_api.multiplayer_peer = null

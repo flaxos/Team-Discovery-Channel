@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="CampaignDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/campaign/CampaignDefinition.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+campaign_id = "operation_hatak_strike"
+title = "Operation Ha'tak Strike"
+description = "Three-stage expeditionary campaign against System Lord forces. Secure ring access telemetry at an offworld outpost, breach a Ha'tak mothership's cargo bay, and sabotage its hyperdrive reactor core before tactical withdrawal to the SGC."
+stages = [{
+"briefing": "Deploy from SGC Sublevel 28 to the Goa'uld offworld outpost. Sabotage the secondary naquadah generator to cut security grids, then access the command terminal to download Ha'tak mothership telemetry and ring access codes. Extract back to SGC.",
+"chevron_sequence": ["UP", "RIGHT", "DOWN", "LEFT", "UP", "UP", "RIGHT"],
+"intel_unlocked_description": "Ha'tak Mothership Cargo Bay Gate Address & Ring Frequency",
+"mission_id": "travel_infiltration",
+"stage_id": "stage_1_intel",
+"stage_title": "Stage 1: Outpost Infiltration & Intel Recovery",
+"target_objectives_summary": "1. Infiltrate compound\n2. Sabotage sub-space generator\n3. Download command records & ring codes\n4. Extract to SGC"
+}, {
+"briefing": "Dial the Ha'tak mothership's cargo bay Stargate using recovered coordinates. Fight through security bulkheads, neutralize cargo patrols, and breach to the upper decks via transport rings. Secure the intermediate deck manifest before extraction.",
+"chevron_sequence": ["RIGHT", "UP", "LEFT", "DOWN", "RIGHT", "UP", "DOWN"],
+"intel_unlocked_description": "Command Bridge Layout & Reactor Diagnostic Keys",
+"mission_id": "travel_mothership",
+"stage_id": "stage_2_breach",
+"stage_title": "Stage 2: Mothership Cargo Bay & Ring Breach",
+"target_objectives_summary": "1. Deploy to Ha'tak cargo bay\n2. Breach interior bulkheads\n3. Transport ring breach to Deck 1\n4. Access shipboard manifest & extract"
+}, {
+"briefing": "Infiltrate the upper decks of the Ha'tak. Sabotage the hyperdrive naquadah reactor core in Engineering, override ship navigation at the Bridge helm, and execute a tactical withdrawal under red alarm to the Stargate for debrief at SGC.",
+"chevron_sequence": ["UP", "UP", "LEFT", "RIGHT", "DOWN", "RIGHT", "LEFT"],
+"intel_unlocked_description": "Ha'tak System Offline — Fleet Threat Neutralized",
+"mission_id": "mothership_objective",
+"stage_id": "stage_3_objective",
+"stage_title": "Stage 3: Bridge & Hyperdrive Reactor Sabotage",
+"target_objectives_summary": "1. Infiltrate command deck\n2. Sabotage hyperdrive reactor core\n3. Override bridge navigation helm\n4. Alarm escape to Stargate & SGC debrief"
+}]

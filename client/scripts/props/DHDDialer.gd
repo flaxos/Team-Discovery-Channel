@@ -60,8 +60,18 @@ func _physics_process(_delta: float) -> void:
 func _generate_sequences() -> void:
 	var glyphs: Array[String] = ["UP", "DOWN", "LEFT", "RIGHT"]
 	chevron_sequence.clear()
-	for i in range(TOTAL_CHEVRONS):
-		chevron_sequence.append(glyphs[randi() % glyphs.size()])
+
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	var stage_chevrons: Array = []
+	if campaign_mgr != null and campaign_mgr.get("is_campaign_active"):
+		stage_chevrons = campaign_mgr.call(&"get_current_chevron_sequence")
+
+	if stage_chevrons.size() == TOTAL_CHEVRONS:
+		for g: Variant in stage_chevrons:
+			chevron_sequence.append(str(g))
+	else:
+		for i in range(TOTAL_CHEVRONS):
+			chevron_sequence.append(glyphs[randi() % glyphs.size()])
 
 	gdo_sequence.clear()
 	for i in range(GDO_CODE_LENGTH):

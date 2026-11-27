@@ -75,7 +75,13 @@ func _load_gate_room() -> void:
 	var gate_scene := load(entry["scene"]) as PackedScene
 	if gate_scene != null:
 		current_gate_room = gate_scene.instantiate() as Node3D
-		var site_scene := load(entry["site"]) as PackedScene if entry.has("site") else null
+		var site_path: String = entry.get("site", "")
+		var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+		if mission_id == SGCNetworkManager.MISSION_CAMPAIGN_OPERATION and campaign_mgr != null and campaign_mgr.get("is_campaign_active"):
+			var stage_mission: String = campaign_mgr.call(&"get_current_mission_id")
+			if SGCNetworkManager.MISSIONS.has(stage_mission) and SGCNetworkManager.MISSIONS[stage_mission].has("site"):
+				site_path = SGCNetworkManager.MISSIONS[stage_mission]["site"]
+		var site_scene := load(site_path) as PackedScene if not site_path.is_empty() else null
 		if site_scene == null:
 			current_gate_room.set("mission_id", mission_id)
 			world_container.add_child(current_gate_room)
@@ -94,6 +100,9 @@ func _add_two_worlds(site_scene: PackedScene) -> void:
 	session.name = "MissionSession"
 	add_child(session)
 	current_site = site_scene.instantiate() as Node3D
+	var campaign_mgr: Node = get_node_or_null("/root/CampaignManager")
+	if campaign_mgr != null and campaign_mgr.get("is_campaign_active"):
+		current_site.set("mission_id", campaign_mgr.call(&"get_current_mission_id"))
 	session.add_world(current_gate_room)
 	session.add_world(current_site)
 	var holder := Node3D.new()

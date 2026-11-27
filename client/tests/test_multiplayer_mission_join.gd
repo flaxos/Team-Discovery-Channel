@@ -106,6 +106,7 @@ func run_test() -> void:
 		room.wave_manager.computer_upgraded = true
 		var airman := room.get_node(^"Allies/AirmanDavis") as SGCAirmanAI
 		airman.health_component.take_damage(400)
+		airman.health_component.bleedout_timer = 180.0
 		var siler := room.get_node(^"Allies/AirmanSiler") as SGCAirmanAI
 		var turret := room.get_node(^"BunkerGeometry/TurretEast") as DeployableTurret
 		siler.mount_turret(turret)

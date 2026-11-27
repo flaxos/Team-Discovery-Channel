@@ -7,10 +7,12 @@ static func success(tree: SceneTree) -> void:
 			node.stop()
 			node.stream = null
 	for node: Node in tree.root.get_children():
-		if node.name not in ["NetworkManager", "KeybindingManager"]:
+		if node.name not in ["NetworkManager", "KeybindingManager", "CampaignManager"]:
 			if node.has_method("end_mission"):
 				node.end_mission()
 			node.queue_free()
+	await tree.physics_frame
+	await tree.physics_frame
 	await tree.process_frame
 	# The audio mixer is asynchronous even when fixed-fps tests run faster than realtime.
 	OS.delay_msec(50)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/mission/ModularMission.gd" id="1_mission"]
 [ext_resource type="Script" path="res://scripts/level/LevelAssembly.gd" id="2_level"]
@@ -7,6 +7,7 @@
 [ext_resource type="Resource" path="res://resources/missions/goauld_mothership_boarding.tres" id="4_definition"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
 [ext_resource type="Script" path="res://scripts/mission/MissionEvents.gd" id="7_events"]
+[ext_resource type="PackedScene" path="res://scenes/props/MothershipHangarVista.tscn" id="8_hangar_vista"]
 
 [node name="GateRoom" type="Node3D"]
 script = ExtResource("1_mission")
@@ -40,3 +41,6 @@ _spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn", "
 spawn_path = NodePath("../Enemies")
 
 [node name="TacticalHUD" parent="." instance=ExtResource("5_hud")]
+
+[node name="MothershipHangarVista" parent="." instance=ExtResource("8_hangar_vista")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 8, 0, -4.3)

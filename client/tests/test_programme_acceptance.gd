@@ -93,23 +93,27 @@ func test_offworld_destinations() -> void:
 	# Alpha Site
 	var alpha_packed: PackedScene = load(ALPHA_SITE_SCENE)
 	require(alpha_packed != null, "Alpha site mission scene loads")
-	var alpha: Node = alpha_packed.instantiate()
+	var alpha := alpha_packed.instantiate() as ModularMission
 	root.add_child(alpha)
-	await process_frame
+	while not alpha.is_started:
+		await process_frame
 	require(alpha.has_node("LevelAssembly") or alpha.get("level") != null, "Alpha site has level structure")
 	print("  PASS: Alpha Site Outpost verified")
-	alpha.free()
+	alpha.queue_free()
+	await process_frame
 	await process_frame
 	
 	# Mothership
 	var mothership_packed: PackedScene = load(MOTHERSHIP_OBJECTIVE_SCENE)
 	require(mothership_packed != null, "Mothership objective mission scene loads")
-	var mothership: Node = mothership_packed.instantiate()
+	var mothership := mothership_packed.instantiate() as ModularMission
 	root.add_child(mothership)
-	await process_frame
+	while not mothership.is_started:
+		await process_frame
 	require(mothership.has_node("LevelAssembly") or mothership.get("level") != null, "Mothership has level structure")
 	print("  PASS: Goa'uld Mothership Objective verified")
-	mothership.free()
+	mothership.queue_free()
+	await process_frame
 	await process_frame
 
 func test_normal_vs_alarm_lighting() -> void:
@@ -126,7 +130,8 @@ func test_normal_vs_alarm_lighting() -> void:
 	sgc.set_emergency_lights(false)
 	require(not sgc.is_emergency_active, "SGC returns to standby normal lighting")
 	print("  PASS: SGC normal/emergency lighting toggle verified")
-	sgc.free()
+	sgc.queue_free()
+	await process_frame
 	await process_frame
 
 func test_licensing_integrity() -> void:

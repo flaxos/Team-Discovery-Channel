@@ -228,6 +228,10 @@ func suspend_owner_poll(phase: String) -> void:
 	await frames(30)
 	if phase == "timeout":
 		var actor := (main.current_gate_room as GateRoom).players_container.get_node(str(net.local_peer_id)) as PlayerController3D
+		var deadline := Time.get_ticks_msec() + 10000
+		while (not net._paused_actors.is_empty() or not actor.synchronizer.public_visibility) and Time.get_ticks_msec() < deadline:
+			await frames(1)
+		await frames(10)
 		require(net._paused_actors.is_empty() and actor.synchronizer.public_visibility,
 			"A canceled transfer restores the original owner, including after its late acknowledgment")
 	mark("owner_resumed_" + phase)

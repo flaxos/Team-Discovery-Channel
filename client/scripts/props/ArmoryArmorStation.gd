@@ -125,7 +125,7 @@ func sync_feedback() -> void:
 	if station_light != null:
 		station_light.light_color = Color(0.9, 0.6, 0.1, 1.0)
 
-	_play_sfx("res://audio/sfx_p90_reload.wav", 15.0)
+	_play_sfx("res://audio/sfx_gdo_beep.wav", 15.0)
 
 
 

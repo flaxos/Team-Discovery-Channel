@@ -18,7 +18,7 @@ func run() -> void:
 		if entry.kind == "module" and entry.id == "room01":
 			straight = entry
 	assert(
-		counts.module == 15 and counts.preset == 16 and counts.theme == 6 and counts.composite >= 1
+		counts.module == 15 and counts.preset == 20 and counts.theme == 6 and counts.composite >= 1
 	)
 	assert(
 		(

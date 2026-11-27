@@ -75,8 +75,12 @@ func run() -> void:
 		await run_client()
 	else:
 		await run_host()
-	net.disconnect_game()
+	net.multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	main.queue_free()
+	await physics_frame
+	await physics_frame
 	await frames(5)
+	net.disconnect_game()
 	mark("exit_%d" % slot)
 	print("PASS SGC result cleanup (dedicated=%s slot=%d)" % [is_dedicated, slot])
 	await preload("res://tests/support/finish.gd").success(self)
@@ -155,6 +159,7 @@ func run_host() -> void:
 	require(not room.has_node("Enemies/ResultGuard") and not room.has_node("TurretDeployments/ResultTripod"))
 	for index in range(1, count + 1):
 		mark("leave_%d" % index)
+	for index in range(1, count + 1):
 		require(await marked("exit_%d" % index))
 		await wait_until(func() -> bool: return not OS.is_process_running(children[index - 1]), "Client %d exits cleanly" % index)
 		var log := FileAccess.get_file_as_string(output_dir.path_join("client_%d.log" % index))

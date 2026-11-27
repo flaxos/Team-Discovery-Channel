@@ -370,7 +370,7 @@ func _apply_class_profile(target_class_id: String) -> void:
 
 	if health_component != null:
 		health_component.max_health = profile.get("health", 120.0)
-		if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		if not multiplayer.has_multiplayer_peer() or multiplayer.is_server() or health_component._last_revision < 0:
 			health_component.current_health = health_component.max_health
 
 	primary_weapon_id = profile.get("primary", "m249")

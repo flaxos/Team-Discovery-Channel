@@ -118,12 +118,12 @@ func run_host() -> void:
 		await wait_for_pawn(room, index, spot(lower, index % 4))
 	await wait_for_cycle(room, State.INACTIVE)
 	await all_marked("return_seen", count)
-	require(room.players_container.get_child_count() == 4 and net._player_pauses.is_empty())
+	require(room.players_container.get_child_count() == 4 and net._player_pauses.is_empty(), "Expected 4 operatives and empty pauses, got players=%d pauses=%d" % [room.players_container.get_child_count(), net._player_pauses.size()])
 	var previous := room.get_instance_id()
 	require(net.request_restart_game())
 	room = await mission(previous)
 	await all_marked("retry_seen", count)
-	require(rings(room, "lower").current_state == State.INACTIVE and rings(room, "upper").current_state == State.INACTIVE)
+	require(rings(room, "lower").current_state == State.INACTIVE and rings(room, "upper").current_state == State.INACTIVE, "Retry rings must start inactive")
 	mark("done")
 	for index in range(1, count + 1):
 		require(await marked("exit_%d" % index))
@@ -139,6 +139,10 @@ func run_client() -> void:
 	require(net.join_game("127.0.0.1", port()) == OK)
 	var room := await mission()
 	var mine := room.players_container.get_node(str(net.local_peer_id)) as PlayerController3D
+	var health_deadline := Time.get_ticks_msec() + 5000
+	while mine.health_component._last_revision < 0 and Time.get_ticks_msec() < health_deadline:
+		await frames(1)
+	require(mine.health_component._last_revision >= 0, "Client slot %d did not receive initial health snapshot" % slot)
 	var lower := rings(room, "lower")
 	var upper := rings(room, "upper")
 	var initial_id := mine.get_instance_id()
@@ -174,11 +178,11 @@ func run_client() -> void:
 	for index in range(0 if not is_dedicated else 1, count + 1):
 		await wait_for_pawn(room, index, spot(lower, index % 4))
 	await wait_for_cycle(room, State.INACTIVE)
-	require(mine.get_instance_id() == initial_id and mine.health_component.current_health == initial_health)
-	require(mine.current_weapon.current_ammo == initial_ammo and net._paused_actors.is_empty())
+	require(mine.get_instance_id() == initial_id and mine.health_component.current_health == initial_health, "Slot %d id/health changed across transport: id=%d/%d health=%s/%s" % [slot, mine.get_instance_id(), initial_id, mine.health_component.current_health, initial_health])
+	require(mine.current_weapon.current_ammo == initial_ammo and net._paused_actors.is_empty(), "Slot %d ammo/pause mismatch: ammo=%d/%d paused=%d" % [slot, mine.current_weapon.current_ammo, initial_ammo, net._paused_actors.size()])
 	require(mine.synchronizer.public_visibility, "The owner publishes movement again after transport")
 	mark("return_seen_%d" % slot)
 	room = await mission(room.get_instance_id())
-	require(rings(room, "lower").current_state == State.INACTIVE and rings(room, "upper").current_state == State.INACTIVE)
+	require(rings(room, "lower").current_state == State.INACTIVE and rings(room, "upper").current_state == State.INACTIVE, "Client slot %d retry rings must start inactive" % slot)
 	mark("retry_seen_%d" % slot)
 	require(await marked("done"))

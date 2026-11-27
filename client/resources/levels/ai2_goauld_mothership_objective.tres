@@ -361,18 +361,16 @@ state = "security_door"
 
 [resource]
 script = ExtResource("17_layout")
-id = &"ai2_goauld_mothership_objective"
-title = "Ha'tak Mothership Bridge & Engineering"
-theme_id = &"goauld"
-default_theme = "goauld"
-entry_instance = &"gate"
-entry_marker = &"entry"
-destination_instance = &"bridge"
-destination_marker = &"destination"
-instances = Array[ExtResource("2_inst")]([SubResource("inst_gate"), SubResource("inst_vestibule"), SubResource("inst_cargo_bay"), SubResource("inst_stores_hall"), SubResource("inst_ring_lower"), SubResource("inst_ramp"), SubResource("inst_upper_hall"), SubResource("inst_interior_checkpoint"), SubResource("inst_ring_upper"), SubResource("inst_corridor_engineering"), SubResource("inst_engineering"), SubResource("inst_bridge")])
-connections = Array[ExtResource("1_conn")]([SubResource("conn_gate_vestibule"), SubResource("conn_vestibule_cargo"), SubResource("conn_cargo_stores"), SubResource("conn_stores_ring"), SubResource("conn_cargo_ramp"), SubResource("conn_ramp_upper"), SubResource("conn_upper_checkpoint"), SubResource("conn_checkpoint_ring"), SubResource("conn_checkpoint_corridor"), SubResource("conn_corridor_engineering"), SubResource("conn_engineering_bridge")])
+schema_version = 1
 decks = {
 "deck0": 0.0,
 "upper": 4.0
 }
-zones = Array[ExtResource("18_zone")]([])
+default_theme = &"goauld"
+theme_zones = Array[ExtResource("18_zone")]([])
+instances = Array[ExtResource("2_inst")]([SubResource("inst_gate"), SubResource("inst_vestibule"), SubResource("inst_cargo_bay"), SubResource("inst_stores_hall"), SubResource("inst_ring_lower"), SubResource("inst_ramp"), SubResource("inst_upper_hall"), SubResource("inst_interior_checkpoint"), SubResource("inst_ring_upper"), SubResource("inst_corridor_engineering"), SubResource("inst_engineering"), SubResource("inst_bridge")])
+connections = Array[ExtResource("1_conn")]([SubResource("conn_gate_vestibule"), SubResource("conn_vestibule_cargo"), SubResource("conn_cargo_stores"), SubResource("conn_stores_ring"), SubResource("conn_cargo_ramp"), SubResource("conn_ramp_upper"), SubResource("conn_upper_checkpoint"), SubResource("conn_checkpoint_ring"), SubResource("conn_checkpoint_corridor"), SubResource("conn_corridor_engineering"), SubResource("conn_engineering_bridge")])
+entry_instance = &"gate"
+entry_marker = &"entry"
+destination_instance = &"bridge"
+destination_marker = &"destination"

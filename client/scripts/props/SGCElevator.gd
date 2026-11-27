@@ -293,7 +293,7 @@ func _animate_cabin_transit(target_floor: int, duration: float = -1.0) -> void:
 			travel_started = false
 			_update_floor_indicator(current_floor)
 			_set_pedestal_lights_status(Color(0.2, 0.9, 0.3))  # Green when arrived
-			_play_sfx("res://audio/sfx_gate_lock.wav", 40.0)
+			_play_sfx("res://audio/sfx_chevron.wav", 40.0)
 			_open_doors()
 			elevator_arrived.emit(current_floor)
 			print("SGCElevator: Arrived at Level %d." % current_floor)

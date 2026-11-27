@@ -104,7 +104,7 @@ func run() -> void:
 	root.add_child(main)
 	await frames(3)
 	var lobby := main.current_lobby as LobbyUI
-	assert(lobby.mission_option_button.item_count == 7)
+	assert(lobby.mission_option_button.item_count == 8)
 	assert(lobby.mission_option_button.get_item_metadata(3) == MISSION)
 	lobby._on_mission_selected(0)
 	lobby._on_mission_selected(3)
