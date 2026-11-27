@@ -17,7 +17,9 @@ const PRESETS: PackedStringArray = [
 	"command",
 	"cargo_hangar",
 	"ceremonial",
-	"observation_communications"
+	"observation_communications",
+	"mothership_cargo",
+	"mothership_checkpoint"
 ]
 
 

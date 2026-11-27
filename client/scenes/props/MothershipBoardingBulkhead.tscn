@@ -1,0 +1,91 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="StandardMaterial3D" id="glow_cyan"]
+albedo_color = Color(0.1, 0.5, 0.6, 1.0)
+emission_enabled = true
+emission = Color(0.1, 0.7, 0.85, 1.0)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="seal_rubber"]
+albedo_color = Color(0.08, 0.08, 0.08, 1.0)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="jamb_mesh"]
+material = ExtResource("basalt")
+size = Vector3(0.25, 2.0, 0.5)
+
+[sub_resource type="BoxMesh" id="jamb_trim"]
+material = ExtResource("bronze")
+size = Vector3(0.08, 1.9, 0.54)
+
+[sub_resource type="BoxMesh" id="lintel_mesh"]
+material = ExtResource("basalt")
+size = Vector3(1.6, 0.35, 0.5)
+
+[sub_resource type="BoxMesh" id="lintel_trim"]
+material = ExtResource("gold")
+size = Vector3(1.2, 0.08, 0.54)
+
+[sub_resource type="BoxMesh" id="clamp_mesh"]
+material = ExtResource("bronze")
+size = Vector3(0.18, 0.35, 0.25)
+
+[sub_resource type="BoxMesh" id="cartouche_mesh"]
+material = ExtResource("gold")
+size = Vector3(0.4, 0.2, 0.08)
+
+[sub_resource type="BoxMesh" id="status_light"]
+material = SubResource("glow_cyan")
+size = Vector3(0.06, 0.18, 0.04)
+
+[node name="MothershipBoardingBulkhead" instance=ExtResource("base")]
+size = Vector3(1.6, 2.0, 0.6)
+
+[node name="LeftJamb" type="MeshInstance3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.675, 1.0, 0)
+mesh = SubResource("jamb_mesh")
+
+[node name="LeftTrim" type="MeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.54, 1.0, 0)
+mesh = SubResource("jamb_trim")
+
+[node name="RightJamb" type="MeshInstance3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.675, 1.0, 0)
+mesh = SubResource("jamb_mesh")
+
+[node name="RightTrim" type="MeshInstance3D" parent="." index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.54, 1.0, 0)
+mesh = SubResource("jamb_trim")
+
+[node name="Lintel" type="MeshInstance3D" parent="." index="4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.825, 0)
+mesh = SubResource("lintel_mesh")
+
+[node name="LintelTrim" type="MeshInstance3D" parent="." index="5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+mesh = SubResource("lintel_trim")
+
+[node name="LeftClamp" type="MeshInstance3D" parent="." index="6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65, 1.4, 0.18)
+mesh = SubResource("clamp_mesh")
+
+[node name="RightClamp" type="MeshInstance3D" parent="." index="7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.65, 1.4, 0.18)
+mesh = SubResource("clamp_mesh")
+
+[node name="Cartouche" type="MeshInstance3D" parent="." index="8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0.26)
+mesh = SubResource("cartouche_mesh")
+
+[node name="StatusLightLeft" type="MeshInstance3D" parent="." index="9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.48, 1.0, 0.26)
+mesh = SubResource("status_light")
+
+[node name="StatusLightRight" type="MeshInstance3D" parent="." index="10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.48, 1.0, 0.26)
+mesh = SubResource("status_light")
