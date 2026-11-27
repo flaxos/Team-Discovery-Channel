@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://cshockguard01"]
+[gd_scene load_steps=13 format=3 uid="uid://cshockguard01"]
 
 [ext_resource type="Script" path="res://scripts/entities/JaffaAI.gd" id="1_jaffa"]
 [ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
 [ext_resource type="Script" path="res://scripts/entities/JaffaGuardVisual.gd" id="3_horus"]
+[ext_resource type="Script" path="res://scripts/entities/GoauldPersonalShield.gd" id="4_shield"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_shock"]
 radius = 0.5
@@ -73,6 +74,9 @@ properties/10/replication_mode = 2
 properties/11/path = NodePath("Visuals:position")
 properties/11/spawn = true
 properties/11/replication_mode = 2
+properties/12/path = NodePath(".:has_personal_shield")
+properties/12/spawn = true
+properties/12/replication_mode = 2
 
 [node name="JaffaShockGuard" type="CharacterBody3D"]
 collision_layer = 4
@@ -123,6 +127,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.1)
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("2_health")
 max_health = 140.0
+
+[node name="PersonalShield" type="Node3D" parent="."]
+script = ExtResource("4_shield")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_desired_distance = 1.0

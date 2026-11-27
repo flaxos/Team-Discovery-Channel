@@ -92,6 +92,7 @@ attachment = &"squad_03"
 count = 2
 delay = 20.0
 shock_guard = true
+personal_shield = true
 
 [resource]
 script = ExtResource("1_definition")

@@ -103,8 +103,18 @@ func take_damage(amount: float, source: Node = null, damage_type: String = "bull
 		elif airman.is_crouching or airman.is_in_cover:
 			final_dmg *= 0.35  # 65% damage mitigation while crouched behind cover
 
-	if damage_type in ["zat_kill", "zat_vaporize", "kawoosh_vortex", "stealth_takedown"]:
+	if damage_type in ["zat_kill", "zat_vaporize", "kawoosh_vortex", "stealth_takedown", "melee_slow", "melee_slow_flank"]:
 		final_dmg = amount
+
+	var shield: Node = parent_node.get_node_or_null("PersonalShield") if parent_node != null else null
+	if shield != null and shield.has_method(&"intercept_damage"):
+		var intercept: Dictionary = shield.call(&"intercept_damage", final_dmg, source, damage_type) as Dictionary
+		if bool(intercept.get("blocked", false)):
+			return
+		final_dmg = float(intercept.get("damage", final_dmg))
+		if final_dmg <= 0.0:
+			return
+
 	current_health = maxf(0.0, current_health - final_dmg)
 	damage_taken.emit(final_dmg, source, damage_type)
 	health_changed.emit(current_health, max_health)
@@ -144,6 +154,12 @@ func revive(_reviver: Node = null) -> void:
 func apply_zat_shot(source: Node = null) -> void:
 	if not _can_mutate() or frozen or is_vaporized:
 		return
+	if not is_dead:
+		var parent_node := get_parent()
+		var shield: Node = parent_node.get_node_or_null("PersonalShield") if parent_node != null else null
+		if shield != null and shield.has_method(&"intercept_zat"):
+			if bool(shield.call(&"intercept_zat", source)):
+				return
 	zat_window_timer = ZAT_WINDOW_DURATION
 
 	if not is_dead:

@@ -349,8 +349,8 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 **SW-1 — Stealth takedown and quiet weapons** · M · Fable · **built 15 November 2026 (`test_stealth_takedowns_and_weapons`)**
 - Takedown on an unalerted Jaffa from behind (`JaffaAI.can_be_taken_down_by`, `perform_stealth_takedown`, `PlayerController3D.try_stealth_takedown`); Zat as the quiet option (`noise_radius = 4.0`, silent stun/kill/vaporize on unalerted sentries without spreading a 1-hop alert or raising `MissionAlert`); both dead and Zat-stunned Jaffa bodies can be dragged out of sightlines. Licensed external `.glb` weapon meshes (`p90_smg.glb`, `mp5_silenced.glb`) wired in `WeaponBase` alongside SW-1 (`AP-1a`).
 
-**SW-2 — Goa'uld personal shield and countermeasures** · M · design first
-- A shielded enemy that stops fast projectiles and is beaten by slow or thrown attacks and flanking. Needs a thrown or melee attack to exist first.
+**SW-2 — Goa'uld personal shield and countermeasures** · M · **built (SW-2 milestone; `docs/plans/goauld-personal-shield.md`, `test_goauld_personal_shield`, `test_goauld_personal_shield_multiplayer`, `test_goauld_personal_shield_dedicated`)**
+- Server-authoritative `GoauldPersonalShield` (`goauld_personal_shield.gdshader`) blocks fast ballistic projectiles (`"bullet"`, `"50cal_heavy"`), grants suppression immunity, and triggers perception/alert escalation on deflection; beaten by operative slow melee/flank strikes (`"melee"` action, `[F]`), silent rear takedowns, Zat overload (`6.0 s` lockout), Ma'Tok Staff plasma drain/overload, and C4/Claymore blasts. Deployed on Mothership Bridge Commander, heavy Horus reinforcements, and Wave 3+ Medium/Hard SGC Defense officers.
 
 **SW-3 — Specialised enemies** · L · after GI-2
 - Variants with a role (officer who raises the alarm, heavy, sniper), each changing how a room is approached.

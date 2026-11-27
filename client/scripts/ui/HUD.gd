@@ -510,8 +510,13 @@ func bind_local_player(player: PlayerController3D) -> void:
 
 func _process(delta: float) -> void:
 	if ammo_share_label != null:
-		ammo_share_label.text = local_player.ammo_share_prompt() if is_instance_valid(local_player) and not is_mission_ended else ""
-		ammo_share_label.visible = not ammo_share_label.text.is_empty()
+		var prompt := ""
+		if is_instance_valid(local_player) and not is_mission_ended:
+			prompt = local_player.ammo_share_prompt()
+			if prompt.is_empty():
+				prompt = local_player.close_quarters_prompt()
+		ammo_share_label.text = prompt
+		ammo_share_label.visible = not prompt.is_empty()
 	if not is_mission_ended:
 		mission_seconds += delta
 	heat_pulse_time += delta * 6.0

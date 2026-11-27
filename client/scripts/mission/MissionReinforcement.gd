@@ -8,3 +8,4 @@ extends Resource
 ## Seconds after the alarm before this group arrives.
 @export var delay: float = 6.0
 @export var shock_guard := false
+@export var personal_shield := false
