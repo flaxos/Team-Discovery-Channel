@@ -144,6 +144,13 @@ func activate(clip: StringName) -> void:
 	pose = clip
 
 
+func snap_to_end(clip: StringName) -> void:
+	activate(clip)
+	if animation.current_animation_length > 0.0:
+		animation.seek(animation.current_animation_length, true)
+	update_grounding(1.0)
+
+
 func prepare_model() -> PackedScene:
 	var started := Time.get_ticks_usec()
 	var model := RuntimeGLB.load_scene(MODEL_PATH)
@@ -154,6 +161,7 @@ func prepare_model() -> PackedScene:
 	if player == null or skeletons.size() != 1:
 		model.free()
 		return null
+	RuntimeGLB.apply_mesh_lods(model)
 	for clip in MOTION_CLIPS:
 		if not player.has_animation(clip):
 			model.free()

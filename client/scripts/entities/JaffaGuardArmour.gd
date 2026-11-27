@@ -2,7 +2,9 @@ extends RefCounted
 ## Fits the armour in the shared humanoid's initial +Z-forward ready frame.
 
 const CACHE := &"serpent_armour_resources"
+const HORUS_CACHE := &"horus_armour_resources"
 const HELMET_CACHE := &"serpent_helmet_review_scene"
+const HorusHelmet := preload("res://scripts/entities/JaffaHorusHelmet.gd")
 const ANCHORS: Array[StringName] = [
 	&"Head", &"Chest", &"Hips", &"LeftUpperArm", &"RightUpperArm",
 	&"LeftLowerArm", &"RightLowerArm", &"LeftLowerLeg", &"RightLowerLeg",
@@ -12,7 +14,7 @@ var kit: Dictionary
 var fitting_axes: Basis
 
 
-func fit(skeleton: Skeleton3D, bones: BoneMap, model_basis: Basis, helmet_path: String) -> bool:
+func fit(skeleton: Skeleton3D, bones: BoneMap, model_basis: Basis, helmet_path: String, horus: bool) -> bool:
 	var indices: Dictionary = {}
 	for anchor: StringName in ANCHORS:
 		var index := skeleton.find_bone(bones.get_skeleton_bone_name(anchor))
@@ -21,12 +23,23 @@ func fit(skeleton: Skeleton3D, bones: BoneMap, model_basis: Basis, helmet_path: 
 		indices[anchor] = index
 
 	var root := skeleton.get_tree().root
-	if not root.has_meta(CACHE):
-		root.set_meta(CACHE, make_kit())
-	kit = root.get_meta(CACHE)
+	var cache := HORUS_CACHE if horus else CACHE
+	if not root.has_meta(cache):
+		root.set_meta(cache, make_kit(horus))
+	kit = root.get_meta(cache)
 	fitting_axes = skeleton.global_basis.orthonormalized().inverse() * model_basis.orthonormalized()
 
-	var head := attach(skeleton, indices[&"Head"], &"SerpentHelmet")
+	var head := attach(skeleton, indices[&"Head"], &"HorusHelmet" if horus else &"SerpentHelmet")
+	if horus:
+		var headpiece := part(head, kit.helmet, null, Vector3.ZERO, Vector3.ONE)
+		headpiece.name = "FalconHeadpiece"
+	else:
+		fit_serpent_helmet(head, root, helmet_path)
+	fit_body(skeleton, indices)
+	return true
+
+
+func fit_serpent_helmet(head: Node3D, root: Window, helmet_path: String) -> void:
 	var helmet := load_review_helmet(root, helmet_path)
 	if helmet == null:
 		fit_native_helmet(head)
@@ -34,10 +47,6 @@ func fit(skeleton: Skeleton3D, bones: BoneMap, model_basis: Basis, helmet_path: 
 		head.add_child(helmet)
 		helmet.position = Vector3(0.0, -0.244, -0.065)
 		helmet.scale = Vector3.ONE * 0.096
-
-	fit_body(skeleton, indices)
-	return true
-
 
 func load_review_helmet(root: Window, path: String) -> Node3D:
 	if path.is_empty():
@@ -127,10 +136,18 @@ func part(parent: Node3D, mesh: Mesh, finish: Material, at: Vector3, size: Vecto
 	return instance
 
 
-func make_kit() -> Dictionary:
+func make_kit(horus: bool) -> Dictionary:
 	var round := SphereMesh.new()
 	round.radial_segments = 16
 	round.rings = 8
+	if horus:
+		return {
+			"round": round,
+			"helmet": HorusHelmet.build(),
+			"bronze": finish(Color(0.19, 0.27, 0.32), 0.45),
+			"trim": finish(Color(0.47, 0.37, 0.23), 0.46),
+			"iron": finish(Color(0.11, 0.16, 0.20), 0.28),
+		}
 	var eyes := finish(Color(0.51, 0.063, 0.024), 0.15)
 	eyes.emission_enabled = true
 	eyes.emission = Color(0.82, 0.108, 0.034)

@@ -5,7 +5,7 @@
   "keep_nodes": [
     "MP5SD_Obj"
   ],
-  "max_texture_size": 2048,
+  "max_texture_size": 1024,
   "image_format": "PNG",
   "materials": {
     "Material.002": {

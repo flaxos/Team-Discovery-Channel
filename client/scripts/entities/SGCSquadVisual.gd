@@ -98,11 +98,11 @@ func _ready() -> void:
 	if chest >= 0:
 		var chest_pose := skeleton.global_transform * skeleton.get_bone_global_pose(chest)
 		chest_fit_transform = chest_pose.affine_inverse() * global_transform
-	var world := MissionWorld.of(player)
-	if world != null:
-		iris_servo = world.get_node_or_null(^"IrisServoHousing") as IrisServoHousing
+	_resolve_iris_servo()
 	player.class_configured.connect(apply_class_appearance)
 	apply_class_appearance(player.class_id)
+	if player.health_component != null and player.health_component.is_dead:
+		snap_to_end(&"death")
 	for path: NodePath in [^"BodyMesh", ^"VisorMesh", ^"ClassGear"]:
 		(get_parent().get_node(path) as Node3D).hide()
 	set_process(true)
@@ -175,7 +175,10 @@ func _process(delta: float) -> void:
 	var fitted_grips := has_fitted_grips(turret)
 	var next_pose := select_pose(moving, mounted, fitted_grips)
 	was_downed = health.is_downed
-	update_pose(next_pose, next_pose == &"shoot" and shot_pending, delta)
+	if next_pose == &"death" and pose != &"death" and health.snapped_from_snapshot:
+		snap_to_end(&"death")
+	else:
+		update_pose(next_pose, next_pose == &"shoot" and shot_pending, delta)
 	shot_pending = false
 	if turning != null:
 		var can_step := not moving and not shifting_vertically and not mounted and pose in [
@@ -208,6 +211,8 @@ func select_pose(moving: bool, mounted: bool, fitted_grips: bool) -> StringName:
 		return &"revived"
 	if is_instance_valid(player.active_revive_target) and not moving:
 		return &"revive_kneel"
+	if player.is_dragging_body:
+		return &"crouch_walk" if moving else &"crouch_idle"
 	if not player.is_crouching and (shot_pending or (pose == &"shoot" and animation.is_playing())):
 		return &"shoot"
 	if player.is_crouching:
@@ -231,7 +236,7 @@ func update_held_weapon(delta: float) -> void:
 	var model := weapon.get_node_or_null(^"WeaponModel") as Node3D
 	if model == null:
 		return
-	model.visible = pose not in [&"death", &"revived", &"revive_kneel"] and not player.health_component.is_stunned
+	model.visible = pose not in [&"death", &"revived", &"revive_kneel", &"crouch_idle", &"crouch_walk"] and not player.health_component.is_stunned and not player.is_dragging_body
 	if not model.visible:
 		return
 	if visual_role == TECH and pose_iris_repair():
@@ -325,15 +330,26 @@ func fit_palms_on_plane(preferred: Vector3, support_offset: Vector3, axis: Vecto
 	return result
 
 
+func _resolve_iris_servo() -> IrisServoHousing:
+	var world := MissionWorld.of(player)
+	if world == null:
+		iris_servo = null
+		return null
+	if not is_instance_valid(iris_servo) or MissionWorld.of(iris_servo) != world:
+		iris_servo = world.get_node_or_null(^"IrisServoHousing") as IrisServoHousing
+	return iris_servo
+
+
 func pose_iris_repair() -> bool:
-	if not is_instance_valid(iris_servo) or not iris_servo.is_repairing or iris_servo.repairer_player != player:
+	var servo := _resolve_iris_servo()
+	if not is_instance_valid(servo) or not servo.is_repairing or servo.repairer_player != player:
 		return false
 	if pose not in [&"ready_idle", &"aim_crouch_idle"] or arms.has(null):
 		return false
 	if player.is_aiming_down_sights or player.is_firing or recoil > 0.0:
 		return false
-	var lever := iris_servo.get_node_or_null(^"LeverMesh/RepairLeverPalm") as Marker3D
-	var brace := iris_servo.get_node_or_null(^"RepairBracePalm") as Marker3D
+	var lever := servo.get_node_or_null(^"LeverMesh/RepairLeverPalm") as Marker3D
+	var brace := servo.get_node_or_null(^"RepairBracePalm") as Marker3D
 	if lever == null or brace == null:
 		return false
 	var heading := (lever.global_position - global_position).slide(Vector3.UP).normalized()

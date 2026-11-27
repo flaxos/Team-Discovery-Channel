@@ -18,6 +18,7 @@ static func _load_parts() -> bool:
 	var scene := RuntimeGLB.load_scene(MODEL)
 	if scene == null:
 		return false
+	RuntimeGLB.apply_mesh_lods(scene)
 	var materials := {}
 	var parts := {}
 	for name: StringName in PART_NAMES:

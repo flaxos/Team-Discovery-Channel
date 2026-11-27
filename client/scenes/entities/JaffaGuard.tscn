@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/entities/JaffaAI.gd" id="1_jaffa"]
 [ext_resource type="Script" path="res://scripts/entities/HealthComponent.gd" id="2_health"]
-[ext_resource type="Script" path="res://scripts/entities/JaffaSerpentVisual.gd" id="3_serpent"]
+[ext_resource type="Script" path="res://scripts/entities/JaffaGuardVisual.gd" id="3_serpent"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jaffa"]
 radius = 0.45

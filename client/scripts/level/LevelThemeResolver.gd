@@ -310,7 +310,12 @@ static func apply(
 	var theme := selected(layout, item)
 	if theme == null:
 		return warnings
-	for node: Node in module.get_node("Visuals").find_children("*", "MeshInstance3D", true, false):
+	var visuals_root := module.get_node("Visuals") as Node3D
+	var old_batch := visuals_root.get_node_or_null("ThemeBatch")
+	if old_batch != null and old_batch.has_meta("theme_cosmetic"):
+		visuals_root.remove_child(old_batch)
+		old_batch.free()
+	for node: Node in visuals_root.find_children("*", "MeshInstance3D", true, false):
 		if not is_instance_valid(node):
 			continue
 		var cursor := node.get_parent()
@@ -391,5 +396,94 @@ static func apply(
 				light.light_color = palette.fixture_color
 				light.light_energy = palette.fixture_energy
 		mesh.mesh = null
+	_batch_theme_visuals(module)
 	module.set_meta("architectural_theme", describe(layout, item))
 	return warnings
+
+
+static func _relative_to(node: Node3D, ancestor: Node3D) -> Transform3D:
+	var xform := Transform3D.IDENTITY
+	var cursor: Node = node
+	while cursor != null and cursor != ancestor:
+		if cursor is Node3D:
+			xform = (cursor as Node3D).transform * xform
+		cursor = cursor.get_parent()
+	return xform
+
+
+static func _batch_theme_visuals(module: LevelModule) -> void:
+	var visuals_root := module.get_node_or_null("Visuals") as Node3D
+	if visuals_root == null:
+		return
+	var theme_roots: Array[Node] = []
+	for node: Node in visuals_root.find_children("*", "Node3D", true, false):
+		if node.has_meta("theme_cosmetic") and node.name != "ThemeBatch":
+			theme_roots.append(node)
+	var leaf_meshes: Array[MeshInstance3D] = []
+	var seen := {}
+	for tv: Node in theme_roots:
+		var candidates: Array[Node] = tv.find_children("*", "MeshInstance3D", true, false)
+		if tv is MeshInstance3D:
+			candidates.append(tv)
+		for child: Node in candidates:
+			var mi := child as MeshInstance3D
+			if mi == null or seen.has(mi.get_instance_id()):
+				continue
+			seen[mi.get_instance_id()] = true
+			if not mi.visible or mi.mesh == null or mi.mesh.get_surface_count() == 0:
+				continue
+			leaf_meshes.append(mi)
+	if leaf_meshes.size() < 2:
+		return
+	var groups: Dictionary = {}
+	var order: Array[Variant] = []
+	var merged_nodes: Array[MeshInstance3D] = []
+	for mi: MeshInstance3D in leaf_meshes:
+		var xform := _relative_to(mi, visuals_root)
+		var can_merge := true
+		for s in range(mi.mesh.get_surface_count()):
+			var arr := mi.mesh.surface_get_arrays(s)
+			if arr.is_empty() or (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():
+				can_merge = false
+				break
+		if not can_merge:
+			continue
+		for s in range(mi.mesh.get_surface_count()):
+			var mat: Material = mi.material_override
+			if mat == null:
+				mat = mi.get_surface_override_material(s)
+			if mat == null:
+				mat = mi.mesh.surface_get_material(s)
+			var key: Variant = mat if mat != null else &"__default__"
+			if not groups.has(key):
+				groups[key] = {"material": mat, "entries": []}
+				order.append(key)
+			(groups[key]["entries"] as Array).append({"mesh": mi.mesh, "surface": s, "xform": xform})
+		merged_nodes.append(mi)
+	if merged_nodes.size() < 2:
+		return
+	var combined := ArrayMesh.new()
+	for key: Variant in order:
+		var grp: Dictionary = groups[key]
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var mat: Material = grp["material"] as Material
+		if mat != null:
+			st.set_material(mat)
+		for entry: Dictionary in grp["entries"]:
+			st.append_from(entry["mesh"] as Mesh, int(entry["surface"]), entry["xform"] as Transform3D)
+		st.commit(combined)
+	if combined.get_surface_count() == 0:
+		return
+	for mi: MeshInstance3D in merged_nodes:
+		mi.visible = false
+	var batch_root := Node3D.new()
+	batch_root.name = "ThemeBatch"
+	batch_root.set_meta("theme_cosmetic", true)
+	visuals_root.add_child(batch_root)
+	batch_root.owner = module.owner
+	var batched := MeshInstance3D.new()
+	batched.name = "BatchedMesh"
+	batched.mesh = combined
+	batch_root.add_child(batched)
+	batched.owner = module.owner

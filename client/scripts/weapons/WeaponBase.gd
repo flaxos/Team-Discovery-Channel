@@ -162,6 +162,7 @@ static func _parse_glb_model(res_path: String) -> PackedScene:
 	var imported := doc.generate_scene(state) as Node3D
 	if imported == null:
 		return null
+	RuntimeGLB.apply_mesh_lods(imported)
 	_sanitize_glb_materials(imported, res_path == GLB_MODELS["m249"])
 	for node: Node in imported.find_children("*", "", true, false):
 		node.owner = imported

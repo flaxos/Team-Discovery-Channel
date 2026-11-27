@@ -24,6 +24,7 @@ var _last_revision: int = -1
 var _snapshot_timer: float = 0.0
 ## Server only: peers whose copy of this actor exists and has asked for its state.
 var replica_peers: Dictionary = {}
+var snapped_from_snapshot: bool = false
 var is_downed: bool = false
 ## Set once the mission result is final: no further damage, bleed-out or stun changes.
 var frozen: bool = false
@@ -127,6 +128,7 @@ func take_damage(amount: float, source: Node = null, damage_type: String = "bull
 func revive(_reviver: Node = null) -> void:
 	if not _can_mutate() or not is_downed or is_dead:
 		return
+	snapped_from_snapshot = false
 	is_downed = false
 	bleedout_timer = 0.0
 	current_health = max_health * 0.40
@@ -223,6 +225,7 @@ func sync_health_state(state: Dictionary, event: String, amount: float, source_p
 	var revision: int = state.get("revision", -1)
 	if revision <= _last_revision:
 		return
+	var was_uninitialized: bool = _last_revision < 0
 	_last_revision = revision
 	var was_dead: bool = is_dead
 	var was_downed: bool = is_downed
@@ -231,6 +234,7 @@ func sync_health_state(state: Dictionary, event: String, amount: float, source_p
 	current_health = state.health
 	max_health = state.maximum
 	is_dead = state.dead
+	snapped_from_snapshot = was_uninitialized and event.is_empty() and is_dead
 	is_downed = state.downed
 	is_stunned = state.stunned
 	is_vaporized = state.vaporized
