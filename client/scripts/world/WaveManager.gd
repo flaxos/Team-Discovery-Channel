@@ -425,6 +425,8 @@ func _spawn_next_column_rank() -> void:
 		jaffa.formation_rank = current_rank_index
 		jaffa.is_front_rank = (current_rank_index == 0)
 		jaffa.column_x_lane = spawn_origin.x + x_offset
+		if is_shock_wave and current_rank_index == 0 and i == 0 and difficulty != DifficultyTier.EASY:
+			jaffa.has_personal_shield = true
 
 		enemies_container.add_child(jaffa, true)
 		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))

@@ -28,6 +28,11 @@ enum State {
 }
 
 @export var is_shock_guard: bool = false
+@export var has_personal_shield: bool = false:
+	set(value):
+		has_personal_shield = value
+		if personal_shield != null and (not multiplayer.has_multiplayer_peer() or multiplayer.is_server() or personal_shield._last_revision < 0):
+			personal_shield.set_shield_enabled(value)
 @export var move_speed: float = 4.2
 @export var march_speed: float = 2.4
 @export var combat_run_speed: float = 5.5
@@ -144,6 +149,7 @@ var patrol_laps: int = 0
 @onready var body_mesh: MeshInstance3D = $Visuals/ArmorMesh if has_node("Visuals/ArmorMesh") else null
 @onready var visuals_root: Node3D = $Visuals if has_node("Visuals") else null
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D if has_node("CollisionShape3D") else null
+@onready var personal_shield: GoauldPersonalShield = $PersonalShield if has_node("PersonalShield") else null
 
 
 func _enter_tree() -> void:
@@ -179,7 +185,22 @@ func _ready() -> void:
 	# Randomize initial fire offset so multiple Jaffa don't shoot in unison
 	fire_timer = randf_range(0.5, fire_interval_s)
 
+	if personal_shield != null:
+		personal_shield.set_shield_enabled(has_personal_shield, false)
+		personal_shield.shield_deflected.connect(_on_shield_deflected)
+		personal_shield.shield_overloaded.connect(_on_shield_overloaded)
+
 	_setup_staff_visual()
+
+
+func has_active_shield() -> bool:
+	return personal_shield != null and personal_shield.is_active()
+
+
+func set_personal_shield_enabled(enabled: bool) -> void:
+	has_personal_shield = enabled
+	if personal_shield != null:
+		personal_shield.set_shield_enabled(enabled)
 
 
 ## Initializes disciplined Stargate 2-by-2 column march mode down the ramp.
@@ -212,6 +233,8 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 func stand_down() -> void:
 	_clear_modular_flank()
 	_clear_suppression()
+	if personal_shield != null:
+		personal_shield.stand_down()
 	current_target = null
 	velocity = Vector3.ZERO
 	investigating = false
@@ -531,6 +554,7 @@ func _physics_process(delta: float) -> void:
 func can_be_suppressed() -> bool:
 	return (
 		profile == Profile.SENTRY and is_physics_processing() and errand == Vector3.INF
+		and not has_active_shield()
 		and current_state not in [State.DEAD, State.STUNNED, State.DOWNED]
 		and not health_component.is_dead and not health_component.is_stunned and not health_component.is_downed
 	)
@@ -1422,20 +1446,34 @@ func _on_damage_taken(_amount: float, source: Node, damage_type: String) -> void
 	if is_shock_guard and current_state != State.DEAD:
 		var spark_at := global_position + Vector3(0, 1.2, 0)
 		play_armor_spark_fx(spark_at)
-		SGCNetworkManager.mission_rpc(self, &"play_armor_spark_fx", [spark_at], health_component)
+		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+			SGCNetworkManager.mission_rpc(self, &"play_armor_spark_fx", [spark_at], health_component)
 
-	var is_silent_incapacitation := damage_type in ["zat_stun", "zat_kill", "zat_vaporize", "stealth_takedown"]
+	var is_silent_incapacitation := (
+		damage_type in ["zat_stun", "zat_kill", "zat_vaporize", "stealth_takedown"]
+		or (damage_type == "melee_slow_flank" and health_component != null and (health_component.is_dead or health_component.current_health <= 0.0))
+	)
 
 	if profile == Profile.SENTRY and perception != null and multiplayer.is_server():
 		if is_silent_incapacitation and perception.level != JaffaPerception.Level.ALERTED:
-			# Silent Zat incapacitation or stealth takedown drops an unalerted sentry before it can
+			# Silent Zat incapacitation or stealth takedown / lethal flank drops an unalerted sentry before it can
 			# shout or alert nearby sentries.
 			investigating = false
 			current_target = null
 			perception.calm()
 			_publish_awareness()
 			return
-		# Being hit by loud fire is an immediate alert, wherever the shot came from.
+		_react_to_hostile_contact(source)
+		return
+
+	if is_silent_incapacitation:
+		return
+
+	_react_to_hostile_contact(source)
+
+
+func _react_to_hostile_contact(source: Node) -> void:
+	if profile == Profile.SENTRY and perception != null and multiplayer.is_server():
 		var hit_by_operative := (
 			source is Node3D and is_instance_valid(source) and source.has_node("HealthComponent")
 		)
@@ -1454,15 +1492,24 @@ func _on_damage_taken(_amount: float, source: Node, damage_type: String) -> void
 			current_target = attacker
 		return
 
-	if is_silent_incapacitation:
-		return
-
 	if source is Node3D and is_instance_valid(source):
 		current_target = source as Node3D
 
 	if current_state in [State.MARCHING_FORMATION, State.ADVANCE, State.PATROL]:
 		break_formation_and_engage()
 		_alert_nearby_formation_jaffa()
+
+
+func _on_shield_deflected(source: Node, _damage_type: String, _impact_pos: Vector3) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
+	_react_to_hostile_contact(source)
+
+
+func _on_shield_overloaded(source: Node, _damage_type: String) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
+	_react_to_hostile_contact(source)
 
 
 @rpc("call_local", "unreliable")

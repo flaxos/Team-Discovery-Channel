@@ -6,6 +6,7 @@ extends GateRoom
 ## (MissionAlert: alarm consoles and reinforcements). SGC-only nodes are simply absent.
 signal started
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
+const SHOCK_JAFFA := "res://scenes/entities/JaffaShockGuard.tscn"
 const NEAR_MISS_RADIUS := 1.15
 const AIRMAN := "res://scenes/entities/SGCAirman.tscn"
 const SquadOrders := preload("res://scripts/mission/ModularSquadOrders.gd")
@@ -238,10 +239,13 @@ func _spawn_patrols() -> void:
 			route.append(level.marker(StringName(room), patrol.marker))
 		var home := level.get_node(patrol.rooms[0]) as Node3D
 		for n in range(patrol.size):
-			var jaffa := load(JAFFA).instantiate() as JaffaAI
+			var scene_path := SHOCK_JAFFA if patrol.shock_guard else JAFFA
+			var jaffa := load(scene_path).instantiate() as JaffaAI
 			jaffa.name = "Jaffa_P%d_%d" % [p, n]
 			# Rank 0 leads and suppresses; later ranks take marker cover when engaged.
 			jaffa.formation_rank = n
+			if patrol.personal_shield and n == 0:
+				jaffa.has_personal_shield = true
 			jaffa.position = enemies.to_local(route[0] + home.global_basis.z * -1.2 * n)
 			jaffa.position.y += 0.05
 			enemies.add_child(jaffa, true)

@@ -21,6 +21,7 @@ signal player_revived(peer_id: int)
 signal revive_progress_changed(progress: float)
 signal weapon_ammo_changed(current: int, reserve: int)
 signal class_configured(class_id: String)
+signal melee_struck(target: Node, damage: float, is_flank: bool)
 
 @export var class_id: String = "sg3_heavy":
 	set(val):
@@ -52,6 +53,15 @@ var _server_class_id: String = ""
 var _applying_weapon_state: bool = false
 var _shot_request_id: int = 0
 var _last_shot_request: int = 0
+var melee_cooldown: float = 0.0
+var _server_melee_cooldown: float = 0.0
+const MELEE_RANGE: float = 2.2
+const MELEE_MAX_DY: float = 1.2
+const MELEE_ARC_DOT: float = 0.25
+const MELEE_COOLDOWN_S: float = 0.85
+const MELEE_DAMAGE_FRONT: float = 65.0
+const MELEE_DAMAGE_FLANK: float = 150.0
+const MELEE_NOISE_RADIUS: float = 2.5
 const AMMO_SHARE_REACH: float = 3.0
 const AMMO_SHARE_COOLDOWN_MS: int = 500
 var _ammo_share_sequence: int = 0
@@ -344,6 +354,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		switch_slot(2)
 	elif event.is_action_pressed("plant_claymore"):
 		_plant_claymore()
+	elif event.is_action_pressed("melee"):
+		try_melee_strike()
 	elif event.is_action_pressed("reload") and current_weapon != null:
 		current_weapon.reload()
 	elif event.is_action_pressed("zoom_in") or event.is_action_pressed("zoom_out"):
@@ -583,6 +595,7 @@ func stand_down() -> void:
 func _physics_process(delta: float) -> void:
 	if multiplayer.is_server():
 		_server_revive_tick(delta)
+		_server_melee_cooldown = maxf(0.0, _server_melee_cooldown - delta)
 	# Non-authorities rely on MultiplayerSynchronizer replication for position/rotation
 	if not is_local_authority:
 		if multiplayer.is_server() and turret_cooldown > 0.0 and not is_instance_valid(mounted_turret):
@@ -590,6 +603,7 @@ func _physics_process(delta: float) -> void:
 		if not is_instance_valid(mounted_turret):
 			move_and_slide()
 		return
+	melee_cooldown = maxf(0.0, melee_cooldown - delta)
 
 	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
 	if not is_window_focused or _is_ui_modal_open():
@@ -1602,6 +1616,156 @@ func server_request_takedown(target_path: NodePath) -> void:
 	if target == null or MissionWorld.of(target) != MissionWorld.of(self):
 		return
 	target.perform_stealth_takedown(self)
+
+
+func is_flanking_target(target: Node3D) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	var target_forward := -target.global_transform.basis.z
+	target_forward.y = 0.0
+	if target_forward.length_squared() < 0.0001:
+		return false
+	target_forward = target_forward.normalized()
+	var to_self := global_position - target.global_position
+	to_self.y = 0.0
+	if to_self.length_squared() < 0.0001:
+		return true
+	return target_forward.dot(to_self.normalized()) <= 0.15
+
+
+func find_melee_target() -> JaffaAI:
+	if not is_inside_tree():
+		return null
+	var enemies_container := MissionWorld.find(self, "Enemies")
+	if enemies_container == null:
+		return null
+	var self_forward := -global_transform.basis.z
+	self_forward.y = 0.0
+	if self_forward.length_squared() > 0.0001:
+		self_forward = self_forward.normalized()
+	var space := get_world_3d().direct_space_state if get_world_3d() != null else null
+	var best_jaffa: JaffaAI = null
+	var min_d: float = MELEE_RANGE + 0.01
+	for child: Node in enemies_container.get_children():
+		var jaffa := child as JaffaAI
+		if jaffa == null or not is_instance_valid(jaffa) or jaffa.health_component == null:
+			continue
+		if jaffa.health_component.is_dead or jaffa.current_state == JaffaAI.State.DEAD:
+			continue
+		var offset := jaffa.global_position - global_position
+		if absf(offset.y) > MELEE_MAX_DY:
+			continue
+		var flat := Vector2(offset.x, offset.z)
+		var flat_dist := flat.length()
+		if flat_dist > MELEE_RANGE or flat_dist >= min_d:
+			continue
+		if flat_dist >= 0.9 and self_forward.length_squared() > 0.0001:
+			var dir := Vector3(offset.x, 0.0, offset.z).normalized()
+			if self_forward.dot(dir) < MELEE_ARC_DOT:
+				continue
+		if space != null:
+			var query := PhysicsRayQueryParameters3D.create(
+				global_position + Vector3(0.0, 1.1, 0.0),
+				jaffa.global_position + Vector3(0.0, 1.1, 0.0),
+				1 | 128,
+				[get_rid(), jaffa.get_rid()]
+			)
+			if not space.intersect_ray(query).is_empty():
+				continue
+		min_d = flat_dist
+		best_jaffa = jaffa
+	return best_jaffa
+
+
+func try_melee_strike() -> bool:
+	if not _can_use_weapon(1) or health_component.is_downed or is_dragging_body or is_instance_valid(mounted_turret) or melee_cooldown > 0.0:
+		return false
+	melee_cooldown = MELEE_COOLDOWN_S
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
+		return _perform_melee_on_server()
+	if is_local_authority:
+		_render_melee_fx()
+		server_request_melee.rpc_id(1)
+		return true
+	return false
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func server_request_melee() -> void:
+	if not _valid_combat_sender() or not _can_use_weapon(1) or health_component.is_downed or is_dragging_body or is_instance_valid(mounted_turret):
+		return
+	_perform_melee_on_server()
+
+
+func _perform_melee_on_server() -> bool:
+	if MissionWorld.combat_ended(self) or _server_melee_cooldown > 0.0:
+		return false
+	_server_melee_cooldown = MELEE_COOLDOWN_S
+	play_melee_fx()
+	SGCNetworkManager.mission_rpc(self, &"play_melee_fx", [], health_component)
+	var target := find_melee_target()
+	if target == null:
+		return false
+	if target.can_be_taken_down_by(self):
+		var max_hp := target.health_component.max_health
+		var ok := target.perform_stealth_takedown(self)
+		if ok:
+			melee_struck.emit(target, max_hp, true)
+		return ok
+	var flank := is_flanking_target(target)
+	var dmg := MELEE_DAMAGE_FLANK if flank else MELEE_DAMAGE_FRONT
+	var dmg_type := "melee_slow_flank" if flank else "melee_slow"
+	target.health_component.take_damage(dmg, self, dmg_type)
+	var silent_kill := flank and target.health_component.is_dead and target.awareness_level != JaffaPerception.Level.ALERTED
+	if not silent_kill and is_inside_tree():
+		get_tree().call_group(&"noise_listeners", &"hear", global_position, MELEE_NOISE_RADIUS, self)
+	melee_struck.emit(target, dmg, flank)
+	return true
+
+
+@rpc("any_peer", "call_local", "unreliable")
+func play_melee_fx() -> void:
+	var sender: int = multiplayer.get_remote_sender_id()
+	if multiplayer.has_multiplayer_peer() and sender != 0 and sender != 1:
+		return
+	if sender == 1 and is_local_authority:
+		return
+	_render_melee_fx()
+
+
+func _render_melee_fx() -> void:
+	if DisplayServer.get_name() == "headless" or not is_inside_tree():
+		return
+	var arc := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.75, 0.06, 0.14)
+	arc.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.95, 0.85, 0.55, 0.85)
+	arc.material_override = mat
+	arc.position = Vector3(0.0, 1.15, -0.85)
+	arc.rotation_degrees = Vector3(0.0, 20.0, -14.0)
+	add_child(arc)
+	var tween := arc.create_tween()
+	tween.tween_property(arc, "rotation_degrees:y", -35.0, 0.14)
+	tween.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.14)
+	tween.tween_callback(arc.queue_free)
+
+
+func close_quarters_prompt() -> String:
+	if is_window_focused == false or _is_ui_modal_open() or is_command_wheel_open or is_in_cctv_mode:
+		return ""
+	if not _can_use_weapon(1) or health_component.is_downed or is_dragging_body or is_instance_valid(mounted_turret):
+		return ""
+	if find_takedown_target() != null:
+		return "[%s] STEALTH TAKEDOWN" % _bindings().binding_text("interact")
+	var melee_target := find_melee_target()
+	if melee_target != null and melee_target.has_active_shield():
+		var action := "FLANK MELEE (BYPASS SHIELD)" if is_flanking_target(melee_target) else "SLOW MELEE (BYPASS SHIELD)"
+		return "[%s] %s" % [_bindings().binding_text("melee"), action]
+	return ""
 
 
 func _find_nearby_drag_target() -> CharacterBody3D:

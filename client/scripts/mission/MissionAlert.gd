@@ -253,6 +253,8 @@ func _spawn_group(index: int) -> void:
 		var jaffa := load(SHOCK_JAFFA if group.shock_guard else JAFFA).instantiate() as JaffaAI
 		jaffa.name = "Jaffa_R%d_%d" % [index, n]
 		jaffa.formation_rank = n
+		if group.personal_shield and n == 0:
+			jaffa.has_personal_shield = true
 		var spot := NavigationServer3D.map_get_closest_point(
 			map, node.global_position + node.global_basis.x * (1.2 * n - 0.6 * (group.count - 1))
 		)
