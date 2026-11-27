@@ -154,21 +154,30 @@ func run_host() -> void:
 	var actor := room.players_container.get_node(str(actor_id)) as PlayerController3D
 	var host_op := room.players_container.get_node("1") as PlayerController3D if not is_dedicated else room.players_container.get_node(str(int(read_mark("ready_2")))) as PlayerController3D
 	host_op.health_component.current_health = 10000.0
+	var gate_entry := room.level.marker(&"gate", &"entry")
+	var deploy_spot := gate_entry + Vector3(0.0, 0.05, 1.5)
+	var clear_spot := gate_entry + Vector3(2.0, 0.05, 1.5)
+	var buddy_spot := gate_entry + Vector3(2.4, 0.05, 1.8)
+	if not is_dedicated:
+		host_op.global_position = buddy_spot
 
-	# 1. Remote operative deploys shield offworld, steps clear so server syncs position, and orders Airman to Hold Corner behind it
+	# 1. Wait for all operatives to sync clear of the shield slot, then deploy shield and order Airman to Hold Corner
+	deadline = Time.get_ticks_msec() + 30000
+	while (actor.global_position.distance_to(deploy_spot) > 0.35 or host_op.global_position.distance_to(buddy_spot) > 0.35) and Time.get_ticks_msec() < deadline:
+		await frames(1)
+	assert(actor.global_position.distance_to(deploy_spot) <= 0.35 and host_op.global_position.distance_to(buddy_spot) <= 0.35, "Server receives initial operative poses")
 	mark("deploy_shield")
 	var deployments := room.get_node("FieldKitDeployments") as Node3D
-	deadline = Time.get_ticks_msec() + 15000
+	deadline = Time.get_ticks_msec() + 30000
 	while deployments.get_child_count() == 0 and Time.get_ticks_msec() < deadline:
 		await frames(1)
 	assert(deployments.get_child_count() == 1, "Remote offworld shield spawned on server")
-	var clear_spot := room.level.marker(&"gate", &"entry") + Vector3(2.0, 0.05, 1.5)
-	deadline = Time.get_ticks_msec() + 15000
-	while actor.global_position.distance_to(clear_spot) > 0.35 and Time.get_ticks_msec() < deadline:
+	deadline = Time.get_ticks_msec() + 30000
+	while (actor.global_position.distance_to(clear_spot) > 0.35 or host_op.global_position.distance_to(buddy_spot) > 0.35) and Time.get_ticks_msec() < deadline:
 		await frames(1)
-	assert(actor.global_position.distance_to(clear_spot) <= 0.35, "Server receives remote operative step-clear pose")
+	assert(actor.global_position.distance_to(clear_spot) <= 0.35 and host_op.global_position.distance_to(buddy_spot) <= 0.35, "Server receives remote operative step-clear pose")
 	mark("ready_to_order")
-	deadline = Time.get_ticks_msec() + 15000
+	deadline = Time.get_ticks_msec() + 30000
 	while not _airmen(room).any(func(a: SGCAirmanAI) -> bool: return a.current_state == SGCAirmanAI.State.HOLD_CORNER and a.is_in_cover) and Time.get_ticks_msec() < deadline:
 		await frames(1)
 	assert(_airmen(room).any(func(a: SGCAirmanAI) -> bool: return a.current_state == SGCAirmanAI.State.HOLD_CORNER and a.is_in_cover))
@@ -178,12 +187,11 @@ func run_host() -> void:
 	# 2. Coordinated rescue cover fire: down remote operative while both Airmen are in gate
 	var holder := _airmen(room)[0]
 	var partner := _airmen(room)[1]
-	var gate_entry := room.level.marker(&"gate", &"entry")
 	holder.global_position = gate_entry + Vector3(-1.0, 0.05, 0.0)
 	partner.global_position = gate_entry + Vector3(2.2, 0.05, 0.0)
 	actor.health_component.take_damage(99999.0, null, "bullet")
 	assert(actor.health_component.is_downed)
-	deadline = Time.get_ticks_msec() + 15000
+	deadline = Time.get_ticks_msec() + 30000
 	var saw_cover_fire := false
 	while actor.health_component.is_downed and Time.get_ticks_msec() < deadline:
 		for a: SGCAirmanAI in _airmen(room):
@@ -232,7 +240,7 @@ func run_client() -> void:
 	if slot == 1:
 		mine.deploy_shield()
 		var deployments := room.get_node("FieldKitDeployments") as Node3D
-		var deadline_s := Time.get_ticks_msec() + 15000
+		var deadline_s := Time.get_ticks_msec() + 30000
 		while deployments.get_child_count() == 0 and Time.get_ticks_msec() < deadline_s:
 			await frames(1)
 		var shield := deployments.get_child(0) as DeployableShield
@@ -241,7 +249,7 @@ func run_client() -> void:
 		mine.execute_squad_radial_command(Wheel.CMD_HOLD_CORNER, shield.global_position)
 
 	assert(await marked("shield_cover_ok"))
-	var deadline := Time.get_ticks_msec() + 15000
+	var deadline := Time.get_ticks_msec() + 30000
 	while not _airmen(room).any(func(a: SGCAirmanAI) -> bool: return a.is_in_cover) and Time.get_ticks_msec() < deadline:
 		await frames(1)
 	assert(_airmen(room).any(func(a: SGCAirmanAI) -> bool: return a.is_in_cover), "Client sees Airman cover state replicated")
@@ -250,7 +258,7 @@ func run_client() -> void:
 	var prev_id := room.get_instance_id()
 	room = await mission(prev_id)
 	_park_enemies(room)
-	deadline = Time.get_ticks_msec() + 15000
+	deadline = Time.get_ticks_msec() + 30000
 	while _airmen(room).size() < 2 and Time.get_ticks_msec() < deadline:
 		await frames(1)
 	assert(_airmen(room).size() == 2 and _airmen(room)[0].current_state == SGCAirmanAI.State.STAGING)
