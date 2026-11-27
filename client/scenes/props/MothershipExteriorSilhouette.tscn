@@ -1,0 +1,323 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="StandardMaterial3D" id="mat_capstone_glow"]
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.45, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_engine_glow"]
+shading_mode = 0
+albedo_color = Color(1, 0.65, 0.18, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_glider_bay_void"]
+shading_mode = 0
+albedo_color = Color(0.02, 0.035, 0.06, 1)
+
+[sub_resource type="StandardMaterial3D" id="mat_bay_runway_glow"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.6, 0.85, 0.85)
+
+[sub_resource type="CylinderMesh" id="mesh_pyramid_gold"]
+material = ExtResource("gold")
+top_radius = 0.0
+bottom_radius = 18.0
+height = 18.0
+radial_segments = 4
+rings = 1
+
+[sub_resource type="CylinderMesh" id="mesh_pyramid_terrace"]
+material = ExtResource("basalt")
+top_radius = 6.0
+bottom_radius = 21.0
+height = 13.0
+radial_segments = 4
+rings = 1
+
+[sub_resource type="BoxMesh" id="mesh_pyramid_plinth"]
+material = ExtResource("bronze")
+size = Vector3(32, 3.5, 32)
+
+[sub_resource type="CylinderMesh" id="mesh_capstone"]
+material = SubResource("mat_capstone_glow")
+top_radius = 0.0
+bottom_radius = 3.2
+height = 3.8
+radial_segments = 4
+rings = 1
+
+[sub_resource type="CylinderMesh" id="mesh_apex_spire"]
+material = ExtResource("gold")
+top_radius = 0.08
+bottom_radius = 0.28
+height = 4.8
+radial_segments = 6
+rings = 1
+
+[sub_resource type="BoxMesh" id="mesh_outrigger_arm"]
+material = ExtResource("bronze")
+size = Vector3(5.5, 4.5, 27)
+
+[sub_resource type="BoxMesh" id="mesh_outrigger_flange"]
+material = ExtResource("bronze")
+size = Vector3(11, 1.6, 18)
+
+[sub_resource type="BoxMesh" id="mesh_outrigger_crest"]
+material = ExtResource("gold")
+size = Vector3(1.2, 1.2, 25)
+
+[sub_resource type="BoxMesh" id="mesh_outrigger_ventral"]
+material = ExtResource("basalt")
+size = Vector3(7.5, 2.2, 23)
+
+[sub_resource type="CylinderMesh" id="mesh_turret_blister"]
+material = ExtResource("bronze")
+top_radius = 2.6
+bottom_radius = 3.2
+height = 2.2
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderMesh" id="mesh_turret_barrel"]
+material = ExtResource("gold")
+top_radius = 0.28
+bottom_radius = 0.38
+height = 5.2
+radial_segments = 6
+rings = 1
+
+[sub_resource type="BoxMesh" id="mesh_connecting_collar"]
+material = ExtResource("bronze")
+size = Vector3(28, 4, 4.5)
+
+[sub_resource type="BoxMesh" id="mesh_collar_trim"]
+material = ExtResource("gold")
+size = Vector3(27, 0.6, 4.6)
+
+[sub_resource type="BoxMesh" id="mesh_glider_bay_aperture"]
+material = SubResource("mat_glider_bay_void")
+size = Vector3(12, 1.8, 1.2)
+
+[sub_resource type="BoxMesh" id="mesh_glider_runway"]
+material = SubResource("mat_bay_runway_glow")
+size = Vector3(10, 0.2, 0.8)
+
+[sub_resource type="CylinderMesh" id="mesh_engine_housing"]
+material = ExtResource("basalt")
+top_radius = 2.4
+bottom_radius = 3.4
+height = 4.5
+radial_segments = 10
+rings = 1
+
+[sub_resource type="CylinderMesh" id="mesh_engine_plume"]
+material = SubResource("mat_engine_glow")
+top_radius = 0.4
+bottom_radius = 2.1
+height = 3.6
+radial_segments = 8
+rings = 1
+
+[node name="MothershipExteriorSilhouette" type="Node3D"]
+
+[node name="PyramidCore" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Plinth" type="MeshInstance3D" parent="PyramidCore"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("mesh_pyramid_plinth")
+
+[node name="BasaltTerrace" type="MeshInstance3D" parent="PyramidCore"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 6, 0)
+mesh = SubResource("mesh_pyramid_terrace")
+
+[node name="GoldApex" type="MeshInstance3D" parent="PyramidCore"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 11, 0)
+mesh = SubResource("mesh_pyramid_gold")
+
+[node name="Capstone" type="MeshInstance3D" parent="PyramidCore"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 20.8, 0)
+mesh = SubResource("mesh_capstone")
+
+[node name="ApexSpire" type="MeshInstance3D" parent="PyramidCore"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24.2, 0)
+mesh = SubResource("mesh_apex_spire")
+
+[node name="OuterSuperstructure" type="Node3D" parent="."]
+
+[node name="ArmForward" type="Node3D" parent="OuterSuperstructure"]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 0.5, -23)
+
+[node name="Arm" type="MeshInstance3D" parent="OuterSuperstructure/ArmForward"]
+mesh = SubResource("mesh_outrigger_arm")
+
+[node name="Flange" type="MeshInstance3D" parent="OuterSuperstructure/ArmForward"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
+mesh = SubResource("mesh_outrigger_flange")
+
+[node name="Crest" type="MeshInstance3D" parent="OuterSuperstructure/ArmForward"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+mesh = SubResource("mesh_outrigger_crest")
+
+[node name="Ventral" type="MeshInstance3D" parent="OuterSuperstructure/ArmForward"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.2, 0)
+mesh = SubResource("mesh_outrigger_ventral")
+
+[node name="Turret" type="MeshInstance3D" parent="OuterSuperstructure/ArmForward"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -13)
+mesh = SubResource("mesh_turret_blister")
+
+[node name="BarrelL" type="MeshInstance3D" parent="OuterSuperstructure/ArmForward/Turret"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.9, 0.4, -2.8)
+mesh = SubResource("mesh_turret_barrel")
+
+[node name="BarrelR" type="MeshInstance3D" parent="OuterSuperstructure/ArmForward/Turret"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.9, 0.4, -2.8)
+mesh = SubResource("mesh_turret_barrel")
+
+[node name="ArmPort" type="Node3D" parent="OuterSuperstructure"]
+transform = Transform3D(-0.5, -0.150384, -0.852869, 0, 0.984808, -0.173648, 0.866025, -0.086824, -0.492404, -19.9, 0.5, 11.5)
+
+[node name="Arm" type="MeshInstance3D" parent="OuterSuperstructure/ArmPort"]
+mesh = SubResource("mesh_outrigger_arm")
+
+[node name="Flange" type="MeshInstance3D" parent="OuterSuperstructure/ArmPort"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
+mesh = SubResource("mesh_outrigger_flange")
+
+[node name="Crest" type="MeshInstance3D" parent="OuterSuperstructure/ArmPort"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+mesh = SubResource("mesh_outrigger_crest")
+
+[node name="Ventral" type="MeshInstance3D" parent="OuterSuperstructure/ArmPort"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.2, 0)
+mesh = SubResource("mesh_outrigger_ventral")
+
+[node name="Turret" type="MeshInstance3D" parent="OuterSuperstructure/ArmPort"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -13)
+mesh = SubResource("mesh_turret_blister")
+
+[node name="BarrelL" type="MeshInstance3D" parent="OuterSuperstructure/ArmPort/Turret"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.9, 0.4, -2.8)
+mesh = SubResource("mesh_turret_barrel")
+
+[node name="BarrelR" type="MeshInstance3D" parent="OuterSuperstructure/ArmPort/Turret"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.9, 0.4, -2.8)
+mesh = SubResource("mesh_turret_barrel")
+
+[node name="ArmStarboard" type="Node3D" parent="OuterSuperstructure"]
+transform = Transform3D(-0.5, 0.150384, 0.852869, 0, 0.984808, -0.173648, -0.866025, -0.086824, -0.492404, 19.9, 0.5, 11.5)
+
+[node name="Arm" type="MeshInstance3D" parent="OuterSuperstructure/ArmStarboard"]
+mesh = SubResource("mesh_outrigger_arm")
+
+[node name="Flange" type="MeshInstance3D" parent="OuterSuperstructure/ArmStarboard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
+mesh = SubResource("mesh_outrigger_flange")
+
+[node name="Crest" type="MeshInstance3D" parent="OuterSuperstructure/ArmStarboard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+mesh = SubResource("mesh_outrigger_crest")
+
+[node name="Ventral" type="MeshInstance3D" parent="OuterSuperstructure/ArmStarboard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.2, 0)
+mesh = SubResource("mesh_outrigger_ventral")
+
+[node name="Turret" type="MeshInstance3D" parent="OuterSuperstructure/ArmStarboard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -13)
+mesh = SubResource("mesh_turret_blister")
+
+[node name="BarrelL" type="MeshInstance3D" parent="OuterSuperstructure/ArmStarboard/Turret"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.9, 0.4, -2.8)
+mesh = SubResource("mesh_turret_barrel")
+
+[node name="BarrelR" type="MeshInstance3D" parent="OuterSuperstructure/ArmStarboard/Turret"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.9, 0.4, -2.8)
+mesh = SubResource("mesh_turret_barrel")
+
+[node name="Collars" type="Node3D" parent="OuterSuperstructure"]
+
+[node name="CollarAft" type="MeshInstance3D" parent="OuterSuperstructure/Collars"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 21)
+mesh = SubResource("mesh_connecting_collar")
+
+[node name="TrimAft" type="MeshInstance3D" parent="OuterSuperstructure/Collars"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 21)
+mesh = SubResource("mesh_collar_trim")
+
+[node name="CollarPort" type="MeshInstance3D" parent="OuterSuperstructure/Collars"]
+transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, -18.2, -0.2, -10.5)
+mesh = SubResource("mesh_connecting_collar")
+
+[node name="TrimPort" type="MeshInstance3D" parent="OuterSuperstructure/Collars"]
+transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, -18.2, 1.9, -10.5)
+mesh = SubResource("mesh_collar_trim")
+
+[node name="CollarStarboard" type="MeshInstance3D" parent="OuterSuperstructure/Collars"]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 18.2, -0.2, -10.5)
+mesh = SubResource("mesh_connecting_collar")
+
+[node name="TrimStarboard" type="MeshInstance3D" parent="OuterSuperstructure/Collars"]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 18.2, 1.9, -10.5)
+mesh = SubResource("mesh_collar_trim")
+
+[node name="GliderBays" type="Node3D" parent="OuterSuperstructure"]
+
+[node name="BayAft" type="Node3D" parent="OuterSuperstructure/GliderBays"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 23.3)
+
+[node name="Aperture" type="MeshInstance3D" parent="OuterSuperstructure/GliderBays/BayAft"]
+mesh = SubResource("mesh_glider_bay_aperture")
+
+[node name="Runway" type="MeshInstance3D" parent="OuterSuperstructure/GliderBays/BayAft"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0.2)
+mesh = SubResource("mesh_glider_runway")
+
+[node name="BayPort" type="Node3D" parent="OuterSuperstructure/GliderBays"]
+transform = Transform3D(0.5, 0, -0.866025, 0, 1, 0, 0.866025, 0, 0.5, -20.2, -0.2, -11.6)
+
+[node name="Aperture" type="MeshInstance3D" parent="OuterSuperstructure/GliderBays/BayPort"]
+mesh = SubResource("mesh_glider_bay_aperture")
+
+[node name="Runway" type="MeshInstance3D" parent="OuterSuperstructure/GliderBays/BayPort"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0.2)
+mesh = SubResource("mesh_glider_runway")
+
+[node name="BayStarboard" type="Node3D" parent="OuterSuperstructure/GliderBays"]
+transform = Transform3D(0.5, 0, 0.866025, 0, 1, 0, -0.866025, 0, 0.5, 20.2, -0.2, -11.6)
+
+[node name="Aperture" type="MeshInstance3D" parent="OuterSuperstructure/GliderBays/BayStarboard"]
+mesh = SubResource("mesh_glider_bay_aperture")
+
+[node name="Runway" type="MeshInstance3D" parent="OuterSuperstructure/GliderBays/BayStarboard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0.2)
+mesh = SubResource("mesh_glider_runway")
+
+[node name="Propulsion" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 22)
+
+[node name="EngineCenter" type="MeshInstance3D" parent="Propulsion"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.4, 2.5)
+mesh = SubResource("mesh_engine_housing")
+
+[node name="PlumeCenter" type="MeshInstance3D" parent="Propulsion/EngineCenter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("mesh_engine_plume")
+
+[node name="EnginePort" type="MeshInstance3D" parent="Propulsion"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -6.8, -0.4, 1.5)
+mesh = SubResource("mesh_engine_housing")
+
+[node name="PlumePort" type="MeshInstance3D" parent="Propulsion/EnginePort"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("mesh_engine_plume")
+
+[node name="EngineStarboard" type="MeshInstance3D" parent="Propulsion"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 6.8, -0.4, 1.5)
+mesh = SubResource("mesh_engine_housing")
+
+[node name="PlumeStarboard" type="MeshInstance3D" parent="Propulsion/EngineStarboard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("mesh_engine_plume")
