@@ -371,9 +371,10 @@ func run_client() -> void:
 	assert(await marked("enter_antechamber"))
 	pm.global_position = probe_room.level.marker(&"cmd_antechamber", &"entry") + Vector3(0, 0.05, 0)
 	deadline = Time.get_ticks_msec() + 30000
-	while not probe_room.objectives.is_objective_enabled(1) and Time.get_ticks_msec() < deadline:
+	while (not probe_room.objectives.is_objective_enabled(1) or not probe_room.events.fired.has("antechamber_enables_records")) and Time.get_ticks_msec() < deadline:
 		await frames(1)
 	assert(probe_room.objectives.index == 1 and probe_room.objectives.is_objective_enabled(1))
+	assert(probe_room.events.fired.has("antechamber_enables_records"))
 	assert(records_station.is_in_group("interactable") and records_station.prompt.visible)
 	assert(probe_room.hud.objective_label.text.begins_with("OBJECTIVE 2/3"))
 	assert(probe_room.hud.squad_toast_label.text == "COMMAND UPLINK ACTIVATED")
