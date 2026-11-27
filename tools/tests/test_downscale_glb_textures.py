@@ -1,14 +1,18 @@
 """Tests for tools/downscale_glb_textures.py."""
 import io
 import json
+import math
 from pathlib import Path
 import struct
 import sys
 import tempfile
 import unittest
+import zlib
 
-import numpy as np
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 TOOLS_DIR = Path(__file__).resolve().parents[1]
 if str(TOOLS_DIR) not in sys.path:
@@ -18,19 +22,26 @@ import asset_intake  # noqa: E402
 import downscale_glb_textures as downscaler  # noqa: E402
 
 
-def _make_png(color: tuple[int, int, int], size: int = 2048) -> bytes:
-    arr = np.full((size, size, 3), color, dtype=np.uint8)
+def _png_chunk(tag: bytes, data: bytes) -> bytes:
+    body = tag + data
+    return struct.pack('>I', len(data)) + body + struct.pack('>I', zlib.crc32(body) & 0xffffffff)
+
+
+def _make_1x1_png(color: tuple[int, int, int]) -> bytes:
+    ihdr = struct.pack('>IIBBBBB', 1, 1, 8, 2, 0, 0, 0)
+    idat = zlib.compress(b'\x00' + bytes(color))
+    return b'\x89PNG\r\n\x1a\n' + _png_chunk(b'IHDR', ihdr) + _png_chunk(b'IDAT', idat) + _png_chunk(b'IEND', b'')
+
+
+def _make_large_png(color: tuple[int, int, int], size: int = 2048) -> bytes:
     buf = io.BytesIO()
-    Image.fromarray(arr, mode='RGB').save(buf, format='PNG')
+    Image.new('RGB', (size, size), color).save(buf, format='PNG')
     return buf.getvalue()
 
 
-def _build_test_glb(path: Path) -> bytes:
-    """Create a valid self-contained GLB with 1 geometry bufferView + 2 2K PNGs."""
-    # Geometry bufferView: 3 float32 positions (36 bytes) + 3 uint16 indices (6 bytes) + 2B pad.
+def _build_test_glb(path: Path, albedo_png: bytes, normal_png: bytes) -> bytes:
+    """Create a valid self-contained GLB with 1 geometry bufferView + 2 PNG images."""
     geom_bytes = struct.pack('<9f3H', 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0, 1, 2) + b'\x00\x00'
-    albedo_png = _make_png((200, 140, 80), 2048)
-    normal_png = _make_png((180, 128, 220), 2048)
 
     bin_buf = bytearray()
     bv0_off = 0
@@ -109,12 +120,42 @@ def _build_test_glb(path: Path) -> bytes:
 
 
 class DownscaleGlbTexturesTest(unittest.TestCase):
+    def test_passthrough_small_png_and_normal_detection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            src = tmp_dir / 'small.glb'
+            dst = tmp_dir / 'small_out.glb'
+            albedo_png = _make_1x1_png((200, 140, 80))
+            normal_png = _make_1x1_png((128, 128, 255))
+            geom_bytes = _build_test_glb(src, albedo_png, normal_png)
+
+            stats = downscaler.downscale_glb(src, dst, max_size=1024)
+            self.assertEqual(stats['images_resized'], 0)
+
+            report = asset_intake.inspect_glb(dst)
+            self.assertEqual(report['errors'], [])
+
+            out_data = dst.read_bytes()
+            jlen, _ = struct.unpack_from('<II', out_data, 12)
+            out_doc = json.loads(out_data[20:20 + jlen])
+            self.assertEqual(downscaler._normal_image_indices(out_doc), {1})
+
+            bin_start = 20 + jlen + 8
+            bv0 = out_doc['bufferViews'][0]
+            out_geom = out_data[bin_start + bv0['byteOffset']:bin_start + bv0['byteOffset'] + bv0['byteLength']]
+            self.assertEqual(out_geom, geom_bytes)
+
+    @unittest.skipIf(Image is None, 'Pillow is optional in CI runner-contract')
     def test_downscales_2k_images_preserves_geometry_and_normalizes(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_dir = Path(tmp)
             src = tmp_dir / 'fixture.glb'
             dst = tmp_dir / 'fixture_1k.glb'
-            geom_bytes = _build_test_glb(src)
+            geom_bytes = _build_test_glb(
+                src,
+                _make_large_png((200, 140, 80), 2048),
+                _make_large_png((180, 128, 220), 2048),
+            )
 
             stats = downscaler.downscale_glb(src, dst, max_size=1024)
             self.assertEqual(stats['images_resized'], 2)
@@ -138,8 +179,11 @@ class DownscaleGlbTexturesTest(unittest.TestCase):
                 with Image.open(io.BytesIO(raw)) as im:
                     self.assertEqual(im.size, (1024, 1024))
                     if img_idx == 1:
-                        center = np.asarray(im, dtype=np.float32)[512, 512] / 127.5 - 1.0
-                        self.assertAlmostEqual(float(np.linalg.norm(center)), 1.0, places=2)
+                        r, g, b = im.getpixel((512, 512))
+                        nx = r / 127.5 - 1.0
+                        ny = g / 127.5 - 1.0
+                        nz = b / 127.5 - 1.0
+                        self.assertAlmostEqual(math.sqrt(nx * nx + ny * ny + nz * nz), 1.0, places=2)
 
 
 if __name__ == '__main__':

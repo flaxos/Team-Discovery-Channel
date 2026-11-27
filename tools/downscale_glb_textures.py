@@ -10,12 +10,10 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import math
 from pathlib import Path
 import struct
 import sys
-
-import numpy as np
-from PIL import Image
 
 
 def _normal_image_indices(document: dict) -> set[int]:
@@ -33,7 +31,56 @@ def _normal_image_indices(document: dict) -> set[int]:
     return indices
 
 
+def _png_dimensions(raw: bytes) -> tuple[int, int] | None:
+    if len(raw) >= 24 and raw[:8] == b'\x89PNG\r\n\x1a\n':
+        return struct.unpack('>II', raw[16:24])
+    return None
+
+
+def _renormalize_normal_image(resized, mode: str):
+    from PIL import Image
+
+    try:
+        import numpy as np
+    except ImportError:
+        np = None
+
+    rgb_img = resized.convert('RGB')
+    if np is not None:
+        arr = np.asarray(rgb_img, dtype=np.float32) / 127.5 - 1.0
+        norms = np.linalg.norm(arr, axis=2, keepdims=True)
+        norms = np.maximum(norms, 1e-6)
+        arr = arr / norms
+        out_rgb = np.clip(np.rint((arr + 1.0) * 127.5), 0.0, 255.0).astype(np.uint8)
+        out_img = Image.fromarray(out_rgb, mode='RGB')
+    else:
+        pixels = []
+        for r, g, b in rgb_img.getdata():
+            nx = r / 127.5 - 1.0
+            ny = g / 127.5 - 1.0
+            nz = b / 127.5 - 1.0
+            length = max(math.sqrt(nx * nx + ny * ny + nz * nz), 1e-6)
+            pixels.append((
+                max(0, min(255, round((nx / length + 1.0) * 127.5))),
+                max(0, min(255, round((ny / length + 1.0) * 127.5))),
+                max(0, min(255, round((nz / length + 1.0) * 127.5))),
+            ))
+        out_img = Image.new('RGB', rgb_img.size)
+        out_img.putdata(pixels)
+
+    if 'A' in mode:
+        alpha = resized.getchannel('A')
+        out_img.putalpha(alpha)
+    return out_img
+
+
 def _resize_image_bytes(raw: bytes, mime: str, max_size: int, is_normal: bool) -> tuple[bytes, bool]:
+    dims = _png_dimensions(raw)
+    if dims is not None and max(dims) <= max_size:
+        return raw, False
+
+    from PIL import Image
+
     with Image.open(io.BytesIO(raw)) as img:
         w, h = img.size
         if max(w, h) <= max_size:
@@ -44,18 +91,7 @@ def _resize_image_bytes(raw: bytes, mime: str, max_size: int, is_normal: bool) -
         mode = img.mode
         resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
         if is_normal:
-            rgb_img = resized.convert('RGB')
-            arr = np.asarray(rgb_img, dtype=np.float32) / 127.5 - 1.0
-            norms = np.linalg.norm(arr, axis=2, keepdims=True)
-            norms = np.maximum(norms, 1e-6)
-            arr = arr / norms
-            out_rgb = np.clip(np.rint((arr + 1.0) * 127.5), 0.0, 255.0).astype(np.uint8)
-            if 'A' in mode:
-                alpha = resized.getchannel('A')
-                resized = Image.fromarray(out_rgb, mode='RGB')
-                resized.putalpha(alpha)
-            else:
-                resized = Image.fromarray(out_rgb, mode='RGB')
+            resized = _renormalize_normal_image(resized, mode)
         buf = io.BytesIO()
         if mime == 'image/jpeg':
             if resized.mode not in ('RGB', 'L'):
