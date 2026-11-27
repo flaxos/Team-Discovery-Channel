@@ -1,0 +1,137 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/level/RoomPlaceholder.tscn" id="base"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/basalt.tres" id="basalt"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/bronze.tres" id="bronze"]
+[ext_resource type="Material" path="res://resources/level_themes/goauld/gold.tres" id="gold"]
+
+[sub_resource type="StandardMaterial3D" id="helm_display"]
+albedo_color = Color(0.08, 0.05, 0.02, 1)
+roughness = 0.28
+emission_enabled = true
+emission = Color(0.85, 0.52, 0.12, 1)
+emission_energy_multiplier = 0.8
+
+[sub_resource type="StandardMaterial3D" id="nav_orb"]
+albedo_color = Color(1.0, 0.75, 0.2, 1)
+roughness = 0.15
+emission_enabled = true
+emission = Color(0.95, 0.65, 0.15, 1)
+emission_energy_multiplier = 1.4
+
+[sub_resource type="StandardMaterial3D" id="crystal_cyan"]
+albedo_color = Color(0.1, 0.6, 0.7, 1)
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.15, 0.75, 0.85, 1)
+emission_energy_multiplier = 1.0
+
+[sub_resource type="BoxMesh" id="mesh_plinth"]
+material = ExtResource("basalt")
+size = Vector3(1.95, 0.12, 0.95)
+
+[sub_resource type="BoxMesh" id="mesh_pedestal"]
+material = ExtResource("bronze")
+size = Vector3(0.58, 0.62, 0.58)
+
+[sub_resource type="BoxMesh" id="mesh_wing"]
+material = ExtResource("bronze")
+size = Vector3(0.62, 0.48, 0.46)
+
+[sub_resource type="BoxMesh" id="mesh_helm_surface"]
+material = ExtResource("basalt")
+size = Vector3(1.85, 0.14, 0.75)
+
+[sub_resource type="BoxMesh" id="mesh_bezel"]
+material = ExtResource("gold")
+size = Vector3(1.72, 0.04, 0.66)
+
+[sub_resource type="BoxMesh" id="mesh_display"]
+material = SubResource("helm_display")
+size = Vector3(1.25, 0.025, 0.46)
+
+[sub_resource type="SphereMesh" id="mesh_orb"]
+material = SubResource("nav_orb")
+radius = 0.12
+height = 0.24
+radial_segments = 16
+rings = 8
+
+[sub_resource type="BoxMesh" id="mesh_key_gold"]
+material = ExtResource("gold")
+size = Vector3(0.12, 0.03, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_crystal"]
+material = SubResource("crystal_cyan")
+size = Vector3(0.06, 0.04, 0.06)
+
+[node name="MothershipBridgeConsole" instance=ExtResource("base")]
+size = Vector3(2, 1.1, 1)
+
+[node name="Mesh" parent="Visuals" index="0"]
+visible = false
+
+[node name="Plinth" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.06, 0)
+mesh = SubResource("mesh_plinth")
+
+[node name="Pedestal" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.42, 0)
+mesh = SubResource("mesh_pedestal")
+
+[node name="WingLeft" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.62, 0.35, 0.04)
+mesh = SubResource("mesh_wing")
+
+[node name="WingRight" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.62, 0.35, 0.04)
+mesh = SubResource("mesh_wing")
+
+[node name="HelmSurface" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.78, 0)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_helm_surface")
+
+[node name="Bezel" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.86, -0.01)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_bezel")
+
+[node name="Display" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.89, -0.04)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_display")
+
+[node name="NavigationOrb" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0, 0.99, 0.04)
+mesh = SubResource("mesh_orb")
+
+[node name="KeyLeft0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.54, 0.90, -0.08)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_key_gold")
+
+[node name="KeyLeft1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.54, 0.87, 0.03)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_key_gold")
+
+[node name="KeyRight0" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.54, 0.90, -0.08)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_key_gold")
+
+[node name="KeyRight1" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.54, 0.87, 0.03)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_key_gold")
+
+[node name="CrystalLeft" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(-0.35, 0.90, 0.14)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_crystal")
+
+[node name="CrystalRight" type="MeshInstance3D" parent="Visuals"]
+position = Vector3(0.35, 0.90, 0.14)
+rotation = Vector3(0.28, 0, 0)
+mesh = SubResource("mesh_crystal")

@@ -49,6 +49,7 @@ const MISSION_TIMED_EXTRACTION: String = "goauld_timed_extraction"
 const MISSION_ALARM_ESCAPE: String = "goauld_alarm_escape"
 const MISSION_TAURI_ALPHA_SITE: String = "tauri_alpha_site"
 const MISSION_TRAVEL_MOTHERSHIP: String = "travel_mothership"
+const MISSION_MOTHERSHIP_OBJECTIVE: String = "mothership_objective"
 ## "scene" is the mission's world. "site" adds a second world beside it (see
 ## MainGameCoordinator). "hidden" keeps an entry out of the lobby.
 const MISSIONS: Dictionary = {
@@ -61,7 +62,8 @@ const MISSIONS: Dictionary = {
 	MISSION_TIMED_EXTRACTION: {"name": "Goa'uld Infiltration — Timed Extraction", "description": "Sabotage the generator, then download the command records. Downloading starts a three-minute extraction window: get every standing operative back to the Stargate before it expires. The countdown continues while menus are open.", "scene": "res://scenes/mission/TimedExtractionMission.tscn"},
 	MISSION_ALARM_ESCAPE: {"name": "Goa'uld Infiltration — Alarm Escape", "description": "Recover the command records and return every standing operative to the Stargate. If a guard raises the alarm, a three-minute extraction countdown starts immediately, even with objectives unfinished. Prevent the alarm for an untimed escape. Menus leave the clock running.", "scene": "res://scenes/mission/AlarmEscapeMission.tscn"},
 	MISSION_TAURI_ALPHA_SITE: {"name": "Alpha Site Outpost — Reconnaissance", "description": "Offworld Tau’ri outpost: traverse the checkpoint to the command center, recover telemetry records, observe the offworld perimeter and extract.", "scene": "res://scenes/mission/TauriAlphaSiteMission.tscn", "hidden": true},
-	MISSION_TRAVEL_MOTHERSHIP: {"name": "Operation Boarding — Mothership Ring Breach", "description": "Travel mission: Dial from SGC to a captured Goa'uld Ha'tak cargo bay, navigate past bulkheads and checkpoints, breach to upper decks via transport rings, and extract.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldMothershipBoardingMission.tscn", "hidden": true}
+	MISSION_TRAVEL_MOTHERSHIP: {"name": "Operation Boarding — Mothership Ring Breach", "description": "Travel mission: Dial from SGC to a captured Goa'uld Ha'tak cargo bay, navigate past bulkheads and checkpoints, breach to upper decks via transport rings, and extract.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldMothershipBoardingMission.tscn", "hidden": true},
+	MISSION_MOTHERSHIP_OBJECTIVE: {"name": "Operation Mothership — Bridge & Engineering", "description": "Travel mission: Infiltrate upper decks, sabotage hyperdrive reactor core, override bridge navigation helm, and extract under shipboard alarm.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldMothershipObjectiveMission.tscn", "hidden": true}
 }
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"

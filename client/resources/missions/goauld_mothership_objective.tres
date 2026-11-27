@@ -1,0 +1,77 @@
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
+[ext_resource type="Script" path="res://scripts/mission/MissionPatrol.gd" id="3_patrol"]
+[ext_resource type="Resource" path="res://resources/levels/ai2_goauld_mothership_objective.tres" id="4_layout"]
+[ext_resource type="Script" path="res://scripts/mission/MissionTrigger.gd" id="5_trigger"]
+
+[sub_resource type="Resource" id="reach_checkpoint"]
+script = ExtResource("2_objective")
+id = &"reach_checkpoint"
+kind = "reach"
+room = &"interior_checkpoint"
+text = "INFILTRATE UPPER DECK CHECKPOINT VIA RINGS OR RAMP"
+
+[sub_resource type="Resource" id="sabotage_hyperdrive"]
+script = ExtResource("2_objective")
+id = &"sabotage_hyperdrive"
+kind = "interact"
+room = &"engineering"
+attachment = &"console"
+text = "SABOTAGE HYPERDRIVE REACTOR CORE CONTROLS"
+prompt = "SABOTAGE HYPERDRIVE"
+
+[sub_resource type="Resource" id="override_bridge_helm"]
+script = ExtResource("2_objective")
+id = &"override_bridge_helm"
+kind = "interact"
+room = &"bridge"
+attachment = &"bridge_console"
+text = "OVERRIDE NAVIGATION HELM ON MOTHERSHIP BRIDGE"
+prompt = "LOCK SHIP TRAJECTORY"
+
+[sub_resource type="Resource" id="extract_gate"]
+script = ExtResource("2_objective")
+id = &"extract"
+kind = "extract"
+room = &"gate"
+marker = &"entry"
+radius = 4.0
+text = "RETURN TO STARGATE FOR EXTRACTION"
+
+[sub_resource type="Resource" id="trigger_release_bridge"]
+script = ExtResource("5_trigger")
+id = &"sabotage_releases_bridge"
+objective_id = &"sabotage_hyperdrive"
+security_id = &"bridge_blast_door"
+notice = "HYPERDRIVE SABOTAGED — BRIDGE BLAST DOOR RELEASED"
+
+[sub_resource type="Resource" id="patrol_cargo"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("vestibule", "cargo_bay")
+size = 1
+
+[sub_resource type="Resource" id="patrol_upper"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("upper_hall", "interior_checkpoint")
+size = 1
+
+[sub_resource type="Resource" id="patrol_engineering"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("corridor_engineering", "engineering")
+size = 1
+
+[sub_resource type="Resource" id="patrol_bridge"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("bridge")
+size = 1
+
+[resource]
+script = ExtResource("1_definition")
+title = "GOA'ULD MOTHERSHIP — BRIDGE & ENGINEERING"
+layout = ExtResource("4_layout")
+objectives = Array[ExtResource("2_objective")]([SubResource("reach_checkpoint"), SubResource("sabotage_hyperdrive"), SubResource("override_bridge_helm"), SubResource("extract_gate")])
+patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_cargo"), SubResource("patrol_upper"), SubResource("patrol_engineering"), SubResource("patrol_bridge")])
+triggers = Array[ExtResource("5_trigger")]([SubResource("trigger_release_bridge")])
+airman_support = false

@@ -1,0 +1,52 @@
+[gd_resource type="Resource" script_class="LevelRoomPreset" format=3]
+
+[ext_resource type="Script" path="res://scripts/level/LevelRoomPreset.gd" id="1_preset"]
+[ext_resource type="Script" path="res://scripts/level/LevelRoomAttachment.gd" id="2_attachment"]
+[ext_resource type="PackedScene" path="res://scenes/props/MothershipReactorCore.tscn" id="3_reactor"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldGeneratorConsole.tscn" id="4_console"]
+
+[sub_resource type="Resource" id="a_reactor_core"]
+script = ExtResource("2_attachment")
+id = &"reactor_core"
+component = &"equipment"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+approach = Vector3(0, 0, -2.5)
+placeholder_size = Vector3(2.4, 2.8, 3.2)
+scene = ExtResource("3_reactor")
+bounds = AABB(-1.2, 0, -1.6, 2.4, 2.8, 3.2)
+references = PackedStringArray("systems.power", "objective.sabotage")
+
+[sub_resource type="Resource" id="a_console"]
+script = ExtResource("2_attachment")
+id = &"console"
+component = &"console"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0, -2.6)
+approach = Vector3(-1.2, 0, 1.2)
+placeholder_size = Vector3(1, 1, 0.8)
+scene = ExtResource("4_console")
+bounds = AABB(-0.5, 0, -0.4, 1, 1, 0.8)
+references = PackedStringArray("systems.diagnostics")
+
+[sub_resource type="Resource" id="a_patrol_entry"]
+script = ExtResource("2_attachment")
+id = &"patrol_entry"
+component = &"patrol"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+approach = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="a_patrol_reactor"]
+script = ExtResource("2_attachment")
+id = &"patrol_reactor"
+component = &"patrol"
+local_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+approach = Vector3(0, 0, 0)
+
+[resource]
+script = ExtResource("1_preset")
+id = &"mothership_engineering"
+label = "Mothership engineering"
+compatible_modules = PackedStringArray("room10")
+attachments = Array[ExtResource("2_attachment")]([SubResource("a_reactor_core"), SubResource("a_console"), SubResource("a_patrol_entry"), SubResource("a_patrol_reactor")])
+system_references = PackedStringArray("systems.power")
+description = "Ha'tak engineering core with hyperdrive reactor machinery and diagnostics console."
+synonyms = PackedStringArray("engineering", "hyperdrive", "reactor core")
