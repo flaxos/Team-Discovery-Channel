@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="MissionDefinition" load_steps=15 format=3]
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
 [ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
 [ext_resource type="Script" path="res://scripts/mission/MissionPatrol.gd" id="3_patrol"]
 [ext_resource type="Resource" path="res://resources/levels/ai2_goauld_mothership_boarding.tres" id="4_layout"]
 [ext_resource type="Script" path="res://scripts/mission/MissionObjectiveVariant.gd" id="5_variant"]
+[ext_resource type="Script" path="res://scripts/mission/MissionTrigger.gd" id="6_trigger"]
 
 [sub_resource type="Resource" id="reach_cargo"]
 script = ExtResource("2_objective")
@@ -91,11 +92,20 @@ briefing_note = "Sweep the Deck 1 transport ring platform prior to downloading t
 insert_before_id = &"download_manifest"
 bonus_objectives = Array[ExtResource("2_objective")]([SubResource("obj_secure_upper_rings")])
 
+[sub_resource type="Resource" id="trigger_ring_notice"]
+script = ExtResource("6_trigger")
+id = &"ring_chamber_entry_notice"
+condition = "room_entered"
+room = &"ring_lower"
+action = "show_notice"
+notice = "RING CHAMBER REACHED — STEP ONTO PLATFORM TO BREACH DECK 1"
+
 [resource]
 script = ExtResource("1_definition")
 title = "GOA'ULD MOTHERSHIP — BOARDING & RING BREACH"
 layout = ExtResource("4_layout")
 objectives = Array[ExtResource("2_objective")]([SubResource("reach_cargo"), SubResource("reach_rings"), SubResource("reach_checkpoint"), SubResource("download_manifest"), SubResource("extract_gate")])
 patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_cargo"), SubResource("patrol_upper")])
+triggers = Array[ExtResource("6_trigger")]([SubResource("trigger_ring_notice")])
 airman_support = false
 objective_variants = Array[ExtResource("5_variant")]([SubResource("variant_standard"), SubResource("variant_ramp_flank_recon"), SubResource("variant_upper_ring_sweep")])

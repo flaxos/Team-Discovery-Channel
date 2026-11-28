@@ -327,15 +327,17 @@ func _spawn_patrols() -> void:
 			jaffa.start_patrol(route)
 
 
-func _show_objective(index: int) -> void:
+func _show_objective(_index: int) -> void:
 	if hud == null:
 		return
 	var objective := objectives.current()
 	if objective == null:
 		hud.update_objective("ALL OBJECTIVES COMPLETE", Color(0.3, 1.0, 0.5))
 	else:
+		var total := maxi(1, objectives.enabled_count())
+		var current_num := mini(total, objectives.completed_count() + 1)
 		hud.update_objective(
-			"OBJECTIVE %d/%d: %s" % [index + 1, definition.objectives.size(), objective.text],
+			"OBJECTIVE %d/%d: %s" % [current_num, total, objective.text],
 			Color(0.3, 1.0, 0.5) if objective.kind == "extract" else Color(0.4, 0.9, 1.0)
 		)
 
@@ -414,7 +416,7 @@ func _show_debrief(victory: bool) -> void:
 					else ("EXTRACTION WINDOW EXPIRED" if expired else "ALL OPERATIVES DOWN — MISSION ABORTED")
 				),
 				"objectives": "OBJECTIVES COMPLETE: %d / %d" % [
-					objectives.index, definition.objectives.size()
+					objectives.completed_count(), objectives.enabled_count()
 				],
 				"squad": "OPERATIVES STANDING: %d" % objectives.standing().size(),
 				"status": "STATUS: %s — %s" % [

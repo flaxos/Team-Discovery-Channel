@@ -73,13 +73,29 @@ A client can finish its navigation bake before the host. Snapshot requests recei
 
 A final mission result stops actions. Restart creates a fresh world, objective index, event list and initial locks. SGC Defense keeps `WaveManager` and has no event director.
 
+## General triggers, objective enabling & acoustics (EV-2 chunk 4)
+
+Chunk 4 rounds out `MissionTrigger`, `MissionObjectives`, `MissionEvents`, and sentry hearing (`LevelAcoustics`):
+
+- **Additional trigger conditions (`MissionTrigger.condition`)**:
+  - `room_entered`: fires once when any **standing** operative (`MissionObjectives.standing()`) occupies `trigger.room`'s `LevelModule.occupied` bounds. Downed or dead operatives do not trigger room entry.
+  - `alert_searching`: fires once when `MissionAlert` reaches `SEARCHING` (or `ALARM`).
+- **Additional actions (`MissionTrigger.action`)**:
+  - `lock_door`: starts unlocked and locks `trigger.security_id` when fired. If an NPC or operative currently occupies the doorway (`ModularDoor.set_locked(true)` returns `false`), `MissionEvents` queues `_pending_locks` and locks cleanly as soon as the doorway clears. Topology validation rejects any `lock_door` whose security door permanently blocks an objective (`Lock trigger permanently blocks objective`).
+  - `enable_objective`: sets `MissionObjective.initially_enabled = false` objectives active at runtime via `target_objective_id`, updating `MissionInteractable` visibility/`"interactable"` group membership and inserting ahead of later objectives (including `extract`). Validation ensures every `initially_enabled = false` objective has at least one `enable_objective` trigger and that final extraction always starts enabled.
+  - `show_notice`: displays a HUD banner toast without touching doors, timers, or objectives (`tauri_alpha_site` observation deck entry and `goauld_mothership_boarding` lower transport ring entry consume this).
+- **Dynamic objective replication (`MissionObjectives.sync_state`)**: replicates monotonic `(index, enabled_bits, completed_bits)` snapshots to peers and late joiners so dynamic enables and skipped dormant steps cannot be undone by stale packets.
+- **Wall & closed-door sound propagation (`LevelAcoustics`)**: `JaffaAI.hear()` combines direct barrier attenuation (`12.0 m` per solid structural partition, merged within `0.75 m` and ignoring interior low props/`DeployableShield`) with shortest portal-graph diffraction (`6.0 m` penalty per closed `ModularDoor`, `0.0 m` through open doors), plus `MissionWorld` isolation between coexisting worlds.
+
 ## Scope and verification
 
-EV-2 remains incremental. Other alert levels, room conditions, objective enabling, optional/parallel objectives and power visuals remain future work. Add each only alongside a mission definition that needs it (D-003).
+EV-2 triggers, dynamic objective enabling, door locking/releasing, notices, countdowns, and wall/door acoustics are covered across:
 
-- `test_mission_events`: definition validation, unearnable-stage rejection, real generator interaction, reach/downed rejection, TA-3 blocked/released navigation, one-shot behavior, result freeze and retry.
-- `test_mission_events_multiplayer`: real ENet late join while locked and after release, stale snapshot monotonicity, no stale notice, connected retry, rejected client event/door calls and forged/out-of-reach console identities, a real client console release and a second reset.
-- `test_mission_events_dedicated`: the same network contract with a pawnless host. The first completed objective is a server-controller fixture for late join; after retry the remote operative earns the release through the real console.
+- `test_mission_events`, `_multiplayer`, `_dedicated`
+- `test_mission_countdown`, `_multiplayer`, `_dedicated`
+- `test_alarm_escape`, `_multiplayer`, `_dedicated`
+- `test_ev2_triggers_and_acoustics`, `_multiplayer`, `_dedicated`
+- `test_jaffa_hearing`
 
 [Review and captures](../reviews/2026-11-17-ev2-1-objective-doors.md).
 

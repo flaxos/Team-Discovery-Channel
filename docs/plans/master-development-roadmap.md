@@ -57,11 +57,11 @@ Paths are under `client/` unless they start with `tools/` or `docs/`.
 | Suppression and firefights | Implemented for modular Jaffa sentries | Operative ballistic hits and nearby rounds can suppress a sentry on the host. Suppressed guards crouch, seek authored cover and hold their fire for a bounded interval. [Rules and tests](../maps/modular-flanking.md#suppression) |
 | Door interaction | Verified | `ModularDoor` open/close, server-validated, snapshots; AI opens doors with `open_for`; TA-3 closes AI-opened doors after clearance, respects occupied doorways and preserves manual openings (`test_modular_navigation_ta3_multiplayer` covers late-join snapshot and closure) |
 | Level-wide alert and alarm | Awaiting human | `MissionAlert` (EV-1): calm, alerted and alarm levels; a runner must reach an alarm console; operatives can disable consoles; reinforcement budget; `test_mission_alert`, `test_mission_alert_multiplayer` |
-| Locked doors and access control | EV-2-1 implemented; human review pending | `MissionTrigger`/`MissionEvents` lock command security at mission startup and release it when generator sabotage completes; existing door authority/snapshots and TA-3 navigation remain in charge. Single-process, real listen/dedicated peers and retry: `test_mission_events*`. [Contract](../maps/mission-events.md) |
+| Locked doors and access control | EV-2 complete (chunks 1–4); human review pending | `MissionTrigger`/`MissionEvents` handle `objective_completed`, `alarm_raised`, `alert_searching`, and `room_entered` conditions with `release_door`, `lock_door` (occupied-doorway deferred), `start_timer`, `enable_objective`, and `show_notice` actions, plus monotonic bitmask snapshots and retry across listen/dedicated peers (`test_mission_events*`, `test_ev2_triggers_and_acoustics*`). [Contract](../maps/mission-events.md) |
 | NPC avoidance and rerouting | Awaiting human (TA-3) | `LevelNavigator` uses the room graph with live locks and navmesh legs, and steers nearby NPCs to their right. `blocked_door` holds only when no alternate route can be built. `test_modular_navigation_ta3` |
 | Mounted weapons | Verified (SGC) | Fixed .50 cal turrets and the Heavy tripod; airmen can crew them. Not available as a modular attachment |
 | Deployable equipment | Verified (SGC) | Claymore, C4, ballistic shield, smoke; smoke blocks AI sight |
-| Stealth interactions, takedowns | Partial | Body dragging exists. Weapon noise with a suppressed MP5 and sentry hearing and search (ST-2, `test_jaffa_hearing`). SW-1 adds rear takedowns on unaware sentries and quiet Zat incapacitation (`test_stealth_takedowns_and_weapons`). Knife combat and body discovery remain unimplemented. |
+| Stealth interactions, takedowns | Partial | Body dragging exists. Weapon noise with a suppressed MP5, sentry hearing/search (ST-2), and `LevelAcoustics` wall/closed-door sound propagation (`test_jaffa_hearing`, `test_ev2_triggers_and_acoustics`). SW-1 adds rear takedowns on unaware sentries and quiet Zat incapacitation (`test_stealth_takedowns_and_weapons`). Knife combat and body discovery remain unimplemented. |
 
 ### Stargate systems
 
@@ -229,20 +229,11 @@ Every milestone ends with the full regression profile, a draft PR and updated ma
 - **Risks:** this is where a second mission manager could appear. `WaveManager` stays the SGC Defense director and is not generalised.
 - **Complexity:** M · Fable · independent of F, J.
 
-**EV-2 — Stages, triggers and door or power actions**
+**EV-2 — Stages, triggers and door or power actions** · **built (chunks 1–4; `docs/maps/mission-events.md`, `test_mission_events*`, `test_mission_countdown*`, `test_alarm_escape*`, `test_ev2_triggers_and_acoustics*`)**
 
-**Chunk 1 implemented (17 November 2026):** generator-objective completion releases the existing command security door, with validated typed data, a host-owned one-shot action, initialized late-join snapshots and connected retry. See [contract](../maps/mission-events.md) and [review](../reviews/2026-11-17-ev2-1-objective-doors.md). The remaining trigger/action types below are not implemented by this chunk.
-
-- **Experience:** missions with a middle: cut the power to open a door, a timed escape after sabotage.
-- **Baseline:** sequential objectives of three kinds (`reach`, `interact`, `extract`).
-- **New:** triggers (objective complete, alert level, room entered, timer) and actions (lock or unlock a security door by `security_id`, start a timer, enable an objective, show a notice). Optional and parallel objectives only if a designed mission needs them.
-- **Non-goals:** visual scripting, branching narrative.
-- **Prerequisites:** EV-1 and at least two designed missions that need it.
-- **Components:** `scripts/mission/*`, `ModularDoor.set_locked`.
-- **Multiplayer / AI:** each action is a server call with its own snapshot; locking a door needs TA-3 rerouting to avoid stranded patrols.
-- **Acceptance:** a console unlocks a named security door for all peers and late joiners; a timer failure ends the mission through the existing result path.
-- **Risks:** premature generality. Add a trigger or action only when a mission definition uses it.
-- **Complexity:** M–L · Fable.
+- **Chunk 1:** objective-completed door releases with topology validation, late-join snapshots, and retry.
+- **Chunk 2 & 3:** `start_timer` extraction windows (`goauld_timed_extraction`, `goauld_alarm_escape`).
+- **Chunk 4:** general `room_entered` and `alert_searching` conditions, `lock_door` (with occupied-doorway deferral and soft-lock proof), `enable_objective` (`initially_enabled = false` + monotonic `(index, enabled_bits, completed_bits)` replication), `show_notice` (`tauri_alpha_site` & `goauld_mothership_boarding` consumers), and wall/closed-door sentry sound propagation (`LevelAcoustics` + `JaffaAI.hear`).
 
 ### D — Tactical AI and combat
 

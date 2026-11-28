@@ -117,7 +117,7 @@ Community asset preparation now includes source-verified shortlists, a staged in
 | **Content pipeline** | 15 structural modules, 20 room presets, 8 composites, a visual editor, and an AI authoring CLI with a graph planner and topology checks |
 | **First faction art** | The `goauld` theme: dark stone, bronze and gold palette and built pieces across 14 of 15 modules (`Room13SpecialHall` pending). `tauri_sgc` is palette-authored (`art_status = "authored"`) across all 7 resolver slots with observation window glass for `room04`. Not yet reviewed by a person. [Kit guide](docs/maps/goauld-theme-kit.md) |
 | **Placeholder only** | The other faction themes (`asgard`, `tokra`, `replicator` carry `art_status = "fallback"`). External Serpent helmet authorship remains open (native hood active by default); owner art acceptance remains open across enemy Jaffa and 27/28 asset rows. `MothershipInteriorDoor.tscn` remains a decorative bulkhead shell. Several class perks named in the lobby text |
-| **Not built** | Sound propagation through walls. General room-entry triggers and objective enabling beyond the implemented objective-completion/raised-alarm actions. Cover in rooms without low props (bare modules fall back to a marker). Non-Goa'uld/non-Tau'ri structural module kits. Outdoor terrain. SW-3 specialist faction weapons/enemies |
+| **Not built** | Cover in rooms without low props (bare modules fall back to a marker). Non-Goa'uld/non-Tau'ri structural module kits. Outdoor terrain. SW-3 specialist faction weapons/enemies. Power visual swaps on unrelated props |
 | **Accepted by people** | Phases 1 to 3, by one owner playing alone on 14 November 2026 ([record](docs/reviews/2026-11-14-owner-solo-uat.md)). Not yet run by two people: late join, shared extraction, revive, mixed-route play, SGC Defense, and two-world gate travel on the current build |
 
 **TA-2 suppression.** Closely spaced ballistic fire makes a modular sentry duck and seek nearby cover. An amber down arrow marks the opening for the squad. [Behavior and verification](docs/maps/modular-flanking.md#suppression).
@@ -204,7 +204,7 @@ Automated suites never satisfy a human gate. The gates were defined for two peop
 |---|---|---|---|
 | A | Extraction mission hardening | EX-1 | Now |
 | B | Stealth and perception | ST-1 | CI repair |
-| C | Mission scripting and events | EV-1 | ST-1, preferably GI-1 |
+| C | Mission scripting and events | EV-1 & EV-2 (`test_mission_events*`, `test_mission_countdown*`, `test_alarm_escape*`, `test_ev2_triggers_and_acoustics*`, plus wall/door acoustics in `LevelAcoustics`) implemented | ST-1, preferably GI-1 |
 | D | Tactical AI and combat | TA-1, TA-2 (flanking, suppression, & modular friendly squad tactics: `test_ta2_squad_tactics*`), and TA-3 implemented | ST-1 |
 | E | Goa'uld infiltration mission | GI-0 | Now (layout), ST-1 (mission) |
 | F | Goa'uld architecture and visuals | GA-0/GA-1 done; GA-2 part 1 corridor kit implemented for review ([brief](docs/maps/goauld-visual-brief.md), [kit](docs/maps/goauld-theme-kit.md)); human art review, then larger chambers | Now |

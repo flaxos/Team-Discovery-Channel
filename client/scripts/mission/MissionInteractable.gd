@@ -23,14 +23,16 @@ func _ready() -> void:
 
 func _refresh(_index: int) -> void:
 	var mine := objectives.definition.objectives.find(objective)
-	var active := objectives.index == mine
+	var is_enabled := objectives.is_objective_enabled(mine)
+	var is_done := objectives.is_objective_completed(mine)
+	var active := is_enabled and not is_done and objectives.index == mine
 	# Only the active objective answers the interact key, so a finished console
 	# cannot swallow input meant for a door.
 	if active:
 		add_to_group("interactable")
 	elif is_in_group("interactable"):
 		remove_from_group("interactable")
-	prompt.visible = objectives.index >= mine
+	prompt.visible = active or is_done
 	var bindings := get_node_or_null("/root/KeybindingManager")
 	var label := "[E] " + objective.prompt
 	prompt.text = (bindings.format_prompt(label) if bindings != null else label) if active else "COMPLETE"

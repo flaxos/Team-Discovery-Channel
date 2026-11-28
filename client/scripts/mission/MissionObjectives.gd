@@ -4,11 +4,14 @@ extends Node
 ## every completion; clients receive the index of the active objective and a snapshot on
 ## joining. Objectives before `index` are complete; `index == size` means all are.
 signal objective_changed(index: int)
+signal objective_enabled(objective_id: StringName)
 signal completed
 var definition: MissionDefinition
 var level: LevelAssembly
 var players: Node
 var index := 0
+var enabled: Array[bool] = []
+var completed_mask := 0
 var beacon: MeshInstance3D
 var beacon_label: Label3D
 ## Optional mission-owned admission check, evaluated before accepting a completion.
@@ -19,17 +22,85 @@ func setup(mission: MissionDefinition, assembly: LevelAssembly, players_containe
 	definition = mission
 	level = assembly
 	players = players_container
+	enabled.clear()
+	completed_mask = 0
 	for objective in definition.objectives:
+		enabled.append(objective != null and objective.initially_enabled)
 		if objective.kind == "interact":
 			var station := MissionInteractable.new()
 			station.name = "MissionInteract"
 			station.objectives = self
 			station.objective = objective
 			_attachment_node(objective).add_child(station)
+	index = _resolve_active_index()
 	_build_beacon()
 	_show()
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		request_snapshot.rpc_id(1)
+
+
+func is_objective_enabled(idx: int) -> bool:
+	return idx >= 0 and idx < enabled.size() and enabled[idx]
+
+
+func is_objective_completed(idx: int) -> bool:
+	return idx >= 0 and idx < definition.objectives.size() and (completed_mask & (1 << idx)) != 0
+
+
+func enabled_count() -> int:
+	return enabled.count(true)
+
+
+func completed_count() -> int:
+	if definition == null:
+		return 0
+	var done := 0
+	for i in range(definition.objectives.size()):
+		if is_objective_enabled(i) and is_objective_completed(i):
+			done += 1
+	return done
+
+
+func _valid_mask() -> int:
+	return (1 << definition.objectives.size()) - 1 if definition != null else 0
+
+
+func _enabled_mask() -> int:
+	var bits := 0
+	for i in range(enabled.size()):
+		if enabled[i]:
+			bits |= 1 << i
+	return bits
+
+
+func _resolve_active_index_for(enabled_bits: int, completed_bits: int) -> int:
+	if definition == null:
+		return 0
+	for i in range(definition.objectives.size()):
+		var bit := 1 << i
+		if (enabled_bits & bit) != 0 and (completed_bits & bit) == 0:
+			return i
+	return definition.objectives.size()
+
+
+func _resolve_active_index() -> int:
+	return _resolve_active_index_for(_enabled_mask(), completed_mask)
+
+
+func enable_objective(objective_id: StringName) -> bool:
+	if not multiplayer.is_server() or definition == null or is_complete():
+		return false
+	for i in range(definition.objectives.size()):
+		var obj := definition.objectives[i]
+		if obj != null and obj.id == objective_id:
+			if enabled[i] or is_objective_completed(i):
+				return false
+			var next_enabled := _enabled_mask() | (1 << i)
+			var next_index := _resolve_active_index_for(next_enabled, completed_mask)
+			SGCNetworkManager.mission_rpc(self, &"sync_state", [next_index, next_enabled, completed_mask])
+			sync_state(next_index, next_enabled, completed_mask)
+			return true
+	return false
 
 
 func current() -> MissionObjective:
@@ -99,30 +170,66 @@ func complete_interaction(objective: MissionObjective) -> bool:
 func _advance(expected: int) -> bool:
 	if not multiplayer.is_server() or expected != index or is_complete():
 		return false
+	if not is_objective_enabled(expected) or is_objective_completed(expected):
+		return false
 	if advancement_allowed.is_valid() and not advancement_allowed.call():
 		return false
-	var next := index + 1
-	SGCNetworkManager.mission_rpc(self, &"sync_state", [next])
-	sync_state(next)
+	var next_completed := completed_mask | (1 << expected)
+	var enabled_bits := _enabled_mask()
+	var next := _resolve_active_index_for(enabled_bits, next_completed)
+	SGCNetworkManager.mission_rpc(self, &"sync_state", [next, enabled_bits, next_completed])
+	sync_state(next, enabled_bits, next_completed)
 	return true
 
 
 @rpc("authority", "call_local", "reliable")
-func sync_state(value: int) -> void:
-	# Monotonic: a snapshot crossing a live update, or a repeat, changes nothing.
-	if value <= index or value > definition.objectives.size():
+func sync_state(value: int, enabled_bits: int = -1, completed_bits: int = -1) -> void:
+	# Monotonic: a snapshot crossing a live update, or a repeat, cannot undo completed/enabled bits.
+	if definition == null:
 		return
-	index = value
+	if enabled_bits < 0:
+		if value <= index or value > definition.objectives.size():
+			return
+		var prev_done := is_complete()
+		for i in range(value):
+			if is_objective_enabled(i):
+				completed_mask |= 1 << i
+		index = maxi(value, _resolve_active_index())
+		_show()
+		objective_changed.emit(index)
+		if is_complete() and not prev_done:
+			completed.emit()
+		return
+	var valid := _valid_mask()
+	var incoming_enabled := enabled_bits & valid
+	var incoming_completed := completed_bits & valid
+	var prev_enabled := _enabled_mask()
+	var prev_completed := completed_mask
+	var prev_index := index
+	var prev_complete := is_complete()
+	var newly_enabled: Array[StringName] = []
+	for i in range(definition.objectives.size()):
+		var bit := 1 << i
+		if (incoming_enabled & bit) != 0 and not enabled[i]:
+			enabled[i] = true
+			newly_enabled.append(definition.objectives[i].id)
+	completed_mask |= incoming_completed
+	var next_index := _resolve_active_index()
+	if _enabled_mask() == prev_enabled and completed_mask == prev_completed and next_index == prev_index:
+		return
+	index = next_index
 	_show()
+	for obj_id: StringName in newly_enabled:
+		objective_enabled.emit(obj_id)
 	objective_changed.emit(index)
-	if is_complete():
+	if is_complete() and not prev_complete:
 		completed.emit()
 
 
 @rpc("any_peer", "call_remote", "reliable")
 func request_snapshot() -> void:
 	if multiplayer.is_server():
-		sync_state.rpc_id(multiplayer.get_remote_sender_id(), index)
+		sync_state.rpc_id(multiplayer.get_remote_sender_id(), index, _enabled_mask(), completed_mask)
 
 
 func _build_beacon() -> void:
