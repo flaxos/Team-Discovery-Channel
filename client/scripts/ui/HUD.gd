@@ -674,10 +674,11 @@ func _update_weapon_display() -> void:
 		gadget_label.modulate = Color(1.0, 0.85, 0.35)
 
 	# Append shared tactical kit indicators
-	gadget_label.text += "  |  [%s] CLAYMORE (%d/%d)  |  [%s] SHIELD (%d/%d)  |  [%s] SMOKE (%d/%d)" % [
+	gadget_label.text += "  |  [%s] CLAYMORE (%d/%d)  |  [%s] SHIELD (%d/%d)  |  [%s] SMOKE (%d/%d)  |  [%s] KNIFE (%d/%d)" % [
 		_bindings().binding_text("plant_claymore"), local_player.claymore_charges, local_player.MAX_CLAYMORE_CHARGES,
 		_bindings().binding_text("deploy_shield"), local_player.deployable_shields_count, local_player.MAX_DEPLOYABLE_SHIELDS,
 		_bindings().binding_text("throw_smoke"), local_player.smoke_grenades_count, local_player.MAX_SMOKE_GRENADES,
+		_bindings().binding_text("throw_knife"), local_player.throwing_knives_count, local_player.MAX_THROWING_KNIVES,
 	]
 
 

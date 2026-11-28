@@ -46,6 +46,8 @@ MULTIPLAYER = (
     'test_campaign_variation_dedicated',
     'test_ow1_exterior_gate_site_multiplayer',
     'test_ow1_exterior_gate_site_dedicated',
+    'test_stealth_body_discovery_and_cqc_multiplayer',
+    'test_stealth_body_discovery_and_cqc_dedicated',
 )
 FATAL = re.compile(r'(?:SCRIPT ERROR:|(?:^|\n)ERROR:|Assertion failed|WARNING: ObjectDB|AddressSanitizer|Segmentation fault)', re.MULTILINE)
 ANSI = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')

@@ -210,7 +210,7 @@ Automated suites never satisfy a human gate. The gates were defined for two peop
 | F | Goa'uld architecture and visuals | GA-0/GA-1 done; GA-2 part 1 corridor kit implemented for review ([brief](docs/maps/goauld-visual-brief.md), [kit](docs/maps/goauld-theme-kit.md)); human art review, then larger chambers | Now |
 | G | Stargate world transitions | GT-1, GT-2, and GT-3 done | Complete (CA-1 / GA-2 / AP-1 next) |
 | H | Expanded co-op mechanics | CO-1 (`test_offworld_resupply`, `_multiplayer`) & CO-2 (`test_ammunition_sharing*`, `test_co2_roles_and_cover*`) complete | GI-1 |
-| I | Special weapons and faction mechanics | SW-1 (`test_stealth_takedowns_and_weapons`) & SW-2 (`test_goauld_personal_shield`, `_multiplayer`, `_dedicated`) done; SW-3 next | ST-2 |
+| I | Special weapons and faction mechanics | SW-1 (`test_stealth_takedowns_and_weapons`, `test_stealth_body_discovery_and_cqc*`: takedowns, Zat, body discovery, combat knife / thrown knife CQC) & SW-2 (`test_goauld_personal_shield`, `_multiplayer`, `_dedicated`) done; SW-3 next | ST-2 |
 | J | Outdoor world construction | OW-0 & OW-1 (`docs/plans/outdoor-world-boundary.md`, `OutdoorBoundary`, `OutdoorGateSiteMission.tscn`, `test_ow0_outdoor_boundary`, `test_ow1_exterior_gate_site*`) implemented; OW-2 next | Complete for OW-0/OW-1 |
 | K | Other factions and locations | Alpha Site mission | EV-1 |
 | L | Campaign and replayability | CA-1 & CA-2 implemented (Operation Ha'tak Strike, offworld difficulty tiers, deterministic run seeds, mutators, patrol/objective variation, tactical ratings/career records: `test_campaign_progression`, `test_campaign_variation_and_tiers`, `_multiplayer`, `_dedicated`) | GT-3 and two offworld missions |

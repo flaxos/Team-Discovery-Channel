@@ -23,10 +23,13 @@ var awareness := 0.0
 var stimulus := Vector3.INF
 ## The operative an alerted Jaffa is engaging, while it is still being seen.
 var target: Node3D
+## The undiscovered fallen or stunned fellow Jaffa spotted on this tick, if any.
+var discovered_body: Node3D = null
 var searching := false
 var unseen := 0.0
 var _clock := 0.0
 var _containers: Array[Node] = []
+var _enemies_container: Node = null
 
 
 func _init(body: Node3D) -> void:
@@ -62,6 +65,13 @@ func update(delta: float) -> String:
 		unseen += dt
 		target = null
 		return "lost" if unseen >= float(jaffa.lose_target_time) else ""
+	var body := visible_undiscovered_body()
+	if body != null:
+		discovered_body = body
+		var body_health := body.get_node_or_null("HealthComponent") as HealthComponent
+		if body_health != null and body_health.is_dead:
+			return "body_dead"
+		return "body_stunned"
 	if not searching:
 		awareness = maxf(0.0, awareness - dt / float(jaffa.forget_time))
 		level = Level.SUSPICIOUS if awareness > 0.0 else Level.UNAWARE
@@ -108,6 +118,32 @@ func visible_target() -> Node3D:
 	return best if best != null else _nearest_seen(downed)
 
 
+## Nearest visible, non-vaporized, undiscovered dead or Zat-stunned fellow Jaffa.
+func visible_undiscovered_body() -> Node3D:
+	var enemies := _enemy_container()
+	if enemies == null:
+		return null
+	var dead_bodies: Array[Node3D] = []
+	var stunned_bodies: Array[Node3D] = []
+	for child in enemies.get_children():
+		var body := child as Node3D
+		if body == null or body == jaffa or not is_instance_valid(body) or not body.is_inside_tree() or not body.visible:
+			continue
+		if bool(body.get(&"body_discovered_flag")):
+			continue
+		var health := body.get_node_or_null("HealthComponent") as HealthComponent
+		if health == null or health.is_vaporized:
+			continue
+		if health.is_dead:
+			dead_bodies.append(body)
+		elif health.is_stunned:
+			stunned_bodies.append(body)
+	var dead_seen := _nearest_seen(dead_bodies)
+	if dead_seen != null:
+		return dead_seen
+	return _nearest_seen(stunned_bodies)
+
+
 func can_see(body: Node3D) -> bool:
 	var here: Vector3 = jaffa.global_position
 	var offset: Vector3 = body.global_position - here
@@ -148,3 +184,11 @@ func _operative_containers() -> Array[Node]:
 			if found != null:
 				_containers.append(found)
 	return _containers
+
+
+func _enemy_container() -> Node:
+	if _enemies_container != null and (not is_instance_valid(_enemies_container) or not _enemies_container.is_inside_tree()):
+		_enemies_container = null
+	if _enemies_container == null and bool(jaffa.is_inside_tree()):
+		_enemies_container = MissionWorld.find(jaffa as Node, "Enemies")
+	return _enemies_container

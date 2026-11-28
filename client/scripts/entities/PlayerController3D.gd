@@ -11,6 +11,8 @@ const DEPLOYABLE_SHIELD_PATH: String = "res://scenes/props/DeployableShield.tscn
 const DeployableShieldScript = preload("res://scripts/props/DeployableShield.gd")
 const SMOKE_GRENADE_PATH: String = "res://scenes/weapons/SmokeGrenade.tscn"
 const SmokeGrenadeScript = preload("res://scripts/weapons/SmokeGrenade.gd")
+const THROWN_KNIFE_PATH: String = "res://scenes/weapons/ThrownKnife.tscn"
+const ThrownKnifeScript = preload("res://scripts/weapons/ThrownKnife.gd")
 const SGCAirmanAIScript = preload("res://scripts/entities/SGCAirmanAI.gd")
 const RadialCommandWheelScript = preload("res://scripts/ui/RadialCommandWheel.gd")
 const RingScan := preload("res://scripts/props/ring_transport_scan.gdshader")
@@ -153,6 +155,10 @@ var deployable_shields_count: int = 1
 const MAX_DEPLOYABLE_SHIELDS: int = 1
 var smoke_grenades_count: int = 2
 const MAX_SMOKE_GRENADES: int = 2
+var throwing_knives_count: int = 2
+const MAX_THROWING_KNIVES: int = 2
+var knife_throw_cooldown: float = 0.0
+const KNIFE_THROW_COOLDOWN_S: float = 0.55
 var q_press_time_ms: int = 0
 var command_press_time_ms: int = 0
 var is_holding_command_input: bool = false
@@ -365,6 +371,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_plant_claymore()
 	elif event.is_action_pressed("melee"):
 		try_melee_strike()
+	elif event.is_action_pressed("throw_knife"):
+		try_throw_knife()
 	elif event.is_action_pressed("reload") and current_weapon != null:
 		current_weapon.reload()
 	elif event.is_action_pressed("zoom_in") or event.is_action_pressed("zoom_out"):
@@ -614,6 +622,7 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 		return
 	melee_cooldown = maxf(0.0, melee_cooldown - delta)
+	knife_throw_cooldown = maxf(0.0, knife_throw_cooldown - delta)
 
 	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
 	if not is_window_focused or _is_ui_modal_open():
@@ -1182,7 +1191,7 @@ func _confirm_turret_deployment() -> void:
 		turret_cooldown = TURRET_COOLDOWN_S
 
 
-enum FieldKitAction { SATCHEL, CLAYMORE, SMOKE, SHIELD }
+enum FieldKitAction { SATCHEL, CLAYMORE, SMOKE, SHIELD, THROW_KNIFE }
 
 
 func _field_kit_parent() -> Node:
@@ -1236,17 +1245,18 @@ func revive_health_ratio() -> float:
 
 func _send_field_kit_inventory() -> void:
 	if is_inside_tree() and multiplayer != null and multiplayer.has_multiplayer_peer() and multiplayer.is_server() and peer_id in multiplayer.get_peers():
-		_confirm_field_kit.rpc_id(peer_id, claymore_charges, c4_charges_remaining, smoke_grenades_count, deployable_shields_count, medkit_charges)
+		_confirm_field_kit.rpc_id(peer_id, claymore_charges, c4_charges_remaining, smoke_grenades_count, deployable_shields_count, medkit_charges, throwing_knives_count)
 
 
 @rpc("any_peer", "call_remote", "reliable")
-func _confirm_field_kit(claymore: int, satchel: int, smoke: int, shield: int, medkit: int = 0) -> void:
+func _confirm_field_kit(claymore: int, satchel: int, smoke: int, shield: int, medkit: int = 0, knives: int = MAX_THROWING_KNIVES) -> void:
 	if is_local_authority and multiplayer.get_remote_sender_id() == 1:
 		claymore_charges = claymore
 		c4_charges_remaining = satchel
 		smoke_grenades_count = smoke
 		deployable_shields_count = shield
 		medkit_charges = medkit
+		throwing_knives_count = knives
 
 
 func _use_field_kit_on_server(action: int, mode: int) -> void:
@@ -1262,6 +1272,8 @@ func _use_field_kit_on_server(action: int, mode: int) -> void:
 			_spawn_smoke_grenade()
 		FieldKitAction.SHIELD:
 			_spawn_shield()
+		FieldKitAction.THROW_KNIFE:
+			_spawn_thrown_knife()
 
 
 func _deploy_tactical_gadget() -> void:
@@ -1772,22 +1784,54 @@ func play_melee_fx() -> void:
 func _render_melee_fx() -> void:
 	if DisplayServer.get_name() == "headless" or not is_inside_tree():
 		return
+	var pivot := Node3D.new()
+	pivot.position = Vector3(0.0, 1.15, -0.55)
+	pivot.rotation_degrees = Vector3(0.0, 34.0, -14.0)
+	add_child(pivot)
+
+	var blade := MeshInstance3D.new()
+	var blade_mesh := BoxMesh.new()
+	blade_mesh.size = Vector3(0.03, 0.06, 0.36)
+	blade.mesh = blade_mesh
+	var blade_mat := StandardMaterial3D.new()
+	blade_mat.albedo_color = Color(0.75, 0.79, 0.84, 1.0)
+	blade_mat.roughness = 0.28
+	blade.material_override = blade_mat
+	blade.position = Vector3(0.0, 0.0, -0.45)
+	pivot.add_child(blade)
+
 	var arc := MeshInstance3D.new()
 	var box := BoxMesh.new()
-	box.size = Vector3(0.75, 0.06, 0.14)
+	box.size = Vector3(0.75, 0.05, 0.14)
 	arc.mesh = box
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(0.95, 0.85, 0.55, 0.85)
+	mat.albedo_color = Color(0.95, 0.88, 0.65, 0.82)
 	arc.material_override = mat
-	arc.position = Vector3(0.0, 1.15, -0.85)
-	arc.rotation_degrees = Vector3(0.0, 20.0, -14.0)
-	add_child(arc)
-	var tween := arc.create_tween()
-	tween.tween_property(arc, "rotation_degrees:y", -35.0, 0.14)
+	arc.position = Vector3(0.0, 0.0, -0.35)
+	pivot.add_child(arc)
+
+	var tween := pivot.create_tween()
+	tween.tween_property(pivot, "rotation_degrees:y", -42.0, 0.14)
 	tween.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.14)
-	tween.tween_callback(arc.queue_free)
+	tween.tween_callback(pivot.queue_free)
+
+
+func find_recoverable_knife() -> Node3D:
+	if not is_inside_tree() or throwing_knives_count >= MAX_THROWING_KNIVES:
+		return null
+	var best: Node3D = null
+	var min_d := ThrownKnifeScript.INTERACT_RECOVER_RADIUS
+	for node in MissionWorld.in_group(self, &"thrown_knife"):
+		var knife := node as Node3D
+		if knife == null or not is_instance_valid(knife) or not bool(knife.get(&"lodged")) or bool(knife.get(&"retrieved")):
+			continue
+		var d := global_position.distance_to(knife.global_position)
+		if d <= min_d:
+			min_d = d
+			best = knife
+	return best
 
 
 func close_quarters_prompt() -> String:
@@ -1798,9 +1842,14 @@ func close_quarters_prompt() -> String:
 	if find_takedown_target() != null:
 		return "[%s] STEALTH TAKEDOWN" % _bindings().binding_text("interact")
 	var melee_target := find_melee_target()
-	if melee_target != null and melee_target.has_active_shield():
-		var action := "FLANK MELEE (BYPASS SHIELD)" if is_flanking_target(melee_target) else "SLOW MELEE (BYPASS SHIELD)"
-		return "[%s] %s" % [_bindings().binding_text("melee"), action]
+	if melee_target != null:
+		if melee_target.has_active_shield():
+			var action := "FLANK MELEE (BYPASS SHIELD)" if is_flanking_target(melee_target) else "SLOW MELEE (BYPASS SHIELD)"
+			return "[%s] %s" % [_bindings().binding_text("melee"), action]
+		var knife_action := "FLANK KNIFE" if is_flanking_target(melee_target) else "COMBAT KNIFE"
+		return "[%s] %s" % [_bindings().binding_text("melee"), knife_action]
+	if find_recoverable_knife() != null:
+		return "[%s] RECOVER KNIFE" % _bindings().binding_text("interact")
 	return ""
 
 
@@ -2399,6 +2448,35 @@ func _spawn_smoke_grenade() -> void:
 	parent.add_child(grenade, true)
 
 	print("Player %d threw M18 Smoke Grenade! (Remaining: %d)" % [peer_id, smoke_grenades_count])
+
+
+func try_throw_knife() -> bool:
+	if not _can_use_weapon(1) or health_component.is_downed or is_dragging_body or is_instance_valid(mounted_turret):
+		return false
+	if knife_throw_cooldown > 0.0 or throwing_knives_count <= 0:
+		return false
+	knife_throw_cooldown = KNIFE_THROW_COOLDOWN_S
+	_use_field_kit(FieldKitAction.THROW_KNIFE)
+	return true
+
+
+func _spawn_thrown_knife() -> void:
+	if throwing_knives_count <= 0:
+		return
+	throwing_knives_count -= 1
+	var parent := _field_kit_parent()
+	var knife := (load(THROWN_KNIFE_PATH) as PackedScene).instantiate() as ThrownKnifeScript
+	var spawn_pos := global_position + Vector3(0.0, 1.35, 0.0) - global_transform.basis.z * 0.75
+	var dir := -global_transform.basis.z
+	if current_aim_target != Vector3.ZERO:
+		var aim_vec := (current_aim_target + Vector3(0.0, 1.1, 0.0)) - spawn_pos
+		if aim_vec.length_squared() > 0.25:
+			dir = aim_vec.normalized()
+	knife.position = MissionWorld.local(parent, spawn_pos)
+	parent.add_child(knife, true)
+	knife.launch(dir, self)
+	_send_field_kit_inventory()
+	print("Player %d threw Combat Knife! (Remaining: %d)" % [peer_id, throwing_knives_count])
 
 
 func _on_downed() -> void:

@@ -133,6 +133,7 @@ func _perform_ammo_resupply(player: PlayerController3D) -> void:
 	player.c4_charges_remaining = player.MAX_C4_CHARGES
 	player.deployable_shields_count = player.MAX_DEPLOYABLE_SHIELDS
 	player.smoke_grenades_count = player.MAX_SMOKE_GRENADES
+	player.throwing_knives_count = player.MAX_THROWING_KNIVES
 	player.medkit_charges = player.max_medkit_charges()
 
 	_pulse_indicator(Color(0.1, 1.0, 0.4))
@@ -290,4 +291,5 @@ func sync_inventory(player_path: NodePath, primary_id: String, swapped: bool) ->
 		player.c4_charges_remaining = player.MAX_C4_CHARGES
 		player.deployable_shields_count = player.MAX_DEPLOYABLE_SHIELDS
 		player.smoke_grenades_count = player.MAX_SMOKE_GRENADES
+		player.throwing_knives_count = player.MAX_THROWING_KNIVES
 		player.medkit_charges = player.max_medkit_charges()

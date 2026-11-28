@@ -318,6 +318,7 @@ func capture_state(player: PlayerController3D) -> Dictionary:
 		"claymore_charges": player.claymore_charges,
 		"c4_charges_remaining": player.c4_charges_remaining,
 		"smoke_grenades_count": player.smoke_grenades_count,
+		"throwing_knives_count": player.throwing_knives_count,
 		"deployable_shields_count": player.deployable_shields_count,
 		"medkit_charges": player.medkit_charges,
 		"is_carrying_patch_rom": player.is_carrying_patch_rom,
@@ -394,6 +395,7 @@ func apply_state(player: PlayerController3D, state: Dictionary) -> void:
 	player.claymore_charges = state.get("claymore_charges", player.claymore_charges)
 	player.c4_charges_remaining = state.get("c4_charges_remaining", player.c4_charges_remaining)
 	player.smoke_grenades_count = state.get("smoke_grenades_count", player.smoke_grenades_count)
+	player.throwing_knives_count = state.get("throwing_knives_count", player.throwing_knives_count)
 	player.deployable_shields_count = state.get("deployable_shields_count", player.deployable_shields_count)
 	player.medkit_charges = state.get("medkit_charges", player.max_medkit_charges() if state.get("class_id", player.class_id) == SGCNetworkManager.CLASS_CARTER_TECH else 0)
 	player.is_carrying_patch_rom = state.get("is_carrying_patch_rom", false)
