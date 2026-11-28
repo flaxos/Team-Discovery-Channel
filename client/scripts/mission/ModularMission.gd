@@ -102,6 +102,7 @@ func _ready() -> void:
 	alert.level_changed.connect(_on_alert_changed)
 	alert.runner_changed.connect(_on_alarm_runner)
 	alert.console_disabled.connect(_on_alarm_disabled)
+	alert.body_discovered.connect(_on_body_discovered)
 	if setup_errors.is_empty():
 		events.setup(definition, level, objectives, alert)
 		events.configure_difficulty(active_difficulty, active_modifiers)
@@ -279,6 +280,11 @@ func _on_alert_changed(value: int) -> void:
 func _on_alarm_runner(runner_name: String) -> void:
 	if hud != null and not hud.is_mission_ended and runner_name != "" and not alert.is_raised():
 		hud.show_squad_order_toast("A JAFFA IS RUNNING FOR THE ALARM — STOP HIM", 4.0)
+
+
+func _on_body_discovered(_at: Vector3) -> void:
+	if hud != null and not hud.is_mission_ended:
+		hud.show_squad_order_toast("FALLEN JAFFA DISCOVERED — COMPOUND ALERTED", 4.0)
 
 
 func _on_alarm_disabled(_index: int) -> void:

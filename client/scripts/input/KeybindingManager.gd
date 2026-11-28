@@ -17,6 +17,7 @@ const ACTIONS: Dictionary = {
 	"gadget": {"label": "Class gadget / drag nearby body", "category": COMBAT, "keys": [KEY_G]},
 	"plant_claymore": {"label": "Plant claymore", "category": COMBAT, "keys": [KEY_3]},
 	"melee": {"label": "Slow melee / knife strike", "category": COMBAT, "keys": [KEY_F]},
+	"throw_knife": {"label": "Throw combat knife", "category": COMBAT, "keys": [KEY_6]},
 	"move_up": {"label": "Move forward (hold)", "category": MOVEMENT, "keys": [KEY_W, KEY_UP], "hold": true},
 	"move_down": {"label": "Move backward (hold)", "category": MOVEMENT, "keys": [KEY_S, KEY_DOWN], "hold": true},
 	"move_left": {"label": "Move left (hold)", "category": MOVEMENT, "keys": [KEY_A, KEY_LEFT], "hold": true},
@@ -238,7 +239,7 @@ func release_all() -> void:
 	for action: String in ACTIONS:
 		Input.action_release(action)
 
-const PROMPT_ACTIONS: Dictionary = {"E": "interact", "F": "melee", "G": "gadget", "Q": "squad_command", "4": "deploy_shield", "5": "throw_smoke", "R": "reload", "F1": "toggle_pause", "3": "plant_claymore", "1": "weapon_primary", "2": "weapon_secondary", "H": "drag_body", "T": "c4_mode"}
+const PROMPT_ACTIONS: Dictionary = {"E": "interact", "F": "melee", "6": "throw_knife", "G": "gadget", "Q": "squad_command", "4": "deploy_shield", "5": "throw_smoke", "R": "reload", "F1": "toggle_pause", "3": "plant_claymore", "1": "weapon_primary", "2": "weapon_secondary", "H": "drag_body", "T": "c4_mode"}
 var prompt_nodes: Dictionary = {}
 
 func format_prompt(text: String) -> String:

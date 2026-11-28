@@ -162,7 +162,7 @@ func intercept_damage(amount: float, source: Node, damage_type: String) -> Dicti
 	]:
 		return {"blocked": false, "damage": amount}
 
-	if damage_type in ["bullet", "50cal_heavy"]:
+	if damage_type in ["bullet", "50cal_heavy", "thrown_knife", "thrown_knife_stealth"]:
 		deflect_count += 1
 		var impact := _impact_point_for(source)
 		_play_deflect_fx(impact)

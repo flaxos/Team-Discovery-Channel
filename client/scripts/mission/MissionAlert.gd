@@ -16,6 +16,7 @@ extends Node
 signal level_changed(level: int)
 signal runner_changed(runner_name: String)
 signal console_disabled(index: int)
+signal body_discovered(at: Vector3)
 enum Level { CALM, SEARCHING, ALARM }
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
 const SHOCK_JAFFA := "res://scenes/entities/JaffaShockGuard.tscn"
@@ -107,6 +108,25 @@ func console_spot(index: int) -> Vector3:
 func console_position(index: int) -> Vector3:
 	var alarm := definition.alarms[index]
 	return _attachment_node(alarm.room, alarm.attachment).global_position
+
+
+## Server: a patrolling sentry discovered a slain comrade. Record its location, escalate CALM ->
+## SEARCHING immediately, and inform every peer in this world so the HUD shows the body-discovery
+## cause rather than a generic "you have been spotted" banner.
+func report_body_discovered(at: Vector3) -> void:
+	if not multiplayer.is_server():
+		return
+	last_known = at
+	if alert_level == Level.CALM:
+		_quiet = 0.0
+		_publish(Level.SEARCHING)
+	SGCNetworkManager.mission_rpc(self, &"notify_body_discovered", [at])
+	notify_body_discovered(at)
+
+
+@rpc("authority", "call_remote", "reliable")
+func notify_body_discovered(at: Vector3) -> void:
+	body_discovered.emit(at)
 
 
 ## Server: an operative disabled console `index`. Not possible once the alarm is raised.

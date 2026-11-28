@@ -10,6 +10,7 @@ signal staff_fired(origin: Vector3, direction: Vector3)
 signal staff_visual_fired
 signal patrol_waypoint_reached(index: int)
 signal patrol_lap_completed(laps: int)
+signal body_discovered(corpse: Node3D, lethal: bool)
 
 enum State {
 	IDLE,
@@ -134,6 +135,8 @@ var _peek := 0.0
 var _cover_check := 0.0
 var suppressive_hold_timer: float = 0.0
 var _death_notified: bool = false
+## Server-side body discovery flag: prevents repeated rediscovery of the same fallen or stunned Jaffa.
+var body_discovered_flag: bool = false
 var navigator: SGCNavigator
 var overrun_destination_index: int = 0
 var patrol_points: Array[Vector3] = []
@@ -269,6 +272,27 @@ func _update_perception(delta: float) -> void:
 			else:
 				# Continue only the bounded plan to the last sighting, never chase hidden motion.
 				current_target = null
+		"body_dead":
+			var corpse: Node3D = perception.discovered_body
+			perception.discovered_body = null
+			if corpse != null and is_instance_valid(corpse):
+				corpse.set(&"body_discovered_flag", true)
+				body_discovered.emit(corpse, true)
+				investigating = false
+				current_target = null
+				perception.alert(null, corpse.global_position)
+				var compound_alert := MissionWorld.find(self, "Alert") as MissionAlert
+				if compound_alert != null:
+					compound_alert.report_body_discovered(corpse.global_position)
+				if current_state not in [State.DEAD, State.STUNNED, State.DOWNED]:
+					current_state = State.CHASE
+		"body_stunned":
+			var stunned_body: Node3D = perception.discovered_body
+			perception.discovered_body = null
+			if stunned_body != null and is_instance_valid(stunned_body):
+				stunned_body.set(&"body_discovered_flag", true)
+				body_discovered.emit(stunned_body, false)
+				investigate_at(stunned_body.global_position)
 	if perception.level == JaffaPerception.Level.ALERTED and perception.target != null:
 		current_target = perception.target
 	_publish_awareness()
@@ -415,6 +439,18 @@ func _process_sentry_calm(delta: float) -> void:
 		perception.calm()
 		_publish_awareness()
 		current_state = _resume_state()
+		return
+	if perception.level == JaffaPerception.Level.ALERTED and perception.stimulus.is_finite():
+		# Alerted by a fallen comrade without direct visual contact: move to the body while
+		# MissionAlert dispatches an alarm runner; perception transitions to search if quiet.
+		var offset := perception.stimulus - global_position
+		offset.y = 0.0
+		if offset.length() > 1.8:
+			_advance_towards(perception.stimulus, delta, move_speed)
+		else:
+			velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
+			velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
+			rotation.y += delta * 1.4
 		return
 	if perception.level == JaffaPerception.Level.SUSPICIOUS:
 		# Stop and look where something was seen; keep looking until it is forgotten or confirmed.
@@ -1291,8 +1327,11 @@ func _has_line_of_sight(target: Node3D, from_eye: bool = false) -> bool:
 			target.global_position + Vector3(0, 1.0, 0)   # Torso
 		]
 	var health := target.get_node_or_null("HealthComponent") as HealthComponent
-	if health != null and health.is_downed:
-		test_points.append(target.global_position + Vector3(0, 0.35, 0))
+	if health != null and (health.is_downed or health.is_dead or health.is_stunned):
+		if health.is_dead:
+			test_points = [target.global_position + Vector3(0, 0.45, 0)]
+		else:
+			test_points.append(target.global_position + Vector3(0, 0.35, 0))
 
 	for to in test_points:
 		if _cast_los_ray(space, from, to, exclude_list.duplicate()):
@@ -1473,7 +1512,7 @@ func _on_damage_taken(_amount: float, source: Node, damage_type: String) -> void
 			SGCNetworkManager.mission_rpc(self, &"play_armor_spark_fx", [spark_at], health_component)
 
 	var is_silent_incapacitation := (
-		damage_type in ["zat_stun", "zat_kill", "zat_vaporize", "stealth_takedown"]
+		damage_type in ["zat_stun", "zat_kill", "zat_vaporize", "stealth_takedown", "thrown_knife_stealth"]
 		or (damage_type == "melee_slow_flank" and health_component != null and (health_component.is_dead or health_component.current_health <= 0.0))
 	)
 
@@ -1599,6 +1638,7 @@ func _on_stunned(duration: float) -> void:
 
 
 func _on_recovered_from_stun() -> void:
+	body_discovered_flag = false
 	if current_state == State.STUNNED:
 		current_state = _resume_state()
 		if stun_fx != null:
@@ -1613,6 +1653,7 @@ func _on_died() -> void:
 	if _death_notified:
 		return
 	_death_notified = true
+	body_discovered_flag = false
 	current_state = State.DEAD
 	_set_crouching(false)
 	collision_layer = 64  # Corpse-only ray layer: Zat can vaporize, players/bullets pass through.

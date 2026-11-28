@@ -71,8 +71,9 @@ func _process(_delta: float) -> bool:
 			assert(modal.binding_buttons.has(action), "Missing action row: " + action)
 			var button: Button = modal.binding_buttons[action]
 			assert(button.text == manager.binding_text(action), "Button must reflect active InputMap")
-		assert(modal.combat_container.get_child_count() == 11, "Combat actions need individual rows")
+		assert(modal.combat_container.get_child_count() == 12, "Combat actions need individual rows")
 		assert(modal.binding_buttons.has("melee"), "Melee action must have a binding button")
+		assert(modal.binding_buttons.has("throw_knife"), "Throw knife action must have a binding button")
 		print("[TEST 2/5] PASS: Canonical actions and live binding buttons verified.")
 
 	elif ticks == 3:

@@ -158,6 +158,7 @@ func _ready() -> void:
 	for gadget_scene: String in [
 		"res://scenes/props/C4Satchel.tscn", "res://scenes/props/ClaymoreMine.tscn",
 		"res://scenes/weapons/SmokeGrenade.tscn", "res://scenes/props/DeployableShield.tscn",
+		"res://scenes/weapons/ThrownKnife.tscn",
 	]:
 		gadget_spawner.add_spawnable_scene(gadget_scene)
 	add_child(gadget_spawner)
@@ -776,7 +777,7 @@ func _stop_world_combat() -> void:
 			node.stand_down()
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		for item: Node in $FieldKitDeployments.get_children():
-			if item is C4Satchel or item is ClaymoreMine:
+			if item is C4Satchel or item is ClaymoreMine or item is ThrownKnife:
 				item.queue_free()
 
 

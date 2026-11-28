@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/ThrownKnife.gd" id="1_knife"]
+
+[sub_resource type="StandardMaterial3D" id="MatBlade"]
+albedo_color = Color(0.56, 0.60, 0.65, 1)
+metallic = 0.0
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="MatHilt"]
+albedo_color = Color(0.18, 0.20, 0.16, 1)
+roughness = 0.82
+
+[sub_resource type="StandardMaterial3D" id="MatGuard"]
+albedo_color = Color(0.32, 0.30, 0.24, 1)
+roughness = 0.55
+
+[sub_resource type="BoxMesh" id="MeshBlade"]
+material = SubResource("MatBlade")
+size = Vector3(0.025, 0.055, 0.28)
+
+[sub_resource type="BoxMesh" id="MeshHilt"]
+material = SubResource("MatHilt")
+size = Vector3(0.038, 0.045, 0.14)
+
+[sub_resource type="BoxMesh" id="MeshGuard"]
+material = SubResource("MatGuard")
+size = Vector3(0.085, 0.075, 0.024)
+
+[node name="ThrownKnife" type="Node3D"]
+script = ExtResource("1_knife")
+
+[node name="KnifeVisual" type="Node3D" parent="."]
+
+[node name="Blade" type="MeshInstance3D" parent="KnifeVisual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.14)
+mesh = SubResource("MeshBlade")
+
+[node name="Guard" type="MeshInstance3D" parent="KnifeVisual"]
+mesh = SubResource("MeshGuard")
+
+[node name="Hilt" type="MeshInstance3D" parent="KnifeVisual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.08)
+mesh = SubResource("MeshHilt")
+
+[node name="FieldKitSync" type="MultiplayerSynchronizer" parent="."]
