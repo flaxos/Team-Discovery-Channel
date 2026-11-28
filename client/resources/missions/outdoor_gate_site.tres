@@ -48,6 +48,8 @@ size = 1
 script = ExtResource("3_patrol")
 rooms = PackedStringArray("bunker_command", "bunker_corridor", "bunker_barracks")
 size = 2
+combat_role = "grenadier"
+lead_role = "officer"
 
 [sub_resource type="Resource" id="alarm_entry"]
 script = ExtResource("5_alarm")
@@ -60,6 +62,7 @@ room = &"bunker_barracks"
 attachment = &"squad_01"
 count = 2
 delay = 8.0
+lead_role = "heavy"
 
 [resource]
 script = ExtResource("1_definition")

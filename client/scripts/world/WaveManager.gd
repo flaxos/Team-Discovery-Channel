@@ -24,6 +24,7 @@ enum DifficultyTier { EASY, MEDIUM, HARD }
 
 const JAFFA_SCENE_PATH: String = "res://scenes/entities/JaffaGuard.tscn"
 const SHOCK_GUARD_SCENE_PATH: String = "res://scenes/entities/JaffaShockGuard.tscn"
+const GOAULD_LORD_SCENE_PATH: String = "res://scenes/entities/GoauldSystemLord.tscn"
 
 @export var difficulty: DifficultyTier = DifficultyTier.EASY
 @export var wormhole_duration_s: float = 38.0
@@ -425,8 +426,18 @@ func _spawn_next_column_rank() -> void:
 		jaffa.formation_rank = current_rank_index
 		jaffa.is_front_rank = (current_rank_index == 0)
 		jaffa.column_x_lane = spawn_origin.x + x_offset
-		if is_shock_wave and current_rank_index == 0 and i == 0 and difficulty != DifficultyTier.EASY:
-			jaffa.has_personal_shield = true
+		if current_wave == 2 and difficulty != DifficultyTier.EASY:
+			if current_rank_index == 0 and i == 0:
+				jaffa.combat_role = JaffaAI.ROLE_OFFICER
+			elif current_rank_index == 1 and i == 0:
+				jaffa.combat_role = JaffaAI.ROLE_GRENADIER
+		elif is_shock_wave:
+			if current_rank_index == 0 and i == 0:
+				jaffa.combat_role = JaffaAI.ROLE_OFFICER
+				if difficulty != DifficultyTier.EASY:
+					jaffa.has_personal_shield = true
+			elif current_rank_index == 1 and i == 0:
+				jaffa.combat_role = JaffaAI.ROLE_HEAVY
 
 		enemies_container.add_child(jaffa, true)
 		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))
@@ -547,21 +558,31 @@ func trigger_climax_incursion() -> void:
 	print("WaveManager: MULTI-SECTOR CLIMAX INCURSION ENGAGED! Breaches across Gate Room and Level 27!")
 
 	# This multi-sector breach must not depend on an already-open inbound gate.
-	_spawn_sector_jaffa(Vector3(0.0, 0.0, -6.0), 4, true)
-	_spawn_sector_jaffa(Vector3(3.0, 0.0, 39.0), 2, true)
-	_spawn_sector_jaffa(Vector3(26.0, 5.5, 18.0), 2, true)
+	_spawn_sector_jaffa(Vector3(0.0, 0.0, -6.0), 4, true, true)
+	_spawn_sector_jaffa(Vector3(3.0, 0.0, 39.0), 2, true, false)
+	_spawn_sector_jaffa(Vector3(26.0, 5.5, 18.0), 2, true, false)
 
 
-func _spawn_sector_jaffa(spawn_pos: Vector3, count: int, is_shock: bool = false) -> void:
+func _spawn_sector_jaffa(spawn_pos: Vector3, count: int, is_shock: bool = false, include_lord_boss: bool = false) -> void:
 	var scene_path: String = SHOCK_GUARD_SCENE_PATH if is_shock else JAFFA_SCENE_PATH
 	var jaffa_scene := load(scene_path) as PackedScene
+	var lord_scene := load(GOAULD_LORD_SCENE_PATH) as PackedScene if include_lord_boss else null
 	if jaffa_scene == null or enemies_container == null:
 		return
 
 	for i in range(count):
 		var offset := Vector3(randf_range(-1.5, 1.5), 0, randf_range(-1.0, 1.0))
-		var jaffa := jaffa_scene.instantiate() as JaffaAI
-		jaffa.name = "%s_Sector_%d" % ["Shock" if is_shock else "Jaffa", randi() % 10000]
+		var spawn_boss: bool = include_lord_boss and i == 0 and lord_scene != null
+		var jaffa := (lord_scene.instantiate() if spawn_boss else jaffa_scene.instantiate()) as JaffaAI
+		jaffa.name = "%s_Sector_%d" % [
+			"GoauldLord" if spawn_boss else ("Shock" if is_shock else "Jaffa"),
+			randi() % 10000
+		]
+		if spawn_boss:
+			jaffa.combat_role = JaffaAI.ROLE_GOAULD_LORD
+			jaffa.has_personal_shield = true
+		elif is_shock and i == 1:
+			jaffa.combat_role = JaffaAI.ROLE_HEAVY
 		jaffa.position = spawn_pos + offset
 		enemies_container.add_child(jaffa, true)
 		jaffa.jaffa_died.connect(_on_jaffa_killed.bind(jaffa))

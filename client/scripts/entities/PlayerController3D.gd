@@ -159,6 +159,10 @@ var throwing_knives_count: int = 2
 const MAX_THROWING_KNIVES: int = 2
 var knife_throw_cooldown: float = 0.0
 const KNIFE_THROW_COOLDOWN_S: float = 0.55
+var disorientation_timer: float = 0.0
+var disorientation_speed_scale: float = 1.0
+var external_impulse_velocity: Vector3 = Vector3.ZERO
+var last_external_impulse: Vector3 = Vector3.ZERO
 var q_press_time_ms: int = 0
 var command_press_time_ms: int = 0
 var is_holding_command_input: bool = false
@@ -616,6 +620,10 @@ func _physics_process(delta: float) -> void:
 		_server_melee_cooldown = maxf(0.0, _server_melee_cooldown - delta)
 	# Non-authorities rely on MultiplayerSynchronizer replication for position/rotation
 	if not is_local_authority:
+		if multiplayer.is_server() and disorientation_timer > 0.0:
+			disorientation_timer = maxf(0.0, disorientation_timer - delta)
+			if disorientation_timer <= 0.0:
+				disorientation_speed_scale = 1.0
 		if multiplayer.is_server() and turret_cooldown > 0.0 and not is_instance_valid(mounted_turret):
 			turret_cooldown = maxf(0.0, turret_cooldown - delta)
 		if not is_instance_valid(mounted_turret):
@@ -623,6 +631,10 @@ func _physics_process(delta: float) -> void:
 		return
 	melee_cooldown = maxf(0.0, melee_cooldown - delta)
 	knife_throw_cooldown = maxf(0.0, knife_throw_cooldown - delta)
+	if disorientation_timer > 0.0:
+		disorientation_timer = maxf(0.0, disorientation_timer - delta)
+		if disorientation_timer <= 0.0:
+			disorientation_speed_scale = 1.0
 
 	# If victory / defeat / pause UI modal is open, ensure mouse is visible and suppress movement & firing
 	if not is_window_focused or _is_ui_modal_open():
@@ -762,6 +774,8 @@ func _physics_process(delta: float) -> void:
 		speed *= crouch_multiplier
 	elif is_sprinting:
 		speed *= sprint_multiplier
+	if disorientation_timer > 0.0:
+		speed *= disorientation_speed_scale
 
 	# Body Dragging Physics follow
 	if is_dragging_body:
@@ -785,6 +799,13 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
+
+	if external_impulse_velocity.length_squared() > 0.01:
+		velocity.x += external_impulse_velocity.x
+		velocity.z += external_impulse_velocity.z
+		external_impulse_velocity = external_impulse_velocity.move_toward(Vector3.ZERO, 24.0 * delta)
+	else:
+		external_impulse_velocity = Vector3.ZERO
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -3228,3 +3249,71 @@ func open_lift_selector(lift: SGCElevator) -> void:
 	lift_floor_dialog.confirmed.connect(_update_mouse_mode)
 	lift_floor_dialog.popup_centered(Vector2i(340, 220))
 	_update_mouse_mode()
+
+
+## Server-callable knockback impulse (e.g. Goa'uld Kara Kesh telekinetic shockwave push).
+## Applies immediately on local/host operative and relays reliably to remote owning peer.
+func apply_external_impulse(impulse: Vector3) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
+	var flat_impulse := Vector3(impulse.x, 0.0, impulse.z)
+	last_external_impulse = flat_impulse
+	if mounted_turret != null and is_instance_valid(mounted_turret):
+		mounted_turret.dismount()
+		mounted_turret = null
+	if is_local_authority or not multiplayer.has_multiplayer_peer():
+		_apply_local_external_impulse(flat_impulse)
+	elif peer_id in multiplayer.get_peers():
+		receive_external_impulse.rpc_id(peer_id, flat_impulse)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func receive_external_impulse(impulse: Vector3) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	last_external_impulse = impulse
+	if mounted_turret != null and is_instance_valid(mounted_turret):
+		mounted_turret.dismount()
+		mounted_turret = null
+	_apply_local_external_impulse(impulse)
+
+
+func _apply_local_external_impulse(impulse: Vector3) -> void:
+	external_impulse_velocity = Vector3(impulse.x, 0.0, impulse.z)
+	velocity.x += external_impulse_velocity.x * 0.5
+	velocity.z += external_impulse_velocity.z * 0.5
+	add_screen_shake(0.55)
+	var hud := _get_tactical_hud()
+	if hud != null and hud.has_method(&"flash_shock_overlay"):
+		hud.call(&"flash_shock_overlay", 0.55, 0.45)
+
+
+## Server-callable concussive/neural disorientation (Goa'uld Shock Grenade & Kara Kesh beam).
+func apply_disorientation(duration: float, flash_intensity: float = 0.75, speed_scale: float = 0.55) -> void:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return
+	var clamped_dur := clampf(duration, 0.1, 6.0)
+	var clamped_scale := clampf(speed_scale, 0.25, 1.0)
+	var clamped_flash := clampf(flash_intensity, 0.0, 1.0)
+	disorientation_timer = maxf(disorientation_timer, clamped_dur)
+	disorientation_speed_scale = minf(disorientation_speed_scale, clamped_scale)
+	if is_local_authority or not multiplayer.has_multiplayer_peer():
+		_apply_local_disorientation(clamped_dur, clamped_flash, clamped_scale)
+	elif peer_id in multiplayer.get_peers():
+		receive_disorientation.rpc_id(peer_id, clamped_dur, clamped_flash, clamped_scale)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func receive_disorientation(duration: float, flash_intensity: float, speed_scale: float) -> void:
+	if multiplayer.get_remote_sender_id() != 1:
+		return
+	_apply_local_disorientation(duration, flash_intensity, speed_scale)
+
+
+func _apply_local_disorientation(duration: float, flash_intensity: float, speed_scale: float) -> void:
+	disorientation_timer = maxf(disorientation_timer, duration)
+	disorientation_speed_scale = minf(disorientation_speed_scale, speed_scale)
+	add_screen_shake(clampf(flash_intensity * 0.65, 0.15, 0.65))
+	var hud := _get_tactical_hud()
+	if hud != null and hud.has_method(&"flash_shock_overlay"):
+		hud.call(&"flash_shock_overlay", flash_intensity, duration)

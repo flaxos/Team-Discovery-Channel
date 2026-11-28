@@ -7,6 +7,7 @@ extends GateRoom
 signal started
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
 const SHOCK_JAFFA := "res://scenes/entities/JaffaShockGuard.tscn"
+const GOAULD_LORD := "res://scenes/entities/GoauldSystemLord.tscn"
 const NEAR_MISS_RADIUS := 1.15
 const AIRMAN := "res://scenes/entities/SGCAirman.tscn"
 const SquadOrders := preload("res://scripts/mission/ModularSquadOrders.gd")
@@ -329,14 +330,22 @@ func _spawn_patrols() -> void:
 		var use_shock_all: bool = bool(plan["shock_guard"])
 		var base_shield: bool = bool(plan["personal_shield"])
 		var promoted_shield: bool = bool(plan["promoted_lead_shield"])
+		var base_role: String = str(plan.get("combat_role", JaffaAI.ROLE_TROOPER))
+		var lead_role: String = str(plan.get("lead_role", ""))
+		var boss_name_text: String = str(plan.get("boss_name", ""))
 		for n: int in range(p_size):
+			var assigned_role: String = lead_role if (n == 0 and not lead_role.is_empty()) else base_role
+			var is_boss_unit: bool = assigned_role == JaffaAI.ROLE_GOAULD_LORD
 			var use_shock: bool = use_shock_all or (promoted_shield and n == 0)
-			var scene_path := SHOCK_JAFFA if use_shock else JAFFA
+			var scene_path := GOAULD_LORD if is_boss_unit else (SHOCK_JAFFA if use_shock else JAFFA)
 			var jaffa := load(scene_path).instantiate() as JaffaAI
 			jaffa.name = "Jaffa_P%d_%d" % [p, n]
 			# Rank 0 leads and suppresses; later ranks take marker cover when engaged.
 			jaffa.formation_rank = n
-			if (base_shield or promoted_shield) and n == 0:
+			jaffa.combat_role = assigned_role
+			if is_boss_unit and not boss_name_text.is_empty():
+				jaffa.boss_display_name = boss_name_text
+			if is_boss_unit or ((base_shield or promoted_shield) and n == 0):
 				jaffa.has_personal_shield = true
 			if notice_scale != 1.0:
 				jaffa.notice_time_near *= notice_scale

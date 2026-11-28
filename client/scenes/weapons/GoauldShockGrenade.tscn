@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/GoauldShockGrenade.gd" id="1_shock"]
+
+[sub_resource type="StandardMaterial3D" id="MatOrbBody"]
+albedo_color = Color(0.76, 0.72, 0.56, 1)
+metallic = 0.0
+roughness = 0.28
+emission_enabled = true
+emission = Color(1.0, 0.78, 0.3, 1)
+emission_energy_multiplier = 0.85
+
+[sub_resource type="SphereMesh" id="MeshOrb"]
+material = SubResource("MatOrbBody")
+radius = 0.14
+height = 0.28
+radial_segments = 16
+rings = 10
+
+[sub_resource type="StandardMaterial3D" id="MatBand"]
+albedo_color = Color(0.95, 0.88, 0.5, 1)
+shading_mode = 0
+
+[sub_resource type="TorusMesh" id="MeshBand"]
+material = SubResource("MatBand")
+inner_radius = 0.125
+outer_radius = 0.155
+
+[node name="GoauldShockGrenade" type="Node3D"]
+script = ExtResource("1_shock")
+
+[node name="OrbMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("MeshOrb")
+
+[node name="EquatorialBand" type="MeshInstance3D" parent="OrbMesh"]
+mesh = SubResource("MeshBand")
+
+[node name="WarningLight" type="OmniLight3D" parent="."]
+light_color = Color(1.0, 0.84, 0.35, 1)
+light_energy = 2.4
+omni_range = 3.8
+
+[node name="FieldKitSync" type="MultiplayerSynchronizer" parent="."]

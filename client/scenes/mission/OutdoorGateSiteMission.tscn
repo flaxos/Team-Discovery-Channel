@@ -367,7 +367,7 @@ spawn_path = NodePath("../Players")
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn", "res://scenes/entities/JaffaShockGuard.tscn")
+_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn", "res://scenes/entities/JaffaShockGuard.tscn", "res://scenes/entities/GoauldSystemLord.tscn")
 spawn_path = NodePath("../Enemies")
 
 [node name="TacticalHUD" parent="." instance=ExtResource("5_hud")]

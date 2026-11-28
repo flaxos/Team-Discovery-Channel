@@ -84,6 +84,14 @@ var total_kills: int = 0
 var is_mission_ended: bool = false
 var toast_tween: Tween = null
 var ammo_share_label: Label
+var boss_panel: PanelContainer = null
+var boss_name_label: Label = null
+var boss_hp_bar: ProgressBar = null
+var boss_shield_bar: ProgressBar = null
+var boss_shield_label: Label = null
+var shock_flash_rect: ColorRect = null
+var shock_flash_alpha: float = 0.0
+var shock_flash_decay_rate: float = 1.0
 
 # Crosshair and Heat Gauge Variables
 var crosshair_override_pos: Vector2 = Vector2.ZERO
@@ -136,6 +144,8 @@ func _ready() -> void:
 	if squad_toast_panel == null:
 		_create_squad_toast_ui()
 	_create_ammo_share_ui()
+	_create_boss_bar_ui()
+	_create_shock_flash_ui()
 
 	objective_label.text = "DEFEND SGC LEVEL 28 - HOLD THE RAMP"
 
@@ -402,6 +412,157 @@ func _create_ammo_share_ui() -> void:
 	add_child(ammo_share_label)
 
 
+func _create_boss_bar_ui() -> void:
+	if boss_panel != null:
+		return
+	var panel := PanelContainer.new()
+	panel.name = "BossStatusPanel"
+	panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	panel.offset_left = -260.0
+	panel.offset_right = 260.0
+	panel.offset_top = 176.0
+	panel.offset_bottom = 248.0
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.10, 0.04, 0.05, 0.88)
+	sb.border_width_left = 2
+	sb.border_width_top = 2
+	sb.border_width_right = 2
+	sb.border_width_bottom = 2
+	sb.border_color = Color(0.95, 0.76, 0.22, 0.95)
+	sb.corner_radius_top_left = 4
+	sb.corner_radius_top_right = 4
+	sb.corner_radius_bottom_left = 4
+	sb.corner_radius_bottom_right = 4
+	panel.add_theme_stylebox_override("panel", sb)
+
+	var vbox := VBoxContainer.new()
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_theme_constant_override("separation", 3)
+	panel.add_child(vbox)
+
+	boss_name_label = Label.new()
+	boss_name_label.name = "BossNameLabel"
+	boss_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_name_label.add_theme_font_size_override("font_size", 13)
+	boss_name_label.add_theme_color_override("font_color", Color(1.0, 0.86, 0.30))
+	boss_name_label.text = "GOA'ULD SYSTEM LORD"
+	vbox.add_child(boss_name_label)
+
+	boss_hp_bar = ProgressBar.new()
+	boss_hp_bar.name = "BossHealthBar"
+	boss_hp_bar.custom_minimum_size = Vector2(480.0, 14.0)
+	boss_hp_bar.show_percentage = false
+	boss_hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var hp_fill := StyleBoxFlat.new()
+	hp_fill.bg_color = Color(0.82, 0.16, 0.18, 0.95)
+	boss_hp_bar.add_theme_stylebox_override("fill", hp_fill)
+	vbox.add_child(boss_hp_bar)
+
+	boss_shield_bar = ProgressBar.new()
+	boss_shield_bar.name = "BossShieldBar"
+	boss_shield_bar.custom_minimum_size = Vector2(480.0, 10.0)
+	boss_shield_bar.show_percentage = false
+	boss_shield_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sh_fill := StyleBoxFlat.new()
+	sh_fill.bg_color = Color(0.96, 0.78, 0.22, 0.95)
+	boss_shield_bar.add_theme_stylebox_override("fill", sh_fill)
+	vbox.add_child(boss_shield_bar)
+
+	boss_shield_label = Label.new()
+	boss_shield_label.name = "BossShieldLabel"
+	boss_shield_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_shield_label.add_theme_font_size_override("font_size", 11)
+	boss_shield_label.add_theme_color_override("font_color", Color(0.98, 0.86, 0.45))
+	vbox.add_child(boss_shield_label)
+
+	add_child(panel)
+	boss_panel = panel
+	boss_panel.visible = false
+
+
+func _create_shock_flash_ui() -> void:
+	if shock_flash_rect != null:
+		return
+	shock_flash_rect = ColorRect.new()
+	shock_flash_rect.name = "ShockFlashOverlay"
+	shock_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shock_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shock_flash_rect.color = Color(1.0, 0.93, 0.72, 0.0)
+	add_child(shock_flash_rect)
+
+
+func flash_shock_overlay(intensity: float, duration: float = 1.6) -> void:
+	if shock_flash_rect == null:
+		_create_shock_flash_ui()
+	shock_flash_alpha = maxf(shock_flash_alpha, clampf(intensity * 0.72, 0.0, 0.78))
+	shock_flash_decay_rate = shock_flash_alpha / maxf(duration, 0.25)
+	if shock_flash_rect != null:
+		shock_flash_rect.color.a = shock_flash_alpha
+
+
+func _update_shock_flash(delta: float) -> void:
+	if shock_flash_rect == null:
+		return
+	if shock_flash_alpha > 0.0:
+		shock_flash_alpha = maxf(0.0, shock_flash_alpha - shock_flash_decay_rate * delta)
+		shock_flash_rect.color.a = shock_flash_alpha
+
+
+func _update_boss_bar() -> void:
+	if boss_panel == null:
+		return
+	if is_mission_ended:
+		boss_panel.visible = false
+		return
+	var enemies := MissionWorld.find(self, "Enemies")
+	if enemies == null:
+		boss_panel.visible = false
+		return
+	var active_boss: Node = null
+	for child: Node in enemies.get_children():
+		if not is_instance_valid(child) or not child.has_method(&"is_boss"):
+			continue
+		if not bool(child.call(&"is_boss")):
+			continue
+		var health := child.get_node_or_null("HealthComponent") as HealthComponent
+		if health == null or health.is_dead or health.is_vaporized:
+			continue
+		var alerted := int(child.get(&"awareness_level")) == JaffaPerception.Level.ALERTED
+		var in_combat := int(child.get(&"current_state")) in [JaffaAI.State.COMBAT, JaffaAI.State.ATTACK, JaffaAI.State.MELEE, JaffaAI.State.COVER]
+		var kara_active := int(child.get(&"kara_kesh_state")) != 0
+		var damaged := health.current_health < health.max_health
+		var close_enough := (
+			is_instance_valid(local_player)
+			and (child as Node3D).global_position.distance_to(local_player.global_position) <= 22.0
+		)
+		if alerted or in_combat or kara_active or damaged or close_enough:
+			active_boss = child
+			break
+	if active_boss == null:
+		boss_panel.visible = false
+		return
+	boss_panel.visible = true
+	var boss_health := active_boss.get_node_or_null("HealthComponent") as HealthComponent
+	var boss_shield := active_boss.get_node_or_null("PersonalShield") as GoauldPersonalShield
+	if boss_name_label != null:
+		boss_name_label.text = str(active_boss.call(&"role_label"))
+	if boss_hp_bar != null and boss_health != null:
+		boss_hp_bar.max_value = maxf(1.0, boss_health.max_health)
+		boss_hp_bar.value = boss_health.current_health
+	if boss_shield_bar != null and boss_shield != null:
+		boss_shield_bar.max_value = maxf(1.0, boss_shield.max_energy)
+		boss_shield_bar.value = 0.0 if boss_shield.is_overloaded else boss_shield.energy
+	if boss_shield_label != null:
+		if boss_shield != null and boss_shield.is_active():
+			boss_shield_label.text = "PERSONAL SHIELD ACTIVE — OVERLOAD WITH ZAT / STAFF / C4 OR SLOW MELEE [F]"
+			boss_shield_label.add_theme_color_override("font_color", Color(1.0, 0.84, 0.32))
+		else:
+			boss_shield_label.text = "SHIELD DOWN — VULNERABLE TO ALL FIRE"
+			boss_shield_label.add_theme_color_override("font_color", Color(0.35, 1.0, 0.65))
+
+
 func show_squad_order_toast(text: String, duration: float = 3.5) -> void:
 	if squad_toast_panel == null or squad_toast_label == null:
 		_create_squad_toast_ui()
@@ -537,6 +698,8 @@ func _process(delta: float) -> void:
 			bind_local_player(local_player)
 		_update_weapon_display()
 	_update_damage_vignette(delta)
+	_update_shock_flash(delta)
+	_update_boss_bar()
 	if crosshair_overlay != null:
 		crosshair_overlay.queue_redraw()
 
