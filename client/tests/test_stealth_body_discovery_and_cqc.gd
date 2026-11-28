@@ -342,4 +342,4 @@ func _run() -> void:
 	await _frames(10)
 	net.disconnect_game()
 	print("PASS test_stealth_body_discovery_and_cqc")
-	quit(0)
+	await preload("res://tests/support/finish.gd").success(self)
