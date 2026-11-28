@@ -134,15 +134,6 @@ func attach_to_level() -> PackedStringArray:
 		old_link.free()
 	await get_tree().physics_frame
 
-	navigation = NavigationRegion3D.new()
-	navigation.name = "ExteriorNavigation"
-	navigation.navigation_mesh = LevelNavigation.bake(self)
-	navigation.set_navigation_map(level.navigation_map)
-	var iter_before := NavigationServer3D.map_get_iteration_id(level.navigation_map)
-	add_child(navigation)
-
-	await _wait_region_synced(navigation.get_rid(), iter_before)
-
 	var inside_target := module.to_global(socket.approach)
 	var socket_world := module.global_transform * socket.local_transform
 	var outward := socket_world.origin - inside_target
@@ -152,6 +143,15 @@ func attach_to_level() -> PackedStringArray:
 		outward.y = 0.0
 	outward = outward.normalized()
 	var outside_target := socket_world.origin + outward * threshold_outward_offset
+
+	navigation = NavigationRegion3D.new()
+	navigation.name = "ExteriorNavigation"
+	navigation.navigation_mesh = LevelNavigation.bake(self)
+	navigation.set_navigation_map(level.navigation_map)
+	var iter_before := NavigationServer3D.map_get_iteration_id(level.navigation_map)
+	add_child(navigation)
+
+	await _wait_region_synced(navigation.get_rid(), iter_before, outside_target)
 
 	var inside_snap := NavigationServer3D.map_get_closest_point(level.navigation_map, inside_target)
 	var outside_snap := NavigationServer3D.map_get_closest_point(level.navigation_map, outside_target)
@@ -170,10 +170,9 @@ func attach_to_level() -> PackedStringArray:
 		doorway_link.start_position = to_local(outside_snap)
 		doorway_link.end_position = to_local(inside_snap)
 		doorway_link.set_navigation_map(level.navigation_map)
-		add_child(doorway_link)
 		var iter_link := NavigationServer3D.map_get_iteration_id(level.navigation_map)
-		await _wait_map_iteration(iter_link)
-		await get_tree().physics_frame
+		add_child(doorway_link)
+		await _wait_link_synced(doorway_link.get_rid(), iter_link, outside_snap, inside_snap)
 		errors.append_array(validate_boundary())
 
 	_finish(errors)
@@ -246,23 +245,29 @@ func validate_mission_markers(required_markers: PackedStringArray) -> PackedStri
 	return errors
 
 
-func _wait_region_synced(region_rid: RID, iter_before: int) -> void:
-	for _i in range(20):
+func _wait_region_synced(region_rid: RID, iter_before: int, probe_point: Vector3) -> void:
+	for _i in range(180):
 		await get_tree().physics_frame
 		if (
 			NavigationServer3D.map_get_regions(level.navigation_map).has(region_rid)
 			and NavigationServer3D.map_get_iteration_id(level.navigation_map) > iter_before
+			and NavigationServer3D.map_get_closest_point(level.navigation_map, probe_point).distance_to(probe_point) <= 0.65
 		):
 			break
 	await get_tree().physics_frame
-	await get_tree().physics_frame
 
 
-func _wait_map_iteration(previous_iteration: int) -> void:
-	for _i in range(20):
+func _wait_link_synced(link_rid: RID, iter_before: int, start_pt: Vector3, end_pt: Vector3) -> void:
+	for _i in range(180):
 		await get_tree().physics_frame
-		if NavigationServer3D.map_get_iteration_id(level.navigation_map) > previous_iteration:
-			break
+		if (
+			NavigationServer3D.map_get_links(level.navigation_map).has(link_rid)
+			and NavigationServer3D.map_get_iteration_id(level.navigation_map) > iter_before
+		):
+			var path := level.local_path(start_pt, end_pt)
+			if not path.is_empty() and path[-1].distance_to(end_pt) <= 0.65:
+				break
+	await get_tree().physics_frame
 
 
 func _finish(errors: PackedStringArray) -> void:
