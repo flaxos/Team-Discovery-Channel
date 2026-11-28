@@ -1,0 +1,73 @@
+[gd_resource type="Resource" script_class="MissionDefinition" load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/MissionDefinition.gd" id="1_definition"]
+[ext_resource type="Script" path="res://scripts/mission/MissionObjective.gd" id="2_objective"]
+[ext_resource type="Script" path="res://scripts/mission/MissionPatrol.gd" id="3_patrol"]
+[ext_resource type="Resource" path="res://resources/levels/outdoor_gate_site_bunker.tres" id="4_layout"]
+[ext_resource type="Script" path="res://scripts/mission/MissionAlarm.gd" id="5_alarm"]
+[ext_resource type="Script" path="res://scripts/mission/MissionReinforcement.gd" id="6_reinforcement"]
+
+[sub_resource type="Resource" id="obj_breach"]
+script = ExtResource("2_objective")
+id = &"breach_bunker"
+kind = "reach"
+room = &"bunker_entry"
+marker = &"entry"
+radius = 3.2
+text = "CROSS THE GATE CLEARING AND ENTER THE GOA'ULD BUNKER"
+
+[sub_resource type="Resource" id="obj_download"]
+script = ExtResource("2_objective")
+id = &"download_bunker_intel"
+kind = "interact"
+room = &"bunker_command"
+attachment = &"main_console"
+text = "DOWNLOAD OFFWORLD TELEMETRY FROM BUNKER COMMAND"
+prompt = "DOWNLOAD TELEMETRY"
+
+[sub_resource type="Resource" id="obj_extract"]
+script = ExtResource("2_objective")
+id = &"extract_gate"
+kind = "extract"
+room = &"exterior"
+marker = &"gate_arrival"
+radius = 4.5
+text = "RETURN TO THE EXTERIOR STARGATE — ALL STANDING OPERATIVES"
+
+[sub_resource type="Resource" id="patrol_clearing"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("exterior:clearing_west", "exterior:bunker_threshold", "exterior:clearing_east")
+size = 2
+
+[sub_resource type="Resource" id="patrol_threshold"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("exterior:bunker_threshold", "bunker_entry", "bunker_stores")
+size = 1
+
+[sub_resource type="Resource" id="patrol_command"]
+script = ExtResource("3_patrol")
+rooms = PackedStringArray("bunker_command", "bunker_corridor", "bunker_barracks")
+size = 2
+
+[sub_resource type="Resource" id="alarm_entry"]
+script = ExtResource("5_alarm")
+room = &"bunker_entry"
+attachment = &"console"
+
+[sub_resource type="Resource" id="reinforce_barracks"]
+script = ExtResource("6_reinforcement")
+room = &"bunker_barracks"
+attachment = &"squad_01"
+count = 2
+delay = 8.0
+
+[resource]
+script = ExtResource("1_definition")
+title = "OFFWORLD GATE SITE — BUNKER RECON"
+layout = ExtResource("4_layout")
+airman_support = true
+exterior_markers = PackedStringArray("gate_arrival", "clearing_west", "clearing_east", "bunker_threshold")
+objectives = Array[ExtResource("2_objective")]([SubResource("obj_breach"), SubResource("obj_download"), SubResource("obj_extract")])
+patrols = Array[ExtResource("3_patrol")]([SubResource("patrol_clearing"), SubResource("patrol_threshold"), SubResource("patrol_command")])
+alarms = Array[ExtResource("5_alarm")]([SubResource("alarm_entry")])
+reinforcements = Array[ExtResource("6_reinforcement")]([SubResource("reinforce_barracks")])

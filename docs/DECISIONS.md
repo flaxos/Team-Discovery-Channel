@@ -80,7 +80,7 @@ Add new entries at the end. Change a decision by adding an entry that supersedes
 
 **Why.** The module system's guarantees (snap, overlap, enclosure, deck height) assume boxes with sockets. Terrain, cliffs and villages break all of them, and bending the validator to fit would weaken it for interiors.
 
-**Status.** Recommended. No outdoor code exists. Spike OW-0 must prove the doorway contract and shared navigation before this is accepted.
+**Status.** Accepted (OW-0 / OW-1). `OutdoorBoundary` (`client/scripts/level/OutdoorBoundary.gd`) joins a separate exterior terrain `NavigationRegion3D` to a sealed modular `LevelAssembly` strictly at declared unconnected doorway sockets via a runtime `ModularDoor` and bidirectional `NavigationLink3D` on the shared `NavigationServer3D` map, preserving interior `LevelEnclosureValidator` checks unchanged. Design and proof: [outdoor-world-boundary.md](plans/outdoor-world-boundary.md), `test_ow0_outdoor_boundary`, and `test_ow1_exterior_gate_site*`.
 
 ## D-007 — Network authority and persistent state
 

@@ -52,6 +52,8 @@ const MISSION_TAURI_ALPHA_SITE: String = "tauri_alpha_site"
 const MISSION_TRAVEL_MOTHERSHIP: String = "travel_mothership"
 const MISSION_MOTHERSHIP_OBJECTIVE: String = "mothership_objective"
 const MISSION_CAMPAIGN_OPERATION: String = "campaign_operation"
+const MISSION_OUTDOOR_GATE_SITE: String = "outdoor_gate_site"
+const MISSION_TRAVEL_OUTDOOR_SITE: String = "travel_outdoor_site"
 ## "scene" is the mission's world. "site" adds a second world beside it (see
 ## MainGameCoordinator). "hidden" keeps an entry out of the lobby.
 const MISSIONS: Dictionary = {
@@ -66,7 +68,9 @@ const MISSIONS: Dictionary = {
 	MISSION_TAURI_ALPHA_SITE: {"name": "Alpha Site Outpost — Reconnaissance", "description": "Offworld Tau’ri outpost: traverse the checkpoint to the command center, recover telemetry records, observe the offworld perimeter and extract.", "scene": "res://scenes/mission/TauriAlphaSiteMission.tscn", "hidden": true},
 	MISSION_TRAVEL_MOTHERSHIP: {"name": "Operation Boarding — Mothership Ring Breach", "description": "Travel mission: Dial from SGC to a captured Goa'uld Ha'tak cargo bay, navigate past bulkheads and checkpoints, breach to upper decks via transport rings, and extract.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldMothershipBoardingMission.tscn", "hidden": true},
 	MISSION_MOTHERSHIP_OBJECTIVE: {"name": "Operation Mothership — Bridge & Engineering", "description": "Travel mission: Infiltrate upper decks, sabotage hyperdrive reactor core, override bridge navigation helm, and extract under shipboard alarm.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldMothershipObjectiveMission.tscn", "hidden": true},
-	MISSION_CAMPAIGN_OPERATION: {"name": "Campaign: Operation Ha'tak Strike", "description": "Linked three-stage expeditionary operation. Infiltrate a planetary compound to recover telemetry, breach a Ha'tak cargo bay via transport rings, and sabotage its hyperdrive core with carried squad inventory and debrief persistence.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldInfiltrationMission.tscn"}
+	MISSION_CAMPAIGN_OPERATION: {"name": "Campaign: Operation Ha'tak Strike", "description": "Linked three-stage expeditionary operation. Infiltrate a planetary compound to recover telemetry, breach a Ha'tak cargo bay via transport rings, and sabotage its hyperdrive core with carried squad inventory and debrief persistence.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/GoauldInfiltrationMission.tscn"},
+	MISSION_OUTDOOR_GATE_SITE: {"name": "Offworld Gate Site — Bunker Recon", "description": "Arrive at an active exterior Stargate and DHD clearing surrounded by natural rock cover, cross past outdoor Jaffa patrols into a modular Goa'uld outpost bunker, recover telemetry from Command, and extract back at the exterior Stargate.", "scene": "res://scenes/mission/OutdoorGateSiteMission.tscn", "hidden": true},
+	MISSION_TRAVEL_OUTDOOR_SITE: {"name": "Operation Gatehead — SGC to Exterior Site", "description": "Travel mission: Dial from SGC to an exterior offworld Stargate clearing, breach the outpost bunker, recover telemetry, and return through the exterior Stargate.", "scene": "res://scenes/main/SGCUATBase.tscn", "site": "res://scenes/mission/OutdoorGateSiteMission.tscn", "hidden": true}
 }
 
 const CLASS_SG3_HEAVY: String = "sg3_heavy"

@@ -21,6 +21,7 @@ var active_variant: Dictionary = {}
 var active_patrol_plans: Array[Dictionary] = []
 var _patrols_spawned: int = 0
 @onready var level: LevelAssembly = $Level
+@onready var outdoor: OutdoorBoundary = get_node_or_null("Exterior") as OutdoorBoundary
 @onready var objectives: MissionObjectives = $Objectives
 @onready var enemies: Node3D = $Enemies
 @onready var alert: MissionAlert = $Alert
@@ -76,9 +77,13 @@ func _ready() -> void:
 	_resolve_variation_context()
 	setup_errors = definition.validate()
 	var layout := level.layout
-	var entry := (
-		level.get_node("%s/Markers/%s" % [layout.entry_instance, layout.entry_marker]) as Node3D
-	)
+	var entry: Node3D = null
+	if outdoor != null and outdoor.has_marker(outdoor.arrival_marker):
+		entry = outdoor.marker_node(outdoor.arrival_marker)
+	else:
+		entry = (
+			level.get_node("%s/Markers/%s" % [layout.entry_instance, layout.entry_marker]) as Node3D
+		)
 	for i in range(SGCNetworkManager.MAX_PLAYERS):
 		var point := Marker3D.new()
 		point.name = "Spawn%d" % (i + 1)
@@ -113,6 +118,11 @@ func _ready() -> void:
 		_add_presentation()
 	if not level.ready_for_navigation:
 		await level.navigation_ready
+	if outdoor != null:
+		if not outdoor.ready_for_navigation:
+			await outdoor.navigation_ready
+		setup_errors.append_array(outdoor.last_errors)
+		setup_errors.append_array(outdoor.validate_mission_markers(definition.exterior_markers))
 	if setup_errors.is_empty() and mission_result < 0:
 		setup_errors.append_array(events.start())
 	if multiplayer.is_server():
@@ -295,9 +305,19 @@ func _spawn_patrols() -> void:
 		var rooms: PackedStringArray = plan["rooms"] as PackedStringArray
 		var marker_name: StringName = plan["marker"] as StringName
 		var route: Array[Vector3] = []
+		var home: Node3D = null
 		for room: String in rooms:
-			route.append(level.marker(StringName(room), marker_name))
-		var home := level.get_node(rooms[0]) as Node3D
+			if room.begins_with("exterior:"):
+				var ext_marker := StringName(room.substr(9))
+				route.append(level.marker(&"exterior", ext_marker))
+				if home == null and outdoor != null:
+					home = outdoor.marker_node(ext_marker)
+			else:
+				route.append(level.marker(StringName(room), marker_name))
+				if home == null:
+					home = level.get_node(room) as Node3D
+		if home == null:
+			home = self
 		var p_size: int = int(plan["size"])
 		var base_size: int = int(plan["base_size"])
 		var use_shock_all: bool = bool(plan["shock_guard"])
@@ -446,6 +466,8 @@ func get_current_sector(pos: Vector3) -> String:
 		var module := level.get_node_or_null(str(item.id)) as Node3D
 		if module != null and item.module.occupied.has_point(module.to_local(pos)):
 			return str(item.id).to_upper()
+	if outdoor != null and outdoor.contains_point(pos):
+		return outdoor.exterior_sector_id
 	return SECTOR_UNKNOWN
 
 
@@ -456,15 +478,28 @@ func get_sector_display_name(sector_id: String) -> String:
 ## View-only: the level preview's ambient light. Roofs stay on for the operative camera.
 func _add_presentation() -> void:
 	var settings := Environment.new()
-	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color(0.05, 0.06, 0.08)
-	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	settings.ambient_light_color = Color.WHITE
-	settings.ambient_light_energy = 0.8
-	var palette := LevelThemeResolver.lighting(level.layout)
-	if palette != null:
-		settings.ambient_light_color = palette.ambient_color
-		settings.ambient_light_energy = palette.ambient_energy
+	if outdoor != null:
+		var sky := Sky.new()
+		var sky_mat := ProceduralSkyMaterial.new()
+		sky_mat.sky_top_color = Color(0.24, 0.44, 0.68)
+		sky_mat.sky_horizon_color = Color(0.68, 0.77, 0.84)
+		sky_mat.ground_horizon_color = Color(0.36, 0.34, 0.28)
+		sky_mat.ground_bottom_color = Color(0.20, 0.22, 0.16)
+		sky.sky_material = sky_mat
+		settings.background_mode = Environment.BG_SKY
+		settings.sky = sky
+		settings.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+		settings.ambient_light_energy = 0.75
+	else:
+		settings.background_mode = Environment.BG_COLOR
+		settings.background_color = Color(0.05, 0.06, 0.08)
+		settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		settings.ambient_light_color = Color.WHITE
+		settings.ambient_light_energy = 0.8
+		var palette := LevelThemeResolver.lighting(level.layout)
+		if palette != null:
+			settings.ambient_light_color = palette.ambient_color
+			settings.ambient_light_energy = palette.ambient_energy
 	if level.find_child("Rings", true, false) is TransportRings:
 		settings.glow_enabled = true
 		settings.glow_hdr_threshold = 2.2
