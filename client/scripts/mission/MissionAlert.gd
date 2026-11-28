@@ -20,6 +20,7 @@ signal body_discovered(at: Vector3)
 enum Level { CALM, SEARCHING, ALARM }
 const JAFFA := "res://scenes/entities/JaffaGuard.tscn"
 const SHOCK_JAFFA := "res://scenes/entities/JaffaShockGuard.tscn"
+const GOAULD_LORD := "res://scenes/entities/GoauldSystemLord.tscn"
 ## Seconds between server evaluations.
 const INTERVAL := 0.2
 const CALM_DELAY := 8.0
@@ -199,16 +200,25 @@ func _update_runner(hot: Array[JaffaAI], dt: float) -> void:
 		raise_progress = 0.0
 		return
 	raise_progress += dt
-	var effective_raise_time: float = definition.alarms[runner_console].raise_time * MissionDifficulty.alarm_raise_time_scale(difficulty_tier, active_modifiers)
+	var effective_raise_time: float = (
+		definition.alarms[runner_console].raise_time
+		* MissionDifficulty.alarm_raise_time_scale(difficulty_tier, active_modifiers)
+		* runner.alarm_raise_speed_multiplier()
+	)
 	if raise_progress >= effective_raise_time:
 		_raise_alarm()
 
 
 ## The alerted sentry with the shortest walk to a working console it can reach.
+## Alerted Officers (First Prime) take priority when they can reach a working console.
 func _pick_runner(hot: Array[JaffaAI]) -> void:
 	var best_length := INF
+	var best_is_officer := false
 	for jaffa in hot:
 		if not _can_run(jaffa):
+			continue
+		var jaffa_is_officer := jaffa.is_officer()
+		if best_is_officer and not jaffa_is_officer:
 			continue
 		for i in range(definition.alarms.size()):
 			if disabled[i] or _attachment_node(definition.alarms[i].room, definition.alarms[i].attachment) == null:
@@ -220,7 +230,8 @@ func _pick_runner(hot: Array[JaffaAI]) -> void:
 			var length := 0.0
 			for p in range(1, path.size()):
 				length += path[p - 1].distance_to(path[p])
-			if length < best_length:
+			if (jaffa_is_officer and not best_is_officer) or length < best_length:
+				best_is_officer = jaffa_is_officer
 				best_length = length
 				runner = jaffa
 				runner_console = i
@@ -281,10 +292,16 @@ func _spawn_group(index: int) -> void:
 	var notice_scale: float = MissionDifficulty.sight_notice_scale(difficulty_tier, active_modifiers)
 	for n in range(group.count):
 		var promote_lead: bool = n == 0 and MissionDifficulty.should_promote_reinforcement_lead(difficulty_tier, index, active_modifiers)
-		var jaffa := load(SHOCK_JAFFA if (group.shock_guard or promote_lead) else JAFFA).instantiate() as JaffaAI
+		var assigned_role: String = group.lead_role if (n == 0 and not group.lead_role.is_empty()) else group.combat_role
+		var is_boss_unit: bool = assigned_role == JaffaAI.ROLE_GOAULD_LORD
+		var scene_path: String = GOAULD_LORD if is_boss_unit else (SHOCK_JAFFA if (group.shock_guard or promote_lead) else JAFFA)
+		var jaffa := load(scene_path).instantiate() as JaffaAI
 		jaffa.name = "Jaffa_R%d_%d" % [index, n]
 		jaffa.formation_rank = n
-		if n == 0 and (group.personal_shield or promote_lead):
+		jaffa.combat_role = assigned_role
+		if is_boss_unit and not group.boss_name.is_empty():
+			jaffa.boss_display_name = group.boss_name
+		if is_boss_unit or (n == 0 and (group.personal_shield or promote_lead)):
 			jaffa.has_personal_shield = true
 		if notice_scale != 1.0:
 			jaffa.notice_time_near *= notice_scale

@@ -48,6 +48,7 @@ text = "RETURN TO THE STARGATE — ALL STANDING OPERATIVES"
 script = ExtResource("3_patrol")
 rooms = PackedStringArray("barracks", "checkpoint", "approach2")
 size = 2
+lead_role = "officer"
 
 [sub_resource type="Resource" id="patrol_generator"]
 script = ExtResource("3_patrol")
@@ -68,6 +69,7 @@ size = 1
 script = ExtResource("3_patrol")
 rooms = PackedStringArray("cmd_command", "cmd_observation")
 size = 1
+lead_role = "grenadier"
 
 [sub_resource type="Resource" id="alarm_checkpoint"]
 script = ExtResource("5_alarm")
@@ -85,6 +87,7 @@ room = &"barracks"
 attachment = &"squad_01"
 count = 2
 delay = 6.0
+lead_role = "heavy"
 
 [sub_resource type="Resource" id="reinforce_second"]
 script = ExtResource("6_reinforcement")
@@ -94,6 +97,7 @@ count = 2
 delay = 20.0
 shock_guard = true
 personal_shield = true
+lead_role = "officer"
 
 [sub_resource type="Resource" id="obj_recon_armoury"]
 script = ExtResource("2_objective")

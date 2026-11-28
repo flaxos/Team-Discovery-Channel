@@ -57,11 +57,13 @@ size = 1
 script = ExtResource("3_patrol")
 rooms = PackedStringArray("upper_hall", "interior_checkpoint")
 size = 1
+lead_role = "officer"
 
 [sub_resource type="Resource" id="patrol_engineering"]
 script = ExtResource("3_patrol")
 rooms = PackedStringArray("corridor_engineering", "engineering")
 size = 1
+lead_role = "heavy"
 
 [sub_resource type="Resource" id="patrol_bridge"]
 script = ExtResource("3_patrol")
@@ -69,6 +71,8 @@ rooms = PackedStringArray("bridge")
 size = 1
 shock_guard = true
 personal_shield = true
+lead_role = "goauld_lord"
+boss_name = "GOA'ULD SYSTEM LORD"
 
 [sub_resource type="Resource" id="obj_sweep_cargo_bay"]
 script = ExtResource("2_objective")

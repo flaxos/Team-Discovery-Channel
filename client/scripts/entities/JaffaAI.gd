@@ -11,6 +11,52 @@ signal staff_visual_fired
 signal patrol_waypoint_reached(index: int)
 signal patrol_lap_completed(laps: int)
 signal body_discovered(corpse: Node3D, lethal: bool)
+signal rally_command_issued(rallied_count: int)
+signal shock_grenade_thrown(grenade: Node3D, target_pos: Vector3)
+signal kara_kesh_push_fired(affected_count: int)
+signal kara_kesh_beam_started(target: Node3D)
+signal kara_kesh_beam_ticked(target: Node3D, damage: float)
+signal kara_kesh_beam_ended(reason: String)
+
+const ROLE_TROOPER: String = "trooper"
+const ROLE_OFFICER: String = "officer"
+const ROLE_HEAVY: String = "heavy"
+const ROLE_GRENADIER: String = "grenadier"
+const ROLE_GOAULD_LORD: String = "goauld_lord"
+const VALID_ROLES: PackedStringArray = [
+	ROLE_TROOPER, ROLE_OFFICER, ROLE_HEAVY, ROLE_GRENADIER, ROLE_GOAULD_LORD
+]
+
+const SHOCK_GRENADE_SCENE_PATH: String = "res://scenes/weapons/GoauldShockGrenade.tscn"
+const OFFICER_ALERT_RADIUS: float = 30.0
+const OFFICER_RALLY_RADIUS: float = 12.0
+const BOSS_RALLY_RADIUS: float = 14.0
+const OFFICER_RALLY_COOLDOWN_S: float = 7.5
+const RALLY_RESOLVE_DURATION_S: float = 2.5
+const HEAVY_FRONTAL_DAMAGE_SCALE: float = 0.70
+const HEAVY_SUPPRESSION_HITS: int = 5
+const HEAVY_SUPPRESSION_HOLD: float = 0.8
+const HEAVY_SUPPRESSION_LIMIT: float = 1.6
+const HEAVY_BOLT_SPEED: float = 24.0
+const MAX_SHOCK_GRENADES: int = 3
+const SHOCK_GRENADE_COOLDOWN_S: float = 9.5
+const SHOCK_GRENADE_MIN_RANGE: float = 4.5
+const SHOCK_GRENADE_MAX_RANGE: float = 18.0
+const KARA_KESH_PUSH_RANGE: float = 10.5
+const KARA_KESH_PUSH_HALF_ANGLE_COS: float = 0.5735  # ~55 deg half-angle (~110 deg cone; forgiving close arc)
+const KARA_KESH_PUSH_CHARGE_S: float = 0.55
+const KARA_KESH_PUSH_COOLDOWN_S: float = 7.0
+const KARA_KESH_PUSH_DAMAGE: float = 32.0
+const KARA_KESH_PUSH_IMPULSE: float = 13.5
+const KARA_KESH_BEAM_MIN_RANGE: float = 3.5
+const KARA_KESH_BEAM_MAX_RANGE: float = 16.0
+const KARA_KESH_BEAM_CHARGE_S: float = 0.65
+const KARA_KESH_BEAM_DURATION_S: float = 2.2
+const KARA_KESH_BEAM_TICK_S: float = 0.35
+const KARA_KESH_BEAM_TICK_DAMAGE: float = 14.0
+const KARA_KESH_BEAM_COOLDOWN_S: float = 8.5
+
+enum KaraKeshState { IDLE, CHARGING_PUSH, CHARGING_BEAM, CHANNELING_BEAM }
 
 enum State {
 	IDLE,
@@ -34,6 +80,19 @@ enum State {
 		has_personal_shield = value
 		if personal_shield != null and (not multiplayer.has_multiplayer_peer() or multiplayer.is_server() or personal_shield._last_revision < 0):
 			personal_shield.set_shield_enabled(value)
+@export var combat_role: String = ROLE_TROOPER:
+	set(value):
+		var clean := value.strip_edges().to_lower()
+		if not VALID_ROLES.has(clean):
+			clean = ROLE_TROOPER
+		combat_role = clean
+		if is_node_ready():
+			_refresh_role_visuals()
+@export var boss_display_name: String = "GOA'ULD SYSTEM LORD":
+	set(value):
+		boss_display_name = value
+		if is_node_ready():
+			_refresh_role_visuals()
 @export var move_speed: float = 4.2
 @export var march_speed: float = 2.4
 @export var combat_run_speed: float = 5.5
@@ -124,10 +183,32 @@ const SUPPRESSION_HOLD := 1.3
 const SUPPRESSION_LIMIT := 3.0
 const SUPPRESSION_RECOVERY := 1.0
 var _incoming_fire_window := 0.0
+var _incoming_fire_hits := 0
 var _suppression_hold := 0.0
 var _suppression_limit := 0.0
 var _suppression_recovery := 0.0
 var _suppression_cover := Vector3.INF
+var _rally_resolve_timer := 0.0
+var _rally_cooldown := 2.0
+var _burst_shots_remaining: int = 0
+var _burst_shot_timer: float = 0.0
+var shock_grenades_remaining: int = 0
+var _shock_grenade_cooldown: float = 2.0
+## Replicated Kara Kesh phase for Goa'uld System Lord boss visuals on every peer.
+var kara_kesh_state: int = KaraKeshState.IDLE:
+	set(value):
+		kara_kesh_state = value
+		if is_node_ready():
+			_update_kara_kesh_visuals()
+var _kara_kesh_phase_timer: float = 0.0
+var _kara_kesh_tick_timer: float = 0.0
+var _kara_kesh_push_cd: float = 1.5
+var _kara_kesh_beam_cd: float = 3.0
+var _kara_kesh_beam_target: Node3D = null
+var _kara_kesh_beam_end: Vector3 = Vector3.ZERO
+var _kara_kesh_beam_mesh: MeshInstance3D = null
+var _role_badge: Label3D = null
+var _role_accent: Node3D = null
 ## Staff height while standing to fire over a cover prop, above the tallest low cover.
 const OVER_COVER_STAFF_HEIGHT := 1.35
 ## Seconds left standing up to fire over cover, and until the cover is re-checked.
@@ -148,6 +229,8 @@ var patrol_laps: int = 0
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D if has_node("NavigationAgent3D") else null
 @onready var staff_mount: Node3D = $StaffMount if has_node("StaffMount") else null
 @onready var muzzle_point: Marker3D = $StaffMount/MuzzlePoint if has_node("StaffMount/MuzzlePoint") else null
+@onready var kara_kesh_mount: Node3D = $KaraKeshMount if has_node("KaraKeshMount") else null
+@onready var kara_kesh_light: OmniLight3D = $KaraKeshMount/ChargeLight if has_node("KaraKeshMount/ChargeLight") else null
 @onready var stun_fx: Node3D = $Visuals/StunFX if has_node("Visuals/StunFX") else null
 @onready var body_mesh: MeshInstance3D = $Visuals/ArmorMesh if has_node("Visuals/ArmorMesh") else null
 @onready var visuals_root: Node3D = $Visuals if has_node("Visuals") else null
@@ -178,6 +261,8 @@ func _ready() -> void:
 		plasma_damage = 42.0
 		fire_interval_s = 1.4
 
+	_apply_role_stats()
+
 	if health_component != null:
 		health_component.died.connect(_on_died)
 		health_component.stunned.connect(_on_stunned)
@@ -193,7 +278,185 @@ func _ready() -> void:
 		personal_shield.shield_deflected.connect(_on_shield_deflected)
 		personal_shield.shield_overloaded.connect(_on_shield_overloaded)
 
-	_setup_staff_visual()
+	if not is_boss():
+		_setup_staff_visual()
+	_refresh_role_visuals()
+	_update_kara_kesh_visuals()
+
+
+func is_boss() -> bool:
+	return combat_role == ROLE_GOAULD_LORD
+
+
+func is_officer() -> bool:
+	return combat_role == ROLE_OFFICER
+
+
+func is_heavy() -> bool:
+	return combat_role == ROLE_HEAVY
+
+
+func is_grenadier() -> bool:
+	return combat_role == ROLE_GRENADIER
+
+
+func role_label() -> String:
+	match combat_role:
+		ROLE_OFFICER:
+			return "FIRST PRIME"
+		ROLE_HEAVY:
+			return "HEAVY CANNON"
+		ROLE_GRENADIER:
+			return "SHOCK GRENADIER"
+		ROLE_GOAULD_LORD:
+			return boss_display_name if not boss_display_name.strip_edges().is_empty() else "GOA'ULD SYSTEM LORD"
+		_:
+			return ""
+
+
+func alarm_raise_speed_multiplier() -> float:
+	return 0.75 if combat_role == ROLE_OFFICER else 1.0
+
+
+func _apply_role_stats() -> void:
+	match combat_role:
+		ROLE_OFFICER:
+			if health_component != null:
+				var hp := 160.0 if is_shock_guard else 135.0
+				health_component.max_health = hp
+				health_component.current_health = hp
+			move_speed = maxf(move_speed, 4.5)
+			combat_run_speed = maxf(combat_run_speed, 5.8)
+			combat_range = 24.0
+		ROLE_HEAVY:
+			if health_component != null:
+				health_component.max_health = 220.0
+				health_component.current_health = 220.0
+			move_speed = 3.2
+			combat_run_speed = 4.0
+			plasma_damage = 34.0
+			fire_interval_s = 2.4
+			staff_accuracy_spread_deg = 4.5
+		ROLE_GRENADIER:
+			if health_component != null:
+				health_component.max_health = 115.0
+				health_component.current_health = 115.0
+			move_speed = maxf(move_speed, 4.4)
+			combat_run_speed = maxf(combat_run_speed, 5.5)
+			shock_grenades_remaining = MAX_SHOCK_GRENADES
+		ROLE_GOAULD_LORD:
+			is_shock_guard = true
+			has_personal_shield = true
+			if health_component != null:
+				health_component.max_health = 320.0
+				health_component.current_health = 320.0
+			if personal_shield != null:
+				personal_shield.max_energy = 140.0
+				personal_shield.energy = 140.0
+			move_speed = 3.9
+			combat_run_speed = 5.0
+			combat_range = 24.0
+			plasma_damage = 38.0
+			fire_interval_s = 2.0
+
+
+func modify_incoming_damage(amount: float, source: Node, damage_type: String) -> float:
+	if combat_role != ROLE_HEAVY:
+		return amount
+	if damage_type not in ["bullet", "50cal_heavy"]:
+		return amount
+	if source == null or not is_instance_valid(source) or not (source is Node3D):
+		return amount
+	var forward := -global_transform.basis.z
+	forward.y = 0.0
+	var to_source := (source as Node3D).global_position - global_position
+	to_source.y = 0.0
+	if forward.length_squared() < 0.0001 or to_source.length_squared() < 0.0001:
+		return amount
+	if forward.normalized().dot(to_source.normalized()) > 0.15:
+		return amount * HEAVY_FRONTAL_DAMAGE_SCALE
+	return amount
+
+
+func _refresh_role_visuals() -> void:
+	var label_text := role_label()
+	if label_text.is_empty():
+		if _role_badge != null:
+			_role_badge.visible = false
+		if _role_accent != null:
+			_role_accent.visible = false
+		return
+	if _role_badge == null:
+		_role_badge = Label3D.new()
+		_role_badge.name = "RoleBadge"
+		_role_badge.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_role_badge.font_size = 42 if is_boss() else 34
+		_role_badge.outline_size = 10
+		add_child(_role_badge)
+	_role_badge.position = Vector3(0.0, 2.34 if is_boss() else 2.18, 0.0)
+	_role_badge.text = label_text
+	match combat_role:
+		ROLE_OFFICER:
+			_role_badge.modulate = Color(0.98, 0.82, 0.28)
+		ROLE_HEAVY:
+			_role_badge.modulate = Color(0.95, 0.48, 0.24)
+		ROLE_GRENADIER:
+			_role_badge.modulate = Color(0.36, 0.85, 1.0)
+		ROLE_GOAULD_LORD:
+			_role_badge.modulate = Color(1.0, 0.85, 0.25)
+	_role_badge.visible = current_state != State.DEAD
+
+	if _tell != null and is_boss():
+		_tell.position = Vector3(0.0, 2.68, 0.0)
+
+	if is_boss():
+		return
+	if _role_accent != null:
+		_role_accent.queue_free()
+		_role_accent = null
+	if visuals_root == null:
+		return
+	_role_accent = Node3D.new()
+	_role_accent.name = "RoleAccent"
+	visuals_root.add_child(_role_accent)
+	var accent_mat := StandardMaterial3D.new()
+	accent_mat.metallic = 0.0
+	accent_mat.roughness = 0.28
+	match combat_role:
+		ROLE_OFFICER:
+			accent_mat.albedo_color = Color(0.95, 0.78, 0.22)
+			for side: float in [-0.34, 0.34]:
+				var ep := MeshInstance3D.new()
+				var b := BoxMesh.new()
+				b.size = Vector3(0.20, 0.09, 0.24)
+				b.material = accent_mat
+				ep.mesh = b
+				ep.position = Vector3(side, 1.46, 0.0)
+				_role_accent.add_child(ep)
+		ROLE_HEAVY:
+			accent_mat.albedo_color = Color(0.68, 0.28, 0.16)
+			for side: float in [-0.40, 0.40]:
+				var pauldron := MeshInstance3D.new()
+				var b := BoxMesh.new()
+				b.size = Vector3(0.24, 0.26, 0.34)
+				b.material = accent_mat
+				pauldron.mesh = b
+				pauldron.position = Vector3(side, 1.36, 0.0)
+				_role_accent.add_child(pauldron)
+		ROLE_GRENADIER:
+			accent_mat.albedo_color = Color(0.35, 0.82, 0.96)
+			accent_mat.emission_enabled = true
+			accent_mat.emission = Color(0.35, 0.82, 0.96)
+			accent_mat.emission_energy_multiplier = 0.65
+			for side: float in [-0.30, 0.30]:
+				var orb := MeshInstance3D.new()
+				var s := SphereMesh.new()
+				s.radius = 0.09
+				s.height = 0.18
+				s.material = accent_mat
+				orb.mesh = s
+				orb.position = Vector3(side, 0.96, -0.22)
+				_role_accent.add_child(orb)
 
 
 func has_active_shield() -> bool:
@@ -236,6 +499,9 @@ func start_patrol(points: Array[Vector3], loop: bool = true) -> void:
 func stand_down() -> void:
 	_clear_modular_flank()
 	_clear_suppression()
+	_burst_shots_remaining = 0
+	_burst_shot_timer = 0.0
+	_cancel_kara_kesh("stand_down")
 	if personal_shield != null:
 		personal_shield.stand_down()
 	current_target = null
@@ -513,6 +779,8 @@ func _build_tell() -> void:
 ## Overhead tell on every peer, from the replicated awareness: "?" fills as suspicion builds,
 ## a red "!" once alerted.
 func _process(_delta: float) -> void:
+	if _role_badge != null:
+		_role_badge.visible = not role_label().is_empty() and current_state != State.DEAD
 	if _tell == null:
 		return
 	_tell.visible = (
@@ -556,12 +824,19 @@ func _physics_process(delta: float) -> void:
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
 	_flank_cooldown = maxf(0.0, _flank_cooldown - delta)
+	_rally_resolve_timer = maxf(0.0, _rally_resolve_timer - delta)
+	_rally_cooldown = maxf(0.0, _rally_cooldown - delta)
+	_shock_grenade_cooldown = maxf(0.0, _shock_grenade_cooldown - delta)
+	_kara_kesh_push_cd = maxf(0.0, _kara_kesh_push_cd - delta)
+	_kara_kesh_beam_cd = maxf(0.0, _kara_kesh_beam_cd - delta)
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
 	if current_state == State.DEAD or current_state == State.STUNNED or current_state == State.DOWNED:
 		_clear_modular_flank()
 		_clear_suppression()
+		_burst_shots_remaining = 0
+		_cancel_kara_kesh("incapacitated")
 		velocity.x = move_toward(velocity.x, 0.0, 15.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 15.0 * delta)
 		move_and_slide()
@@ -576,6 +851,13 @@ func _physics_process(delta: float) -> void:
 		if _process_suppression(delta):
 			move_and_slide()
 			return
+
+	_process_burst_fire(delta)
+	if combat_role in [ROLE_OFFICER, ROLE_GOAULD_LORD] and current_target != null and _rally_cooldown <= 0.0:
+		_try_officer_rally()
+	if is_boss() and _process_kara_kesh(delta):
+		move_and_slide()
+		return
 
 	# State evaluations
 	match current_state:
@@ -597,21 +879,30 @@ func can_be_suppressed() -> bool:
 	return (
 		profile == Profile.SENTRY and is_physics_processing() and errand == Vector3.INF
 		and not has_active_shield()
+		and _rally_resolve_timer <= 0.0
 		and current_state not in [State.DEAD, State.STUNNED, State.DOWNED]
 		and not health_component.is_dead and not health_component.is_stunned and not health_component.is_downed
 	)
 
 
-## Two nearby rounds within the pressure window make a sentry duck. Perception
-## continues to own the target and receives no new sighting from this reaction.
+## Nearby ballistic pressure makes a sentry duck (2 rounds for troopers, 5 rounds for Heavy).
+## Perception continues to own the target and receives no new sighting from this reaction.
 func register_incoming_fire(origin: Vector3) -> void:
 	if not multiplayer.is_server() or not can_be_suppressed() or _suppression_recovery > 0.0:
 		return
+	var hold_s: float = HEAVY_SUPPRESSION_HOLD if is_heavy() else SUPPRESSION_HOLD
+	var limit_s: float = HEAVY_SUPPRESSION_LIMIT if is_heavy() else SUPPRESSION_LIMIT
+	var hits_needed: int = HEAVY_SUPPRESSION_HITS if is_heavy() else 2
 	if is_suppressed:
-		_suppression_hold = SUPPRESSION_HOLD
+		_suppression_hold = hold_s
 		return
 	if _incoming_fire_window <= 0.0:
+		_incoming_fire_hits = 1
 		_incoming_fire_window = INCOMING_FIRE_WINDOW
+		return
+	_incoming_fire_hits += 1
+	_incoming_fire_window = INCOMING_FIRE_WINDOW
+	if _incoming_fire_hits < hits_needed:
 		return
 	var level := LevelNavigator.find_level(self)
 	if level == null:
@@ -620,8 +911,9 @@ func register_incoming_fire(origin: Vector3) -> void:
 		_end_modular_flank("suppressed")
 	is_suppressed = true
 	_incoming_fire_window = 0.0
-	_suppression_hold = SUPPRESSION_HOLD
-	_suppression_limit = SUPPRESSION_LIMIT
+	_incoming_fire_hits = 0
+	_suppression_hold = hold_s
+	_suppression_limit = limit_s
 	var threat_floor := origin - Vector3.UP * LevelNavigator.THREAT_TORSO
 	var found := LevelNavigator.prop_cover(level, self, threat_floor, 7.0)
 	_suppression_cover = found.get("spot", Vector3.INF)
@@ -631,6 +923,8 @@ func register_incoming_fire(origin: Vector3) -> void:
 
 func _process_suppression(delta: float) -> bool:
 	_incoming_fire_window = maxf(0.0, _incoming_fire_window - delta)
+	if _incoming_fire_window <= 0.0:
+		_incoming_fire_hits = 0
 	_suppression_recovery = maxf(0.0, _suppression_recovery - delta)
 	if not is_suppressed:
 		return false
@@ -653,6 +947,7 @@ func _process_suppression(delta: float) -> bool:
 func _clear_suppression() -> void:
 	is_suppressed = false
 	_incoming_fire_window = 0.0
+	_incoming_fire_hits = 0
 	_suppression_hold = 0.0
 	_suppression_limit = 0.0
 	_suppression_recovery = 0.0
@@ -740,13 +1035,14 @@ func _alert_nearby_formation_jaffa() -> void:
 	var enemies: Node = get_parent()
 	if enemies == null:
 		return
+	var spread_radius: float = OFFICER_ALERT_RADIUS if combat_role in [ROLE_OFFICER, ROLE_GOAULD_LORD] else combat_range
 	for child: Node in enemies.get_children():
 		var other: JaffaAI = child as JaffaAI
 		if other != null and other != self and is_instance_valid(other):
 			if other.profile == Profile.SENTRY:
 				# One hop, as before: the alerted sentry engages but does not pass it on.
 				if (
-					other.global_position.distance_to(global_position) <= combat_range
+					other.global_position.distance_to(global_position) <= spread_radius
 					and other.perception.level != JaffaPerception.Level.ALERTED
 					and other.current_state not in [State.DEAD, State.STUNNED, State.DOWNED]
 				):
@@ -758,7 +1054,7 @@ func _alert_nearby_formation_jaffa() -> void:
 					other._publish_awareness()
 					other._engage(other.perception.target, false)
 				continue
-			if other.current_state == State.PATROL and other.global_position.distance_to(global_position) > combat_range:
+			if other.current_state == State.PATROL and other.global_position.distance_to(global_position) > spread_radius:
 				continue
 			if other.current_state in [State.MARCHING_FORMATION, State.ADVANCE, State.PATROL]:
 				if other.current_target == null and current_target != null:
@@ -1081,6 +1377,21 @@ func _process_combat_state(delta: float) -> void:
 			if look_dir.length_squared() > 0.01:
 				rotation.y = atan2(-look_dir.x, -look_dir.z)
 
+			if is_boss() and kara_kesh_state == KaraKeshState.IDLE:
+				if dist <= KARA_KESH_PUSH_RANGE and _kara_kesh_push_cd <= 0.0:
+					_set_crouching(false)
+					trigger_kara_kesh_push()
+					return
+				if dist >= KARA_KESH_BEAM_MIN_RANGE and dist <= KARA_KESH_BEAM_MAX_RANGE and _kara_kesh_beam_cd <= 0.0:
+					_set_crouching(false)
+					trigger_kara_kesh_beam(current_target)
+					return
+
+			if is_grenadier() and shock_grenades_remaining > 0 and _shock_grenade_cooldown <= 0.0:
+				if dist >= SHOCK_GRENADE_MIN_RANGE and dist <= SHOCK_GRENADE_MAX_RANGE:
+					if try_throw_shock_grenade(current_target.global_position) != null:
+						return
+
 			fire_timer -= delta
 			if fire_timer <= 0.0:
 				fire_timer = fire_interval_s + randf_range(-0.3, 0.4)
@@ -1378,8 +1689,30 @@ func _get_hallway_destination(target_pos: Vector3) -> Vector3:
 
 
 func _process_combat(delta: float, dist: float) -> void:
+	# Face active target in combat so frontal armor/Kara Kesh arcs stay aligned.
+	var look_dir: Vector3 = current_target.global_position - global_position
+	look_dir.y = 0.0
+	if look_dir.length_squared() > 0.01:
+		rotation.y = lerp_angle(rotation.y, atan2(-look_dir.x, -look_dir.z), clampf(10.0 * delta, 0.0, 1.0))
+
+	# Goa'uld System Lord Boss: prioritize Kara Kesh telekinetic push / focused energy beam
+	if is_boss() and kara_kesh_state == KaraKeshState.IDLE and _has_line_of_sight(current_target):
+		if dist <= KARA_KESH_PUSH_RANGE and _kara_kesh_push_cd <= 0.0:
+			trigger_kara_kesh_push()
+			return
+		if dist >= KARA_KESH_BEAM_MIN_RANGE and dist <= KARA_KESH_BEAM_MAX_RANGE and _kara_kesh_beam_cd <= 0.0:
+			trigger_kara_kesh_beam(current_target)
+			return
+
+	# Shock Grenadier: flush operatives holding cover or mid-range chokepoints
+	if is_grenadier() and shock_grenades_remaining > 0 and _shock_grenade_cooldown <= 0.0:
+		if dist >= SHOCK_GRENADE_MIN_RANGE and dist <= SHOCK_GRENADE_MAX_RANGE:
+			if try_throw_shock_grenade(current_target.global_position) != null:
+				return
+
 	# Continue advancing down the ramp while in long-range combat (> 10m)
-	if dist > 10.0:
+	var hold_dist: float = 8.0 if is_boss() else 10.0
+	if dist > hold_dist:
 		_advance_towards(current_target.global_position, delta)
 	else:
 		# Tactical stop-and-shoot when holding position at mid-range
@@ -1398,21 +1731,45 @@ func _fire_staff_blast() -> void:
 
 	_dispatch_single_plasma_bolt()
 
-	# Jaffa Shock Guard rapid double-burst logic (fires 2nd bolt after 0.18s)
-	if is_shock_guard:
-		var burst_timer := get_tree().create_timer(0.18)
-		burst_timer.timeout.connect(func() -> void:
-			if is_instance_valid(self) and is_inside_tree() and current_state != State.DEAD and current_state != State.STUNNED and current_target != null:
-				if _has_line_of_sight(current_target):
-					_dispatch_single_plasma_bolt()
-		)
+	if is_heavy():
+		# Heavy Staff Cannon Trooper: sustained 3-bolt rapid suppressive volley (0.14s spacing)
+		_burst_shots_remaining = 2
+		_burst_shot_timer = 0.14
+	elif is_shock_guard and not is_boss():
+		# Jaffa Shock Guard rapid double-burst logic (fires 2nd bolt after 0.18s)
+		_burst_shots_remaining = 1
+		_burst_shot_timer = 0.18
+
+
+func _process_burst_fire(delta: float) -> void:
+	if _burst_shots_remaining <= 0:
+		return
+	_burst_shot_timer -= delta
+	if _burst_shot_timer > 0.0:
+		return
+	_burst_shots_remaining -= 1
+	_burst_shot_timer = 0.14 if is_heavy() else 0.18
+	if (
+		not is_suppressed
+		and current_state not in [State.DEAD, State.STUNNED, State.DOWNED]
+		and current_target != null
+		and is_instance_valid(current_target)
+		and _has_line_of_sight(current_target)
+	):
+		_dispatch_single_plasma_bolt()
+	else:
+		_burst_shots_remaining = 0
 
 
 func _dispatch_single_plasma_bolt() -> void:
 	if is_suppressed or current_target == null or not _has_line_of_sight(current_target):
 		return
 
-	var origin: Vector3 = muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.2, -0.6)
+	var origin: Vector3 = (
+		kara_kesh_mount.global_position
+		if (is_boss() and kara_kesh_mount != null)
+		else (muzzle_point.global_position if muzzle_point != null else global_position + Vector3(0, 1.2, -0.6))
+	)
 	var aim_height: float = 0.60 if (
 		current_target.get(&"is_crouching") == true
 		and current_target.get(&"is_in_cover") == true
@@ -1431,6 +1788,8 @@ func _dispatch_single_plasma_bolt() -> void:
 	if bolt_scene != null:
 		var bolt := bolt_scene.instantiate() as PlasmaBolt
 		bolt.damage = plasma_damage
+		if is_heavy():
+			bolt.speed = HEAVY_BOLT_SPEED
 		var root_node := get_tree().root if is_inside_tree() else null
 		if root_node != null:
 			root_node.add_child(bolt)
@@ -1454,7 +1813,10 @@ const TAKEDOWN_REAR_DOT := -0.15
 
 
 ## True when `operative` can silently take down this standing, unalerted Jaffa from behind.
+## Goa'uld System Lord bosses resist instant rear takedowns (allowing flank melee bypass instead).
 func can_be_taken_down_by(operative: Node3D) -> bool:
+	if is_boss():
+		return false
 	if operative == null or not is_instance_valid(operative) or not is_inside_tree():
 		return false
 	if health_component == null or health_component.is_dead or health_component.is_stunned or health_component.is_downed:
@@ -1571,6 +1933,8 @@ func _on_shield_deflected(source: Node, _damage_type: String, _impact_pos: Vecto
 func _on_shield_overloaded(source: Node, _damage_type: String) -> void:
 	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
 		return
+	if kara_kesh_state != KaraKeshState.IDLE:
+		_cancel_kara_kesh("shield_overloaded")
 	_react_to_hostile_contact(source)
 
 
@@ -1622,6 +1986,8 @@ func play_staff_fire_fx(origin_pos: Vector3) -> void:
 func _on_stunned(duration: float) -> void:
 	_clear_modular_flank()
 	_clear_suppression()
+	_burst_shots_remaining = 0
+	_cancel_kara_kesh("stunned")
 	current_state = State.STUNNED
 	current_target = null
 	investigating = false
@@ -1649,6 +2015,10 @@ func _on_recovered_from_stun() -> void:
 func _on_died() -> void:
 	_clear_modular_flank()
 	_clear_suppression()
+	_burst_shots_remaining = 0
+	_cancel_kara_kesh("died")
+	if _role_badge != null:
+		_role_badge.visible = false
 	if navigator != null: navigator.reset()
 	if _death_notified:
 		return
@@ -1704,3 +2074,407 @@ func _overrun_destination() -> Vector3:
 		overrun_destination_index += 1
 		goal = map.definition.region(destinations[overrun_destination_index]).anchor
 	return goal
+
+
+# ==============================================================================
+# SW-3: CANONICAL SPECIALIST ABILITIES & GOA'ULD SYSTEM LORD KARA KESH
+# ==============================================================================
+
+## Server: Officer / System Lord command pulse. Clears suppression on nearby allied Jaffa,
+## grants brief rally resolve, and shares target intel across the tactical command radius.
+func issue_rally_command() -> int:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return 0
+	if current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+		return 0
+	var enemies := get_parent()
+	if enemies == null:
+		return 0
+	var radius: float = BOSS_RALLY_RADIUS if is_boss() else OFFICER_RALLY_RADIUS
+	var rallied: int = 0
+	var known := is_instance_valid(current_target)
+	for child: Node in enemies.get_children():
+		var ally := child as JaffaAI
+		if ally == null or ally == self or not is_instance_valid(ally):
+			continue
+		if ally.current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+			continue
+		if ally.global_position.distance_to(global_position) > radius:
+			continue
+		var touched := false
+		if ally.is_suppressed:
+			ally._clear_suppression()
+			ally._set_crouching(false)
+			touched = true
+		if ally._rally_resolve_timer < RALLY_RESOLVE_DURATION_S * 0.5:
+			ally._rally_resolve_timer = RALLY_RESOLVE_DURATION_S
+			touched = true
+		if ally.profile == Profile.SENTRY and ally.perception != null and ally.perception.level != JaffaPerception.Level.ALERTED and known:
+			ally.perception.alert(current_target, current_target.global_position)
+			ally._publish_awareness()
+			ally._engage(current_target, false)
+			touched = true
+		if touched:
+			rallied += 1
+	if rallied > 0:
+		_rally_cooldown = OFFICER_RALLY_COOLDOWN_S
+		rally_command_issued.emit(rallied)
+		play_rally_fx(global_position + Vector3(0.0, 1.35, 0.0))
+		SGCNetworkManager.mission_rpc(self, &"play_rally_fx", [global_position + Vector3(0.0, 1.35, 0.0)], health_component)
+	return rallied
+
+
+func _try_officer_rally() -> void:
+	var enemies := get_parent()
+	if enemies == null:
+		return
+	var radius: float = BOSS_RALLY_RADIUS if is_boss() else OFFICER_RALLY_RADIUS
+	var needs_rally := false
+	for child: Node in enemies.get_children():
+		var ally := child as JaffaAI
+		if ally == null or ally == self or not is_instance_valid(ally):
+			continue
+		if ally.current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+			continue
+		if ally.global_position.distance_to(global_position) > radius:
+			continue
+		if ally.is_suppressed or (ally.profile == Profile.SENTRY and ally.perception != null and ally.perception.level != JaffaPerception.Level.ALERTED):
+			needs_rally = true
+			break
+	if needs_rally:
+		issue_rally_command()
+
+
+@rpc("call_local", "unreliable")
+func play_rally_fx(pos: Vector3) -> void:
+	if DisplayServer.get_name() == "headless" or not is_inside_tree():
+		return
+	var pulse := OmniLight3D.new()
+	pulse.light_color = Color(1.0, 0.82, 0.28)
+	pulse.light_energy = 4.2
+	pulse.omni_range = 6.0
+	add_child(pulse)
+	pulse.global_position = pos
+	var tw := pulse.create_tween()
+	tw.tween_property(pulse, "light_energy", 0.0, 0.25)
+	tw.tween_callback(pulse.queue_free)
+
+
+## Server: Shock Grenadier throws a canonical Goa'uld Shock Grenade toward `target_pos`.
+func try_throw_shock_grenade(target_pos: Vector3) -> Node3D:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return null
+	if not is_grenadier() or shock_grenades_remaining <= 0 or _shock_grenade_cooldown > 0.0:
+		return null
+	if current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+		return null
+	var deployments := MissionWorld.find(self, "FieldKitDeployments") as Node3D
+	if deployments == null:
+		return null
+	var scene := load(SHOCK_GRENADE_SCENE_PATH) as PackedScene
+	if scene == null:
+		return null
+	var origin := global_position + Vector3(0.0, 1.45, 0.0) + (-global_transform.basis.z * 0.45)
+	var delta_vec := target_pos - origin
+	var horiz := Vector3(delta_vec.x, 0.0, delta_vec.z)
+	var horiz_dist := horiz.length()
+	if horiz_dist < 1.0 or horiz_dist > SHOCK_GRENADE_MAX_RANGE + 2.0:
+		return null
+	var flight_t := clampf(horiz_dist / 12.5, 0.45, 1.05)
+	var vel := Vector3(
+		delta_vec.x / flight_t,
+		(delta_vec.y + 0.5 * 14.5 * flight_t * flight_t) / flight_t,
+		delta_vec.z / flight_t
+	)
+	var grenade := scene.instantiate() as Node3D
+	grenade.name = "ShockGrenade_%d_%d" % [get_instance_id(), shock_grenades_remaining]
+	grenade.position = MissionWorld.local(deployments, origin)
+	deployments.add_child(grenade, true)
+	if grenade.has_method(&"launch"):
+		grenade.call(&"launch", vel, self)
+	shock_grenades_remaining -= 1
+	_shock_grenade_cooldown = SHOCK_GRENADE_COOLDOWN_S
+	shock_grenade_thrown.emit(grenade, target_pos)
+	return grenade
+
+
+## Server: initiates the Goa'uld System Lord's Kara Kesh telekinetic shockwave push telegraph.
+func trigger_kara_kesh_push() -> bool:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return false
+	if not is_boss() or kara_kesh_state != KaraKeshState.IDLE:
+		return false
+	if current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+		return false
+	kara_kesh_state = KaraKeshState.CHARGING_PUSH
+	_kara_kesh_phase_timer = KARA_KESH_PUSH_CHARGE_S
+	_kara_kesh_push_cd = KARA_KESH_PUSH_COOLDOWN_S
+	_set_crouching(false)
+	return true
+
+
+## Server: initiates the Goa'uld System Lord's Kara Kesh focused neural/energy beam telegraph.
+func trigger_kara_kesh_beam(target: Node3D) -> bool:
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		return false
+	if not is_boss() or kara_kesh_state != KaraKeshState.IDLE:
+		return false
+	if target == null or not is_instance_valid(target) or current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+		return false
+	kara_kesh_state = KaraKeshState.CHARGING_BEAM
+	_kara_kesh_beam_target = target
+	_kara_kesh_phase_timer = KARA_KESH_BEAM_CHARGE_S
+	_kara_kesh_tick_timer = 0.0
+	_kara_kesh_beam_cd = KARA_KESH_BEAM_COOLDOWN_S
+	_set_crouching(false)
+	return true
+
+
+func _process_kara_kesh(delta: float) -> bool:
+	if kara_kesh_state == KaraKeshState.IDLE:
+		return false
+	if current_state in [State.DEAD, State.STUNNED, State.DOWNED]:
+		_cancel_kara_kesh("incapacitated")
+		return false
+
+	velocity.x = move_toward(velocity.x, 0.0, 18.0 * delta)
+	velocity.z = move_toward(velocity.z, 0.0, 18.0 * delta)
+
+	var aim_target: Node3D = (
+		_kara_kesh_beam_target
+		if (_kara_kesh_beam_target != null and is_instance_valid(_kara_kesh_beam_target))
+		else (current_target if (current_target != null and is_instance_valid(current_target)) else null)
+	)
+	if aim_target != null and is_instance_valid(aim_target):
+		var look := aim_target.global_position - global_position
+		look.y = 0.0
+		if look.length_squared() > 0.001:
+			rotation.y = lerp_angle(rotation.y, atan2(-look.x, -look.z), clampf(12.0 * delta, 0.0, 1.0))
+
+	match kara_kesh_state:
+		KaraKeshState.CHARGING_PUSH:
+			_kara_kesh_phase_timer -= delta
+			if _kara_kesh_phase_timer <= 0.0:
+				_execute_kara_kesh_push()
+				kara_kesh_state = KaraKeshState.IDLE
+			return true
+		KaraKeshState.CHARGING_BEAM:
+			if not _is_kara_kesh_target_valid(_kara_kesh_beam_target):
+				_cancel_kara_kesh("target_lost")
+				return false
+			_kara_kesh_phase_timer -= delta
+			if _kara_kesh_phase_timer <= 0.0:
+				if not _has_kara_kesh_los(_kara_kesh_beam_target):
+					_cancel_kara_kesh("los_blocked")
+					return false
+				kara_kesh_state = KaraKeshState.CHANNELING_BEAM
+				_kara_kesh_phase_timer = KARA_KESH_BEAM_DURATION_S
+				_kara_kesh_tick_timer = 0.0
+				kara_kesh_beam_started.emit(_kara_kesh_beam_target)
+				_publish_kara_kesh_beam(true, _kara_kesh_beam_target.global_position + Vector3(0.0, 1.1, 0.0))
+			return true
+		KaraKeshState.CHANNELING_BEAM:
+			if not _is_kara_kesh_target_valid(_kara_kesh_beam_target):
+				_cancel_kara_kesh("target_lost")
+				return false
+			if global_position.distance_to(_kara_kesh_beam_target.global_position) > KARA_KESH_BEAM_MAX_RANGE + 1.5:
+				_cancel_kara_kesh("out_of_range")
+				return false
+			if not _has_kara_kesh_los(_kara_kesh_beam_target):
+				_cancel_kara_kesh("los_blocked")
+				return false
+			var end_pt := _kara_kesh_beam_target.global_position + Vector3(0.0, 1.1, 0.0)
+			_publish_kara_kesh_beam(true, end_pt)
+			_kara_kesh_tick_timer -= delta
+			if _kara_kesh_tick_timer <= 0.0:
+				_kara_kesh_tick_timer = KARA_KESH_BEAM_TICK_S
+				var target_health := _kara_kesh_beam_target.get_node_or_null("HealthComponent") as HealthComponent
+				if target_health != null and not target_health.is_dead and not target_health.is_downed:
+					target_health.take_damage(KARA_KESH_BEAM_TICK_DAMAGE, self, "kara_kesh_beam")
+					if _kara_kesh_beam_target.has_method(&"apply_disorientation"):
+						_kara_kesh_beam_target.call(&"apply_disorientation", 0.65, 0.28, 0.55)
+					kara_kesh_beam_ticked.emit(_kara_kesh_beam_target, KARA_KESH_BEAM_TICK_DAMAGE)
+			_kara_kesh_phase_timer -= delta
+			if _kara_kesh_phase_timer <= 0.0:
+				_cancel_kara_kesh("completed")
+			return true
+	return false
+
+
+func _execute_kara_kesh_push() -> void:
+	var forward := -global_transform.basis.z
+	forward.y = 0.0
+	forward = forward.normalized() if forward.length_squared() > 0.0001 else Vector3.FORWARD
+	var origin := kara_kesh_mount.global_position if kara_kesh_mount != null else global_position + Vector3(0.0, 1.35, 0.0)
+	var affected: int = 0
+	var containers: Array[Node] = []
+	var players_node := MissionWorld.find(self, "Players")
+	if players_node != null:
+		containers.append(players_node)
+	var allies_node := MissionWorld.find(self, "Allies")
+	if allies_node != null:
+		containers.append(allies_node)
+
+	for container: Node in containers:
+		for child: Node in container.get_children():
+			var actor := child as Node3D
+			if actor == null or not is_instance_valid(actor):
+				continue
+			var health := actor.get_node_or_null("HealthComponent") as HealthComponent
+			if health == null or health.is_dead or health.is_downed:
+				continue
+			var offset := actor.global_position - global_position
+			var flat := Vector3(offset.x, 0.0, offset.z)
+			var dist := flat.length()
+			if dist > KARA_KESH_PUSH_RANGE or absf(offset.y) > 2.2:
+				continue
+			var push_dir := flat.normalized() if dist > 0.05 else forward
+			if dist > 1.8 and forward.dot(push_dir) < KARA_KESH_PUSH_HALF_ANGLE_COS:
+				continue
+			if not _has_kara_kesh_los(actor):
+				continue
+			affected += 1
+			health.take_damage(KARA_KESH_PUSH_DAMAGE, self, "kara_kesh_push")
+			if actor.has_method(&"apply_external_impulse"):
+				actor.call(&"apply_external_impulse", push_dir * KARA_KESH_PUSH_IMPULSE)
+			elif actor is CharacterBody3D:
+				(actor as CharacterBody3D).velocity += push_dir * KARA_KESH_PUSH_IMPULSE
+
+	kara_kesh_push_fired.emit(affected)
+	play_kara_kesh_push_fx(origin, forward)
+	SGCNetworkManager.mission_rpc(self, &"play_kara_kesh_push_fx", [origin, forward], health_component)
+
+
+func _cancel_kara_kesh(reason: String) -> void:
+	var was_active := kara_kesh_state != KaraKeshState.IDLE
+	var was_beam := kara_kesh_state == KaraKeshState.CHANNELING_BEAM
+	kara_kesh_state = KaraKeshState.IDLE
+	_kara_kesh_phase_timer = 0.0
+	_kara_kesh_tick_timer = 0.0
+	_kara_kesh_beam_target = null
+	if was_beam or _kara_kesh_beam_mesh != null:
+		if reason == "stand_down":
+			_apply_kara_kesh_beam_visual(false, Vector3.ZERO)
+		else:
+			_publish_kara_kesh_beam(false, Vector3.ZERO)
+	if was_active and was_beam:
+		kara_kesh_beam_ended.emit(reason)
+
+
+func _is_kara_kesh_target_valid(target: Variant) -> bool:
+	if target == null or not is_instance_valid(target) or not (target is Node3D):
+		return false
+	var target_node := target as Node3D
+	if not target_node.is_inside_tree():
+		return false
+	var health := target_node.get_node_or_null("HealthComponent") as HealthComponent
+	if health != null and (health.is_dead or health.is_downed):
+		return false
+	return true
+
+
+func _has_kara_kesh_los(target: Node3D) -> bool:
+	if target == null or not is_inside_tree():
+		return false
+	var world3d := get_world_3d()
+	if world3d == null or world3d.direct_space_state == null:
+		return false
+	var from := kara_kesh_mount.global_position if kara_kesh_mount != null else global_position + Vector3(0.0, 1.35, 0.0)
+	var to := target.global_position + Vector3(0.0, 1.1, 0.0)
+	var exclude: Array[RID] = [get_rid()]
+	if target is CollisionObject3D:
+		exclude.append((target as CollisionObject3D).get_rid())
+	return _cast_los_ray(world3d.direct_space_state, from, to, exclude)
+
+
+func _publish_kara_kesh_beam(active: bool, end_pos: Vector3) -> void:
+	_apply_kara_kesh_beam_visual(active, end_pos)
+	if is_inside_tree() and multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+		SGCNetworkManager.mission_rpc(self, &"sync_kara_kesh_beam", [active, end_pos], health_component)
+
+
+@rpc("authority", "call_remote", "unreliable")
+func sync_kara_kesh_beam(active: bool, end_pos: Vector3) -> void:
+	_apply_kara_kesh_beam_visual(active, end_pos)
+
+
+func _update_kara_kesh_visuals() -> void:
+	if kara_kesh_light != null:
+		match kara_kesh_state:
+			KaraKeshState.IDLE:
+				kara_kesh_light.light_energy = 0.8
+				kara_kesh_light.omni_range = 3.2
+			KaraKeshState.CHARGING_PUSH:
+				kara_kesh_light.light_energy = 4.6
+				kara_kesh_light.omni_range = 5.5
+			KaraKeshState.CHARGING_BEAM:
+				kara_kesh_light.light_energy = 3.8
+				kara_kesh_light.omni_range = 4.8
+			KaraKeshState.CHANNELING_BEAM:
+				kara_kesh_light.light_energy = 5.5
+				kara_kesh_light.omni_range = 6.0
+	if kara_kesh_state != KaraKeshState.CHANNELING_BEAM and _kara_kesh_beam_mesh != null:
+		_kara_kesh_beam_mesh.visible = false
+
+
+func _apply_kara_kesh_beam_visual(active: bool, end_pos: Vector3) -> void:
+	_kara_kesh_beam_end = end_pos
+	if not active or not is_inside_tree() or kara_kesh_mount == null:
+		if _kara_kesh_beam_mesh != null:
+			_kara_kesh_beam_mesh.visible = false
+		return
+	if _kara_kesh_beam_mesh == null:
+		_kara_kesh_beam_mesh = MeshInstance3D.new()
+		_kara_kesh_beam_mesh.name = "KaraKeshBeamMesh"
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = 0.055
+		cyl.bottom_radius = 0.085
+		cyl.height = 1.0
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.albedo_color = Color(1.0, 0.82, 0.24, 0.88)
+		cyl.material = mat
+		_kara_kesh_beam_mesh.mesh = cyl
+		_kara_kesh_beam_mesh.top_level = true
+		_kara_kesh_beam_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		kara_kesh_mount.add_child(_kara_kesh_beam_mesh)
+	var start_pos := kara_kesh_mount.global_position
+	var delta_vec := end_pos - start_pos
+	var length := delta_vec.length()
+	if length < 0.05:
+		_kara_kesh_beam_mesh.visible = false
+		return
+	_kara_kesh_beam_mesh.visible = true
+	_kara_kesh_beam_mesh.global_position = start_pos + delta_vec * 0.5
+	var up := Vector3.UP if absf(delta_vec.normalized().dot(Vector3.UP)) < 0.98 else Vector3.RIGHT
+	_kara_kesh_beam_mesh.look_at(end_pos, up)
+	_kara_kesh_beam_mesh.rotate_object_local(Vector3.RIGHT, PI * 0.5)
+	_kara_kesh_beam_mesh.scale = Vector3(1.0, length, 1.0)
+
+
+@rpc("call_local", "unreliable")
+func play_kara_kesh_push_fx(origin: Vector3, forward: Vector3) -> void:
+	if DisplayServer.get_name() == "headless" or not is_inside_tree():
+		return
+	var wave := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.45
+	torus.outer_radius = 0.65
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(1.0, 0.84, 0.28, 0.9)
+	torus.material = mat
+	wave.mesh = torus
+	wave.top_level = true
+	add_child(wave)
+	wave.global_position = origin
+	var dir := forward.normalized() if forward.length_squared() > 0.001 else -global_transform.basis.z
+	wave.look_at(origin + dir, Vector3.UP)
+	wave.rotate_object_local(Vector3.RIGHT, PI * 0.5)
+	var tw := wave.create_tween()
+	tw.tween_property(wave, "global_position", origin + dir * (KARA_KESH_PUSH_RANGE * 0.75), 0.24)
+	tw.parallel().tween_property(wave, "scale", Vector3(4.2, 4.2, 4.2), 0.24)
+	tw.parallel().tween_property(mat, "albedo_color:a", 0.0, 0.24)
+	tw.tween_callback(wave.queue_free)

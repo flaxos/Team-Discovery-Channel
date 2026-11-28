@@ -9,3 +9,9 @@ extends Resource
 @export var delay: float = 6.0
 @export var shock_guard := false
 @export var personal_shield := false
+## Canonical SW-3 combat role for reinforcement troopers ("trooper", "officer", "heavy", "grenadier", "goauld_lord").
+@export var combat_role: String = "trooper"
+## Optional SW-3 specialist role applied specifically to rank 0 lead.
+@export var lead_role: String = ""
+## Optional display name when spawning a Goa'uld System Lord boss.
+@export var boss_name: String = ""

@@ -267,6 +267,9 @@ static func resolve_patrol_plans(
 		var marker_val: StringName = patrol.get(&"marker") as StringName
 		var use_shock: bool = bool(patrol.get(&"shock_guard"))
 		var has_shield: bool = bool(patrol.get(&"personal_shield"))
+		var role_val: String = str(patrol.get(&"combat_role")) if patrol.get(&"combat_role") != null else "trooper"
+		var lead_role_val: String = str(patrol.get(&"lead_role")) if patrol.get(&"lead_role") != null else ""
+		var boss_name_val: String = str(patrol.get(&"boss_name")) if patrol.get(&"boss_name") != null else ""
 
 		var plan := {
 			"index": p,
@@ -276,6 +279,9 @@ static func resolve_patrol_plans(
 			"size": final_size,
 			"shock_guard": use_shock,
 			"personal_shield": has_shield,
+			"combat_role": role_val,
+			"lead_role": lead_role_val,
+			"boss_name": boss_name_val,
 			"promoted_lead_shield": false,
 			"route_reversed": route_reversed,
 			"start_offset": start_offset
