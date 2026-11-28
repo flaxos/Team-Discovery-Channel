@@ -2352,7 +2352,11 @@ func _cancel_kara_kesh(reason: String) -> void:
 	_kara_kesh_phase_timer = 0.0
 	_kara_kesh_tick_timer = 0.0
 	_kara_kesh_beam_target = null
-	_publish_kara_kesh_beam(false, Vector3.ZERO)
+	if was_beam or _kara_kesh_beam_mesh != null:
+		if reason == "stand_down":
+			_apply_kara_kesh_beam_visual(false, Vector3.ZERO)
+		else:
+			_publish_kara_kesh_beam(false, Vector3.ZERO)
 	if was_active and was_beam:
 		kara_kesh_beam_ended.emit(reason)
 

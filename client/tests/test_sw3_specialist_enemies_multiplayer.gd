@@ -239,6 +239,8 @@ func run_host() -> void:
 	assert(await marked("client_saw_push"), "Client confirmed Kara Kesh push impulse & Boss HUD Bar")
 
 	# 3. Server Boss channels Kara Kesh Beam -> client overloads shield with Zat to interrupt
+	boss.global_position = (spot.at as Vector3) + Vector3.UP * 0.05
+	boss.velocity = Vector3.ZERO
 	boss._kara_kesh_beam_cd = 0.0
 	var beam_end_reason := [""]
 	boss.kara_kesh_beam_ended.connect(func(reason: String) -> void: beam_end_reason[0] = reason)
@@ -344,6 +346,11 @@ func run_client() -> void:
 	assert(me.last_external_impulse.length() > 8.0, "Client received Kara Kesh Push impulse RPC")
 	assert(room.hud.boss_panel.visible and room.hud.boss_name_label.text == "SYSTEM LORD ANUBIS",
 		"Client HUD shows Boss Health & Shield Bar")
+	me.set_physics_process(false)
+	me.external_impulse_velocity = Vector3.ZERO
+	me.global_position = front + Vector3(0.0, 0.05, 0.0)
+	me.velocity = Vector3.ZERO
+	await frames(8)
 	mark("client_saw_push")
 
 	# Wait for Kara Kesh Beam channel, then fire Carter's Zat to overload shield & cancel beam
@@ -353,12 +360,14 @@ func run_client() -> void:
 	for _attempt: int in range(8):
 		if boss.personal_shield.is_overloaded:
 			break
+		var boss_pos := boss.global_position
 		me.global_position = front + Vector3(0.0, 0.05, 0.0)
 		me.velocity = Vector3.ZERO
-		var aim_boss := boss.global_position + Vector3(0.0, 1.05, 0.0)
+		var aim_boss := boss_pos + Vector3(0.0, 1.05, 0.0)
 		me.look_at(Vector3(aim_boss.x, me.global_position.y, aim_boss.z), Vector3.UP)
 		me.current_aim_target = aim_boss
 		await frames(10)
+		me.current_aim_target = boss.global_position + Vector3(0.0, 1.05, 0.0)
 		if me.current_weapon != null:
 			me.current_weapon.fire_cooldown = 0.0
 			if "current_heat" in me.current_weapon:
