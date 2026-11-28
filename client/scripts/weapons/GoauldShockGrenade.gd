@@ -58,8 +58,6 @@ func stand_down() -> void:
 	_stopped = true
 	set_physics_process(false)
 	set_process(false)
-	if is_inside_tree():
-		queue_free()
 
 
 func launch(initial_velocity: Vector3, owner_hostile: Node3D) -> void:
