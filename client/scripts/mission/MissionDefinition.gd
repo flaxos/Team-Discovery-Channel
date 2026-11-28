@@ -16,6 +16,15 @@ extends Resource
 @export var airman_support := false
 ## Optional per-run objective variations (Milestone CA-2).
 @export var objective_variants: Array[MissionObjectiveVariant] = []
+## Optional named exterior markers provided by a sibling OutdoorBoundary (roadmap OW-0 / D-006).
+## Interior-only missions leave this empty.
+@export var exterior_markers: PackedStringArray = PackedStringArray()
+
+
+static func parse_patrol_room(entry: String) -> Dictionary:
+	if entry.begins_with("exterior:"):
+		return {"room": &"exterior", "marker": StringName(entry.substr(9))}
+	return {"room": StringName(entry), "marker": &""}
 
 
 func objective_variant_entries() -> Array[Dictionary]:
@@ -94,13 +103,21 @@ func validate() -> PackedStringArray:
 		obj_by_id[objective.id] = objective
 		if not objective.initially_enabled:
 			disabled_objectives[objective.id] = true
-		var item := layout.instance(objective.room)
-		if item == null:
-			errors.append("Unknown objective room: %s/%s" % [objective.id, objective.room])
-		elif objective.kind == "interact" and attachment(objective) == null:
-			errors.append(
-				"Unknown objective attachment: %s/%s" % [objective.room, objective.attachment]
-			)
+		if objective.room == &"exterior":
+			if objective.kind not in ["reach", "extract"]:
+				errors.append("Exterior objective must be reach or extract: %s" % objective.id)
+			elif objective.marker == &"" or not exterior_markers.has(str(objective.marker)):
+				errors.append(
+					"Unknown exterior objective marker: %s/%s" % [objective.id, objective.marker]
+				)
+		else:
+			var item := layout.instance(objective.room)
+			if item == null:
+				errors.append("Unknown objective room: %s/%s" % [objective.id, objective.room])
+			elif objective.kind == "interact" and attachment(objective) == null:
+				errors.append(
+					"Unknown objective attachment: %s/%s" % [objective.room, objective.attachment]
+				)
 	if objectives[-1] != null and objectives[-1].kind != "extract":
 		errors.append("The final objective must be an extraction")
 	elif objectives[-1] != null and not objectives[-1].initially_enabled:
@@ -110,7 +127,11 @@ func validate() -> PackedStringArray:
 			errors.append("Empty patrol")
 			continue
 		for room in patrol.rooms:
-			if layout.instance(StringName(room)) == null:
+			if room.begins_with("exterior:"):
+				var marker_key := room.substr(9)
+				if marker_key.is_empty() or not exterior_markers.has(marker_key):
+					errors.append("Unknown exterior patrol marker: " + room)
+			elif layout.instance(StringName(room)) == null:
 				errors.append("Unknown patrol room: " + room)
 	var consoles := {}
 	for alarm in alarms:
@@ -270,7 +291,8 @@ func validate() -> PackedStringArray:
 									progressed = true
 		for objective in objectives:
 			unlock_room_releases.call()
-			if LevelTopology.path(links, previous, str(objective.room), [], true).is_empty():
+			var target_room := str(layout.entry_instance) if objective.room == &"exterior" else str(objective.room)
+			if LevelTopology.path(links, previous, target_room, [], true).is_empty():
 				errors.append("Mission doors block objective: %s" % objective.id)
 			for trigger in triggers:
 				if trigger.condition == "objective_completed" and trigger.action == "release_door" and trigger.objective_id == objective.id:
@@ -278,7 +300,7 @@ func validate() -> PackedStringArray:
 						for edge: Dictionary in edges:
 							if edge.security_id == str(trigger.security_id):
 								edge.locked = false
-			previous = str(objective.room)
+			previous = target_room
 		unlock_room_releases.call()
 		var all_reachable := LevelTopology.reach(links, str(layout.entry_instance), [], true)
 		for trigger in triggers:
@@ -291,7 +313,8 @@ func validate() -> PackedStringArray:
 					if lock_ids.has(StringName(edge.security_id)):
 						edge.locked = true
 			for objective in objectives:
-				if LevelTopology.path(lock_links, str(layout.entry_instance), str(objective.room), [], true).is_empty():
+				var lock_room := str(layout.entry_instance) if objective.room == &"exterior" else str(objective.room)
+				if LevelTopology.path(lock_links, str(layout.entry_instance), lock_room, [], true).is_empty():
 					errors.append("Lock trigger permanently blocks objective: %s" % objective.id)
 
 	var variant_ids := {}

@@ -1,0 +1,373 @@
+[gd_scene load_steps=34 format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/ModularMission.gd" id="1_mission"]
+[ext_resource type="Script" path="res://scripts/level/LevelAssembly.gd" id="2_level"]
+[ext_resource type="Script" path="res://scripts/mission/MissionObjectives.gd" id="3_objectives"]
+[ext_resource type="Resource" path="res://resources/missions/outdoor_gate_site.tres" id="4_definition"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/mission/MissionAlert.gd" id="6_alert"]
+[ext_resource type="Script" path="res://scripts/mission/MissionEvents.gd" id="7_events"]
+[ext_resource type="Script" path="res://scripts/level/OutdoorBoundary.gd" id="8_outdoor"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldStargate.tscn" id="9_gate"]
+[ext_resource type="PackedScene" path="res://scenes/props/OffworldDHD.tscn" id="10_dhd"]
+
+[sub_resource type="StandardMaterial3D" id="MatMeadow"]
+albedo_color = Color(0.28, 0.34, 0.21, 1)
+roughness = 0.94
+
+[sub_resource type="StandardMaterial3D" id="MatPathStone"]
+albedo_color = Color(0.39, 0.37, 0.32, 1)
+roughness = 0.88
+
+[sub_resource type="StandardMaterial3D" id="MatCliff"]
+albedo_color = Color(0.30, 0.28, 0.25, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="MatBoulder"]
+albedo_color = Color(0.38, 0.36, 0.31, 1)
+roughness = 0.86
+
+[sub_resource type="StandardMaterial3D" id="MatRuin"]
+albedo_color = Color(0.47, 0.41, 0.29, 1)
+roughness = 0.78
+
+[sub_resource type="StandardMaterial3D" id="MatBark"]
+albedo_color = Color(0.24, 0.17, 0.11, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="MatPine"]
+albedo_color = Color(0.14, 0.27, 0.14, 1)
+roughness = 0.90
+
+[sub_resource type="BoxShape3D" id="ShapeGround"]
+size = Vector3(54, 0.4, 38)
+
+[sub_resource type="BoxMesh" id="MeshGround"]
+material = SubResource("MatMeadow")
+size = Vector3(54, 0.4, 38)
+
+[sub_resource type="BoxMesh" id="MeshStonePath"]
+material = SubResource("MatPathStone")
+size = Vector3(6.5, 0.02, 26)
+
+[sub_resource type="BoxMesh" id="MeshApron"]
+material = SubResource("MatPathStone")
+size = Vector3(11.0, 0.02, 5.2)
+
+[sub_resource type="BoxShape3D" id="ShapeSouthCliff"]
+size = Vector3(54, 8, 2.4)
+
+[sub_resource type="BoxMesh" id="MeshSouthCliff"]
+material = SubResource("MatCliff")
+size = Vector3(54, 8, 2.4)
+
+[sub_resource type="BoxShape3D" id="ShapeSideCliff"]
+size = Vector3(2.4, 7.5, 38)
+
+[sub_resource type="BoxMesh" id="MeshSideCliff"]
+material = SubResource("MatCliff")
+size = Vector3(2.4, 7.5, 38)
+
+[sub_resource type="BoxShape3D" id="ShapeNorthEastCliff"]
+size = Vector3(21, 6.5, 1.4)
+
+[sub_resource type="BoxMesh" id="MeshNorthEastCliff"]
+material = SubResource("MatCliff")
+size = Vector3(21, 6.5, 1.4)
+
+[sub_resource type="BoxShape3D" id="ShapeNorthWestCliff"]
+size = Vector3(13, 6.5, 1.4)
+
+[sub_resource type="BoxMesh" id="MeshNorthWestCliff"]
+material = SubResource("MatCliff")
+size = Vector3(13, 6.5, 1.4)
+
+[sub_resource type="BoxShape3D" id="ShapeLowBoulder"]
+size = Vector3(2.8, 1.1, 1.4)
+
+[sub_resource type="BoxMesh" id="MeshLowBoulder"]
+material = SubResource("MatBoulder")
+size = Vector3(2.8, 1.1, 1.4)
+
+[sub_resource type="BoxShape3D" id="ShapeOutcrop"]
+size = Vector3(3.4, 2.4, 2.4)
+
+[sub_resource type="BoxMesh" id="MeshOutcrop"]
+material = SubResource("MatCliff")
+size = Vector3(3.4, 2.4, 2.4)
+
+[sub_resource type="BoxShape3D" id="ShapeRuin"]
+size = Vector3(2.2, 1.1, 1.1)
+
+[sub_resource type="BoxMesh" id="MeshRuin"]
+material = SubResource("MatRuin")
+size = Vector3(2.2, 1.1, 1.1)
+
+[sub_resource type="CylinderMesh" id="MeshTrunk"]
+material = SubResource("MatBark")
+top_radius = 0.24
+bottom_radius = 0.34
+height = 3.2
+
+[sub_resource type="CylinderMesh" id="MeshCanopy"]
+material = SubResource("MatPine")
+top_radius = 0.15
+bottom_radius = 1.9
+height = 4.2
+
+[node name="GateRoom" type="Node3D"]
+script = ExtResource("1_mission")
+definition = ExtResource("4_definition")
+mission_id = "outdoor_gate_site"
+
+[node name="Level" type="Node3D" parent="."]
+script = ExtResource("2_level")
+
+[node name="Exterior" type="Node3D" parent="."]
+script = ExtResource("8_outdoor")
+level_path = NodePath("../Level")
+doorway_instance = &"bunker_entry"
+doorway_socket = &"south"
+arrival_marker = &"gate_arrival"
+exterior_sector_id = "EXTERIOR_GATE_SITE"
+exterior_bounds = AABB(-28, -4, 4, 56, 24, 39)
+doorway_mount_door = true
+threshold_outward_offset = 1.6
+
+[node name="Terrain" type="Node3D" parent="Exterior"]
+
+[node name="ClearingGround" type="StaticBody3D" parent="Exterior/Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 23)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Terrain/ClearingGround"]
+shape = SubResource("ShapeGround")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Terrain/ClearingGround"]
+mesh = SubResource("MeshGround")
+
+[node name="FlagstoneCauseway" type="MeshInstance3D" parent="Exterior/Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 17.5)
+mesh = SubResource("MeshStonePath")
+
+[node name="BunkerApron" type="MeshInstance3D" parent="Exterior/Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 6.7)
+mesh = SubResource("MeshApron")
+
+[node name="Cliffs" type="Node3D" parent="Exterior"]
+
+[node name="SouthRidge" type="StaticBody3D" parent="Exterior/Cliffs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 41.2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cliffs/SouthRidge"]
+shape = SubResource("ShapeSouthCliff")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cliffs/SouthRidge"]
+mesh = SubResource("MeshSouthCliff")
+
+[node name="EastRidge" type="StaticBody3D" parent="Exterior/Cliffs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.8, 3.75, 23)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cliffs/EastRidge"]
+shape = SubResource("ShapeSideCliff")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cliffs/EastRidge"]
+mesh = SubResource("MeshSideCliff")
+
+[node name="WestRidge" type="StaticBody3D" parent="Exterior/Cliffs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.8, 3.75, 23)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cliffs/WestRidge"]
+shape = SubResource("ShapeSideCliff")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cliffs/WestRidge"]
+mesh = SubResource("MeshSideCliff")
+
+[node name="NorthEastBluff" type="StaticBody3D" parent="Exterior/Cliffs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.8, 3.25, 4.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cliffs/NorthEastBluff"]
+shape = SubResource("ShapeNorthEastCliff")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cliffs/NorthEastBluff"]
+mesh = SubResource("MeshNorthEastCliff")
+
+[node name="NorthWestBluff" type="StaticBody3D" parent="Exterior/Cliffs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.8, 3.25, 4.9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cliffs/NorthWestBluff"]
+shape = SubResource("ShapeNorthWestCliff")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cliffs/NorthWestBluff"]
+mesh = SubResource("MeshNorthWestCliff")
+
+[node name="Cover" type="Node3D" parent="Exterior"]
+
+[node name="BoulderLowWest" type="StaticBody3D" parent="Exterior/Cover" groups=["cover", "exterior_cover"]]
+transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -5.5, 0.55, 19.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cover/BoulderLowWest"]
+shape = SubResource("ShapeLowBoulder")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cover/BoulderLowWest"]
+mesh = SubResource("MeshLowBoulder")
+
+[node name="BoulderLowEast" type="StaticBody3D" parent="Exterior/Cover" groups=["cover", "exterior_cover"]]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 5.5, 0.55, 18.0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cover/BoulderLowEast"]
+shape = SubResource("ShapeLowBoulder")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cover/BoulderLowEast"]
+mesh = SubResource("MeshLowBoulder")
+
+[node name="OutcropWest" type="StaticBody3D" parent="Exterior/Cover" groups=["cover"]]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, -12.0, 1.2, 13.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cover/OutcropWest"]
+shape = SubResource("ShapeOutcrop")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cover/OutcropWest"]
+mesh = SubResource("MeshOutcrop")
+
+[node name="OutcropEast" type="StaticBody3D" parent="Exterior/Cover" groups=["cover"]]
+transform = Transform3D(0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, 0.939693, 12.0, 1.2, 13.5)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cover/OutcropEast"]
+shape = SubResource("ShapeOutcrop")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cover/OutcropEast"]
+mesh = SubResource("MeshOutcrop")
+
+[node name="RuinWallWest" type="StaticBody3D" parent="Exterior/Cover" groups=["cover", "exterior_cover"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 0.55, 10.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cover/RuinWallWest"]
+shape = SubResource("ShapeRuin")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cover/RuinWallWest"]
+mesh = SubResource("MeshRuin")
+
+[node name="RuinWallEast" type="StaticBody3D" parent="Exterior/Cover" groups=["cover", "exterior_cover"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 0.55, 10.6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Exterior/Cover/RuinWallEast"]
+shape = SubResource("ShapeRuin")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Exterior/Cover/RuinWallEast"]
+mesh = SubResource("MeshRuin")
+
+[node name="Foliage" type="Node3D" parent="Exterior"]
+
+[node name="PineNW" type="Node3D" parent="Exterior/Foliage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 0, 11.5)
+
+[node name="Trunk" type="MeshInstance3D" parent="Exterior/Foliage/PineNW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("MeshTrunk")
+
+[node name="Canopy" type="MeshInstance3D" parent="Exterior/Foliage/PineNW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+mesh = SubResource("MeshCanopy")
+
+[node name="PineSW" type="Node3D" parent="Exterior/Foliage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.0, 0, 29.0)
+
+[node name="Trunk" type="MeshInstance3D" parent="Exterior/Foliage/PineSW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("MeshTrunk")
+
+[node name="Canopy" type="MeshInstance3D" parent="Exterior/Foliage/PineSW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+mesh = SubResource("MeshCanopy")
+
+[node name="PineNE" type="Node3D" parent="Exterior/Foliage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 0, 12.0)
+
+[node name="Trunk" type="MeshInstance3D" parent="Exterior/Foliage/PineNE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("MeshTrunk")
+
+[node name="Canopy" type="MeshInstance3D" parent="Exterior/Foliage/PineNE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+mesh = SubResource("MeshCanopy")
+
+[node name="PineSE" type="Node3D" parent="Exterior/Foliage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.0, 0, 29.5)
+
+[node name="Trunk" type="MeshInstance3D" parent="Exterior/Foliage/PineSE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("MeshTrunk")
+
+[node name="Canopy" type="MeshInstance3D" parent="Exterior/Foliage/PineSE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+mesh = SubResource("MeshCanopy")
+
+[node name="Stargate" parent="Exterior" instance=ExtResource("9_gate")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 3.5, 34.5)
+
+[node name="DHD" parent="Exterior" instance=ExtResource("10_dhd")]
+transform = Transform3D(-0.939693, 0, 0.34202, 0, 1, 0, -0.34202, 0, -0.939693, 5.2, 0, 29.2)
+stargate_path = NodePath("../Stargate")
+
+[node name="Markers" type="Node3D" parent="Exterior"]
+
+[node name="gate_arrival" type="Marker3D" parent="Exterior/Markers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 26.5)
+
+[node name="clearing_west" type="Marker3D" parent="Exterior/Markers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 0, 17.5)
+
+[node name="clearing_east" type="Marker3D" parent="Exterior/Markers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 0, 16.5)
+
+[node name="bunker_threshold" type="Marker3D" parent="Exterior/Markers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.5)
+
+[node name="Objectives" type="Node" parent="."]
+script = ExtResource("3_objectives")
+
+[node name="Alert" type="Node" parent="."]
+script = ExtResource("6_alert")
+
+[node name="Events" type="Node" parent="."]
+script = ExtResource("7_events")
+
+[node name="Spawns" type="Node3D" parent="."]
+
+[node name="Players" type="Node3D" parent="."]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/entities/Player.tscn")
+spawn_path = NodePath("../Players")
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/entities/JaffaGuard.tscn", "res://scenes/entities/JaffaShockGuard.tscn")
+spawn_path = NodePath("../Enemies")
+
+[node name="TacticalHUD" parent="." instance=ExtResource("5_hud")]

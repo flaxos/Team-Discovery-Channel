@@ -107,6 +107,9 @@ static func cover_props(assembly: LevelAssembly) -> Array[Node3D]:
 	for node: Node in MissionWorld.in_group(assembly, &"deployable_shield"):
 		if node is StaticBody3D and is_instance_valid(node) and (node as StaticBody3D).collision_layer != 0:
 			result.append(node as Node3D)
+	for node: Node in MissionWorld.in_group(assembly, &"exterior_cover"):
+		if node is StaticBody3D and is_instance_valid(node) and (node as StaticBody3D).collision_layer != 0:
+			result.append(node as Node3D)
 	return result
 
 

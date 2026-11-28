@@ -348,10 +348,11 @@ Rewritten 14 November 2026 from the [split-world travel design](gate-travel-spli
 
 ### J — Outdoor world construction
 
-**OW-0 — Outdoor authoring boundary spike** · S · Fable · design plus a throwaway prototype
-- Decide how an exterior scene joins an interior `LevelLayout`: recommended as a separate terrain scene with its own navigation region and a doorway contract, not as modules ([D-006](../DECISIONS.md)).
+**OW-0 — Outdoor authoring boundary spike** · S · **built ([outdoor-world-boundary.md](outdoor-world-boundary.md), `OutdoorBoundary`, `test_ow0_outdoor_boundary`)**
+- Proves decision [D-006](../DECISIONS.md): `LevelLayout` and `LevelEnclosureValidator` stay strictly enclosed interior-only; `OutdoorBoundary` opens explicitly declared exterior sockets after interior enclosure validation passes, mounts a runtime `ModularDoor`, bakes an independent exterior `NavigationRegion3D` using `LevelNavigation.profile()`, joins it to `LevelAssembly.navigation_map` with a bidirectional `NavigationLink3D`, and validates round-trip navigation across the doorway (including 2 km split-world offsets).
 
-**OW-1 — Exterior gate site** · L · needs OW-0 · a small outdoor arrival area with a gate, DHD and one building entrance.
+**OW-1 — Exterior gate site** · L · **built (`OutdoorGateSiteMission.tscn`, `outdoor_gate_site_bunker.tres`, `outdoor_gate_site.tres`, `test_ow1_exterior_gate_site`, `test_ow1_exterior_gate_site_multiplayer`, `test_ow1_exterior_gate_site_dedicated`)**
+- Playable outdoor arrival clearing with active offworld `Stargate`, `DHD`, natural cliff/boulder cover (`exterior_cover`), Airman fireteam support, outdoor and cross-boundary Jaffa patrols, one doorway entrance into a 5-room Goa'uld modular bunker (`bunker_entry` → `bunker_command`), telemetry download, exterior Stargate extraction, and SGC-to-exterior two-world gate travel (`travel_outdoor_site`).
 
 **OW-2 — Village or outpost** · XL · split later.
 

@@ -9,6 +9,10 @@ signal navigation_ready
 @export var target_socket: StringName
 @export var capture_destination: String = ""
 @export var discard_uncaptured_edits: bool = false
+## Optional exterior doorway declarations ("<instance_id>/<socket_id>"), registered by a sibling
+## OutdoorBoundary before baking. Interior enclosure validation still runs on the sealed interior
+## first; declared exterior portals are opened only after enclosure checks pass.
+@export var exterior_portals: PackedStringArray = PackedStringArray()
 @export_tool_button("Snap sockets (capture to save)") var snap_action: Callable = snap_selected
 @export_tool_button("Capture placed modules") var capture_action: Callable = capture
 @export_tool_button("Rebuild from layout") var rebuild_action: Callable = rebuild
@@ -17,6 +21,18 @@ var navigation_map: RID
 var navigation: NavigationRegion3D
 var ready_for_navigation := false
 var last_errors := PackedStringArray()
+## Optional exterior marker resolver registered by a sibling OutdoorBoundary (`marker_id -> Vector3`).
+var exterior_marker_resolver: Callable
+var _exterior_portal_doors: Dictionary = {}
+
+
+func register_exterior_portal(
+	instance_id: StringName, socket_id: StringName, mount_door: bool = true
+) -> void:
+	var key := "%s/%s" % [instance_id, socket_id]
+	if not exterior_portals.has(key):
+		exterior_portals.append(key)
+	_exterior_portal_doors[key] = mount_door
 
 
 func _ready() -> void:
@@ -156,6 +172,12 @@ func validate_and_bake() -> void:
 	if not errors.is_empty():
 		report(errors)
 		return
+	if not exterior_portals.is_empty():
+		errors = _open_exterior_portals()
+		if not errors.is_empty():
+			report(errors)
+			return
+		await get_tree().physics_frame
 	navigation = get_node_or_null("Navigation") as NavigationRegion3D
 	if navigation != null:
 		navigation.free()
@@ -166,6 +188,8 @@ func validate_and_bake() -> void:
 		navigation_map = NavigationServer3D.map_create()
 	NavigationServer3D.map_set_active(navigation_map, true)
 	NavigationServer3D.map_set_cell_size(navigation_map, 0.15)
+	NavigationServer3D.map_set_cell_height(navigation_map, 0.1)
+	NavigationServer3D.map_set_merge_rasterizer_cell_scale(navigation_map, 0.01)
 	navigation.set_navigation_map(navigation_map)
 	add_child(navigation)
 	await get_tree().physics_frame
@@ -188,7 +212,58 @@ func local_path(start: Vector3, goal: Vector3) -> PackedVector3Array:
 
 
 func marker(instance_id: StringName, marker_id: StringName) -> Vector3:
+	if instance_id == &"exterior" and exterior_marker_resolver.is_valid():
+		return exterior_marker_resolver.call(marker_id) as Vector3
 	return (get_node(str(instance_id) + "/Markers/" + str(marker_id)) as Node3D).global_position
+
+
+func _open_exterior_portals() -> PackedStringArray:
+	var errors := PackedStringArray()
+	var connected := {}
+	for edge in layout.connections:
+		connected["%s/%s" % [edge.from_instance, edge.from_socket]] = true
+		connected["%s/%s" % [edge.to_instance, edge.to_socket]] = true
+	var seen := {}
+	for raw_key: String in exterior_portals:
+		var parts := raw_key.split("/")
+		if parts.size() != 2 or parts[0].is_empty() or parts[1].is_empty():
+			errors.append("Malformed exterior portal declaration: " + raw_key)
+			continue
+		if seen.has(raw_key):
+			errors.append("Duplicate exterior portal declaration: " + raw_key)
+			continue
+		seen[raw_key] = true
+		if connected.has(raw_key):
+			errors.append("Exterior portal is already connected indoors: " + raw_key)
+			continue
+		var inst_id := StringName(parts[0])
+		var sock_id := StringName(parts[1])
+		var item := layout.instance(inst_id)
+		var mod := get_node_or_null(parts[0]) as LevelModule
+		if item == null or item.module == null or mod == null:
+			errors.append("Unknown exterior portal instance: " + raw_key)
+			continue
+		var socket := item.module.socket(sock_id)
+		if socket == null:
+			errors.append("Unknown exterior portal socket: " + raw_key)
+			continue
+		mod.set_portal(sock_id, true)
+		var mount_door: bool = bool(_exterior_portal_doors.get(raw_key, true))
+		var door_name := "ExteriorDoor_%s_%s" % [parts[0], parts[1]]
+		if mount_door and not has_node(door_name):
+			var door := load("res://scenes/level/ModularDoor.tscn").instantiate() as Node3D
+			door.name = door_name
+			door.transform = (
+				item.placement(float(layout.decks[str(item.deck)])) * socket.local_transform
+			)
+			door.set("width", socket.width)
+			door.set("height", socket.height)
+			door.set("is_security", false)
+			door.set("security_id", StringName("exterior/%s/%s" % [parts[0], parts[1]]))
+			door.set("locked", false)
+			add_child(door)
+			door.owner = owner if owner != null else self
+	return errors
 
 
 func _exit_tree() -> void:
